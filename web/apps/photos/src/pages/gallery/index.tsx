@@ -87,7 +87,7 @@ import {
 import downloadManager from "services/download";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
-import { fetchAndSaveFeatureFlags } from "services/feature-flag";
+import { fetchAndSaveFeatureFlagsIfNeeded } from "services/feature-flag";
 import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
@@ -341,7 +341,6 @@ export default function Gallery() {
             return;
         }
         preloadImage("/images/subscription-card-background");
-        let ffTimeout: ReturnType<typeof setTimeout> | undefined;
         const electron = globalThis.electron;
         const main = async () => {
             const valid = await validateKey();
@@ -385,11 +384,7 @@ export default function Gallery() {
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            // Not critical, so fetch these after some delay.
-            ffTimeout = setTimeout(() => {
-                ffTimeout = undefined;
-                void fetchAndSaveFeatureFlags();
-            }, 5000);
+            fetchAndSaveFeatureFlagsIfNeeded();
             if (electron) {
                 // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
@@ -398,7 +393,6 @@ export default function Gallery() {
         main();
         return () => {
             clearInterval(syncInterval.current);
-            if (ffTimeout) clearTimeout(ffTimeout);
             if (electron) {
                 electron.onMainWindowFocus(undefined);
                 clipService.removeOnFileUploadListener();
