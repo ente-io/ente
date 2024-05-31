@@ -1,7 +1,7 @@
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import { getFilesToIndex } from "services/face/indexer";
+import { syncAndGetFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
 import { EnteFile } from "types/file";
 
@@ -56,7 +56,10 @@ class MachineLearningService {
 
         const syncContext = await this.getSyncContext(token, userID, userAgent);
 
-        syncContext.outOfSyncFiles = await getFilesToIndex(userID, batchSize);
+        syncContext.outOfSyncFiles = await syncAndGetFilesToIndex(
+            userID,
+            batchSize,
+        );
 
         if (syncContext.outOfSyncFiles.length > 0) {
             await this.syncFiles(syncContext);

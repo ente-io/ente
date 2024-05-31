@@ -11,7 +11,7 @@ import {
     faceIndex,
     indexableFileIDs,
     indexedAndIndexableCounts,
-    syncWithLocalIndexableFileIDs,
+    syncWithLocalFiles,
 } from "./db";
 import { FaceIndexerWorker } from "./indexer.worker";
 
@@ -226,29 +226,37 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
  * the next {@link count} files that still need to be indexed.
  *
  * For more specifics of what a "sync" entails, see
- * {@link syncWithLocalIndexableFileIDs}.
+ * {@link syncWithLocalFiles}.
  *
  * @param userID Limit indexing to files owned by a {@link userID}.
  *
  * @param count Limit the resulting list of files to {@link count}.
  */
-export const getFilesToIndex = async (userID: number, count: number) => {
+export const syncAndGetFilesToIndex = async (userID: number, count: number) => {
     const indexableTypes = [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO];
     const isIndexable = (f: EnteFile) =>
         f.ownerID == userID && indexableTypes.includes(f.metadata.fileType);
 
     const normalFiles = await getLocalFiles("normal");
     const hiddenFiles = await getLocalFiles("hidden");
-    const indexableNormalFiles = normalFiles.filter(isIndexable);
-    const indexableHiddenFiles = hiddenFiles.filter(isIndexable);
 
-    const normalFilesByID = new Map(indexableNormalFiles.map((f) => [f.id, f]));
-    const hiddenFilesByID = new Map(indexableHiddenFiles.map((f) => [f.id, f]));
+    const indexableNormalFilesByID = new Map(
+        normalFiles.filter(isIndexable).map((f) => [f.id, f]),
+    );
+    const indexableHiddenFilesByID = new Map(
+        hiddenFiles.filter(isIndexable).map((f) => [f.id, f]),
+    );
 
-    await syncWithLocalIndexableFileIDs([...filesByID.keys()]);
+    await syncWithLocalFiles(
+        indexableNormalFilesByID,
+        indexableHiddenFilesByID,
+    );
 
     const fileIDsToIndex = await indexableFileIDs(count);
     return fileIDsToIndex.map((id) =>
-        ensure(normalFilesByID.get(id) ?? hiddenFilesByID.get(id)),
+        ensure(
+            indexableNormalFilesByID.get(id) ??
+                indexableHiddenFilesByID.get(id),
+        ),
     );
 };
