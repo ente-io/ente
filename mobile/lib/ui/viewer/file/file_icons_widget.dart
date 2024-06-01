@@ -123,41 +123,67 @@ class VideoOverlayIcon extends StatelessWidget {
 
 class VideoOverlayDuration extends StatelessWidget {
   final int? duration;
-  const VideoOverlayDuration({Key? key, required this.duration}) : super(key: key);
+  const VideoOverlayDuration({Key? key, required this.duration})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    late Widget onDarkBackground;
-    final bool iconFallback = (duration == null || duration! == 0);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        late Widget onDarkBackground;
+        final bool iconFallback = (duration == null || duration == 0);
 
-    if (iconFallback || duration! == 0) {
-      onDarkBackground = const Icon(Icons.play_arrow, color: Colors.white, size: 24);
-    } else {
-      final String formattedDuration = getFormattedDuration(duration!);
-      onDarkBackground = Text(
-        formattedDuration,
-        style: Theme.of(context)
-            .textTheme
-            .titleSmall!
-            .copyWith(color: Colors.white, fontSize: 14.0), // Default font size is 14
-      );
-    }
+        double inset = 4;
+        double size = iconFallback ? 18 : 10;
+        if (constraints.hasBoundedWidth) {
+          final w = constraints.maxWidth;
+          if (w > 120) {
+            size = iconFallback ? 24 : 14;
+          } else if (w < 75) {
+            inset = 3;
+            size = iconFallback ? 16 : 8;
+          }
+        }
 
-    return _BottomRightOverlay(
-      Container(
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: iconFallback ? null : BorderRadius.circular(8.0),
-          shape: iconFallback ? BoxShape.circle : BoxShape.rectangle,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: onDarkBackground,
-      ),
+        if (iconFallback) {
+          onDarkBackground = Icon(
+            Icons.play_arrow,
+            color: Colors.white,
+            size: size, //default 24
+          );
+        } else {
+          final String formattedDuration = _getFormattedDuration(duration!);
+          onDarkBackground = Text(
+            formattedDuration,
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                  color: Colors.white,
+                  fontSize: size, // Default font size is 14
+                ),
+          );
+        }
+
+        return Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: inset, right: inset),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: iconFallback ? null : BorderRadius.circular(8.0),
+                shape: iconFallback ? BoxShape.circle : BoxShape.rectangle,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: onDarkBackground,
+            ),
+          ),
+        );
+      },
     );
   }
 
-  String getFormattedDuration(int duration) {
-    final String formattedDuration = Duration(seconds: duration).toString().split('.').first;
+  String _getFormattedDuration(int duration) {
+    final String formattedDuration =
+        Duration(seconds: duration).toString().split('.').first;
     final List<String> separated = formattedDuration.split(':');
     final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
     final String minute = int.parse(separated[1]).toString() + ':';
@@ -194,7 +220,8 @@ class TrashedFileOverlayText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int daysLeft =
-        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) / Duration.microsecondsPerDay)
+        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
+                Duration.microsecondsPerDay)
             .ceil();
     return Container(
       decoration: BoxDecoration(
@@ -363,32 +390,6 @@ class _BottomRightOverlayIcon extends StatelessWidget {
                       ),
                     ),
             ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _BottomRightOverlay extends StatelessWidget {
-  final Widget overlayWidget;
-
-  const _BottomRightOverlay(
-    this.overlayWidget, {
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const double inset = 4;
-
-        return Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: inset, right: inset),
-            child: overlayWidget,
           ),
         );
       },
