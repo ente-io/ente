@@ -422,7 +422,8 @@ double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
     "The two embeddings should have the same length",
   );
   double score = 0;
-  for (int index = 0; index < imageEmbedding.length; index++) {
+  final length = imageEmbedding.length;
+  for (int index = 0; index < length; index++) {
     score += imageEmbedding[index] * textEmbedding[index];
   }
   return score;
