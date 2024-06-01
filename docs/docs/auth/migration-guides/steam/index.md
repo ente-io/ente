@@ -5,8 +5,6 @@ description: Guide for importing from Steam Authenticator to Ente Auth
 
 # Migrating from Steam Authenticator
 
-A guide written by an ente.io lover
-
 > [!WARNING]
 >
 > Steam Authenticator code is only supported after auth-v3.0.3, check the app's
