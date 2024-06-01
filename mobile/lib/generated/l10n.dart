@@ -4735,11 +4735,11 @@ class S {
     );
   }
 
-  /// `The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
-  String get devAccountChanged {
+  /// `Due to technical glitch, you have been logged out. Our apologies for the inconvenience.`
+  String get autoLogoutMessage {
     return Intl.message(
-      'The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
-      name: 'devAccountChanged',
+      'Due to technical glitch, you have been logged out. Our apologies for the inconvenience.',
+      name: 'autoLogoutMessage',
       desc: '',
       args: [],
     );

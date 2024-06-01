@@ -577,8 +577,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Conçu pour survivre"),
         "details": MessageLookupByLibrary.simpleMessage("Détails"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "Le compte développeur que nous utilisons pour publier ente sur l\'App Store a changé. Pour cette raison, vous devrez vous connecter à nouveau.\n\nNous nous excusons pour la gêne occasionnée, mais cela était inévitable."),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Les fichiers ajoutés à cet album seront automatiquement téléchargés sur ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(

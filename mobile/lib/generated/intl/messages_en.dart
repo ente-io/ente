@@ -362,6 +362,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "You\'ll see available Cast devices here."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
+        "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
+            "Due to technical glitch, you have been logged out. Our apologies for the inconvenience."),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Auto pair works only with devices that support Chromecast."),
@@ -581,8 +583,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Designed to outlive"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."),
         "developerSettings":
             MessageLookupByLibrary.simpleMessage("Developer settings"),
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(

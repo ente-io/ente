@@ -582,8 +582,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Entwickelt um zu bewahren"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "Das Entwicklerkonto, das wir verwenden, um ente im App Store zu veröffentlichen, hat sich geändert. Aus diesem Grund musst du dich erneut anmelden.\n\nWir entschuldigen uns für die Unannehmlichkeiten, aber das war unvermeidlich."),
         "deviceCodeHint": MessageLookupByLibrary.simpleMessage("Code eingeben"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Dateien, die zu diesem Album hinzugefügt werden, werden automatisch zu ente hochgeladen."),

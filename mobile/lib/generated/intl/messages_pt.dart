@@ -592,8 +592,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Feito para ter longevidade"),
         "details": MessageLookupByLibrary.simpleMessage("Detalhes"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "A conta de desenvolvedor que usamos para publicar o Ente na App Store foi alterada. Por esse motivo, você precisará fazer entrar novamente.\n\nPedimos desculpas pelo inconveniente, mas isso era inevitável."),
         "developerSettings": MessageLookupByLibrary.simpleMessage(
             "Configurações de desenvolvedor"),
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(

@@ -667,7 +667,7 @@
   "mobileWebDesktop": "Mobile, Web, Desktop",
   "newToEnte": "New to Ente",
   "pleaseLoginAgain": "Please login again",
-  "devAccountChanged": "The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.",
+  "autoLogoutMessage": "Due to technical glitch, you have been logged out. Our apologies for the inconvenience.",
   "yourSubscriptionHasExpired": "Your subscription has expired",
   "storageLimitExceeded": "Storage limit exceeded",
   "upgrade": "Upgrade",
