@@ -76,7 +76,7 @@ Future<void> _pickAegisJsonFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDesc,
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }
@@ -148,7 +148,7 @@ Future<int?> _processAegisExportFile(
       otpUrl =
           'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
     } else {
-      throw Exception('Invalid OTP type');
+      throw Exception('Invalid OTP type: $kind');
     }
     parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
