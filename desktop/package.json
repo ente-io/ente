@@ -53,7 +53,7 @@
         "prettier-plugin-packagejson": "^2",
         "shx": "^0.3",
         "typescript": "^5",
-        "typescript-eslint": "^7.11.0"
+        "typescript-eslint": "8.0.0-alpha.10"
     },
     "packageManager": "yarn@1.22.21",
     "productName": "ente"
