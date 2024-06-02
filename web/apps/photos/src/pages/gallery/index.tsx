@@ -87,7 +87,7 @@ import {
 import downloadManager from "services/download";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
-import { fetchAndSaveFeatureFlagsIfNeeded } from "services/feature-flag";
+import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
 import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
