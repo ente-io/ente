@@ -143,12 +143,16 @@ const registerPrivilegedSchemes = () => {
  * This window will show the HTML served from {@link rendererURL}.
  */
 const createMainWindow = () => {
+    const rect = windowRect();
+
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
+        // Set the window's position and size (if we have one saved).
+        ...(rect ?? {}),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
@@ -164,8 +168,10 @@ const createMainWindow = () => {
         // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window (maximizing it) otherwise.
-        window.maximize();
+        // Show our window otherwise.
+        //
+        // If we did not give it an explicit size, maximize it
+        rect ? window.show() : window.maximize();
     }
 
     // Open the DevTools automatically when running in dev mode
@@ -212,107 +218,19 @@ const createMainWindow = () => {
 };
 
 /**
- * Automatically set the save path for user initiated downloads to the system's
- * "downloads" directory instead of asking the user to select a save location.
- */
-export const setDownloadPath = (webContents: WebContents) => {
-    webContents.session.on("will-download", (_, item) => {
-        item.setSavePath(
-            uniqueSavePath(app.getPath("downloads"), item.getFilename()),
-        );
-    });
-};
-
-const uniqueSavePath = (dirPath: string, fileName: string) => {
-    const { name, ext } = path.parse(fileName);
-
-    let savePath = path.join(dirPath, fileName);
-    let n = 1;
-    while (existsSync(savePath)) {
-        const suffixedName = [`${name}(${n})`, ext].filter((x) => x).join(".");
-        savePath = path.join(dirPath, suffixedName);
-        n++;
-    }
-    return savePath;
-};
-
-/**
- * Allow opening external links, e.g. when the user clicks on the "Feature
- * requests" button in the sidebar (to open our GitHub repository), or when they
- * click the "Support" button to send an email to support.
+ * Determine the position and size of our app's main window based on the
+ * position and size of the window the last time around (if any).
  *
- * @param webContents The renderer to configure.
- */
-export const allowExternalLinks = (webContents: WebContents) =>
-    // By default, if the user were open a link, say
-    // https://github.com/ente-io/ente/discussions, then it would open a _new_
-    // BrowserWindow within our app.
-    //
-    // This is not the behaviour we want; what we want is to ask the system to
-    // handle the link (e.g. open the URL in the default browser, or if it is a
-    // mailto: link, then open the user's mail client).
-    //
-    // Returning `action` "deny" accomplishes this.
-    webContents.setWindowOpenHandler(({ url }) => {
-        if (!url.startsWith(rendererURL)) {
-            // This does not work in Ubuntu currently: mailto links seem to just
-            // get ignored, and HTTP links open in the text editor instead of in
-            // the browser.
-            // https://github.com/electron/electron/issues/31485
-            void shell.openExternal(url);
-            return { action: "deny" };
-        } else {
-            return { action: "allow" };
-        }
-    });
-
-/**
- * Allow uploading to arbitrary S3 buckets.
+ * The saved size is compared to the current screen size to ensure we don't do
+ * anything too wonky if say the user's screen size has changed since the last
+ * time our app was running.
  *
- * The files in the desktop app are served over the ente:// protocol. During
- * testing or self-hosting, we might be using a S3 bucket that does not allow
- * whitelisting a custom URI scheme. To avoid requiring the bucket to set an
- * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
- * workaround here instead, intercepting the ACAO header and allowing `*`.
+ * If it doubt (and where there is no previous saved state), return `undefined`.
+ * This should be taken to mean that the app's main window should be maximized.
  */
-export const allowAllCORSOrigins = (webContents: WebContents) =>
-    webContents.session.webRequest.onHeadersReceived(
-        ({ responseHeaders }, callback) => {
-            const headers: NonNullable<typeof responseHeaders> = {};
-            for (const [key, value] of Object.entries(responseHeaders ?? {}))
-                if (key.toLowerCase() != "access-control-allow-origin")
-                    headers[key] = value;
-            headers["Access-Control-Allow-Origin"] = ["*"];
-            callback({ responseHeaders: headers });
-        },
-    );
-
-/**
- * Add an icon for our app in the system tray.
- *
- * For example, these are the small icons that appear on the top right of the
- * screen in the main menu bar on macOS.
- */
-const setupTrayItem = (mainWindow: BrowserWindow) => {
-    // There are a total of 6 files corresponding to this tray icon.
-    //
-    // On macOS, use template images (filename needs to end with "Template.ext")
-    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
-    //
-    // And for each (template or otherwise), there are 3 "retina" variants
-    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
-    const iconName =
-        process.platform == "darwin"
-            ? "taskbar-icon-Template.png"
-            : "taskbar-icon.png";
-    const trayImgPath = path.join(
-        isDev ? "build" : process.resourcesPath,
-        iconName,
-    );
-    const trayIcon = nativeImage.createFromPath(trayImgPath);
-    const tray = new Tray(trayIcon);
-    tray.setToolTip("Ente Photos");
-    tray.setContextMenu(createTrayContextMenu(mainWindow));
+const windowRect = () => {
+    return userPreferences.get("windowRect");
+    // return undefined;
 };
 
 /**
@@ -360,6 +278,110 @@ const windowIconOptions = () => {
     );
 
     return { icon };
+};
+
+/**
+ * Automatically set the save path for user initiated downloads to the system's
+ * "downloads" directory instead of asking the user to select a save location.
+ */
+const setDownloadPath = (webContents: WebContents) => {
+    webContents.session.on("will-download", (_, item) => {
+        item.setSavePath(
+            uniqueSavePath(app.getPath("downloads"), item.getFilename()),
+        );
+    });
+};
+
+const uniqueSavePath = (dirPath: string, fileName: string) => {
+    const { name, ext } = path.parse(fileName);
+
+    let savePath = path.join(dirPath, fileName);
+    let n = 1;
+    while (existsSync(savePath)) {
+        const suffixedName = [`${name}(${n})`, ext].filter((x) => x).join(".");
+        savePath = path.join(dirPath, suffixedName);
+        n++;
+    }
+    return savePath;
+};
+
+/**
+ * Allow opening external links, e.g. when the user clicks on the "Feature
+ * requests" button in the sidebar (to open our GitHub repository), or when they
+ * click the "Support" button to send an email to support.
+ *
+ * @param webContents The renderer to configure.
+ */
+const allowExternalLinks = (webContents: WebContents) =>
+    // By default, if the user were open a link, say
+    // https://github.com/ente-io/ente/discussions, then it would open a _new_
+    // BrowserWindow within our app.
+    //
+    // This is not the behaviour we want; what we want is to ask the system to
+    // handle the link (e.g. open the URL in the default browser, or if it is a
+    // mailto: link, then open the user's mail client).
+    //
+    // Returning `action` "deny" accomplishes this.
+    webContents.setWindowOpenHandler(({ url }) => {
+        if (!url.startsWith(rendererURL)) {
+            // This does not work in Ubuntu currently: mailto links seem to just
+            // get ignored, and HTTP links open in the text editor instead of in
+            // the browser.
+            // https://github.com/electron/electron/issues/31485
+            void shell.openExternal(url);
+            return { action: "deny" };
+        } else {
+            return { action: "allow" };
+        }
+    });
+
+/**
+ * Allow uploading to arbitrary S3 buckets.
+ *
+ * The files in the desktop app are served over the ente:// protocol. During
+ * testing or self-hosting, we might be using a S3 bucket that does not allow
+ * whitelisting a custom URI scheme. To avoid requiring the bucket to set an
+ * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
+ * workaround here instead, intercepting the ACAO header and allowing `*`.
+ */
+const allowAllCORSOrigins = (webContents: WebContents) =>
+    webContents.session.webRequest.onHeadersReceived(
+        ({ responseHeaders }, callback) => {
+            const headers: NonNullable<typeof responseHeaders> = {};
+            for (const [key, value] of Object.entries(responseHeaders ?? {}))
+                if (key.toLowerCase() != "access-control-allow-origin")
+                    headers[key] = value;
+            headers["Access-Control-Allow-Origin"] = ["*"];
+            callback({ responseHeaders: headers });
+        },
+    );
+
+/**
+ * Add an icon for our app in the system tray.
+ *
+ * For example, these are the small icons that appear on the top right of the
+ * screen in the main menu bar on macOS.
+ */
+const setupTrayItem = (mainWindow: BrowserWindow) => {
+    // There are a total of 6 files corresponding to this tray icon.
+    //
+    // On macOS, use template images (filename needs to end with "Template.ext")
+    // https://www.electronjs.org/docs/latest/api/native-image#template-image-macos
+    //
+    // And for each (template or otherwise), there are 3 "retina" variants
+    // https://www.electronjs.org/docs/latest/api/native-image#high-resolution-image
+    const iconName =
+        process.platform == "darwin"
+            ? "taskbar-icon-Template.png"
+            : "taskbar-icon.png";
+    const trayImgPath = path.join(
+        isDev ? "build" : process.resourcesPath,
+        iconName,
+    );
+    const trayIcon = nativeImage.createFromPath(trayImgPath);
+    const tray = new Tray(trayIcon);
+    tray.setToolTip("Ente Photos");
+    tray.setContextMenu(createTrayContextMenu(mainWindow));
 };
 
 /**
