@@ -14,11 +14,17 @@ baseline for how our code be in all the workspaces in this (yarn) monorepo.
 They also need some support packages, which come from the leaf `@/build-config`
 package:
 
--   [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/)
-    \- Tells ESLint how to read TypeScript syntax.
+-   [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality,
+    and provides the configuration recommended the by ESLint team.
 
--   [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/)
-    \- Provides TypeScript rules and presets
+-   [typescript-eslint](https://typescript-eslint.io/packages/typescript-eslint/)
+    \- provides TypeScript ESLint functionality and provides a set of
+    recommended configurations (`typescript-eslint` is the new entry point, our
+    yet-unmigrated packages use the older method of separately including
+    [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/)
+    \- which tells ESLint how to read TypeScript syntax - and
+    [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/)
+    \- which provides the TypeScript rules and presets).
 
 -   [eslint-plugin-react-hooks](https://github.com/jsx-eslint/eslint-plugin-react),
     [eslint-plugin-react-hooks](https://reactjs.org/) \- Some React specific

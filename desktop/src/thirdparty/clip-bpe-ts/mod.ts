@@ -373,7 +373,6 @@ export default class {
             return token + "</w>";
         }
 
-        // eslint-disable-next-line no-constant-condition
         while (1) {
             let bigram: [string, string] | null = null;
             let minRank = Infinity;
