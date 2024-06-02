@@ -80,7 +80,7 @@ const saveFlagJSONString = (s: string) =>
 const remoteFeatureFlags = () => {
     const s = localStorage.getItem("remoteFeatureFlags");
     if (!s) return undefined;
-    return FeatureFlags.parse(s);
+    return FeatureFlags.parse(JSON.parse(s));
 };
 
 const FeatureFlags = z.object({
