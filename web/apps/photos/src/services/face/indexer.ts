@@ -1,7 +1,10 @@
+import {
+    isBetaUser,
+    isInternalUser,
+} from "@/new/photos/services/feature-flags";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import type { Remote } from "comlink";
-import { isBetaUser, isInternalUser } from "services/feature-flag";
 import { getAllLocalFiles } from "services/fileService";
 import type { EnteFile } from "types/file";
 import { isInternalUserForML } from "utils/user";
