@@ -10,7 +10,7 @@ interface UserPreferences {
     skipAppVersion?: string;
     muteUpdateNotificationVersion?: string;
     /**
-     * The last position size of our app's window, saved when the app is closed.
+     * The last position and size of our app's window.
      *
      * This value is saved when the app is about to quit, and is used to restore
      * the window to the previous state when it restarts.
@@ -19,7 +19,7 @@ interface UserPreferences {
      * we just re-maximize the window on restart. This is also the behaviour if
      * no previously saved `windowRect` is found.
      */
-    windowRect?: {
+    windowBounds?: {
         x: number;
         y: number;
         width: number;
@@ -31,7 +31,7 @@ const userPreferencesSchema: Schema<UserPreferences> = {
     hideDockIcon: { type: "boolean" },
     skipAppVersion: { type: "string" },
     muteUpdateNotificationVersion: { type: "string" },
-    windowRect: {
+    windowBounds: {
         properties: {
             x: { type: "number" },
             y: { type: "number" },

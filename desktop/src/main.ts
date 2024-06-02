@@ -143,7 +143,7 @@ const registerPrivilegedSchemes = () => {
  * This window will show the HTML served from {@link rendererURL}.
  */
 const createMainWindow = () => {
-    const rect = windowRect();
+    const bounds = windowBounds();
 
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
@@ -152,14 +152,16 @@ const createMainWindow = () => {
             sandbox: true,
         },
         // Set the window's position and size (if we have one saved).
-        ...(rect ?? {}),
+        ...(bounds ?? {}),
+        // Enforce a minimum size
+        ...minimumWindowSize(),
+        // (Maybe) fix the dock icon on Linux.
+        ...windowIconOptions(),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
         // We'll show it conditionally depending on `wasAutoLaunched` later.
         show: false,
-        // (Maybe) fix the dock icon on Linux.
-        ...windowIconOptions(),
     });
 
     const wasAutoLaunched = autoLauncher.wasAutoLaunched();
@@ -171,7 +173,7 @@ const createMainWindow = () => {
         // Show our window otherwise.
         //
         // If we did not give it an explicit size, maximize it
-        rect ? window.show() : window.maximize();
+        bounds ? window.show() : window.maximize();
     }
 
     // Open the DevTools automatically when running in dev mode
@@ -218,28 +220,35 @@ const createMainWindow = () => {
 };
 
 /**
- * Determine the position and size of our app's main window based on the
- * position and size of the window the last time around (if any).
+ * The position and size of the window the last time it was closed.
  *
- * The saved size is compared to the current screen size to ensure we don't do
- * anything too wonky if say the user's screen size has changed since the last
- * time our app was running.
- *
- * If it doubt (and where there is no previous saved state), return `undefined`.
- * This should be taken to mean that the app's main window should be maximized.
+ * The return value of `undefined` is taken to mean that the app's main window
+ * should be maximized.
  */
-const windowRect = () => {
-    return userPreferences.get("windowRect");
-    // return undefined;
-};
+const windowBounds = () => userPreferences.get("windowBounds");
 
 /**
- * Sibling of {@link windowRect}, see that function's documentation for more
+ * If for some reason {@link windowBounds} is outside the screen's bounds (e.g.
+ * if the user's screen resolution has changed), then the previously saved
+ * bounds might not be appropriate.
+ *
+ * Luckily, if we try to set an x/y position that is outside the screen's
+ * bounds, then Electron automatically clamps them to the screen's available
+ * space, and we do not need to tackle it specifically.
+ *
+ * However, there is no minimum window size the Electron enforces by default. As
+ * a safety valve, provide an (arbitrary) minimum size so that the user can
+ * resize it back to sanity if something I cannot currently anticipate happens.
+ */
+const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
+
+/**
+ * Sibling of {@link windowBounds}, see that function's documentation for more
  * details.
  */
-const saveWindowRect = (window: BrowserWindow) => {
-    if (window.isMaximized()) userPreferences.delete("windowRect");
-    else userPreferences.set("windowRect", window.getBounds());
+const saveWindowBounds = (window: BrowserWindow) => {
+    if (window.isMaximized()) userPreferences.delete("windowBounds");
+    else userPreferences.set("windowBounds", window.getBounds());
 };
 
 /**
@@ -525,7 +534,7 @@ const main = () => {
     app.on("activate", () => mainWindow?.show());
 
     app.on("before-quit", () => {
-        if (mainWindow) saveWindowRect(mainWindow);
+        if (mainWindow) saveWindowBounds(mainWindow);
         allowWindowClose();
     });
 };
