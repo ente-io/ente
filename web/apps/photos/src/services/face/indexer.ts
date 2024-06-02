@@ -7,7 +7,6 @@ import { ensure } from "@/utils/ensure";
 import type { Remote } from "comlink";
 import { getAllLocalFiles } from "services/fileService";
 import type { EnteFile } from "types/file";
-import { isInternalUserForML } from "utils/user";
 import {
     faceIndex,
     indexableFileIDs,
@@ -202,7 +201,7 @@ export const unidentifiedFaceIDs = async (
  * face search in the UI.
  */
 export const canEnableFaceIndexing = async () =>
-    isInternalUserForML() || (await isInternalUser()) || (await isBetaUser());
+    (await isInternalUser()) || (await isBetaUser());
 
 /**
  * Return true if the user has enabled face indexing in the app's settings.
