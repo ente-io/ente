@@ -13,7 +13,7 @@ import {
     indexedAndIndexableCounts,
     syncWithLocalFiles,
 } from "./db";
-import { FaceIndexerWorker } from "./indexer.worker";
+import { type FaceIndexerWorker } from "./indexer.worker";
 
 /**
  * Face indexing orchestrator.
