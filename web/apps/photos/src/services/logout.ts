@@ -5,7 +5,7 @@ import DownloadManager from "./download";
 import exportService from "./export";
 import { clearFaceData } from "./face/db";
 import { clearFeatureFlagSessionState } from "./feature-flag";
-import mlWorkManager from "./machineLearning/mlWorkManager";
+import mlWorkManager from "./face/mlWorkManager";
 
 /**
  * Logout sequence for the photos app.

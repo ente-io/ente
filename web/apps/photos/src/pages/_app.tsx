@@ -55,7 +55,7 @@ import {
     setIsFaceIndexingEnabled,
 } from "services/face/indexer";
 import { photosLogout } from "services/logout";
-import mlWorkManager from "services/machineLearning/mlWorkManager";
+import mlWorkManager from "services/face/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
