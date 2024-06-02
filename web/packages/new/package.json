@@ -6,7 +6,7 @@
         "@/next": "*",
         "@/utils": "*",
         "@ente/shared": "*",
-        "zod": "^3.23.8"
+        "zod": "^3"
     },
     "devDependencies": {}
 }
