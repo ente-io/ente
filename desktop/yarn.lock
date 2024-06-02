@@ -65,10 +65,10 @@
     fs-extra "^9.0.1"
     promise-retry "^2.0.1"
 
-"@electron/osx-sign@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@electron/osx-sign/-/osx-sign-1.0.5.tgz#0af7149f2fce44d1a8215660fd25a9fb610454d8"
-  integrity sha512-k9ZzUQtamSoweGQDV2jILiRIHUu7lYlJ3c6IEmjv1hC17rclE+eb9U+f6UFlOOETo0JzY1HNlXy4YOlCvl+Lww==
+"@electron/osx-sign@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@electron/osx-sign/-/osx-sign-1.3.0.tgz#bd6fb60c519b76ca8a000e5801f5685690e8adad"
+  integrity sha512-TEXhxlYSDRr9JWK5nWdOv5MtuUdaZ412uxIIEQ0hLt80o0HYWtQJBlW5QmrQDMtebzATaOjKG9UfCzLyA90zWQ==
   dependencies:
     compare-version "^0.1.2"
     debug "^4.3.4"
@@ -574,14 +574,14 @@ app-builder-bin@4.0.0:
   resolved "https://registry.yarnpkg.com/app-builder-bin/-/app-builder-bin-4.0.0.tgz#1df8e654bd1395e4a319d82545c98667d7eed2f0"
   integrity sha512-xwdG0FJPQMe0M0UA4Tz0zEB8rBJTRA5a476ZawAqiBkMv16GRK5xpXThOjMaEOFnZ6zabejjG4J3da0SXG63KA==
 
-app-builder-lib@25.0.0-alpha.6:
-  version "25.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/app-builder-lib/-/app-builder-lib-25.0.0-alpha.6.tgz#3edb49843b249a1dd52b32a80f9787677bc5a32b"
-  integrity sha512-kXveR7MFTJXBwb2xB2geKWeWP+YGcJ3IzWRgTEV96zwyo4IxzE5xRXcndSQQglmlzw/VoM5Mx322E9ErYbMCVg==
+app-builder-lib@25.0.0-alpha.8:
+  version "25.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/app-builder-lib/-/app-builder-lib-25.0.0-alpha.8.tgz#e8065005b0b5d43f22153ac72101f71bf4e1022b"
+  integrity sha512-d/pcaTcDv3gfdl9AGGP/DKvc+A+TdJmG15f+vqPeEGKOoqLE0ukReaEevXAtH3wOOs5CqgX6QgNPdszeeqFn3Q==
   dependencies:
     "@develar/schema-utils" "~2.6.5"
     "@electron/notarize" "2.3.0"
-    "@electron/osx-sign" "1.0.5"
+    "@electron/osx-sign" "1.3.0"
     "@electron/rebuild" "3.6.0"
     "@electron/universal" "2.0.1"
     "@malept/flatpak-bundler" "^0.4.0"
@@ -593,7 +593,7 @@ app-builder-lib@25.0.0-alpha.6:
     chromium-pickle-js "^0.2.0"
     debug "^4.3.4"
     ejs "^3.1.8"
-    electron-publish "25.0.0-alpha.6"
+    electron-publish "25.0.0-alpha.7"
     form-data "^4.0.0"
     fs-extra "^10.1.0"
     hosted-git-info "^4.1.0"
@@ -602,7 +602,7 @@ app-builder-lib@25.0.0-alpha.6:
     js-yaml "^4.1.0"
     lazy-val "^1.0.5"
     minimatch "^5.1.1"
-    read-config-file "6.3.2"
+    read-config-file "6.4.0"
     sanitize-filename "^1.6.3"
     semver "^7.3.8"
     tar "^6.1.12"
@@ -1034,6 +1034,14 @@ conf@^10.2.0:
     pkg-up "^3.1.0"
     semver "^7.3.5"
 
+config-file-ts@0.2.8-rc1:
+  version "0.2.8-rc1"
+  resolved "https://registry.yarnpkg.com/config-file-ts/-/config-file-ts-0.2.8-rc1.tgz#fb7fc6ccb2e313f69dbeb78f1db0b00038049de0"
+  integrity sha512-GtNECbVI82bT4RiDIzBSVuTKoSHufnU7Ce7/42bkWZJZFLjmDF2WBpVsvRkhKCfKBnTBb3qZrBwPpFBU/Myvhg==
+  dependencies:
+    glob "^10.3.12"
+    typescript "^5.4.3"
+
 config-file-ts@^0.2.4:
   version "0.2.6"
   resolved "https://registry.yarnpkg.com/config-file-ts/-/config-file-ts-0.2.6.tgz#b424ff74612fb37f626d6528f08f92ddf5d22027"
@@ -1183,12 +1191,12 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-dmg-builder@25.0.0-alpha.6:
-  version "25.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/dmg-builder/-/dmg-builder-25.0.0-alpha.6.tgz#1a13008de0543c3080595534ab294cde2a5e57e8"
-  integrity sha512-GStVExwsuumGN6rPGJksA5bLN5n5QEQd5iQrGKyBSxuwR1+LWidFkM+anroXnANIyTwbppk2S7+808vHjT/Eyw==
+dmg-builder@25.0.0-alpha.8:
+  version "25.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/dmg-builder/-/dmg-builder-25.0.0-alpha.8.tgz#fe887023ffc9ce72dfd2472303a76ec008a156d2"
+  integrity sha512-1/Sfl1sQugHkHEobFafyx1HcmgkFj8pV7HFEK0NQ8bH5K2qsGvknjAeHjtYhV2sBoSNGod4P0SfbScS6p6h4eg==
   dependencies:
-    app-builder-lib "25.0.0-alpha.6"
+    app-builder-lib "25.0.0-alpha.8"
     builder-util "25.0.0-alpha.6"
     builder-util-runtime "9.2.5-alpha.2"
     fs-extra "^10.1.0"
@@ -1218,10 +1226,22 @@ dot-prop@^6.0.1:
   dependencies:
     is-obj "^2.0.0"
 
+dotenv-expand@^11.0.6:
+  version "11.0.6"
+  resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-11.0.6.tgz#f2c840fd924d7c77a94eff98f153331d876882d3"
+  integrity sha512-8NHi73otpWsZGBSZwwknTXS5pqMOrk9+Ssrna8xCaxkzEpU9OTf9R5ArQGVw03//Zmk9MOwLPng9WwndvpAJ5g==
+  dependencies:
+    dotenv "^16.4.4"
+
 dotenv-expand@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
   integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
+
+dotenv@^16.4.4, dotenv@^16.4.5:
+  version "16.4.5"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.5.tgz#cdd3b3b604cb327e286b4762e13502f717cb099f"
+  integrity sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==
 
 dotenv@^9.0.2:
   version "9.0.2"
@@ -1235,16 +1255,16 @@ ejs@^3.1.8:
   dependencies:
     jake "^10.8.5"
 
-electron-builder@25.0.0-alpha.6:
-  version "25.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/electron-builder/-/electron-builder-25.0.0-alpha.6.tgz#a72f96f7029539ac28f92ce5c83f872ba3b6e7c1"
-  integrity sha512-qXzzdID2W9hhx3TXddwXv1C5HsqjF6bKnftUtywAB/gtDwu+neifPZvnXDNHI4ZamRrZpJJH59esfkqkc2KNSQ==
+electron-builder@25.0.0-alpha.8:
+  version "25.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/electron-builder/-/electron-builder-25.0.0-alpha.8.tgz#7238623cf7a753d0da31f16daea8767d0ef6d572"
+  integrity sha512-nfrtTljEZackbhJE1BcK+RFXrPvrkrBo0TgR0gH2GxNhPiRTwj/S24K3zHbYj6vBaDVtnqlS6Mqm8tMUrRU4tA==
   dependencies:
-    app-builder-lib "25.0.0-alpha.6"
+    app-builder-lib "25.0.0-alpha.8"
     builder-util "25.0.0-alpha.6"
     builder-util-runtime "9.2.5-alpha.2"
     chalk "^4.1.2"
-    dmg-builder "25.0.0-alpha.6"
+    dmg-builder "25.0.0-alpha.8"
     fs-extra "^10.1.0"
     is-ci "^3.0.0"
     lazy-val "^1.0.5"
@@ -1257,10 +1277,10 @@ electron-log@^5.1:
   resolved "https://registry.yarnpkg.com/electron-log/-/electron-log-5.1.5.tgz#70d5051fc5ab7669b2592f53f72034867269c96e"
   integrity sha512-vuq10faUAxRbILgQx7yHoMObKZDEfj7hMSZrJPsVrDNeCpV/HN11dU7QuY4UDUe055pzBxhSCB3m0+6D3Aktjw==
 
-electron-publish@25.0.0-alpha.6:
-  version "25.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/electron-publish/-/electron-publish-25.0.0-alpha.6.tgz#8af3cb6e2435c00b8c71de43c330483808df5924"
-  integrity sha512-Hin+6j+jiXBc5g6Wlv9JB5Xu7MADBHxZAndt4WE7luCw7b3+OJdQeDvD/uYiCLpiG8cc2NLxu4MyBSVu86MrJA==
+electron-publish@25.0.0-alpha.7:
+  version "25.0.0-alpha.7"
+  resolved "https://registry.yarnpkg.com/electron-publish/-/electron-publish-25.0.0-alpha.7.tgz#3c1944c8890b22d5f674772bf16c5382da248861"
+  integrity sha512-d9R6Jnds3PjzBM4Wt3nRn9ramkbM3kBzt9a6WHQL4/09ByyZGZ1Cu9GS9atRCkH3tBJlOIotUYVhVO36lk3sAA==
   dependencies:
     "@types/fs-extra" "^9.0.11"
     builder-util "25.0.0-alpha.6"
@@ -1716,7 +1736,7 @@ glob@^10.3.10:
     minipass "^7.0.4"
     path-scurry "^1.10.2"
 
-glob@^10.3.7:
+glob@^10.3.12, glob@^10.3.7:
   version "10.4.1"
   resolved "https://registry.yarnpkg.com/glob/-/glob-10.4.1.tgz#0cfb01ab6a6b438177bfe6a58e2576f6efe909c2"
   integrity sha512-2jelhlq3E4ho74ZyVLN03oKdAZVUa6UDZzFLVH1H7dnoax+y9qyaq8zBkfDIggjniU19z0wU18y16jMB2eyVIw==
@@ -2150,7 +2170,7 @@ json-stringify-safe@^5.0.1:
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==
 
-json5@^2.2.0:
+json5@^2.2.0, json5@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
   integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
@@ -2567,7 +2587,7 @@ onnxruntime-common@1.18.0:
   resolved "https://registry.yarnpkg.com/onnxruntime-common/-/onnxruntime-common-1.18.0.tgz#b904dc6ff134e7f21a3eab702fac17538f59e116"
   integrity sha512-lufrSzX6QdKrktAELG5x5VkBpapbCeS3dQwrXbN0eD9rHvU0yAWl7Ztju9FvgAKWvwd/teEKJNj3OwM6eTZh3Q==
 
-onnxruntime-node@^1.17:
+onnxruntime-node@^1.18:
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/onnxruntime-node/-/onnxruntime-node-1.18.0.tgz#ad3947365ca038ec3a16fa4c48972708ccd294e9"
   integrity sha512-iTnFcxKpmywCatx8ov4GTbECe3tJk2Bp1OA2mWRJde78q+7tpPYBhKMnwhlaoKy9oKQcy4UoEuuhoy2PSD13ww==
@@ -2805,6 +2825,18 @@ read-config-file@6.3.2:
     js-yaml "^4.1.0"
     json5 "^2.2.0"
     lazy-val "^1.0.4"
+
+read-config-file@6.4.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/read-config-file/-/read-config-file-6.4.0.tgz#970542833216cccff6b1d83320495003dcf85a45"
+  integrity sha512-uB5QOBeF84PT61GlV11OTV4jUGHAO3iDEOP6v9ygxhG6Bs9PLg7WsjNT6mtIX2G+x8lJTr4ZWNeG6LDTKkNf2Q==
+  dependencies:
+    config-file-ts "0.2.8-rc1"
+    dotenv "^16.4.5"
+    dotenv-expand "^11.0.6"
+    js-yaml "^4.1.0"
+    json5 "^2.2.3"
+    lazy-val "^1.0.5"
 
 readable-stream@^3.0.2, readable-stream@^3.4.0, readable-stream@^3.6.0:
   version "3.6.2"
@@ -3306,7 +3338,7 @@ typescript-eslint@8.0.0-alpha.10:
     "@typescript-eslint/parser" "8.0.0-alpha.10"
     "@typescript-eslint/utils" "8.0.0-alpha.10"
 
-typescript@^5, typescript@^5.3.3:
+typescript@^5, typescript@^5.3.3, typescript@^5.4.3:
   version "5.4.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
   integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==

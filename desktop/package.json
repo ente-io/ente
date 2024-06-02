@@ -36,7 +36,7 @@
         "jpeg-js": "^0.4",
         "next-electron-server": "^1",
         "node-stream-zip": "^1.15",
-        "onnxruntime-node": "^1.17"
+        "onnxruntime-node": "^1.18"
     },
     "devDependencies": {
         "@eslint/js": "^9.4.0",
@@ -46,7 +46,7 @@
         "@types/ffmpeg-static": "^3.0",
         "concurrently": "^8",
         "electron": "^30",
-        "electron-builder": "25.0.0-alpha.6",
+        "electron-builder": "25.0.0-alpha.8",
         "eslint": "^9.4.0",
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3",
