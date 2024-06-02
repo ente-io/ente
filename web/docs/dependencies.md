@@ -15,7 +15,7 @@ They also need some support packages, which come from the leaf `@/build-config`
 package:
 
 -   [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality,
-    and provides the configuration recommended the  by ESLint team.
+    and provides the configuration recommended the by ESLint team.
 
 -   [typescript-eslint](https://typescript-eslint.io/packages/typescript-eslint/)
     \- provides TypeScript ESLint functionality and provides a set of
