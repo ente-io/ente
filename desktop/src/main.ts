@@ -234,6 +234,15 @@ const windowRect = () => {
 };
 
 /**
+ * Sibling of {@link windowRect}, see that function's documentation for more
+ * details.
+ */
+const saveWindowRect = (window: BrowserWindow) => {
+    if (window.isMaximized()) userPreferences.delete("windowRect");
+    else userPreferences.set("windowRect", window.getBounds());
+};
+
+/**
  * On Linux the app does not show a dock icon by default, attempt to fix this by
  * returning the path to an icon as the "icon" property that can be passed to
  * the BrowserWindow during creation.
@@ -515,7 +524,10 @@ const main = () => {
     // app, e.g. by clicking on its dock icon.
     app.on("activate", () => mainWindow?.show());
 
-    app.on("before-quit", allowWindowClose);
+    app.on("before-quit", () => {
+        if (mainWindow) saveWindowRect(mainWindow);
+        allowWindowClose();
+    });
 };
 
 main();
