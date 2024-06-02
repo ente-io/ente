@@ -1,6 +1,11 @@
 import Store, { Schema } from "electron-store";
 
 interface UserPreferences {
+    /**
+     * If true, then the user has set a preference to also hide the dock icon on
+     * macOS whenever the app is hidden. The tray icon is always visible and can
+     * then be used to reopen the app when needed.
+     */
     hideDockIcon?: boolean;
     skipAppVersion?: string;
     muteUpdateNotificationVersion?: string;
