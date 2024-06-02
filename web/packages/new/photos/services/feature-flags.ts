@@ -2,6 +2,7 @@ import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { z } from "zod";
 
 let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;
 let _haveFetched = false;
@@ -63,6 +64,19 @@ const remoteFeatureFlags = () => {
     if (!s) return undefined;
     return JSON.parse(s);
 };
+
+const FeatureFlags = z.object({
+    internalUser: z
+        .boolean()
+        .nullish()
+        .transform((v) => (v === null ? undefined : v)),
+    betaUser: z
+        .boolean()
+        .nullish()
+        .transform((v) => (v === null ? undefined : v)),
+});
+
+type FeatureFlags = 
 
 const remoteFeatureFlagsFetchingIfNeeded = async () => {
     let ff = await remoteFeatureFlags();

@@ -5,7 +5,8 @@
     "dependencies": {
         "@/next": "*",
         "@/utils": "*",
-        "@ente/shared": "*"
+        "@ente/shared": "*",
+        "zod": "^3.23.8"
     },
     "devDependencies": {}
 }
