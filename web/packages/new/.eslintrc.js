@@ -1,3 +1,3 @@
 module.exports = {
-    extends: ["@/build-config/eslintrc-base"],
+    extends: ["@/build-config/eslintrc-react"],
 };
