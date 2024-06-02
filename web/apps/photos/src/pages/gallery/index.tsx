@@ -1,3 +1,4 @@
+import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
 import log from "@/next/log";
 import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -87,7 +88,6 @@ import {
 import downloadManager from "services/download";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
-import { fetchAndSaveFeatureFlagsIfNeeded } from "services/feature-flag";
 import { getLocalFiles, syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
@@ -720,7 +720,7 @@ export default function Gallery() {
                 await syncCLIPEmbeddings();
                 // TODO-ML(MR): Disable fetch until we start storing it in the
                 // same place as the local ones.
-                // if (isInternalUserForML()) await syncFaceEmbeddings();
+                // if (isFaceIndexingEnabled()) await syncFaceEmbeddings();
             }
             if (clipService.isPlatformSupported()) {
                 void clipService.scheduleImageEmbeddingExtraction();

@@ -1,19 +1,19 @@
+import {
+    isBetaUser,
+    isInternalUser,
+} from "@/new/photos/services/feature-flags";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
-import { type Remote } from "comlink";
-import { isBetaUser, isInternalUser } from "services/feature-flag";
+import type { Remote } from "comlink";
 import { getAllLocalFiles } from "services/fileService";
-import mlWorkManager from "services/machineLearning/mlWorkManager";
 import type { EnteFile } from "types/file";
-import { isInternalUserForML } from "utils/user";
 import {
     faceIndex,
     indexableFileIDs,
     indexedAndIndexableCounts,
     syncWithLocalFiles,
 } from "./db";
-import { FaceIndexerWorker } from "./indexer.worker";
+import type { FaceIndexerWorker } from "./indexer.worker";
 
 /**
  * Face indexing orchestrator.
@@ -41,33 +41,33 @@ class FaceIndexer {
     /** Timeout for when the next time we will wake up. */
     private wakeTimeout: ReturnType<typeof setTimeout> | undefined;
 
-    /**
-     * Add a file to the live indexing queue.
-     *
-     * @param enteFile An {@link EnteFile} that should be indexed.
-     *
-     * @param file The contents of {@link enteFile} as a web {@link File}
-     * object, if available.
-     */
-    enqueueFile(enteFile: EnteFile, file: File | undefined) {
-        // If face indexing is not enabled, don't enqueue anything. Later on if
-        // the user turns on face indexing these files will get indexed as part
-        // of the backfilling anyway, the live indexing is just an optimization.
-        if (!mlWorkManager.isMlSearchEnabled) return;
+    // /**
+    //  * Add a file to the live indexing queue.
+    //  *
+    //  * @param enteFile An {@link EnteFile} that should be indexed.
+    //  *
+    //  * @param file The contents of {@link enteFile} as a web {@link File}
+    //  * object, if available.
+    //  */
+    // enqueueFile(enteFile: EnteFile, file: File | undefined) {
+    //     // If face indexing is not enabled, don't enqueue anything. Later on if
+    //     // the user turns on face indexing these files will get indexed as part
+    //     // of the backfilling anyway, the live indexing is just an optimization.
+    //     if (!mlWorkManager.isMlSearchEnabled) return;
 
-        this.liveItems.push({ enteFile, file });
-        this.wakeUpIfNeeded();
-    }
+    //     this.liveItems.push({ enteFile, file });
+    //     this.wakeUpIfNeeded();
+    // }
 
-    private wakeUpIfNeeded() {
-        // Already awake.
-        if (!this.wakeTimeout) return;
-        // Cancel the alarm, wake up now.
-        clearTimeout(this.wakeTimeout);
-        this.wakeTimeout = undefined;
-        // Get to work.
-        this.tick();
-    }
+    // private wakeUpIfNeeded() {
+    //     // Already awake.
+    //     if (!this.wakeTimeout) return;
+    //     // Cancel the alarm, wake up now.
+    //     clearTimeout(this.wakeTimeout);
+    //     this.wakeTimeout = undefined;
+    //     // Get to work.
+    //     this.tick();
+    // }
 
     /* TODO-ML(MR): This code is not currently in use */
 
@@ -85,34 +85,34 @@ class FaceIndexer {
     faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
         (this._faceIndexer ??= createFaceIndexerComlinkWorker().remote);
 
-    private async tick() {
-        console.log("tick");
+    //     private async tick() {
+    //         console.log("tick");
 
-        const item = this.liveItems.pop();
-        if (!item) {
-            // TODO-ML: backfill instead if needed here.
-            this.wakeTimeout = setTimeout(() => {
-                this.wakeTimeout = undefined;
-                this.wakeUpIfNeeded();
-            }, 30 * 1000);
-            return;
-        }
-        /*
-        const fileID = item.enteFile.id;
-        try {
-            const faceIndex = await indexFaces(item.enteFile, item.file, userAgent);
-            log.info(`faces in file ${fileID}`, faceIndex);
-        } catch (e) {
-            log.error(`Failed to index faces in file ${fileID}`, e);
-            markIndexingFailed(item.enteFile.id);
-        }
-*/
-        // Let the runloop drain.
-        await wait(0);
-        // Run again.
-        // TODO
-        // this.tick();
-    }
+    //         const item = this.liveItems.pop();
+    //         if (!item) {
+    //             // TODO-ML: backfill instead if needed here.
+    //             this.wakeTimeout = setTimeout(() => {
+    //                 this.wakeTimeout = undefined;
+    //                 this.wakeUpIfNeeded();
+    //             }, 30 * 1000);
+    //             return;
+    //         }
+    //         /*
+    //         const fileID = item.enteFile.id;
+    //         try {
+    //             const faceIndex = await indexFaces(item.enteFile, item.file, userAgent);
+    //             log.info(`faces in file ${fileID}`, faceIndex);
+    //         } catch (e) {
+    //             log.error(`Failed to index faces in file ${fileID}`, e);
+    //             markIndexingFailed(item.enteFile.id);
+    //         }
+    // */
+    //         // Let the runloop drain.
+    //         await wait(0);
+    //         // Run again.
+    //         // TODO
+    //         // this.tick();
+    //     }
 
     /**
      * Add a newly uploaded file to the face indexing queue.
@@ -162,8 +162,9 @@ export interface FaceIndexingStatus {
     nTotalFiles: number;
 }
 
-export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
-    const isSyncing = mlWorkManager.isSyncing;
+export const faceIndexingStatus = async (
+    isSyncing: boolean,
+): Promise<FaceIndexingStatus> => {
     const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
 
     let phase: FaceIndexingStatus["phase"];
@@ -200,7 +201,7 @@ export const unidentifiedFaceIDs = async (
  * face search in the UI.
  */
 export const canEnableFaceIndexing = async () =>
-    isInternalUserForML() || (await isInternalUser()) || (await isBetaUser());
+    (await isInternalUser()) || (await isBetaUser());
 
 /**
  * Return true if the user has enabled face indexing in the app's settings.

@@ -83,7 +83,6 @@ import {
 } from "utils/billing";
 import { openLink } from "utils/common";
 import { getDownloadAppMessage } from "utils/ui";
-import { isInternalUser } from "utils/user";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
@@ -553,7 +552,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={openRecoveryKeyModal}
                 label={t("RECOVERY_KEY")}
             />
-            {isInternalUser() && (
+            {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
                     onClick={toggleTheme}
                     variant="secondary"
@@ -572,7 +571,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 label={t("TWO_FACTOR")}
             />
 
-            {isInternalUser() && (
+            {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
                     variant="secondary"
                     onClick={redirectToAccountsPage}
@@ -768,7 +767,7 @@ const DebugSection: React.FC = () => {
                     {appVersion}
                 </Typography>
             )}
-            {isInternalUser() && (
+            {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
                     variant="secondary"
                     onClick={testUpload}
@@ -777,4 +776,12 @@ const DebugSection: React.FC = () => {
             )}
         </>
     );
+};
+
+// TODO: Legacy synchronous check, use the one for feature-flags.ts instead.
+const isInternalUserViaEmailCheck = () => {
+    const userEmail = getData(LS_KEYS.USER)?.email;
+    if (!userEmail) return false;
+
+    return userEmail.endsWith("@ente.io");
 };

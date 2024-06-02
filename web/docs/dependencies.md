@@ -154,6 +154,19 @@ It is more lower level than Next, but the bells and whistles it doesn't have are
 the bells and whistles (and the accompanying complexity) that we don't need in
 some cases.
 
+## General
+
+-   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
+    layer on top of Web Workers to make them more easier to use.
+
+-   [idb](https://github.com/jakearchibald/idb) provides a promise API over the
+    browser-native IndexedDB APIs.
+
+    > For more details about IDB and its role, see [storage.md](storage.md).
+
+-   [zod](https://github.com/colinhacks/zod) is used for runtime typechecking
+    (e.g. verifying that API responses match the expected TypeScript shape).
+
 ## Media
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in
@@ -166,16 +179,6 @@ some cases.
 
 -   [heic-convert](https://github.com/catdad-experiments/heic-convert) is used
     for converting HEIC files (which browsers don't natively support) into JPEG.
-
-## General
-
--   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
-    layer on top of Web Workers to make them more easier to use.
-
--   [idb](https://github.com/jakearchibald/idb) provides a promise API over the
-    browser-native IndexedDB APIs.
-
-    > For more details about IDB and its role, see [storage.md](storage.md).
 
 ## Photos app specific
 
