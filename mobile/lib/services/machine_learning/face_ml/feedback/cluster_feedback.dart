@@ -117,7 +117,11 @@ class ClusterFeedbackService {
 
       final sortingStartTime = DateTime.now();
       if (extremeFilesFirst) {
-        await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
+        try {
+          await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
+        } catch (e, s) {
+          _logger.severe("Error in sorting suggestions", e, s);
+        }
       }
       _logger.info(
         'getSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(findSuggestionsTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(findSuggestionsTime).inMilliseconds} ms',
@@ -156,7 +160,8 @@ class ClusterFeedbackService {
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.20,
       );
-      if (clusterResult == null || clusterResult.isEmpty) {
+      if (clusterResult.isEmpty) {
+        _logger.warning('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
@@ -164,7 +169,7 @@ class ClusterFeedbackService {
       // Update the deleted faces
       await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
       await FaceMLDataDB.instance
-          .clusterSummaryUpdate(clusterResult.newClusterSummaries!);
+          .clusterSummaryUpdate(clusterResult.newClusterSummaries);
 
       // Make sure the deleted faces don't get suggested in the future
       final notClusterIdToPersonId = <int, String>{};
@@ -208,7 +213,7 @@ class ClusterFeedbackService {
         fileIDToCreationTime: fileIDToCreationTime,
         distanceThreshold: 0.20,
       );
-      if (clusterResult == null || clusterResult.isEmpty) {
+      if (clusterResult.isEmpty) {
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
@@ -216,7 +221,7 @@ class ClusterFeedbackService {
       // Update the deleted faces
       await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
       await FaceMLDataDB.instance
-          .clusterSummaryUpdate(clusterResult.newClusterSummaries!);
+          .clusterSummaryUpdate(clusterResult.newClusterSummaries);
 
       Bus.instance.fire(
         PeopleChangedEvent(
@@ -344,9 +349,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.22,
       );
 
-      if (clusterResult == null ||
-          clusterResult.newClusterIdToFaceIds == null ||
-          clusterResult.isEmpty) {
+      if (clusterResult.isEmpty) {
         _logger.warning(
           '[CheckMixedClusters] Clustering did not seem to work for cluster $clusterID of size ${allClusterToFaceCount[clusterID]}',
         );
@@ -354,7 +357,7 @@ class ClusterFeedbackService {
       }
 
       final newClusterIdToCount =
-          clusterResult.newClusterIdToFaceIds!.map((key, value) {
+          clusterResult.newClusterIdToFaceIds.map((key, value) {
         return MapEntry(key, value.length);
       });
       final amountOfNewClusters = newClusterIdToCount.length;
@@ -423,6 +426,11 @@ class ClusterFeedbackService {
 
     final embeddings = await faceMlDb.getFaceEmbeddingMapForFaces(faceIDs);
 
+    if (embeddings.isEmpty) {
+      _logger.warning('No embeddings found for cluster $clusterID');
+      return ClusteringResult.empty();
+    }
+
     final fileIDToCreationTime =
         await FilesDB.instance.getFileIDToCreationTime();
 
@@ -433,15 +441,13 @@ class ClusterFeedbackService {
       distanceThreshold: 0.22,
     );
 
-    if (clusterResult == null ||
-        clusterResult.newClusterIdToFaceIds == null ||
-        clusterResult.isEmpty) {
+    if (clusterResult.isEmpty) {
       _logger.warning('No clusters found or something went wrong');
-      return ClusteringResult(newFaceIdToCluster: {});
+      return ClusteringResult.empty();
     }
 
     final clusterIdToCount =
-        clusterResult.newClusterIdToFaceIds!.map((key, value) {
+        clusterResult.newClusterIdToFaceIds.map((key, value) {
       return MapEntry(key, value.length);
     });
     final amountOfNewClusters = clusterIdToCount.length;
@@ -453,7 +459,7 @@ class ClusterFeedbackService {
     if (kDebugMode) {
       final Set allClusteredFaceIDsSet = {};
       for (final List<String> value
-          in clusterResult.newClusterIdToFaceIds!.values) {
+          in clusterResult.newClusterIdToFaceIds.values) {
         allClusteredFaceIDsSet.addAll(value);
       }
       assert((originalFaceIDsSet.difference(allClusteredFaceIDsSet)).isEmpty);
@@ -685,7 +691,7 @@ class ClusterFeedbackService {
           clusterAvgBigClusters,
           personClusters,
           ignoredClusters,
-          (minimumSize == 100) ? goodMeanDistance + 0.15 : goodMeanDistance,
+          goodMeanDistance,
         );
         w?.log(
           'Calculate suggestions using mean for ${clusterAvgBigClusters.length} clusters of min size $minimumSize',
@@ -1040,11 +1046,25 @@ class ClusterFeedbackService {
         await faceMlDb.getClusterToClusterSummary(personClusters);
     final clusterSummaryCallTime = DateTime.now();
 
+    // remove personClusters that don't have any summary
+    for (final clusterID in personClusters.toSet()) {
+      if (!personClusterToSummary.containsKey(clusterID)) {
+        _logger.warning('missing summary for $clusterID');
+        personClusters.remove(clusterID);
+      }
+    }
+    if (personClusters.isEmpty) {
+      _logger.warning('No person clusters with summary found');
+      return;
+    }
+
     // Calculate the avg embedding of the person
     final w = (kDebugMode ? EnteWatch('sortSuggestions') : null)?..start();
-    final personEmbeddingsCount = personClusters
-        .map((e) => personClusterToSummary[e]!.$2)
-        .reduce((a, b) => a + b);
+    int personEmbeddingsCount = 0;
+    for (final clusterID in personClusters) {
+      personEmbeddingsCount += personClusterToSummary[clusterID]!.$2;
+    }
+
     Vector personAvg = Vector.filled(192, 0);
     for (final personClusterID in personClusters) {
       final personClusterBlob = personClusterToSummary[personClusterID]!.$1;

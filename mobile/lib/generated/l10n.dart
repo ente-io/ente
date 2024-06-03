@@ -2876,11 +2876,11 @@ class S {
     );
   }
 
-  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
-  String get magicSearchDescription {
+  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.`
+  String get mlIndexingDescription {
     return Intl.message(
-      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
-      name: 'magicSearchDescription',
+      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.',
+      name: 'mlIndexingDescription',
       desc: '',
       args: [],
     );
@@ -4735,11 +4735,11 @@ class S {
     );
   }
 
-  /// `The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
-  String get devAccountChanged {
+  /// `Due to technical glitch, you have been logged out. Our apologies for the inconvenience.`
+  String get autoLogoutMessage {
     return Intl.message(
-      'The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
-      name: 'devAccountChanged',
+      'Due to technical glitch, you have been logged out. Our apologies for the inconvenience.',
+      name: 'autoLogoutMessage',
       desc: '',
       args: [],
     );
@@ -8759,16 +8759,6 @@ class S {
     return Intl.message(
       'Face recognition',
       name: 'faceRecognition',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
-  String get faceRecognitionIndexingDescription {
-    return Intl.message(
-      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
-      name: 'faceRecognitionIndexingDescription',
       desc: '',
       args: [],
     );

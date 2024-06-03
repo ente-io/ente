@@ -503,8 +503,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Diseñado para sobrevivir"),
         "details": MessageLookupByLibrary.simpleMessage("Detalles"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "La cuenta de desarrollador que utilizamos para publicar ente en la App Store ha cambiado. Por eso, tendrás que iniciar sesión de nuevo.\n\nNuestras disculpas por las molestias, pero esto era inevitable."),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Los archivos añadidos a este álbum de dispositivo se subirán automáticamente a ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
@@ -615,8 +613,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportar tus datos"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Error al aplicar el código"),
         "failedToCancel":

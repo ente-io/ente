@@ -37,7 +37,7 @@ endpoint:
 (Another
 [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
 
-## Web appps and Photos desktop app
+## Web apps and Photos desktop app
 
 You will need to build the app from source and use the
 `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable to tell it which server to

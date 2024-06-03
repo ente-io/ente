@@ -32,6 +32,6 @@
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true
     },
-    /* Transpile all `.ts` files in `src/` */
-    "include": ["src/**/*.ts"]
+    /* Include all `.ts` files in `src/` */
+    "include": ["src"]
 }

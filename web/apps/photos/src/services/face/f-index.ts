@@ -1,16 +1,9 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
-import type {
-    Box,
-    Dimensions,
-    Face,
-    FaceAlignment,
-    FaceDetection,
-    MlFileData,
-} from "services/face/types";
-import { defaultMLVersion } from "services/machineLearning/machineLearningService";
+import DownloadManager from "services/download";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
     Matrix as TransformationMatrix,
@@ -20,14 +13,15 @@ import {
     translate,
 } from "transformation-matrix";
 import type { EnteFile } from "types/file";
+import { getRenderableImage } from "utils/file";
 import { saveFaceCrop } from "./crop";
-import { fetchImageBitmap, getLocalFileImageBitmap } from "./file";
 import {
     clamp,
     grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+import type { Box, Dimensions, Face, Point } from "./types";
 
 /**
  * Index faces in the given file.
@@ -44,95 +38,128 @@ import {
  * they can be saved locally for offline use, and encrypts and uploads them to
  * the user's remote storage so that their other devices can download them
  * instead of needing to reindex.
+ *
+ * @param enteFile The {@link EnteFile} to index.
+ *
+ * @param file The contents of {@link enteFile} as a web {@link File}, if
+ * available. These are used when they are provided, otherwise the file is
+ * downloaded and decrypted from remote.
+ *
+ * @param userAgent The UA of the client that is doing the indexing (us).
  */
-export const indexFaces = async (enteFile: EnteFile, localFile?: File) => {
-    const startTime = Date.now();
+export const indexFaces = async (
+    enteFile: EnteFile,
+    file: File | undefined,
+    userAgent: string,
+) => {
+    const imageBitmap = await renderableImageBlob(enteFile, file).then(
+        createImageBitmap,
+    );
+    const { width, height } = imageBitmap;
+    const fileID = enteFile.id;
 
-    const imageBitmap = await fetchOrCreateImageBitmap(enteFile, localFile);
-    let mlFile: MlFileData;
     try {
-        mlFile = await indexFaces_(enteFile, imageBitmap);
+        return {
+            fileID,
+            width,
+            height,
+            faceEmbedding: {
+                version: 1,
+                client: userAgent,
+                faces: await indexFacesInBitmap(fileID, imageBitmap),
+            },
+        };
     } finally {
         imageBitmap.close();
     }
-
-    log.debug(() => {
-        const nf = mlFile.faces?.length ?? 0;
-        const ms = Date.now() - startTime;
-        return `Indexed ${nf} faces in file ${enteFile.id} (${ms} ms)`;
-    });
-    return mlFile;
 };
 
 /**
- * Return a {@link ImageBitmap}, using {@link localFile} if present otherwise
+ * Return a "renderable" image blob, using {@link file} if present otherwise
  * downloading the source image corresponding to {@link enteFile} from remote.
+ *
+ * For videos their thumbnail is used.
  */
-const fetchOrCreateImageBitmap = async (
-    enteFile: EnteFile,
-    localFile: File,
-) => {
+const renderableImageBlob = async (enteFile: EnteFile, file: File) => {
     const fileType = enteFile.metadata.fileType;
-    if (localFile) {
-        // TODO-ML(MR): Could also be image part of live photo?
-        if (fileType !== FILE_TYPE.IMAGE)
-            throw new Error("Local file of only image type is supported");
-
-        return await getLocalFileImageBitmap(enteFile, localFile);
-    } else if ([FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(fileType)) {
-        return await fetchImageBitmap(enteFile);
+    if (fileType == FILE_TYPE.VIDEO) {
+        const thumbnailData = await DownloadManager.getThumbnail(enteFile);
+        return new Blob([thumbnailData]);
     } else {
+        return file
+            ? getRenderableImage(enteFile.metadata.title, file)
+            : fetchRenderableBlob(enteFile);
+    }
+};
+
+const fetchRenderableBlob = async (enteFile: EnteFile) => {
+    const fileStream = await DownloadManager.getFile(enteFile);
+    const fileBlob = await new Response(fileStream).blob();
+    const fileType = enteFile.metadata.fileType;
+    if (fileType == FILE_TYPE.IMAGE) {
+        return getRenderableImage(enteFile.metadata.title, fileBlob);
+    } else if (fileType == FILE_TYPE.LIVE_PHOTO) {
+        const { imageFileName, imageData } = await decodeLivePhoto(
+            enteFile.metadata.title,
+            fileBlob,
+        );
+        return getRenderableImage(imageFileName, new Blob([imageData]));
+    } else {
+        // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 };
 
-const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
-    const fileID = enteFile.id;
+const indexFacesInBitmap = async (
+    fileID: number,
+    imageBitmap: ImageBitmap,
+): Promise<Face[]> => {
     const { width, height } = imageBitmap;
     const imageDimensions = { width, height };
-    const mlFile: MlFileData = {
-        fileId: fileID,
-        mlVersion: defaultMLVersion,
-        imageDimensions,
-        errorCount: 0,
-    };
 
-    const faceDetections = await detectFaces(imageBitmap);
-    const detectedFaces = faceDetections.map((detection) => ({
-        id: makeFaceID(fileID, detection, imageDimensions),
-        fileId: fileID,
-        detection,
-    }));
-    mlFile.faces = detectedFaces;
+    const yoloFaceDetections = await detectFaces(imageBitmap);
+    const partialResult = yoloFaceDetections.map(
+        ({ box, landmarks, score }) => {
+            const faceID = makeFaceID(fileID, box, imageDimensions);
+            const detection = { box, landmarks };
+            return { faceID, detection, score };
+        },
+    );
 
-    if (detectedFaces.length > 0) {
-        const alignments: FaceAlignment[] = [];
+    const alignments: FaceAlignment[] = [];
 
-        for (const face of mlFile.faces) {
-            const alignment = faceAlignment(face.detection);
-            face.alignment = alignment;
-            alignments.push(alignment);
+    for (const { faceID, detection } of partialResult) {
+        const alignment = computeFaceAlignment(detection);
+        alignments.push(alignment);
 
-            await saveFaceCrop(imageBitmap, face);
+        // This step is not part of the indexing pipeline, we just do it here
+        // since we have already computed the face alignment. Ignore errors that
+        // happen during this since it does not impact the generated face index.
+        try {
+            await saveFaceCrop(imageBitmap, faceID, alignment);
+        } catch (e) {
+            log.error(`Failed to save face crop for faceID ${faceID}`, e);
         }
-
-        const alignedFacesData = convertToMobileFaceNetInput(
-            imageBitmap,
-            alignments,
-        );
-
-        const blurValues = detectBlur(alignedFacesData, mlFile.faces);
-        mlFile.faces.forEach((f, i) => (f.blurValue = blurValues[i]));
-
-        const embeddings = await computeEmbeddings(alignedFacesData);
-        mlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
-
-        mlFile.faces.forEach((face) => {
-            face.detection = relativeDetection(face.detection, imageDimensions);
-        });
     }
 
-    return mlFile;
+    const alignedFacesData = convertToMobileFaceNetInput(
+        imageBitmap,
+        alignments,
+    );
+
+    const embeddings = await computeEmbeddings(alignedFacesData);
+    const blurs = detectBlur(
+        alignedFacesData,
+        partialResult.map((f) => f.detection),
+    );
+
+    return partialResult.map(({ faceID, detection, score }, i) => ({
+        faceID,
+        detection: normalizeToImageDimensions(detection, imageDimensions),
+        score,
+        blur: blurs[i],
+        embedding: Array.from(embeddings[i]),
+    }));
 };
 
 /**
@@ -142,14 +169,14 @@ const indexFaces_ = async (enteFile: EnteFile, imageBitmap: ImageBitmap) => {
  */
 const detectFaces = async (
     imageBitmap: ImageBitmap,
-): Promise<FaceDetection[]> => {
+): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }) => ({ x: 0, y: 0, width, height });
 
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
     const yoloOutput = await workerBridge.detectFaces(yoloInput);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
-    const faceDetections = transformFaceDetections(
+    const faceDetections = transformYOLOFaceDetections(
         faces,
         rect(yoloSize),
         rect(imageBitmap),
@@ -210,6 +237,12 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     return { yoloInput, yoloSize };
 };
 
+export interface YOLOFaceDetection {
+    box: Box;
+    landmarks: Point[];
+    score: number;
+}
+
 /**
  * Extract detected faces from the YOLOv5Face's output.
  *
@@ -228,8 +261,8 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
  */
 const filterExtractDetectionsFromYOLOOutput = (
     rows: Float32Array,
-): FaceDetection[] => {
-    const faces: FaceDetection[] = [];
+): YOLOFaceDetection[] => {
+    const faces: YOLOFaceDetection[] = [];
     // Iterate over each row.
     for (let i = 0; i < rows.length; i += 16) {
         const score = rows[i + 4];
@@ -254,7 +287,6 @@ const filterExtractDetectionsFromYOLOOutput = (
         const rightMouthY = rows[i + 14];
 
         const box = { x, y, width, height };
-        const probability = score as number;
         const landmarks = [
             { x: leftEyeX, y: leftEyeY },
             { x: rightEyeX, y: rightEyeY },
@@ -262,26 +294,26 @@ const filterExtractDetectionsFromYOLOOutput = (
             { x: leftMouthX, y: leftMouthY },
             { x: rightMouthX, y: rightMouthY },
         ];
-        faces.push({ box, landmarks, probability });
+        faces.push({ box, landmarks, score });
     }
     return faces;
 };
 
 /**
- * Transform the given {@link faceDetections} from their coordinate system in
+ * Transform the given {@link yoloFaceDetections} from their coordinate system in
  * which they were detected ({@link inBox}) back to the coordinate system of the
  * original image ({@link toBox}).
  */
-const transformFaceDetections = (
-    faceDetections: FaceDetection[],
+const transformYOLOFaceDetections = (
+    yoloFaceDetections: YOLOFaceDetection[],
     inBox: Box,
     toBox: Box,
-): FaceDetection[] => {
+): YOLOFaceDetection[] => {
     const transform = boxTransformationMatrix(inBox, toBox);
-    return faceDetections.map((f) => ({
+    return yoloFaceDetections.map((f) => ({
         box: transformBox(f.box, transform),
         landmarks: f.landmarks.map((p) => applyToPoint(transform, p)),
-        probability: f.probability,
+        score: f.score,
     }));
 };
 
@@ -313,8 +345,8 @@ const transformBox = (box: Box, transform: TransformationMatrix): Box => {
  * Remove overlapping faces from an array of face detections through non-maximum
  * suppression algorithm.
  *
- * This function sorts the detections by their probability in descending order,
- * then iterates over them.
+ * This function sorts the detections by their score in descending order, then
+ * iterates over them.
  *
  * For each detection, it calculates the Intersection over Union (IoU) with all
  * other detections.
@@ -323,8 +355,8 @@ const transformBox = (box: Box, transform: TransformationMatrix): Box => {
  * (`iouThreshold`), the other detection is considered overlapping and is
  * removed.
  *
- * @param detections - An array of face detections to remove overlapping faces
- * from.
+ * @param detections - An array of YOLO face detections to remove overlapping
+ * faces from.
  *
  * @param iouThreshold - The minimum IoU between two detections for them to be
  * considered overlapping.
@@ -332,11 +364,11 @@ const transformBox = (box: Box, transform: TransformationMatrix): Box => {
  * @returns An array of face detections with overlapping faces removed
  */
 const naiveNonMaxSuppression = (
-    detections: FaceDetection[],
+    detections: YOLOFaceDetection[],
     iouThreshold: number,
-): FaceDetection[] => {
+): YOLOFaceDetection[] => {
     // Sort the detections by score, the highest first.
-    detections.sort((a, b) => b.probability - a.probability);
+    detections.sort((a, b) => b.score - a.score);
 
     // Loop through the detections and calculate the IOU.
     for (let i = 0; i < detections.length - 1; i++) {
@@ -380,11 +412,7 @@ const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
     return intersectionArea / unionArea;
 };
 
-const makeFaceID = (
-    fileID: number,
-    { box }: FaceDetection,
-    image: Dimensions,
-) => {
+const makeFaceID = (fileID: number, box: Box, image: Dimensions) => {
     const part = (v: number) => clamp(v, 0.0, 0.999999).toFixed(5).substring(2);
     const xMin = part(box.x / image.width);
     const yMin = part(box.y / image.height);
@@ -393,13 +421,30 @@ const makeFaceID = (
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
+export interface FaceAlignment {
+    /**
+     * An affine transformation matrix (rotation, translation, scaling) to align
+     * the face extracted from the image.
+     */
+    affineMatrix: number[][];
+    /**
+     * The bounding box of the transformed box.
+     *
+     * The affine transformation shifts the original detection box a new,
+     * transformed, box (possibily rotated). This property is the bounding box
+     * of that transformed box. It is in the coordinate system of the original,
+     * full, image on which the detection occurred.
+     */
+    boundingBox: Box;
+}
+
 /**
  * Compute and return an {@link FaceAlignment} for the given face detection.
  *
  * @param faceDetection A geometry indicating a face detected in an image.
  */
-const faceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
-    faceAlignmentUsingSimilarityTransform(
+const computeFaceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
+    computeFaceAlignmentUsingSimilarityTransform(
         faceDetection,
         normalizeLandmarks(idealMobileFaceNetLandmarks, mobileFaceNetFaceSize),
     );
@@ -422,7 +467,7 @@ const normalizeLandmarks = (
 ): [number, number][] =>
     landmarks.map(([x, y]) => [x / faceSize, y / faceSize]);
 
-const faceAlignmentUsingSimilarityTransform = (
+const computeFaceAlignmentUsingSimilarityTransform = (
     faceDetection: FaceDetection,
     alignedLandmarks: [number, number][],
 ): FaceAlignment => {
@@ -484,28 +529,35 @@ const convertToMobileFaceNetInput = (
     return faceData;
 };
 
+interface FaceDetection {
+    box: Box;
+    landmarks: Point[];
+}
+
 /**
  * Laplacian blur detection.
  *
- * Return an array of detected blur values, one for each face in {@link faces}.
- * The face data is taken from the slice of {@link alignedFacesData}
- * corresponding to each face of {@link faces}.
+ * Return an array of detected blur values, one for each face detection in
+ * {@link faceDetections}. The face data is taken from the slice of
+ * {@link alignedFacesData} corresponding to the face of {@link faceDetections}.
  */
-const detectBlur = (alignedFacesData: Float32Array, faces: Face[]): number[] =>
-    faces.map((face, i) => {
+const detectBlur = (
+    alignedFacesData: Float32Array,
+    faceDetections: FaceDetection[],
+): number[] =>
+    faceDetections.map((d, i) => {
         const faceImage = grayscaleIntMatrixFromNormalized2List(
             alignedFacesData,
             i,
             mobileFaceNetFaceSize,
             mobileFaceNetFaceSize,
         );
-        return matrixVariance(applyLaplacian(faceImage, faceDirection(face)));
+        return matrixVariance(applyLaplacian(faceImage, faceDirection(d)));
     });
 
 type FaceDirection = "left" | "right" | "straight";
 
-const faceDirection = (face: Face): FaceDirection => {
-    const landmarks = face.detection.landmarks;
+const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
     const leftEye = landmarks[0];
     const rightEye = landmarks[1];
     const nose = landmarks[2];
@@ -695,7 +747,7 @@ const computeEmbeddings = async (
 /**
  * Convert the coordinates to between 0-1, normalized by the image's dimensions.
  */
-const relativeDetection = (
+const normalizeToImageDimensions = (
     faceDetection: FaceDetection,
     { width, height }: Dimensions,
 ): FaceDetection => {
@@ -710,6 +762,5 @@ const relativeDetection = (
         x: l.x / width,
         y: l.y / height,
     }));
-    const probability = faceDetection.probability;
-    return { box, landmarks, probability };
+    return { box, landmarks };
 };
