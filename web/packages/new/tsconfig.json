@@ -1,5 +1,9 @@
 {
     "extends": "@/build-config/tsconfig-typecheck.json",
+    "compilerOptions": {
+        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        "exactOptionalPropertyTypes": false
+    },
     "include": [
         ".",
         "../next/global-electron.d.ts",

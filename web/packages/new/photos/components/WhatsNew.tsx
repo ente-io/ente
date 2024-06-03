@@ -10,17 +10,8 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
+import type { TransitionProps } from "@mui/material/transitions";
 import React from "react";
-
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface WhatsNewProps {
     /** Set this to `true` to show the dialog. */
@@ -39,8 +30,8 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     return (
         <Dialog
             {...{ open, fullScreen }}
+            TransitionComponent={SlideTransition}
             maxWidth="xs"
-            TransitionComponent={Transition}
         >
             <DialogTitle>{"What's new"}</DialogTitle>
             <DialogContent>
@@ -67,6 +58,15 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
         </Dialog>
     );
 };
+
+const SlideTransition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+        children: React.ReactElement;
+    },
+    ref: React.Ref<unknown>,
+) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const StyledUL = styled("ul")`
     padding-inline: 1rem;
