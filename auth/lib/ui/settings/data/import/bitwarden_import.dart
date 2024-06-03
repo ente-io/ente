@@ -84,13 +84,22 @@ Future<int?> _processBitwardenExportFile(
       var totp = item['login']['totp'];
 
       Code code;
-
       if (totp.contains("otpauth://")) {
         code = Code.fromOTPAuthUrl(totp);
+      } else if (totp.contains("steam://")) {
+        // "totp": "steam://AAABBBCCCDDDEEEFFF"
+        var secret = totp.split("steam://")[1];
+        code = Code.fromAccountAndSecret(
+          Type.steam,
+          item['login']['username'],
+          item['name'],
+          secret,
+          null,
+          Code.steamDigits,
+        );
       } else {
         var issuer = item['name'];
         var account = item['login']['username'];
-
         code = Code.fromAccountAndSecret(
           Type.totp,
           account,
