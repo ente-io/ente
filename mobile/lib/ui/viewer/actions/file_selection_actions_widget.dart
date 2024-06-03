@@ -169,8 +169,8 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.navigation_rounded,
-            labelText: S.of(context).shareLink,
-            onTap: anyUploadedFiles ? _onCreateLinkTapped : null,
+            labelText: S.of(context).sendLink,
+            onTap: anyUploadedFiles ? _onSendLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
           ),
         );
@@ -623,7 +623,7 @@ class _FileSelectionActionsWidgetState
     return path;
   }
 
-  Future<String?> _selectedFilesPlaceholderPath(
+  Future<String?> _createPlaceholder(
     List<EnteFile> ownedSelectedFiles,
   ) async {
     final Widget imageWidget = LinkPlaceholder(
@@ -643,7 +643,7 @@ class _FileSelectionActionsWidgetState
     return onCreatedPlaceholderPath;
   }
 
-  Future<void> _onCreateLinkTapped() async {
+  Future<void> _onSendLinkTapped() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
         context,
@@ -661,7 +661,7 @@ class _FileSelectionActionsWidgetState
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
-    placeholderPath = await _selectedFilesPlaceholderPath(ownedSelectedFiles);
+    placeholderPath = await _createPlaceholder(ownedSelectedFiles);
     await dialog.hide();
     await _sendLink();
     widget.selectedFiles.clearAll();
