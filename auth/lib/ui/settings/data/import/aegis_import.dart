@@ -138,6 +138,7 @@ Future<int?> _processAegisExportFile(
 
   final parsedCodes = [];
   for (var item in aegisDB?['entries']) {
+    bool isFavorite = item['favorite'] ?? false;
     List<String> tags = [];
     var kind = item['type'];
     var account = item['name'];
@@ -167,7 +168,7 @@ Future<int?> _processAegisExportFile(
     }
 
     Code code = Code.fromOTPAuthUrl(otpUrl);
-    code = code.copyWith(display: CodeDisplay(tags: tags));
+    code = code.copyWith(display: CodeDisplay(pinned: isFavorite, tags: tags));
     parsedCodes.add(code);
   }
 
