@@ -6,9 +6,9 @@
     "scripts": {
         "build": "tsc && vite build",
         "dev": "vite",
-        "preview": "vite preview",
         "lint": "yarn prettier --check --log-level warn . && yarn eslint && yarn tsc",
-        "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint --fix && yarn tsc"
+        "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint --fix && yarn tsc",
+        "preview": "vite preview"
     },
     "dependencies": {
         "react": "^18",
@@ -18,18 +18,18 @@
     "devDependencies": {
         "@types/react": "^18",
         "@types/react-dom": "^18",
-        "@vitejs/plugin-react": "^4.2",
-        "vite": "^5.2",
-        "eslint": "^8",
-        "prettier": "^3",
-        "typescript": "^5",
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
+        "@vitejs/plugin-react": "^4.2",
+        "eslint": "^8",
         "eslint-plugin-react": "^7.34",
         "eslint-plugin-react-hooks": "^4.6",
         "eslint-plugin-react-refresh": "^0.4.7",
+        "prettier": "^3",
         "prettier-plugin-organize-imports": "^3.2",
-        "prettier-plugin-packagejson": "^2.5"
+        "prettier-plugin-packagejson": "^2.5",
+        "typescript": "^5",
+        "vite": "^5.2"
     },
     "packageManager": "yarn@1.22.21"
 }
