@@ -657,51 +657,6 @@ class _FileSelectionActionsWidgetState
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
     placeholderPath = await _selectedFilesPlaceholderPath(ownedSelectedFiles);
     await _sendLink();
-    // final actionResult = await showActionSheet(
-    //   context: context,
-    //   buttons: [
-    //     ButtonWidget(
-    //       labelText: S.of(context).shareLink,
-    //       buttonType: ButtonType.neutral,
-    //       buttonSize: ButtonSize.large,
-    //       shouldStickToDarkTheme: true,
-    //       buttonAction: ButtonAction.first,
-    //       isInAlert: true,
-    //     ),
-    //     ButtonWidget(
-    //       labelText: S.of(context).manageLink,
-    //       buttonType: ButtonType.secondary,
-    //       buttonSize: ButtonSize.large,
-    //       buttonAction: ButtonAction.second,
-    //       shouldStickToDarkTheme: true,
-    //       isInAlert: true,
-    //     ),
-    //     ButtonWidget(
-    //       labelText: S.of(context).done,
-    //       buttonType: ButtonType.secondary,
-    //       buttonSize: ButtonSize.large,
-    //       buttonAction: ButtonAction.third,
-    //       shouldStickToDarkTheme: true,
-    //       isInAlert: true,
-    //     ),
-    //   ],
-    //   title: S.of(context).publicLinkCreated,
-    //   body: S.of(context).youCanManageYourLinksInTheShareTab,
-    //   actionSheetType: ActionSheetType.defaultActionSheet,
-    // );
-    // if (actionResult?.action != null) {
-    //   if (actionResult!.action == ButtonAction.first) {
-    //     placeholderPath =
-    //         await _selectedFilesPlaceholderPath(ownedSelectedFiles);
-    //     await _sendLink();
-    //   }
-    //   if (actionResult.action == ButtonAction.second) {
-    //     await routeToPage(
-    //       context,
-    //       ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
-    //     );
-    //   }
-    // }
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
