@@ -44,13 +44,17 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
     );
 };
 
-const ButtonContents = styled("div")`
-    width: 100%;
-    text-align: left;
-`;
-
 const StyledButton = styled(Button)`
+    /* Show an outline when the button gains keyboard focus, e.g. when the user
+       tabs to it. */
     &.Mui-focusVisible {
         outline: 1px solid #aaa;
     }
+`;
+
+const ButtonContents = styled("div")`
+    /* Make the button text fill the entire space so the endIcon shows at the
+       trailing edge of the button. */
+    width: 100%;
+    text-align: left;
 `;
