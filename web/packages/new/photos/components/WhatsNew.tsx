@@ -24,7 +24,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
     return (
-        <Dialog open={true} fullScreen={fullScreen}>
+        <Dialog open={true} fullScreen={fullScreen} maxWidth="xs">
             <DialogTitle>{"What's new"}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
