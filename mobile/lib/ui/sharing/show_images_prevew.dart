@@ -5,6 +5,7 @@ import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class LinkPlaceholder extends StatelessWidget {
@@ -246,16 +247,17 @@ class LinkPlaceholder extends StatelessWidget {
                     top: 290,
                     left: 270,
                     child: Stack(
+                      alignment: Alignment.center,
                       children: [
                         Center(
                           child: Container(
-                            height: boxHeight + 3,
-                            width: boxHeight + 3,
+                            height: boxHeight + 1,
+                            width: boxHeight + 1,
                             decoration: ShapeDecoration(
                               color: const Color.fromRGBO(129, 129, 129, 0.1),
                               shape: SmoothRectangleBorder(
                                 borderRadius: SmoothBorderRadius(
-                                  cornerRadius: 15.0,
+                                  cornerRadius: 12.5,
                                   cornerSmoothing: 1.0,
                                 ),
                               ),
@@ -272,14 +274,12 @@ class LinkPlaceholder extends StatelessWidget {
                               height: boxHeight,
                               width: boxHeight,
                               color: const Color.fromRGBO(255, 255, 255, 1),
+                              padding: const EdgeInsets.all(4),
                               child: Center(
-                                child: Text(
-                                  "+" "${length - 3}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
-                                    color: Color.fromRGBO(0, 0, 0, 1),
-                                    fontFamily: 'Inter',
+                                child: FittedBox(
+                                  child: Text(
+                                    "+" "${length - 3}",
+                                    style: getEnteTextTheme(context).h3Bold,
                                   ),
                                 ),
                               ),
