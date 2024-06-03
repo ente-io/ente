@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 export const Card: React.FC = () => {
     return <div>Hello</div>;

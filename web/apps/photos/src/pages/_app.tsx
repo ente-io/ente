@@ -1,3 +1,4 @@
+import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
@@ -128,6 +129,8 @@ export default function App({ Component, pageProps }: AppProps) {
     >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [shouldShowWhatsNew, setShouldShowWhatsNew] = useState(true);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -385,6 +388,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
                 />
+                {shouldShowWhatsNew && <WhatsNew />}
                 <Notification
                     open={notificationView}
                     onClose={closeNotification}
