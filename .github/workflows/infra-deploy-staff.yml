@@ -11,7 +11,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    deploy:
+    lint:
         runs-on: ubuntu-latest
 
         defaults:
