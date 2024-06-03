@@ -14,6 +14,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 Future<void> showBitwardenImportInstruction(BuildContext context) async {
   final l10n = context.l10n;
@@ -60,12 +61,13 @@ Future<void> _pickBitwardenJsonFile(BuildContext context) async {
     if (count != null) {
       await importSuccessDialog(context, count);
     }
-  } catch (e) {
+  } catch (e,s) {
+    Logger("BitwardenImport").severe('Failed to import',e,s);
     await progressDialog.hide();
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDesc,
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }

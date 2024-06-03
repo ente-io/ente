@@ -21,6 +21,7 @@ import { clipService, computeClipMatchScore } from "./clip-service";
 import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import { faceIndexingStatus, isFaceIndexingEnabled } from "./face/indexer";
+import mlWorkManager from "./face/mlWorkManager";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -178,7 +179,8 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     try {
-        const indexStatus = await faceIndexingStatus();
+        const isSyncing = mlWorkManager.isSyncing;
+        const indexStatus = await faceIndexingStatus(isSyncing);
 
         let label: string;
         switch (indexStatus.phase) {

@@ -41,7 +41,7 @@ NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
 That's about it. If you open http://localhost:3000, you will be able to create
 an account on a Ente Photos web app running on your machine, and this web app
 will be connecting to the server running on your local machine at
-localhost:8080.
+`localhost:8080`.
 
 For the mobile apps, you don't even need to build, and can install normal Ente
 apps and configure them to use your
