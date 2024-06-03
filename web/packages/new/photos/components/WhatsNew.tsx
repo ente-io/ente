@@ -30,14 +30,15 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
                 <DialogContentText>Content</DialogContentText>
             </DialogContent>
             <DialogActions>
-                <Button
+                <StyledButton
                     onClick={onClose}
                     color="accent"
                     fullWidth
+                    disableRipple
                     endIcon={<ArrowForward />}
                 >
                     <ButtonContents>{"Continue"}</ButtonContents>
-                </Button>
+                </StyledButton>
             </DialogActions>
         </Dialog>
     );
@@ -46,4 +47,10 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
 const ButtonContents = styled("div")`
     width: 100%;
     text-align: left;
+`;
+
+const StyledButton = styled(Button)`
+    &.Mui-focusVisible {
+        outline: 1px solid #aaa;
+    }
 `;
