@@ -220,12 +220,27 @@ const createMainWindow = () => {
 };
 
 /**
- * The position and size of the window the last time it was closed.
+ * The position and size to use when showing the main window.
  *
- * The return value of `undefined` is taken to mean that the app's main window
- * should be maximized.
+ * The return value is `undefined` if the app's window was maximized the last
+ * time around, and so if we should restore it to the maximized state.
+ *
+ * Otherwise it returns the position and size of the window the last time the
+ * app quit.
+ *
+ * If there is no such saved value (or if it is the first time the user is
+ * running the app), return a default size.
  */
-const windowBounds = () => userPreferences.get("windowBounds");
+const windowBounds = () => {
+    if (userPreferences.get("isWindowMaximized")) return undefined;
+
+    const bounds = userPreferences.get("windowBounds");
+    if (bounds) return bounds;
+
+    // Default size. Picked arbitrarily as something that should look good on
+    // first launch. We don't provide a position to let Electron center the app.
+    return { width: 1170, height: 710 };
+};
 
 /**
  * If for some reason {@link windowBounds} is outside the screen's bounds (e.g.
@@ -236,9 +251,10 @@ const windowBounds = () => userPreferences.get("windowBounds");
  * bounds, then Electron automatically clamps them to the screen's available
  * space, and we do not need to tackle it specifically.
  *
- * However, there is no minimum window size the Electron enforces by default. As
- * a safety valve, provide an (arbitrary) minimum size so that the user can
- * resize it back to sanity if something I cannot currently anticipate happens.
+ * However, there is no clamping to the width and height, and neither is there
+ * is no minimum window size the Electron enforces by default. As a safety
+ * valve, provide an (arbitrary) minimum size so that the user can resize it
+ * back to sanity if something I cannot currently anticipate happens.
  */
 const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
 
@@ -247,8 +263,13 @@ const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
  * details.
  */
 const saveWindowBounds = (window: BrowserWindow) => {
-    if (window.isMaximized()) userPreferences.delete("windowBounds");
-    else userPreferences.set("windowBounds", window.getBounds());
+    if (window.isMaximized()) {
+        userPreferences.set("isWindowMaximized", true);
+        userPreferences.delete("windowBounds");
+    } else {
+        userPreferences.delete("isWindowMaximized");
+        userPreferences.set("windowBounds", window.getBounds());
+    }
 };
 
 /**
