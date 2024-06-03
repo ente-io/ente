@@ -100,27 +100,21 @@ class __BodyState extends State<_Body> {
                       color: getEnteColorScheme(context).primary300,
                       shadows: const [
                         BoxShadow(
-                          color: Color.fromARGB(30, 0, 179, 60),
+                          color: Color.fromARGB(12, 0, 179, 60),
                           offset: Offset(0, 2.51),
                           blurRadius: 5.02,
                           spreadRadius: 0,
                         ),
                         BoxShadow(
-                          color: Color.fromARGB(61, 0, 179, 60),
+                          color: Color.fromARGB(24, 0, 179, 60),
                           offset: Offset(0, 1.25),
                           blurRadius: 3.76,
                           spreadRadius: 0,
                         ),
                         BoxShadow(
-                          color: Color.fromARGB(61, 0, 179, 60),
+                          color: Color.fromARGB(24, 0, 179, 60),
                           offset: Offset(0, 0.63),
                           blurRadius: 1.88,
-                          spreadRadius: 0,
-                        ),
-                        BoxShadow(
-                          color: Color.fromARGB(61, 255, 255, 255),
-                          offset: Offset(0.63, 0.63),
-                          blurRadius: 1.25,
                           spreadRadius: 0,
                         ),
                       ],
