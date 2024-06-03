@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/common/progress_dialog.dart';
@@ -126,8 +127,18 @@ Future<int?> _processAegisExportFile(
   } else {
     aegisDB = decodedJson['db'];
   }
+  final Map<String, String> groupIDToName = {};
+  try {
+    for (var item in aegisDB?['groups']) {
+      groupIDToName[item['uuid']] = item['name'];
+    }
+  } catch (e) {
+    Logger("AegisImport").warning("Failed to parse groups", e);
+  }
+
   final parsedCodes = [];
   for (var item in aegisDB?['entries']) {
+    List<String> tags = [];
     var kind = item['type'];
     var account = item['name'];
     var issuer = item['issuer'];
@@ -137,7 +148,11 @@ Future<int?> _processAegisExportFile(
     var digits = item['info']['digits'];
 
     var counter = item['info']['counter'];
-
+    for (var group in item['groups']) {
+      if (groupIDToName.containsKey(group)) {
+        tags.add(groupIDToName[group]!);
+      }
+    }
     // Build the OTP URL
     String otpUrl;
 
@@ -150,7 +165,10 @@ Future<int?> _processAegisExportFile(
     } else {
       throw Exception('Invalid OTP type: $kind');
     }
-    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
+
+    Code code = Code.fromOTPAuthUrl(otpUrl);
+    code = code.copyWith(display: CodeDisplay(tags: tags));
+    parsedCodes.add(code);
   }
 
   for (final code in parsedCodes) {
