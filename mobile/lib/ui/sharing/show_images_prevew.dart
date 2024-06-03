@@ -247,7 +247,6 @@ class LinkPlaceholder extends StatelessWidget {
                     top: 290,
                     left: 270,
                     child: Stack(
-                      alignment: Alignment.center,
                       children: [
                         Center(
                           child: Container(
@@ -375,11 +374,11 @@ class _CustomImage extends StatelessWidget {
           ),
           Center(
             child: SizedBox(
-              height: height - 5,
-              width: width - 5,
+              height: height - 2,
+              width: width - 2,
               child: ClipSmoothRect(
                 radius: SmoothBorderRadius(
-                  cornerRadius: 16.0,
+                  cornerRadius: 20.0,
                   cornerSmoothing: 1,
                 ),
                 clipBehavior: Clip.antiAliasWithSaveLayer,
