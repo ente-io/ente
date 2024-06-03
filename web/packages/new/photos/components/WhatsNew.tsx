@@ -1,9 +1,12 @@
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
+    Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
+    styled,
     useMediaQuery,
 } from "@mui/material";
 import React from "react";
@@ -27,13 +30,20 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
                 <DialogContentText>Content</DialogContentText>
             </DialogContent>
             <DialogActions>
-                <button onClick={onClose}>Hello</button>
+                <Button
+                    onClick={onClose}
+                    color="accent"
+                    fullWidth
+                    endIcon={<ArrowForward />}
+                >
+                    <ButtonContents>{"Continue"}</ButtonContents>
+                </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-// const Contents = styled("div")`
-//     width: 300px;
-//     height: 300px;
-// `;
+const ButtonContents = styled("div")`
+    width: 100%;
+    text-align: left;
+`;

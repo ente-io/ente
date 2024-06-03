@@ -1,4 +1,8 @@
 {
     "extends": "@/build-config/tsconfig-typecheck.json",
-    "include": [".", "../next/global-electron.d.ts"]
+    "include": [
+        ".",
+        "../next/global-electron.d.ts",
+        "../shared/themes/mui-theme.d.ts"
+    ]
 }
