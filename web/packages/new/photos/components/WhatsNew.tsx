@@ -27,7 +27,14 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
         <Dialog open={true} fullScreen={fullScreen}>
             <DialogTitle>{"What's new"}</DialogTitle>
             <DialogContent>
-                <DialogContentText>Content</DialogContentText>
+                <DialogContentText>
+                    <StyledUL>
+                        <li>
+                            The app will remember its position and size when it
+                            is closed, and will reopen the same way.
+                        </li>
+                    </StyledUL>
+                </DialogContentText>
             </DialogContent>
             <DialogActions>
                 <StyledButton
@@ -43,6 +50,11 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
         </Dialog>
     );
 };
+
+const StyledUL = styled("ul")`
+    padding-inline: 1rem;
+    list-style-type: circle;
+`;
 
 const StyledButton = styled(Button)`
     /* Show an outline when the button gains keyboard focus, e.g. when the user
