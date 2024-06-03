@@ -248,13 +248,13 @@ const windowBounds = () => {
  * bounds might not be appropriate.
  *
  * Luckily, if we try to set an x/y position that is outside the screen's
- * bounds, then Electron automatically clamps them to the screen's available
- * space, and we do not need to tackle it specifically.
+ * bounds, then Electron automatically clamps x + width and y + height to lie
+ * within the screen's available space, and we do not need to tackle such out of
+ * bounds cases specifically.
  *
- * However, there is no clamping to the width and height, and neither is there
- * is no minimum window size the Electron enforces by default. As a safety
- * valve, provide an (arbitrary) minimum size so that the user can resize it
- * back to sanity if something I cannot currently anticipate happens.
+ * However there is no minimum window size the Electron enforces by default. As
+ * a safety valve, provide an (arbitrary) minimum size so that the user can
+ * resize it back to sanity if something I cannot currently anticipate happens.
  */
 const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
 
