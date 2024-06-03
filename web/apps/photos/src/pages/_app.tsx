@@ -133,7 +133,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
@@ -388,7 +388,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     attributes={dialogBoxAttributeV2}
                 />
                 {shouldShowWhatsNew && (
-                    <WhatsNew close={() => setShouldShowWhatsNew(false)} />
+                    <WhatsNew onClose={() => setShouldShowWhatsNew(false)} />
                 )}
                 <Notification
                     open={notificationView}

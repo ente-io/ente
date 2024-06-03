@@ -52,7 +52,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const router = useRouter();
 

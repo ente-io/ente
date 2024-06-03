@@ -3,20 +3,20 @@ import React from "react";
 
 interface WhatsNewProps {
     /** Invoked by the component when it wants to get closed. */
-    close: () => void;
+    onClose: () => void;
 }
 
 /**
  * Show a dialog showing a short summary of interesting-for-the-user things in
  * this release of the desktop app.
  */
-export const WhatsNew: React.FC<WhatsNewProps> = ({ close }) => {
-    const fullScreen = useMediaQuery("(max-width:428px)");
+export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
+    const fullScreen = useMediaQuery("(max-width: 428px)");
 
     return (
         <Dialog open={true} fullScreen={fullScreen}>
             <Contents>
-                <button onClick={close}>Hello</button>
+                <button onClick={onClose}>Hello</button>
             </Contents>
         </Dialog>
     );
