@@ -1,4 +1,11 @@
-import { Dialog, styled, useMediaQuery } from "@mui/material";
+import {
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    useMediaQuery,
+} from "@mui/material";
 import React from "react";
 
 interface WhatsNewProps {
@@ -15,14 +22,18 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
 
     return (
         <Dialog open={true} fullScreen={fullScreen}>
-            <Contents>
+            <DialogTitle>{"What's new"}</DialogTitle>
+            <DialogContent>
+                <DialogContentText>Content</DialogContentText>
+            </DialogContent>
+            <DialogActions>
                 <button onClick={onClose}>Hello</button>
-            </Contents>
+            </DialogActions>
         </Dialog>
     );
 };
 
-const Contents = styled("div")`
-    width: 300px;
-    height: 300px;
-`;
+// const Contents = styled("div")`
+//     width: 300px;
+//     height: 300px;
+// `;
