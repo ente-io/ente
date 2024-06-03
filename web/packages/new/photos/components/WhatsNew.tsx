@@ -54,6 +54,8 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
 const StyledUL = styled("ul")`
     padding-inline: 1rem;
     list-style-type: circle;
+
+    margin-block-end: 20px;
 `;
 
 const StyledButton = styled(Button)`
