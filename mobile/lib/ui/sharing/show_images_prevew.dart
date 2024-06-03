@@ -317,8 +317,8 @@ class _BackDrop extends StatelessWidget {
         children: [
           ThumbnailWidget(
             backDropImage,
-            shouldShowArchiveStatus: false,
             shouldShowSyncStatus: false,
+            shouldShowFavoriteIcon: false,
             thumbnailSize: thumbnailLargeSize,
           ),
           BackdropFilter(
@@ -386,8 +386,8 @@ class _CustomImage extends StatelessWidget {
                   decoration: BoxDecoration(boxShadow: imageShadow),
                   child: ThumbnailWidget(
                     file,
-                    shouldShowArchiveStatus: false,
                     shouldShowSyncStatus: false,
+                    shouldShowFavoriteIcon: false,
                     thumbnailSize: thumbnailLargeSize,
                   ),
                 ),
