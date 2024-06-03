@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+
+# Local env files
+.env*.local
+
+# tsc
+*.tsbuildinfo
+
+# Vite
+dist
