@@ -1,14 +1,12 @@
-name: "Deploy (staff)"
+name: "Lint (staff)"
 
 on:
-    # Run on every push to main that changes infra/staff/
+    # Run on every push to a branch other than main that changes infra/staff/
     push:
-        branches: [main]
+        branches-ignore: [main]
         paths:
             - "infra/staff/**"
             - ".github/workflows/infra-deploy-staff.yml"
-    # Also allow manually running the workflow
-    workflow_dispatch:
 
 jobs:
     deploy:
@@ -32,12 +30,5 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build
-              run: yarn build
-
-            - name: Publish
-              uses: cloudflare/wrangler-action@v3
-              with:
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/staff infra/staff/dist
+            - name: Lint
+              run: yarn lint
