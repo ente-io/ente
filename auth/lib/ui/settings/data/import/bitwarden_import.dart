@@ -61,8 +61,8 @@ Future<void> _pickBitwardenJsonFile(BuildContext context) async {
     if (count != null) {
       await importSuccessDialog(context, count);
     }
-  } catch (e,s) {
-    Logger("BitwardenImport").severe('Failed to import',e,s);
+  } catch (e, s) {
+    Logger("BitwardenImport").severe('Failed to import', e, s);
     await progressDialog.hide();
     await showErrorDialog(
       context,
@@ -89,7 +89,6 @@ Future<int?> _processBitwardenExportFile(
       if (totp.contains("otpauth://")) {
         code = Code.fromOTPAuthUrl(totp);
       } else if (totp.contains("steam://")) {
-        // "totp": "steam://AAABBBCCCDDDEEEFFF"
         var secret = totp.split("steam://")[1];
         code = Code.fromAccountAndSecret(
           Type.steam,
