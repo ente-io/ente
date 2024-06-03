@@ -128,7 +128,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 setState(() {});
               }
             });
-            return InkWell(
+            return GestureDetector(
               onTap: () {
                 final List<EnteFile> sortedFiles =
                     List<EnteFile>.from(currentSuggestion.filesInCluster);
@@ -146,6 +146,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   ),
                 );
               },
+              behavior: HitTestBehavior.opaque,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8.0,
@@ -493,9 +494,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
       fetch = false;
       futureClusterSuggestions = futureClusterSuggestions.then((list) {
-        return list
-            .sublist(currentSuggestionIndex)
-            ..insert(0, lastFeedback.suggestion);
+        return list.sublist(currentSuggestionIndex)
+          ..insert(0, lastFeedback.suggestion);
       });
       currentSuggestionIndex = 0;
       futureBuilderKeySuggestions = UniqueKey();
