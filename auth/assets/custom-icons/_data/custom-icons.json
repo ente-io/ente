@@ -426,6 +426,13 @@
       "slug": "wyze"
     },
     {
+      "title": "WorkOS",
+      "slug": "workos",
+      "altNames": [
+        "Work OS"
+      ]
+    },
+    {
       "title": "X",
       "altNames": [
         "twitter"
