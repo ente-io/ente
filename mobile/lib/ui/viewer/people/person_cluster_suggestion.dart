@@ -240,7 +240,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             style: getEnteTextTheme(context).smallMuted,
           ),
         Text(
-          // TODO: come up with a better copy for strings below!
           "${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
         ),
