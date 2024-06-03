@@ -34,10 +34,13 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build staff
+            - name: Lint
+              run: yarn lint
+
+            - name: Build
               run: yarn build
 
-            - name: Publish staff
+            - name: Publish
               uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
