@@ -77,8 +77,7 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-  final ScreenshotController screenshotController = ScreenshotController();
-  late String? placeholderPath;
+  ScreenshotController screenshotController = ScreenshotController();
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -100,6 +99,7 @@ class _FileSelectionActionsWidgetState
   @override
   void dispose() {
     widget.selectedFiles.removeListener(_selectFileChangeListener);
+    generatedPathNotifier.dispose();
     super.dispose();
   }
 
@@ -162,7 +162,7 @@ class _FileSelectionActionsWidgetState
           SelectionActionButton(
             icon: Icons.copy_outlined,
             labelText: S.of(context).copyLink,
-            onTap: anyUploadedFiles ? _sendLink : null,
+            onTap: anyUploadedFiles ? _copyLink : null,
           ),
         );
       } else {
@@ -618,12 +618,14 @@ class _FileSelectionActionsWidgetState
       final file = await File(filePath).writeAsBytes(bytes);
       path = file.path;
     } catch (e) {
-      _logger.severe("Failed to save placeholder image", e);
+      debugPrint(e.toString());
     }
     return path;
   }
 
-  Future<String?> _selectedFilesPlaceholderPath(
+  ValueNotifier<String?> generatedPathNotifier = ValueNotifier<String?>(null);
+
+  Future<String?> _selectedFilePlaceholderPath(
     List<EnteFile> ownedSelectedFiles,
   ) async {
     final Widget imageWidget = LinkPlaceholder(
@@ -638,9 +640,8 @@ class _FileSelectionActionsWidgetState
       delay: const Duration(milliseconds: 100),
     );
 
-    final String onCreatedPlaceholderPath =
-        await saveImage(bytesOfImageToWidget);
-    return onCreatedPlaceholderPath;
+    final String onCreateLinkTapped = await saveImage(bytesOfImageToWidget);
+    return onCreateLinkTapped;
   }
 
   Future<void> _onCreateLinkTapped() async {
@@ -690,9 +691,9 @@ class _FileSelectionActionsWidgetState
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.first) {
-        placeholderPath =
-            await _selectedFilesPlaceholderPath(ownedSelectedFiles);
-        await _sendLink();
+        generatedPathNotifier.value =
+            await _selectedFilePlaceholderPath(ownedSelectedFiles);
+        await _copyLink();
       }
       if (actionResult.action == ButtonAction.second) {
         await routeToPage(
@@ -802,7 +803,7 @@ class _FileSelectionActionsWidgetState
     }
   }
 
-  Future<void> _sendLink() async {
+  Future<void> _copyLink() async {
     if (_cachedCollectionForSharedLink != null) {
       final String collectionKey = Base58Encode(
         CollectionsService.instance
@@ -810,19 +811,19 @@ class _FileSelectionActionsWidgetState
       );
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
-      await shareImageAndUrl(placeholderPath!, url);
+      await shareImageAndUrl(generatedPathNotifier.value!, url);
       await Clipboard.setData(ClipboardData(text: url));
       showShortToast(context, S.of(context).linkCopiedToClipboard);
-      if (placeholderPath != null) {
-        final file = File(placeholderPath!);
+      if (generatedPathNotifier.value != null) {
+        final file = File(generatedPathNotifier.value!);
         try {
-          if (file.existsSync()) {
-            file.deleteSync();
+          if (await file.exists()) {
+            await file.delete();
           }
         } catch (e) {
-          _logger.warning("Failed to delete the file: $e");
+          debugPrint("Failed to delete the file: $e");
         } finally {
-          placeholderPath = null;
+          generatedPathNotifier.value = null;
         }
       }
     }
