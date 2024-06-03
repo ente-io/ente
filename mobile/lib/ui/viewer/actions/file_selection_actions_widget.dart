@@ -651,11 +651,18 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
+    final dialog = createProgressDialog(
+      context,
+      S.of(context).creatingLink,
+      isDismissible: true,
+    );
+    await dialog.show();
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
     placeholderPath = await _selectedFilesPlaceholderPath(ownedSelectedFiles);
+    await dialog.hide();
     await _sendLink();
     widget.selectedFiles.clearAll();
     if (mounted) {
