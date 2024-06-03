@@ -766,9 +766,8 @@ class _FileSelectionActionsWidgetState
       );
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
+      unawaited(Clipboard.setData(ClipboardData(text: url)));
       await shareImageAndUrl(placeholderPath!, url);
-      await Clipboard.setData(ClipboardData(text: url));
-      showShortToast(context, S.of(context).linkCopiedToClipboard);
       if (placeholderPath != null) {
         final file = File(placeholderPath!);
         try {
