@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## v1.7.0 (Unreleased)
+## v1.7.1 (Unreleased)
+
+-   Remember the window size across app restarts.
+
+## v1.7.0
 
 v1.7 is a major rewrite to improve the security of our app. In particular, the
 UI and the native parts of the app now run isolated from each other and

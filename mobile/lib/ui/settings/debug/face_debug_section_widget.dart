@@ -177,7 +177,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<double>(
-            future: FaceMLDataDB.instance.getClusteredToTotalFacesRatio(),
+            future: FaceMLDataDB.instance.getClusteredToIndexableFilesRatio(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
@@ -193,7 +193,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await PersonService.instance.storeRemoteFeedback();
+              await PersonService.instance.fetchRemoteClusterFeedback();
               FaceMlService.instance.debugIndexingDisabled = false;
               await FaceMlService.instance
                   .clusterAllImages(clusterInBuckets: true);

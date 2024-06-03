@@ -58,7 +58,8 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                 setFieldError("confirm", t("PASSPHRASE_MATCH_ERROR"));
             }
         } catch (e) {
-            setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${e.message}`);
+            const message = e instanceof Error ? e.message : "";
+            setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
         } finally {
             setLoading(false);
         }

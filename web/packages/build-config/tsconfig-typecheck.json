@@ -10,8 +10,8 @@
          * runtime will have.
          *
          * In our case, we tell it that the code will run in a modern browser,
-         * and will have access to a latest JS (esnext) and the DOM (dom). Our
-         * transpiler (Next.js) will ensure that these things hold.
+         * and will have access to a latest JS ("ESNext") and the DOM ("DOM")
+         * and web workers ("WebWorker").
          *
          * Unlike the other individual library components (say how "esnext"
          * implies "ESNext.*"), "DOM.Iterable" (the ability to iterate over DOM
@@ -21,7 +21,7 @@
          * Note that we don't need to specify the `target` compilerOption, since
          * tsc isn't actually generating (emitting) the JavaScript.
          */
-        "lib": ["ESnext", "DOM", "DOM.Iterable"],
+        "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"],
 
         /*
          * The module system to assume the generated JavaScript will use.
@@ -67,8 +67,10 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "noFallthroughCasesInSwitch": true,
-        /* e.g. makes array indexing returns undefined */
+        /* e.g. makes array indexing returns undefined. */
         "noUncheckedIndexedAccess": true,
+        /* Treat optional (?) properties and properties where undefined is a
+           valid value separately */
         "exactOptionalPropertyTypes": true
     }
 }

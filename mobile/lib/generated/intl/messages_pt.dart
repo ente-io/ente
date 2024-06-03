@@ -592,8 +592,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Feito para ter longevidade"),
         "details": MessageLookupByLibrary.simpleMessage("Detalhes"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "A conta de desenvolvedor que usamos para publicar o Ente na App Store foi alterada. Por esse motivo, você precisará fazer entrar novamente.\n\nPedimos desculpas pelo inconveniente, mas isso era inevitável."),
         "developerSettings": MessageLookupByLibrary.simpleMessage(
             "Configurações de desenvolvedor"),
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
@@ -629,7 +627,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage(
                 "Você quer descartar as edições que você fez?"),
-        "done": MessageLookupByLibrary.simpleMessage("Concluído"),
+        "done": MessageLookupByLibrary.simpleMessage("Pronto"),
         "doubleYourStorage":
             MessageLookupByLibrary.simpleMessage("Dobre seu armazenamento"),
         "download": MessageLookupByLibrary.simpleMessage("Baixar"),
@@ -721,8 +719,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconhecimento facial"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Falha ao aplicar o código"),
@@ -820,7 +816,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "A autenticação biométrica não está configurada no seu dispositivo. Por favor, ative o Touch ID ou o Face ID no seu telefone."),
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "A Autenticação Biométrica está desativada. Por favor, bloqueie e desbloqueie sua tela para ativá-la."),
-        "iOSOkButton": MessageLookupByLibrary.simpleMessage("Aceitar"),
+        "iOSOkButton": MessageLookupByLibrary.simpleMessage("Tudo bem"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorar"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alguns arquivos neste álbum são ignorados do envio porque eles tinham sido anteriormente excluídos do Ente."),
@@ -836,6 +832,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Chave de recuperação incorreta"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("Itens indexados"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "A indexação está pausada, será retomada automaticamente quando o dispositivo estiver pronto."),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Dispositivo não seguro"),
         "installManually":
@@ -948,8 +946,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Aprendizagem de máquina"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Busca mágica"),
-        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "manageDeviceStorage": MessageLookupByLibrary.simpleMessage(
             "Gerenciar o armazenamento do dispositivo"),
@@ -967,6 +963,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m33,
         "merchandise": MessageLookupByLibrary.simpleMessage("Produtos"),
+        "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
@@ -1027,11 +1025,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nada para ver aqui! 👀"),
         "notifications": MessageLookupByLibrary.simpleMessage("Notificações"),
-        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onDevice": MessageLookupByLibrary.simpleMessage("No dispositivo"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Em <branding>ente</branding>"),
-        "oops": MessageLookupByLibrary.simpleMessage("Ops"),
+        "oops": MessageLookupByLibrary.simpleMessage("Opa"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ops, não foi possível salvar edições"),
         "oopsSomethingWentWrong":
@@ -1312,7 +1310,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "As pastas selecionadas serão criptografadas e armazenadas em backup"),
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
-                "Os itens selecionados serão excluídos de todos os álbuns e movidos para o lixo."),
+                "Os itens selecionados serão excluídos de todos os álbuns e movidos para a lixeira."),
         "selectedPhotos": m46,
         "selectedPhotosWithYours": m47,
         "send": MessageLookupByLibrary.simpleMessage("Enviar"),

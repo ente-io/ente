@@ -371,7 +371,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           );
         }
       }
-      newFile.generatedID = await FilesDB.instance.insert(newFile);
+      newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       unawaited(SyncService.instance.sync());
       showShortToast(context, S.of(context).editsSaved);

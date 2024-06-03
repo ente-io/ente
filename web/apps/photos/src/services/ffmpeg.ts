@@ -1,7 +1,7 @@
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
-import { Remote } from "comlink";
+import type { Remote } from "comlink";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,

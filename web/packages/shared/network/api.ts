@@ -1,3 +1,13 @@
+/**
+ * Return the origin (scheme, host, port triple) that should be used for making
+ * API requests to museum.
+ *
+ * This defaults to api.ente.io, Ente's own servers, but can be overridden when
+ * running locally by setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment
+ * variable.
+ */
+export const apiOrigin = () => getEndpoint();
+
 export const getEndpoint = () => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (endpoint) {

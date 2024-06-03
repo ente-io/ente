@@ -1,4 +1,4 @@
-import { FixedColors, ThemeColorsOptions } from "@mui/material";
+import type { FixedColors, ThemeColorsOptions } from "@mui/material";
 
 const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     background: {

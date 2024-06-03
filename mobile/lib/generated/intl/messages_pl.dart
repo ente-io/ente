@@ -115,8 +115,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadź swój klucz odzyskiwania"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "forgotPassword":
@@ -131,6 +129,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kod jest nieprawidłowy"),
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Nieprawidłowy klucz odzyskiwania"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),

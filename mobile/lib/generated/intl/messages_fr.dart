@@ -577,8 +577,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Conçu pour survivre"),
         "details": MessageLookupByLibrary.simpleMessage("Détails"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "Le compte développeur que nous utilisons pour publier ente sur l\'App Store a changé. Pour cette raison, vous devrez vous connecter à nouveau.\n\nNous nous excusons pour la gêne occasionnée, mais cela était inévitable."),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Les fichiers ajoutés à cet album seront automatiquement téléchargés sur ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
@@ -694,8 +692,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportez vos données"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Visages"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossible d\'appliquer le code"),
@@ -804,6 +800,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "La clé de secours que vous avez entrée est incorrecte"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Clé de secours non valide"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Appareil non sécurisé"),
         "installManually":

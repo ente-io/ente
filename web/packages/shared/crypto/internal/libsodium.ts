@@ -1,7 +1,7 @@
 import { CustomError } from "@ente/shared/error";
-import sodium, { StateAddress } from "libsodium-wrappers";
+import sodium, { type StateAddress } from "libsodium-wrappers";
 import { ENCRYPTION_CHUNK_SIZE } from "../constants";
-import { B64EncryptionResult } from "../types";
+import type { B64EncryptionResult } from "../types";
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,
@@ -308,6 +308,7 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
             memLimit /= 2;
         }
     }
+    throw new Error("Failed to derive key: Memory limit exceeded");
 }
 
 export async function deriveInteractiveKey(passphrase: string, salt: string) {

@@ -67,11 +67,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Skriv inn e-postadressen din"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),

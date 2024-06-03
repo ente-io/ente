@@ -598,8 +598,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive": MessageLookupByLibrary.simpleMessage(
             "Ontworpen om levenslang mee te gaan"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "Het ontwikkelaarsaccount dat we gebruiken om te publiceren in de App Store is veranderd. Daarom moet je opnieuw inloggen.\n\nOnze excuses voor het ongemak, helaas was dit onvermijdelijk."),
         "developerSettings":
             MessageLookupByLibrary.simpleMessage("Ontwikkelaarsinstellingen"),
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
@@ -727,8 +725,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exporteer je gegevens"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Gezichten"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Code toepassen mislukt"),
@@ -840,6 +836,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Onjuiste herstelsleutel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Geïndexeerde bestanden"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Onveilig apparaat"),
         "installManually":
@@ -950,8 +948,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Machine Learning"),
         "magicSearch":
             MessageLookupByLibrary.simpleMessage("Magische zoekfunctie"),
-        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Houd er rekening mee dat dit zal resulteren in een hoger internet- en batterijverbruik totdat alle items zijn geïndexeerd."),
         "manage": MessageLookupByLibrary.simpleMessage("Beheren"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Apparaatopslag beheren"),

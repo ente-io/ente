@@ -7,7 +7,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { FileML } from "services/face/remote";
 import type {
     Embedding,
     EmbeddingModel,
@@ -17,9 +16,13 @@ import type {
 } from "types/embedding";
 import { EnteFile } from "types/file";
 import { getLocalCollections } from "./collectionService";
+import type { FaceIndex } from "./face/types";
 import { getAllLocalFiles } from "./fileService";
 import { getLocalTrashedFiles } from "./trashService";
 
+type FileML = FaceIndex & {
+    updatedAt: number;
+};
 const DIFF_LIMIT = 500;
 
 /** Local storage key suffix for embedding sync times */

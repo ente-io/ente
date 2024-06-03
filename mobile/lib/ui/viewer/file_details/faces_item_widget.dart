@@ -173,7 +173,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Future<Map<String, Uint8List>?> getRelevantFaceCrops(
-    Iterable<Face> faces,
+    Iterable<Face> faces, {
+    int fetchAttempt = 1,
+    }
   ) async {
     try {
       final faceIdToCrop = <String, Uint8List>{};
@@ -223,6 +225,10 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         error: e,
         stackTrace: s,
       );
+      resetPool(fullFile: true);
+      if(fetchAttempt <= retryLimit) {
+        return getRelevantFaceCrops(faces, fetchAttempt: fetchAttempt + 1);
+      }
       return null;
     }
   }

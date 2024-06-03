@@ -5,7 +5,7 @@ import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { getLocalCollections } from "services/collectionService";
 import downloadManager from "services/download";
 import { getAllLocalFiles } from "services/fileService";

@@ -582,8 +582,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Entwickelt um zu bewahren"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "Das Entwicklerkonto, das wir verwenden, um ente im App Store zu veröffentlichen, hat sich geändert. Aus diesem Grund musst du dich erneut anmelden.\n\nWir entschuldigen uns für die Unannehmlichkeiten, aber das war unvermeidlich."),
         "deviceCodeHint": MessageLookupByLibrary.simpleMessage("Code eingeben"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Dateien, die zu diesem Album hinzugefügt werden, werden automatisch zu ente hochgeladen."),
@@ -706,8 +704,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Daten exportieren"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "faces": MessageLookupByLibrary.simpleMessage("Gesichter"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Der Code konnte nicht aktiviert werden"),
@@ -819,6 +815,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Falscher Wiederherstellungs-Schlüssel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indizierte Elemente"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Unsicheres Gerät"),
         "installManually":
@@ -926,8 +924,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Maschinelles Lernen"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magische Suche"),
-        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Bitte beachten Sie, dass dies mehr Bandbreite nutzt und zu einem höheren Akkuverbrauch führt, bis alle Elemente indiziert sind."),
         "manage": MessageLookupByLibrary.simpleMessage("Verwalten"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Gerätespeicher verwalten"),

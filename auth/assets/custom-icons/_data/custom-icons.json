@@ -32,7 +32,10 @@
     },
     {
       "title": "Bloom Host",
-      "slug": "bloom_host"
+      "slug": "bloom_host",
+      "altNames": [
+        "Bloom Host Billing"
+      ]
     },
     {
       "title": "BorgBase",
@@ -82,6 +85,9 @@
     },
     {
       "title": "Discourse"
+    },
+    {
+      "title": "Doppler"
     },
     {
       "title": "dus.net",
@@ -191,6 +197,15 @@
       "title": "Letterboxd"
     },
     {
+      "title": "Local",
+      "slug": "local_wp",
+      "altNames": [
+        "LocalWP",
+        "Local WP",
+        "Local Wordpress"
+      ]
+    },
+    {
       "title": "Mastodon",
       "altNames": [
         "mstdn",
@@ -203,7 +218,12 @@
     },
     {
       "title": "Mercado Livre",
-      "slug": "mercado_livre"
+      "slug": "mercado_livre",
+      "altNames": [
+        "Mercado Libre",
+        "MercadoLibre",
+        "MercadoLivre"
+      ]
     },
     {
       "title": "Murena",
@@ -303,6 +323,10 @@
       "slug": "rockstar_games"
     },
     {
+      "title": "RuneMate",
+      "hex": "2ECC71"
+    },
+    {
       "title": "Rust Language Forum",
       "slug": "rust_language_forum",
       "hex": "000000"
@@ -341,7 +365,10 @@
       "hex": "FFFFFF"
     },
     {
-      "title": "Techlore"
+      "title": "Techlore",
+      "altNames": [
+        "Techlore Courses"
+      ]
     },
     {
       "title": "Termius",
@@ -412,6 +439,14 @@
         "Яндекс"
       ],
       "slug": "Yandex"
+    },
+    {
+      "title": "YNAB",
+      "altNames": [
+        "You Need A Budget"
+      ],
+      "slug": "ynab",
+      "hex": "3B5EDA"
     }
   ]
 }

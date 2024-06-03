@@ -1,15 +1,15 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { APP_HOMES } from "@ente/shared/apps/constants";
-import { PageProps } from "@ente/shared/apps/types";
+import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import {
@@ -19,17 +19,24 @@ import {
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../types/page";
 
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({ appContext, appName }: PageProps) {
-    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
+
+    const [keyAttributes, setKeyAttributes] = useState<
+        KeyAttributes | undefined
+    >();
 
     const router = useRouter();
 
@@ -42,7 +49,7 @@ export default function Recover({ appContext, appName }: PageProps) {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            sendOtt(appName, user.email);
+            sendOtt(appNameOld, user.email);
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.RECOVER);
             router.push(PAGES.VERIFY);
             return;
@@ -50,7 +57,8 @@ export default function Recover({ appContext, appName }: PageProps) {
         if (!keyAttributes) {
             router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push(APP_HOMES.get(appName));
+            // TODO: Refactor the type of APP_HOMES to not require the ??
+            router.push(APP_HOMES.get(appNameOld) ?? "/");
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -76,13 +84,14 @@ export default function Recover({ appContext, appName }: PageProps) {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const keyAttr = ensure(keyAttributes);
             const masterKey = await cryptoWorker.decryptB64(
-                keyAttributes.masterKeyEncryptedWithRecoveryKey,
-                keyAttributes.masterKeyDecryptionNonce,
+                keyAttr.masterKeyEncryptedWithRecoveryKey,
+                keyAttr.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
-            await decryptAndStoreToken(keyAttributes, masterKey);
+            await decryptAndStoreToken(keyAttr, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
@@ -122,4 +131,6 @@ export default function Recover({ appContext, appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

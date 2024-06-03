@@ -151,9 +151,7 @@ class FavoritesService {
     final collectionID = await _getOrCreateFavoriteCollectionID();
     final List<EnteFile> files = [file];
     if (file.uploadedFileID == null) {
-      file.collectionID = collectionID;
-      await _filesDB.insert(file);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTFav"));
+      throw AssertionError("Can only favorite uploaded items");
     } else {
       await _collectionsService.addOrCopyToCollection(collectionID, files);
     }

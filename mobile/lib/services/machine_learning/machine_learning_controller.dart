@@ -4,7 +4,6 @@ import "dart:io";
 import "package:battery_info/battery_info_plugin.dart";
 import "package:battery_info/model/android_battery_info.dart";
 import "package:battery_info/model/iso_battery_info.dart";
-import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
@@ -19,8 +18,7 @@ class MachineLearningController {
 
   static const kMaximumTemperature = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
-  static const kDefaultInteractionTimeout =
-      kDebugMode ? Duration(seconds: 3) : Duration(seconds: 5);
+  static const kDefaultInteractionTimeout = Duration(seconds: 15);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
 
   bool _isDeviceHealthy = true;
@@ -28,7 +26,10 @@ class MachineLearningController {
   bool _canRunML = false;
   late Timer _userInteractionTimer;
 
+  bool get isDeviceHealthy => _isDeviceHealthy;
+
   void init() {
+    _logger.info('init called');
     if (Platform.isAndroid) {
       _startInteractionTimer();
       BatteryInfoPlugin()
@@ -45,6 +46,7 @@ class MachineLearningController {
       });
     }
     _fireControlEvent();
+    _logger.info('init done');
   }
 
   void onUserInteraction() {

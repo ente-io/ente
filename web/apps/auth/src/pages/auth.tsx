@@ -1,69 +1,75 @@
+import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import NavbarBase from "@ente/shared/components/Navbar/base";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
+import { ApiError, CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Button, ButtonBase, Snackbar, TextField } from "@mui/material";
+import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { HOTP, TOTP } from "otpauth";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
-import { Code } from "services/code";
+import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
-const AuthenticatorCodesPage = () => {
-    const appContext = useContext(AppContext);
+const Page: React.FC = () => {
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = ensure(
+        useContext(AppContext),
+    );
     const router = useRouter();
-    const [codes, setCodes] = useState([]);
+    const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+
+    const showSessionExpiredDialog = () =>
+        setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
 
     useEffect(() => {
         const fetchCodes = async () => {
             try {
-                const res = await getAuthCodes();
-                setCodes(res);
-            } catch (err) {
-                if (err.message === CustomError.KEY_MISSING) {
+                setCodes(await getAuthCodes());
+            } catch (e) {
+                if (
+                    e instanceof Error &&
+                    e.message == CustomError.KEY_MISSING
+                ) {
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
                     router.push(PAGES.ROOT);
+                } else if (e instanceof ApiError && e.httpStatusCode == 401) {
+                    // We get back a 401 Unauthorized if the token is not valid.
+                    showSessionExpiredDialog();
                 } else {
                     // do not log errors
                 }
             }
             setHasFetched(true);
         };
-        fetchCodes();
-        appContext.showNavBar(false);
+        void fetchCodes();
+        showNavBar(false);
     }, []);
 
+    const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
-        (secret) =>
-            (secret.issuer ?? "")
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()) ||
-            (secret.account ?? "")
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()),
+        (code) =>
+            code.issuer?.toLowerCase().includes(lcSearch) ||
+            code.account?.toLowerCase().includes(lcSearch),
     );
 
     if (!hasFetched) {
         return (
-            <>
-                <VerticallyCentered>
-                    <EnteSpinner></EnteSpinner>
-                </VerticallyCentered>
-            </>
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
         );
     }
 
@@ -81,7 +87,7 @@ const AuthenticatorCodesPage = () => {
                 }}
             >
                 <div style={{ marginBottom: "1rem" }} />
-                {filteredCodes.length === 0 && searchTerm.length === 0 ? (
+                {filteredCodes.length == 0 && searchTerm.length == 0 ? (
                     <></>
                 ) : (
                     <TextField
@@ -105,7 +111,7 @@ const AuthenticatorCodesPage = () => {
                         justifyContent: "center",
                     }}
                 >
-                    {filteredCodes.length === 0 ? (
+                    {filteredCodes.length == 0 ? (
                         <div
                             style={{
                                 alignItems: "center",
@@ -114,30 +120,41 @@ const AuthenticatorCodesPage = () => {
                                 marginTop: "32px",
                             }}
                         >
-                            {searchTerm.length !== 0 ? (
+                            {searchTerm.length > 0 ? (
                                 <p>{t("NO_RESULTS")}</p>
                             ) : (
-                                <div />
+                                <></>
                             )}
                         </div>
                     ) : (
                         filteredCodes.map((code) => (
-                            <CodeDisplay codeInfo={code} key={code.id} />
+                            <CodeDisplay key={code.id} code={code} />
                         ))
                     )}
                 </div>
-                <div style={{ marginBottom: "2rem" }} />
-                <AuthFooter />
-                <div style={{ marginBottom: "4rem" }} />
+                <Footer />
             </div>
         </>
     );
 };
 
-export default AuthenticatorCodesPage;
+export default Page;
+
+const sessionExpiredDialogAttributes = (
+    action: () => void,
+): DialogBoxAttributesV2 => ({
+    title: t("SESSION_EXPIRED"),
+    content: t("SESSION_EXPIRED_MESSAGE"),
+    nonClosable: true,
+    proceed: {
+        text: t("LOGIN"),
+        action,
+        variant: "accent",
+    },
+});
 
 const AuthNavbar: React.FC = () => {
-    const { isMobile, logout } = useContext(AppContext);
+    const { isMobile, logout } = ensure(useContext(AppContext));
 
     return (
         <NavbarBase isMobile={isMobile}>
@@ -162,98 +179,61 @@ const AuthNavbar: React.FC = () => {
     );
 };
 
-interface CodeDisplay {
-    codeInfo: Code;
+interface CodeDisplayProps {
+    code: Code;
 }
 
-const CodeDisplay: React.FC<CodeDisplay> = ({ codeInfo }) => {
+const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
-    const [codeErr, setCodeErr] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
-    const generateCodes = () => {
+    const regen = () => {
         try {
-            const currentTime = new Date().getTime();
-            if (codeInfo.type === "totp") {
-                const totp = new TOTP({
-                    secret: codeInfo.secret,
-                    algorithm: codeInfo.algorithm,
-                    period: codeInfo.period,
-                    digits: codeInfo.digits,
-                });
-                setOTP(totp.generate());
-                setNextOTP(
-                    totp.generate({
-                        timestamp: currentTime + codeInfo.period * 1000,
-                    }),
-                );
-            } else if (codeInfo.type === "hotp") {
-                const hotp = new HOTP({
-                    secret: codeInfo.secret,
-                    counter: 0,
-                    algorithm: codeInfo.algorithm,
-                });
-                setOTP(hotp.generate());
-                setNextOTP(hotp.generate({ counter: 1 }));
-            }
-        } catch (err) {
-            setCodeErr(err.message);
+            const [m, n] = generateOTPs(code);
+            setOTP(m);
+            setNextOTP(n);
+        } catch (e) {
+            setErrorMessage(e instanceof Error ? e.message : String(e));
         }
     };
 
     const copyCode = () => {
         navigator.clipboard.writeText(otp);
         setHasCopied(true);
-        setTimeout(() => {
-            setHasCopied(false);
-        }, 2000);
+        setTimeout(() => setHasCopied(false), 2000);
     };
 
     useEffect(() => {
-        // this is to set the initial code and nextCode on component mount
-        generateCodes();
-        const codeType = codeInfo.type;
-        const codePeriodInMs = codeInfo.period * 1000;
-        const timeToNextCode =
-            codePeriodInMs - (new Date().getTime() % codePeriodInMs);
-        const intervalId = null;
-        // wait until we are at the start of the next code period,
-        // and then start the interval loop
+        // Generate to set the initial otp and nextOTP on component mount.
+        regen();
+
+        const periodMs = code.period * 1000;
+        const timeToNextCode = periodMs - (Date.now() % periodMs);
+
+        let interval: ReturnType<typeof setInterval> | undefined;
+        // Wait until we are at the start of the next code period, and then
+        // start the interval loop.
         setTimeout(() => {
-            // we need to call generateCodes() once before the interval loop
-            // to set the initial code and nextCode
-            generateCodes();
-            codeType.toLowerCase() === "totp" ||
-            codeType.toLowerCase() === "hotp"
-                ? setInterval(() => {
-                      generateCodes();
-                  }, codePeriodInMs)
-                : null;
+            // We need to call regen() once before the interval loop to set the
+            // initial otp and nextOTP.
+            regen();
+            interval = setInterval(regen, periodMs);
         }, timeToNextCode);
 
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [codeInfo]);
+        return () => interval && clearInterval(interval);
+    }, [code]);
 
     return (
         <div style={{ padding: "8px" }}>
-            {codeErr === "" ? (
-                <ButtonBase
-                    component="div"
-                    onClick={() => {
-                        copyCode();
-                    }}
-                >
-                    <OTPDisplay code={codeInfo} otp={otp} nextOTP={nextOTP} />
-                    <Snackbar
-                        open={hasCopied}
-                        message="Code copied to clipboard"
-                    />
-                </ButtonBase>
+            {errorMessage ? (
+                <UnparseableCode {...{ code, errorMessage }} />
             ) : (
-                <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />
+                <ButtonBase component="div" onClick={copyCode}>
+                    <OTPDisplay {...{ code, otp, nextOTP }} />
+                    <Snackbar open={hasCopied} message={t("COPIED")} />
+                </ButtonBase>
             )}
         </div>
     );
@@ -274,7 +254,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                 overflow: "hidden",
             }}
         >
-            <TimerProgress period={code.period} />
+            <CodeValidityBar code={code} />
             <div
                 style={{
                     padding: "12px 20px 0px 20px",
@@ -301,7 +281,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             textAlign: "left",
                         }}
                     >
-                        {code.issuer}
+                        {code.issuer ?? ""}
                     </p>
                     <p
                         style={{
@@ -314,7 +294,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             color: "grey",
                         }}
                     >
-                        {code.account}
+                        {code.account ?? ""}
                     </p>
                     <p
                         style={{
@@ -370,28 +350,25 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
     );
 };
 
-interface TimerProgressProps {
-    period: number;
+interface CodeValidityBarProps {
+    code: Code;
 }
 
-const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
-    const [progress, setProgress] = useState(0);
-    const microSecondsInPeriod = period * 1000000;
+const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
+    const [progress, setProgress] = useState(code.type == "hotp" ? 1 : 0);
 
     useEffect(() => {
-        const updateTimeRemaining = () => {
-            const timeRemaining =
-                microSecondsInPeriod -
-                ((new Date().getTime() * 1000) % microSecondsInPeriod);
-            setProgress(timeRemaining / microSecondsInPeriod);
+        const advance = () => {
+            const us = code.period * 1e6;
+            const timeRemaining = us - ((Date.now() * 1000) % us);
+            setProgress(timeRemaining / us);
         };
 
-        const ticker = setInterval(() => {
-            updateTimeRemaining();
-        }, 10);
+        const ticker =
+            code.type == "hotp" ? undefined : setInterval(advance, 10);
 
-        return () => clearInterval(ticker);
-    }, []);
+        return () => ticker && clearInterval(ticker);
+    }, [code]);
 
     const color = progress > 0.4 ? "green" : "orange";
 
@@ -407,17 +384,25 @@ const TimerProgress: React.FC<TimerProgressProps> = ({ period }) => {
     );
 };
 
-function BadCodeInfo({ codeInfo, codeErr }) {
+interface UnparseableCodeProps {
+    code: Code;
+    errorMessage: string;
+}
+
+const UnparseableCode: React.FC<UnparseableCodeProps> = ({
+    code,
+    errorMessage,
+}) => {
     const [showRawData, setShowRawData] = useState(false);
 
     return (
         <div className="code-info">
-            <div>{codeInfo.title}</div>
-            <div>{codeErr}</div>
+            <div>{code.issuer}</div>
+            <div>{errorMessage}</div>
             <div>
                 {showRawData ? (
                     <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.uriString ?? "(no raw data)"}
+                        {code.uriString}
                     </div>
                 ) : (
                     <div onClick={() => setShowRawData(true)}>Show rawData</div>
@@ -425,18 +410,11 @@ function BadCodeInfo({ codeInfo, codeErr }) {
             </div>
         </div>
     );
-}
+};
 
-const AuthFooter: React.FC = () => {
+const Footer: React.FC = () => {
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
+        <Footer_>
             <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
@@ -444,6 +422,15 @@ const AuthFooter: React.FC = () => {
             >
                 <Button color="accent">{t("DOWNLOAD")}</Button>
             </a>
-        </div>
+        </Footer_>
     );
 };
+
+const Footer_ = styled("div")`
+    margin-block-start: 2rem;
+    margin-block-end: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;

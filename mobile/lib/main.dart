@@ -49,6 +49,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -178,56 +179,72 @@ void _headlessTaskHandler(HeadlessTask task) {
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
-  _isProcessRunning = true;
-  _logger.info("Initializing...  inBG =$isBackground via: $via");
-  final SharedPreferences preferences = await SharedPreferences.getInstance();
+  try {
+    bool initComplete = false;
+    Future.delayed(const Duration(seconds: 15), () {
+      if (!initComplete && !isBackground) {
+        sendLogsForInit(
+          "support@ente.io",
+          "Stuck on splash screen for >= 15 seconds",
+          null,
+        );
+      }
+    });
+    _isProcessRunning = true;
+    _logger.info("Initializing...  inBG =$isBackground via: $via");
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
 
-  await _logFGHeartBeatInfo();
-  unawaited(_scheduleHeartBeat(preferences, isBackground));
-  AppLifecycleService.instance.init(preferences);
-  if (isBackground) {
-    AppLifecycleService.instance.onAppInBackground('init via: $via');
-  } else {
-    AppLifecycleService.instance.onAppInForeground('init via: $via');
-  }
-  // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4).ignore();
-  CryptoUtil.init();
-  await Configuration.instance.init();
-  await NetworkClient.instance.init();
-  ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
-  await UserService.instance.init();
-  await EntityService.instance.init();
-  LocationService.instance.init(preferences);
+    await _logFGHeartBeatInfo();
+    unawaited(_scheduleHeartBeat(preferences, isBackground));
+    AppLifecycleService.instance.init(preferences);
+    if (isBackground) {
+      AppLifecycleService.instance.onAppInBackground('init via: $via');
+    } else {
+      AppLifecycleService.instance.onAppInForeground('init via: $via');
+    }
+    // Start workers asynchronously. No need to wait for them to start
+    Computer.shared().turnOn(workersCount: 4).ignore();
+    CryptoUtil.init();
+    await Configuration.instance.init();
+    await NetworkClient.instance.init();
+    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
+    await UserService.instance.init();
+    await EntityService.instance.init();
+    LocationService.instance.init(preferences);
 
-  await UserRemoteFlagService.instance.init();
-  await UpdateService.instance.init();
-  BillingService.instance.init();
-  await CollectionsService.instance.init(preferences);
-  FavoritesService.instance.initFav().ignore();
-  await FileUploader.instance.init(preferences, isBackground);
-  await LocalSyncService.instance.init(preferences);
-  TrashSyncService.instance.init(preferences);
-  RemoteSyncService.instance.init(preferences);
-  await SyncService.instance.init(preferences);
-  MemoriesService.instance.init(preferences);
-  LocalSettings.instance.init(preferences);
-  LocalFileUpdateService.instance.init(preferences);
-  SearchService.instance.init();
-  StorageBonusService.instance.init(preferences);
-  RemoteFileMLService.instance.init(preferences);
-  if (!isBackground &&
-      Platform.isAndroid &&
-      await HomeWidgetService.instance.countHomeWidgets() == 0) {
-    unawaited(HomeWidgetService.instance.initHomeWidget());
-  }
-  unawaited(SemanticSearchService.instance.init());
-  MachineLearningController.instance.init();
-  // Can not including existing tf/ml binaries as they are not being built
-  // from source.
-  // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  if (!UpdateService.instance.isFdroidFlavor()) {
-    // unawaited(ObjectDetectionService.instance.init());
+    await UserRemoteFlagService.instance.init();
+    await UpdateService.instance.init();
+    BillingService.instance.init();
+    await CollectionsService.instance.init(preferences);
+    FavoritesService.instance.initFav().ignore();
+    await FileUploader.instance.init(preferences, isBackground);
+    await LocalSyncService.instance.init(preferences);
+    TrashSyncService.instance.init(preferences);
+    RemoteSyncService.instance.init(preferences);
+    await SyncService.instance.init(preferences);
+    MemoriesService.instance.init(preferences);
+    LocalSettings.instance.init(preferences);
+    LocalFileUpdateService.instance.init(preferences);
+    SearchService.instance.init();
+    StorageBonusService.instance.init(preferences);
+    RemoteFileMLService.instance.init(preferences);
+    if (!isBackground &&
+        Platform.isAndroid &&
+        await HomeWidgetService.instance.countHomeWidgets() == 0) {
+      unawaited(HomeWidgetService.instance.initHomeWidget());
+    }
+
+    if (Platform.isIOS) {
+      // ignore: unawaited_futures
+      // PushService.instance.init().then((_) {
+      //   FirebaseMessaging.onBackgroundMessage(
+      //     _firebaseMessagingBackgroundHandler,
+      //   );
+      // });
+    }
+
+    unawaited(SemanticSearchService.instance.init());
+    MachineLearningController.instance.init();
     if (flagService.faceSearchEnabled) {
       unawaited(FaceMlService.instance.init());
     } else {
@@ -235,14 +252,18 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         unawaited(LocalSettings.instance.toggleFaceIndexing());
       }
     }
-  }
-  PersonService.init(
-    EntityService.instance,
-    FaceMLDataDB.instance,
-    preferences,
-  );
+    PersonService.init(
+      EntityService.instance,
+      FaceMLDataDB.instance,
+      preferences,
+    );
 
-  _logger.info("Initialization done");
+    initComplete = true;
+    _logger.info("Initialization done");
+  } catch (e, s) {
+    _logger.severe("Error in init", e, s);
+    rethrow;
+  }
 }
 
 Future<void> _sync(String caller) async {

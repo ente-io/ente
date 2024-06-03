@@ -73,7 +73,7 @@ class PersonService {
   Future<void> reconcileClusters() async {
     final EnteWatch? w = kDebugMode ? EnteWatch("reconcileClusters") : null;
     w?.start();
-    await storeRemoteFeedback();
+    await fetchRemoteClusterFeedback();
     w?.log("Stored remote feedback");
     final dbPersonClusterInfo =
         await faceMLDataDB.getPersonToClusterIdToFaceIds();
@@ -225,7 +225,7 @@ class PersonService {
     Bus.instance.fire(PeopleChangedEvent());
   }
 
-  Future<void> storeRemoteFeedback() async {
+  Future<void> fetchRemoteClusterFeedback() async {
     await entityService.syncEntities();
     final entities = await entityService.getEntities(EntityType.person);
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));

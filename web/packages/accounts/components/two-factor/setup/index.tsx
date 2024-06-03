@@ -1,12 +1,12 @@
 import SetupManualMode from "@ente/accounts/components/two-factor/setup/ManualMode";
 import SetupQRMode from "@ente/accounts/components/two-factor/setup/QRMode";
 import { SetupMode } from "@ente/accounts/pages/two-factor/setup";
-import { TwoFactorSecret } from "@ente/accounts/types/user";
+import type { TwoFactorSecret } from "@ente/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { useState } from "react";
 
 interface Iprops {
-    twoFactorSecret: TwoFactorSecret;
+    twoFactorSecret?: TwoFactorSecret;
 }
 export function TwoFactorSetup({ twoFactorSecret }: Iprops) {
     const [setupMode, setSetupMode] = useState<SetupMode>(SetupMode.QR_CODE);

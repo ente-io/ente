@@ -7,14 +7,14 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
-        mavenLocal() // for FDroid
+        mavenLocal() /merge/ for FDroid
     }
 }
 
 rootProject.buildDir = '../build'
 
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.buildDir = "${mobile/lib/main.dartrootProject.buildDir}/${project.name}"
     project.evaluationDependsOn(':app')
 }
 

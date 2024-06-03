@@ -557,8 +557,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Progettato per sopravvivere"),
         "details": MessageLookupByLibrary.simpleMessage("Dettagli"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "L\'account sviluppatore che utilizziamo per pubblicare ente su App Store è cambiato. Per questo motivo dovrai effettuare nuovamente il login.\n\nCi dispiace per il disagio, ma era inevitabile."),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "I file aggiunti in questa cartella del dispositivo verranno automaticamente caricati su ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
@@ -671,8 +669,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportYourData": MessageLookupByLibrary.simpleMessage("Esporta dati"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
-        "faceRecognitionIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossibile applicare il codice"),
         "failedToCancel":
@@ -773,6 +769,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Il codice che hai inserito non è corretto"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Chiave di recupero errata"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Dispositivo non sicuro"),
         "installManually":

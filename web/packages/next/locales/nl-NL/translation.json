@@ -83,9 +83,8 @@
     "ZOOM_IN_OUT": "In/uitzoomen",
     "PREVIOUS": "Vorige (←)",
     "NEXT": "Volgende (→)",
-    "TITLE_PHOTOS": "Ente Foto's",
-    "TITLE_ALBUMS": "Ente Foto's",
-    "TITLE_AUTH": "Ente Auth",
+    "title_photos": "Ente Foto's",
+    "title_auth": "Ente Auth",
     "UPLOAD_FIRST_PHOTO": "Je eerste foto uploaden",
     "IMPORT_YOUR_FOLDERS": "Importeer uw mappen",
     "UPLOAD_DROPZONE_MESSAGE": "Sleep om een back-up van je bestanden te maken",
@@ -566,7 +565,7 @@
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live foto",
     "editor": {
-        "crop": ""
+        "crop": "Bijsnijden"
     },
     "CONVERT": "Converteren",
     "CONFIRM_EDITOR_CLOSE_MESSAGE": "Weet u zeker dat u de editor wilt afsluiten?",

@@ -1,10 +1,8 @@
 module.exports = {
     extends: [
-        "next/core-web-vitals",
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
-        "prettier",
     ],
     parserOptions: {
         tsconfigRootDir: __dirname,
@@ -33,12 +31,6 @@ module.exports = {
             "error",
             "after",
             { overrides: { "?": "before", ":": "before" } },
-        ],
-        "import/no-anonymous-default-export": [
-            "error",
-            {
-                allowNew: true,
-            },
         ],
         "@typescript-eslint/no-unsafe-member-access": "off",
         "@typescript-eslint/no-unsafe-return": "off",

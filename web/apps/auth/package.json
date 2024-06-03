@@ -3,9 +3,12 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
+        "@/build-config": "*",
         "@/next": "*",
         "@ente/accounts": "*",
         "@ente/eslint-config": "*",
-        "@ente/shared": "*"
+        "@ente/shared": "*",
+        "jssha": "~3.3.1",
+        "otpauth": "^9"
     }
 }

@@ -20,6 +20,8 @@
   "codeIssuerHint": "発行者",
   "codeSecretKeyHint": "秘密鍵",
   "codeAccountHint": "アカウント (you@domain.com)",
+  "codeTagHint": "タグ",
+  "accountKeyType": "鍵の種類",
   "sessionExpired": "セッションが失効しました",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -77,6 +79,7 @@
   "data": "データ",
   "importCodes": "コードをインポート",
   "importTypePlainText": "プレーンテキスト",
+  "importTypeEnteEncrypted": "Ente 暗号化されたエクスポート",
   "passwordForDecryptingExport": "復号化用パスワード",
   "passwordEmptyError": "パスワードは空欄にできません",
   "importFromApp": "{appName} からコードをインポート",
@@ -121,6 +124,7 @@
   "suggestFeatures": "機能を提案",
   "faq": "FAQ",
   "faq_q_1": "Authはどのくらい安全ですか？",
+  "faq_a_1": "Ente Authでバックアップされたコードはすべてエンドツーエンドで暗号化されて保存されます。つまり、コードにアクセスできるのはあなただけです。当社のアプリはオープンソースであり、暗号化技術は外部監査を受けています。",
   "faq_q_2": "パソコンから私のコードにアクセスできますか？",
   "faq_a_2": "auth.ente.io で Web からコードにアクセス可能です。",
   "faq_q_3": "コードを削除するにはどうすればいいですか？",
@@ -154,6 +158,7 @@
       }
     }
   },
+  "invalidQRCode": "QRコードが無効です",
   "noRecoveryKeyTitle": "回復キーがありませんか？",
   "enterEmailHint": "メールアドレスを入力してください",
   "invalidEmailTitle": "メールアドレスが無効です",
@@ -347,6 +352,7 @@
   "deleteCodeAuthMessage": "コードを削除するためには認証が必要です",
   "showQRAuthMessage": "QR コードを表示するためには認証が必要です",
   "confirmAccountDeleteTitle": "アカウントの削除に同意",
+  "confirmAccountDeleteMessage": "このアカウントは他のEnteアプリも使用している場合はそれらにも紐づけされています。\nすべてのEnteアプリでアップロードされたデータは削除され、アカウントは完全に削除されます。",
   "androidBiometricHint": "本人を確認する",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -417,5 +423,18 @@
   "invalidEndpoint": "無効なエンドポイントです",
   "invalidEndpointMessage": "入力されたエンドポイントは無効です。有効なエンドポイントを入力して再試行してください。",
   "endpointUpdatedMessage": "エンドポイントの更新に成功しました",
-  "customEndpoint": "{endpoint} に接続しました"
+  "customEndpoint": "{endpoint} に接続しました",
+  "pinText": "固定",
+  "unpinText": "固定を解除",
+  "pinnedCodeMessage": "{code} を固定しました",
+  "unpinnedCodeMessage": "{code} の固定が解除されました",
+  "tags": "タグ",
+  "createNewTag": "新しいタグの作成",
+  "tag": "タグ",
+  "create": "作成",
+  "editTag": "タグの編集",
+  "deleteTagTitle": "タグを削除しますか？",
+  "deleteTagMessage": "このタグを削除してもよろしいですか？この操作は取り消しできません。",
+  "somethingWentWrongParsingCode": "{x} のコードを解析できませんでした。",
+  "updateNotAvailable": "アップデートは利用できません"
 }

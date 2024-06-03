@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/ui/common/progress_dialog.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -122,9 +123,28 @@ Future<void> _sendLogs(
   }
 }
 
-Future<String> getZippedLogsFile(BuildContext context) async {
-  final dialog = createProgressDialog(context, S.of(context).preparingLogs);
-  await dialog.show();
+Future<void> sendLogsForInit(
+  String toEmail,
+  String? subject,
+  String? body,
+) async {
+  final String zipFilePath = await getZippedLogsFile(null);
+  final Email email = Email(
+    recipients: [toEmail],
+    subject: subject ?? '',
+    body: body ?? '',
+    attachmentPaths: [zipFilePath],
+    isHTML: false,
+  );
+  await FlutterEmailSender.send(email);
+}
+
+Future<String> getZippedLogsFile(BuildContext? context) async {
+  late final ProgressDialog dialog;
+  if (context != null) {
+    dialog = createProgressDialog(context, S.of(context).preparingLogs);
+    await dialog.show();
+  }
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory(logsPath + "/logs");
   final tempPath = (await getTemporaryDirectory()).path;
@@ -134,7 +154,9 @@ Future<String> getZippedLogsFile(BuildContext context) async {
   encoder.create(zipFilePath);
   await encoder.addDirectory(logsDirectory);
   encoder.close();
-  await dialog.hide();
+  if (context != null) {
+    await dialog.hide();
+  }
   return zipFilePath;
 }
 

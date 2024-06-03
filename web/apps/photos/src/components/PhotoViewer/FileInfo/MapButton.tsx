@@ -1,5 +1,5 @@
-import { Button, ButtonProps, styled } from "@mui/material";
-import { CSSProperties } from "@mui/material/styles/createTypography";
+import { Button, styled, type ButtonProps } from "@mui/material";
+import { type CSSProperties } from "@mui/material/styles/createTypography";
 
 export const MapButton = styled((props: ButtonProps) => (
     <Button color="secondary" {...props} />

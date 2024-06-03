@@ -1,10 +1,9 @@
+import { ensure } from "@/utils/ensure";
 import { verifyTwoFactor } from "@ente/accounts/api/user";
 import VerifyTwoFactor, {
-    VerifyTwoFactorCallback,
+    type VerifyTwoFactorCallback,
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@ente/accounts/constants/pages";
-
-import type { PageProps } from "@ente/shared/apps/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -13,15 +12,14 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { User } from "@ente/shared/user/types";
+import type { User } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { PageProps } from "../../types/page";
 
-export const TwoFactorVerify: React.FC<PageProps> = ({
-    appContext,
-}: PageProps) => {
+const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout } = appContext;
 
     const [sessionID, setSessionID] = useState("");
@@ -55,7 +53,7 @@ export const TwoFactorVerify: React.FC<PageProps> = ({
                 encryptedToken,
                 id,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? PAGES.CREDENTIALS);
@@ -92,4 +90,4 @@ export const TwoFactorVerify: React.FC<PageProps> = ({
     );
 };
 
-export default TwoFactorVerify;
+export default Page;

@@ -26,6 +26,9 @@ export const getAuthCodes = async (): Promise<Code[]> => {
             authEntity
                 .filter((f) => !f.isDeleted)
                 .map(async (entity) => {
+                    if (!entity.id) return undefined;
+                    if (!entity.encryptedData) return undefined;
+                    if (!entity.header) return undefined;
                     try {
                         const decryptedCode =
                             await cryptoWorker.decryptMetadata(
@@ -35,15 +38,13 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                             );
                         return codeFromURIString(entity.id, decryptedCode);
                     } catch (e) {
-                        log.error(`failed to parse codeId = ${entity.id}`);
-                        return null;
+                        log.error(`Failed to parse codeID ${entity.id}`, e);
+                        return undefined;
                     }
                 }),
         );
-        // Remove null and undefined values
-        const filteredAuthCodes = authCodes.filter(
-            (f) => f !== null && f !== undefined,
-        );
+        // Remove undefined values
+        const filteredAuthCodes = authCodes.filter((f): f is Code => !!f);
         filteredAuthCodes.sort((a, b) => {
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);
@@ -58,7 +59,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         });
         return filteredAuthCodes;
     } catch (e) {
-        if (e.message !== CustomError.AUTH_KEY_NOT_FOUND) {
+        if (e instanceof Error && e.message != CustomError.AUTH_KEY_NOT_FOUND) {
             log.error("get authenticator entities failed", e);
         }
         throw e;
@@ -92,7 +93,7 @@ export const getAuthKey = async (): Promise<AuthKey> => {
     } catch (e) {
         if (
             e instanceof ApiError &&
-            e.httpStatusCode === HttpStatusCode.NotFound
+            e.httpStatusCode == HttpStatusCode.NotFound
         ) {
             throw Error(CustomError.AUTH_KEY_NOT_FOUND);
         } else {

@@ -12,19 +12,22 @@ import { watchReset } from "./watch";
  * See: [Note: Do not throw during logout].
  */
 export const logout = (watcher: FSWatcher) => {
+    const ignoreError = (label: string, e: unknown) =>
+        log.error(`Ignoring error during logout (${label})`, e);
+
     try {
         watchReset(watcher);
     } catch (e) {
-        log.error("Ignoring error during logout (FS watch)", e);
+        ignoreError("FS watch", e);
     }
     try {
         clearConvertToMP4Results();
     } catch (e) {
-        log.error("Ignoring error during logout (convert-to-mp4)", e);
+        ignoreError("convert-to-mp4", e);
     }
     try {
         clearStores();
     } catch (e) {
-        log.error("Ignoring error during logout (native stores)", e);
+        ignoreError("native stores", e);
     }
 };

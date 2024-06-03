@@ -143,12 +143,20 @@ const registerPrivilegedSchemes = () => {
  * This window will show the HTML served from {@link rendererURL}.
  */
 const createMainWindow = () => {
+    const bounds = windowBounds();
+
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
+        // Set the window's position and size (if we have one saved).
+        ...(bounds ?? {}),
+        // Enforce a minimum size
+        ...minimumWindowSize(),
+        // (Maybe) fix the dock icon on Linux.
+        ...windowIconOptions(),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
@@ -162,8 +170,10 @@ const createMainWindow = () => {
         // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window (maximizing it) otherwise.
-        window.maximize();
+        // Show our window otherwise.
+        //
+        // If we did not give it an explicit size, maximize it
+        bounds ? window.show() : window.maximize();
     }
 
     // Open the DevTools automatically when running in dev mode
@@ -210,10 +220,89 @@ const createMainWindow = () => {
 };
 
 /**
+ * The position and size of the window the last time it was closed.
+ *
+ * The return value of `undefined` is taken to mean that the app's main window
+ * should be maximized.
+ */
+const windowBounds = () => userPreferences.get("windowBounds");
+
+/**
+ * If for some reason {@link windowBounds} is outside the screen's bounds (e.g.
+ * if the user's screen resolution has changed), then the previously saved
+ * bounds might not be appropriate.
+ *
+ * Luckily, if we try to set an x/y position that is outside the screen's
+ * bounds, then Electron automatically clamps them to the screen's available
+ * space, and we do not need to tackle it specifically.
+ *
+ * However, there is no minimum window size the Electron enforces by default. As
+ * a safety valve, provide an (arbitrary) minimum size so that the user can
+ * resize it back to sanity if something I cannot currently anticipate happens.
+ */
+const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
+
+/**
+ * Sibling of {@link windowBounds}, see that function's documentation for more
+ * details.
+ */
+const saveWindowBounds = (window: BrowserWindow) => {
+    if (window.isMaximized()) userPreferences.delete("windowBounds");
+    else userPreferences.set("windowBounds", window.getBounds());
+};
+
+/**
+ * On Linux the app does not show a dock icon by default, attempt to fix this by
+ * returning the path to an icon as the "icon" property that can be passed to
+ * the BrowserWindow during creation.
+ */
+const windowIconOptions = () => {
+    if (process.platform != "linux") return {};
+
+    // There are two, possibly three, different issues with icons on Linux.
+    //
+    // Firstly, the AppImage itself doesn't show an icon. There does not seem to
+    // be a reasonable workaround either currently. See:
+    // https://github.com/AppImage/AppImageKit/issues/346
+    //
+    // Secondly, and this is the problem we're trying to fix here, when the app
+    // is started it does not show a dock icon (Ubuntu 22) or shows the generic
+    // gear icon (Ubuntu 24). The issue possibly exists on other distributions
+    // too.
+    //
+    // Electron provides a `BrowserWindow.setIcon` function which should solve
+    // our issue, we could call it selectively on Linux. There is also an
+    // apparently undocumented "icon" option that can be passed when creating a
+    // new BrowserWindow, and that is what most of the other code I saw on
+    // GitHub seems to be doing.
+    //
+    // However, try what I may, I can't get either of these to work. Which leads
+    // me to believe there is a third issue: I can't get it to work because I'm
+    // testing on an Ubuntu 24 VM, where this might just not be working:
+    // https://askubuntu.com/questions/1511534/ubuntu-24-04-skype-logo-on-the-dock-not-showing-skype-logo
+    //
+    // 24 isn't likely the year of the Linux desktop either.
+    //
+    // For now, I'm adding a very specific incantation taken from
+    // https://github.com/arduino/arduino-ide/blob/main/arduino-ide-extension/src/electron-main/fix-app-image-icon.ts
+    //
+    // Possibly all this specific naming of the file etc is superstition, and
+    // just any name would do as long as the path is correct, but let me try it
+    // this way and see if this gets the icon to appear on Ubuntu 22 etc.
+
+    const icon = path.join(
+        isDev ? "build" : process.resourcesPath,
+        "icons/512x512.png",
+    );
+
+    return { icon };
+};
+
+/**
  * Automatically set the save path for user initiated downloads to the system's
  * "downloads" directory instead of asking the user to select a save location.
  */
-export const setDownloadPath = (webContents: WebContents) => {
+const setDownloadPath = (webContents: WebContents) => {
     webContents.session.on("will-download", (_, item) => {
         item.setSavePath(
             uniqueSavePath(app.getPath("downloads"), item.getFilename()),
@@ -241,7 +330,7 @@ const uniqueSavePath = (dirPath: string, fileName: string) => {
  *
  * @param webContents The renderer to configure.
  */
-export const allowExternalLinks = (webContents: WebContents) =>
+const allowExternalLinks = (webContents: WebContents) =>
     // By default, if the user were open a link, say
     // https://github.com/ente-io/ente/discussions, then it would open a _new_
     // BrowserWindow within our app.
@@ -273,7 +362,7 @@ export const allowExternalLinks = (webContents: WebContents) =>
  * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
  * workaround here instead, intercepting the ACAO header and allowing `*`.
  */
-export const allowAllCORSOrigins = (webContents: WebContents) =>
+const allowAllCORSOrigins = (webContents: WebContents) =>
     webContents.session.webRequest.onHeadersReceived(
         ({ responseHeaders }, callback) => {
             const headers: NonNullable<typeof responseHeaders> = {};
@@ -322,6 +411,13 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * once most people have upgraded to newer versions.
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
+    const removeIfExists = async (dirPath: string) => {
+        if (existsSync(dirPath)) {
+            log.info(`Removing legacy disk cache from ${dirPath}`);
+            await fs.rm(dirPath, { recursive: true });
+        }
+    };
+
     // [Note: Getting the cache path]
     //
     // The existing code was passing "cache" as a parameter to getPath.
@@ -338,9 +434,18 @@ const deleteLegacyDiskCacheDirIfExists = async () => {
     //
     // @ts-expect-error "cache" works but is not part of the public API.
     const cacheDir = path.join(app.getPath("cache"), "ente");
-    if (existsSync(cacheDir)) {
-        log.info(`Removing legacy disk cache from ${cacheDir}`);
-        await fs.rm(cacheDir, { recursive: true });
+    if (process.platform == "win32") {
+        // On Windows the cache dir is the same as the app data (!). So deleting
+        // the ente subfolder of the cache dir is equivalent to deleting the
+        // user data dir.
+        //
+        // Obviously, that's not good. So instead of Windows we explicitly
+        // delete the named cache directories.
+        await removeIfExists(path.join(cacheDir, "thumbs"));
+        await removeIfExists(path.join(cacheDir, "files"));
+        await removeIfExists(path.join(cacheDir, "face-crops"));
+    } else {
+        await removeIfExists(cacheDir);
     }
 };
 
@@ -428,7 +533,10 @@ const main = () => {
     // app, e.g. by clicking on its dock icon.
     app.on("activate", () => mainWindow?.show());
 
-    app.on("before-quit", allowWindowClose);
+    app.on("before-quit", () => {
+        if (mainWindow) saveWindowBounds(mainWindow);
+        allowWindowClose();
+    });
 };
 
 main();
