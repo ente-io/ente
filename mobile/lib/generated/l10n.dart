@@ -7402,10 +7402,10 @@ class S {
   }
 
   /// `{freeAmount} {storageUnit} free`
-  String freeStorageSpace(Object freeAmount, Object storageUnit) {
+  String availableStorageSpace(Object freeAmount, Object storageUnit) {
     return Intl.message(
       '$freeAmount $storageUnit free',
-      name: 'freeStorageSpace',
+      name: 'availableStorageSpace',
       desc: '',
       args: [freeAmount, storageUnit],
     );
