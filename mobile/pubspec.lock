@@ -1875,10 +1875,10 @@ packages:
     dependency: "direct main"
     description:
       name: screenshot
-      sha256: d448f43130f49bc7eead1b267b3ea0291cb2450f037bb0a0ecce7aa4c65e2aee
+      sha256: "63817697a7835e6ce82add4228e15d233b74d42975c143ad8cfe07009fab866b"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.0"
+    version: "3.0.0"
   scrollable_positioned_list:
     dependency: "direct main"
     description:
@@ -2607,4 +2607,4 @@ packages:
     version: "3.1.2"
 sdks:
   dart: ">=3.3.0 <4.0.0"
-  flutter: ">=3.20.0-1.2.pre"
+  flutter: ">=3.22.0"
