@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
@@ -80,10 +81,19 @@ Future<int?> _processBitwardenExportFile(
   final jsonString = await file.readAsString();
   final data = jsonDecode(jsonString);
   List<dynamic> jsonArray = data['items'];
+  final Map<String, String> folderIdToName = {};
+  try {
+    for (var item in data['folders']) {
+      folderIdToName[item['id']] = item['name'];
+    }
+  } catch (e) {
+    debugPrint("Failed to get folder details $e");
+  }
   final parsedCodes = [];
   for (var item in jsonArray) {
     if (item['login'] != null && item['login']['totp'] != null) {
       var totp = item['login']['totp'];
+      String? folderID = item['folderId'];
 
       Code code;
       if (totp.contains("otpauth://")) {
@@ -108,6 +118,11 @@ Future<int?> _processBitwardenExportFile(
           totp,
           null,
           Code.defaultDigits,
+        );
+      }
+      if (folderID != null && folderIdToName.containsKey(folderID)) {
+        code = code.copyWith(
+          display: CodeDisplay(tags: [folderIdToName[folderID]!]),
         );
       }
 
