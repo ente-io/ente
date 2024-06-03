@@ -34,7 +34,7 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/sharing/manage_links_widget.dart';
+// import 'package:photos/ui/sharing/manage_links_widget.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
@@ -168,7 +168,7 @@ class _FileSelectionActionsWidgetState
       } else {
         items.add(
           SelectionActionButton(
-            icon: Icons.link_outlined,
+            icon: Icons.navigation_rounded,
             labelText: S.of(context).shareLink,
             onTap: anyUploadedFiles ? _onCreateLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
@@ -655,52 +655,53 @@ class _FileSelectionActionsWidgetState
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
-
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          labelText: S.of(context).shareLink,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: S.of(context).manageLink,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: S.of(context).done,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.third,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      title: S.of(context).publicLinkCreated,
-      body: S.of(context).youCanManageYourLinksInTheShareTab,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.first) {
-        placeholderPath =
-            await _selectedFilesPlaceholderPath(ownedSelectedFiles);
-        await _sendLink();
-      }
-      if (actionResult.action == ButtonAction.second) {
-        await routeToPage(
-          context,
-          ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
-        );
-      }
-    }
+    placeholderPath = await _selectedFilesPlaceholderPath(ownedSelectedFiles);
+    await _sendLink();
+    // final actionResult = await showActionSheet(
+    //   context: context,
+    //   buttons: [
+    //     ButtonWidget(
+    //       labelText: S.of(context).shareLink,
+    //       buttonType: ButtonType.neutral,
+    //       buttonSize: ButtonSize.large,
+    //       shouldStickToDarkTheme: true,
+    //       buttonAction: ButtonAction.first,
+    //       isInAlert: true,
+    //     ),
+    //     ButtonWidget(
+    //       labelText: S.of(context).manageLink,
+    //       buttonType: ButtonType.secondary,
+    //       buttonSize: ButtonSize.large,
+    //       buttonAction: ButtonAction.second,
+    //       shouldStickToDarkTheme: true,
+    //       isInAlert: true,
+    //     ),
+    //     ButtonWidget(
+    //       labelText: S.of(context).done,
+    //       buttonType: ButtonType.secondary,
+    //       buttonSize: ButtonSize.large,
+    //       buttonAction: ButtonAction.third,
+    //       shouldStickToDarkTheme: true,
+    //       isInAlert: true,
+    //     ),
+    //   ],
+    //   title: S.of(context).publicLinkCreated,
+    //   body: S.of(context).youCanManageYourLinksInTheShareTab,
+    //   actionSheetType: ActionSheetType.defaultActionSheet,
+    // );
+    // if (actionResult?.action != null) {
+    //   if (actionResult!.action == ButtonAction.first) {
+    //     placeholderPath =
+    //         await _selectedFilesPlaceholderPath(ownedSelectedFiles);
+    //     await _sendLink();
+    //   }
+    //   if (actionResult.action == ButtonAction.second) {
+    //     await routeToPage(
+    //       context,
+    //       ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
+    //     );
+    //   }
+    // }
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
