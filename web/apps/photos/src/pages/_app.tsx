@@ -129,7 +129,7 @@ export default function App({ Component, pageProps }: AppProps) {
     >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [shouldShowWhatsNew, setShouldShowWhatsNew] = useState(true);
+    const [openWhatsNew, setOpenWhatsNew] = useState(true);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -387,9 +387,12 @@ export default function App({ Component, pageProps }: AppProps) {
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
                 />
-                {shouldShowWhatsNew && (
-                    <WhatsNew onClose={() => setShouldShowWhatsNew(false)} />
-                )}
+
+                <WhatsNew
+                    open={openWhatsNew}
+                    onClose={() => setOpenWhatsNew(false)}
+                />
+
                 <Notification
                     open={notificationView}
                     onClose={closeNotification}

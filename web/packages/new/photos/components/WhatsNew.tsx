@@ -9,10 +9,23 @@ import {
     styled,
     useMediaQuery,
 } from "@mui/material";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
 import React from "react";
 
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+        children: React.ReactElement
+    },
+    ref: React.Ref<unknown>,
+) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
+
 interface WhatsNewProps {
-    /** Invoked by the component when it wants to get closed. */
+    /** Set this to `true` to show the dialog. */
+    open: boolean;
+    /** Invoked by the dialog when it wants to get closed. */
     onClose: () => void;
 }
 
@@ -20,11 +33,15 @@ interface WhatsNewProps {
  * Show a dialog showing a short summary of interesting-for-the-user things in
  * this release of the desktop app.
  */
-export const WhatsNew: React.FC<WhatsNewProps> = ({ onClose }) => {
+export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
     return (
-        <Dialog open={true} fullScreen={fullScreen} maxWidth="xs">
+        <Dialog
+            {...{ open, fullScreen }}
+            maxWidth="xs"
+            TransitionComponent={Transition}
+        >
             <DialogTitle>{"What's new"}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
