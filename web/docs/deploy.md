@@ -34,7 +34,7 @@ deployments, and the action that triggers them:
 | [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                        |
 | [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                        |
 | [help.ente.io](https://help.ente.io)         | Production | Changes in `docs/` on push to `main`          |
-| [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `web/apps/staff` on push to `main` |
+| [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`    |
 | [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Daily deploy of `main`                        |
 | [auth.ente.sh](https://auth.ente.sh)         | Preview    | Daily deploy of `main`                        |
 | [cast.ente.sh](https://cast.ente.sh)         | Preview    | Daily deploy of `main`                        |
