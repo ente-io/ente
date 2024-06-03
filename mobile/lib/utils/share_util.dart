@@ -223,5 +223,5 @@ Future<void> shareImageAndUrl(
   String imagePath,
   String url,
 ) async {
-  await Share.shareFiles([imagePath], text: url);
+  await Share.shareXFiles([XFile(imagePath)], text: url);
 }
