@@ -1,6 +1,10 @@
 # Node
 node_modules/
 
+# This is not a user facing deployment, so don't commit yarn.lock. We not have
+# pinned versions, and will rely only on their semver-range in package.json.
+yarn.lock
+
 # macOS
 .DS_Store
 
