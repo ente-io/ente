@@ -354,6 +354,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Autenticazione riuscita!"),
         "available": MessageLookupByLibrary.simpleMessage("Disponibile"),
         "availableStorageSpace": m8,
+        "backedUpFolders":
+            MessageLookupByLibrary.simpleMessage("Cartelle salvate"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("Backup fallito"),
         "backupOverMobileData":

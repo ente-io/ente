@@ -308,6 +308,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("¡Autenticación exitosa!"),
         "available": MessageLookupByLibrary.simpleMessage("Disponible"),
+        "backedUpFolders":
+            MessageLookupByLibrary.simpleMessage("Carpetas respaldadas"),
         "backup": MessageLookupByLibrary.simpleMessage("Copia de respaldo"),
         "backupFailed": MessageLookupByLibrary.simpleMessage(
             "La copia de seguridad ha fallado"),

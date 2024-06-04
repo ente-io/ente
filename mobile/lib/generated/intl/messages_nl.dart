@@ -378,6 +378,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Automatisch koppelen werkt alleen met apparaten die Chromecast ondersteunen."),
         "available": MessageLookupByLibrary.simpleMessage("Beschikbaar"),
         "availableStorageSpace": m8,
+        "backedUpFolders":
+            MessageLookupByLibrary.simpleMessage("Back-up mappen"),
         "backup": MessageLookupByLibrary.simpleMessage("Back-up"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("Back-up mislukt"),
         "backupOverMobileData": MessageLookupByLibrary.simpleMessage(

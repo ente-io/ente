@@ -378,6 +378,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "O pareamento automático funciona apenas com dispositivos que suportam o Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Disponível"),
         "availableStorageSpace": m8,
+        "backedUpFolders":
+            MessageLookupByLibrary.simpleMessage("Backup de pastas concluído"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "backupFailed":
             MessageLookupByLibrary.simpleMessage("Erro ao efetuar o backup"),

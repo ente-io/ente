@@ -367,10 +367,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Auto pair works only with devices that support Chromecast."),
-        "automaticBackups":
-            MessageLookupByLibrary.simpleMessage("Automatic backups"),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "availableStorageSpace": m8,
+        "backedUpFolders":
+            MessageLookupByLibrary.simpleMessage("Backed up folders"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("Backup failed"),
         "backupOverMobileData":

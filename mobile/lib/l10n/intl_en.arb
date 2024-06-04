@@ -475,7 +475,7 @@
   "cannotDeleteSharedFiles": "Cannot delete shared files",
   "theDownloadCouldNotBeCompleted": "The download could not be completed",
   "retry": "Retry",
-  "automaticBackups": "Automatic backups",
+  "backedUpFolders": "Backed up folders",
   "backup": "Backup",
   "freeUpDeviceSpace": "Free up device space",
   "freeUpDeviceSpaceDesc": "Save space on your device by clearing files that have been already backed up.",
