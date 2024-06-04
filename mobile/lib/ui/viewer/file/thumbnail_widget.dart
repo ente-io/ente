@@ -140,12 +140,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
 
       if (widget.file.fileType == FileType.video) {
-        if (widget.file.duration == null) {
-          contentChildren.add(const VideoOverlayIcon());
-        } else {
-          contentChildren.add(VideoOverlayDuration(duration: widget.file.duration!));
-        }
-      } else if (widget.shouldShowLivePhotoOverlay && widget.file.isLiveOrMotionPhoto) {
+        contentChildren
+            .add(VideoOverlayDuration(duration: widget.file.duration!));
+      } else if (widget.shouldShowLivePhotoOverlay &&
+          widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
       if (widget.shouldShowOwnerAvatar) {
@@ -198,9 +196,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _loadLocalImage(BuildContext context) {
-    if (!_hasLoadedThumbnail && !_errorLoadingLocalThumbnail && !_isLoadingLocalThumbnail) {
+    if (!_hasLoadedThumbnail &&
+        !_errorLoadingLocalThumbnail &&
+        !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
-      final cachedSmallThumbnail = ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
+      final cachedSmallThumbnail =
+          ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -265,7 +266,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _loadNetworkImage() {
-    if (!_hasLoadedThumbnail && !_errorLoadingRemoteThumbnail && !_isLoadingRemoteThumbnail) {
+    if (!_hasLoadedThumbnail &&
+        !_errorLoadingRemoteThumbnail &&
+        !_isLoadingRemoteThumbnail) {
       _isLoadingRemoteThumbnail = true;
       final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file);
       if (cachedThumbnail != null) {
