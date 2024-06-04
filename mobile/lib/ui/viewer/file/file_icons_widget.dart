@@ -7,6 +7,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -153,12 +154,15 @@ class VideoOverlayDuration extends StatelessWidget {
           );
         } else {
           final String formattedDuration = _getFormattedDuration(duration!);
-          onDarkBackground = Text(
-            formattedDuration,
-            style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                  color: Colors.white,
-                  fontSize: size, // Default font size is 14
-                ),
+          onDarkBackground = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: Text(
+              formattedDuration,
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: Colors.white,
+                    fontSize: size, // Default font size is 14
+                  ),
+            ),
           );
         }
 
