@@ -33,6 +33,21 @@ export const fileURL = (id: number) => {
     return `https://files.ente.io/?fileID=${id}`;
 };
 
+/**
+ * Return the URL that should be used for fetching the thumbnail for a file with
+ * the given {@link id}.
+ *
+ * This defaults to a URL on Ente's own servers, but can be overridden when self
+ * hosting by setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable.
+ */
+export const thumbnailURL = (id: number) => {
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (endpoint) {
+        return `${endpoint}/files/preview/${id}`;
+    }
+    return `https://thumbnails.ente.io/?fileID=${id}`;
+};
+
 export const getPublicCollectionFileURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (endpoint) {
@@ -55,14 +70,6 @@ export const getCastThumbnailURL = (id: number) => {
         return `${endpoint}/cast/files/preview/${id}`;
     }
     return `https://cast-albums.ente.io/preview/?fileID=${id}`;
-};
-
-export const getThumbnailURL = (id: number) => {
-    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (endpoint) {
-        return `${endpoint}/files/preview/${id}`;
-    }
-    return `https://thumbnails.ente.io/?fileID=${id}`;
 };
 
 export const getPublicCollectionThumbnailURL = (id: number) => {

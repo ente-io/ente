@@ -1,6 +1,6 @@
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { fileURL, getThumbnailURL } from "@ente/shared/network/api";
+import { fileURL, thumbnailURL } from "@ente/shared/network/api";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
@@ -23,7 +23,7 @@ export class PhotosDownloadClient implements DownloadClient {
         const params = new URLSearchParams({ token });
         const getThumbnail = () =>
             HTTPService.get(
-                `${getThumbnailURL(file.id)}?${params.toString()}`,
+                `${thumbnailURL(file.id)}?${params.toString()}`,
                 undefined,
                 undefined,
                 { responseType: "arraybuffer", timeout: this.timeout },
