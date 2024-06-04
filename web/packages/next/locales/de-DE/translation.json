@@ -26,6 +26,7 @@
     "SENT": "Gesendet!",
     "password": "Passwort",
     "link_password_description": "Passwort zum Entsperren des Albums eingeben",
+    "unlock": "",
     "SET_PASSPHRASE": "Passwort setzen",
     "VERIFY_PASSPHRASE": "Einloggen",
     "INCORRECT_PASSPHRASE": "Falsches Passwort",

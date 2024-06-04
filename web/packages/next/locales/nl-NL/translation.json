@@ -26,6 +26,7 @@
     "SENT": "Verzonden!",
     "password": "Wachtwoord",
     "link_password_description": "Voer wachtwoord in om het album te ontgrendelen",
+    "unlock": "",
     "SET_PASSPHRASE": "Wachtwoord instellen",
     "VERIFY_PASSPHRASE": "Aanmelden",
     "INCORRECT_PASSPHRASE": "Onjuist wachtwoord",
