@@ -302,7 +302,7 @@ export default Page;
 const Header: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
         <Header_>
-            <Typography variant="h2">{t("PASSWORD")}</Typography>
+            <Typography variant="h2">{t("password")}</Typography>
             <Typography color="text.faint">{children}</Typography>
         </Header_>
     );

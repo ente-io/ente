@@ -49,7 +49,7 @@ export function ManageLinkPassword({
     return (
         <>
             <EnteMenuItem
-                label={t("LINK_PASSWORD_LOCK")}
+                label={t("link_password_lock")}
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
                 variant="toggle"

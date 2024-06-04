@@ -102,7 +102,7 @@ export default function VerifyMasterPasswordForm({
     return (
         <SingleInputForm
             callback={verifyPassphrase}
-            placeholder={t("RETURN_PASSPHRASE_HINT")}
+            placeholder={t("password")}
             buttonText={buttonText}
             submitButtonProps={submitButtonProps}
             hiddenPreInput={
