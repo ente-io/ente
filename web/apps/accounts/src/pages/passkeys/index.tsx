@@ -11,7 +11,7 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import type { Dispatch, SetStateAction } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Passkey } from "types/passkey";
+import type { Passkey } from "types/passkey";
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,

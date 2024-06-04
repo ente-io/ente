@@ -1,7 +1,7 @@
 import MenuItemDivider from "@ente/shared/components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "@ente/shared/components/Menu/MenuItemGroup";
 import { Fragment } from "react";
-import { Passkey } from "types/passkey";
+import type { Passkey } from "types/passkey";
 import PasskeyListItem from "./PasskeyListItem";
 
 interface IProps {

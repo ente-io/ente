@@ -2,7 +2,7 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import KeyIcon from "@mui/icons-material/Key";
 import { useContext } from "react";
-import { Passkey } from "types/passkey";
+import type { Passkey } from "types/passkey";
 import { PasskeysContext } from ".";
 
 interface IProps {
