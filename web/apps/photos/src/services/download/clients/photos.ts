@@ -1,6 +1,6 @@
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { fileURL, thumbnailURL } from "@ente/shared/network/api";
+import { customAPIOrigin, thumbnailURL } from "@ente/shared/network/api";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
@@ -42,18 +42,31 @@ export class PhotosDownloadClient implements DownloadClient {
         if (!token) throw Error(CustomError.TOKEN_MISSING);
 
         // See: [Note: Passing credentials for self-hosted file fetches]
-        const params = new URLSearchParams({ token });
-        const getFile = () =>
-            HTTPService.get(
-                `${fileURL(file.id)}?${params.toString()}`,
-                undefined,
-                undefined,
-                {
-                    responseType: "arraybuffer",
-                    timeout: this.timeout,
-                    onDownloadProgress,
-                },
-            );
+        const getFile = () => {
+            const opts = {
+                responseType: "arraybuffer",
+                timeout: this.timeout,
+                onDownloadProgress,
+            };
+
+            const customOrigin = customAPIOrigin();
+            if (customOrigin) {
+                const params = new URLSearchParams({ token });
+                return HTTPService.get(
+                    `${customOrigin}/files/download/${file.id}?${params.toString()}`,
+                    undefined,
+                    undefined,
+                    opts,
+                );
+            } else {
+                return HTTPService.get(
+                    `https://files.ente.io/?fileID=${file.id}`,
+                    undefined,
+                    { "X-Auth-Token": token },
+                    opts,
+                );
+            }
+        };
 
         const resp = await retryAsyncFunction(getFile);
         if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
@@ -100,8 +113,21 @@ export class PhotosDownloadClient implements DownloadClient {
         //    credentials to get the pre signed URL, and (b) fetch that pre
         //    signed URL and stream back the response.
 
-        const params = new URLSearchParams({ token });
-        const getFile = () => fetch(`${fileURL(file.id)}?${params.toString()}`);
+        const getFile = () => {
+            const customOrigin = customAPIOrigin();
+            if (customOrigin) {
+                const params = new URLSearchParams({ token });
+                return fetch(
+                    `${customOrigin}/files/download/${file.id}?${params.toString()}`,
+                );
+            } else {
+                return fetch(`https://files.ente.io/?fileID=${file.id}`, {
+                    headers: {
+                        "X-Auth-Token": token,
+                    },
+                });
+            }
+        };
 
         return retryAsyncFunction(getFile);
     }
