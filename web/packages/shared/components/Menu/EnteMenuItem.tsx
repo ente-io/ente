@@ -69,7 +69,9 @@ export function EnteMenuItem({
             sx={{
                 width: "100%",
                 color: (theme) =>
-                    variant !== "captioned" && theme.palette[color].main,
+                    variant !== "captioned"
+                        ? theme.palette[color].main
+                        : "inherit",
                 backgroundColor: (theme) =>
                     variant !== "secondary" && variant !== "mini"
                         ? theme.colors.fill.faint
