@@ -202,7 +202,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
                         {exportStage === ExportStage.FINISHED ||
                         exportStage === ExportStage.INIT ? (
                             <ChangeDirectoryOption
-                                changeExportDirectory={changeExportDirectory}
+                                onClick={changeExportDirectory}
                             />
                         ) : (
                             <Box sx={{ width: "16px" }} />

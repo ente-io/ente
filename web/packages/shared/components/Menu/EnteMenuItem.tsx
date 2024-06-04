@@ -117,9 +117,7 @@ export function EnteMenuItem({
                         />
                     )}
                     {variant === "path" && (
-                        <ChangeDirectoryOption
-                            changeExportDirectory={handleIconClick}
-                        />
+                        <ChangeDirectoryOption onClick={handleIconClick} />
                     )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>
