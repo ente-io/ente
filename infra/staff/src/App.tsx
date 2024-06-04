@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import S from "./utils/strings";
 
@@ -8,6 +8,39 @@ export const App: React.FC = () => {
   const [userId, setUserId] = useState("");
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+   
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []); 
+  useEffect(() => {
+    
+    if (token) { 
+      localStorage.setItem("token", token); 
+    } else {
+      
+      localStorage.removeItem("token"); 
+    }
+  }, [token]);
+  useEffect(() => {
+   
+    const storedserverUrl = localStorage.getItem("serverUrl");
+    if (storedserverUrl) {
+      setServerUrl(storedserverUrl);
+    }
+  }, []); 
+  useEffect(() => {
+    
+    if (serverUrl) { 
+      localStorage.setItem("serverUrl", serverUrl); 
+    } else {
+      
+      localStorage.removeItem("severUrl"); 
+    }
+  }, [serverUrl]);
+  
 
   const fetchData = async () => {
     try {
@@ -48,22 +81,26 @@ export const App: React.FC = () => {
           nullAttributes.push(key);
         }
   
-        // Special handling for expiryTime key
+        
         let displayValue = value;
-        if (key === "expiryTime" && typeof value === "number") {
-          displayValue = new Date(value / 1000).toLocaleString();
-        } 
-       else if (key === "creationTime" && typeof value === "number") {
-            displayValue = new Date(value / 1000).toLocaleString();
-          } 
-        
-        
-        else if (key === "storage") {
-          displayValue = value === null ? "null" : `${(value / (1024 ** 3)).toFixed(2)} GB`;
-        } else {
-          displayValue = value === null ? "null" : JSON.stringify(value);
-        }
-  
+    if (key === "expiryTime" && typeof value === "number") {
+      displayValue = new Date(value / 1000).toLocaleString();
+    } else if (key === "creationTime" && typeof value === "number") {
+      displayValue = new Date(value / 1000).toLocaleString();
+    } else if (key === "storage") {
+      displayValue = value === null ? "null" : `${(value / (1024 ** 3)).toFixed(2)} GB`;
+    } else if (typeof value === "string") {
+      try {
+       
+        const parsedValue = JSON.parse(value);
+        displayValue = parsedValue; 
+      } catch (error) {
+       
+        displayValue = value; 
+      }
+    } else {
+      displayValue = value === null ? "null" : value.toString();
+    }
         return (
           <tr key={key}>
             <td style={{ padding: '10px', border: '1px solid #ddd' }}>{key}</td>
@@ -102,6 +139,7 @@ export const App: React.FC = () => {
               type="text"
               value={token}
               onChange={(e) => setToken(e.target.value)}
+
               style={{ padding: '10px', margin: '10px', width: '100%' }}
             />
           </label>
