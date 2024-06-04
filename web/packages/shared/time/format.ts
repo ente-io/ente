@@ -52,27 +52,3 @@ export function formatDateTimeFull(dateTime: number | Date): string {
 export function formatDateTime(dateTime: number | Date): string {
     return [formatDate(dateTime), t("at"), formatTime(dateTime)].join(" ");
 }
-
-export function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
-        localeMatcher: "best fit",
-        numeric: "always",
-        style: "long",
-    });
-    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
-
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === "second")
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit,
-            );
-}
