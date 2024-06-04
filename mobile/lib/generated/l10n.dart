@@ -60,6 +60,56 @@ class S {
     );
   }
 
+  /// `Device Lock`
+  String get deviceLock {
+    return Intl.message(
+      'Device lock',
+      name: 'deviceLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PIN Lock`
+  String get pinLock {
+    return Intl.message(
+      'PIN lock',
+      name: 'pinLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the pin to lock the app`
+  String get enterThePinToLockTheApp {
+    return Intl.message(
+      'Enter the pin to lock the app',
+      name: 'enterThePinToLockTheApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When a pin is set , you need to enter password\n whenever you open the app .`
+  String get whenPinIsSetYouNeedToEnterPassword {
+    return Intl.message(
+      'When a pin is set , you need to enter password\n whenever you open the app .',
+      name: 'whenPinIsSetYouNeedToEnterPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable PIN`
+  String get enablePin {
+    return Intl.message(
+      'Enable PIN',
+      name: 'enablePin',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Welcome back!`
   String get accountWelcomeBack {
     return Intl.message(

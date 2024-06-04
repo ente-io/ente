@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/ui/settings/TEMP/lock_screen_option.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -50,6 +51,15 @@ class LocalAuthenticationService {
         AppLock.of(context)!.setEnabled(shouldEnableLockScreen);
         await Configuration.instance
             .setShouldShowLockScreen(shouldEnableLockScreen);
+        if (shouldEnableLockScreen) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return const LockScreenOption();
+              },
+            ),
+          );
+        }
         return true;
       } else {
         AppLock.of(context)!

@@ -153,6 +153,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               S.of(context).authToChangeLockscreenSetting,
               S.of(context).lockScreenEnablePreSteps,
             );
+
+            ///try here also once about the material page route
           },
         ),
       ),
