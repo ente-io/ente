@@ -487,13 +487,13 @@ export default function PublicCollectionGallery() {
             return (
                 <VerticallyCentered>
                     <FormPaper>
-                        <FormPaperTitle>{t("PASSWORD")}</FormPaperTitle>
+                        <FormPaperTitle>{t("password")}</FormPaperTitle>
                         <Typography color={"text.muted"} mb={2} variant="small">
                             {t("LINK_PASSWORD")}
                         </Typography>
                         <SingleInputForm
                             callback={verifyLinkPassword}
-                            placeholder={t("RETURN_PASSPHRASE_HINT")}
+                            placeholder={t("password")}
                             buttonText={t("unlock")}
                             fieldType="password"
                         />
