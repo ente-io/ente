@@ -26,6 +26,7 @@
     "SENT": "Envoyé!",
     "password": "Mot de passe",
     "link_password_description": "Saisir le mot de passe pour déverrouiller l'album",
+    "unlock": "",
     "SET_PASSPHRASE": "Définir le mot de passe",
     "VERIFY_PASSPHRASE": "Connexion",
     "INCORRECT_PASSPHRASE": "Mot de passe non valide",

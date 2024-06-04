@@ -26,6 +26,7 @@
     "SENT": "Отправлено!",
     "password": "Пароль",
     "link_password_description": "Введите пароль, чтобы разблокировать альбом",
+    "unlock": "",
     "SET_PASSPHRASE": "Установить пароль",
     "VERIFY_PASSPHRASE": "Войти",
     "INCORRECT_PASSPHRASE": "Неверный пароль",
