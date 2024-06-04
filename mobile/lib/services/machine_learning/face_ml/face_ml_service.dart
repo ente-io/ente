@@ -101,7 +101,7 @@ class FaceMlService {
   bool _shouldSyncPeople = false;
   bool _isSyncing = false;
 
-  final int _fileDownloadLimit = 5;
+  final int _fileDownloadLimit = 10;
   final int _embeddingFetchLimit = 200;
   final int _kForceClusteringFaceCount = 8000;
   final int _kcooldownLimit = 300;
