@@ -4,6 +4,7 @@ import 'package:photos/events/collection_meta_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -33,10 +34,18 @@ class LargeFilesPagePage extends StatelessWidget {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final List<EnteFile> allFiles =
             await SearchService.instance.getAllFiles();
+        final Set<int> alreadyTracked = <int>{};
+
         final filesWithSize = <EnteFile>[];
         for (final file in allFiles) {
-          if (file.fileSize != null && file.fileSize! > minLargeFileSize) {
-            filesWithSize.add(file);
+          if (file.isOwner &&
+              file.isUploaded &&
+              file.fileSize != null &&
+              file.fileSize! > minLargeFileSize) {
+            if (!alreadyTracked.contains(file.uploadedFileID!)) {
+              filesWithSize.add(file);
+              alreadyTracked.add(file.uploadedFileID!);
+            }
           }
         }
         final FileLoadResult result = FileLoadResult(filesWithSize, false);
