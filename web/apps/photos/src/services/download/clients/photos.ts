@@ -16,20 +16,21 @@ export class PhotosDownloadClient implements DownloadClient {
     }
 
     async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {
-        if (!this.token) {
-            throw Error(CustomError.TOKEN_MISSING);
-        }
-        const resp = await retryAsyncFunction(() =>
+        const token = this.token;
+        if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const params = new URLSearchParams({ token });
+        const getThumbnail = () =>
             HTTPService.get(
-                getThumbnailURL(file.id),
-                null,
-                { "X-Auth-Token": this.token },
+                `${getThumbnailURL(file.id)}?${params.toString()}`,
+                undefined,
+                undefined,
                 { responseType: "arraybuffer", timeout: this.timeout },
-            ),
-        );
-        if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
-        }
+            );
+
+        const resp = await retryAsyncFunction(getThumbnail);
+        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
         return new Uint8Array(resp.data);
     }
 
