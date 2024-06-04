@@ -4,6 +4,7 @@
     "private": true,
     "dependencies": {
         "@/media": "*",
+        "@/new": "*",
         "@/next": "*",
         "@date-io/date-fns": "^2.14.0",
         "@ente/accounts": "*",

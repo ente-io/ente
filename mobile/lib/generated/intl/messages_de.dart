@@ -41,13 +41,16 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(versionValue) => "Version: ${versionValue}";
 
-  static String m8(paymentProvider) =>
+  static String m8(freeAmount, storageUnit) =>
+      "${freeAmount} ${storageUnit} frei";
+
+  static String m9(paymentProvider) =>
       "Bitte kündigen Sie Ihr aktuelles Abo über ${paymentProvider} zuerst";
 
-  static String m9(user) =>
+  static String m10(user) =>
       "Der Nutzer \"${user}\" wird keine weiteren Fotos zum Album hinzufügen können.\n\nJedoch kann er weiterhin vorhandene Bilder, welche durch ihn hinzugefügt worden sind, wieder entfernen";
 
-  static String m10(isFamilyMember, storageAmountInGb) =>
+  static String m11(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
                 'Deine Familiengruppe hat bereits ${storageAmountInGb} GB erhalten',
@@ -55,49 +58,46 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': 'Du hast bereits ${storageAmountInGb} GB erhalten!',
           })}";
 
-  static String m11(albumName) =>
+  static String m12(albumName) =>
       "Kollaborativer Link für ${albumName} erstellt";
 
-  static String m12(familyAdminEmail) =>
+  static String m13(familyAdminEmail) =>
       "Bitte kontaktiere <green>${familyAdminEmail}</green> um dein Abo zu verwalten";
 
-  static String m13(provider) =>
+  static String m14(provider) =>
       "Bitte kontaktieren Sie uns über support@ente.io, um Ihr ${provider} Abo zu verwalten.";
 
-  static String m14(count) =>
+  static String m15(count) =>
       "${Intl.plural(count, one: 'Lösche ${count} Element', other: 'Lösche ${count} Elemente')}";
 
-  static String m15(currentlyDeleting, totalCount) =>
+  static String m16(currentlyDeleting, totalCount) =>
       "Lösche ${currentlyDeleting} / ${totalCount}";
 
-  static String m16(albumName) =>
+  static String m17(albumName) =>
       "Der öffentliche Link zum Zugriff auf \"${albumName}\" wird entfernt.";
 
-  static String m17(supportEmail) =>
+  static String m18(supportEmail) =>
       "Bitte sende eine E-Mail an ${supportEmail} von deiner registrierten E-Mail-Adresse";
 
-  static String m18(count, storageSaved) =>
+  static String m19(count, storageSaved) =>
       "Du hast ${Intl.plural(count, one: '${count} duplizierte Datei', other: '${count} dupliziere Dateien')} gelöscht und (${storageSaved}!) freigegeben";
 
-  static String m19(count, formattedSize) =>
+  static String m20(count, formattedSize) =>
       "${count} Dateien, ${formattedSize} jede";
 
-  static String m20(newEmail) => "E-Mail-Adresse geändert zu ${newEmail}";
+  static String m21(newEmail) => "E-Mail-Adresse geändert zu ${newEmail}";
 
-  static String m21(email) =>
+  static String m22(email) =>
       "${email} hat kein Ente-Konto.\n\nSenden Sie eine Einladung, um Fotos zu teilen.";
 
-  static String m22(count, formattedNumber) =>
+  static String m23(count, formattedNumber) =>
       "${Intl.plural(count, one: '1 Datei', other: '${formattedNumber} Dateien')} auf diesem Gerät wurde(n) sicher gespeichert";
 
-  static String m23(count, formattedNumber) =>
+  static String m24(count, formattedNumber) =>
       "${Intl.plural(count, one: '1 Datei', other: '${formattedNumber} Dateien')} in diesem Album wurde(n) sicher gespeichert";
 
-  static String m24(storageAmountInGB) =>
+  static String m25(storageAmountInGB) =>
       "${storageAmountInGB} GB jedes Mal, wenn sich jemand mit deinem Code für einen bezahlten Tarif anmeldet";
-
-  static String m25(freeAmount, storageUnit) =>
-      "${freeAmount} ${storageUnit} kostenlos";
 
   static String m26(endDate) => "Kostenlose Demo verfügbar bis zum ${endDate}";
 
@@ -368,6 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "authenticationSuccessful": MessageLookupByLibrary.simpleMessage(
             "Authentifizierung erfogreich!"),
         "available": MessageLookupByLibrary.simpleMessage("Verfügbar"),
+        "availableStorageSpace": m8,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Gesicherte Ordner"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
@@ -393,10 +394,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Du kannst nur Dateien entfernen, die dir gehören"),
         "cancel": MessageLookupByLibrary.simpleMessage("Abbrechen"),
-        "cancelOtherSubscription": m8,
+        "cancelOtherSubscription": m9,
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Abonnement kündigen"),
-        "cannotAddMorePhotosAfterBecomingViewer": m9,
+        "cannotAddMorePhotosAfterBecomingViewer": m10,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Konnte geteilte Dateien nicht löschen"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
@@ -421,7 +422,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Freien Speicher einlösen"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Mehr einlösen!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Eingelöst"),
-        "claimedStorageSoFar": m10,
+        "claimedStorageSoFar": m11,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Unkategorisiert leeren"),
         "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
@@ -448,7 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Erstelle einen Link, um anderen zu ermöglichen, Fotos in deinem geteilten Album hinzuzufügen und zu sehen - ohne dass diese ein Konto von ente.io oder die App benötigen. Ideal, um Fotos von Events zu sammeln."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Gemeinschaftlicher Link"),
-        "collaborativeLinkCreatedFor": m11,
+        "collaborativeLinkCreatedFor": m12,
         "collaborator": MessageLookupByLibrary.simpleMessage("Bearbeiter"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
@@ -475,10 +476,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wiederherstellungsschlüssel bestätigen"),
         "confirmYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Bestätigen Sie ihren Wiederherstellungsschlüssel"),
-        "contactFamilyAdmin": m12,
+        "contactFamilyAdmin": m13,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Support kontaktieren"),
-        "contactToManageSubscription": m13,
+        "contactToManageSubscription": m14,
         "contacts": MessageLookupByLibrary.simpleMessage("Kontakte"),
         "contents": MessageLookupByLibrary.simpleMessage("Inhalte"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Weiter"),
@@ -558,11 +559,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Vom Gerät löschen"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Auf ente.io löschen"),
-        "deleteItemCount": m14,
+        "deleteItemCount": m15,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Standort löschen"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Fotos löschen"),
-        "deleteProgress": m15,
+        "deleteProgress": m16,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Es fehlt eine zentrale Funktion, die ich benötige"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -582,8 +583,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Entwickelt um zu bewahren"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
-        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
-            "Das Entwicklerkonto, das wir verwenden, um ente im App Store zu veröffentlichen, hat sich geändert. Aus diesem Grund musst du dich erneut anmelden.\n\nWir entschuldigen uns für die Unannehmlichkeiten, aber das war unvermeidlich."),
         "deviceCodeHint": MessageLookupByLibrary.simpleMessage("Code eingeben"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Dateien, die zu diesem Album hinzugefügt werden, werden automatisch zu ente hochgeladen."),
@@ -598,7 +597,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Zuschauer können weiterhin Screenshots oder mit anderen externen Programmen Kopien der Bilder machen."),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Bitte beachten Sie:"),
-        "disableLinkMessage": m16,
+        "disableLinkMessage": m17,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage(
             "Zweiten Faktor (2FA) deaktivieren"),
         "disablingTwofactorAuthentication":
@@ -621,9 +620,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Herunterladen fehlgeschlagen"),
         "downloading":
             MessageLookupByLibrary.simpleMessage("Wird heruntergeladen..."),
-        "dropSupportEmail": m17,
-        "duplicateFileCountWithStorageSaved": m18,
-        "duplicateItemsGroup": m19,
+        "dropSupportEmail": m18,
+        "duplicateFileCountWithStorageSaved": m19,
+        "duplicateItemsGroup": m20,
         "edit": MessageLookupByLibrary.simpleMessage("Bearbeiten"),
         "editLocation":
             MessageLookupByLibrary.simpleMessage("Standort bearbeiten"),
@@ -636,8 +635,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Änderungen des Standorts werden nur in ente sichtbar sein"),
         "eligible": MessageLookupByLibrary.simpleMessage("zulässig"),
         "email": MessageLookupByLibrary.simpleMessage("E-Mail"),
-        "emailChangedTo": m20,
-        "emailNoEnteAccount": m21,
+        "emailChangedTo": m21,
+        "emailNoEnteAccount": m22,
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("E-Mail-Verifizierung"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage(
@@ -741,8 +740,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileTypes": MessageLookupByLibrary.simpleMessage("Dateitypen"),
         "fileTypesAndNames":
             MessageLookupByLibrary.simpleMessage("Dateitypen und -namen"),
-        "filesBackedUpFromDevice": m22,
-        "filesBackedUpInAlbum": m23,
+        "filesBackedUpFromDevice": m23,
+        "filesBackedUpInAlbum": m24,
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Dateien gelöscht"),
         "findPeopleByName": MessageLookupByLibrary.simpleMessage(
@@ -755,8 +754,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Kostenlos hinzugefügter Speicherplatz"),
-        "freeStorageOnReferralSuccess": m24,
-        "freeStorageSpace": m25,
+        "freeStorageOnReferralSuccess": m25,
         "freeStorageUsable": MessageLookupByLibrary.simpleMessage(
             "Freier Speicherplatz nutzbar"),
         "freeTrial":

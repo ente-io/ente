@@ -143,12 +143,22 @@ const registerPrivilegedSchemes = () => {
  * This window will show the HTML served from {@link rendererURL}.
  */
 const createMainWindow = () => {
+    const icon = nativeImage.createFromPath(
+        path.join(isDev ? "build" : process.resourcesPath, "window-icon.png"),
+    );
+    const bounds = windowBounds();
+
     // Create the main window. This'll show our web content.
     const window = new BrowserWindow({
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
+        icon,
+        // Set the window's position and size (if we have one saved).
+        ...(bounds ?? {}),
+        // Enforce a minimum size
+        ...minimumWindowSize(),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
@@ -162,8 +172,10 @@ const createMainWindow = () => {
         // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window (maximizing it) otherwise.
-        window.maximize();
+        // Show our window otherwise.
+        //
+        // If we did not give it an explicit size, maximize it
+        bounds ? window.show() : window.maximize();
     }
 
     // Open the DevTools automatically when running in dev mode
@@ -210,10 +222,63 @@ const createMainWindow = () => {
 };
 
 /**
+ * The position and size to use when showing the main window.
+ *
+ * The return value is `undefined` if the app's window was maximized the last
+ * time around, and so if we should restore it to the maximized state.
+ *
+ * Otherwise it returns the position and size of the window the last time the
+ * app quit.
+ *
+ * If there is no such saved value (or if it is the first time the user is
+ * running the app), return a default size.
+ */
+const windowBounds = () => {
+    if (userPreferences.get("isWindowMaximized")) return undefined;
+
+    const bounds = userPreferences.get("windowBounds");
+    if (bounds) return bounds;
+
+    // Default size. Picked arbitrarily as something that should look good on
+    // first launch. We don't provide a position to let Electron center the app.
+    return { width: 1170, height: 710 };
+};
+
+/**
+ * If for some reason {@link windowBounds} is outside the screen's bounds (e.g.
+ * if the user's screen resolution has changed), then the previously saved
+ * bounds might not be appropriate.
+ *
+ * Luckily, if we try to set an x/y position that is outside the screen's
+ * bounds, then Electron automatically clamps x + width and y + height to lie
+ * within the screen's available space, and we do not need to tackle such out of
+ * bounds cases specifically.
+ *
+ * However there is no minimum window size the Electron enforces by default. As
+ * a safety valve, provide an (arbitrary) minimum size so that the user can
+ * resize it back to sanity if something I cannot currently anticipate happens.
+ */
+const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
+
+/**
+ * Sibling of {@link windowBounds}, see that function's documentation for more
+ * details.
+ */
+const saveWindowBounds = (window: BrowserWindow) => {
+    if (window.isMaximized()) {
+        userPreferences.set("isWindowMaximized", true);
+        userPreferences.delete("windowBounds");
+    } else {
+        userPreferences.delete("isWindowMaximized");
+        userPreferences.set("windowBounds", window.getBounds());
+    }
+};
+
+/**
  * Automatically set the save path for user initiated downloads to the system's
  * "downloads" directory instead of asking the user to select a save location.
  */
-export const setDownloadPath = (webContents: WebContents) => {
+const setDownloadPath = (webContents: WebContents) => {
     webContents.session.on("will-download", (_, item) => {
         item.setSavePath(
             uniqueSavePath(app.getPath("downloads"), item.getFilename()),
@@ -241,7 +306,7 @@ const uniqueSavePath = (dirPath: string, fileName: string) => {
  *
  * @param webContents The renderer to configure.
  */
-export const allowExternalLinks = (webContents: WebContents) =>
+const allowExternalLinks = (webContents: WebContents) =>
     // By default, if the user were open a link, say
     // https://github.com/ente-io/ente/discussions, then it would open a _new_
     // BrowserWindow within our app.
@@ -273,7 +338,7 @@ export const allowExternalLinks = (webContents: WebContents) =>
  * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
  * workaround here instead, intercepting the ACAO header and allowing `*`.
  */
-export const allowAllCORSOrigins = (webContents: WebContents) =>
+const allowAllCORSOrigins = (webContents: WebContents) =>
     webContents.session.webRequest.onHeadersReceived(
         ({ responseHeaders }, callback) => {
             const headers: NonNullable<typeof responseHeaders> = {};
@@ -444,7 +509,10 @@ const main = () => {
     // app, e.g. by clicking on its dock icon.
     app.on("activate", () => mainWindow?.show());
 
-    app.on("before-quit", allowWindowClose);
+    app.on("before-quit", () => {
+        if (mainWindow) saveWindowBounds(mainWindow);
+        allowWindowClose();
+    });
 };
 
 main();

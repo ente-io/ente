@@ -1,10 +1,10 @@
-import { object, type InferType } from "yup";
+import { z } from "zod";
 
 const apiOrigin = import.meta.env.VITE_ENTE_ENDPOINT ?? "https://api.ente.io";
 
-const userDetailsSchema = object({});
+const UserDetails = z.object({}).passthrough();
 
-export type UserDetails = InferType<typeof userDetailsSchema>;
+export type UserDetails = z.infer<typeof UserDetails>;
 
 /** Fetch details of the user associated with the given {@link authToken}. */
 export const getUserDetails = async (
@@ -17,5 +17,5 @@ export const getUserDetails = async (
         },
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    return await userDetailsSchema.validate(await res.json());
+    return UserDetails.parse(await res.json());
 };

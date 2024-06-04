@@ -7,11 +7,16 @@ import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import { createFaceComlinkWorker } from "services/face";
 import type { DedicatedMLWorker } from "services/face/face.worker";
 import { EnteFile } from "types/file";
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
+
+const createFaceWebWorker = () =>
+    new Worker(new URL("face.worker.ts", import.meta.url));
+
+const createFaceComlinkWorker = (name: string) =>
+    new ComlinkWorker<typeof DedicatedMLWorker>(name, createFaceWebWorker());
 
 export class MLSyncJob {
     private runCallback: () => Promise<boolean>;

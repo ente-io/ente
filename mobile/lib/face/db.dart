@@ -841,6 +841,18 @@ class FaceMLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
+  Future<void> removeNotPersonFeedback({
+    required String personID,
+    required int clusterID,
+  }) async {
+    final db = await instance.asyncDB;
+
+    const String sql = '''
+      DELETE FROM $notPersonFeedback WHERE $personIdColumn = ? AND $clusterIDColumn = ?
+    ''';
+    await db.execute(sql, [personID, clusterID]);
+  }
+
   Future<void> removeClusterToPerson({
     required String personID,
     required int clusterID,

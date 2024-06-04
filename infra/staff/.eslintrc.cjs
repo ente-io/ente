@@ -3,20 +3,17 @@ module.exports = {
     root: true,
     extends: [
         "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/strict-type-checked",
         "plugin:@typescript-eslint/stylistic-type-checked",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:react/jsx-runtime",
     ],
-    plugins: ["@typescript-eslint"],
+    plugins: ["@typescript-eslint", "react-refresh"],
+    parserOptions: { project: true },
     parser: "@typescript-eslint/parser",
-    parserOptions: {
-        project: true,
-    },
-    ignorePatterns: [".eslintrc.js", "app", "out", "dist"],
-    env: {
-        es2022: true,
-        node: true,
-    },
+    ignorePatterns: [".eslintrc.cjs", "vite.config.ts", "dist"],
+    settings: { react: { version: "18.2" } },
     rules: {
         /* Allow numbers to be used in template literals */
         "@typescript-eslint/restrict-template-expressions": [
@@ -31,6 +28,10 @@ module.exports = {
             {
                 ignoreArrowShorthand: true,
             },
+        ],
+        "react-refresh/only-export-components": [
+            "warn",
+            { allowConstantExport: true },
         ],
     },
 };

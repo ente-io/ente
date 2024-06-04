@@ -24,6 +24,7 @@ class MachineLearningController {
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
   bool _canRunML = false;
+  bool mlInteractionOverride = false;
   late Timer _userInteractionTimer;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
@@ -61,13 +62,23 @@ class MachineLearningController {
     _resetTimer();
   }
 
+  bool _canRunGivenUserInteraction() {
+    return (Platform.isIOS ? true : !_isUserInteracting) ||
+        mlInteractionOverride;
+  }
+
+  void forceOverrideML({required bool turnOn}) {
+    _logger.info("Forcing to turn on ML: $turnOn");
+    mlInteractionOverride = turnOn;
+    _fireControlEvent();
+  }
+
   void _fireControlEvent() {
-    final shouldRunML =
-        _isDeviceHealthy && (Platform.isAndroid ? !_isUserInteracting : true);
+    final shouldRunML = _isDeviceHealthy && _canRunGivenUserInteraction();
     if (shouldRunML != _canRunML) {
       _canRunML = shouldRunML;
       _logger.info(
-        "Firing event with $shouldRunML, device health: $_isDeviceHealthy and user interaction: $_isUserInteracting",
+        "Firing event: $shouldRunML      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $mlInteractionOverride)",
       );
       Bus.instance.fire(MachineLearningControlEvent(shouldRunML));
     }
