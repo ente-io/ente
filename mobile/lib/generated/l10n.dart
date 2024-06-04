@@ -3432,6 +3432,16 @@ class S {
     );
   }
 
+  /// `Save space on your device by clearing files that have been already backed up.`
+  String get freeUpDeviceSpaceDesc {
+    return Intl.message(
+      'Save space on your device by clearing files that have been already backed up.',
+      name: 'freeUpDeviceSpaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `✨ All clear`
   String get allClear {
     return Intl.message(
@@ -3457,6 +3467,16 @@ class S {
     return Intl.message(
       'Remove duplicates',
       name: 'removeDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and remove files that are exact duplicates.`
+  String get removeDuplicatesDesc {
+    return Intl.message(
+      'Review and remove files that are exact duplicates.',
+      name: 'removeDuplicatesDesc',
       desc: '',
       args: [],
     );

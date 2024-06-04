@@ -763,6 +763,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpAmount": m29,
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("Free up device space"),
+        "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
+            "Save space on your device by clearing files that have been already backed up."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Free up space"),
         "freeUpSpaceSaving": m30,
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
@@ -1154,6 +1156,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "remove": MessageLookupByLibrary.simpleMessage("Remove"),
         "removeDuplicates":
             MessageLookupByLibrary.simpleMessage("Remove duplicates"),
+        "removeDuplicatesDesc": MessageLookupByLibrary.simpleMessage(
+            "Review and remove files that are exact duplicates."),
         "removeFromAlbum":
             MessageLookupByLibrary.simpleMessage("Remove from album"),
         "removeFromAlbumTitle":

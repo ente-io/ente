@@ -14,6 +14,7 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import "package:photos/ui/components/dialog_widget.dart";
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -118,6 +119,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     }
                                   },
                                 ),
+                                MenuSectionDescriptionWidget(
+                                  content: S.of(context).freeUpDeviceSpaceDesc,
+                                ),
                                 const SizedBox(
                                   height: 24,
                                 ),
@@ -171,6 +175,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   }
                                 }
                               },
+                            ),
+                            MenuSectionDescriptionWidget(
+                              content: S.of(context).removeDuplicatesDesc,
                             ),
                             const SizedBox(
                               height: 24,
