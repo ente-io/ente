@@ -3482,6 +3482,26 @@ class S {
     );
   }
 
+  /// `Large files`
+  String get viewLargeFiles {
+    return Intl.message(
+      'Large files',
+      name: 'viewLargeFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View files that are consuming the most amount of storage`
+  String get viewLargeFilesDesc {
+    return Intl.message(
+      'View files that are consuming the most amount of storage',
+      name: 'viewLargeFilesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `✨ No duplicates`
   String get noDuplicates {
     return Intl.message(

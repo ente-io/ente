@@ -1533,6 +1533,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewAll": MessageLookupByLibrary.simpleMessage("View all"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("View all EXIF data"),
+        "viewLargeFiles": MessageLookupByLibrary.simpleMessage("Large files"),
+        "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
+            "View files that are consuming the most amount of storage"),
         "viewLogs": MessageLookupByLibrary.simpleMessage("View logs"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),

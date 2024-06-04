@@ -20,6 +20,7 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
+import "package:photos/ui/viewer/gallery/large_files_page.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/local_settings.dart';
@@ -125,62 +126,90 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 const SizedBox(
                                   height: 24,
                                 ),
-                              ],
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).removeDuplicates,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: Icon(
-                                Icons.chevron_right_outlined,
-                                color: colorScheme.strokeBase,
-                              ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              trailingIconIsMuted: true,
-                              showOnlyLoadingState: true,
-                              onTap: () async {
-                                List<DuplicateFiles> duplicates;
-                                try {
-                                  duplicates = await DeduplicationService
-                                      .instance
-                                      .getDuplicateFiles();
-                                } catch (e) {
-                                  await showGenericErrorDialog(
-                                    context: context,
-                                    error: e,
-                                  );
-                                  return;
-                                }
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: S.of(context).removeDuplicates,
+                                  ),
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingWidget: Icon(
+                                    Icons.chevron_right_outlined,
+                                    color: colorScheme.strokeBase,
+                                  ),
+                                  singleBorderRadius: 8,
+                                  alignCaptionedTextToLeft: true,
+                                  trailingIconIsMuted: true,
+                                  showOnlyLoadingState: true,
+                                  onTap: () async {
+                                    List<DuplicateFiles> duplicates;
+                                    try {
+                                      duplicates = await DeduplicationService
+                                          .instance
+                                          .getDuplicateFiles();
+                                    } catch (e) {
+                                      await showGenericErrorDialog(
+                                        context: context,
+                                        error: e,
+                                      );
+                                      return;
+                                    }
 
-                                if (duplicates.isEmpty) {
-                                  unawaited(
-                                    showErrorDialog(
+                                    if (duplicates.isEmpty) {
+                                      unawaited(
+                                        showErrorDialog(
+                                          context,
+                                          S.of(context).noDuplicates,
+                                          S
+                                              .of(context)
+                                              .youveNoDuplicateFilesThatCanBeCleared,
+                                        ),
+                                      );
+                                    } else {
+                                      final DeduplicationResult? result =
+                                          await routeToPage(
+                                        context,
+                                        DeduplicatePage(duplicates),
+                                      );
+                                      if (result != null) {
+                                        _showDuplicateFilesDeletedDialog(
+                                          result,
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: MenuSectionDescriptionWidget(
+                                    content: S.of(context).removeDuplicatesDesc,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 24,
+                                ),
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: S.of(context).viewLargeFiles,
+                                  ),
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingWidget: Icon(
+                                    Icons.chevron_right_outlined,
+                                    color: colorScheme.strokeBase,
+                                  ),
+                                  singleBorderRadius: 8,
+                                  alignCaptionedTextToLeft: true,
+                                  trailingIconIsMuted: true,
+                                  showOnlyLoadingState: true,
+                                  onTap: () async {
+                                    await routeToPage(
                                       context,
-                                      S.of(context).noDuplicates,
-                                      S
-                                          .of(context)
-                                          .youveNoDuplicateFilesThatCanBeCleared,
-                                    ),
-                                  );
-                                } else {
-                                  final DeduplicationResult? result =
-                                      await routeToPage(
-                                    context,
-                                    DeduplicatePage(duplicates),
-                                  );
-                                  if (result != null) {
-                                    _showDuplicateFilesDeletedDialog(result);
-                                  }
-                                }
-                              },
-                            ),
-                            MenuSectionDescriptionWidget(
-                              content: S.of(context).removeDuplicatesDesc,
-                            ),
-                            const SizedBox(
-                              height: 24,
+                                    LargeFilesPagePage(),
+                                    );
+                                    },
+                                ),
+                                MenuSectionDescriptionWidget(
+                                  content: S.of(context).viewLargeFilesDesc,
+                                ),
+                              ],
                             ),
                           ],
                         ),

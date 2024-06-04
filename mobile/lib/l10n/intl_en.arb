@@ -483,6 +483,8 @@
   "noDeviceThatCanBeDeleted": "You've no files on this device that can be deleted",
   "removeDuplicates": "Remove duplicates",
   "removeDuplicatesDesc": "Review and remove files that are exact duplicates.",
+  "viewLargeFiles": "Large files",
+  "viewLargeFilesDesc": "View files that are consuming the most amount of storage",
   "noDuplicates": "✨ No duplicates",
   "youveNoDuplicateFilesThatCanBeCleared": "You've no duplicate files that can be cleared",
   "success": "Success",
