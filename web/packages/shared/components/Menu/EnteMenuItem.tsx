@@ -27,7 +27,7 @@ interface Iprops {
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    label?: string;
+    label: string;
     subText?: string;
     subIcon?: React.ReactNode;
     checked?: boolean;
