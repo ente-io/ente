@@ -3,6 +3,7 @@
 ## v1.7.1 (Unreleased)
 
 -   Remember the window size across app restarts.
+-   Revert changes to the Linux icon.
 
 ## v1.7.0
 
