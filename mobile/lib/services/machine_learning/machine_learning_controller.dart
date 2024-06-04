@@ -18,7 +18,7 @@ class MachineLearningController {
 
   static const kMaximumTemperature = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
-  static const kDefaultInteractionTimeout = Duration(seconds: 15);
+  final kDefaultInteractionTimeout = Duration(seconds: Platform.isIOS ? 5 : 15);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
 
   bool _isDeviceHealthy = true;
@@ -31,19 +31,19 @@ class MachineLearningController {
 
   void init() {
     _logger.info('init called');
-    if (Platform.isAndroid) {
-      _startInteractionTimer();
-      BatteryInfoPlugin()
-          .androidBatteryInfoStream
-          .listen((AndroidBatteryInfo? batteryInfo) {
-        _onAndroidBatteryStateUpdate(batteryInfo);
-      });
-    }
+    _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
       BatteryInfoPlugin()
           .iosBatteryInfoStream
           .listen((IosBatteryInfo? batteryInfo) {
         _oniOSBatteryStateUpdate(batteryInfo);
+      });
+    } 
+    if (Platform.isAndroid) {
+      BatteryInfoPlugin()
+          .androidBatteryInfoStream
+          .listen((AndroidBatteryInfo? batteryInfo) {
+        _onAndroidBatteryStateUpdate(batteryInfo);
       });
     }
     _fireControlEvent();
@@ -51,9 +51,6 @@ class MachineLearningController {
   }
 
   void onUserInteraction() {
-    if (Platform.isIOS) {
-      return;
-    }
     if (!_isUserInteracting) {
       _logger.info("User is interacting with the app");
       _isUserInteracting = true;
@@ -63,8 +60,7 @@ class MachineLearningController {
   }
 
   bool _canRunGivenUserInteraction() {
-    return (Platform.isIOS ? true : !_isUserInteracting) ||
-        mlInteractionOverride;
+    return !_isUserInteracting || mlInteractionOverride;
   }
 
   void forceOverrideML({required bool turnOn}) {
@@ -84,7 +80,7 @@ class MachineLearningController {
     }
   }
 
-  void _startInteractionTimer({Duration timeout = kDefaultInteractionTimeout}) {
+  void _startInteractionTimer(Duration timeout) {
     _userInteractionTimer = Timer(timeout, () {
       _logger.info("User is not interacting with the app");
       _isUserInteracting = false;
@@ -94,7 +90,7 @@ class MachineLearningController {
 
   void _resetTimer() {
     _userInteractionTimer.cancel();
-    _startInteractionTimer();
+    _startInteractionTimer(kDefaultInteractionTimeout);
   }
 
   void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {
