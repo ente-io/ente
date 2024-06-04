@@ -6969,10 +6969,10 @@ class S {
     );
   }
 
-  /// `Persons will be shown here once indexing is done`
+  /// `People will be shown here once indexing is done`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Persons will be shown here once indexing is done',
+      'People will be shown here once indexing is done',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],
@@ -7402,10 +7402,10 @@ class S {
   }
 
   /// `{freeAmount} {storageUnit} free`
-  String freeStorageSpace(Object freeAmount, Object storageUnit) {
+  String availableStorageSpace(Object freeAmount, Object storageUnit) {
     return Intl.message(
       '$freeAmount $storageUnit free',
-      name: 'freeStorageSpace',
+      name: 'availableStorageSpace',
       desc: '',
       args: [freeAmount, storageUnit],
     );
