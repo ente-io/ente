@@ -37,24 +37,25 @@ export class PhotosDownloadClient implements DownloadClient {
         file: EnteFile,
         onDownloadProgress: (event: { loaded: number; total: number }) => void,
     ): Promise<Uint8Array> {
-        if (!this.token) {
-            throw Error(CustomError.TOKEN_MISSING);
-        }
-        const resp = await retryAsyncFunction(() =>
+        const token = this.token;
+        if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const params = new URLSearchParams({ token });
+        const getFile = () =>
             HTTPService.get(
-                getFileURL(file.id),
-                null,
-                { "X-Auth-Token": this.token },
+                `${getFileURL(file.id)}?${params.toString()}`,
+                undefined,
+                undefined,
                 {
                     responseType: "arraybuffer",
                     timeout: this.timeout,
                     onDownloadProgress,
                 },
-            ),
-        );
-        if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
-        }
+            );
+
+        const resp = await retryAsyncFunction(getFile);
+        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
         return new Uint8Array(resp.data);
     }
 
