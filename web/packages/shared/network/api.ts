@@ -26,22 +26,6 @@ export const getEndpoint = () => {
     return "https://api.ente.io";
 };
 
-export const getPublicCollectionFileURL = (id: number) => {
-    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (endpoint) {
-        return `${endpoint}/public-collection/files/download/${id}`;
-    }
-    return `https://public-albums.ente.io/download/?fileID=${id}`;
-};
-
-export const getPublicCollectionThumbnailURL = (id: number) => {
-    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (endpoint) {
-        return `${endpoint}/public-collection/files/preview/${id}`;
-    }
-    return `https://public-albums.ente.io/preview/?fileID=${id}`;
-};
-
 export const getUploadEndpoint = () => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (endpoint) {
