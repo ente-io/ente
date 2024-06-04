@@ -303,6 +303,10 @@ class FaceMlService {
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
 
+      if (_shouldPauseIndexingAndClustering) {
+        return null;
+      }
+
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
 
@@ -811,9 +815,11 @@ class FaceMlService {
         // disposeImageIsolateAfterUse: false,
       );
       if (result == null) {
-        _logger.severe(
-          "Failed to analyze image with uploadedFileID: ${enteFile.uploadedFileID}",
-        );
+        if (!_shouldPauseIndexingAndClustering) {
+          _logger.severe(
+            "Failed to analyze image with uploadedFileID: ${enteFile.uploadedFileID}",
+          );
+        }
         return false;
       }
       final List<Face> faces = [];
@@ -942,7 +948,9 @@ class FaceMlService {
         ),
       ) as String?;
       if (resultJsonString == null) {
-        _logger.severe('Analyzing image in isolate is giving back null');
+        if (!_shouldPauseIndexingAndClustering) {
+          _logger.severe('Analyzing image in isolate is giving back null');
+        }
         return null;
       }
       result = FaceMlResult.fromJsonString(resultJsonString);
