@@ -2,9 +2,9 @@
  * Return the origin (scheme, host, port triple) that should be used for making
  * API requests to museum.
  *
- * This defaults to api.ente.io, Ente's own servers, but can be overridden when
- * running locally by setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment
- * variable.
+ * This defaults to "https://api.ente.io", Ente's own servers, but can be
+ * overridden when self hosting by setting the `NEXT_PUBLIC_ENTE_ENDPOINT`
+ * environment variable.
  */
 export const apiOrigin = () => getEndpoint();
 
@@ -15,6 +15,16 @@ export const getEndpoint = () => {
     }
     return "https://api.ente.io";
 };
+
+/**
+ * Return the origin that should be used for fetching files.
+ *
+ * This defaults to "https://files.ente.io", Ente's own servers, but can be
+ * overridden when self hosting by setting the `NEXT_PUBLIC_ENTE_ENDPOINT`
+ * environment variable.
+ */
+export const filesOrigin = () =>
+    process.env.NEXT_PUBLIC_ENTE_ENDPOINT || "https://files.ente.io"
 
 export const getFileURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
