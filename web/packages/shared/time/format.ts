@@ -21,7 +21,7 @@ const timeFormatter = new Intl.DateTimeFormat(i18n.language, {
     timeStyle: "short",
 });
 
-export function formatDateFull(date: number | Date) {
+function formatDateFull(date: number | Date) {
     return [dateTimeFullFormatter1, dateTimeFullFormatter2]
         .map((f) => f.format(date))
         .join(" ");
@@ -32,7 +32,7 @@ export function formatDate(date: number | Date) {
         new Date().getFullYear() === new Date(date).getFullYear();
     const dateTimeFormat2 = !withinYear ? dateTimeFullFormatter2 : null;
     return [dateTimeFullFormatter1, dateTimeFormat2]
-        .filter((f) => !!f)
+        .filter((f): f is Intl.DateTimeFormat => !!f)
         .map((f) => f.format(date))
         .join(" ");
 }
