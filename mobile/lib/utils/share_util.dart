@@ -18,19 +18,8 @@ import 'package:share_plus/share_plus.dart';
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("ShareUtil");
-// Set of possible image extensions
-final _imageExtension = {"jpg", "jpeg", "png", "heic", "heif", "webp", ".gif"};
-final _videoExtension = {
-  "mp4",
-  "mov",
-  "avi",
-  "mkv",
-  "webm",
-  "wmv",
-  "flv",
-  "3gp",
-};
-// share is used to share media/files from ente to other apps
+
+/// share is used to share media/files from ente to other apps
 Future<void> share(
   BuildContext context,
   List<EnteFile> files, {
@@ -62,9 +51,13 @@ Future<void> share(
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
     paths.removeWhere((element) => element == null);
-    final List<String> nonNullPaths = paths.map((element) => element!).toList();
-    return Share.shareFiles(
-      nonNullPaths,
+    final xFiles = <XFile>[];
+    for (String? path in paths) {
+      if (path == null) continue;
+      xFiles.add(XFile(path));
+    }
+    await Share.shareXFiles(
+      xFiles,
       // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
       sharePositionOrigin: shareButtonRect(context, shareButtonKey),
     );
@@ -99,8 +92,10 @@ Rect shareButtonRect(BuildContext context, GlobalKey? shareButtonKey) {
   );
 }
 
-Future<void> shareText(String text) async {
-  return Share.share(text);
+Future<ShareResult> shareText(String text) async {
+  return Share.shareUri(
+    Uri.parse(text),
+  );
 }
 
 Future<List<EnteFile>> convertIncomingSharedMediaToFile(
@@ -223,5 +218,8 @@ Future<void> shareImageAndUrl(
   String imagePath,
   String url,
 ) async {
-  await Share.shareXFiles([XFile(imagePath)], text: url);
+  await Share.shareXFiles(
+    [XFile(imagePath)],
+    text: url,
+  );
 }
