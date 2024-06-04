@@ -143,6 +143,9 @@ const registerPrivilegedSchemes = () => {
  * This window will show the HTML served from {@link rendererURL}.
  */
 const createMainWindow = () => {
+    const icon = nativeImage.createFromPath(
+        path.join(isDev ? "build" : process.resourcesPath, "window-icon.png"),
+    );
     const bounds = windowBounds();
 
     // Create the main window. This'll show our web content.
@@ -151,12 +154,11 @@ const createMainWindow = () => {
             preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
+        icon,
         // Set the window's position and size (if we have one saved).
         ...(bounds ?? {}),
         // Enforce a minimum size
         ...minimumWindowSize(),
-        // (Maybe) fix the dock icon on Linux.
-        ...windowIconOptions(),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
@@ -270,53 +272,6 @@ const saveWindowBounds = (window: BrowserWindow) => {
         userPreferences.delete("isWindowMaximized");
         userPreferences.set("windowBounds", window.getBounds());
     }
-};
-
-/**
- * On Linux the app does not show a dock icon by default, attempt to fix this by
- * returning the path to an icon as the "icon" property that can be passed to
- * the BrowserWindow during creation.
- */
-const windowIconOptions = () => {
-    if (process.platform != "linux") return {};
-
-    // There are two, possibly three, different issues with icons on Linux.
-    //
-    // Firstly, the AppImage itself doesn't show an icon. There does not seem to
-    // be a reasonable workaround either currently. See:
-    // https://github.com/AppImage/AppImageKit/issues/346
-    //
-    // Secondly, and this is the problem we're trying to fix here, when the app
-    // is started it does not show a dock icon (Ubuntu 22) or shows the generic
-    // gear icon (Ubuntu 24). The issue possibly exists on other distributions
-    // too.
-    //
-    // Electron provides a `BrowserWindow.setIcon` function which should solve
-    // our issue, we could call it selectively on Linux. There is also an
-    // apparently undocumented "icon" option that can be passed when creating a
-    // new BrowserWindow, and that is what most of the other code I saw on
-    // GitHub seems to be doing.
-    //
-    // However, try what I may, I can't get either of these to work. Which leads
-    // me to believe there is a third issue: I can't get it to work because I'm
-    // testing on an Ubuntu 24 VM, where this might just not be working:
-    // https://askubuntu.com/questions/1511534/ubuntu-24-04-skype-logo-on-the-dock-not-showing-skype-logo
-    //
-    // 24 isn't likely the year of the Linux desktop either.
-    //
-    // For now, I'm adding a very specific incantation taken from
-    // https://github.com/arduino/arduino-ide/blob/main/arduino-ide-extension/src/electron-main/fix-app-image-icon.ts
-    //
-    // Possibly all this specific naming of the file etc is superstition, and
-    // just any name would do as long as the path is correct, but let me try it
-    // this way and see if this gets the icon to appear on Ubuntu 22 etc.
-
-    const icon = path.join(
-        isDev ? "build" : process.resourcesPath,
-        "icons/512x512.png",
-    );
-
-    return { icon };
 };
 
 /**
