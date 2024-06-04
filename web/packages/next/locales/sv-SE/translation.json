@@ -25,7 +25,7 @@
     "SENDING": "Skickar...",
     "SENT": "Skickat!",
     "password": "Lösenord",
-    "LINK_PASSWORD": "Ange lösenord för att låsa upp albumet",
+    "link_password_description": "Ange lösenord för att låsa upp albumet",
     "SET_PASSPHRASE": "Välj lösenord",
     "VERIFY_PASSPHRASE": "Logga in",
     "INCORRECT_PASSPHRASE": "Felaktigt lösenord",

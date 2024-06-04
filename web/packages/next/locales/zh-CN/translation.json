@@ -25,7 +25,7 @@
     "SENDING": "发送中……",
     "SENT": "已发送！",
     "password": "密码",
-    "LINK_PASSWORD": "输入密码来解锁相册",
+    "link_password_description": "输入密码来解锁相册",
     "SET_PASSPHRASE": "设置密码",
     "VERIFY_PASSPHRASE": "登录",
     "INCORRECT_PASSPHRASE": "密码错误",

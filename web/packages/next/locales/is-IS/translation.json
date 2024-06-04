@@ -25,7 +25,7 @@
     "SENDING": "",
     "SENT": "",
     "password": "Lykilorð",
-    "LINK_PASSWORD": "",
+    "link_password_description": "",
     "SET_PASSPHRASE": "",
     "VERIFY_PASSPHRASE": "",
     "INCORRECT_PASSPHRASE": "Rangt lykilorð",

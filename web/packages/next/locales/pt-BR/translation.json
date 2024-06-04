@@ -25,7 +25,7 @@
     "SENDING": "Enviando...",
     "SENT": "Enviado!",
     "password": "Senha",
-    "LINK_PASSWORD": "Insira a senha para desbloquear o álbum",
+    "link_password_description": "Insira a senha para desbloquear o álbum",
     "SET_PASSPHRASE": "Definir senha",
     "VERIFY_PASSPHRASE": "Iniciar sessão",
     "INCORRECT_PASSPHRASE": "Senha incorreta",

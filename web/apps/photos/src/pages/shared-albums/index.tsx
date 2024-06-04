@@ -489,7 +489,7 @@ export default function PublicCollectionGallery() {
                     <FormPaper>
                         <FormPaperTitle>{t("password")}</FormPaperTitle>
                         <Typography color={"text.muted"} mb={2} variant="small">
-                            {t("LINK_PASSWORD")}
+                            {t("link_password_description")}
                         </Typography>
                         <SingleInputForm
                             callback={verifyLinkPassword}

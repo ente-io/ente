@@ -25,7 +25,7 @@
     "SENDING": "Wird gesendet...",
     "SENT": "Gesendet!",
     "password": "Passwort",
-    "LINK_PASSWORD": "Passwort zum Entsperren des Albums eingeben",
+    "link_password_description": "Passwort zum Entsperren des Albums eingeben",
     "SET_PASSPHRASE": "Passwort setzen",
     "VERIFY_PASSPHRASE": "Einloggen",
     "INCORRECT_PASSPHRASE": "Falsches Passwort",
