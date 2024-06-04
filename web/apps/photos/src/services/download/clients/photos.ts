@@ -1,6 +1,6 @@
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { customAPIOrigin, thumbnailURL } from "@ente/shared/network/api";
+import { customAPIOrigin } from "@ente/shared/network/api";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
@@ -20,14 +20,26 @@ export class PhotosDownloadClient implements DownloadClient {
         if (!token) throw Error(CustomError.TOKEN_MISSING);
 
         // See: [Note: Passing credentials for self-hosted file fetches]
-        const params = new URLSearchParams({ token });
-        const getThumbnail = () =>
-            HTTPService.get(
-                `${thumbnailURL(file.id)}?${params.toString()}`,
-                undefined,
-                undefined,
-                { responseType: "arraybuffer", timeout: this.timeout },
-            );
+        const getThumbnail = () => {
+            const opts = { responseType: "arraybuffer", timeout: this.timeout };
+            const customOrigin = customAPIOrigin();
+            if (customOrigin) {
+                const params = new URLSearchParams({ token });
+                return HTTPService.get(
+                    `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
+                    undefined,
+                    undefined,
+                    opts,
+                );
+            } else {
+                return HTTPService.get(
+                    `https://thumbnails.ente.io/?fileID=${file.id}`,
+                    undefined,
+                    { "X-Auth-Token": token },
+                    opts,
+                );
+            }
+        };
 
         const resp = await retryAsyncFunction(getThumbnail);
         if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
