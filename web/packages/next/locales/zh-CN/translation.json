@@ -380,7 +380,7 @@
     "MANAGE_LINK": "管理链接",
     "LINK_TOO_MANY_REQUESTS": "抱歉，该相册已在太多设备上查看！",
     "FILE_DOWNLOAD": "允许下载",
-    "LINK_PASSWORD_LOCK": "密码锁",
+    "link_password_lock": "密码锁",
     "PUBLIC_COLLECT": "允许添加照片",
     "LINK_DEVICE_LIMIT": "设备限制",
     "NO_DEVICE_LIMIT": "无",

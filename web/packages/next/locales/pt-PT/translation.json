@@ -380,7 +380,7 @@
     "MANAGE_LINK": "",
     "LINK_TOO_MANY_REQUESTS": "",
     "FILE_DOWNLOAD": "",
-    "LINK_PASSWORD_LOCK": "",
+    "link_password_lock": "",
     "PUBLIC_COLLECT": "",
     "LINK_DEVICE_LIMIT": "",
     "NO_DEVICE_LIMIT": "",

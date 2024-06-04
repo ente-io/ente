@@ -380,7 +380,7 @@
     "MANAGE_LINK": "Gérer le lien",
     "LINK_TOO_MANY_REQUESTS": "Désolé, cet album a été consulté sur trop d'appareils !",
     "FILE_DOWNLOAD": "Autoriser les téléchargements",
-    "LINK_PASSWORD_LOCK": "Verrou par mot de passe",
+    "link_password_lock": "Verrou par mot de passe",
     "PUBLIC_COLLECT": "Autoriser l'ajout de photos",
     "LINK_DEVICE_LIMIT": "Limite d'appareil",
     "NO_DEVICE_LIMIT": "Aucune",

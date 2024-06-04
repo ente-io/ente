@@ -380,7 +380,7 @@
     "MANAGE_LINK": "Link beheren",
     "LINK_TOO_MANY_REQUESTS": "Dit album is te populair voor ons om te verwerken!",
     "FILE_DOWNLOAD": "Downloads toestaan",
-    "LINK_PASSWORD_LOCK": "Wachtwoord versleuteling",
+    "link_password_lock": "Wachtwoord versleuteling",
     "PUBLIC_COLLECT": "Foto's toevoegen toestaan",
     "LINK_DEVICE_LIMIT": "Apparaat limiet",
     "NO_DEVICE_LIMIT": "Geen",

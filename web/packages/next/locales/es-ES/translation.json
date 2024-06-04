@@ -380,7 +380,7 @@
     "MANAGE_LINK": "Administrar enlace",
     "LINK_TOO_MANY_REQUESTS": "Este álbum es demasiado popular para que podamos manejarlo!",
     "FILE_DOWNLOAD": "Permitir descargas",
-    "LINK_PASSWORD_LOCK": "Contraseña bloqueada",
+    "link_password_lock": "Contraseña bloqueada",
     "PUBLIC_COLLECT": "Permitir añadir fotos",
     "LINK_DEVICE_LIMIT": "Límites del dispositivo",
     "NO_DEVICE_LIMIT": "Ninguno",

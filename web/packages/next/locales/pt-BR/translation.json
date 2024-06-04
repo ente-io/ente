@@ -380,7 +380,7 @@
     "MANAGE_LINK": "Gerenciar link",
     "LINK_TOO_MANY_REQUESTS": "Desculpe, este álbum foi visualizado em muitos dispositivos!",
     "FILE_DOWNLOAD": "Permitir downloads",
-    "LINK_PASSWORD_LOCK": "Bloqueio de senha",
+    "link_password_lock": "Bloqueio de senha",
     "PUBLIC_COLLECT": "Permitir adicionar fotos",
     "LINK_DEVICE_LIMIT": "Limite de dispositivos",
     "NO_DEVICE_LIMIT": "Nenhum",
