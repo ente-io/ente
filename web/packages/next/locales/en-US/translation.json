@@ -26,6 +26,7 @@
     "SENT": "Sent!",
     "PASSWORD": "Password",
     "LINK_PASSWORD": "Enter password to unlock the album",
+    "unlock": "Unlock",
     "RETURN_PASSPHRASE_HINT": "Password",
     "SET_PASSPHRASE": "Set password",
     "VERIFY_PASSPHRASE": "Sign in",

@@ -494,7 +494,7 @@ export default function PublicCollectionGallery() {
                         <SingleInputForm
                             callback={verifyLinkPassword}
                             placeholder={t("RETURN_PASSPHRASE_HINT")}
-                            buttonText={t("UNLOCK")}
+                            buttonText={t("unlock")}
                             fieldType="password"
                         />
                     </FormPaper>
