@@ -3402,11 +3402,11 @@ class S {
     );
   }
 
-  /// `Backed up folders`
-  String get backedUpFolders {
+  /// `Automatic backups`
+  String get automaticBackups {
     return Intl.message(
-      'Backed up folders',
-      name: 'backedUpFolders',
+      'Automatic backups',
+      name: 'automaticBackups',
       desc: '',
       args: [],
     );

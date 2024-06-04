@@ -48,7 +48,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).backedUpFolders,
+          title: S.of(context).automaticBackups,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
