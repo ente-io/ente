@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
@@ -63,7 +64,7 @@ const Passkeys = () => {
     const handleSubmit = async (
         inputValue: string,
         setFieldError: (errorMessage: string) => void,
-        resetForm: (nextState?: unknown) => void,
+        resetForm: () => void,
     ) => {
         let response: {
             options: {
@@ -93,10 +94,10 @@ const Passkeys = () => {
         );
 
         // create new credential
-        let newCredential: Credential | null = null;
+        let newCredential: Credential;
 
         try {
-            newCredential = await navigator.credentials.create(options);
+            newCredential = ensure(await navigator.credentials.create(options));
         } catch (e) {
             log.error("Error creating credential", e);
             setFieldError("Failed to create credential");
