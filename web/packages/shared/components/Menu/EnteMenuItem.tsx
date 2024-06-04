@@ -70,10 +70,10 @@ export function EnteMenuItem({
                 width: "100%",
                 color: (theme) =>
                     variant !== "captioned" && theme.palette[color].main,
-                ...(variant !== "secondary" &&
-                    variant !== "mini" && {
-                        backgroundColor: (theme) => theme.colors.fill.faint,
-                    }),
+                backgroundColor: (theme) =>
+                    variant !== "secondary" && variant !== "mini"
+                        ? theme.colors.fill.faint
+                        : "inherit",
                 "&:hover": {
                     backgroundColor: (theme) => theme.colors.fill.faintPressed,
                 },
