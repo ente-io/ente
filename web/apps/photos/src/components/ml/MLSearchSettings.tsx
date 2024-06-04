@@ -18,11 +18,11 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { canEnableFaceIndexing } from "services/face/indexer";
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from "services/userService";
-import { isInternalUserForML } from "utils/user";
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -60,6 +60,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const enableFaceSearch = async () => {
         try {
             startLoading();
+            // Update the consent flag.
             await updateFaceSearchEnabledStatus(true);
             updateMlSearchEnabled(true);
             closeEnableFaceSearch();
@@ -83,7 +84,6 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const disableFaceSearch = async () => {
         try {
             startLoading();
-            await updateFaceSearchEnabledStatus(false);
             await disableMlSearch();
             finishLoading();
         } catch (e) {
@@ -258,6 +258,12 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
     // const showDetails = () =>
     //     openLink("https://ente.io/blog/desktop-ml-beta", true);
 
+    const [canEnable, setCanEnable] = useState(false);
+
+    useEffect(() => {
+        canEnableFaceIndexing().then((v) => setCanEnable(v));
+    }, []);
+
     return (
         <Stack spacing={"4px"} py={"12px"}>
             <Titlebar
@@ -266,14 +272,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                 onRootClose={onRootClose}
             />
             <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                <Box px={"8px"}>
-                    {" "}
-                    <Typography color="text.muted">
-                        {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                        We're putting finishing touches, coming back soon!
-                    </Typography>
-                </Box>
-                {isInternalUserForML() && (
+                {canEnable ? (
                     <Stack px={"8px"} spacing={"8px"}>
                         <Button
                             color={"accent"}
@@ -292,6 +291,14 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                         </Button>
                         */}
                     </Stack>
+                ) : (
+                    <Box px={"8px"}>
+                        {" "}
+                        <Typography color="text.muted">
+                            {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
+                            We're putting finishing touches, coming back soon!
+                        </Typography>
+                    </Box>
                 )}
             </Stack>
         </Stack>

@@ -84,6 +84,10 @@ export const syncPeopleIndex = async () => {
                 : best,
         );
 
+export async function getLocalFile(fileId: number) {
+    const localFiles = await getLocalFiles();
+    return localFiles.find((f) => f.id === fileId);
+}
 
         if (personFace && !personFace.crop?.cacheKey) {
             const file = await getLocalFile(personFace.fileId);

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
@@ -14,6 +15,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 Future<void> showBitwardenImportInstruction(BuildContext context) async {
   final l10n = context.l10n;
@@ -60,12 +62,13 @@ Future<void> _pickBitwardenJsonFile(BuildContext context) async {
     if (count != null) {
       await importSuccessDialog(context, count);
     }
-  } catch (e) {
+  } catch (e, s) {
+    Logger("BitwardenImport").severe('Failed to import', e, s);
     await progressDialog.hide();
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDesc,
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }
@@ -78,19 +81,36 @@ Future<int?> _processBitwardenExportFile(
   final jsonString = await file.readAsString();
   final data = jsonDecode(jsonString);
   List<dynamic> jsonArray = data['items'];
+  final Map<String, String> folderIdToName = {};
+  try {
+    for (var item in data['folders']) {
+      folderIdToName[item['id']] = item['name'];
+    }
+  } catch (e) {
+    debugPrint("Failed to get folder details $e");
+  }
   final parsedCodes = [];
   for (var item in jsonArray) {
     if (item['login'] != null && item['login']['totp'] != null) {
       var totp = item['login']['totp'];
+      String? folderID = item['folderId'];
 
       Code code;
-
       if (totp.contains("otpauth://")) {
         code = Code.fromOTPAuthUrl(totp);
+      } else if (totp.contains("steam://")) {
+        var secret = totp.split("steam://")[1];
+        code = Code.fromAccountAndSecret(
+          Type.steam,
+          item['login']['username'],
+          item['name'],
+          secret,
+          null,
+          Code.steamDigits,
+        );
       } else {
         var issuer = item['name'];
         var account = item['login']['username'];
-
         code = Code.fromAccountAndSecret(
           Type.totp,
           account,
@@ -98,6 +118,11 @@ Future<int?> _processBitwardenExportFile(
           totp,
           null,
           Code.defaultDigits,
+        );
+      }
+      if (folderID != null && folderIdToName.containsKey(folderID)) {
+        code = code.copyWith(
+          display: CodeDisplay(tags: [folderIdToName[folderID]!]),
         );
       }
 

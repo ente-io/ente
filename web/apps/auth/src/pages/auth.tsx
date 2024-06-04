@@ -3,13 +3,14 @@ import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import NavbarBase from "@ente/shared/components/Navbar/base";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
+import { ApiError, CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
@@ -22,11 +23,16 @@ import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
 
 const Page: React.FC = () => {
-    const appContext = ensure(useContext(AppContext));
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = ensure(
+        useContext(AppContext),
+    );
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+
+    const showSessionExpiredDialog = () =>
+        setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -39,6 +45,9 @@ const Page: React.FC = () => {
                 ) {
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
                     router.push(PAGES.ROOT);
+                } else if (e instanceof ApiError && e.httpStatusCode == 401) {
+                    // We get back a 401 Unauthorized if the token is not valid.
+                    showSessionExpiredDialog();
                 } else {
                     // do not log errors
                 }
@@ -46,7 +55,7 @@ const Page: React.FC = () => {
             setHasFetched(true);
         };
         void fetchCodes();
-        appContext.showNavBar(false);
+        showNavBar(false);
     }, []);
 
     const lcSearch = searchTerm.toLowerCase();
@@ -130,6 +139,19 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+const sessionExpiredDialogAttributes = (
+    action: () => void,
+): DialogBoxAttributesV2 => ({
+    title: t("SESSION_EXPIRED"),
+    content: t("SESSION_EXPIRED_MESSAGE"),
+    nonClosable: true,
+    proceed: {
+        text: t("LOGIN"),
+        action,
+        variant: "accent",
+    },
+});
 
 const AuthNavbar: React.FC = () => {
     const { isMobile, logout } = ensure(useContext(AppContext));

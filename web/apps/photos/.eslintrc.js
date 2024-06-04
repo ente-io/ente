@@ -9,5 +9,11 @@ module.exports = {
         tsconfigRootDir: __dirname,
         project: "./tsconfig.json",
     },
-    ignorePatterns: [".eslintrc.js", "out", "thirdparty", "public"],
+    ignorePatterns: [
+        ".eslintrc.js",
+        "out",
+        "thirdparty",
+        "public",
+        "next.config.js",
+    ],
 };

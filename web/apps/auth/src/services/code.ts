@@ -84,20 +84,6 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
 const _codeFromURIString = (id: string, uriString: string): Code => {
     const url = new URL(uriString);
 
-    // A URL like
-    //
-    // new URL("otpauth://hotp/Test?secret=AAABBBCCCDDDEEEFFF&issuer=Test&counter=0")
-    //
-    // is parsed differently by the browser and Node depending on the scheme.
-    // When the scheme is http(s), then both of them consider "hotp" as the
-    // `host`. However, when the scheme is "otpauth", as is our case, the
-    // browser considers the entire thing as part of the pathname. so we get.
-    //
-    //     host: ""
-    //     pathname: "//hotp/Test"
-    //
-    // Since this code run on browsers only, we parse as per that behaviour.
-
     const [type, path] = parsePathname(url);
 
     return {
@@ -115,10 +101,46 @@ const _codeFromURIString = (id: string, uriString: string): Code => {
 };
 
 const parsePathname = (url: URL): [type: Code["type"], path: string] => {
+    // A URL like
+    //
+    // new
+    // URL("otpauth://hotp/Test?secret=AAABBBCCCDDDEEEFFF&issuer=Test&counter=0")
+    //
+    // is parsed differently by different browsers, and there are differences
+    // even depending on the scheme.
+    //
+    // When the scheme is http(s), then all of them consider "hotp" as the
+    // `host`. However, when the scheme is "otpauth", as is our case, Safari
+    // splits it into
+    //
+    //     host: "hotp"
+    //     pathname: "/Test"
+    //
+    // while Chrome and Firefox consider the entire thing as part of the
+    // pathname
+    //
+    //     host: ""
+    //     pathname: "//hotp/Test"
+    //
+    // So we try to handle both scenarios by first checking for the host match,
+    // and if not fall back to deducing the "host" from the pathname.
+
+    switch (url.host.toLowerCase()) {
+        case "totp":
+            return ["totp", url.pathname.toLowerCase()];
+        case "hotp":
+            return ["hotp", url.pathname.toLowerCase()];
+        case "steam":
+            return ["steam", url.pathname.toLowerCase()];
+        default:
+            break;
+    }
+
     const p = url.pathname.toLowerCase();
     if (p.startsWith("//totp")) return ["totp", url.pathname.slice(6)];
     if (p.startsWith("//hotp")) return ["hotp", url.pathname.slice(6)];
     if (p.startsWith("//steam")) return ["steam", url.pathname.slice(7)];
+
     throw new Error(`Unsupported code or unparseable path "${url.pathname}"`);
 };
 

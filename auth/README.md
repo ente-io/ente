@@ -95,13 +95,10 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 
 ## 💚 Contribute
 
-For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
+The best way to support this project is by checking out [Ente
+Photos](../mobile/README.md) or spreading the word.
 
-You can also support us by giving this project a ⭐ star on GitHub or by leaving
-a review on
-[PlayStore](https://play.google.com/store/apps/details?id=io.ente.auth),
-[AppStore](https://apps.apple.com/us/app/ente-authenticator/id6444121398) or
-[AlternativeTo](https://alternativeto.net/software/ente-authenticator/).
+For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## ⭐️ About
 

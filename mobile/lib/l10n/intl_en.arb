@@ -409,7 +409,7 @@
   "manageDeviceStorage": "Manage device storage",
   "machineLearning": "Machine learning",
   "magicSearch": "Magic search",
-  "magicSearchDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "mlIndexingDescription": "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.",
   "loadingModel": "Downloading models...",
   "waitingForWifi": "Waiting for WiFi...",
   "status": "Status",
@@ -667,7 +667,7 @@
   "mobileWebDesktop": "Mobile, Web, Desktop",
   "newToEnte": "New to Ente",
   "pleaseLoginAgain": "Please login again",
-  "devAccountChanged": "The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.",
+  "autoLogoutMessage": "Due to technical glitch, you have been logged out. Our apologies for the inconvenience.",
   "yourSubscriptionHasExpired": "Your subscription has expired",
   "storageLimitExceeded": "Storage limit exceeded",
   "upgrade": "Upgrade",
@@ -987,7 +987,7 @@
   "fileTypesAndNames": "File types and names",
   "location": "Location",
   "moments": "Moments",
-  "searchFaceEmptySection": "Persons will be shown here once indexing is done",
+  "searchFaceEmptySection": "People will be shown here once indexing is done",
   "searchDatesEmptySection": "Search by a date, month or year",
   "searchLocationEmptySection": "Group photos that are taken within some radius of a photo",
   "searchPeopleEmptySection": "Invite people, and you'll see all photos shared by them here",
@@ -1042,7 +1042,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "freeStorageSpace": "{freeAmount} {storageUnit} free",
+  "availableStorageSpace": "{freeAmount} {storageUnit} free",
   "appVersion": "Version: {versionValue}",
   "verifyIDLabel": "Verify",
   "fileInfoAddDescHint": "Add a description...",
@@ -1233,8 +1233,7 @@
   "autoPair": "Auto pair",
   "pairWithPin": "Pair with PIN",
   "faceRecognition": "Face recognition",
-  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
   "foundFaces": "Found faces",
   "clusteringProgress": "Clustering progress",
-  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
+  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready."
 }

@@ -18,7 +18,6 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
-import 'package:photos/ui/viewer/people/person_clusters_page.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -46,8 +45,7 @@ enum PeoplePopupAction {
   rename,
   setCover,
   removeLabel,
-  viewPhotos,
-  confirmPhotos,
+  reviewSuggestions,
   unignore,
 }
 
@@ -69,8 +67,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     };
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+    _userAuthEventSubscription = Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
     _appBarTitle = widget.title;
@@ -91,8 +88,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       centerTitle: false,
       title: Text(
         _appBarTitle!,
-        style:
-            Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
+        style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
@@ -116,8 +112,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         }
 
         try {
-          await PersonService.instance
-              .updateAttributes(widget.person.remoteID, name: text);
+          await PersonService.instance.updateAttributes(widget.person.remoteID, name: text);
           if (mounted) {
             _appBarTitle = text;
             setState(() {});
@@ -137,8 +132,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   List<Widget> _getDefaultActions(BuildContext context) {
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
-    if (widget.selectedFiles.files.isNotEmpty ||
-        !Configuration.instance.hasConfiguredAccount()) {
+    if (widget.selectedFiles.files.isNotEmpty || !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
 
@@ -185,19 +179,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             ),
           ),
           const PopupMenuItem(
-            value: PeoplePopupAction.viewPhotos,
-            child: Row(
-              children: [
-                Icon(Icons.view_array_outlined),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text('View confirmed photos'),
-              ],
-            ),
-          ),
-          const PopupMenuItem(
-            value: PeoplePopupAction.confirmPhotos,
+            value: PeoplePopupAction.reviewSuggestions,
             child: Row(
               children: [
                 Icon(CupertinoIcons.square_stack_3d_down_right),
@@ -236,22 +218,12 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             return items;
           },
           onSelected: (PeoplePopupAction value) async {
-            if (value == PeoplePopupAction.viewPhotos) {
+            if (value == PeoplePopupAction.reviewSuggestions) {
               // ignore: unawaited_futures
               unawaited(
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => PersonClustersPage(widget.person),
-                  ),
-                ),
-              );
-            } else if (value == PeoplePopupAction.confirmPhotos) {
-              // ignore: unawaited_futures
-              unawaited(
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        PersonReviewClusterSuggestion(widget.person),
+                    builder: (context) => PersonReviewClusterSuggestion(widget.person),
                   ),
                 ),
               );
@@ -294,13 +266,11 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     bool assignName = false;
     await showChoiceDialog(
       context,
-      title:
-          "Are you sure you want to show this person in people section again?",
+      title: "Are you sure you want to show this person in people section again?",
       firstButtonLabel: "Yes, show person",
       firstButtonOnTap: () async {
         try {
-          await PersonService.instance
-              .deletePerson(widget.person.remoteID, onlyMapping: false);
+          await PersonService.instance.deletePerson(widget.person.remoteID, onlyMapping: false);
           Bus.instance.fire(PeopleChangedEvent());
           assignName = true;
         } catch (e, s) {

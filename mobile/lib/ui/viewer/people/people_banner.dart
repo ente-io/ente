@@ -68,65 +68,67 @@ class PeopleBanner extends StatelessWidget {
         roundedActionIcon = false;
     }
 
-    return RepaintBoundary(
-      child: Center(
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
-              color: backgroundColor,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  startWidget,
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          text,
-                          style: mainTextStyle,
-                          textAlign: TextAlign.left,
-                        ),
-                        subText != null
-                            ? const SizedBox(height: 6)
-                            : const SizedBox.shrink(),
-                        subText != null
-                            ? Text(
-                                subText!,
-                                style: subTextStyle,
-                              )
-                            : const SizedBox.shrink(),
-                      ],
+    return SafeArea(
+      child: RepaintBoundary(
+        child: Center(
+          child: GestureDetector(
+            onTap: onTap,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
+                color: backgroundColor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    startWidget,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            text,
+                            style: mainTextStyle,
+                            textAlign: TextAlign.left,
+                          ),
+                          subText != null
+                              ? const SizedBox(height: 6)
+                              : const SizedBox.shrink(),
+                          subText != null
+                              ? Text(
+                                  subText!,
+                                  style: subTextStyle,
+                                )
+                              : const SizedBox.shrink(),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  IconButtonWidget(
-                    icon: actionIcon,
-                    iconButtonType: IconButtonType.primary,
-                    iconColor: colorScheme.strokeBase,
-                    defaultColor: colorScheme.fillFaint,
-                    pressedColor: colorScheme.fillMuted,
-                    roundedIcon: roundedActionIcon,
-                    onTap: onTap,
-                  ),
-                  const SizedBox(width: 6),
-                ],
+                    const SizedBox(width: 12),
+                    IconButtonWidget(
+                      icon: actionIcon,
+                      iconButtonType: IconButtonType.primary,
+                      iconColor: colorScheme.strokeBase,
+                      defaultColor: colorScheme.fillFaint,
+                      pressedColor: colorScheme.fillMuted,
+                      roundedIcon: roundedActionIcon,
+                      onTap: onTap,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ).animate(onPlay: (controller) => controller.repeat()).shimmer(
-            duration: 1000.ms,
-            delay: 3200.ms,
-            size: 0.6,
-          ),
+        ).animate(onPlay: (controller) => controller.repeat()).shimmer(
+              duration: 1000.ms,
+              delay: 3200.ms,
+              size: 0.6,
+            ),
+      ),
     );
   }
 }

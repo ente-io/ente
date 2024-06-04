@@ -153,12 +153,12 @@ const Title_ = styled("div")`
 `;
 
 interface WatchList {
-    watches: FolderWatch[];
+    watches: FolderWatch[] | undefined;
     removeWatch: (watch: FolderWatch) => void;
 }
 
 const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) => {
-    return watches.length === 0 ? (
+    return (watches ?? []).length === 0 ? (
         <NoWatches />
     ) : (
         <WatchesContainer>
