@@ -9,6 +9,7 @@ on:
             - ".github/workflows/mobile-lint.yml"
 
 env:
+
     FLUTTER_VERSION: "3.22.0"
 
 jobs:

@@ -29,7 +29,7 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   );
   ''';
 
-const deleteFacesTable = 'DROP TABLE IF EXISTS $facesTable';
+const deleteFacesTable = 'DELETE FROM $facesTable';
 // End of Faces Table Fields & Schema Queries
 
 //##region Face Clusters Table Fields & Schema Queries
@@ -48,14 +48,8 @@ CREATE TABLE IF NOT EXISTS $faceClustersTable (
 // -- Creating a non-unique index on clusterID for query optimization
 const fcClusterIDIndex =
     '''CREATE INDEX IF NOT EXISTS idx_fcClusterID ON $faceClustersTable($fcClusterID);''';
-const dropFaceClustersTable = 'DROP TABLE IF EXISTS $faceClustersTable';
+const deleteFaceClustersTable = 'DELETE FROM $faceClustersTable';
 //##endregion
-
-// People Table Fields & Schema Queries
-const personTable = 'person';
-
-const deletePersonTable = 'DROP TABLE IF EXISTS $personTable';
-//End People Table Fields & Schema Queries
 
 // Clusters Table Fields & Schema Queries
 const clusterPersonTable = 'cluster_person';
@@ -69,7 +63,7 @@ CREATE TABLE IF NOT EXISTS $clusterPersonTable (
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
-const dropClusterPersonTable = 'DROP TABLE IF EXISTS $clusterPersonTable';
+const deleteClusterPersonTable = 'DELETE FROM $clusterPersonTable';
 // End Clusters Table Fields & Schema Queries
 
 /// Cluster Summary Table Fields & Schema Queries
@@ -85,7 +79,7 @@ CREATE TABLE IF NOT EXISTS $clusterSummaryTable (
 );
 ''';
 
-const dropClusterSummaryTable = 'DROP TABLE IF EXISTS $clusterSummaryTable';
+const deleteClusterSummaryTable = 'DELETE FROM $clusterSummaryTable';
 
 /// End Cluster Summary Table Fields & Schema Queries
 
@@ -99,5 +93,5 @@ CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
-const dropNotPersonFeedbackTable = 'DROP TABLE IF EXISTS $notPersonFeedback';
+const deleteNotPersonFeedbackTable = 'DELETE FROM $notPersonFeedback';
 // End Clusters Table Fields & Schema Queries

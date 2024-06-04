@@ -60,8 +60,8 @@ Our labour of love. Two years ago, while building Ente Photos, we realized that
 there was no open source end-to-end encrypted authenticator app. We already had
 the building blocks, so we built one.
 
-Ente Auth is currently free. If in the future we convert this to a paid service,
-existing users will be grandfathered in.
+Ente Auth is free, and will remain free forever. If you like the service and
+want to give back, please check out Ente Photos or spread the word.
 
 <br />
 

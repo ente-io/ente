@@ -4,7 +4,6 @@ import "dart:io";
 import "package:battery_info/battery_info_plugin.dart";
 import "package:battery_info/model/android_battery_info.dart";
 import "package:battery_info/model/iso_battery_info.dart";
-import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
@@ -19,18 +18,19 @@ class MachineLearningController {
 
   static const kMaximumTemperature = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
-  static const kDefaultInteractionTimeout =
-      kDebugMode ? Duration(seconds: 3) : Duration(seconds: 5);
+  static const kDefaultInteractionTimeout = Duration(seconds: 15);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
 
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
   bool _canRunML = false;
+  bool mlInteractionOverride = false;
   late Timer _userInteractionTimer;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
   void init() {
+    _logger.info('init called');
     if (Platform.isAndroid) {
       _startInteractionTimer();
       BatteryInfoPlugin()
@@ -47,6 +47,7 @@ class MachineLearningController {
       });
     }
     _fireControlEvent();
+    _logger.info('init done');
   }
 
   void onUserInteraction() {
@@ -61,13 +62,23 @@ class MachineLearningController {
     _resetTimer();
   }
 
+  bool _canRunGivenUserInteraction() {
+    return (Platform.isIOS ? true : !_isUserInteracting) ||
+        mlInteractionOverride;
+  }
+
+  void forceOverrideML({required bool turnOn}) {
+    _logger.info("Forcing to turn on ML: $turnOn");
+    mlInteractionOverride = turnOn;
+    _fireControlEvent();
+  }
+
   void _fireControlEvent() {
-    final shouldRunML =
-        _isDeviceHealthy && (Platform.isAndroid ? !_isUserInteracting : true);
+    final shouldRunML = _isDeviceHealthy && _canRunGivenUserInteraction();
     if (shouldRunML != _canRunML) {
       _canRunML = shouldRunML;
       _logger.info(
-        "Firing event with $shouldRunML, device health: $_isDeviceHealthy and user interaction: $_isUserInteracting",
+        "Firing event: $shouldRunML      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $mlInteractionOverride)",
       );
       Bus.instance.fire(MachineLearningControlEvent(shouldRunML));
     }

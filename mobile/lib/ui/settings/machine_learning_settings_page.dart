@@ -58,6 +58,7 @@ class _MachineLearningSettingsPageState
     });
     _fetchState();
     _wakeLock.enable();
+    MachineLearningController.instance.forceOverrideML(turnOn: true);
   }
 
   void _fetchState() {
@@ -69,6 +70,7 @@ class _MachineLearningSettingsPageState
     super.dispose();
     _eventSubscription.cancel();
     _wakeLock.disable();
+    MachineLearningController.instance.forceOverrideML(turnOn: false);
   }
 
   @override
@@ -89,11 +91,26 @@ class _MachineLearningSettingsPageState
                 iconButtonType: IconButtonType.secondary,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
                 },
               ),
             ],
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (delegateBuildContext, index) => Padding(
+                padding: const EdgeInsets.only(left: 16, right: 16),
+                child: Text(
+                  S.of(context).mlIndexingDescription,
+                  textAlign: TextAlign.left,
+                  style: getEnteTextTheme(context)
+                      .mini
+                      .copyWith(color: getEnteColorScheme(context).textMuted),
+                ),
+              ),
+              childCount: 1,
+            ),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
@@ -153,12 +170,6 @@ class _MachineLearningSettingsPageState
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
           isGestureDetectorDisabled: true,
-        ),
-        const SizedBox(
-          height: 4,
-        ),
-        MenuSectionDescriptionWidget(
-          content: S.of(context).magicSearchDescription,
         ),
         const SizedBox(
           height: 12,
@@ -224,12 +235,6 @@ class _MachineLearningSettingsPageState
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
           isGestureDetectorDisabled: true,
-        ),
-        const SizedBox(
-          height: 4,
-        ),
-        MenuSectionDescriptionWidget(
-          content: S.of(context).faceRecognitionIndexingDescription,
         ),
         const SizedBox(
           height: 12,
@@ -535,15 +540,19 @@ class FaceRecognitionStatusWidgetState
                       title: S.of(context).clusteringProgress,
                     ),
                     trailingWidget: Text(
-                      "${clusteringPercentage.toStringAsFixed(0)}%",
+                      FaceMlService.instance.showClusteringIsHappening
+                          ? "currently running"
+                          : "${clusteringPercentage.toStringAsFixed(0)}%",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey(
-                      "clustering_progress_" +
-                          clusteringPercentage.toStringAsFixed(0),
+                      FaceMlService.instance.showClusteringIsHappening
+                          ? "currently running"
+                          : "clustering_progress_" +
+                              clusteringPercentage.toStringAsFixed(0),
                     ),
                   ),
                 ],

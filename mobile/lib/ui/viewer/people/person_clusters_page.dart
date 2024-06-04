@@ -9,7 +9,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
-// import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
@@ -34,16 +33,20 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
         title: Text(widget.person.data.name),
       ),
       body: FutureBuilder<Map<int, List<EnteFile>>>(
-        future: SearchService.instance
-            .getClusterFilesForPersonID(widget.person.remoteID),
+        future: SearchService.instance.getClusterFilesForPersonID(widget.person.remoteID),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            final List<int> keys = snapshot.data!.keys.toList();
+            final clusters = snapshot.data!;
+            final List<int> keys = clusters.keys.toList();
+            // Sort the clusters by the number of files in each cluster, largest first
+            keys.sort(
+              (b, a) => clusters[a]!.length.compareTo(clusters[b]!.length),
+            );
             return ListView.builder(
               itemCount: keys.length,
               itemBuilder: (context, index) {
                 final int clusterID = keys[index];
-                final List<EnteFile> files = snapshot.data![keys[index]]!;
+                final List<EnteFile> files = clusters[clusterID]!;
                 return InkWell(
                   onTap: () {
                     Navigator.of(context).push(
@@ -52,6 +55,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                           files,
                           personID: widget.person,
                           clusterID: index,
+                          showNamingBanner: false,
                         ),
                       ),
                     );
@@ -87,40 +91,40 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                         ), // Add some spacing between the thumbnail and the text
                         Expanded(
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  "${snapshot.data![keys[index]]!.length} photos",
+                                  "${files.length} photos",
                                   style: getEnteTextTheme(context).body,
                                 ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    try {
-                                      await PersonService.instance
-                                          .removeClusterToPerson(
-                                        personID: widget.person.remoteID,
-                                        clusterID: clusterID,
-                                      );
-                                      _logger.info(
-                                        "Removed cluster $clusterID from person ${widget.person.remoteID}",
-                                      );
-                                      Bus.instance.fire(PeopleChangedEvent());
-                                      setState(() {});
-                                    } catch (e) {
-                                      _logger.severe(
-                                        "removing cluster from person,",
-                                        e,
-                                      );
-                                    }
-                                  },
-                                  child: const Icon(
-                                    CupertinoIcons.minus_circled,
-                                    color: Colors.red,
-                                  ),
-                                ),
+                                (index != 0)
+                                    ? GestureDetector(
+                                        onTap: () async {
+                                          try {
+                                            await PersonService.instance.removeClusterToPerson(
+                                              personID: widget.person.remoteID,
+                                              clusterID: clusterID,
+                                            );
+                                            _logger.info(
+                                              "Removed cluster $clusterID from person ${widget.person.remoteID}",
+                                            );
+                                            Bus.instance.fire(PeopleChangedEvent());
+                                            setState(() {});
+                                          } catch (e) {
+                                            _logger.severe(
+                                              "removing cluster from person,",
+                                              e,
+                                            );
+                                          }
+                                        },
+                                        child: const Icon(
+                                          CupertinoIcons.minus_circled,
+                                          color: Colors.red,
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
                               ],
                             ),
                           ),

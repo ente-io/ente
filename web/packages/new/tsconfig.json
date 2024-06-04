@@ -1,0 +1,4 @@
+{
+    "extends": "@/build-config/tsconfig-typecheck.json",
+    "include": [".", "../next/global-electron.d.ts"]
+}

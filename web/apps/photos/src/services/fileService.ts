@@ -32,6 +32,17 @@ const ENDPOINT = getEndpoint();
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";
 
+/**
+ * Return all files that we know about locally, both "normal" and "hidden".
+ */
+export const getAllLocalFiles = async () =>
+    [].concat(await getLocalFiles("normal"), await getLocalFiles("hidden"));
+
+/**
+ * Return all files that we know about locally. By default it returns only
+ * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
+ * "hidden" to get it to instead return hidden files that we know about locally.
+ */
 export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
     const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     const files: Array<EnteFile> =
@@ -62,12 +73,6 @@ const setLocalFiles = async (type: "normal" | "hidden", files: EnteFile[]) => {
         }
         throw e1;
     }
-};
-
-export const getAllLocalFiles = async () => {
-    const normalFiles = await getLocalFiles("normal");
-    const hiddenFiles = await getLocalFiles("hidden");
-    return [...normalFiles, ...hiddenFiles];
 };
 
 export const syncFiles = async (

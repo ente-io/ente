@@ -5,17 +5,15 @@ import "package:ml_linalg/linalg.dart";
 /// Calculates the cosine distance between two embeddings/vectors using SIMD from ml_linalg
 ///
 /// WARNING: This assumes both vectors are already normalized!
+/// WARNING: For even more performance, consider calculating the logic below inline!
+@pragma("vm:prefer-inline")
 double cosineDistanceSIMD(Vector vector1, Vector vector2) {
-  if (vector1.length != vector2.length) {
-    throw ArgumentError('Vectors must be the same length');
-  }
-
   return 1 - vector1.dot(vector2);
 }
 
 /// Calculates the cosine distance between two embeddings/vectors using SIMD from ml_linalg
 ///
-/// WARNING: Only use when you're not sure if vectors are normalized. If you're sure they are, use [cosineDistanceSIMD] instead for better performance.
+/// WARNING: Only use when you're not sure if vectors are normalized. If you're sure they are, use [cosineDistanceSIMD] instead for better performance, or inline for best performance.
 double cosineDistanceSIMDSafe(Vector vector1, Vector vector2) {
   if (vector1.length != vector2.length) {
     throw ArgumentError('Vectors must be the same length');

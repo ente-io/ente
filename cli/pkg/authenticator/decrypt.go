@@ -55,7 +55,7 @@ func DecryptExport(inputPath string, outputPath string) error {
 		return fmt.Errorf("error deriving key: %v", err)
 	}
 
-	_, decryptedData, err := eCrypto.DecryptChaChaBase64(export.EncryptedData, key, export.EncryptionNonce)
+	_, decryptedData, err := eCrypto.DecryptChaChaBase64Auth(export.EncryptedData, key, export.EncryptionNonce)
 	if err != nil {
 		fmt.Printf("\nerror decrypting data %v", err)
 		fmt.Println("\nPlease check your password and try again")

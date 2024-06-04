@@ -293,7 +293,7 @@ class _FaceWidgetState extends State<FaceWidget> {
     }
   }
 
-  Future<Map<String, Uint8List>?> getFaceCrop() async {
+  Future<Map<String, Uint8List>?> getFaceCrop({int fetchAttempt = 1}) async {
     try {
       final Uint8List? cachedFace = faceCropCache.get(widget.face.faceID);
       if (cachedFace != null) {
@@ -326,6 +326,10 @@ class _FaceWidgetState extends State<FaceWidget> {
         error: e,
         stackTrace: s,
       );
+      resetPool(fullFile: true);
+      if (fetchAttempt <= retryLimit) {
+        return getFaceCrop(fetchAttempt: fetchAttempt + 1);
+      }
       return null;
     }
   }

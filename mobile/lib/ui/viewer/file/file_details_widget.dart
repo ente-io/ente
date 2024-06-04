@@ -11,7 +11,6 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
-import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -26,6 +25,7 @@ import "package:photos/ui/viewer/file_details/faces_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/utils/exif_util.dart";
+import "package:photos/utils/local_settings.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
@@ -230,9 +230,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (!UpdateService.instance.isFdroidFlavor()) {
+    if (LocalSettings.instance.isFaceIndexingEnabled) {
       fileDetailsTiles.addAll([
-        // ObjectsItemWidget(file),
         FacesItemWidget(file),
         const FileDetailsDivider(),
       ]);

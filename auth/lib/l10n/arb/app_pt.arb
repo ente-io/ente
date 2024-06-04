@@ -7,7 +7,7 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Proteja seus códigos 2FA",
-  "onBoardingGetStarted": "Vamos Começar",
+  "onBoardingGetStarted": "Introdução",
   "setupFirstAccount": "Configure sua primeira conta",
   "importScanQrCode": "Escanear QR code",
   "qrCode": "QR Code",
@@ -31,13 +31,13 @@
   "timeBasedKeyType": "Baseado no horário (TOTP)",
   "counterBasedKeyType": "Baseado em um contador (HOTP)",
   "saveAction": "Salvar",
-  "nextTotpTitle": "próximo",
-  "deleteCodeTitle": "Excluir código?",
+  "nextTotpTitle": "avançar",
+  "deleteCodeTitle": "Apagar código?",
   "deleteCodeMessage": "Tem certeza de que deseja excluir este código? Esta ação é irreversível.",
   "viewLogsAction": "Ver logs",
   "sendLogsDescription": "Isto irá compartilhar seus logs para nos ajudar a depurar seu problema. Embora tomemos precauções para garantir que informações sensíveis não sejam enviadas, encorajamos você a ver esses logs antes de compartilhá-los.",
   "preparingLogsTitle": "Preparando logs...",
-  "emailLogsTitle": "Logs por e-mail",
+  "emailLogsTitle": "Logs (e-mail)",
   "emailLogsMessage": "Por favor, envie os logs para {email}",
   "@emailLogsMessage": {
     "placeholders": {
@@ -48,9 +48,9 @@
   },
   "copyEmailAction": "Copiar e-mail",
   "exportLogsAction": "Exportar logs",
-  "reportABug": "Reportar um problema",
+  "reportABug": "Informar um problema",
   "crashAndErrorReporting": "Reporte de erros e falhas",
-  "reportBug": "Reportar problema",
+  "reportBug": "Informar problema",
   "emailUsMessage": "Por favor, envie um e-mail para {email}",
   "@emailUsMessage": {
     "placeholders": {
@@ -105,14 +105,14 @@
   "authToChangeYourPassword": "Por favor, autentique-se para alterar sua senha",
   "authToViewSecrets": "Por favor, autentique-se para ver as suas chaves secretas",
   "authToInitiateSignIn": "Por favor, autentique-se para iniciar o login para um backup.",
-  "ok": "Ok",
+  "ok": "OK",
   "cancel": "Cancelar",
   "yes": "Sim",
   "no": "Não",
   "email": "E-mail",
   "support": "Suporte",
   "general": "Geral",
-  "settings": "Configurações",
+  "settings": "Ajustes",
   "copied": "Copiado",
   "pleaseTryAgain": "Por favor, tente novamente",
   "existingUser": "Usuário Existente",
@@ -120,7 +120,7 @@
   "delete": "Excluir",
   "enterYourPasswordHint": "Insira sua senha",
   "forgotPassword": "Esqueci a senha",
-  "oops": "Oops",
+  "oops": "Opa",
   "suggestFeatures": "Sugerir funcionalidades",
   "faq": "Perguntas frequentes",
   "faq_q_1": "Quão seguro é o Auth?",
@@ -139,7 +139,7 @@
   "inFamilyPlanMessage": "Você está em um plano familiar!",
   "swipeHint": "Deslize para a esquerda para editar ou remover os códigos",
   "scan": "Escanear",
-  "scanACode": "Escanear um código",
+  "scanACode": "Escanear código",
   "verify": "Verificar",
   "verifyEmail": "Verificar e-mail",
   "enterCodeHint": "Digite o código de 6 dígitos de\nseu aplicativo autenticador",
@@ -185,7 +185,7 @@
   "lockScreenEnablePreSteps": "Para ativar o bloqueio de tela, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
   "viewActiveSessions": "Ver sessões ativas",
   "authToViewYourActiveSessions": "Por favor, autentique-se para ver as sessões ativas",
-  "searchHint": "Pesquisar...",
+  "searchHint": "Buscar...",
   "search": "Pesquisar",
   "sorryUnableToGenCode": "Desculpe, não foi possível gerar um código para {issuerName}",
   "noResult": "Nenhum resultado",
@@ -239,10 +239,10 @@
   "howItWorks": "Como funciona",
   "ackPasswordLostWarning": "Eu entendo que se eu perder minha senha, posso perder meus dados, já que meus dados são <underline>criptografados de ponta a ponta</underline>.",
   "loginTerms": "Ao clicar em login, eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>",
-  "logInLabel": "Login",
-  "logout": "Encerrar sessão",
+  "logInLabel": "Entrar",
+  "logout": "Sair",
   "areYouSureYouWantToLogout": "Você tem certeza que deseja encerrar a sessão?",
-  "yesLogout": "Sim, encerrar sessão",
+  "yesLogout": "Sim, sair",
   "exit": "Sair",
   "verifyingRecoveryKey": "Verificando chave de recuperação...",
   "recoveryKeyVerified": "Chave de recuperação verificada",
@@ -282,7 +282,7 @@
     "description": "Text for the button to confirm the user understands the warning"
   },
   "authToExportCodes": "Por favor, autentique-se para exportar seus códigos",
-  "importSuccessTitle": "Yay!",
+  "importSuccessTitle": "Oba!",
   "importSuccessDesc": "Você importou {count} códigos!",
   "@importSuccessDesc": {
     "placeholders": {
@@ -317,7 +317,7 @@
   "thisWillLogYouOutOfTheFollowingDevice": "Isso fará com que você saia do seguinte dispositivo:",
   "terminateSession": "Encerrar sessão?",
   "terminate": "Encerrar",
-  "thisDevice": "Este dispositivo",
+  "thisDevice": "Esse dispositivo",
   "toResetVerifyEmail": "Para redefinir a sua senha, por favor verifique o seu email primeiro.",
   "thisEmailIsAlreadyInUse": "Este e-mail já está em uso",
   "verificationFailedPleaseTryAgain": "Falha na verificação. Por favor, tente novamente",
@@ -339,7 +339,7 @@
   "export": "Exportar",
   "useOffline": "Usar sem backups",
   "signInToBackup": "Entre para fazer backup de seus códigos",
-  "singIn": "Iniciar sessão",
+  "singIn": "Entrar",
   "sigInBackupReminder": "Por favor, exporte seus códigos para garantir que você tenha um backup do qual você possa restaurar.",
   "offlineModeWarning": "Você escolheu prosseguir sem backups. Por favor, faça backups manuais para ter certeza de que seus códigos estão seguros.",
   "showLargeIcons": "Mostrar ícones grandes",
@@ -361,7 +361,7 @@
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
   },
-  "androidBiometricSuccess": "Bem-sucedido",
+  "androidBiometricSuccess": "Êxito",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
   },
@@ -401,7 +401,7 @@
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
   },
-  "iOSOkButton": "Ok",
+  "iOSOkButton": "OK",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
@@ -425,13 +425,15 @@
   "endpointUpdatedMessage": "Endpoint atualizado com sucesso",
   "customEndpoint": "Conectado a {endpoint}",
   "pinText": "Fixar",
+  "unpinText": "Desafixar",
   "pinnedCodeMessage": "{code} foi fixado",
+  "unpinnedCodeMessage": "{code} foi desafixado",
   "tags": "Etiquetas",
   "createNewTag": "Criar etiqueta",
   "tag": "Etiqueta",
   "create": "Criar",
   "editTag": "Editar etiqueta",
-  "deleteTagTitle": "Excluir etiqueta?",
+  "deleteTagTitle": "Apagar etiqueta?",
   "deleteTagMessage": "Tem certeza de que deseja excluir esta etiqueta? Essa ação é irreversível.",
   "somethingWentWrongParsingCode": "Não foi possível analisar os códigos {x}.",
   "updateNotAvailable": "Atualização não está disponível"
