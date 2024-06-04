@@ -667,7 +667,7 @@
   "mobileWebDesktop": "Mobile, Web, Desktop",
   "newToEnte": "Novo no Ente",
   "pleaseLoginAgain": "Por favor, faça login novamente",
-  "devAccountChanged": "A conta de desenvolvedor que usamos para publicar o Ente na App Store foi alterada. Por esse motivo, você precisará fazer entrar novamente.\n\nPedimos desculpas pelo inconveniente, mas isso era inevitável.",
+  "autoLogoutMessage": "Devido a erros técnicos, você foi desconectado. Pedimos desculpas pelo inconveniente.",
   "yourSubscriptionHasExpired": "A sua assinatura expirou",
   "storageLimitExceeded": "Limite de armazenamento excedido",
   "upgrade": "Aprimorar",

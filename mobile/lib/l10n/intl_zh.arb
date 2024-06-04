@@ -667,7 +667,7 @@
   "mobileWebDesktop": "移动端, 网页端, 桌面端",
   "newToEnte": "初来 Ente",
   "pleaseLoginAgain": "请重新登录",
-  "devAccountChanged": "我们用于在 App Store 上发布 Ente 的开发者账户已更改。因此，您需要重新登录。\n\n对于给您带来的不便，我们深表歉意，但这是不可避免的。",
+  "autoLogoutMessage": "由于技术故障，您已退出登录。对于由此造成的不便，我们深表歉意。",
   "yourSubscriptionHasExpired": "您的订阅已过期",
   "storageLimitExceeded": "已超出存储限制",
   "upgrade": "升级",
