@@ -1,8 +1,8 @@
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import Photo from "@mui/icons-material/Photo";
 import { Stack } from "@mui/material";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";

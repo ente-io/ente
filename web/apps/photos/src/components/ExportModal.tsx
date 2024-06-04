@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -26,7 +27,6 @@ import { ExportProgress, ExportSettings } from "types/export";
 import { EnteFile } from "types/file";
 import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
 import { DirectoryPath } from "./Directory";
-import ChangeDirectoryOption from "./Directory/changeOption";
 import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";

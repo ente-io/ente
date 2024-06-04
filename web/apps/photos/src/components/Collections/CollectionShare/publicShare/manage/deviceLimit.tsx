@@ -1,7 +1,7 @@
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import Titlebar from "components/Titlebar";

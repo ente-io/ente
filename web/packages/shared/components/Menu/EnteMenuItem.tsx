@@ -1,22 +1,29 @@
+import { CaptionedText } from "@ente/shared/components/CaptionedText";
+import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
+import PublicShareSwitch from "@ente/shared/components/Collections/CollectionShare/publicShare/switch";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import {
     Box,
-    ButtonProps,
     MenuItem,
     Typography,
+    type ButtonProps,
     type TypographyProps,
 } from "@mui/material";
 import React from "react";
-import { CaptionedText } from "../CaptionedText";
-import PublicShareSwitch from "../Collections/CollectionShare/publicShare/switch";
 
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps["color"];
-    variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
+    variant?:
+        | "primary"
+        | "captioned"
+        | "toggle"
+        | "secondary"
+        | "mini"
+        | "path";
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
@@ -42,14 +49,14 @@ export function EnteMenuItem({
     disabled = false,
 }: Iprops) {
     const handleButtonClick = () => {
-        if (variant === "toggle") {
+        if (variant === "path" || variant === "toggle") {
             return;
         }
         onClick();
     };
 
     const handleIconClick = () => {
-        if (variant !== "toggle") {
+        if (variant !== "path" && variant !== "toggle") {
             return;
         }
         onClick();
@@ -107,6 +114,11 @@ export function EnteMenuItem({
                         <PublicShareSwitch
                             checked={checked}
                             onClick={handleIconClick}
+                        />
+                    )}
+                    {variant === "path" && (
+                        <ChangeDirectoryOption
+                            changeExportDirectory={handleIconClick}
                         />
                     )}
                 </VerticallyCenteredFlex>
