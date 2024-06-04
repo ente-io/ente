@@ -1,6 +1,6 @@
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getFileURL, getThumbnailURL } from "@ente/shared/network/api";
+import { fileURL, getThumbnailURL } from "@ente/shared/network/api";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
@@ -45,7 +45,7 @@ export class PhotosDownloadClient implements DownloadClient {
         const params = new URLSearchParams({ token });
         const getFile = () =>
             HTTPService.get(
-                `${getFileURL(file.id)}?${params.toString()}`,
+                `${fileURL(file.id)}?${params.toString()}`,
                 undefined,
                 undefined,
                 {
@@ -101,8 +101,7 @@ export class PhotosDownloadClient implements DownloadClient {
         //    signed URL and stream back the response.
 
         const params = new URLSearchParams({ token });
-        const getFile = () =>
-            fetch(`${getFileURL(file.id)}?${params.toString()}`);
+        const getFile = () => fetch(`${fileURL(file.id)}?${params.toString()}`);
 
         return retryAsyncFunction(getFile);
     }

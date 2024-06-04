@@ -6,8 +6,10 @@
  * overridden when self hosting by setting the `NEXT_PUBLIC_ENTE_ENDPOINT`
  * environment variable.
  */
-export const apiOrigin = () => getEndpoint();
+export const apiOrigin = () =>
+    process.env.NEXT_PUBLIC_ENTE_ENDPOINT || "https://api.ente.io";
 
+/** Deprecated, use {@link apiOrigin} instead. */
 export const getEndpoint = () => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (endpoint) {
@@ -17,16 +19,13 @@ export const getEndpoint = () => {
 };
 
 /**
- * Return the origin that should be used for fetching files.
+ * Return the URL that should be used for fetching a file with the given
+ * {@link id}.
  *
- * This defaults to "https://files.ente.io", Ente's own servers, but can be
- * overridden when self hosting by setting the `NEXT_PUBLIC_ENTE_ENDPOINT`
- * environment variable.
+ * This defaults to a URL on Ente's own servers, but can be overridden when self
+ * hosting by setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable.
  */
-export const filesOrigin = () =>
-    process.env.NEXT_PUBLIC_ENTE_ENDPOINT || "https://files.ente.io"
-
-export const getFileURL = (id: number) => {
+export const fileURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (endpoint) {
         return `${endpoint}/files/download/${id}`;
