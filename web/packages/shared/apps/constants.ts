@@ -10,7 +10,7 @@ export enum APPS {
 
 export const appNameToAppNameOld = (appName: AppName): APPS => {
     switch (appName) {
-        case "account":
+        case "accounts":
             return APPS.ACCOUNTS;
         case "albums":
             return APPS.ALBUMS;

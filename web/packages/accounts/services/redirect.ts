@@ -12,7 +12,7 @@ import {
  */
 export const appHomeRoute = (appName: AppName): string => {
     switch (appName) {
-        case "account":
+        case "accounts":
             return ACCOUNTS_PAGES.PASSKEYS;
         case "albums":
             return "/";

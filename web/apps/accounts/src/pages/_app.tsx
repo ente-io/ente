@@ -34,7 +34,7 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
-    const appName: AppName = "account";
+    const appName: AppName = "accounts";
 
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 

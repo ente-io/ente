@@ -4,7 +4,7 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
  * Arbitrary names that we used as keys for indexing various constants
  * corresponding to our apps that rely on this package.
  */
-export type AppName = "account" | "albums" | "auth" | "photos";
+export type AppName = "accounts" | "albums" | "auth" | "photos";
 
 /**
  * Properties guaranteed to be present in the AppContext types for apps that are
