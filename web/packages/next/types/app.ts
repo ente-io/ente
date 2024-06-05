@@ -4,7 +4,7 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
  * Arbitrary names that we used as keys for indexing various constants
  * corresponding to our apps that rely on this package.
  */
-export type AppName = "accounts" | "albums" | "auth" | "photos";
+export type AppName = "accounts" | "auth" | "photos";
 
 /**
  * Static title for the app.
@@ -13,7 +13,6 @@ export type AppName = "accounts" | "albums" | "auth" | "photos";
  */
 export const appTitle: Record<AppName, string> = {
     accounts: "Ente Accounts",
-    albums: "Ente Albums",
     auth: "Ente Auth",
     photos: "Ente Photos",
 };
