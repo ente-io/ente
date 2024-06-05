@@ -13,7 +13,7 @@ import {
     convertBase64ToBuffer,
     convertBufferToBase64,
 } from "@ente/accounts/utils";
-import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -33,6 +33,7 @@ import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
@@ -126,8 +127,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        // TODO: Refactor the type of APP_HOMES to not require the ??
-        router.push(APP_HOMES.get(appNameOld) ?? "/");
+        router.push(appHomeRoute(appName));
     };
 
     // TODO: Handle the case where user is not loaded yet.

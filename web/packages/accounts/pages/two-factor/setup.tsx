@@ -6,7 +6,7 @@ import VerifyTwoFactor, {
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
 import type { TwoFactorSecret } from "@ente/accounts/types/user";
-import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -16,6 +16,7 @@ import Card from "@mui/material/Card";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { appHomeRoute } from "../../services/redirect";
 import type { PageProps } from "../../types/page";
 
 export enum SetupMode {
@@ -62,8 +63,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        // TODO: Refactor the type of APP_HOMES to not require the ??
-        router.push(APP_HOMES.get(appNameOld) ?? "/");
+        router.push(appHomeRoute(appName));
     };
 
     return (
