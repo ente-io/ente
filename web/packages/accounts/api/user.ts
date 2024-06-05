@@ -1,3 +1,4 @@
+import type { AppName } from "@/next/types/app";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
@@ -5,7 +6,6 @@ import type {
     TwoFactorVerificationResponse,
     UserVerificationResponse,
 } from "@ente/accounts/types/user";
-import { APPS, OTT_CLIENTS } from "@ente/shared/apps/constants";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -13,14 +13,13 @@ import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
-import { TwoFactorType } from "../constants/twofactor";
 
 const ENDPOINT = getEndpoint();
 
-export const sendOtt = (appName: APPS, email: string) => {
+export const sendOtt = (appName: AppName, email: string) => {
     return HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
-        client: OTT_CLIENTS.get(appName),
+        client: appName == "auth" ? "totp" : "web",
     });
 };
 
@@ -73,9 +72,12 @@ export const verifyTwoFactor = async (code: string, sessionID: string) => {
     return resp.data as UserVerificationResponse;
 };
 
+/** The type of the second factor we're trying to act on */
+export type TwoFactorType = "totp" | "passkey";
+
 export const recoverTwoFactor = async (
     sessionID: string,
-    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
+    twoFactorType: TwoFactorType,
 ) => {
     const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
         sessionID,
@@ -87,7 +89,7 @@ export const recoverTwoFactor = async (
 export const removeTwoFactor = async (
     sessionID: string,
     secret: string,
-    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
+    twoFactorType: TwoFactorType,
 ) => {
     const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
         sessionID,

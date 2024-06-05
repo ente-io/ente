@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
+import { clientPackageName } from "@/next/types/app";
 import {
     CenteredFlex,
     VerticallyCentered,
@@ -18,7 +18,7 @@ import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     type BeginPasskeyAuthenticationResponse,
-} from "services/passkeysService";
+} from "services/passkey";
 
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
@@ -51,11 +51,11 @@ const PasskeysFlow = () => {
             }
         }
 
-        let pkg = CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS);
+        let pkg = clientPackageName["photos"];
         if (redirectURL.protocol === "enteauth:") {
-            pkg = CLIENT_PACKAGE_NAMES.get(APPS.AUTH);
+            pkg = clientPackageName["auth"];
         } else if (redirectURL.hostname.startsWith("accounts")) {
-            pkg = CLIENT_PACKAGE_NAMES.get(APPS.ACCOUNTS);
+            pkg = clientPackageName["accounts"];
         }
 
         setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
@@ -257,7 +257,7 @@ const PasskeysFlow = () => {
                             {t("TRY_AGAIN")}
                         </EnteButton>
                         <EnteButton
-                            href="/passkeys/flow/recover"
+                            href="/passkeys/recover"
                             fullWidth
                             style={{
                                 marginTop: "1rem",

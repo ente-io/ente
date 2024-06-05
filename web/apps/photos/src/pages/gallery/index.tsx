@@ -1,6 +1,5 @@
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
 import log from "@/next/log";
-import { APPS } from "@ente/shared/apps/constants";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -347,7 +346,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
-            await downloadManager.init(APPS.PHOTOS, { token });
+            await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());

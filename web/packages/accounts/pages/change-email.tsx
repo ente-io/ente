@@ -1,12 +1,8 @@
+import type { AppName } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
-import {
-    APP_HOMES,
-    appNameToAppNameOld,
-    type APPS,
-} from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -21,12 +17,11 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
+import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const router = useRouter();
 
@@ -41,7 +36,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
-                <ChangeEmailForm appName={appNameOld} />
+                <ChangeEmailForm {...{ appName }} />
             </FormPaper>
         </VerticallyCentered>
     );
@@ -54,7 +49,11 @@ interface formValues {
     ott?: string;
 }
 
-function ChangeEmailForm({ appName }: { appName: APPS }) {
+interface ChangeEmailFormProps {
+    appName: AppName;
+}
+
+const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({ appName }) => {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
@@ -102,10 +101,7 @@ function ChangeEmailForm({ appName }: { appName: APPS }) {
         }
     };
 
-    const goToApp = () => {
-        // TODO: Refactor the type of APP_HOMES to not require the ??
-        router.push(APP_HOMES.get(appName) ?? "/");
-    };
+    const goToApp = () => router.push(appHomeRoute(appName));
 
     return (
         <Formik<formValues>
@@ -212,4 +208,4 @@ function ChangeEmailForm({ appName }: { appName: APPS }) {
             )}
         </Formik>
     );
-}
+};

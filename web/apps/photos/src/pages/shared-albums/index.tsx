@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { APPS } from "@ente/shared/apps/constants";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
@@ -212,7 +211,7 @@ export default function PublicCollectionGallery() {
             let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-                await downloadManager.init(APPS.ALBUMS);
+                await downloadManager.init();
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
