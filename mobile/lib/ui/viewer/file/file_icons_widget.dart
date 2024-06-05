@@ -7,6 +7,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -118,6 +119,80 @@ class VideoOverlayIcon extends StatelessWidget {
       size: 24,
       color: Colors.white70,
     );
+  }
+}
+
+class VideoOverlayDuration extends StatelessWidget {
+  final int? duration;
+  const VideoOverlayDuration({Key? key, required this.duration})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        late Widget onDarkBackground;
+        final bool iconFallback = (duration == null || duration == 0);
+
+        double inset = 4;
+        double size = iconFallback ? 18 : 10;
+        if (constraints.hasBoundedWidth) {
+          final w = constraints.maxWidth;
+          if (w > 120) {
+            size = iconFallback ? 24 : 14;
+          } else if (w < 75) {
+            inset = 3;
+            size = iconFallback ? 16 : 8;
+          }
+        }
+
+        if (iconFallback) {
+          onDarkBackground = Icon(
+            Icons.play_arrow,
+            color: Colors.white,
+            size: size, //default 24
+          );
+        } else {
+          final String formattedDuration = _getFormattedDuration(duration!);
+          onDarkBackground = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: Text(
+              formattedDuration,
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: Colors.white,
+                    fontSize: size, // Default font size is 14
+                  ),
+            ),
+          );
+        }
+
+        return Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: inset, right: inset),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: iconFallback ? null : BorderRadius.circular(8.0),
+                shape: iconFallback ? BoxShape.circle : BoxShape.rectangle,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: onDarkBackground,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getFormattedDuration(int duration) {
+    final String formattedDuration =
+        Duration(seconds: duration).toString().split('.').first;
+    final List<String> separated = formattedDuration.split(':');
+    final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
+    final String minute = int.parse(separated[1]).toString() + ':';
+    final String second = separated[2];
+    return hour + minute + second;
   }
 }
 

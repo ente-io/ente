@@ -140,7 +140,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
 
       if (widget.file.fileType == FileType.video) {
-        contentChildren.add(const VideoOverlayIcon());
+        contentChildren
+            .add(VideoOverlayDuration(duration: widget.file.duration!));
       } else if (widget.shouldShowLivePhotoOverlay &&
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
