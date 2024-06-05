@@ -217,9 +217,12 @@ void shareSelected(
 Future<void> shareImageAndUrl(
   String imagePath,
   String url,
+  BuildContext context,
+  GlobalKey key,
 ) async {
   await Share.shareXFiles(
     [XFile(imagePath)],
     text: url,
+    sharePositionOrigin: shareButtonRect(context, key),
   );
 }
