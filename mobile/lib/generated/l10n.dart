@@ -90,6 +90,36 @@ class S {
     );
   }
 
+  /// `Re-enter to confirm the pin`
+  String get reEnterToConfirmPin {
+    return Intl.message(
+      'Re-enter to confirm the pin',
+      name: 'reEnterToConfirmPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the password to lock the app`
+  String get enterPasswordToLockApp {
+    return Intl.message(
+      'Enter the password to lock the app',
+      name: 'enterPasswordToLockApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next`
+  String get next {
+    return Intl.message(
+      'Next',
+      name: 'next',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `When a pin is set , you need to enter password\n whenever you open the app .`
   String get whenPinIsSetYouNeedToEnterPassword {
     return Intl.message(

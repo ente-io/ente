@@ -6,6 +6,7 @@ import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/ui/settings/TEMP/lock_screen_option_password.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_pin.dart";
 
 class LockScreenOption extends StatelessWidget {
@@ -97,6 +98,13 @@ class LockScreenOption extends StatelessWidget {
                               menuItemColor: colorScheme.fillFaint,
                               trailingIconIsMuted: true,
                               trailingIcon: Icons.chevron_right_outlined,
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return const LockScreenOptionPassword();
+                                  },
+                                ),
+                              ),
                             ),
                           ],
                         ),
