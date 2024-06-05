@@ -9,9 +9,9 @@ import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
+import { useAppContext } from "pages/_app";
 import type { Dispatch, SetStateAction } from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import type { Passkey } from "types/passkey";
 import {
     finishPasskeyRegistration,
@@ -31,7 +31,7 @@ export const PasskeysContext = createContext(
 );
 
 const Passkeys = () => {
-    const { showNavBar } = useContext(AppContext);
+    const { showNavBar } = useAppContext();
 
     const [selectedPasskey, setSelectedPasskey] = useState<Passkey | null>(
         null,
