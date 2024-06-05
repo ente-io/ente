@@ -78,6 +78,9 @@
       "title": "DEGIRO"
     },
     {
+      "title": "DirectAdmin"
+    },
+    {
       "title": "Discourse"
     },
     {
@@ -134,6 +137,9 @@
     {
       "title": "Healthchecks.io",
       "slug": "healthchecks"
+    },
+    {
+      "title": "Hivelocity"
     },
     {
       "title": "IceDrive",
@@ -297,6 +303,10 @@
     {
       "title": "Real-Debrid",
       "slug": "real_debrid"
+    },
+    {
+      "title": "Registro.br",
+      "slug": "registro_br"
     },
     {
       "title": "Revolt",
