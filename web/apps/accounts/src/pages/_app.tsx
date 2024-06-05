@@ -1,11 +1,11 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
-import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
+import { APPS } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -95,11 +95,9 @@ export default function App({ Component, pageProps }: AppProps) {
         setDialogBoxAttributesV2,
     };
 
-    // TODO-PK: Fix ||
-    const title =
-        (isI18nReady
-            ? t("title", { context: "accounts" })
-            : APP_TITLES.get(APPS.ACCOUNTS)) || "Ente Accounts";
+    const title = isI18nReady
+        ? t("title", { context: "accounts" })
+        : appTitle[appName];
 
     return (
         <>

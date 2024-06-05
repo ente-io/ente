@@ -7,6 +7,18 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
 export type AppName = "accounts" | "albums" | "auth" | "photos";
 
 /**
+ * Static title for the app.
+ *
+ * This is shown until we have the localized version.
+ */
+export const appTitle: Record<AppName, string> = {
+    accounts: "Ente Accounts",
+    albums: "Ente Albums",
+    auth: "Ente Auth",
+    photos: "Ente Photos",
+};
+
+/**
  * Properties guaranteed to be present in the AppContext types for apps that are
  * listed in {@link AppName}.
  */
