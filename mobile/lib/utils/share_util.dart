@@ -93,9 +93,7 @@ Rect shareButtonRect(BuildContext context, GlobalKey? shareButtonKey) {
 }
 
 Future<ShareResult> shareText(String text) async {
-  return Share.shareUri(
-    Uri.parse(text),
-  );
+  return Share.share(text);
 }
 
 Future<List<EnteFile>> convertIncomingSharedMediaToFile(
