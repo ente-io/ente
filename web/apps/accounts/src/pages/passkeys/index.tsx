@@ -32,13 +32,13 @@ import {
     useEffect,
     useState,
 } from "react";
-import { deletePasskey, renamePasskey } from "services/passkeysService";
+import { deletePasskey, renamePasskey } from "services/passkey";
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,
     getPasskeys,
     type Passkey,
-} from "../../services/passkeysService";
+} from "../../services/passkey";
 
 export const PasskeysContext = createContext(
     {} as {

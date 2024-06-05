@@ -18,7 +18,7 @@ import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     type BeginPasskeyAuthenticationResponse,
-} from "services/passkeysService";
+} from "services/passkey";
 
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
