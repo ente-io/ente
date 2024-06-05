@@ -1,8 +1,10 @@
 import log from "@/next/log";
 import { wait } from "@/utils/promise";
-import { boxSealOpen, toB64 } from "@ente/shared/crypto/internal/libsodium";
+import {
+    boxSealOpen,
+    generateKeyPair,
+} from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
-import _sodium from "libsodium-wrappers";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
@@ -75,9 +77,8 @@ export interface Registration {
  */
 export const register = async (): Promise<Registration> => {
     // Generate keypair.
-    const keypair = await generateKeyPair();
-    const publicKeyB64 = await toB64(keypair.publicKey);
-    const privateKeyB64 = await toB64(keypair.privateKey);
+    const { publicKey: publicKeyB64, privateKey: privateKeyB64 } =
+        await generateKeyPair();
 
     // Register keypair with museum to get a pairing code.
     let pairingCode: string;
@@ -126,9 +127,4 @@ export const getCastData = async (registration: Registration) => {
     );
 
     return JSON.parse(atob(decryptedCastData));
-};
-
-const generateKeyPair = async () => {
-    await _sodium.ready;
-    return _sodium.crypto_box_keypair();
 };

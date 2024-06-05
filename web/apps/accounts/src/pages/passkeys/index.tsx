@@ -101,6 +101,7 @@ const Passkeys = () => {
 
         const options = response.options;
 
+        // TODO-PK: The types don't match.
         options.publicKey.challenge = _sodium.from_base64(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore

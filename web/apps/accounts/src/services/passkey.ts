@@ -1,8 +1,8 @@
 import log from "@/next/log";
+import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import _sodium from "libsodium-wrappers";
 
 const ENDPOINT = getEndpoint();
 
@@ -87,17 +87,15 @@ export const finishPasskeyRegistration = async (
     sessionId: string,
 ) => {
     try {
-        const attestationObjectB64 = _sodium.to_base64(
+        const attestationObjectB64 = await toB64URLSafeNoPadding(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             new Uint8Array(credential.response.attestationObject),
-            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
-        const clientDataJSONB64 = _sodium.to_base64(
+        const clientDataJSONB64 = await toB64URLSafeNoPadding(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             new Uint8Array(credential.response.clientDataJSON),
-            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
 
         const token = getToken();
@@ -168,29 +166,25 @@ export const finishPasskeyAuthentication = async (
                 rawId: credential.id,
                 type: credential.type,
                 response: {
-                    authenticatorData: _sodium.to_base64(
+                    authenticatorData: await toB64URLSafeNoPadding(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.authenticatorData),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
-                    clientDataJSON: _sodium.to_base64(
+                    clientDataJSON: await toB64URLSafeNoPadding(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.clientDataJSON),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
-                    signature: _sodium.to_base64(
+                    signature: await toB64URLSafeNoPadding(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.signature),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
-                    userHandle: _sodium.to_base64(
+                    userHandle: await toB64URLSafeNoPadding(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.userHandle),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
                 },
             },
