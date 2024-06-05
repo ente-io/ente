@@ -6,7 +6,7 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";

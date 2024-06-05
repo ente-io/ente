@@ -30,13 +30,6 @@ export const CLIENT_PACKAGE_NAMES = new Map([
 
 export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
 
-export const APP_TITLES = new Map([
-    [APPS.ALBUMS, "Ente Albums"],
-    [APPS.PHOTOS, "Ente Photos"],
-    [APPS.AUTH, "Ente Auth"],
-    [APPS.ACCOUNTS, "Ente Accounts"],
-]);
-
 export const APP_HOMES = new Map([
     [APPS.ALBUMS, "/"],
     [APPS.PHOTOS, PHOTOS_PAGES.GALLERY],
