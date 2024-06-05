@@ -27,7 +27,11 @@ interface Iprops {
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    label: string;
+    /**
+     * One of {@link label} or {@link labelComponent} must be specified.
+     * TODO: Try and reflect this is the type.
+     */
+    label?: string;
     subText?: string;
     subIcon?: React.ReactNode;
     checked?: boolean;
@@ -62,6 +66,8 @@ export function EnteMenuItem({
         onClick();
     };
 
+    const labelOrDefault = label ?? "";
+
     return (
         <MenuItem
             disabled={disabled}
@@ -95,17 +101,17 @@ export function EnteMenuItem({
                         ) : variant === "captioned" ? (
                             <CaptionedText
                                 color={color}
-                                mainText={label}
+                                mainText={labelOrDefault}
                                 subText={subText}
                                 subIcon={subIcon}
                             />
                         ) : variant === "mini" ? (
                             <Typography variant="mini" color="text.muted">
-                                {label}
+                                {labelOrDefault}
                             </Typography>
                         ) : (
                             <Typography fontWeight={fontWeight}>
-                                {label}
+                                {labelOrDefault}
                             </Typography>
                         )}
                     </Box>
