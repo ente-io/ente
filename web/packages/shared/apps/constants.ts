@@ -4,7 +4,6 @@ import { ACCOUNTS_PAGES, AUTH_PAGES, PHOTOS_PAGES } from "../constants/pages";
 export enum APPS {
     PHOTOS = "PHOTOS",
     AUTH = "AUTH",
-    ALBUMS = "ALBUMS",
     ACCOUNTS = "ACCOUNTS",
 }
 
@@ -12,8 +11,6 @@ export const appNameToAppNameOld = (appName: AppName): APPS => {
     switch (appName) {
         case "accounts":
             return APPS.ACCOUNTS;
-        case "albums":
-            return APPS.ALBUMS;
         case "photos":
             return APPS.PHOTOS;
         case "auth":
@@ -22,7 +19,6 @@ export const appNameToAppNameOld = (appName: AppName): APPS => {
 };
 
 export const CLIENT_PACKAGE_NAMES = new Map([
-    [APPS.ALBUMS, "io.ente.albums.web"],
     [APPS.PHOTOS, "io.ente.photos.web"],
     [APPS.AUTH, "io.ente.auth.web"],
     [APPS.ACCOUNTS, "io.ente.accounts.web"],
@@ -31,8 +27,7 @@ export const CLIENT_PACKAGE_NAMES = new Map([
 export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
 
 export const APP_HOMES = new Map([
-    [APPS.ALBUMS, "/"],
-    [APPS.PHOTOS, PHOTOS_PAGES.GALLERY],
+    [APPS.PHOTOS, PHOTOS_PAGES.GALLERY as string],
     [APPS.AUTH, AUTH_PAGES.AUTH],
     [APPS.ACCOUNTS, ACCOUNTS_PAGES.PASSKEYS],
 ]);
