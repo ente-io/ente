@@ -33,11 +33,11 @@ import {
     useState,
 } from "react";
 import { deletePasskey, renamePasskey } from "services/passkeysService";
-import type { Passkey } from "types/passkey";
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,
     getPasskeys,
+    type Passkey,
 } from "../../services/passkeysService";
 
 export const PasskeysContext = createContext(

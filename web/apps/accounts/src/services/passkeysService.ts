@@ -6,6 +6,13 @@ import _sodium from "libsodium-wrappers";
 
 const ENDPOINT = getEndpoint();
 
+export interface Passkey {
+    id: string;
+    userID: number;
+    friendlyName: string;
+    createdAt: number;
+}
+
 export const getPasskeys = async () => {
     try {
         const token = getToken();
