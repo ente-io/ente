@@ -18,6 +18,21 @@ export const appTitle: Record<AppName, string> = {
 };
 
 /**
+ * Client "package names" for each of the apps.
+ *
+ * These are used as the identifier in the user agent strings that we send to
+ * our own servers.
+ */
+export const clientPackageName: Record<AppName, string> = {
+    accounts: "io.ente.accounts.web",
+    auth: "io.ente.auth.web",
+    photos: "io.ente.photos.web",
+};
+
+/** Client package name for the Photos desktop app */
+export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
+
+/**
  * Properties guaranteed to be present in the AppContext types for apps that are
  * listed in {@link AppName}.
  */

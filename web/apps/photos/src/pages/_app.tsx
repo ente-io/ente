@@ -6,10 +6,15 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
+import {
+    appTitle,
+    clientPackageName,
+    type AppName,
+    type BaseAppContextT,
+} from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
-import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
+import { APPS } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -152,7 +157,7 @@ export default function App({ Component, pageProps }: AppProps) {
         logStartupBanner(APPS.PHOTOS, userId);
         logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
-            "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
+            "X-Client-Package": clientPackageName[appName],
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);

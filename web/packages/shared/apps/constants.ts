@@ -16,11 +16,3 @@ export const appNameToAppNameOld = (appName: AppName): APPS => {
             return APPS.AUTH;
     }
 };
-
-export const CLIENT_PACKAGE_NAMES = new Map([
-    [APPS.PHOTOS, "io.ente.photos.web"],
-    [APPS.AUTH, "io.ente.auth.web"],
-    [APPS.ACCOUNTS, "io.ente.accounts.web"],
-]);
-
-export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";

@@ -1,10 +1,10 @@
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
+import { clientPackageName } from "@/next/types/app";
 import {
     configurePasskeyRecovery,
     isPasskeyRecoveryEnabled,
 } from "@ente/accounts/services/passkey";
-import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -512,9 +512,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             window.open(
                 `${getAccountsURL()}${
                     ACCOUNTS_PAGES.ACCOUNT_HANDOFF
-                }?package=${CLIENT_PACKAGE_NAMES.get(
-                    APPS.PHOTOS,
-                )}&token=${accountsToken}`,
+                }?package=${clientPackageName["photos"]}&token=${accountsToken}`,
             );
         } catch (e) {
             log.error("failed to redirect to accounts page", e);
