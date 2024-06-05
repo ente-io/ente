@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -17,6 +18,7 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/tabs/section_title.dart';
+import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/utils/debouncer.dart";
@@ -97,7 +99,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const maxThumbnailWidth = 160.0;
-    final bool hasQuickLinks = collections.quickLinks.isNotEmpty;
+    const maxQuickLinks = 6;
+    final numberOfQuickLinks = collections.quickLinks.length;
+    const quickLinkTitleHeroTag = "quick_link_title";
     final SectionTitle sharedWithYou =
         SectionTitle(title: S.of(context).sharedWithYou);
     final SectionTitle sharedByYou =
@@ -216,7 +220,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 ],
               ),
             ),
-            hasQuickLinks
+            numberOfQuickLinks > 0
                 ? Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 8.0,
@@ -224,7 +228,29 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     child: Column(
                       children: [
                         SectionOptions(
-                          SectionTitle(title: S.of(context).quickLinks),
+                          Hero(
+                            tag: quickLinkTitleHeroTag,
+                            child: SectionTitle(
+                              title: S.of(context).quickLinks,
+                            ),
+                          ),
+                          trailingWidget: numberOfQuickLinks > maxQuickLinks
+                              ? IconButtonWidget(
+                                  icon: Icons.chevron_right,
+                                  iconButtonType: IconButtonType.secondary,
+                                  onTap: () {
+                                    unawaited(
+                                      routeToPage(
+                                        context,
+                                        AllQuickLinksPage(
+                                          titleHeroTag: quickLinkTitleHeroTag,
+                                          quickLinks: collections.quickLinks,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : null,
                         ),
                         const SizedBox(height: 2),
                         ListView.separated(
@@ -241,9 +267,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             );
                           },
                           separatorBuilder: (context, index) {
-                            return const SizedBox(height: 8);
+                            return const SizedBox(height: 4);
                           },
-                          itemCount: collections.quickLinks.length,
+                          itemCount: min(numberOfQuickLinks, maxQuickLinks),
                         ),
                       ],
                     ),
@@ -257,10 +283,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                         child: ButtonWidget(
-                          buttonType:
-                              !hasQuickLinks && collections.outgoing.isEmpty
-                                  ? ButtonType.trailingIconSecondary
-                                  : ButtonType.trailingIconPrimary,
+                          buttonType: numberOfQuickLinks == 0 &&
+                                  collections.outgoing.isEmpty
+                              ? ButtonType.trailingIconSecondary
+                              : ButtonType.trailingIconPrimary,
                           labelText: S.of(context).inviteYourFriendsToEnte,
                           icon: Icons.ios_share_outlined,
                           onTap: () async {
