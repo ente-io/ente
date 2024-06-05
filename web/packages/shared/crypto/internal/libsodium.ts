@@ -403,6 +403,11 @@ export const toB64URLSafe = async (input: Uint8Array) => {
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
 };
 
+export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
+
 export async function fromUTF8(input: string) {
     await sodium.ready;
     return sodium.from_string(input);
