@@ -218,21 +218,30 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             ),
             hasQuickLinks
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                    ),
                     child: Column(
                       children: [
                         SectionOptions(
                           SectionTitle(title: S.of(context).quickLinks),
                         ),
                         const SizedBox(height: 2),
-                        ListView.builder(
+                        ListView.separated(
                           shrinkWrap: true,
-                          padding: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.only(
+                            bottom: 12,
+                            left: 12,
+                            right: 12,
+                          ),
                           physics: const NeverScrollableScrollPhysics(),
                           itemBuilder: (context, index) {
                             return QuickLinkAlbumItem(
                               c: collections.quickLinks[index],
                             );
+                          },
+                          separatorBuilder: (context, index) {
+                            return const SizedBox(height: 8);
                           },
                           itemCount: collections.quickLinks.length,
                         ),
