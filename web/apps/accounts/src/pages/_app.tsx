@@ -5,7 +5,6 @@ import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
-import { APPS } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -81,7 +80,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
-    const theme = getTheme(themeColor, APPS.PHOTOS);
+    const theme = getTheme(themeColor, "photos");
 
     const logout = () => {
         void accountLogout().then(() => router.push(PAGES.ROOT));
