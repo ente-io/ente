@@ -1,4 +1,3 @@
-import { APPS } from "@ente/shared/apps/constants";
 import { expose } from "comlink";
 import downloadManager from "services/download";
 import mlService from "services/machineLearning/machineLearningService";
@@ -20,7 +19,7 @@ export class DedicatedMLWorker {
     }
 
     public async sync(token: string, userID: number, userAgent: string) {
-        await downloadManager.init(APPS.PHOTOS, { token });
+        await downloadManager.init(token);
         return mlService.sync(token, userID, userAgent);
     }
 }

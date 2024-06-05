@@ -208,7 +208,7 @@ export default function App({ Component, pageProps }: AppProps) {
         const initExport = async () => {
             const token = getToken();
             if (!token) return;
-            await DownloadManager.init(APPS.PHOTOS, { token });
+            await DownloadManager.init(token);
             await resumeExportsIfNeeded();
         };
         initExport();
