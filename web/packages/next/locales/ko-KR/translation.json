@@ -85,6 +85,7 @@
     "NEXT": "다음 항목 (→)",
     "title_photos": "Ente Photos",
     "title_auth": "Ente Auth",
+    "title_accounts": "",
     "UPLOAD_FIRST_PHOTO": "첫 번째 사진을 업로드하세요",
     "IMPORT_YOUR_FOLDERS": "폴더 가져오기",
     "UPLOAD_DROPZONE_MESSAGE": "백업하려는 파일을 올려놓기",

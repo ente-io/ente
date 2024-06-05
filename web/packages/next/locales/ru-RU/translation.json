@@ -85,6 +85,7 @@
     "NEXT": "Следующий (→)",
     "title_photos": "Ente Фото",
     "title_auth": "Ente Auth",
+    "title_accounts": "",
     "UPLOAD_FIRST_PHOTO": "Загрузите своё первое фото",
     "IMPORT_YOUR_FOLDERS": "Импортируйте папки",
     "UPLOAD_DROPZONE_MESSAGE": "Перетащите для резервного копирования файлов",
