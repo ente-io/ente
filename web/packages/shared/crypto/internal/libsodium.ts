@@ -398,10 +398,10 @@ export async function toB64(input: Uint8Array) {
     return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
 }
 
-export async function toURLSafeB64(input: Uint8Array) {
+export const toB64URLSafe = async (input: Uint8Array) => {
     await sodium.ready;
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
-}
+};
 
 export async function fromUTF8(input: string) {
     await sodium.ready;
