@@ -126,6 +126,7 @@ const PasskeysFlow = () => {
 
         const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
 
+        // TODO-PK: Shouldn't this be URL encoded?
         window.location.href = `${redirect}?response=${encodedResponse}`;
     };
 
