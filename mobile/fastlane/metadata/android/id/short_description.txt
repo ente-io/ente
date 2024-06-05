@@ -1,0 +1,1 @@
+ente adalah app penyimpanan foto yang terenkripsi secara end-to-end

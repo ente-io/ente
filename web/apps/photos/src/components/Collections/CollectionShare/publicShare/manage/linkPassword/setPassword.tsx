@@ -54,7 +54,7 @@ export function PublicLinkSetPassword({
                 </Typography>
                 <SingleInputForm
                     callback={savePassword}
-                    placeholder={t("RETURN_PASSPHRASE_HINT")}
+                    placeholder={t("password")}
                     buttonText={t("LOCK")}
                     fieldType="password"
                     secondaryButtonAction={onClose}

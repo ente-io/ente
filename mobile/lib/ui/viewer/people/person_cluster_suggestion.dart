@@ -10,13 +10,20 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-// import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+
+class SuggestionUserFeedback {
+  final bool accepted;
+  final ClusterSuggestion suggestion;
+
+  SuggestionUserFeedback(this.accepted, this.suggestion);
+}
 
 class PersonReviewClusterSuggestion extends StatefulWidget {
   final PersonEntity person;
@@ -36,6 +43,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Key futureBuilderKeySuggestions = UniqueKey();
   Key futureBuilderKeyFaceThumbnails = UniqueKey();
   bool canGiveFeedback = true;
+  List<SuggestionUserFeedback> pastUserFeedback = [];
+  List<ClusterSuggestion> allSuggestions = [];
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
@@ -61,6 +70,13 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       appBar: AppBar(
         title: const Text('Review suggestions'),
         actions: [
+          if (pastUserFeedback.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.undo_outlined),
+              onPressed: () async {
+                await _undoLastFeedback();
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.history_outlined),
             onPressed: () {
@@ -87,7 +103,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               );
             }
 
-            final allSuggestions = snapshot.data!;
+            allSuggestions = snapshot.data!;
             final numberOfDifferentSuggestions = allSuggestions.length;
             final currentSuggestion = allSuggestions[currentSuggestionIndex];
             final int clusterID = currentSuggestion.clusterIDToMerge;
@@ -112,7 +128,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 setState(() {});
               }
             });
-            return InkWell(
+            return GestureDetector(
               onTap: () {
                 final List<EnteFile> sortedFiles =
                     List<EnteFile>.from(currentSuggestion.filesInCluster);
@@ -130,6 +146,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   ),
                 );
               },
+              behavior: HitTestBehavior.opaque,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8.0,
@@ -166,6 +183,13 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     if (!canGiveFeedback) {
       return;
     }
+    // Store the feedback in case the user wants to revert
+    pastUserFeedback.add(
+      SuggestionUserFeedback(
+        yesOrNo,
+        allSuggestions[currentSuggestionIndex],
+      ),
+    );
     if (yesOrNo) {
       canGiveFeedback = false;
       await FaceMLDataDB.instance.assignClusterToPerson(
@@ -240,7 +264,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             style: getEnteTextTheme(context).smallMuted,
           ),
         Text(
-          // TODO: come up with a better copy for strings below!
           "${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
         ),
@@ -448,5 +471,36 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       faceCrops[files[i].uploadedFileID!] = faceCropsList[i];
     }
     return faceCrops;
+  }
+
+  Future<void> _undoLastFeedback() async {
+    if (pastUserFeedback.isNotEmpty) {
+      final SuggestionUserFeedback lastFeedback = pastUserFeedback.removeLast();
+      if (lastFeedback.accepted) {
+        await PersonService.instance.removeClusterToPerson(
+          personID: widget.person.remoteID,
+          clusterID: lastFeedback.suggestion.clusterIDToMerge,
+        );
+      } else {
+        await FaceMLDataDB.instance.removeNotPersonFeedback(
+          personID: widget.person.remoteID,
+          clusterID: lastFeedback.suggestion.clusterIDToMerge,
+        );
+      }
+
+      // futureClusterSuggestions =
+      //     pastUserFeedback.map((element) => element.suggestion)
+      //         as Future<List<ClusterSuggestion>>;
+
+      fetch = false;
+      futureClusterSuggestions = futureClusterSuggestions.then((list) {
+        return list.sublist(currentSuggestionIndex)
+          ..insert(0, lastFeedback.suggestion);
+      });
+      currentSuggestionIndex = 0;
+      futureBuilderKeySuggestions = UniqueKey();
+      futureBuilderKeyFaceThumbnails = UniqueKey();
+      setState(() {});
+    }
   }
 }

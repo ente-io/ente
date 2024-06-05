@@ -67,7 +67,7 @@ export default function App({ Component, pageProps }: AppProps) {
         DialogBoxAttributesV2 | undefined
     >();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,

@@ -1,0 +1,34 @@
+name: "Lint (staff)"
+
+on:
+    # Run on every push to a branch other than main that changes infra/staff/
+    push:
+        branches-ignore: [main]
+        paths:
+            - "infra/staff/**"
+            - ".github/workflows/infra-deploy-staff.yml"
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: infra/staff
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "yarn"
+                  cache-dependency-path: "infra/staff/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Lint
+              run: yarn lint

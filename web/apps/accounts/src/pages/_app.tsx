@@ -19,7 +19,7 @@ import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useState } from "react";
 import "styles/global.css";
@@ -52,7 +52,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const router = useRouter();
 
@@ -96,9 +96,11 @@ export default function App({ Component, pageProps }: AppProps) {
     };
 
     // TODO: This string doesn't actually exist
-    const title = isI18nReady
-        ? t("title", { context: "accounts" })
-        : APP_TITLES.get(APPS.ACCOUNTS);
+    // TODO-PK: Fix ||
+    const title =
+        (isI18nReady
+            ? t("title", { context: "accounts" })
+            : APP_TITLES.get(APPS.ACCOUNTS)) || "Ente Accounts";
 
     return (
         <>

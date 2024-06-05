@@ -3,7 +3,6 @@ import log from "@/next/log";
 import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";
-import { formatDateRelative } from "@ente/shared/time/format";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
@@ -13,6 +12,7 @@ import {
 } from "components/PlaceholderThumbnails";
 import { TRASH_SECTION } from "constants/collection";
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from "constants/gallery";
+import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -390,4 +390,28 @@ export default function PreviewCard(props: IProps) {
     } else {
         return renderFn();
     }
+}
+
+function formatDateRelative(date: number) {
+    const units = {
+        year: 24 * 60 * 60 * 1000 * 365,
+        month: (24 * 60 * 60 * 1000 * 365) / 12,
+        day: 24 * 60 * 60 * 1000,
+        hour: 60 * 60 * 1000,
+        minute: 60 * 1000,
+        second: 1000,
+    };
+    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
+        localeMatcher: "best fit",
+        numeric: "always",
+        style: "long",
+    });
+    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
+
+    for (const u in units)
+        if (Math.abs(elapsed) > units[u] || u === "second")
+            return relativeDateFormat.format(
+                Math.round(elapsed / units[u]),
+                u as Intl.RelativeTimeFormatUnit,
+            );
 }

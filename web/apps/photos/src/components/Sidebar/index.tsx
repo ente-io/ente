@@ -8,6 +8,7 @@ import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
 import {
@@ -42,7 +43,6 @@ import {
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
