@@ -17,9 +17,9 @@ import 'package:photos/ui/viewer/file/video_controls.dart';
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import "package:photos/utils/wakelock_util.dart";
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
@@ -45,7 +45,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   ChewieController? _chewieController;
   final _progressNotifier = ValueNotifier<double?>(null);
   bool _isPlaying = false;
-  bool _wakeLockEnabledHere = false;
+  final EnteWakeLock _wakeLock = EnteWakeLock();
 
   @override
   void initState() {
@@ -126,13 +126,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     _chewieController?.dispose();
     _progressNotifier.dispose();
 
-    if (_wakeLockEnabledHere) {
-      unawaited(
-        WakelockPlus.enabled.then((isEnabled) {
-          isEnabled ? WakelockPlus.disable() : null;
-        }),
-      );
-    }
+    _wakeLock.dispose();
     super.dispose();
   }
 
@@ -257,17 +251,10 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   Future<void> _keepScreenAliveOnPlaying(bool isPlaying) async {
     if (isPlaying) {
-      return WakelockPlus.enabled.then((value) {
-        if (value == false) {
-          WakelockPlus.enable();
-          //wakeLockEnabledHere will not be set to true if wakeLock is already enabled from settings on iOS.
-          //We shouldn't disable when video is not playing if it was enabled manually by the user from ente settings by user.
-          _wakeLockEnabledHere = true;
-        }
-      });
+      _wakeLock.enable();
     }
-    if (_wakeLockEnabledHere && !isPlaying) {
-      return WakelockPlus.disable();
+    if (!isPlaying) {
+      _wakeLock.disable();
     }
   }
 

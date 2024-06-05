@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * @file The preload script
  *
@@ -65,7 +64,7 @@ const selectDirectory = () => ipcRenderer.invoke("selectDirectory");
 
 const logout = () => {
     watchRemoveListeners();
-    ipcRenderer.send("logout");
+    return ipcRenderer.invoke("logout");
 };
 
 const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
@@ -153,20 +152,17 @@ const ffmpegExec = (
 
 // - ML
 
-const clipImageEmbedding = (jpegImageData: Uint8Array) =>
-    ipcRenderer.invoke("clipImageEmbedding", jpegImageData);
+const computeCLIPImageEmbedding = (jpegImageData: Uint8Array) =>
+    ipcRenderer.invoke("computeCLIPImageEmbedding", jpegImageData);
 
-const clipTextEmbeddingIfAvailable = (text: string) =>
-    ipcRenderer.invoke("clipTextEmbeddingIfAvailable", text);
+const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
+    ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);
 
 const detectFaces = (input: Float32Array) =>
     ipcRenderer.invoke("detectFaces", input);
 
-const faceEmbeddings = (input: Float32Array) =>
-    ipcRenderer.invoke("faceEmbeddings", input);
-
-const legacyFaceCrop = (faceID: string) =>
-    ipcRenderer.invoke("legacyFaceCrop", faceID);
+const computeFaceEmbeddings = (input: Float32Array) =>
+    ipcRenderer.invoke("computeFaceEmbeddings", input);
 
 // - Watch
 
@@ -340,11 +336,10 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - ML
 
-    clipImageEmbedding,
-    clipTextEmbeddingIfAvailable,
+    computeCLIPImageEmbedding,
+    computeCLIPTextEmbeddingIfAvailable,
     detectFaces,
-    faceEmbeddings,
-    legacyFaceCrop,
+    computeFaceEmbeddings,
 
     // - Watch
 

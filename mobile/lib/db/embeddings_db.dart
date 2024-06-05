@@ -54,7 +54,7 @@ class EmbeddingsDB {
 
   Future<void> clearTable() async {
     final db = await _database;
-    await db.execute('DELETE * FROM $tableName');
+    await db.execute('DELETE FROM $tableName');
   }
 
   Future<List<Embedding>> getAll(Model model) async {

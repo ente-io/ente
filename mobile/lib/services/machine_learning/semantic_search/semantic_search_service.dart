@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:collection";
-import "dart:io";
+import "dart:math" show min;
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -23,6 +23,7 @@ import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 class SemanticSearchService {
@@ -102,17 +103,13 @@ class SemanticSearchService {
     if (shouldSyncImmediately) {
       unawaited(sync());
     }
-    if (Platform.isAndroid) {
-      Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-        if (event.shouldRun) {
-          _startIndexing();
-        } else {
-          _pauseIndexing();
-        }
-      });
-    } else {
-      _startIndexing();
-    }
+    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+      if (event.shouldRun) {
+        _startIndexing();
+      } else {
+        _pauseIndexing();
+      }
+    });
   }
 
   Future<void> release() async {
@@ -164,8 +161,9 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
+    final indexableFileIDs = await getIndexableFileIDs();
     return IndexStatus(
-      _cachedEmbeddings.length,
+      min(_cachedEmbeddings.length, indexableFileIDs.length),
       (await _getFileIDsToBeIndexed()).length,
     );
   }
@@ -224,8 +222,7 @@ class SemanticSearchService {
   }
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
-    final uploadedFileIDs = await FilesDB.instance
-        .getOwnedFileIDs(Configuration.instance.getUserID()!);
+    final uploadedFileIDs = await getIndexableFileIDs();
     final embeddedFileIDs =
         await EmbeddingsDB.instance.getFileIDs(_currentModel);
 

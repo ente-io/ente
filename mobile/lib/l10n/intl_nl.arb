@@ -1042,7 +1042,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "freeStorageSpace": "{freeAmount} {storageUnit} vrij",
+  "availableStorageSpace": "{freeAmount} {storageUnit} vrij",
   "appVersion": "Versie: {versionValue}",
   "verifyIDLabel": "Verifiëren",
   "fileInfoAddDescHint": "Voeg een beschrijving toe...",
@@ -1226,5 +1226,10 @@
   "stopCastingBody": "Wil je stoppen met casten?",
   "castIPMismatchTitle": "Album casten mislukt",
   "castIPMismatchBody": "Zorg ervoor dat je op hetzelfde netwerk zit als de tv.",
-  "pairingComplete": "Koppeling voltooid"
+  "pairingComplete": "Koppeling voltooid",
+  "faceRecognition": "Face recognition",
+  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "foundFaces": "Found faces",
+  "clusteringProgress": "Clustering progress",
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
 }

@@ -26,7 +26,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m1(count) =>
       "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
 
-  static String m36(passwordStrengthValue) =>
+  static String m37(passwordStrengthValue) =>
       "Siła hasła: ${passwordStrengthValue}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -49,6 +49,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zmień hasło"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Kod został skopiowany do schowka"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
@@ -101,6 +103,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadź nowe hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
+        "enterPersonName":
+            MessageLookupByLibrary.simpleMessage("Enter person name"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Podaj poprawny adres e-mail."),
         "enterYourEmailAddress":
@@ -109,10 +113,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wprowadź hasło"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wprowadź swój klucz odzyskiwania"),
+        "faceRecognition":
+            MessageLookupByLibrary.simpleMessage("Face recognition"),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
+        "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generowanie kluczy szyfrujących..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Jak to działa"),
@@ -122,6 +129,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kod jest nieprawidłowy"),
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Nieprawidłowy klucz odzyskiwania"),
+        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
@@ -147,7 +156,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Hasło zostało pomyślnie zmienione"),
-        "passwordStrength": m36,
+        "passwordStrength": m37,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
         "pleaseTryAgain":
@@ -166,6 +175,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jeśli zapomnisz hasła, jedynym sposobem odzyskania danych jest ten klucz."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Odzyskano pomyślnie!"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("Wyślij e-mail ponownie"),
         "resetPasswordTitle":

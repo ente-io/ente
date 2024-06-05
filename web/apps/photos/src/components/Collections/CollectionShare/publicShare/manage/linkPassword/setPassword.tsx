@@ -1,5 +1,5 @@
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Dialog, Stack, Typography } from "@mui/material";
@@ -54,7 +54,7 @@ export function PublicLinkSetPassword({
                 </Typography>
                 <SingleInputForm
                     callback={savePassword}
-                    placeholder={t("RETURN_PASSPHRASE_HINT")}
+                    placeholder={t("password")}
                     buttonText={t("LOCK")}
                     fieldType="password"
                     secondaryButtonAction={onClose}

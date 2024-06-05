@@ -1,4 +1,4 @@
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useState } from "react";
@@ -49,7 +49,7 @@ export function ManageLinkPassword({
     return (
         <>
             <EnteMenuItem
-                label={t("LINK_PASSWORD_LOCK")}
+                label={t("link_password_lock")}
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
                 variant="toggle"

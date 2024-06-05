@@ -70,8 +70,9 @@ const logInfo = (...params: unknown[]) => {
     const message = params
         .map((p) => (typeof p == "string" ? p : util.inspect(p)))
         .join(" ");
-    log.info(`[main] ${message}`);
-    if (isDev) console.log(`[info] ${message}`);
+    const m = `[info] ${message}`;
+    if (isDev) console.log(m);
+    log.info(`[main] ${m}`);
 };
 
 const logDebug = (param: () => unknown) => {

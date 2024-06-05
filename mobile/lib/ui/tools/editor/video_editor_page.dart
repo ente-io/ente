@@ -221,7 +221,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           newAsset!,
         );
 
-        newFile.generatedID = await FilesDB.instance.insert(widget.file);
+        newFile.generatedID =
+            await FilesDB.instance.insertAndGetId(widget.file);
         Bus.instance
             .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
         unawaited(SyncService.instance.sync());

@@ -1,25 +1,36 @@
+import { CaptionedText } from "@ente/shared/components/CaptionedText";
+import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
+import PublicShareSwitch from "@ente/shared/components/Collections/CollectionShare/publicShare/switch";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import {
     Box,
-    ButtonProps,
     MenuItem,
     Typography,
-    TypographyProps,
+    type ButtonProps,
+    type TypographyProps,
 } from "@mui/material";
 import React from "react";
-import { CaptionedText } from "../CaptionedText";
-import PublicShareSwitch from "../Collections/CollectionShare/publicShare/switch";
 
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps["color"];
-    variant?: "primary" | "captioned" | "toggle" | "secondary" | "mini";
+    variant?:
+        | "primary"
+        | "captioned"
+        | "toggle"
+        | "secondary"
+        | "mini"
+        | "path";
     fontWeight?: TypographyProps["fontWeight"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
+    /**
+     * One of {@link label} or {@link labelComponent} must be specified.
+     * TODO: Try and reflect this is the type.
+     */
     label?: string;
     subText?: string;
     subIcon?: React.ReactNode;
@@ -42,18 +53,20 @@ export function EnteMenuItem({
     disabled = false,
 }: Iprops) {
     const handleButtonClick = () => {
-        if (variant === "toggle") {
+        if (variant === "path" || variant === "toggle") {
             return;
         }
         onClick();
     };
 
     const handleIconClick = () => {
-        if (variant !== "toggle") {
+        if (variant !== "path" && variant !== "toggle") {
             return;
         }
         onClick();
     };
+
+    const labelOrDefault = label ?? "";
 
     return (
         <MenuItem
@@ -62,11 +75,13 @@ export function EnteMenuItem({
             sx={{
                 width: "100%",
                 color: (theme) =>
-                    variant !== "captioned" && theme.palette[color].main,
-                ...(variant !== "secondary" &&
-                    variant !== "mini" && {
-                        backgroundColor: (theme) => theme.colors.fill.faint,
-                    }),
+                    variant !== "captioned"
+                        ? theme.palette[color].main
+                        : "inherit",
+                backgroundColor: (theme) =>
+                    variant !== "secondary" && variant !== "mini"
+                        ? theme.colors.fill.faint
+                        : "inherit",
                 "&:hover": {
                     backgroundColor: (theme) => theme.colors.fill.faintPressed,
                 },
@@ -86,17 +101,17 @@ export function EnteMenuItem({
                         ) : variant === "captioned" ? (
                             <CaptionedText
                                 color={color}
-                                mainText={label}
+                                mainText={labelOrDefault}
                                 subText={subText}
                                 subIcon={subIcon}
                             />
                         ) : variant === "mini" ? (
                             <Typography variant="mini" color="text.muted">
-                                {label}
+                                {labelOrDefault}
                             </Typography>
                         ) : (
                             <Typography fontWeight={fontWeight}>
-                                {label}
+                                {labelOrDefault}
                             </Typography>
                         )}
                     </Box>
@@ -108,6 +123,9 @@ export function EnteMenuItem({
                             checked={checked}
                             onClick={handleIconClick}
                         />
+                    )}
+                    {variant === "path" && (
+                        <ChangeDirectoryOption onClick={handleIconClick} />
                     )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>

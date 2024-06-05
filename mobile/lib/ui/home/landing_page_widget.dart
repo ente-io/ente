@@ -288,7 +288,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       final result = await showDialogWidget(
         context: context,
         title: S.of(context).pleaseLoginAgain,
-        body: S.of(context).devAccountChanged,
+        body: S.of(context).autoLogoutMessage,
         buttons: const [
           ButtonWidget(
             buttonType: ButtonType.neutral,

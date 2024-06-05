@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
@@ -8,16 +9,10 @@ import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
-import {
-    Dispatch,
-    SetStateAction,
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
-import { Passkey } from "types/passkey";
+import { useAppContext } from "pages/_app";
+import type { Dispatch, SetStateAction } from "react";
+import { createContext, useEffect, useState } from "react";
+import type { Passkey } from "types/passkey";
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,
@@ -36,7 +31,7 @@ export const PasskeysContext = createContext(
 );
 
 const Passkeys = () => {
-    const { showNavBar } = useContext(AppContext);
+    const { showNavBar } = useAppContext();
 
     const [selectedPasskey, setSelectedPasskey] = useState<Passkey | null>(
         null,
@@ -69,7 +64,7 @@ const Passkeys = () => {
     const handleSubmit = async (
         inputValue: string,
         setFieldError: (errorMessage: string) => void,
-        resetForm: (nextState?: unknown) => void,
+        resetForm: () => void,
     ) => {
         let response: {
             options: {
@@ -99,10 +94,10 @@ const Passkeys = () => {
         );
 
         // create new credential
-        let newCredential: Credential | null = null;
+        let newCredential: Credential;
 
         try {
-            newCredential = await navigator.credentials.create(options);
+            newCredential = ensure(await navigator.credentials.create(options));
         } catch (e) {
             log.error("Error creating credential", e);
             setFieldError("Failed to create credential");

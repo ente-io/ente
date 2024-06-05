@@ -1,24 +1,20 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
+        /* Set the base directory from which to resolve bare module names */
         "baseUrl": "./src",
-        "downlevelIteration": true,
-        "jsx": "preserve",
-        "jsxImportSource": "@emotion/react",
-        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-        "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "strictNullChecks": false,
-        "target": "es5",
-        "useUnknownInCatchVariables": false
+
+        /* This is hard to enforce in certain cases where we do a lot of array
+           indexing, e.g. image/ML ops, and TS doesn't currently have a way to
+           disable this for blocks of code. */
+        "noUncheckedIndexedAccess": false,
+        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        "exactOptionalPropertyTypes": false
     },
     "include": [
+        "src",
         "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
+        "../../packages/next/global-electron.d.ts",
         "../../packages/shared/themes/mui-theme.d.ts"
-    ],
-    "exclude": ["node_modules", "out", ".next", "thirdparty"]
+    ]
 }

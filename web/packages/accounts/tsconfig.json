@@ -1,21 +1,14 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
-        "downlevelIteration": true,
-        "jsx": "preserve",
-        "jsxImportSource": "@emotion/react",
-        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-        "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "strictNullChecks": false,
-        "target": "es5",
-        "useUnknownInCatchVariables": false
+        /* TODO(MR): Enable this */
+        "noUncheckedIndexedAccess": false,
+        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        "exactOptionalPropertyTypes": false
     },
     "include": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
+        ".",
+        "../next/global-electron.d.ts",
         "../shared/themes/mui-theme.d.ts"
     ]
 }

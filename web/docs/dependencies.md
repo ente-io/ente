@@ -14,11 +14,17 @@ baseline for how our code be in all the workspaces in this (yarn) monorepo.
 They also need some support packages, which come from the leaf `@/build-config`
 package:
 
--   [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/)
-    \- Tells ESLint how to read TypeScript syntax.
+-   [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality,
+    and provides the configuration recommended the by ESLint team.
 
--   [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/)
-    \- Provides TypeScript rules and presets
+-   [typescript-eslint](https://typescript-eslint.io/packages/typescript-eslint/)
+    \- provides TypeScript ESLint functionality and provides a set of
+    recommended configurations (`typescript-eslint` is the new entry point, our
+    yet-unmigrated packages use the older method of separately including
+    [@typescript-eslint/parser](https://typescript-eslint.io/packages/eslint-plugin/)
+    \- which tells ESLint how to read TypeScript syntax - and
+    [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/)
+    \- which provides the TypeScript rules and presets).
 
 -   [eslint-plugin-react-hooks](https://github.com/jsx-eslint/eslint-plugin-react),
     [eslint-plugin-react-hooks](https://reactjs.org/) \- Some React specific
@@ -148,6 +154,19 @@ It is more lower level than Next, but the bells and whistles it doesn't have are
 the bells and whistles (and the accompanying complexity) that we don't need in
 some cases.
 
+## General
+
+-   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
+    layer on top of Web Workers to make them more easier to use.
+
+-   [idb](https://github.com/jakearchibald/idb) provides a promise API over the
+    browser-native IndexedDB APIs.
+
+    > For more details about IDB and its role, see [storage.md](storage.md).
+
+-   [zod](https://github.com/colinhacks/zod) is used for runtime typechecking
+    (e.g. verifying that API responses match the expected TypeScript shape).
+
 ## Media
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in
@@ -161,11 +180,6 @@ some cases.
 -   [heic-convert](https://github.com/catdad-experiments/heic-convert) is used
     for converting HEIC files (which browsers don't natively support) into JPEG.
 
-## Processing
-
--   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
-    layer on top of Web Workers to make them more easier to use.
-
 ## Photos app specific
 
 -   [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a
@@ -177,12 +191,28 @@ some cases.
 
 ## Face search
 
--   [matrix](https://github.com/mljs/matrix) and
-    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
-    are used during face alignment.
-
 -   [transformation-matrix](https://github.com/chrvadala/transformation-matrix)
-    is used during face detection.
+    is used for performing 2D affine transformations using transformation
+    matrices. It is used during face detection.
+
+-   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction.
+    It is used alongwith
+    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
+    during face alignment.
+
+    > Note that while both `transformation-matrix` and `matrix` are "matrix"
+    > libraries, they have different foci and purposes: `transformation-matrix`
+    > provides affine transforms, while `matrix` is for performing computations
+    > on matrices, say inverting them or performing their decomposition.
 
 -   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
     clustering.
+
+## Auth app specific
+
+-   [otpauth](https://github.com/hectorm/otpauth) is used for the generation of
+    the actual OTP from the user's TOTP/HOTP secret.
+
+-   However, otpauth doesn't support steam OTPs. For these, we need to compute
+    the SHA-1, and we use the same library, `jssha` that `otpauth` uses (since
+    it is already part of our bundle).

@@ -6,7 +6,7 @@ import {
     SelectChangeEvent,
     Stack,
     Typography,
-    TypographyProps,
+    type TypographyProps,
 } from "@mui/material";
 
 export interface DropdownOption<T> {

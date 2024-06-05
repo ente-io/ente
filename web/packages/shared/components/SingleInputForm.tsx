@@ -2,7 +2,7 @@ import { FlexWrapper } from "@ente/shared/components/Container";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import { Button, FormHelperText } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { Formik, FormikHelpers, FormikState } from "formik";
+import { Formik, type FormikHelpers, type FormikState } from "formik";
 import { t } from "i18next";
 import React, { useMemo, useState } from "react";
 import * as Yup from "yup";

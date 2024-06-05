@@ -1,8 +1,7 @@
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext, useState } from "react";
 import { deletePasskey } from "services/passkeysService";
 import { PasskeysContext } from ".";
@@ -13,11 +12,12 @@ interface IProps {
 }
 
 const DeletePasskeyModal = (props: IProps) => {
-    const { isMobile } = useContext(AppContext);
     const { selectedPasskey, setShowPasskeyDrawer } =
         useContext(PasskeysContext);
 
     const [loading, setLoading] = useState(false);
+
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const doDelete = async () => {
         if (!selectedPasskey) return;

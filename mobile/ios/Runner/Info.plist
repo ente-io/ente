@@ -23,7 +23,7 @@
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>MinimumOSVersion</key>
-		<string>12.0</string>
+		<string>12.1</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>googlegmail</string>
@@ -65,9 +65,9 @@
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 		 <key>FLTEnableImpeller</key>
-         <false />
+         <true />
          <key>FLTEnableWideGamut</key>
-         <false/>
+         <true/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSCameraUsageDescription</key>

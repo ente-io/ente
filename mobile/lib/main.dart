@@ -21,6 +21,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/face/db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -32,6 +33,9 @@ import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
+import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
@@ -47,6 +51,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -123,7 +128,7 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
-    BackgroundFetch.finish(taskId).ignore();
+    BackgroundFetch.finish(taskId);
   } else {
     _runWithLogs(
       () async {
@@ -140,7 +145,7 @@ Future<void> _runInBackground(String taskId) async {
   await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
-    BackgroundFetch.finish(taskId).ignore();
+    BackgroundFetch.finish(taskId);
     return;
   } else {
     _logger.info("FG task is not running");
@@ -160,7 +165,7 @@ Future<void> _runInBackground(String taskId) async {
       }(),
     ],
   );
-  BackgroundFetch.finish(taskId).ignore();
+  BackgroundFetch.finish(taskId);
 }
 
 // https://stackoverflow.com/a/73796478/546896
@@ -175,68 +180,91 @@ void _headlessTaskHandler(HeadlessTask task) {
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
-  _isProcessRunning = true;
-  _logger.info("Initializing...  inBG =$isBackground via: $via");
-  final SharedPreferences preferences = await SharedPreferences.getInstance();
-
-  await _logFGHeartBeatInfo();
-  unawaited(_scheduleHeartBeat(preferences, isBackground));
-  AppLifecycleService.instance.init(preferences);
-  if (isBackground) {
-    AppLifecycleService.instance.onAppInBackground('init via: $via');
-  } else {
-    AppLifecycleService.instance.onAppInForeground('init via: $via');
-  }
-  // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4).ignore();
-  CryptoUtil.init();
-  await Configuration.instance.init();
-  await NetworkClient.instance.init();
-  ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
-  await UserService.instance.init();
-  await EntityService.instance.init();
-  LocationService.instance.init(preferences);
-
-  await UserRemoteFlagService.instance.init();
-  await UpdateService.instance.init();
-  BillingService.instance.init();
-  await CollectionsService.instance.init(preferences);
-  FavoritesService.instance.initFav().ignore();
-  await FileUploader.instance.init(preferences, isBackground);
-  await LocalSyncService.instance.init(preferences);
-  TrashSyncService.instance.init(preferences);
-  RemoteSyncService.instance.init(preferences);
-  await SyncService.instance.init(preferences);
-  MemoriesService.instance.init(preferences);
-  LocalSettings.instance.init(preferences);
-  LocalFileUpdateService.instance.init(preferences);
-  SearchService.instance.init();
-  StorageBonusService.instance.init(preferences);
-  if (!isBackground &&
-      Platform.isAndroid &&
-      await HomeWidgetService.instance.countHomeWidgets() == 0) {
-    unawaited(HomeWidgetService.instance.initHomeWidget());
-  }
-
-  if (Platform.isIOS) {
-    // ignore: unawaited_futures
-    PushService.instance.init().then((_) {
-      FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler,
-      );
+  try {
+    bool initComplete = false;
+    Future.delayed(const Duration(seconds: 15), () {
+      if (!initComplete && !isBackground) {
+        sendLogsForInit(
+          "support@ente.io",
+          "Stuck on splash screen for >= 15 seconds",
+          null,
+        );
+      }
     });
+    _isProcessRunning = true;
+    _logger.info("Initializing...  inBG =$isBackground via: $via");
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    await _logFGHeartBeatInfo();
+    unawaited(_scheduleHeartBeat(preferences, isBackground));
+    AppLifecycleService.instance.init(preferences);
+    if (isBackground) {
+      AppLifecycleService.instance.onAppInBackground('init via: $via');
+    } else {
+      AppLifecycleService.instance.onAppInForeground('init via: $via');
+    }
+    // Start workers asynchronously. No need to wait for them to start
+    Computer.shared().turnOn(workersCount: 4).ignore();
+    CryptoUtil.init();
+    await Configuration.instance.init();
+    await NetworkClient.instance.init();
+    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
+    await UserService.instance.init();
+    await EntityService.instance.init();
+    LocationService.instance.init(preferences);
+
+    await UserRemoteFlagService.instance.init();
+    await UpdateService.instance.init();
+    BillingService.instance.init();
+    await CollectionsService.instance.init(preferences);
+    FavoritesService.instance.initFav().ignore();
+    await FileUploader.instance.init(preferences, isBackground);
+    await LocalSyncService.instance.init(preferences);
+    TrashSyncService.instance.init(preferences);
+    RemoteSyncService.instance.init(preferences);
+    await SyncService.instance.init(preferences);
+    MemoriesService.instance.init(preferences);
+    LocalSettings.instance.init(preferences);
+    LocalFileUpdateService.instance.init(preferences);
+    SearchService.instance.init();
+    StorageBonusService.instance.init(preferences);
+    RemoteFileMLService.instance.init(preferences);
+    if (!isBackground &&
+        Platform.isAndroid &&
+        await HomeWidgetService.instance.countHomeWidgets() == 0) {
+      unawaited(HomeWidgetService.instance.initHomeWidget());
+    }
+
+    if (Platform.isIOS) {
+      // ignore: unawaited_futures
+      PushService.instance.init().then((_) {
+        FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler,
+        );
+      });
+    }
+
+    unawaited(SemanticSearchService.instance.init());
+    MachineLearningController.instance.init();
+    if (flagService.faceSearchEnabled) {
+      unawaited(FaceMlService.instance.init());
+    } else {
+      if (LocalSettings.instance.isFaceIndexingEnabled) {
+        unawaited(LocalSettings.instance.toggleFaceIndexing());
+      }
+    }
+    PersonService.init(
+      EntityService.instance,
+      FaceMLDataDB.instance,
+      preferences,
+    );
+
+    initComplete = true;
+    _logger.info("Initialization done");
+  } catch (e, s) {
+    _logger.severe("Error in init", e, s);
+    rethrow;
   }
-
-  unawaited(SemanticSearchService.instance.init());
-  MachineLearningController.instance.init();
-  // Can not including existing tf/ml binaries as they are not being built
-  // from source.
-  // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  // if (!UpdateService.instance.isFdroidFlavor()) {
-  //   unawaited(ObjectDetectionService.instance.init());
-  // }
-
-  _logger.info("Initialization done");
 }
 
 Future<void> _sync(String caller) async {
@@ -333,7 +361,7 @@ Future<void> _killBGTask([String? taskId]) async {
 
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
-    BackgroundFetch.finish(taskId).ignore();
+    BackgroundFetch.finish(taskId);
   }
 
   ///Band aid for background process not getting killed. Should migrate to using

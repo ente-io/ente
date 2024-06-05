@@ -7,20 +7,19 @@ import "package:photos/ui/map/marker_image.dart";
 
 Marker mapMarker(
   ImageMarker imageMarker,
-  String key, {
+  ValueKey<int> key, {
   Size markerSize = MapView.defaultMarkerSize,
 }) {
   return Marker(
-    //-6.5 is for taking in the height of the MarkerPointer
-    anchorPos: AnchorPos.exactly(Anchor(markerSize.height / 2, -6.5)),
-    key: Key(key),
+    alignment: Alignment.topCenter,
+    key: key,
     width: markerSize.width,
     height: markerSize.height,
     point: LatLng(
       imageMarker.latitude,
       imageMarker.longitude,
     ),
-    builder: (context) => MarkerImage(
+    child: MarkerImage(
       file: imageMarker.imageFile,
       seperator: (MapView.defaultMarkerSize.height + 10) -
           (MapView.defaultMarkerSize.height - markerSize.height),

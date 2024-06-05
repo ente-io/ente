@@ -50,6 +50,10 @@ class EntityService {
     return await _db.getEntities(type);
   }
 
+  Future<LocalEntityData?> getEntity(EntityType type, String id) async {
+    return await _db.getEntity(type, id);
+  }
+
   Future<LocalEntityData> addOrUpdate(
     EntityType type,
     String plainText, {
@@ -57,13 +61,16 @@ class EntityService {
   }) async {
     final key = await getOrCreateEntityKey(type);
     final encryptedKeyData = await CryptoUtil.encryptChaCha(
-      utf8.encode(plainText) as Uint8List,
+      utf8.encode(plainText),
       key,
     );
     final String encryptedData =
         CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
     final String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
-    debugPrint("Adding entity of type: " + type.typeToString());
+    debugPrint(
+      " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
+          type.typeToString(),
+    );
     final EntityData data = id == null
         ? await _gateway.createEntity(type, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
@@ -87,6 +94,7 @@ class EntityService {
   Future<void> syncEntities() async {
     try {
       await _remoteToLocalSync(EntityType.location);
+      await _remoteToLocalSync(EntityType.person);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
     }

@@ -1,10 +1,10 @@
 import log from "@/next/log";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import VerifyMasterPasswordForm, {
-    VerifyMasterPasswordFormProps,
+    type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
@@ -71,7 +71,7 @@ export default function AuthenticateUserModal({
             onClose={onClose}
             sx={{ position: "absolute" }}
             attributes={{
-                title: t("PASSWORD"),
+                title: t("password"),
             }}
         >
             <VerifyMasterPasswordForm

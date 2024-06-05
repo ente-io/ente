@@ -1,6 +1,6 @@
 import Done from "@mui/icons-material/Done";
-import { Button, ButtonProps, CircularProgress } from "@mui/material";
-import { FC } from "react";
+import { Button, CircularProgress, type ButtonProps } from "@mui/material";
+import React from "react";
 
 export interface SubmitButtonProps {
     loading: boolean;
@@ -9,7 +9,7 @@ export interface SubmitButtonProps {
     disabled?: boolean;
     success?: boolean;
 }
-const SubmitButton: FC<ButtonProps<"button", SubmitButtonProps>> = ({
+const SubmitButton: React.FC<ButtonProps<"button", SubmitButtonProps>> = ({
     loading,
     buttonText,
     disabled,

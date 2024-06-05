@@ -2876,11 +2876,11 @@ class S {
     );
   }
 
-  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
-  String get magicSearchDescription {
+  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.`
+  String get mlIndexingDescription {
     return Intl.message(
-      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
-      name: 'magicSearchDescription',
+      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.',
+      name: 'mlIndexingDescription',
       desc: '',
       args: [],
     );
@@ -3432,6 +3432,16 @@ class S {
     );
   }
 
+  /// `Save space on your device by clearing files that have been already backed up.`
+  String get freeUpDeviceSpaceDesc {
+    return Intl.message(
+      'Save space on your device by clearing files that have been already backed up.',
+      name: 'freeUpDeviceSpaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `✨ All clear`
   String get allClear {
     return Intl.message(
@@ -3457,6 +3467,36 @@ class S {
     return Intl.message(
       'Remove duplicates',
       name: 'removeDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and remove files that are exact duplicates.`
+  String get removeDuplicatesDesc {
+    return Intl.message(
+      'Review and remove files that are exact duplicates.',
+      name: 'removeDuplicatesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Large files`
+  String get viewLargeFiles {
+    return Intl.message(
+      'Large files',
+      name: 'viewLargeFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View files that are consuming the most amount of storage`
+  String get viewLargeFilesDesc {
+    return Intl.message(
+      'View files that are consuming the most amount of storage',
+      name: 'viewLargeFilesDesc',
       desc: '',
       args: [],
     );
@@ -4034,10 +4074,10 @@ class S {
     );
   }
 
-  /// `Free trial valid till {endDate}.\nYou can purchase a paid plan afterwards.`
+  /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
   String playStoreFreeTrialValidTill(Object endDate) {
     return Intl.message(
-      'Free trial valid till $endDate.\nYou can purchase a paid plan afterwards.',
+      'Free trial valid till $endDate.\nYou can choose a paid plan afterwards.',
       name: 'playStoreFreeTrialValidTill',
       desc: '',
       args: [endDate],
@@ -4735,11 +4775,11 @@ class S {
     );
   }
 
-  /// `The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
-  String get devAccountChanged {
+  /// `Due to technical glitch, you have been logged out. Our apologies for the inconvenience.`
+  String get autoLogoutMessage {
     return Intl.message(
-      'The developer account we use to publish Ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
-      name: 'devAccountChanged',
+      'Due to technical glitch, you have been logged out. Our apologies for the inconvenience.',
+      name: 'autoLogoutMessage',
       desc: '',
       args: [],
     );
@@ -6969,10 +7009,10 @@ class S {
     );
   }
 
-  /// `Find all photos of a person`
+  /// `People will be shown here once indexing is done`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Find all photos of a person',
+      'People will be shown here once indexing is done',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],
@@ -7402,10 +7442,10 @@ class S {
   }
 
   /// `{freeAmount} {storageUnit} free`
-  String freeStorageSpace(Object freeAmount, Object storageUnit) {
+  String availableStorageSpace(Object freeAmount, Object storageUnit) {
     return Intl.message(
       '$freeAmount $storageUnit free',
-      name: 'freeStorageSpace',
+      name: 'availableStorageSpace',
       desc: '',
       args: [freeAmount, storageUnit],
     );
@@ -8168,6 +8208,16 @@ class S {
     );
   }
 
+  /// `People`
+  String get people {
+    return Intl.message(
+      'People',
+      name: 'people',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contents`
   String get contents {
     return Intl.message(
@@ -8388,26 +8438,6 @@ class S {
     );
   }
 
-  /// `Auto pair`
-  String get autoPair {
-    return Intl.message(
-      'Auto pair',
-      name: 'autoPair',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pair with PIN`
-  String get pairWithPin {
-    return Intl.message(
-      'Pair with PIN',
-      name: 'pairWithPin',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Device not found`
   String get deviceNotFound {
     return Intl.message(
@@ -8463,6 +8493,26 @@ class S {
     return Intl.message(
       'Descriptions',
       name: 'descriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a name`
+  String get addAName {
+    return Intl.message(
+      'Add a name',
+      name: 'addAName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find people quickly by name`
+  String get findPeopleByName {
+    return Intl.message(
+      'Find people quickly by name',
+      name: 'findPeopleByName',
       desc: '',
       args: [],
     );
@@ -8594,6 +8644,26 @@ class S {
     );
   }
 
+  /// `Enter person name`
+  String get enterPersonName {
+    return Intl.message(
+      'Enter person name',
+      name: 'enterPersonName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove person label`
+  String get removePersonLabel {
+    return Intl.message(
+      'Remove person label',
+      name: 'removePersonLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Auto pair works only with devices that support Chromecast.`
   String get autoPairDesc {
     return Intl.message(
@@ -8709,6 +8779,66 @@ class S {
     return Intl.message(
       'Saving Edits!',
       name: 'savingEdits',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto pair`
+  String get autoPair {
+    return Intl.message(
+      'Auto pair',
+      name: 'autoPair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair with PIN`
+  String get pairWithPin {
+    return Intl.message(
+      'Pair with PIN',
+      name: 'pairWithPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Face recognition`
+  String get faceRecognition {
+    return Intl.message(
+      'Face recognition',
+      name: 'faceRecognition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Found faces`
+  String get foundFaces {
+    return Intl.message(
+      'Found faces',
+      name: 'foundFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clustering progress`
+  String get clusteringProgress {
+    return Intl.message(
+      'Clustering progress',
+      name: 'clusteringProgress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indexing is paused. It will automatically resume when device is ready.`
+  String get indexingIsPaused {
+    return Intl.message(
+      'Indexing is paused. It will automatically resume when device is ready.',
+      name: 'indexingIsPaused',
       desc: '',
       args: [],
     );

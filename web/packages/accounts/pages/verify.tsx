@@ -1,9 +1,6 @@
-import { t } from "i18next";
-import { useEffect, useState } from "react";
-import { Trans } from "react-i18next";
-
-import { UserVerificationResponse } from "@ente/accounts/types/user";
-import { PageProps } from "@ente/shared/apps/types";
+import { ensure } from "@/utils/ensure";
+import type { UserVerificationResponse } from "@ente/accounts/types/user";
+import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -11,7 +8,7 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
-    SingleInputFormProps,
+    type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
 import { getAccountsURL } from "@ente/shared/network/api";
@@ -23,17 +20,23 @@ import {
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
-import { KeyAttributes, User } from "@ente/shared/user/types";
+import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { Box, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
+import { t } from "i18next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
-import { SRPSetupAttributes } from "../types/srp";
+import type { PageProps } from "../types/page";
+import type { SRPSetupAttributes } from "../types/srp";
 
-export default function VerifyPage({ appContext, appName }: PageProps) {
-    const { logout } = appContext;
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName, logout } = appContext;
+
+    const appNameOld = appNameToAppNameOld(appName);
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -111,7 +114,7 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
                 } else {
                     if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                         await putAttributes(
-                            token,
+                            ensure(token),
                             getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                         );
                     }
@@ -148,7 +151,7 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appName, email);
+        await sendOtt(appNameOld, email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
@@ -199,4 +202,6 @@ export default function VerifyPage({ appContext, appName }: PageProps) {
             </FormPaper>
         </VerticallyCentered>
     );
-}
+};
+
+export default Page;

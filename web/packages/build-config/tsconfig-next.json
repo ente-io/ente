@@ -1,0 +1,11 @@
+{
+    /* A base TSConfig for typechecking our Next.js apps and packages. */
+    "extends": "@/build-config/tsconfig-typecheck.json",
+    "compilerOptions": {
+        /* Next.js insists on adding these. Sigh. */
+        "allowJs": true,
+        "incremental": true
+    },
+    /* Next.js insists on adding this, even though we don't need it. */
+    "exclude": ["node_modules"]
+}

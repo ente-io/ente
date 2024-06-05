@@ -69,6 +69,8 @@ const galleryGridSpacing = 2.0;
 
 const kSearchSectionLimit = 9;
 
+const maxPickAssetLimit = 50;
+
 const iOSGroupID = "group.io.ente.frame.SlideshowWidget";
 
 const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
@@ -98,6 +100,9 @@ const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
     'KACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAo' +
     'AKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAo' +
     'AKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgD/9k=';
+
+const localFileServer =
+    String.fromEnvironment("localFileServer", defaultValue: "");
 
 const uploadTempFilePrefix = "upload_file_";
 final tempDirCleanUpInterval = kDebugMode

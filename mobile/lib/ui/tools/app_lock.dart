@@ -113,6 +113,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       theme: widget.lightTheme,
       darkTheme: widget.darkTheme,
       locale: widget.locale,
+      debugShowCheckedModeBanner: false,
       supportedLocales: appSupportedLocales,
       localeListResolutionCallback: localResolutionCallBack,
       localizationsDelegates: const [

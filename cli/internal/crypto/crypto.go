@@ -113,3 +113,23 @@ func DecryptChaChaBase64(data string, key []byte, nonce string) (string, []byte,
 	}
 	return base64.StdEncoding.EncodeToString(decryptedData), decryptedData, nil
 }
+
+func DecryptChaChaBase64Auth(data string, key []byte, nonce string) (string, []byte, error) {
+	// Decode data from base64
+	dataBytes, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		// safe to log the encrypted data
+		return "", nil, fmt.Errorf("invalid base64 data %s: %v", data, err)
+	}
+	// Decode nonce from base64
+	nonceBytes, err := base64.StdEncoding.DecodeString(nonce)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid nonce: %v", err)
+	}
+	// Decrypt data
+	decryptedData, err := decryptChaCha20poly1305V2(dataBytes, key, nonceBytes)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to decrypt data: %v", err)
+	}
+	return base64.StdEncoding.EncodeToString(decryptedData), decryptedData, nil
+}

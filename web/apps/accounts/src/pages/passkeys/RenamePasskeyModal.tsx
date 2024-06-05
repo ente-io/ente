@@ -1,7 +1,7 @@
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
+import { useMediaQuery } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import { renamePasskey } from "services/passkeysService";
 import { PasskeysContext } from ".";
@@ -12,8 +12,9 @@ interface IProps {
 }
 
 const RenamePasskeyModal = (props: IProps) => {
-    const { isMobile } = useContext(AppContext);
     const { selectedPasskey } = useContext(PasskeysContext);
+
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const onSubmit = async (inputValue: string) => {
         if (!selectedPasskey) return;

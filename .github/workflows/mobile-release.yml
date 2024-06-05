@@ -9,7 +9,7 @@ on:
             - "photos-v*"
 
 env:
-    FLUTTER_VERSION: "3.19.3"
+    FLUTTER_VERSION: "3.22.1"
 
 jobs:
     build:

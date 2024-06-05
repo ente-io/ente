@@ -25,22 +25,22 @@ publish to [web.ente.io](https://web.ente.io).
 Here is a list of all the deployments, whether or not they are production
 deployments, and the action that triggers them:
 
-| URL                                          | Type       | Deployment action                             |
-| -------------------------------------------- | ---------- | --------------------------------------------- |
-| [web.ente.io](https://web.ente.io)           | Production | Daily deploy of `main`                        |
-| [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io)   |
-| [auth.ente.io](https://auth.ente.io)         | Production | Daily deploy of `main`                        |
-| [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                        |
-| [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                        |
-| [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                        |
-| [help.ente.io](https://help.ente.io)         | Production | Changes in `docs/` on push to `main`          |
-| [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `web/apps/staff` on push to `main` |
-| [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Daily deploy of `main`                        |
-| [auth.ente.sh](https://auth.ente.sh)         | Preview    | Daily deploy of `main`                        |
-| [cast.ente.sh](https://cast.ente.sh)         | Preview    | Daily deploy of `main`                        |
-| [payments.ente.sh](https://payments.ente.sh) | Preview    | Daily deploy of `main`                        |
-| [photos.ente.sh](https://photos.ente.sh)     | Preview    | Daily deploy of `main`                        |
-| [preview.ente.sh](https://preview.ente.sh)   | Preview    | Manually triggered                            |
+| URL                                          | Type       | Deployment action                           |
+| -------------------------------------------- | ---------- | ------------------------------------------- |
+| [web.ente.io](https://web.ente.io)           | Production | Daily deploy of `main`                      |
+| [photos.ente.io](https://photos.ente.io)     | Production | Alias of [web.ente.io](https://web.ente.io) |
+| [auth.ente.io](https://auth.ente.io)         | Production | Daily deploy of `main`                      |
+| [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                      |
+| [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                      |
+| [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
+| [help.ente.io](https://help.ente.io)         | Production | Changes in `docs/` on push to `main`        |
+| [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
+| [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Daily deploy of `main`                      |
+| [auth.ente.sh](https://auth.ente.sh)         | Preview    | Daily deploy of `main`                      |
+| [cast.ente.sh](https://cast.ente.sh)         | Preview    | Daily deploy of `main`                      |
+| [payments.ente.sh](https://payments.ente.sh) | Preview    | Daily deploy of `main`                      |
+| [photos.ente.sh](https://photos.ente.sh)     | Preview    | Daily deploy of `main`                      |
+| [preview.ente.sh](https://preview.ente.sh)   | Preview    | Manually triggered                          |
 
 ### Other subdomains
 
