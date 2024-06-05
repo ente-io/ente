@@ -214,7 +214,9 @@ class GalleryState extends State<Gallery> {
   // gallery reload
   bool _onFilesLoaded(List<EnteFile> files) {
     final updatedGroupedFiles =
-        widget.enableFileGrouping ? _groupFiles(files) : [files];
+        widget.enableFileGrouping && widget.groupType.timeGrouping()
+            ? _groupBasedOnTime(files)
+            : _genericGroupForPerf(files);
     if (currentGroupedFiles.length != updatedGroupedFiles.length ||
         currentGroupedFiles.isEmpty) {
       if (mounted) {
@@ -261,20 +263,58 @@ class GalleryState extends State<Gallery> {
         tagPrefix: widget.tagPrefix,
         scrollBottomSafeArea: widget.scrollBottomSafeArea,
         limitSelectionToOne: widget.limitSelectionToOne,
-        enableFileGrouping: widget.enableFileGrouping,
+        enableFileGrouping:
+            widget.enableFileGrouping && widget.groupType.showGroupHeader(),
         logTag: _logTag,
         logger: _logger,
         reloadEvent: widget.reloadEvent,
         header: widget.header,
         footer: widget.footer,
         selectedFiles: widget.selectedFiles,
-        showSelectAllByDefault: widget.showSelectAllByDefault,
+        showSelectAllByDefault:
+            widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
         isScrollablePositionedList: widget.isScrollablePositionedList,
       ),
     );
   }
 
-  List<List<EnteFile>> _groupFiles(List<EnteFile> files) {
+  // create groups of 200 files for performance
+  List<List<EnteFile>> _genericGroupForPerf(List<EnteFile> files) {
+    if (widget.groupType == GroupType.size) {
+      // sort files by fileSize on the bases of _sortOrderAsc
+      files.sort((a, b) {
+        if (_sortOrderAsc) {
+          return a.fileSize!.compareTo(b.fileSize!);
+        } else {
+          return b.fileSize!.compareTo(a.fileSize!);
+        }
+      });
+    }
+    // todo:(neeraj) Stick to default group behaviour for magicSearch and editLocationGallery
+    // In case of Magic search, we need to hide the scrollbar title (can be done
+    // by specifying none as groupType)
+    if (widget.groupType != GroupType.size) {
+      return [files];
+    }
+
+    final List<List<EnteFile>> resultGroupedFiles = [];
+    List<EnteFile> singleGroupFile = [];
+    const int groupSize = 40;
+    for (int i = 0; i < files.length; i += 1) {
+      singleGroupFile.add(files[i]);
+      if (singleGroupFile.length == groupSize) {
+        resultGroupedFiles.add(singleGroupFile);
+        singleGroupFile = [];
+      }
+    }
+    if (singleGroupFile.isNotEmpty) {
+      resultGroupedFiles.add(singleGroupFile);
+    }
+    _logger.info('Grouped files into ${resultGroupedFiles.length} groups');
+    return resultGroupedFiles;
+  }
+
+  List<List<EnteFile>> _groupBasedOnTime(List<EnteFile> files) {
     List<EnteFile> dailyFiles = [];
 
     final List<List<EnteFile>> resultGroupedFiles = [];
