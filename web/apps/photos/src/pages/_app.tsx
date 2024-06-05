@@ -9,11 +9,7 @@ import {
 import type { AppName, BaseAppContextT } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
-import {
-    APPS,
-    APP_TITLES,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
+import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -363,7 +359,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const title = isI18nReady
         ? t("title", { context: "photos" })
-        : APP_TITLES.get(APPS.PHOTOS);
+        : appTitle[appName];
 
     return (
         <>

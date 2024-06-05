@@ -4,14 +4,10 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
-import {
-    APPS,
-    APP_TITLES,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
+import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -151,10 +147,9 @@ export default function App({ Component, pageProps }: AppProps) {
         somethingWentWrong,
     };
 
-    // TODO: Refactor this to have a fallback
     const title = isI18nReady
         ? t("title", { context: "auth" })
-        : APP_TITLES.get(APPS.AUTH) ?? "";
+        : appTitle[appName];
 
     return (
         <>
