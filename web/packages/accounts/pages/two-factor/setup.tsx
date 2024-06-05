@@ -6,7 +6,6 @@ import VerifyTwoFactor, {
 } from "@ente/accounts/components/two-factor/VerifyForm";
 import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
 import type { TwoFactorSecret } from "@ente/accounts/types/user";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -26,8 +25,6 @@ export enum SetupMode {
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [twoFactorSecret, setTwoFactorSecret] = useState<
         TwoFactorSecret | undefined

@@ -7,7 +7,6 @@ import SetPasswordForm, {
 import { PAGES } from "@ente/accounts/constants/pages";
 import { configureSRP } from "@ente/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -34,8 +33,6 @@ import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();

@@ -1,5 +1,4 @@
 import type { AppName } from "@/next/types/app";
-import { ACCOUNTS_PAGES, AUTH_PAGES, PHOTOS_PAGES } from "../constants/pages";
 
 export enum APPS {
     PHOTOS = "PHOTOS",
@@ -25,9 +24,3 @@ export const CLIENT_PACKAGE_NAMES = new Map([
 ]);
 
 export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
-
-export const APP_HOMES = new Map([
-    [APPS.PHOTOS, PHOTOS_PAGES.GALLERY as string],
-    [APPS.AUTH, AUTH_PAGES.AUTH],
-    [APPS.ACCOUNTS, ACCOUNTS_PAGES.PASSKEYS],
-]);

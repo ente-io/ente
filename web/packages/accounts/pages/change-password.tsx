@@ -13,7 +13,6 @@ import {
     convertBase64ToBuffer,
     convertBufferToBase64,
 } from "@ente/accounts/utils";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -38,8 +37,6 @@ import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
