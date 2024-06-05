@@ -154,7 +154,7 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(APPS.PHOTOS, userId);
+        logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackageName[appName],
