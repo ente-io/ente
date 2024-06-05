@@ -105,7 +105,7 @@ Future<int?> _processRaivoExportFile(BuildContext context, String path) async {
       otpUrl =
           'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
     } else {
-      throw Exception('Invalid OTP type');
+      throw Exception('Invalid OTP type $kind');
     }
     parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
