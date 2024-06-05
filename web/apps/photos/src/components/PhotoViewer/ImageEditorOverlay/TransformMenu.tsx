@@ -1,11 +1,11 @@
 import log from "@/next/log";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Crop169Icon from "@mui/icons-material/Crop169";
 import Crop32Icon from "@mui/icons-material/Crop32";
 import CropSquareIcon from "@mui/icons-material/CropSquare";
 import FlipIcon from "@mui/icons-material/Flip";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import RotateRightIcon from "@mui/icons-material/RotateRight";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";

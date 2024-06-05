@@ -15,9 +15,9 @@ import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
 import {
-    BeginPasskeyAuthenticationResponse,
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
+    type BeginPasskeyAuthenticationResponse,
 } from "services/passkeysService";
 
 const PasskeysFlow = () => {

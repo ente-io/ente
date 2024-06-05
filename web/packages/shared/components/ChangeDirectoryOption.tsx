@@ -4,9 +4,13 @@ import FolderIcon from "@mui/icons-material/Folder";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { t } from "i18next";
 
+interface ChangeDirectoryOptionProps {
+    onClick: () => void;
+}
+
 export default function ChangeDirectoryOption({
-    changeExportDirectory: changeDirectory,
-}) {
+    onClick,
+}: ChangeDirectoryOptionProps) {
     return (
         <OverflowMenu
             triggerButtonProps={{
@@ -17,10 +21,7 @@ export default function ChangeDirectoryOption({
             ariaControls={"export-option"}
             triggerButtonIcon={<MoreHoriz />}
         >
-            <OverflowMenuOption
-                onClick={changeDirectory}
-                startIcon={<FolderIcon />}
-            >
+            <OverflowMenuOption onClick={onClick} startIcon={<FolderIcon />}>
                 {t("CHANGE_FOLDER")}
             </OverflowMenuOption>
         </OverflowMenu>

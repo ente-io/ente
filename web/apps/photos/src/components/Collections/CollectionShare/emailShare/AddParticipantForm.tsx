@@ -1,9 +1,9 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SubmitButton from "@ente/shared/components/SubmitButton";
 import DoneIcon from "@mui/icons-material/Done";
 import { Button, FormHelperText, Stack } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
