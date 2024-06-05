@@ -13,7 +13,6 @@ import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
-import { TwoFactorType } from "../constants/twofactor";
 
 const ENDPOINT = getEndpoint();
 
@@ -73,9 +72,12 @@ export const verifyTwoFactor = async (code: string, sessionID: string) => {
     return resp.data as UserVerificationResponse;
 };
 
+/** The type of the second factor we're trying to act on */
+export type TwoFactorType = "totp" | "passkey";
+
 export const recoverTwoFactor = async (
     sessionID: string,
-    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
+    twoFactorType: TwoFactorType,
 ) => {
     const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
         sessionID,
@@ -87,7 +89,7 @@ export const recoverTwoFactor = async (
 export const removeTwoFactor = async (
     sessionID: string,
     secret: string,
-    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
+    twoFactorType: TwoFactorType,
 ) => {
     const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
         sessionID,

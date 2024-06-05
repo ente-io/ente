@@ -1,9 +1,12 @@
 import log from "@/next/log";
 import type { BaseAppContextT } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
-import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
+import {
+    recoverTwoFactor,
+    removeTwoFactor,
+    type TwoFactorType,
+} from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { TwoFactorType } from "@ente/accounts/constants/twofactor";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -31,13 +34,10 @@ bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
     appContext: BaseAppContextT;
-    twoFactorType?: TwoFactorType;
+    twoFactorType: TwoFactorType;
 }
 
-const Page: React.FC<RecoverPageProps> = ({
-    appContext,
-    twoFactorType = TwoFactorType.TOTP,
-}) => {
+const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     const { logout } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
