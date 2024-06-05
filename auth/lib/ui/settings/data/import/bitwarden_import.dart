@@ -109,8 +109,8 @@ Future<int?> _processBitwardenExportFile(
           Code.steamDigits,
         );
       } else {
-        var issuer = item['name'];
-        var account = item['login']['username'];
+        var issuer = item['name'] ?? '';
+        var account = item['login']['username'] ?? '';
         code = Code.fromAccountAndSecret(
           Type.totp,
           account,
