@@ -340,14 +340,18 @@ export async function generateSaltToDeriveKey() {
     return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
 }
 
-export async function generateKeyPair() {
+/**
+ * Generate a new public/private keypair, and return their Base64
+ * representations.
+ */
+export const generateKeyPair = async () => {
     await sodium.ready;
-    const keyPair: sodium.KeyPair = sodium.crypto_box_keypair();
+    const keyPair = sodium.crypto_box_keypair();
     return {
-        privateKey: await toB64(keyPair.privateKey),
         publicKey: await toB64(keyPair.publicKey),
+        privateKey: await toB64(keyPair.privateKey),
     };
-}
+};
 
 export async function boxSealOpen(
     input: string,
