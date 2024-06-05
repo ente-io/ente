@@ -4,7 +4,6 @@ import { ensure } from "@/utils/ensure";
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { TwoFactorType } from "@ente/accounts/constants/twofactor";
-import { APPS } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -32,7 +31,6 @@ bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
     appContext: BaseAppContextT;
-    appName?: APPS;
     twoFactorType?: TwoFactorType;
 }
 
