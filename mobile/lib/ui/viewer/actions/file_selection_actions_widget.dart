@@ -777,7 +777,12 @@ class _FileSelectionActionsWidgetState
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       unawaited(Clipboard.setData(ClipboardData(text: url)));
-      await shareImageAndUrl(placeholderPath!, url, context, sendLinkButtonKey);
+      await shareImageAndUrl(
+        placeholderPath!,
+        url,
+        context: context,
+        key: sendLinkButtonKey,
+      );
       if (placeholderPath != null) {
         final file = File(placeholderPath!);
         try {
