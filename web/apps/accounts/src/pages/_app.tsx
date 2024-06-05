@@ -95,7 +95,6 @@ export default function App({ Component, pageProps }: AppProps) {
         setDialogBoxAttributesV2,
     };
 
-    // TODO: This string doesn't actually exist
     // TODO-PK: Fix ||
     const title =
         (isI18nReady
