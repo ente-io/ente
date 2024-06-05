@@ -70,8 +70,8 @@ FROM node:20-alpine as builder
 WORKDIR /app
 COPY . .
 
-ARG NEXT_PUBLIC_ENTE_ENDPOINT=https://your.ente.tld.api
-ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your.albums.tld.api
+ARG NEXT_PUBLIC_ENTE_ENDPOINT=https://your.ente.example.org
+ARG NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your.albums.example.org
 
 RUN yarn install && yarn build
 
@@ -93,3 +93,12 @@ used to run both the normal Ente photos app and the public albums app. There is
 a slightly more involved example showing how to do this also provided by in a
 community contributed guide about
 [configuring external S3](/self-hosting/guides/external-s3).
+
+You will also want to tell museum about your custom shared albums endpoint so
+that it uses that instead of the default URL when creating share links. You can
+configure that in museum's `config.yaml`:
+
+```
+apps:
+    public-albums: https://your.albums.example.org
+```
