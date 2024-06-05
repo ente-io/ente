@@ -4,16 +4,17 @@ import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleW
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { downloadAsFile } from "@ente/shared/utils";
 import {
+    Box,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     Typography,
+    styled,
 } from "@mui/material";
 import * as bip39 from "bip39";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
-import { DashedBorderWrapper } from "./styledComponents";
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
@@ -82,3 +83,8 @@ function RecoveryKey({ somethingWentWrong, isMobile, ...props }: Props) {
     );
 }
 export default RecoveryKey;
+
+const DashedBorderWrapper = styled(Box)(({ theme }) => ({
+    border: `1px dashed ${theme.palette.grey.A400}`,
+    borderRadius: theme.spacing(1),
+}));

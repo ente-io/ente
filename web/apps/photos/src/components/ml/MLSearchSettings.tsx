@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
     Button,
@@ -11,7 +12,6 @@ import {
     Typography,
 } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";

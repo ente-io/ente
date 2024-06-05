@@ -11,7 +11,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    deploy:
+    lint:
         runs-on: ubuntu-latest
 
         defaults:
@@ -21,8 +21,6 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v4
@@ -33,9 +31,6 @@ jobs:
 
             - name: Install dependencies
               run: yarn install
-
-            - name: Lint
-              run: yarn lint
 
             - name: Build
               run: yarn build

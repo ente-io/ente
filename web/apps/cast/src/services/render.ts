@@ -11,11 +11,7 @@ import { wait } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    getCastFileURL,
-    getCastThumbnailURL,
-    getEndpoint,
-} from "@ente/shared/network/api";
+import { apiOrigin, customAPIOrigin } from "@ente/shared/network/api";
 import type { AxiosResponse } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
@@ -168,7 +164,7 @@ const getEncryptedCollectionFiles = async (
     let resp: AxiosResponse;
     do {
         resp = await HTTPService.get(
-            `${getEndpoint()}/cast/diff`,
+            `${apiOrigin()}/cast/diff`,
             { sinceTime },
             {
                 "Cache-Control": "no-cache",
@@ -325,22 +321,36 @@ const downloadFile = async (
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
-    const url = shouldUseThumbnail
-        ? getCastThumbnailURL(file.id)
-        : getCastFileURL(file.id);
-    const resp = await HTTPService.get(
-        url,
-        null,
-        {
-            "X-Cast-Access-Token": castToken,
-        },
-        { responseType: "arraybuffer" },
-    );
-    if (resp.data === undefined) throw new Error(`Failed to get ${url}`);
+    const getFile = () => {
+        const customOrigin = customAPIOrigin();
+        if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
+            const params = new URLSearchParams({ castToken });
+            const baseURL = shouldUseThumbnail
+                ? `${customOrigin}/cast/files/preview/${file.id}`
+                : `${customOrigin}/cast/files/download/${file.id}`;
+            return fetch(`${baseURL}?${params.toString()}`);
+        } else {
+            const url = shouldUseThumbnail
+                ? `https://cast-albums.ente.io/preview/?fileID=${file.id}`
+                : `https://cast-albums.ente.io/download/?fileID=${file.id}`;
+            return fetch(url, {
+                headers: {
+                    "X-Cast-Access-Token": castToken,
+                },
+            });
+        }
+    };
+
+    const res = await getFile();
+    if (!res.ok)
+        throw new Error(
+            `Failed to fetch file with ID ${file.id}: HTTP ${res.status}`,
+        );
 
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const decrypted = await cryptoWorker.decryptFile(
-        new Uint8Array(resp.data),
+        new Uint8Array(await res.arrayBuffer()),
         await cryptoWorker.fromB64(
             shouldUseThumbnail
                 ? file.thumbnail.decryptionHeader

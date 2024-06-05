@@ -209,6 +209,10 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                       )
                       .toList()
                   : persons;
+              // sort searchResults alphabetically by name
+              searchResults.sort(
+                (a, b) => a.$1.data.name.compareTo(b.$1.data.name),
+              );
               final shouldShowAddPerson = widget.showOptionToCreateNewPerson &&
                   (_searchQuery.isEmpty || searchResults.isEmpty);
 
