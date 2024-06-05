@@ -7,6 +7,7 @@ import {
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
+import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import InfoIcon from "@mui/icons-material/Info";
@@ -144,20 +145,16 @@ const PasskeysFlow = () => {
         publicKey: any,
         timeoutMillis: number = 60000, // Default timeout of 60 seconds
     ): Promise<Credential | null> => {
-        publicKey.challenge = _sodium.from_base64(
+        publicKey.challenge = await fromB64URLSafeNoPadding(
             publicKey.challenge,
-            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
-        publicKey.allowCredentials?.forEach(function (listItem: any) {
-            listItem.id = _sodium.from_base64(
-                listItem.id,
-                _sodium.base64_variants.URLSAFE_NO_PADDING,
-            );
+        for (const listItem of publicKey.allowCredentials ?? []) {
+            listItem.id = await fromB64URLSafeNoPadding(listItem.id);
             // note: we are orverwriting the transports array with all possible values.
             // This is because the browser will only prompt the user for the transport that is available.
             // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
             listItem.transports = ["usb", "nfc", "ble", "internal"];
-        });
+        }
         publicKey.timeout = timeoutMillis;
         const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
             publicKey: publicKey,
