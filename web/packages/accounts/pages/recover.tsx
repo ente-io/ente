@@ -2,7 +2,7 @@ import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
-import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
+import { APP_HOMES } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -32,8 +32,6 @@ bip39.setDefaultWordlist("english");
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;
 
-    const appNameOld = appNameToAppNameOld(appName);
-
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
     >();
@@ -49,7 +47,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            sendOtt(appNameOld, user.email);
+            sendOtt(appName, user.email);
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.RECOVER);
             router.push(PAGES.VERIFY);
             return;

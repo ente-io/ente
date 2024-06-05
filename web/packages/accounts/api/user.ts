@@ -1,3 +1,4 @@
+import type { AppName } from "@/next/types/app";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
@@ -5,7 +6,6 @@ import type {
     TwoFactorVerificationResponse,
     UserVerificationResponse,
 } from "@ente/accounts/types/user";
-import { APPS, OTT_CLIENTS } from "@ente/shared/apps/constants";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -17,10 +17,10 @@ import { TwoFactorType } from "../constants/twofactor";
 
 const ENDPOINT = getEndpoint();
 
-export const sendOtt = (appName: APPS, email: string) => {
+export const sendOtt = (appName: AppName, email: string) => {
     return HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
-        client: OTT_CLIENTS.get(appName),
+        client: appName == "auth" ? "totp" : "web",
     });
 };
 

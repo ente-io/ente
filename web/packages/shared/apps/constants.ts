@@ -31,8 +31,3 @@ export const APP_HOMES = new Map([
     [APPS.AUTH, AUTH_PAGES.AUTH],
     [APPS.ACCOUNTS, ACCOUNTS_PAGES.PASSKEYS],
 ]);
-
-export const OTT_CLIENTS = new Map([
-    [APPS.PHOTOS, "web"],
-    [APPS.AUTH, "totp"],
-]);

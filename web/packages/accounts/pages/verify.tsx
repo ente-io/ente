@@ -36,8 +36,6 @@ import type { SRPSetupAttributes } from "../types/srp";
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
 
-    const appNameOld = appNameToAppNameOld(appName);
-
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
 
@@ -151,7 +149,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appNameOld, email);
+        await sendOtt(appName, email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
