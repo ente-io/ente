@@ -9,7 +9,10 @@ import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
 import 'package:photos/ui/viewer/gallery/component/group/lazy_group_gallery.dart';
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
+import "package:photos/utils/data_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
@@ -65,6 +68,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gType = GalleryContextState.of(context)!.type;
     return HugeListView<List<EnteFile>>(
       controller: itemScroller,
       startIndex: 0,
@@ -123,10 +127,17 @@ class MultipleGroupsGalleryView extends StatelessWidget {
       },
       labelTextBuilder: (int index) {
         try {
+          final EnteFile file = groupedFiles[index][0];
+          if (gType == GroupType.size) {
+            return file.fileSize != null
+                ? convertBytesToReadableFormat(file.fileSize!)
+                : "";
+          }
+
           return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
               .format(
             DateTime.fromMicrosecondsSinceEpoch(
-              groupedFiles[index][0].creationTime!,
+              file.creationTime!,
             ),
           );
         } catch (e) {
