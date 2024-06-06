@@ -38,12 +38,11 @@ export const getUploadEndpoint = () => {
  * Return the URL of the Ente Accounts app.
  *
  * Defaults to our production instance, "https://accounts.ente.io", but can be
- * overridden by setting the `NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT` environment
+ * overridden by setting the `NEXT_PUBLIC_ENTE_ACCOUNTS_URL` environment
  * variable to a non-empty value.
  */
 export const accountsAppURL = () =>
-    process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT ||
-    `https://accounts.ente.io`;
+    process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_URL || `https://accounts.ente.io`;
 
 export const getAlbumsURL = () => {
     const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;
@@ -58,7 +57,7 @@ export const getAlbumsURL = () => {
  * family plans.
  */
 export const getFamilyPortalURL = () => {
-    const familyURL = process.env.NEXT_PUBLIC_ENTE_FAMILY_ENDPOINT;
+    const familyURL = process.env.NEXT_PUBLIC_ENTE_FAMILY_URL;
     if (familyURL) {
         return familyURL;
     }
@@ -69,7 +68,7 @@ export const getFamilyPortalURL = () => {
  * Return the URL for the host that handles payment related functionality.
  */
 export const getPaymentsURL = () => {
-    const paymentsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENTS_ENDPOINT;
+    const paymentsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENTS_URL;
     if (paymentsURL) {
         return paymentsURL;
     }
