@@ -23,7 +23,11 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useAppContext } from "pages/_app";
 import React, { useEffect, useState } from "react";
-import { addPasskey, deletePasskey, renamePasskey } from "services/passkey";
+import {
+    deletePasskey,
+    registerPasskey,
+    renamePasskey,
+} from "services/passkey";
 import { getPasskeys, type Passkey } from "../../services/passkey";
 
 const Page: React.FC = () => {
@@ -38,8 +42,11 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     const refreshPasskeys = async () => {
-        const data = await getPasskeys();
-        setPasskeys(data.passkeys || []);
+        try {
+            setPasskeys((await getPasskeys()) || []);
+        } catch (e) {
+            log.error("Failed to fetch passkeys", e);
+        }
     };
 
     useEffect(() => {
@@ -72,9 +79,9 @@ const Page: React.FC = () => {
         resetForm: () => void,
     ) => {
         try {
-            await addPasskey(inputValue);
+            await registerPasskey(inputValue);
         } catch (e) {
-            log.error("Failed to add passkey", e);
+            log.error("Failed to register a new passkey", e);
             // TODO-PK: localize
             setFieldError("Could not add passkey");
             return;

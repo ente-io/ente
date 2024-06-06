@@ -1,9 +1,11 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import _sodium from "libsodium-wrappers";
 
 const ENDPOINT = getEndpoint();
 
@@ -89,20 +91,19 @@ export const isWhitelistedRedirect = (redirectURL: URL) =>
     redirectURL.protocol == "ente:" ||
     redirectURL.protocol == "enteauth:";
 
-export const addPasskey = async (name: string) => {
-    let response: {
+/**
+ * Add a new passkey as the second factor to the user's account.
+ *
+ * @param name An arbitrary name that the user wishes to label this passkey with
+ * (aka "friendly name").
+ */
+export const registerPasskey = async (name: string) => {
+    const response: {
         options: {
             publicKey: PublicKeyCredentialCreationOptions;
         };
         sessionID: string;
-    };
-
-    try {
-        response = await getPasskeyRegistrationOptions();
-    } catch {
-        setFieldError("Failed to begin registration");
-        return;
-    }
+    } = await getPasskeyRegistrationOptions();
 
     const options = response.options;
 
@@ -119,80 +120,56 @@ export const addPasskey = async (name: string) => {
     );
 
     // create new credential
-    let newCredential: Credential;
+    const credential = ensure(await navigator.credentials.create(options));
 
-    try {
-        newCredential = ensure(await navigator.credentials.create(options));
-    } catch (e) {
-        log.error("Error creating credential", e);
-        setFieldError("Failed to create credential");
-        return;
-    }
+    await finishPasskeyRegistration(name, credential, response.sessionID);
+};
 
-    try {
-        await finishPasskeyRegistration(
-            name,
-            newCredential,
-            response.sessionID,
-        );
-    } catch {
-        setFieldError("Failed to finish registration");
-        return;
-    }
-
-
-}
-
-export const finishPasskeyRegistration = async (
+const finishPasskeyRegistration = async (
     friendlyName: string,
     credential: Credential,
-    sessionId: string,
+    sessionID: string,
 ) => {
-    try {
-        const attestationObjectB64 = await toB64URLSafeNoPadding(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            new Uint8Array(credential.response.attestationObject),
-        );
-        const clientDataJSONB64 = await toB64URLSafeNoPadding(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            new Uint8Array(credential.response.clientDataJSON),
-        );
+    const attestationObjectB64 = await toB64URLSafeNoPadding(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        new Uint8Array(credential.response.attestationObject),
+    );
+    const clientDataJSONB64 = await toB64URLSafeNoPadding(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        new Uint8Array(credential.response.clientDataJSON),
+    );
 
-        const token = getToken();
-        if (!token) return;
+    const token = ensure(getToken());
 
-        const response = await HTTPService.post(
-            `${ENDPOINT}/passkeys/registration/finish`,
-            JSON.stringify({
-                id: credential.id,
-                rawId: credential.id,
-                type: credential.type,
-                response: {
-                    attestationObject: attestationObjectB64,
-                    clientDataJSON: clientDataJSONB64,
-                },
-            }),
-            {
-                friendlyName,
-                sessionID: sessionId,
+    const response = await HTTPService.post(
+        `${ENDPOINT}/passkeys/registration/finish`,
+        JSON.stringify({
+            id: credential.id,
+            rawId: credential.id,
+            type: credential.type,
+            response: {
+                attestationObject: attestationObjectB64,
+                clientDataJSON: clientDataJSONB64,
             },
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("finish passkey registration failed", e);
-        throw e;
-    }
+        }),
+        {
+            friendlyName,
+            sessionID,
+        },
+        {
+            "X-Auth-Token": token,
+        },
+    );
+    return await response.data;
 };
 
 export interface BeginPasskeyAuthenticationResponse {
     ceremonySessionID: string;
     options: Options;
 }
+
 interface Options {
     publicKey: PublicKeyCredentialRequestOptions;
 }
