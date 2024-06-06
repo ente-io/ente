@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import S from "./utils/strings";
 
 export const App: React.FC = () => {
-    const [serverUrl, setServerUrl] = useState(
+    const [serverUrl /*, setServerUrl */] = useState(
         import.meta.env.VITE_ENTE_ENDPOINT || "",
     );
     const [token, setToken] = useState("");
@@ -25,21 +25,6 @@ export const App: React.FC = () => {
             localStorage.removeItem("token");
         }
     }, [token]);
-
-    useEffect(() => {
-        const storedServerUrl = localStorage.getItem("serverUrl");
-        if (storedServerUrl) {
-            setServerUrl(storedServerUrl);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (serverUrl) {
-            localStorage.setItem("serverUrl", serverUrl);
-        } else {
-            localStorage.removeItem("serverUrl");
-        }
-    }, [serverUrl]);
 
     const fetchData = async () => {
         try {
