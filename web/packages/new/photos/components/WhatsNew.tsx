@@ -14,9 +14,9 @@ import type { TransitionProps } from "@mui/material/transitions";
 import React from "react";
 
 interface WhatsNewProps {
-    /** Set this to `true` to show the dialog. */
+    /** If `true`, then the dialog is shown. */
     open: boolean;
-    /** Invoked by the dialog when it wants to get closed. */
+    /** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
 }
 

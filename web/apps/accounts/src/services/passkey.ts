@@ -15,19 +15,14 @@ export interface Passkey {
 }
 
 export const getPasskeys = async () => {
-    try {
-        const token = getToken();
-        if (!token) return;
-        const response = await HTTPService.get(
-            `${ENDPOINT}/passkeys`,
-            {},
-            { "X-Auth-Token": token },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("get passkeys failed", e);
-        throw e;
-    }
+    const token = getToken();
+    if (!token) return;
+    const response = await HTTPService.get(
+        `${ENDPOINT}/passkeys`,
+        {},
+        { "X-Auth-Token": token },
+    );
+    return await response.data;
 };
 
 export const renamePasskey = async (id: string, name: string) => {

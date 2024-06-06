@@ -24,13 +24,7 @@ import _sodium from "libsodium-wrappers";
 import { useRouter } from "next/router";
 import { useAppContext } from "pages/_app";
 import type { Dispatch, SetStateAction } from "react";
-import {
-    Fragment,
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { deletePasskey, renamePasskey } from "services/passkey";
 import {
     finishPasskeyRegistration,
@@ -47,37 +41,48 @@ export const PasskeysContext = createContext(
         refreshPasskeys: () => void;
     },
 );
+{
+    /* <PasskeysContext.Provider
+value={{
+    selectedPasskey,
+    setSelectedPasskey,
+    setShowPasskeyDrawer,
+    refreshPasskeys: init,
+}}
+>
+</PasskeysContext.Provider> */
+}
 
-const Passkeys = () => {
+const Page: React.FC = () => {
     const { showNavBar } = useAppContext();
 
-    const [selectedPasskey, setSelectedPasskey] = useState<Passkey | null>(
-        null,
-    );
-
-    const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
-
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
+    const [selectedPasskey, setSelectedPasskey] = useState<
+        Passkey | undefined
+    >();
 
     const router = useRouter();
 
-    const checkLoggedIn = () => {
-        const token = getToken();
-        if (!token) {
-            router.push("/login");
-        }
-    };
-
-    const init = async () => {
-        checkLoggedIn();
+    const refreshPasskeys = async () => {
         const data = await getPasskeys();
         setPasskeys(data.passkeys || []);
     };
 
     useEffect(() => {
+        if (!getToken()) {
+            router.push("/login");
+            return;
+        }
+
         showNavBar(true);
-        init();
+        void refreshPasskeys();
     }, []);
+
+    const handleSelectPasskey = (passkey: Passkey) =>
+        setSelectedPasskey(passkey);
+
+    const shouldOpenDrawer = selectedPasskey !== undefined;
+    const handleDrawerClose = () => setSelectedPasskey(undefined);
 
     const handleSubmit = async (
         inputValue: string,
@@ -134,19 +139,12 @@ const Passkeys = () => {
             return;
         }
 
-        await init();
+        await refreshPasskeys();
         resetForm();
     };
 
     return (
-        <PasskeysContext.Provider
-            value={{
-                selectedPasskey,
-                setSelectedPasskey,
-                setShowPasskeyDrawer,
-                refreshPasskeys: init,
-            }}
-        >
+        <>
             <CenteredFlex>
                 <Box maxWidth="20rem">
                     <Box marginBottom="1rem">
@@ -171,86 +169,109 @@ const Passkeys = () => {
                         />
                     </FormPaper>
                     <Box marginTop="1rem">
-                        <PasskeysList passkeys={passkeys} />
+                        <PasskeysList
+                            passkeys={passkeys}
+                            onSelectPasskey={handleSelectPasskey}
+                        />
                     </Box>
                 </Box>
             </CenteredFlex>
-            <ManagePasskeyDrawer open={showPasskeyDrawer} />
-        </PasskeysContext.Provider>
+            <ManagePasskeyDrawer
+                open={shouldOpenDrawer}
+                onClose={handleDrawerClose}
+                selectedPasskey={selectedPasskey}
+                refreshPasskeys={() => void refreshPasskeys}
+            />
+        </>
     );
 };
 
-export default Passkeys;
+export default Page;
 
 interface PasskeysListProps {
+    /** The list of {@link Passkey}s to show. */
     passkeys: Passkey[];
+    /**
+     * Callback to invoke when an passkey in the list is clicked.
+     *
+     * It is passed the corresponding {@link Passkey}.
+     */
+    onSelectPasskey: (passkey: Passkey) => void;
 }
 
-const PasskeysList: React.FC<PasskeysListProps> = ({ passkeys }) => {
+const PasskeysList: React.FC<PasskeysListProps> = ({
+    passkeys,
+    onSelectPasskey,
+}) => {
     return (
         <MenuItemGroup>
             {passkeys.map((passkey, i) => (
-                <Fragment key={passkey.id}>
-                    <PasskeyListItem passkey={passkey} />
+                <React.Fragment key={passkey.id}>
+                    <PasskeyListItem
+                        passkey={passkey}
+                        onClick={onSelectPasskey}
+                    />
                     {i < passkeys.length - 1 && <MenuItemDivider />}
-                </Fragment>
+                </React.Fragment>
             ))}
         </MenuItemGroup>
     );
 };
 
 interface PasskeyListItemProps {
+    /** The passkey to show in the item. */
     passkey: Passkey;
+    /**
+     * Callback to invoke when the item is clicked.
+     *
+     * It is passed the item's {@link passkey}.
+     */
+    onClick: (passkey: Passkey) => void;
 }
 
-const PasskeyListItem: React.FC<PasskeyListItemProps> = ({ passkey }) => {
-    const { setSelectedPasskey, setShowPasskeyDrawer } =
-        useContext(PasskeysContext);
-
+const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
+    passkey,
+    onClick,
+}) => {
     return (
         <EnteMenuItem
-            onClick={() => {
-                setSelectedPasskey(passkey);
-                setShowPasskeyDrawer(true);
-            }}
+            onClick={() => onClick(passkey)}
             startIcon={<KeyIcon />}
             endIcon={<ChevronRightIcon />}
-            label={passkey?.friendlyName}
+            label={passkey.friendlyName}
         />
     );
 };
 
 interface ManagePasskeyDrawerProps {
+    /** If `true`, then the drawer is shown. */
     open: boolean;
+    /*** Callback to invoke when the drawer wants to be closed. */
+    onClose: () => void;
+    /** The {@link Passkey} whose details should be shown in the drawer. */
+    selectedPasskey: Passkey | undefined;
+    refreshPasskeys: () => void;
 }
 
-const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = (props) => {
-    const { setShowPasskeyDrawer, refreshPasskeys, selectedPasskey } =
-        useContext(PasskeysContext);
-
+const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
+    open,
+    onClose,
+    selectedPasskey,
+    refreshPasskeys,
+}) => {
     const [showDeletePasskeyModal, setShowDeletePasskeyModal] = useState(false);
     const [showRenamePasskeyModal, setShowRenamePasskeyModal] = useState(false);
 
     return (
         <>
-            <EnteDrawer
-                anchor="right"
-                open={props.open}
-                onClose={() => {
-                    setShowPasskeyDrawer(false);
-                }}
-            >
+            <EnteDrawer anchor="right" open={open} onClose={onClose}>
                 {selectedPasskey && (
                     <>
                         <Stack spacing={"4px"} py={"12px"}>
                             <Titlebar
-                                onClose={() => {
-                                    setShowPasskeyDrawer(false);
-                                }}
+                                onClose={onClose}
                                 title="Manage Passkey"
-                                onRootClose={() => {
-                                    setShowPasskeyDrawer(false);
-                                }}
+                                onRootClose={onClose}
                             />
                             <InfoItem
                                 icon={<CalendarTodayIcon />}
