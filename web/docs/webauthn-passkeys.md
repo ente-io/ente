@@ -53,7 +53,7 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 ### Automatically logging into Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/accounts-handoff?token=<accountsToken>&package=<app package name>`.
+`https://accounts.ente.io/passkeys?token=<accountsToken>&package=<app package name>`.
 This page will appear like a normal loading screen to the user, but in the
 background, the app parses the token and package for usage in subsequent
 Accounts-related API calls.

@@ -509,7 +509,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             const pkg = clientPackageName["photos"];
 
             window.open(
-                `${accountsAppURL()}/passkeys/setup?package=${pkg}&token=${accountsToken}`,
+                `${accountsAppURL()}/passkeys?token=${accountsToken}&package=${pkg}`,
             );
         } catch (e) {
             log.error("failed to redirect to accounts page", e);
