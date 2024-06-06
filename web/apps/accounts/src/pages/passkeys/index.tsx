@@ -9,19 +9,7 @@ import { useEffect } from "react";
 const AccountHandoff = () => {
     const router = useRouter();
 
-    const retrieveAccountData = () => {
-        try {
-            extractAccountsToken();
-
-            router.push("/passkeys");
-        } catch (e) {
-            log.error("Failed to deserialize and set passed user data", e);
-            // Not much we can do here, but this redirect might be misleading.
-            router.push("/login");
-        }
-    };
-
-    const getClientPackageName = () => {
+    useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const pkg = urlParams.get("package");
         if (!pkg) return;
@@ -29,24 +17,24 @@ const AccountHandoff = () => {
         HTTPService.setHeaders({
             "X-Client-Package": pkg,
         });
-    };
 
-    const extractAccountsToken = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get("token");
-        if (!token) {
-            throw new Error("token not found");
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get("token");
+            if (!token) {
+                throw new Error("token not found");
+            }
+
+            const user = getData(LS_KEYS.USER) || {};
+            user.token = token;
+
+            setData(LS_KEYS.USER, user);
+
+            router.push("/passkeys/setup");
+        } catch (e) {
+            log.error("Failed to deserialize and set passed user data", e);
+            router.push("/login");
         }
-
-        const user = getData(LS_KEYS.USER) || {};
-        user.token = token;
-
-        setData(LS_KEYS.USER, user);
-    };
-
-    useEffect(() => {
-        getClientPackageName();
-        retrieveAccountData();
     }, []);
 
     return (
