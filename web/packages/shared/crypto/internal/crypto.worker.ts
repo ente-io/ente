@@ -195,8 +195,8 @@ export class DedicatedCryptoWorker {
         return libsodium.toB64(data);
     }
 
-    async toURLSafeB64(data: Uint8Array) {
-        return libsodium.toURLSafeB64(data);
+    async toB64URLSafe(data: Uint8Array) {
+        return libsodium.toB64URLSafe(data);
     }
 
     async fromB64(string: string) {

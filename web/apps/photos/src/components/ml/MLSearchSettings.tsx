@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
     Button,
@@ -11,7 +12,6 @@ import {
     Typography,
 } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
@@ -272,14 +272,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                 onRootClose={onRootClose}
             />
             <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                <Box px={"8px"}>
-                    {" "}
-                    <Typography color="text.muted">
-                        {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                        We're putting finishing touches, coming back soon!
-                    </Typography>
-                </Box>
-                {canEnable && (
+                {canEnable ? (
                     <Stack px={"8px"} spacing={"8px"}>
                         <Button
                             color={"accent"}
@@ -298,6 +291,14 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
                         </Button>
                         */}
                     </Stack>
+                ) : (
+                    <Box px={"8px"}>
+                        {" "}
+                        <Typography color="text.muted">
+                            {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
+                            We're putting finishing touches, coming back soon!
+                        </Typography>
+                    </Box>
                 )}
             </Stack>
         </Stack>

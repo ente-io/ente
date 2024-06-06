@@ -20,6 +20,8 @@
   "codeIssuerHint": "Aussteller",
   "codeSecretKeyHint": "Geheimer Schlüssel",
   "codeAccountHint": "Konto (you@domain.com)",
+  "codeTagHint": "Tag",
+  "accountKeyType": "Art des Keys",
   "sessionExpired": "Sitzung abgelaufen",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -156,6 +158,7 @@
       }
     }
   },
+  "invalidQRCode": "Ungültiger QR-Code",
   "noRecoveryKeyTitle": "Kein Wiederherstellungsschlüssel?",
   "enterEmailHint": "Geben Sie Ihre E-Mail Adresse ein",
   "invalidEmailTitle": "Ungültige E-Mail Adresse",
@@ -420,5 +423,18 @@
   "invalidEndpoint": "Ungültiger Endpunkt",
   "invalidEndpointMessage": "Der eingegebene Endpunkt ist ungültig. Bitte geben Sie einen gültigen Endpunkt ein und versuchen Sie es erneut.",
   "endpointUpdatedMessage": "Endpunkt erfolgreich aktualisiert",
-  "customEndpoint": "Mit {endpoint} verbunden"
+  "customEndpoint": "Mit {endpoint} verbunden",
+  "pinText": "Anpinnen",
+  "unpinText": "Lösen",
+  "pinnedCodeMessage": "{code} wurde angepinnt",
+  "unpinnedCodeMessage": "{code} wurde Losgelöst",
+  "tags": "Tags",
+  "createNewTag": "Neuen Tag erstellen",
+  "tag": "Tag",
+  "create": "Erstellen",
+  "editTag": "Tag bearbeiten",
+  "deleteTagTitle": "Tag löschen?",
+  "deleteTagMessage": "Sind Sie sicher, dass Sie diesen Code löschen wollen? Diese Aktion ist unumkehrbar.",
+  "somethingWentWrongParsingCode": "Wir konnten {x} Codes nicht parsen.",
+  "updateNotAvailable": "Update ist nicht verfügbar"
 }

@@ -57,3 +57,48 @@ apps:
 (For more details, see
 [local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml)
 in the server's source code).
+
+## Dockerfile example
+
+Here is an example of a Dockerfile by @Dylanger on our community Discord. This
+runs a standalone self-hosted version of the public albums app in production
+mode.
+
+```Dockerfile
+FROM node:20-alpine as builder
+
+WORKDIR /app
+COPY . .
+
+ARG NEXT_PUBLIC_ENTE_ENDPOINT=https://your.ente.example.org
+ARG NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your.albums.example.org
+
+RUN yarn install && yarn build
+
+FROM node:20-alpine
+
+WORKDIR /app
+COPY --from=builder /app/apps/photos/out .
+
+RUN npm install -g serve
+
+ENV PORT=3000
+EXPOSE ${PORT}
+
+CMD serve -s . -l tcp://0.0.0.0:${PORT}
+```
+
+Note that this only runs the public albums app, but the same principle can be
+used to run both the normal Ente photos app and the public albums app. There is
+a slightly more involved example showing how to do this also provided by in a
+community contributed guide about
+[configuring external S3](/self-hosting/guides/external-s3).
+
+You will also want to tell museum about your custom shared albums endpoint so
+that it uses that instead of the default URL when creating share links. You can
+configure that in museum's `config.yaml`:
+
+```
+apps:
+    public-albums: https://your.albums.example.org
+```

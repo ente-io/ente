@@ -1,3 +1,4 @@
+import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
@@ -5,14 +6,14 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import {
+    appTitle,
+    clientPackageName,
+    type AppName,
+    type BaseAppContextT,
+} from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
-import {
-    APPS,
-    APP_TITLES,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -54,8 +55,8 @@ import {
     isFaceIndexingEnabled,
     setIsFaceIndexingEnabled,
 } from "services/face/indexer";
+import mlWorkManager from "services/face/mlWorkManager";
 import { photosLogout } from "services/logout";
-import mlWorkManager from "services/machineLearning/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
@@ -128,10 +129,14 @@ export default function App({ Component, pageProps }: AppProps) {
     >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
+    // TODO(MR): This is never true currently, this is the WIP ability to show
+    // what's new dialog on desktop app updates. The UI is done, need to hook
+    // this up to logic to trigger it.
+    const [openWhatsNew, setOpenWhatsNew] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
@@ -148,10 +153,10 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(APPS.PHOTOS, userId);
+        logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
-            "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
+            "X-Client-Package": clientPackageName[appName],
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -207,7 +212,7 @@ export default function App({ Component, pageProps }: AppProps) {
         const initExport = async () => {
             const token = getToken();
             if (!token) return;
-            await DownloadManager.init(APPS.PHOTOS, { token });
+            await DownloadManager.init(token);
             await resumeExportsIfNeeded();
         };
         initExport();
@@ -358,13 +363,13 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const title = isI18nReady
         ? t("title", { context: "photos" })
-        : APP_TITLES.get(APPS.PHOTOS);
+        : appTitle[appName];
 
     return (
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
+            <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
@@ -385,6 +390,12 @@ export default function App({ Component, pageProps }: AppProps) {
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
                 />
+
+                <WhatsNew
+                    open={openWhatsNew}
+                    onClose={() => setOpenWhatsNew(false)}
+                />
+
                 <Notification
                     open={notificationView}
                     onClose={closeNotification}

@@ -4,14 +4,14 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import {
+    appTitle,
+    clientPackageName,
+    type AppName,
+    type BaseAppContextT,
+} from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
-import {
-    APPS,
-    APP_TITLES,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -67,7 +67,7 @@ export default function App({ Component, pageProps }: AppProps) {
         DialogBoxAttributesV2 | undefined
     >();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
@@ -76,10 +76,10 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(APPS.AUTH, userId);
+        logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
         HTTPService.setHeaders({
-            "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
+            "X-Client-Package": clientPackageName[appName],
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -151,16 +151,15 @@ export default function App({ Component, pageProps }: AppProps) {
         somethingWentWrong,
     };
 
-    // TODO: Refactor this to have a fallback
     const title = isI18nReady
         ? t("title", { context: "auth" })
-        : APP_TITLES.get(APPS.AUTH) ?? "";
+        : appTitle[appName];
 
     return (
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme(themeColor, APPS.AUTH)}>
+            <ThemeProvider theme={getTheme(themeColor, "auth")}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>

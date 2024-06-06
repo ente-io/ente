@@ -6,16 +6,14 @@ import {
 } from "@ente/shared/constants/pages";
 
 /**
- * The "home" route for each of our apps.
+ * The default page ("home route") for each of our apps.
  *
  * This is where we redirect to after successful authentication.
  */
 export const appHomeRoute = (appName: AppName): string => {
     switch (appName) {
-        case "account":
+        case "accounts":
             return ACCOUNTS_PAGES.PASSKEYS;
-        case "albums":
-            return "/";
         case "auth":
             return AUTH_PAGES.AUTH;
         case "photos":

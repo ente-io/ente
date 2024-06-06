@@ -23,6 +23,7 @@ linux:
         - target: pacman
           arch: [x64, arm64]
     category: Photography
+    icon: ./build/icon.icns
 mac:
     target:
         target: default

@@ -4,12 +4,12 @@ import { useContext, useEffect, useRef } from "react";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
 import { Box, Dialog, Stack, Typography } from "@mui/material";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import { UploadTypeSelectorIntent } from "types/gallery";
 import { isMobileOrTable } from "utils/common/deviceDetection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";

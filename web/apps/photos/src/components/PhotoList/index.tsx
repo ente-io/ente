@@ -1,5 +1,5 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { formatDate, getDate, isSameDay } from "@ente/shared/time/format";
+import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import {
     DATE_CONTAINER_HEIGHT,
@@ -26,7 +26,6 @@ import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { formattedByteSize } from "utils/units";
 
-const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
 const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
@@ -887,3 +886,24 @@ export function PhotoList({
         </List>
     );
 }
+
+const A_DAY = 24 * 60 * 60 * 1000;
+
+const getDate = (item: EnteFile) => {
+    const currentDate = item.metadata.creationTime / 1000;
+    const date = isSameDay(new Date(currentDate), new Date())
+        ? t("TODAY")
+        : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
+          ? t("YESTERDAY")
+          : formatDate(currentDate);
+
+    return date;
+};
+
+const isSameDay = (first: Date, second: Date) => {
+    return (
+        first.getFullYear() === second.getFullYear() &&
+        first.getMonth() === second.getMonth() &&
+        first.getDate() === second.getDate()
+    );
+};

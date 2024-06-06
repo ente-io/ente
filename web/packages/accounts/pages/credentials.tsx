@@ -1,7 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
-import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -45,6 +44,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
+import { appHomeRoute } from "../services/redirect";
 import {
     configureSRP,
     generateSRPSetupAttributes,
@@ -55,8 +55,6 @@ import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -89,8 +87,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const token = getToken();
             if (key && token) {
-                // TODO: Refactor the type of APP_HOMES to not require the ??
-                router.push(APP_HOMES.get(appNameOld) ?? "/");
+                router.push(appHomeRoute(appName));
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -250,7 +247,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? APP_HOMES.get(appNameOld));
+            router.push(redirectURL ?? appHomeRoute(appName));
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }
@@ -302,7 +299,7 @@ export default Page;
 const Header: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
         <Header_>
-            <Typography variant="h2">{t("PASSWORD")}</Typography>
+            <Typography variant="h2">{t("password")}</Typography>
             <Typography color="text.faint">{children}</Typography>
         </Header_>
     );

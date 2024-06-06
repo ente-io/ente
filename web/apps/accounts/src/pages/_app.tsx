@@ -1,11 +1,10 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
-import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -19,7 +18,7 @@ import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
-import { AppProps } from "next/app";
+import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useState } from "react";
 import "styles/global.css";
@@ -34,7 +33,7 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
-    const appName: AppName = "account";
+    const appName: AppName = "accounts";
 
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
@@ -52,7 +51,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const isMobile = useMediaQuery("(max-width:428px)");
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const router = useRouter();
 
@@ -81,7 +80,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
-    const theme = getTheme(themeColor, APPS.PHOTOS);
+    const theme = getTheme(themeColor, "photos");
 
     const logout = () => {
         void accountLogout().then(() => router.push(PAGES.ROOT));
@@ -95,10 +94,9 @@ export default function App({ Component, pageProps }: AppProps) {
         setDialogBoxAttributesV2,
     };
 
-    // TODO: This string doesn't actually exist
     const title = isI18nReady
         ? t("title", { context: "accounts" })
-        : APP_TITLES.get(APPS.ACCOUNTS);
+        : appTitle[appName];
 
     return (
         <>

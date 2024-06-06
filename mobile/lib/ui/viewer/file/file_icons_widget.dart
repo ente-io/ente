@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
+import "package:photos/utils/data_util.dart";
 
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({Key? key}) : super(key: key);
@@ -121,6 +124,80 @@ class VideoOverlayIcon extends StatelessWidget {
   }
 }
 
+class VideoOverlayDuration extends StatelessWidget {
+  final int? duration;
+  const VideoOverlayDuration({Key? key, required this.duration})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        late Widget onDarkBackground;
+        final bool iconFallback = (duration == null || duration == 0);
+
+        double inset = 4;
+        double size = iconFallback ? 18 : 10;
+        if (constraints.hasBoundedWidth) {
+          final w = constraints.maxWidth;
+          if (w > 120) {
+            size = iconFallback ? 24 : 14;
+          } else if (w < 75) {
+            inset = 3;
+            size = iconFallback ? 16 : 8;
+          }
+        }
+
+        if (iconFallback) {
+          onDarkBackground = Icon(
+            Icons.play_arrow,
+            color: Colors.white,
+            size: size, //default 24
+          );
+        } else {
+          final String formattedDuration = _getFormattedDuration(duration!);
+          onDarkBackground = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: Text(
+              formattedDuration,
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: Colors.white,
+                    fontSize: size, // Default font size is 14
+                  ),
+            ),
+          );
+        }
+
+        return Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: inset, right: inset),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: iconFallback ? null : BorderRadius.circular(8.0),
+                shape: iconFallback ? BoxShape.circle : BoxShape.rectangle,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: onDarkBackground,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getFormattedDuration(int duration) {
+    final String formattedDuration =
+        Duration(seconds: duration).toString().split('.').first;
+    final List<String> separated = formattedDuration.split(':');
+    final String hour = (separated[0] == '0') ? '' : separated[0] + ':';
+    final String minute = int.parse(separated[1]).toString() + ':';
+    final String second = separated[2];
+    return hour + minute + second;
+  }
+}
+
 class OwnerAvatarOverlayIcon extends StatelessWidget {
   final User user;
   const OwnerAvatarOverlayIcon(this.user, {Key? key}) : super(key: key);
@@ -143,15 +220,38 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
 
 class TrashedFileOverlayText extends StatelessWidget {
   final TrashFile file;
-
   const TrashedFileOverlayText(this.file, {Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     final int daysLeft =
         ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
                 Duration.microsecondsPerDay)
             .ceil();
+    final text = S.of(context).trashDaysLeft(daysLeft);
+    return FileOverlayText(text);
+  }
+}
+
+class FileSizeOverlayText extends StatelessWidget {
+  final EnteFile file;
+  const FileSizeOverlayText(this.file, {Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    if (file.fileSize == null) {
+      return const SizedBox.shrink();
+    }
+    final text = convertBytesToReadableFormat(file.fileSize!);
+    return FileOverlayText(text);
+  }
+}
+
+class FileOverlayText extends StatelessWidget {
+  final String text;
+
+  const FileOverlayText(this.text, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -163,7 +263,7 @@ class TrashedFileOverlayText extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       padding: const EdgeInsets.only(bottom: 5),
       child: Text(
-        S.of(context).trashDaysLeft(daysLeft),
+        text,
         style: Theme.of(context)
             .textTheme
             .titleSmall!

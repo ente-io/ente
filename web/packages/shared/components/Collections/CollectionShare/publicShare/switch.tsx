@@ -1,4 +1,4 @@
-import { Switch, SwitchProps, styled } from "@mui/material";
+import { Switch, styled, type SwitchProps } from "@mui/material";
 const PublicShareSwitch = styled((props: SwitchProps) => (
     <Switch
         focusVisibleClassName=".Mui-focusVisible"
