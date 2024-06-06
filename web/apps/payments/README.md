@@ -20,7 +20,7 @@ Add the following to `web/apps/photos/.env.local`:
 
 ```env
 NEXT_PUBLIC_ENTE_ENDPOINT = http://localhost:8080
-NEXT_PUBLIC_ENTE_PAYMENTS_ENDPOINT = http://localhost:3001
+NEXT_PUBLIC_ENTE_PAYMENTS_URL = http://localhost:3001
 ```
 
 Then start it locally

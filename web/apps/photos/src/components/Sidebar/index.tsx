@@ -22,7 +22,7 @@ import {
     generateEncryptionKey,
 } from "@ente/shared/crypto/internal/libsodium";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { getAccountsURL } from "@ente/shared/network/api";
+import { accountsAppURL } from "@ente/shared/network/api";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { downloadAsFile } from "@ente/shared/utils";
@@ -507,10 +507,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 );
             }
 
+            // Ente Accounts specific JWT token.
             const accountsToken = await getAccountsToken();
 
             window.open(
-                `${getAccountsURL()}${
+                `${accountsAppURL()}${
                     ACCOUNTS_PAGES.ACCOUNT_HANDOFF
                 }?package=${clientPackageName["photos"]}&token=${accountsToken}`,
             );

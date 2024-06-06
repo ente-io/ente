@@ -10,7 +10,7 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
-import { getAccountsURL } from "@ente/shared/network/api";
+import { accountsAppURL } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
@@ -85,7 +85,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+                window.location.href = `${accountsAppURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
                     window.location.origin
                 }/passkeys/finish`;
                 router.push(PAGES.CREDENTIALS);

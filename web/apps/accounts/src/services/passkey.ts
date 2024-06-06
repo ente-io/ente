@@ -1,3 +1,4 @@
+import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -80,6 +81,18 @@ export const getPasskeyRegistrationOptions = async () => {
         throw e;
     }
 };
+
+/**
+ * Return `true` if the given {@link redirectURL} (obtained from the redirect
+ * query parameter passed around during the passkey verification flow) is one of
+ * the whitelisted URLs that we allow redirecting to on success.
+ */
+export const isWhitelistedRedirect = (redirectURL: URL) =>
+    (isDevBuild && redirectURL.host.endsWith("localhost")) ||
+    redirectURL.host.endsWith(".ente.io") ||
+    redirectURL.host.endsWith(".ente.sh") ||
+    redirectURL.protocol == "ente:" ||
+    redirectURL.protocol == "enteauth:";
 
 export const finishPasskeyRegistration = async (
     friendlyName: string,

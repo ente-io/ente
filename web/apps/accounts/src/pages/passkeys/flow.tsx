@@ -1,5 +1,6 @@
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
+import { nullToUndefined } from "@/utils/transform";
 import {
     CenteredFlex,
     VerticallyCentered,
@@ -18,6 +19,7 @@ import { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
+    isWhitelistedRedirect,
     type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
 
@@ -31,25 +33,16 @@ const PasskeysFlow = () => {
     const init = async () => {
         const searchParams = new URLSearchParams(window.location.search);
 
-        // get redirect from the query params
-        const redirect = searchParams.get("redirect") as string;
+        // Extract redirect from the query params.
+        const redirect = nullToUndefined(searchParams.get("redirect"));
+        const redirectURL = redirect ? new URL(redirect) : undefined;
 
-        const redirectURL = new URL(redirect);
-        if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== "true") {
-            if (
-                redirect !== "" &&
-                !(
-                    redirectURL.host.endsWith(".ente.io") ||
-                    redirectURL.host.endsWith(".ente.sh") ||
-                    redirectURL.host.endsWith("bada-frame.pages.dev")
-                ) &&
-                redirectURL.protocol !== "ente:" &&
-                redirectURL.protocol !== "enteauth:"
-            ) {
-                setInvalidInfo(true);
-                setLoading(false);
-                return;
-            }
+        // Ensure that redirectURL is whitelisted, otherwise show an invalid
+        // "login" URL error to the user.
+        if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
+            setInvalidInfo(true);
+            setLoading(false);
+            return;
         }
 
         let pkg = clientPackageName["photos"];
@@ -60,6 +53,7 @@ const PasskeysFlow = () => {
         }
 
         setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
+        // The server needs to know the app on whose behalf we're trying to log in
         HTTPService.setHeaders({
             "X-Client-Package": pkg,
         });

@@ -342,7 +342,7 @@ credential authentication. We use Accounts as the central WebAuthn hub because
 credentials are locked to an FQDN.
 
 ```tsx
-window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+window.location.href = `${accountsAppURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
     window.location.origin
 }/passkeys/finish`;
 ```
