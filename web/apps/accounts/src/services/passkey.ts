@@ -89,6 +89,60 @@ export const isWhitelistedRedirect = (redirectURL: URL) =>
     redirectURL.protocol == "ente:" ||
     redirectURL.protocol == "enteauth:";
 
+export const addPasskey = async (name: string) => {
+    let response: {
+        options: {
+            publicKey: PublicKeyCredentialCreationOptions;
+        };
+        sessionID: string;
+    };
+
+    try {
+        response = await getPasskeyRegistrationOptions();
+    } catch {
+        setFieldError("Failed to begin registration");
+        return;
+    }
+
+    const options = response.options;
+
+    // TODO-PK: The types don't match.
+    options.publicKey.challenge = _sodium.from_base64(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        options.publicKey.challenge,
+    );
+    options.publicKey.user.id = _sodium.from_base64(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        options.publicKey.user.id,
+    );
+
+    // create new credential
+    let newCredential: Credential;
+
+    try {
+        newCredential = ensure(await navigator.credentials.create(options));
+    } catch (e) {
+        log.error("Error creating credential", e);
+        setFieldError("Failed to create credential");
+        return;
+    }
+
+    try {
+        await finishPasskeyRegistration(
+            name,
+            newCredential,
+            response.sessionID,
+        );
+    } catch {
+        setFieldError("Failed to finish registration");
+        return;
+    }
+
+
+}
+
 export const finishPasskeyRegistration = async (
     friendlyName: string,
     credential: Credential,

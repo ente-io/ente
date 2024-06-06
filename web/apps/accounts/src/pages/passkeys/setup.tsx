@@ -20,43 +20,17 @@ import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
 import { t } from "i18next";
-import _sodium from "libsodium-wrappers";
 import { useRouter } from "next/router";
 import { useAppContext } from "pages/_app";
-import type { Dispatch, SetStateAction } from "react";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { deletePasskey, renamePasskey } from "services/passkey";
-import {
-    finishPasskeyRegistration,
-    getPasskeyRegistrationOptions,
-    getPasskeys,
-    type Passkey,
-} from "../../services/passkey";
-
-export const PasskeysContext = createContext(
-    {} as {
-        selectedPasskey: Passkey | null;
-        setSelectedPasskey: Dispatch<SetStateAction<Passkey | null>>;
-        setShowPasskeyDrawer: Dispatch<SetStateAction<boolean>>;
-        refreshPasskeys: () => void;
-    },
-);
-{
-    /* <PasskeysContext.Provider
-value={{
-    selectedPasskey,
-    setSelectedPasskey,
-    setShowPasskeyDrawer,
-    refreshPasskeys: init,
-}}
->
-</PasskeysContext.Provider> */
-}
+import React, { useEffect, useState } from "react";
+import { addPasskey, deletePasskey, renamePasskey } from "services/passkey";
+import { getPasskeys, type Passkey } from "../../services/passkey";
 
 const Page: React.FC = () => {
     const { showNavBar } = useAppContext();
 
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
+    const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
     const [selectedPasskey, setSelectedPasskey] = useState<
         Passkey | undefined
     >();
@@ -78,67 +52,33 @@ const Page: React.FC = () => {
         void refreshPasskeys();
     }, []);
 
-    const handleSelectPasskey = (passkey: Passkey) =>
+    const handleSelectPasskey = (passkey: Passkey) => {
         setSelectedPasskey(passkey);
+        setShowPasskeyDrawer(true);
+    };
 
-    const shouldOpenDrawer = selectedPasskey !== undefined;
-    const handleDrawerClose = () => setSelectedPasskey(undefined);
+    const handleDrawerClose = () => {
+        setShowPasskeyDrawer(false);
+        // Don't clear the selected passkey, let the stale value be so that the
+        // drawer closing animation is nicer.
+        //
+        // The value will get overwritten the next time we open the drawer for a
+        // different passkey, so this will not have a functional impact.
+    };
 
     const handleSubmit = async (
         inputValue: string,
         setFieldError: (errorMessage: string) => void,
         resetForm: () => void,
     ) => {
-        let response: {
-            options: {
-                publicKey: PublicKeyCredentialCreationOptions;
-            };
-            sessionID: string;
-        };
-
         try {
-            response = await getPasskeyRegistrationOptions();
-        } catch {
-            setFieldError("Failed to begin registration");
-            return;
-        }
-
-        const options = response.options;
-
-        // TODO-PK: The types don't match.
-        options.publicKey.challenge = _sodium.from_base64(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            options.publicKey.challenge,
-        );
-        options.publicKey.user.id = _sodium.from_base64(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            options.publicKey.user.id,
-        );
-
-        // create new credential
-        let newCredential: Credential;
-
-        try {
-            newCredential = ensure(await navigator.credentials.create(options));
+            await addPasskey(inputValue);
         } catch (e) {
-            log.error("Error creating credential", e);
-            setFieldError("Failed to create credential");
+            log.error("Failed to add passkey", e);
+            // TODO-PK: localize
+            setFieldError("Could not add passkey");
             return;
         }
-
-        try {
-            await finishPasskeyRegistration(
-                inputValue,
-                newCredential,
-                response.sessionID,
-            );
-        } catch {
-            setFieldError("Failed to finish registration");
-            return;
-        }
-
         await refreshPasskeys();
         resetForm();
     };
@@ -150,22 +90,14 @@ const Page: React.FC = () => {
                     <Box marginBottom="1rem">
                         <Typography>{t("PASSKEYS_DESCRIPTION")}</Typography>
                     </Box>
-                    <FormPaper
-                        style={{
-                            padding: "1rem",
-                        }}
-                    >
+                    <FormPaper style={{ padding: "1rem" }}>
                         <SingleInputForm
                             fieldType="text"
                             placeholder={t("ENTER_PASSKEY_NAME")}
                             buttonText={t("ADD_PASSKEY")}
                             initialValue={""}
                             callback={handleSubmit}
-                            submitButtonProps={{
-                                sx: {
-                                    marginBottom: 1,
-                                },
-                            }}
+                            submitButtonProps={{ sx: { marginBottom: 1 } }}
                         />
                     </FormPaper>
                     <Box marginTop="1rem">
@@ -177,9 +109,9 @@ const Page: React.FC = () => {
                 </Box>
             </CenteredFlex>
             <ManagePasskeyDrawer
-                open={shouldOpenDrawer}
+                open={showPasskeyDrawer}
                 onClose={handleDrawerClose}
-                selectedPasskey={selectedPasskey}
+                passkey={selectedPasskey}
                 refreshPasskeys={() => void refreshPasskeys}
             />
         </>
@@ -248,123 +180,124 @@ interface ManagePasskeyDrawerProps {
     open: boolean;
     /*** Callback to invoke when the drawer wants to be closed. */
     onClose: () => void;
-    /** The {@link Passkey} whose details should be shown in the drawer. */
-    selectedPasskey: Passkey | undefined;
+    /**
+     * The {@link Passkey} whose details should be shown in the drawer.
+     *
+     * The cannot be undefined logically, but the types don't currently reflect
+     * that reality and indicate this as undefined (this is mostly to retain the
+     * identity of the drawer component in a way that it animates when opening
+     * and closing instead of instantly getting removed from the DOM).
+     */
+    passkey: Passkey | undefined;
     refreshPasskeys: () => void;
 }
 
 const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     open,
     onClose,
-    selectedPasskey,
+    passkey,
     refreshPasskeys,
 }) => {
-    const [showDeletePasskeyModal, setShowDeletePasskeyModal] = useState(false);
-    const [showRenamePasskeyModal, setShowRenamePasskeyModal] = useState(false);
+    const selectedPasskey = ensure(passkey);
+
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showRenameDialog, setShowRenameDialog] = useState(false);
+
+    const createdAt = formatDateTimeFull(selectedPasskey.createdAt / 1000);
 
     return (
         <>
-            <EnteDrawer anchor="right" open={open} onClose={onClose}>
-                {selectedPasskey && (
-                    <>
-                        <Stack spacing={"4px"} py={"12px"}>
-                            <Titlebar
-                                onClose={onClose}
-                                title="Manage Passkey"
-                                onRootClose={onClose}
-                            />
-                            <InfoItem
-                                icon={<CalendarTodayIcon />}
-                                title={t("CREATED_AT")}
-                                caption={
-                                    `${formatDateTimeFull(
-                                        selectedPasskey.createdAt / 1000,
-                                    )}` || ""
-                                }
-                                loading={!selectedPasskey}
-                                hideEditOption
-                            />
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    onClick={() => {
-                                        setShowRenamePasskeyModal(true);
-                                    }}
-                                    startIcon={<EditIcon />}
-                                    label={"Rename Passkey"}
-                                />
-                                <MenuItemDivider />
-                                <EnteMenuItem
-                                    onClick={() => {
-                                        setShowDeletePasskeyModal(true);
-                                    }}
-                                    startIcon={<DeleteIcon />}
-                                    label={"Delete Passkey"}
-                                    color="critical"
-                                />
-                            </MenuItemGroup>
-                        </Stack>
-                    </>
-                )}
+            <EnteDrawer anchor="right" {...{ open, onClose }}>
+                <Stack spacing={"4px"} py={"12px"}>
+                    <Titlebar
+                        onClose={onClose}
+                        // TODO-PK: Localize (more below too)
+                        title="Manage Passkey"
+                        onRootClose={onClose}
+                    />
+                    <InfoItem
+                        icon={<CalendarTodayIcon />}
+                        title={t("CREATED_AT")}
+                        caption={createdAt}
+                        loading={false}
+                        hideEditOption
+                    />
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            onClick={() => {
+                                setShowRenameDialog(true);
+                            }}
+                            startIcon={<EditIcon />}
+                            label={"Rename Passkey"}
+                        />
+                        <MenuItemDivider />
+                        <EnteMenuItem
+                            onClick={() => {
+                                setShowDeleteDialog(true);
+                            }}
+                            startIcon={<DeleteIcon />}
+                            label={"Delete Passkey"}
+                            color="critical"
+                        />
+                    </MenuItemGroup>
+                </Stack>
             </EnteDrawer>
-            <DeletePasskeyModal
-                open={showDeletePasskeyModal}
+
+            <DeletePasskeyDialog
+                open={showDeleteDialog}
                 onClose={() => {
-                    setShowDeletePasskeyModal(false);
+                    setShowDeleteDialog(false);
                     refreshPasskeys();
                 }}
+                passkey={selectedPasskey}
             />
-            <RenamePasskeyModal
-                open={showRenamePasskeyModal}
+
+            <RenamePasskeyDialog
+                open={showRenameDialog}
                 onClose={() => {
-                    setShowRenamePasskeyModal(false);
+                    setShowRenameDialog(false);
                     refreshPasskeys();
                 }}
+                passkey={selectedPasskey}
             />
         </>
     );
 };
 
-interface DeletePasskeyModalProps {
+interface DeletePasskeyDialogProps {
+    /** If `true`, then the dialog is shown. */
     open: boolean;
+    /*** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
+    /** The {@link Passkey} to delete. */
+    passkey: Passkey;
 }
 
-const DeletePasskeyModal: React.FC<DeletePasskeyModalProps> = (props) => {
-    const { selectedPasskey, setShowPasskeyDrawer } =
-        useContext(PasskeysContext);
+const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
+    open,
+    onClose,
+    passkey,
+}) => {
+    const [isDeleting, setIsDeleting] = useState(false);
+    const fullScreen = useMediaQuery("(max-width: 428px)");
 
-    const [loading, setLoading] = useState(false);
-
-    const isMobile = useMediaQuery("(max-width: 428px)");
-
-    const doDelete = async () => {
-        if (!selectedPasskey) return;
-        setLoading(true);
+    const handleConfirm = async () => {
+        setIsDeleting(true);
         try {
-            await deletePasskey(selectedPasskey.id);
-        } catch (error) {
-            console.error(error);
-            return;
+            await deletePasskey(passkey.id);
+            onClose();
+        } catch (e) {
+            log.error("Failed to delete passkey", e);
         } finally {
-            setLoading(false);
+            setIsDeleting(false);
         }
-        props.onClose();
-        setShowPasskeyDrawer(false);
     };
 
     return (
         <DialogBoxV2
             fullWidth
-            open={props.open}
-            onClose={props.onClose}
-            fullScreen={isMobile}
-            attributes={{
-                title: t("DELETE_PASSKEY"),
-                secondary: {
-                    action: props.onClose,
-                    text: t("CANCEL"),
-                },
-            }}
+            {...{ open, onClose, fullScreen }}
+            attributes={{ title: t("DELETE_PASSKEY") }}
         >
             <Stack spacing={"8px"}>
                 <Typography>{t("DELETE_PASSKEY_CONFIRMATION")}</Typography>
@@ -372,16 +305,12 @@ const DeletePasskeyModal: React.FC<DeletePasskeyModalProps> = (props) => {
                     type="submit"
                     size="large"
                     color="critical"
-                    loading={loading}
-                    onClick={doDelete}
+                    loading={isDeleting}
+                    onClick={handleConfirm}
                 >
                     {t("DELETE")}
                 </EnteButton>
-                <Button
-                    size="large"
-                    color={"secondary"}
-                    onClick={props.onClose}
-                >
+                <Button size="large" color={"secondary"} onClick={onClose}>
                     {t("CANCEL")}
                 </Button>
             </Stack>
@@ -389,49 +318,45 @@ const DeletePasskeyModal: React.FC<DeletePasskeyModalProps> = (props) => {
     );
 };
 
-interface RenamePasskeyModalProps {
+interface RenamePasskeyDialogProps {
+    /** If `true`, then the dialog is shown. */
     open: boolean;
+    /*** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
+    /** The {@link Passkey} to rename. */
+    passkey: Passkey;
 }
 
-const RenamePasskeyModal: React.FC<RenamePasskeyModalProps> = (props) => {
-    const { selectedPasskey } = useContext(PasskeysContext);
-
-    const isMobile = useMediaQuery("(max-width: 428px)");
+const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
+    open,
+    onClose,
+    passkey,
+}) => {
+    const fullScreen = useMediaQuery("(max-width: 428px)");
 
     const onSubmit = async (inputValue: string) => {
-        if (!selectedPasskey) return;
         try {
-            await renamePasskey(selectedPasskey.id, inputValue);
-        } catch (error) {
-            console.error(error);
+            await renamePasskey(passkey.id, inputValue);
+            onClose();
+        } catch (e) {
+            log.error("Failed to rename passkey", e);
             return;
         }
-
-        props.onClose();
     };
 
     return (
         <DialogBoxV2
             fullWidth
-            open={props.open}
-            onClose={props.onClose}
-            fullScreen={isMobile}
-            attributes={{
-                title: t("RENAME_PASSKEY"),
-                secondary: {
-                    action: props.onClose,
-                    text: t("CANCEL"),
-                },
-            }}
+            {...{ open, onClose, fullScreen }}
+            attributes={{ title: t("RENAME_PASSKEY") }}
         >
             <SingleInputForm
-                initialValue={selectedPasskey?.friendlyName}
+                initialValue={passkey?.friendlyName}
                 callback={onSubmit}
                 placeholder={t("ENTER_PASSKEY_NAME")}
                 buttonText={t("RENAME")}
                 fieldType="text"
-                secondaryButtonAction={props.onClose}
+                secondaryButtonAction={onClose}
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
             />
         </DialogBoxV2>
