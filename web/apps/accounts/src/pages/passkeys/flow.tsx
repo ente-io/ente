@@ -1,3 +1,4 @@
+import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import {
@@ -41,7 +42,8 @@ const PasskeysFlow = () => {
                 !(
                     redirectURL.host.endsWith(".ente.io") ||
                     redirectURL.host.endsWith(".ente.sh") ||
-                    redirectURL.host.endsWith("bada-frame.pages.dev")
+                    redirectURL.host.endsWith("bada-frame.pages.dev") ||
+                    (isDevBuild && redirectURL.host.endsWith("localhost"))
                 ) &&
                 redirectURL.protocol !== "ente:" &&
                 redirectURL.protocol !== "enteauth:"
