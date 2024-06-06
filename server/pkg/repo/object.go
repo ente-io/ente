@@ -64,6 +64,16 @@ func (repo *ObjectRepository) GetObject(fileID int64, objType ente.ObjectType) (
 	return s3ObjectKey, stacktrace.Propagate(err, "")
 }
 
+func (repo *ObjectRepository) GetObjectWithDCs(fileID int64, objType ente.ObjectType) (ente.S3ObjectKey, []string, error) {
+	row := repo.DB.QueryRow(`SELECT object_key, size, o_type, datacenters FROM object_keys WHERE file_id = $1 AND o_type = $2 AND is_deleted=false`,
+		fileID, objType)
+	var s3ObjectKey ente.S3ObjectKey
+	var datacenters []string
+	s3ObjectKey.FileID = fileID
+	err := row.Scan(&s3ObjectKey.ObjectKey, &s3ObjectKey.FileSize, &s3ObjectKey.Type, pq.Array(&datacenters))
+	return s3ObjectKey, datacenters, stacktrace.Propagate(err, "")
+}
+
 func (repo *ObjectRepository) GetAllFileObjectsByObjectKey(objectKey string) ([]ente.S3ObjectKey, error) {
 	rows, err := repo.DB.Query(`SELECT file_id, o_type, object_key, size from object_keys where file_id in 
                                                                 (select file_id from object_keys where object_key= $1) 
