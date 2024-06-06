@@ -40,6 +40,33 @@ import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
+const magicPromptsData = [
+  {
+    "prompt": "identity document",
+    "title": "Identity Document",
+    "minimumScore": 0.269,
+    "minimumSize": 0.0,
+  },
+  {
+    "prompt": "sunset at the beach",
+    "title": "Sunset",
+    "minimumScore": 0.25,
+    "minimumSize": 0.0,
+  },
+  {
+    "prompt": "roadtrip",
+    "title": "Roadtrip",
+    "minimumScore": 0.26,
+    "minimumSize": 0.0,
+  },
+  {
+    "prompt": "pizza pasta burger",
+    "title": "Food",
+    "minimumScore": 0.27,
+    "minimumSize": 0.0,
+  }
+];
+
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
@@ -172,6 +199,29 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getMagicSectionResutls() async {
+    if (!SemanticSearchService.instance.isMagicSearchEnabledAndReady()) {
+      return <GenericSearchResult>[];
+    }
+    final searchResuts = <GenericSearchResult>[];
+    for (Map<String, dynamic> magicPrompt in magicPromptsData) {
+      final files = await SemanticSearchService.instance.getMatchingFiles(
+        magicPrompt["prompt"],
+        scoreThreshold: magicPrompt["minimumScore"],
+      );
+      if (files.isNotEmpty) {
+        searchResuts.add(
+          GenericSearchResult(
+            ResultType.magic,
+            magicPrompt["title"],
+            files,
+          ),
+        );
+      }
+    }
+    return searchResuts;
   }
 
   Future<List<GenericSearchResult>> getRandomMomentsSearchResults(

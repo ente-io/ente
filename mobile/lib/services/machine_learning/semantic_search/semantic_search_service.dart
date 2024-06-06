@@ -131,11 +131,15 @@ class SemanticSearchService {
     _isSyncing = false;
   }
 
+  bool isMagicSearchEnabledAndReady() {
+    return LocalSettings.instance.hasEnabledMagicSearch() &&
+        _frameworkInitialization.isCompleted;
+  }
+
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !_frameworkInitialization.isCompleted) {
+    if (!isMagicSearchEnabledAndReady()) {
       return (query, <EnteFile>[]);
     }
     // If there's an ongoing request, just update the last query and return its future.
@@ -144,7 +148,7 @@ class SemanticSearchService {
       return _searchScreenRequest!;
     } else {
       // No ongoing request, start a new search.
-      _searchScreenRequest = _getMatchingFiles(query).then((result) {
+      _searchScreenRequest = getMatchingFiles(query).then((result) {
         // Search completed, reset the ongoing request.
         _searchScreenRequest = null;
         // If there was a new query during the last search, start a new search with the last query.
@@ -236,7 +240,7 @@ class SemanticSearchService {
     _queue.clear();
   }
 
-  Future<List<EnteFile>> _getMatchingFiles(
+  Future<List<EnteFile>> getMatchingFiles(
     String query, {
     double? scoreThreshold,
   }) async {
@@ -247,11 +251,13 @@ class SemanticSearchService {
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
-    final results = <EnteFile>[];
 
     final ignoredCollections =
         CollectionsService.instance.getHiddenCollectionIds();
+
     final deletedEntries = <int>[];
+    final results = <EnteFile>[];
+
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {

@@ -10,10 +10,10 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
-import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
@@ -251,7 +251,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return SearchService.instance.getAllFace(limit);
       case SectionType.content:
-        return Future.value(List<GenericSearchResult>.empty());
+        return SearchService.instance.getMagicSectionResutls();
 
       case SectionType.moment:
         return SearchService.instance.getRandomMomentsSearchResults(context);
@@ -293,6 +293,8 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
+      case SectionType.content:
+        return [Bus.instance.on<MLFrameworkInitializationUpdateEvent>()];
       default:
         return [];
     }
