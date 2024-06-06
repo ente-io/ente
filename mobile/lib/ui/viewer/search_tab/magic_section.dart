@@ -101,14 +101,14 @@ class _MagicSectionState extends State<MagicSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    SectionType.moment.sectionTitle(context),
+                    SectionType.content.sectionTitle(context),
                     style: textTheme.largeBold,
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      SectionType.moment.getEmptyStateText(context),
+                      SectionType.content.getEmptyStateText(context),
                       style: textTheme.smallMuted,
                     ),
                   ),
@@ -116,7 +116,7 @@ class _MagicSectionState extends State<MagicSection> {
               ),
             ),
             const SizedBox(width: 8),
-            const SearchSectionEmptyCTAIcon(SectionType.moment),
+            const SearchSectionEmptyCTAIcon(SectionType.content),
           ],
         ),
       );
@@ -127,7 +127,7 @@ class _MagicSectionState extends State<MagicSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SectionHeader(
-              SectionType.moment,
+              SectionType.content,
               hasMore: (_magicSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 2),
@@ -141,8 +141,8 @@ class _MagicSectionState extends State<MagicSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: _magicSearchResults
                       .map(
-                        (momentSearchResult) =>
-                            MomentRecommendation(momentSearchResult),
+                        (magicSearchResult) =>
+                            MagicRecommendation(magicSearchResult),
                       )
                       .toList(),
                 ),
@@ -155,31 +155,34 @@ class _MagicSectionState extends State<MagicSection> {
   }
 }
 
-class MomentRecommendation extends StatelessWidget {
+class MagicRecommendation extends StatelessWidget {
   static const _width = 100.0;
-  static const _height = 145.0;
+  static const _height = 110.0;
   static const _borderWidth = 1.0;
   static const _cornerRadius = 5.0;
   static const _cornerSmoothing = 1.0;
-  final GenericSearchResult momentSearchResult;
-  const MomentRecommendation(this.momentSearchResult, {super.key});
+  final GenericSearchResult magicSearchResult;
+  const MagicRecommendation(this.magicSearchResult, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = momentSearchResult.heroTag() +
-        (momentSearchResult.previewThumbnail()?.tag ?? "");
+    final heroTag = magicSearchResult.heroTag() +
+        (magicSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
       child: GestureDetector(
         onTap: () {
-          RecentSearches().add(momentSearchResult.name());
-          if (momentSearchResult.onResultTap != null) {
-            momentSearchResult.onResultTap!(context);
+          RecentSearches().add(magicSearchResult.name());
+          if (magicSearchResult.onResultTap != null) {
+            magicSearchResult.onResultTap!(context);
           } else {
             routeToPage(
               context,
-              SearchResultPage(momentSearchResult),
+              SearchResultPage(
+                magicSearchResult,
+                enableGrouping: false,
+              ),
             );
           }
         },
@@ -223,11 +226,11 @@ class MomentRecommendation extends StatelessWidget {
                       SizedBox(
                         width: _width,
                         height: _height,
-                        child: momentSearchResult.previewThumbnail() != null
+                        child: magicSearchResult.previewThumbnail() != null
                             ? Hero(
                                 tag: heroTag,
                                 child: ThumbnailWidget(
-                                  momentSearchResult.previewThumbnail()!,
+                                  magicSearchResult.previewThumbnail()!,
                                   shouldShowArchiveStatus: false,
                                   shouldShowSyncStatus: false,
                                 ),
@@ -263,7 +266,7 @@ class MomentRecommendation extends StatelessWidget {
                             bottom: 8,
                           ),
                           child: Text(
-                            momentSearchResult.name(),
+                            magicSearchResult.name(),
                             style: enteTextTheme.small.copyWith(
                               color: Colors.white,
                             ),
