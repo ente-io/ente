@@ -386,10 +386,7 @@ func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, obj
 func isCliRequest(ctx *gin.Context) bool {
 	// check if user-agent contains go-resty
 	userAgent := ctx.Request.Header.Get("User-Agent")
-	if strings.Contains(userAgent, "go-resty") {
-		return true
-	}
-	return false
+	return strings.Contains(userAgent, "go-resty")
 }
 
 // getWasabiSignedUrlIfAvailable returns a signed URL for the given fileID and objectType. It prefers wasabi over b2
