@@ -5,7 +5,7 @@ const Page = () => {
     useEffect(() => {
         window.location.href = window.location.href.replace(
             "account-handoff",
-            "passkeys",
+            "passkeys/handoff",
         );
     }, []);
 

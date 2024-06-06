@@ -53,9 +53,8 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 ### Automatically logging into Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/passkeys?token=<accountsToken>&package=<app package name>`.
-This page will appear like a normal loading screen to the user, but in the
-background, the app parses the token and package for usage in subsequent
+`https://accounts.ente.io/passkeys/handoff?client=<clientPackageName>&token=<accountsToken>`.
+This page will parse the token and client package name for usage in subsequent
 Accounts-related API calls.
 
 If valid, the user will be automatically redirected to the passkeys management
@@ -342,7 +341,7 @@ credential authentication. We use Accounts as the central WebAuthn hub because
 credentials are locked to an FQDN.
 
 ```tsx
-window.location.href = `${accountsAppURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&redirect=${
     window.location.origin
 }/passkeys/finish`;
 ```

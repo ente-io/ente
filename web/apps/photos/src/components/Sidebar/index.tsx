@@ -506,10 +506,10 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
             // Ente Accounts specific JWT token.
             const accountsToken = await getAccountsToken();
-            const pkg = clientPackageName["photos"];
+            const client = clientPackageName["photos"];
 
             window.open(
-                `${accountsAppURL()}/passkeys?token=${accountsToken}&package=${pkg}`,
+                `${accountsAppURL()}/passkeys/handoff?token=${accountsToken}&client=${client}`,
             );
         } catch (e) {
             log.error("failed to redirect to accounts page", e);

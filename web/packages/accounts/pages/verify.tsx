@@ -85,7 +85,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                window.location.href = `${accountsAppURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+                window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&redirect=${
                     window.location.origin
                 }/passkeys/finish`;
                 router.push(PAGES.CREDENTIALS);
