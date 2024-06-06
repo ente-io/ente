@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 
 import 'package:fast_base58/fast_base58.dart';
 import "package:flutter/cupertino.dart";
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:path_provider/path_provider.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -32,7 +34,8 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/sharing/manage_links_widget.dart';
+// import 'package:photos/ui/sharing/manage_links_widget.dart';
+import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
@@ -42,6 +45,7 @@ import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
 import 'package:photos/utils/toast_util.dart';
+import "package:screenshot/screenshot.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
   final GalleryType type;
@@ -73,12 +77,14 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-
+  final ScreenshotController screenshotController = ScreenshotController();
+  late String? placeholderPath;
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
   Collection? _cachedCollectionForSharedLink;
   final GlobalKey shareButtonKey = GlobalKey();
+  final GlobalKey sendLinkButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -157,16 +163,17 @@ class _FileSelectionActionsWidgetState
           SelectionActionButton(
             icon: Icons.copy_outlined,
             labelText: S.of(context).copyLink,
-            onTap: anyUploadedFiles ? _copyLink : null,
+            onTap: anyUploadedFiles ? _sendLink : null,
           ),
         );
       } else {
         items.add(
           SelectionActionButton(
-            icon: Icons.link_outlined,
-            labelText: S.of(context).shareLink,
-            onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
+            icon: Icons.navigation_rounded,
+            labelText: S.of(context).sendLink,
+            onTap: anyUploadedFiles ? _onSendLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
+            key: sendLinkButtonKey,
           ),
         );
       }
@@ -409,6 +416,7 @@ class _FileSelectionActionsWidgetState
       SelectionActionButton(
         labelText: S.of(context).share,
         icon: Icons.adaptive.share_outlined,
+        key: shareButtonKey,
         onTap: () => shareSelected(
           context,
           shareButtonKey,
@@ -602,7 +610,43 @@ class _FileSelectionActionsWidgetState
     }
   }
 
-  Future<void> _onCreatedSharedLinkClicked() async {
+  Future<String> saveImage(Uint8List bytes) async {
+    String path = "";
+    try {
+      final Directory root = await getTemporaryDirectory();
+      final String directoryPath = '${root.path}/enteTempFiles';
+      final DateTime timeStamp = DateTime.now();
+      await Directory(directoryPath).create(recursive: true);
+      final String filePath = '$directoryPath/$timeStamp.jpg';
+      final file = await File(filePath).writeAsBytes(bytes);
+      path = file.path;
+    } catch (e) {
+      _logger.severe("Failed to save placeholder image", e);
+    }
+    return path;
+  }
+
+  Future<String?> _createPlaceholder(
+    List<EnteFile> ownedSelectedFiles,
+  ) async {
+    final Widget imageWidget = LinkPlaceholder(
+      files: ownedSelectedFiles,
+    );
+    await Future.delayed(const Duration(milliseconds: 100));
+    final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final bytesOfImageToWidget = await screenshotController.captureFromWidget(
+      imageWidget,
+      pixelRatio: pixelRatio,
+      targetSize: MediaQuery.sizeOf(context),
+      delay: const Duration(milliseconds: 100),
+    );
+
+    final String onCreatedPlaceholderPath =
+        await saveImage(bytesOfImageToWidget);
+    return onCreatedPlaceholderPath;
+  }
+
+  Future<void> _onSendLinkTapped() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
         context,
@@ -610,51 +654,19 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
+    final dialog = createProgressDialog(
+      context,
+      S.of(context).creatingLink,
+      isDismissible: true,
+    );
+    await dialog.show();
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          labelText: S.of(context).copyLink,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: S.of(context).manageLink,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: S.of(context).done,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.third,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      title: S.of(context).publicLinkCreated,
-      body: S.of(context).youCanManageYourLinksInTheShareTab,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
-    if (actionResult?.action != null) {
-      if (actionResult!.action == ButtonAction.first) {
-        await _copyLink();
-      }
-      if (actionResult.action == ButtonAction.second) {
-        await routeToPage(
-          context,
-          ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
-        );
-      }
-    }
+
+    final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
+    placeholderPath = await _createPlaceholder(ownedSelectedFiles);
+    await dialog.hide();
+    await _sendLink();
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
@@ -756,7 +768,7 @@ class _FileSelectionActionsWidgetState
     }
   }
 
-  Future<void> _copyLink() async {
+  Future<void> _sendLink() async {
     if (_cachedCollectionForSharedLink != null) {
       final String collectionKey = Base58Encode(
         CollectionsService.instance
@@ -764,8 +776,25 @@ class _FileSelectionActionsWidgetState
       );
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
-      await Clipboard.setData(ClipboardData(text: url));
-      showShortToast(context, S.of(context).linkCopiedToClipboard);
+      unawaited(Clipboard.setData(ClipboardData(text: url)));
+      await shareImageAndUrl(
+        placeholderPath!,
+        url,
+        context: context,
+        key: sendLinkButtonKey,
+      );
+      if (placeholderPath != null) {
+        final file = File(placeholderPath!);
+        try {
+          if (file.existsSync()) {
+            file.deleteSync();
+          }
+        } catch (e) {
+          _logger.warning("Failed to delete the file: $e");
+        } finally {
+          placeholderPath = null;
+        }
+      }
     }
   }
 

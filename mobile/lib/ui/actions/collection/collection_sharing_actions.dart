@@ -110,12 +110,6 @@ class CollectionActions {
     BuildContext context,
     List<EnteFile> files,
   ) async {
-    final dialog = createProgressDialog(
-      context,
-      S.of(context).creatingLink,
-      isDismissible: true,
-    );
-    await dialog.show();
     try {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
@@ -143,10 +137,8 @@ class CollectionActions {
       await collectionsService.addOrCopyToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
       await CollectionsService.instance.createShareUrl(collection);
-      await dialog.hide();
       return collection;
     } catch (e, s) {
-      await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
       logger.severe("Failing to create link for selected files", e, s);
     }
