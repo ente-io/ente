@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -8,32 +7,65 @@ import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_pin.dart";
 import "package:pinput/pin_put/pin_put.dart";
 
 class LockScreenOptionPin extends StatefulWidget {
-  const LockScreenOptionPin({super.key});
+  const LockScreenOptionPin({
+    super.key,
+    this.isAuthenticating = false,
+    this.authPin,
+  });
 
+  final bool isAuthenticating;
+  final String? authPin;
   @override
   State<LockScreenOptionPin> createState() => _LockScreenOptionPinState();
 }
 
 class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
+  String _code = "";
+  final _focusNode = FocusNode();
+
   final _pinPutDecoration = BoxDecoration(
     border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
     borderRadius: BorderRadius.circular(15.0),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 1));
+      _focusNode.requestFocus();
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
     _pinController.dispose();
+    _focusNode.dispose();
   }
 
-  String _code = "";
-  Future<void> confirmPin(String code) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) =>
-            LockScreenOptionConfirmPin(pin: code),
-      ),
-    );
+  Future<bool> confirmPinAuth(String code) async {
+    if (widget.authPin == code) {
+      Navigator.of(context).pop(true);
+      return true;
+    }
+    Navigator.of(context).pop(false);
+    return false;
+  }
+
+  Future<void> _confirmPin(String code) async {
+    if (widget.isAuthenticating) {
+      await confirmPinAuth(code);
+      return;
+    } else {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) =>
+              LockScreenOptionConfirmPin(pin: code),
+        ),
+      );
+    }
   }
 
   @override
@@ -85,13 +117,16 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               ),
             ),
             Text(
-              S.of(context).enterThePinToLockTheApp,
+              widget.isAuthenticating
+                  ? 'Enter the pin to change Lockscreen settings.'
+                  : 'Enter the pin to lock the app',
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
             Padding(
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: PinPut(
+                focusNode: _focusNode,
                 fieldsCount: 4,
                 controller: _pinController,
                 submittedFieldDecoration: _pinPutDecoration.copyWith(
@@ -130,7 +165,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     ? ButtonType.primary
                     : ButtonType.secondary,
                 buttonSize: ButtonSize.large,
-                onTap: () => confirmPin(_code),
+                onTap: () => _confirmPin(_code),
               ),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 24)),

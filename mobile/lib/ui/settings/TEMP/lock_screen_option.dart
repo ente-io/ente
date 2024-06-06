@@ -52,8 +52,8 @@ class LockScreenOption extends StatelessWidget {
                               bgColor: colorScheme.fillFaint,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).deviceLock,
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: 'Device Lock',
                               ),
                               alignCaptionedTextToLeft: true,
                               isTopBorderRadiusRemoved: true,
@@ -67,8 +67,8 @@ class LockScreenOption extends StatelessWidget {
                               bgColor: colorScheme.fillFaint,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).pinLock,
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: 'PIN lock',
                               ),
                               alignCaptionedTextToLeft: true,
                               isTopBorderRadiusRemoved: true,
@@ -89,8 +89,8 @@ class LockScreenOption extends StatelessWidget {
                               bgColor: colorScheme.fillFaint,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).passwordLock,
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: 'Password lock',
                               ),
                               alignCaptionedTextToLeft: true,
                               isTopBorderRadiusRemoved: true,

@@ -72,7 +72,8 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
-
+  static const password = "user_pass";
+  static const pin = "user_pin";
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -149,6 +150,29 @@ class Configuration {
         rethrow;
       }
     }
+  }
+
+  Future<void> savePin(String userPin) async {
+    await _preferences.setString(pin, userPin);
+    await _preferences.remove(password);
+  }
+
+  Future<String?> loadSavedPin() async {
+    return _preferences.getString(pin);
+  }
+
+  Future<void> savePassword(String pass) async {
+    await _preferences.setString(password, pass);
+    await _preferences.remove(pin);
+  }
+
+  Future<String?> loadSavedPassword() async {
+    return _preferences.getString(password);
+  }
+
+  Future<void> removePinAndPassword() async {
+    await _preferences.remove(pin);
+    await _preferences.remove(password);
   }
 
   // _cleanUpStaleFiles deletes all files in the temp directory that are older

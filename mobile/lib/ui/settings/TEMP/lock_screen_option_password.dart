@@ -3,14 +3,18 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_password.dart";
 
 class LockScreenOptionPassword extends StatefulWidget {
-  const LockScreenOptionPassword({super.key});
-
+  const LockScreenOptionPassword({
+    super.key,
+    this.isAuthenticating = false,
+    this.authPass,
+  });
+  final bool isAuthenticating;
+  final String? authPass;
   @override
   State<LockScreenOptionPassword> createState() =>
       _LockScreenOptionPasswordState();
@@ -19,41 +23,44 @@ class LockScreenOptionPassword extends StatefulWidget {
 class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   final _passwordController = TextEditingController(text: null);
   String password = "";
-  @override
-  void dispose() {
-    super.dispose();
-    _passwordController.dispose();
-  }
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 1));
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _passwordController.dispose();
+    _focusNode.dispose();
+  }
+
+  Future<bool> confirmPasswordAuth(String code) async {
+    if (widget.authPass == code) {
+      Navigator.of(context).pop(true);
+      return true;
+    }
+    Navigator.of(context).pop(false);
+    return false;
   }
 
   Future<void> _confirmPassword() async {
-    if (password.length > 8) {
+    if (widget.isAuthenticating) {
+      await confirmPasswordAuth(password);
+      return;
+    } else {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) => LockScreenOptionConfirmPassword(
             password: password,
           ),
         ),
-      );
-    } else {
-      await showDialogWidget(
-        context: context,
-        title: 'Password must have at least 8 characters',
-        icon: Icons.lock,
-        body: 'Please re-enter the password.',
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.secondary,
-            labelText: S.of(context).ok,
-            isInAlert: true,
-            buttonAction: ButtonAction.first,
-          ),
-        ],
       );
     }
   }
@@ -63,7 +70,6 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -101,7 +107,10 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               ),
             ),
             Text(
-              S.of(context).enterPasswordToLockApp,
+              widget.isAuthenticating
+                  ? 'Enter the password to change \nLockscreen settings.'
+                  : 'Enter the password to lock the app',
+              textAlign: TextAlign.center,
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(24)),
@@ -111,6 +120,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
                 hintText: S.of(context).password,
                 borderRadius: 2,
                 isClearable: true,
+                focusNode: _focusNode,
                 textCapitalization: TextCapitalization.words,
                 textEditingController: _passwordController,
                 prefixIcon: Icons.lock_outline,
@@ -126,7 +136,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
             Padding(
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
-                labelText: S.of(context).next,
+                labelText: 'Next',
                 buttonType: password.length > 8
                     ? ButtonType.primary
                     : ButtonType.secondary,

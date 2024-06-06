@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -6,7 +7,6 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
-import "package:photos/ui/settings/TEMP/lock_screen_option.dart";
 
 class LockScreenOptionConfirmPassword extends StatefulWidget {
   const LockScreenOptionConfirmPassword({super.key, required this.password});
@@ -18,22 +18,30 @@ class LockScreenOptionConfirmPassword extends StatefulWidget {
 
 class _LockScreenOptionConfirmPasswordState
     extends State<LockScreenOptionConfirmPassword> {
-  String confirmPassword = "";
+  String _confirmPassword = "";
   final _confirmPasswordController = TextEditingController(text: null);
-
-  @override
-  void dispose() {
-    super.dispose();
-    _confirmPasswordController.dispose();
-  }
+  final Configuration _configuration = Configuration.instance;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 1));
+      _focusNode.requestFocus();
+    });
   }
 
-  Future<void> _confirmPassword() async {
-    if (widget.password == confirmPassword) {
+  @override
+  void dispose() {
+    super.dispose();
+    _focusNode.dispose();
+    _confirmPasswordController.dispose();
+  }
+
+  Future<void> _confirmPasswordMatch() async {
+    if (widget.password == _confirmPassword) {
+      await _configuration.savePassword(_confirmPassword);
       await showDialogWidget(
         context: context,
         title: 'Password has been set',
@@ -49,11 +57,8 @@ class _LockScreenOptionConfirmPasswordState
           ),
         ],
       );
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) => const LockScreenOption(),
-        ),
-      );
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
     } else {
       await showDialogWidget(
         context: context,
@@ -79,7 +84,6 @@ class _LockScreenOptionConfirmPasswordState
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -117,7 +121,7 @@ class _LockScreenOptionConfirmPasswordState
               ),
             ),
             Text(
-              S.of(context).enterPasswordToLockApp,
+              'Enter the password to lock the app',
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(24)),
@@ -126,6 +130,7 @@ class _LockScreenOptionConfirmPasswordState
               child: TextInputWidget(
                 hintText: S.of(context).confirmPassword,
                 borderRadius: 2,
+                focusNode: _focusNode,
                 isClearable: true,
                 textCapitalization: TextCapitalization.words,
                 textEditingController: _confirmPasswordController,
@@ -133,7 +138,7 @@ class _LockScreenOptionConfirmPasswordState
                 isPasswordInput: true,
                 onChange: (String p0) {
                   setState(() {
-                    confirmPassword = p0;
+                    _confirmPassword = p0;
                   });
                 },
               ),
@@ -142,12 +147,12 @@ class _LockScreenOptionConfirmPasswordState
             Padding(
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
-                labelText: S.of(context).next,
-                buttonType: confirmPassword.length > 8
+                labelText: 'Next',
+                buttonType: _confirmPassword.length > 3
                     ? ButtonType.primary
                     : ButtonType.secondary,
                 buttonSize: ButtonSize.large,
-                onTap: () => _confirmPassword(),
+                onTap: () => _confirmPasswordMatch(),
               ),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 24)),

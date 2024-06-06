@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/settings/TEMP/lock_screen_option.dart";
 import "package:pinput/pin_put/pin_put.dart";
 
 class LockScreenOptionConfirmPin extends StatefulWidget {
@@ -19,19 +19,34 @@ class LockScreenOptionConfirmPin extends StatefulWidget {
 class _LockScreenOptionConfirmPinState
     extends State<LockScreenOptionConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
+  String _confirmPin = "";
+  final Configuration _configuration = Configuration.instance;
+  final _focusNode = FocusNode();
 
   final _pinPutDecoration = BoxDecoration(
     border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
     borderRadius: BorderRadius.circular(15.0),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(seconds: 1));
+      _focusNode.requestFocus();
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
+    _focusNode.dispose();
     _confirmPinController.dispose();
   }
 
-  Future<void> confirmPin() async {
-    if (widget.pin == _confirmCode) {
+  Future<void> _confirmPinMatch() async {
+    if (widget.pin == _confirmPin) {
+      await _configuration.savePin(_confirmPin);
       await showDialogWidget(
         context: context,
         title: 'Pin has been set',
@@ -47,11 +62,8 @@ class _LockScreenOptionConfirmPinState
           ),
         ],
       );
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) => const LockScreenOption(),
-        ),
-      );
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
     } else {
       await showDialogWidget(
         context: context,
@@ -71,8 +83,6 @@ class _LockScreenOptionConfirmPinState
     }
     _confirmPinController.clear();
   }
-
-  String _confirmCode = "";
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +133,7 @@ class _LockScreenOptionConfirmPinState
               ),
             ),
             Text(
-              S.of(context).reEnterToConfirmPin,
+              'Re-enter to confirm the pin',
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
@@ -132,6 +142,7 @@ class _LockScreenOptionConfirmPinState
               child: PinPut(
                 fieldsCount: 4,
                 controller: _confirmPinController,
+                focusNode: _focusNode,
                 submittedFieldDecoration: _pinPutDecoration.copyWith(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
@@ -151,7 +162,7 @@ class _LockScreenOptionConfirmPinState
                 obscureText: '*',
                 onChanged: (String pin) {
                   setState(() {
-                    _confirmCode = pin;
+                    _confirmPin = pin;
                   });
                 },
                 onSubmit: (value) {
@@ -164,11 +175,11 @@ class _LockScreenOptionConfirmPinState
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
                 labelText: S.of(context).confirm,
-                buttonType: _confirmCode.length == 4
+                buttonType: _confirmPin.length == 4
                     ? ButtonType.primary
                     : ButtonType.secondary,
                 buttonSize: ButtonSize.large,
-                onTap: () => confirmPin(),
+                onTap: () => _confirmPinMatch(),
               ),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 24)),
