@@ -236,10 +236,14 @@ class SemanticSearchService {
     _queue.clear();
   }
 
-  Future<List<EnteFile>> _getMatchingFiles(String query) async {
+  Future<List<EnteFile>> _getMatchingFiles(
+    String query, {
+    double? scoreThreshold,
+  }) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults = await _getScores(textEmbedding);
+    final queryResults =
+        await _getScores(textEmbedding, scoreThreshold: scoreThreshold);
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
@@ -355,13 +359,17 @@ class SemanticSearchService {
     }
   }
 
-  Future<List<QueryResult>> _getScores(List<double> textEmbedding) async {
+  Future<List<QueryResult>> _getScores(
+    List<double> textEmbedding, {
+    double? scoreThreshold,
+  }) async {
     final startTime = DateTime.now();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkScore,
       param: {
         "imageEmbeddings": _cachedEmbeddings,
         "textEmbedding": textEmbedding,
+        "scoreThreshold": scoreThreshold,
       },
       taskName: "computeBulkScore",
     );
@@ -402,12 +410,14 @@ List<QueryResult> computeBulkScore(Map args) {
   final queryResults = <QueryResult>[];
   final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
+  final scoreThreshold =
+      args["scoreThreshold"] ?? SemanticSearchService.kScoreThreshold;
   for (final imageEmbedding in imageEmbeddings) {
     final score = computeScore(
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (score >= SemanticSearchService.kScoreThreshold) {
+    if (score >= scoreThreshold) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
   }
