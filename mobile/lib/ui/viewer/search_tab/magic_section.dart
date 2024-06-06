@@ -82,11 +82,12 @@ class _MagicSectionState extends State<MagicSection> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant MagicSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _magicSearchResults = widget.magicSearchResults;
-  }
+  // @override
+  // void didUpdateWidget(covariant MagicSection oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
+  //   //widget.magicSearch is empty when doing a hot reload
+  //   _magicSearchResults = widget.magicSearchResults;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +160,7 @@ class MagicRecommendation extends StatelessWidget {
   static const _width = 100.0;
   static const _height = 110.0;
   static const _borderWidth = 1.0;
-  static const _cornerRadius = 5.0;
+  static const _cornerRadius = 12.0;
   static const _cornerSmoothing = 1.0;
   final GenericSearchResult magicSearchResult;
   const MagicRecommendation(this.magicSearchResult, {super.key});
@@ -199,7 +200,7 @@ class MagicRecommendation extends StatelessWidget {
                   cornerSmoothing: _cornerSmoothing,
                 ),
                 child: Container(
-                  color: Colors.white.withOpacity(0.16),
+                  color: getEnteColorScheme(context).strokeFaint,
                   width: _width + _borderWidth * 2,
                   height: _height + _borderWidth * 2,
                 ),
@@ -238,8 +239,8 @@ class MagicRecommendation extends StatelessWidget {
                             : const NoThumbnailWidget(),
                       ),
                       Container(
-                        height: 145,
-                        width: 100,
+                        height: _height,
+                        width: _width,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
