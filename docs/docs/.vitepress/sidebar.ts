@@ -168,6 +168,10 @@ export const sidebar = [
                         link: "/auth/migration-guides/steam/",
                     },
                     {
+                        text: "From others",
+                        link: "/auth/migration-guides/import",
+                    },
+                    {
                         text: "Exporting your data",
                         link: "/auth/migration-guides/export",
                     },
