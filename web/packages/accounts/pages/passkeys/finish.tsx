@@ -16,11 +16,10 @@ import React, { useEffect } from "react";
 const Page: React.FC = () => {
     const router = useRouter();
 
-    const init = async () => {
-        // get response from query params
+    useEffect(() => {
+        // Extract response from query params
         const searchParams = new URLSearchParams(window.location.search);
         const response = searchParams.get("response");
-
         if (!response) return;
 
         saveCredentials(response);
@@ -28,10 +27,6 @@ const Page: React.FC = () => {
         const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
         InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
         router.push(redirectURL ?? PAGES.ROOT);
-    };
-
-    useEffect(() => {
-        init();
     }, []);
 
     return (
@@ -61,7 +56,6 @@ const saveCredentials = (response: string) => {
     // - The plaintext "token" will be passed during fresh signups, where we
     //   don't yet have keys to encrypt it, the account itself is being created
     //   as we go through this flow.
-    //
     //
     // - The encrypted `encryptedToken` will be present otherwise (i.e. if the
     //   user is signing into an existing account).
