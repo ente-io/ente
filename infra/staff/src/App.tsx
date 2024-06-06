@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import S from "./utils/strings";
 
 export const App: React.FC = () => {
-    const [serverUrl, setServerUrl] = useState("");
+    const [serverUrl, setServerUrl] = useState(
+        import.meta.env.VITE_ENTE_ENDPOINT || "",
+    );
     const [token, setToken] = useState("");
     const [email, setEmail] = useState("");
     const [userData, setUserData] = useState<any>(null);
@@ -13,6 +15,7 @@ export const App: React.FC = () => {
         if (storedToken) {
             setToken(storedToken);
         }
+        console.log(import.meta.env.VITE_ENTE_ENDPOINT);
     }, []);
 
     useEffect(() => {
@@ -150,21 +153,6 @@ export const App: React.FC = () => {
             <form className="input-form">
                 <div className="input-group">
                     <label>
-                        Server URL:
-                        <input
-                            type="text"
-                            value={serverUrl}
-                            onChange={(e) => setServerUrl(e.target.value)}
-                            style={{
-                                padding: "10px",
-                                margin: "10px",
-                                width: "100%",
-                            }}
-                        />
-                    </label>
-                </div>
-                <div className="input-group">
-                    <label>
                         Token:
                         <input
                             type="text"
@@ -180,7 +168,7 @@ export const App: React.FC = () => {
                 </div>
                 <div className="input-group">
                     <label>
-                        Emailid:
+                        Email id:
                         <input
                             type="text"
                             value={email}
