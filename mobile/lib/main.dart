@@ -208,11 +208,13 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
     await Configuration.instance.init();
+    _logger.info("Configuration done");
     await NetworkClient.instance.init();
     ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
     await UserService.instance.init();
     await EntityService.instance.init();
     LocationService.instance.init(preferences);
+    _logger.info("LocationServiceInit done");
 
     await UserRemoteFlagService.instance.init();
     await UpdateService.instance.init();
@@ -230,6 +232,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     SearchService.instance.init();
     StorageBonusService.instance.init(preferences);
     RemoteFileMLService.instance.init(preferences);
+    _logger.info("RemoteFileMLService done");
     if (!isBackground &&
         Platform.isAndroid &&
         await HomeWidgetService.instance.countHomeWidgets() == 0) {
@@ -244,9 +247,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         );
       });
     }
-
+    _logger.info("PushService/HomeWidget done");
     unawaited(SemanticSearchService.instance.init());
     MachineLearningController.instance.init();
+
+    _logger.info("MachineLearningController done");
     if (flagService.faceSearchEnabled) {
       unawaited(FaceMlService.instance.init());
     } else {
