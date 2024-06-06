@@ -140,46 +140,44 @@ const Passkeys = () => {
     };
 
     return (
-        <>
-            <PasskeysContext.Provider
-                value={{
-                    selectedPasskey,
-                    setSelectedPasskey,
-                    setShowPasskeyDrawer,
-                    refreshPasskeys: init,
-                }}
-            >
-                <CenteredFlex>
-                    <Box maxWidth="20rem">
-                        <Box marginBottom="1rem">
-                            <Typography>{t("PASSKEYS_DESCRIPTION")}</Typography>
-                        </Box>
-                        <FormPaper
-                            style={{
-                                padding: "1rem",
-                            }}
-                        >
-                            <SingleInputForm
-                                fieldType="text"
-                                placeholder={t("ENTER_PASSKEY_NAME")}
-                                buttonText={t("ADD_PASSKEY")}
-                                initialValue={""}
-                                callback={handleSubmit}
-                                submitButtonProps={{
-                                    sx: {
-                                        marginBottom: 1,
-                                    },
-                                }}
-                            />
-                        </FormPaper>
-                        <Box marginTop="1rem">
-                            <PasskeysList passkeys={passkeys} />
-                        </Box>
+        <PasskeysContext.Provider
+            value={{
+                selectedPasskey,
+                setSelectedPasskey,
+                setShowPasskeyDrawer,
+                refreshPasskeys: init,
+            }}
+        >
+            <CenteredFlex>
+                <Box maxWidth="20rem">
+                    <Box marginBottom="1rem">
+                        <Typography>{t("PASSKEYS_DESCRIPTION")}</Typography>
                     </Box>
-                </CenteredFlex>
-                <ManagePasskeyDrawer open={showPasskeyDrawer} />
-            </PasskeysContext.Provider>
-        </>
+                    <FormPaper
+                        style={{
+                            padding: "1rem",
+                        }}
+                    >
+                        <SingleInputForm
+                            fieldType="text"
+                            placeholder={t("ENTER_PASSKEY_NAME")}
+                            buttonText={t("ADD_PASSKEY")}
+                            initialValue={""}
+                            callback={handleSubmit}
+                            submitButtonProps={{
+                                sx: {
+                                    marginBottom: 1,
+                                },
+                            }}
+                        />
+                    </FormPaper>
+                    <Box marginTop="1rem">
+                        <PasskeysList passkeys={passkeys} />
+                    </Box>
+                </Box>
+            </CenteredFlex>
+            <ManagePasskeyDrawer open={showPasskeyDrawer} />
+        </PasskeysContext.Provider>
     );
 };
 
@@ -191,16 +189,14 @@ interface PasskeysListProps {
 
 const PasskeysList: React.FC<PasskeysListProps> = ({ passkeys }) => {
     return (
-        <>
-            <MenuItemGroup>
-                {passkeys.map((passkey, i) => (
-                    <Fragment key={passkey.id}>
-                        <PasskeyListItem passkey={passkey} />
-                        {i < passkeys.length - 1 && <MenuItemDivider />}
-                    </Fragment>
-                ))}
-            </MenuItemGroup>
-        </>
+        <MenuItemGroup>
+            {passkeys.map((passkey, i) => (
+                <Fragment key={passkey.id}>
+                    <PasskeyListItem passkey={passkey} />
+                    {i < passkeys.length - 1 && <MenuItemDivider />}
+                </Fragment>
+            ))}
+        </MenuItemGroup>
     );
 };
 
