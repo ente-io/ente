@@ -21,7 +21,7 @@ number).
 webauthn:
     rpid: "localhost"
     rporigins:
-	- "http://localhost:3001"
+        - "http://localhost:3001"
 ```
 
 Note that browsers already treat `localhost` as a secure domain, so Passkey APIs
