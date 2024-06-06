@@ -11,7 +11,6 @@ import MenuItemDivider from "@ente/shared/components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "@ente/shared/components/Menu/MenuItemGroup";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import Titlebar from "@ente/shared/components/Titlebar";
-import { ACCOUNTS_PAGES } from "@ente/shared/constants/pages";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { formatDateTimeFull } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -65,7 +64,7 @@ const Passkeys = () => {
     const checkLoggedIn = () => {
         const token = getToken();
         if (!token) {
-            router.push(ACCOUNTS_PAGES.LOGIN);
+            router.push("/login");
         }
     };
 
