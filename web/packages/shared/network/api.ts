@@ -34,13 +34,16 @@ export const getUploadEndpoint = () => {
     return `https://uploader.ente.io`;
 };
 
-export const getAccountsURL = () => {
-    const accountsURL = process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT;
-    if (accountsURL) {
-        return accountsURL;
-    }
-    return `https://accounts.ente.io`;
-};
+/**
+ * Return the URL of the Ente Accounts app.
+ *
+ * Defaults to our production instance, "https://accounts.ente.io", but can be
+ * overridden by setting the `NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT` environment
+ * variable to a non-empty value.
+ */
+export const accountsAppURL = () =>
+    process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT ||
+    `https://accounts.ente.io`;
 
 export const getAlbumsURL = () => {
     const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;

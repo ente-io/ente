@@ -18,7 +18,7 @@ import {
 } from "@ente/shared/crypto/helpers";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
-import { getAccountsURL, getEndpoint } from "@ente/shared/network/api";
+import { accountsAppURL, getEndpoint } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -166,7 +166,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+                    window.location.href = `${accountsAppURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
                         window.location.origin
                     }/passkeys/finish`;
                     return undefined;
