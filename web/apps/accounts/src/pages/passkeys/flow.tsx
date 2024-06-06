@@ -62,6 +62,7 @@ const PasskeysFlow = () => {
         }
 
         setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
+        // The server needs to know the app on whose behalf we're trying to log in
         HTTPService.setHeaders({
             "X-Client-Package": pkg,
         });

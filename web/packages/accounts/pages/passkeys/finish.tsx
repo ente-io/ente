@@ -19,6 +19,9 @@ const Page: React.FC = () => {
         // decode response
         const decodedResponse = JSON.parse(atob(response));
 
+        // only one will be present
+        // token only during fresh signup
+        // encryptedToken othw
         const { keyAttributes, encryptedToken, token, id } = decodedResponse;
         setData(LS_KEYS.USER, {
             ...getData(LS_KEYS.USER),

@@ -507,6 +507,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 );
             }
 
+            // Ente Accounts specific JWT token.
             const accountsToken = await getAccountsToken();
 
             window.open(
