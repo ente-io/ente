@@ -4,7 +4,7 @@ import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { appHomeRoute } from "../../services/redirect";
+import { PAGES } from "../../constants/pages";
 import type { PageProps } from "../../types/page";
 
 /**
@@ -14,9 +14,7 @@ import type { PageProps } from "../../types/page";
  * invoked the passkey flow since it needs to save the obtained credentials
  * in local storage (which is tied to the current origin).
  */
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const router = useRouter();
 
     useEffect(() => {
@@ -29,7 +27,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
         const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
         InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-        router.push(redirectURL ?? appHomeRoute(appName));
+        router.push(redirectURL ?? PAGES.CREDENTIALS);
     }, []);
 
     return (
