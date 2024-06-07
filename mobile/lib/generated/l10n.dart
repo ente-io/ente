@@ -8774,21 +8774,21 @@ class S {
     );
   }
 
-  /// `Auto pair`
-  String get autoPair {
-    return Intl.message(
-      'Auto pair',
-      name: 'autoPair',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Saving Edits!`
   String get savingEdits {
     return Intl.message(
       'Saving Edits!',
       name: 'savingEdits',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto pair`
+  String get autoPair {
+    return Intl.message(
+      'Auto pair',
+      name: 'autoPair',
       desc: '',
       args: [],
     );
