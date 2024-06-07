@@ -1,6 +1,7 @@
-import "dart:async" show StreamSubscription;
+import "dart:io";
 
 import "package:exif/exif.dart";
+import "package:ffmpeg_kit_flutter_min/ffprobe_kit.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -9,6 +10,7 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -25,6 +27,8 @@ import "package:photos/ui/viewer/file_details/faces_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/utils/exif_util.dart";
+import "package:photos/utils/ffprobe_util.dart";
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/local_settings.dart";
 
 class FileDetailsWidget extends StatefulWidget {
@@ -54,6 +58,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     "latRef": null,
     "longRef": null,
   };
+
+  int? creationTime;
+  Location? location;
 
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
@@ -92,12 +99,40 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             _exifData["exposureTime"] != null ||
             _exifData["ISO"] != null;
       });
+    } else {
+      getMediaInfo();
     }
     getExif(widget.file).then((exif) {
       _exifNotifier.value = exif;
     });
 
     super.initState();
+  }
+
+  Future<void> getMediaInfo() async {
+    final File? originFile = await getFile(widget.file, isOrigin: true);
+    if (originFile == null) return;
+    final session = await FFprobeKit.getMediaInformation(originFile.path);
+    final mediaInfo = session.getMediaInformation();
+
+    if (mediaInfo == null) {
+      final failStackTrace = await session.getFailStackTrace();
+      final output = await session.getOutput();
+      _logger.severe(
+        'failed to get video metadata failStackTrace=$failStackTrace, output=$output',
+      );
+      return;
+    }
+    final properties = await FFProbeUtil.getProperties(mediaInfo);
+
+    location = properties.location;
+    if (location != null) {
+      hasLocationData.value = true;
+    }
+    creationTime = DateTime.tryParse(properties.creationTime ?? "")
+        ?.microsecondsSinceEpoch;
+
+    setState(() {});
   }
 
   @override
@@ -128,7 +163,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             ),
     );
     fileDetailsTiles.addAll([
-      CreationTimeItem(file, _currentUserID),
+      CreationTimeItem(
+        file.copyWith(
+          creationTime: creationTime,
+        ),
+        _currentUserID,
+      ),
       const FileDetailsDivider(),
       ValueListenableBuilder(
         valueListenable: _exifNotifier,
@@ -165,7 +205,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ? Column(
                   children: [
                     LocationTagsWidget(
-                      widget.file,
+                      widget.file.copyWith(
+                        location: location,
+                      ),
                     ),
                     const FileDetailsDivider(),
                   ],

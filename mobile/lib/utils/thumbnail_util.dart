@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
