@@ -10,7 +10,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
-import { accountsAppURL } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
@@ -28,10 +27,10 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
+import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
-import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
@@ -87,7 +86,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 });
                 setIsFirstLogin(true);
                 redirectUserToPasskeyVerificationFlow(passkeySessionID);
-                router.push(PAGES.CREDENTIALS);
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
