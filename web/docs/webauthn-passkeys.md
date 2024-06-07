@@ -25,11 +25,13 @@ As of Feb 2024, Ente clients have a button to navigate to a WebView of Ente
 Accounts. Ente Accounts allows users to add and manage their registered
 passkeys.
 
-❗ Your WebView MUST invoke the operating-system's default browser, or an
-equivalent browser with matching API parity. Otherwise, the user will not be
-able to register or use registered WebAuthn credentials.
+> [!NOTE]
+>
+> Your WebView MUST invoke the operating-system's default browser, or an
+> equivalent browser with matching API parity. Otherwise, the user will not be
+> able to register or use registered WebAuthn credentials.
 
-### Accounts-Specific Session Token
+### Ente Accounts specific session token
 
 When a user clicks this button, the client sends a request for an
 Accounts-specific JWT session token as shown below. **The Ente Accounts API is
@@ -50,15 +52,16 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 | ------------- | ------ | ----------------------------------------------------------------- |
 | accountsToken | string | The Accounts-specific JWT session token. It is encoded in base64. |
 
-### Automatically logging into Accounts
+### Automatically logging into Ente Accounts
 
 Clients open a WebView with the URL
 `https://accounts.ente.io/passkeys/handoff?client=<clientPackageName>&token=<accountsToken>`.
 This page will parse the token and client package name for usage in subsequent
 Accounts-related API calls.
 
-If valid, the user will be automatically redirected to the passkeys management
-page. Otherwise, they will be required to login with their Ente credentials.
+If the token is valid, the user will be automatically redirected to the passkeys
+management page. Otherwise, they will be required to login with their Ente
+credentials.
 
 ## Registering a WebAuthn credential
 

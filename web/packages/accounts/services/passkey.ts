@@ -121,8 +121,7 @@ const configurePasskeyRecovery = async (
 /**
  * Fetch an Ente Accounts specific JWT token.
  *
- * Fetch a (JWT) token that can be used to authenticate with accounts.ente.io
- * (or its equivalent).
+ * This token can be used to authenticate with the Ente accounts app.
  */
 const getAccountsToken = async () => {
     const token = getToken();
