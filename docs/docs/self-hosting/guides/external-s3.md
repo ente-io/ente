@@ -7,7 +7,7 @@ description:
 
 # Hosting server and web app using external S3
 
-This guide is cat for self hosting the server and the web application of Ente Photos
+This guide is for self hosting the server and the web application of Ente Photos
 using docker compose and an external S3 bucket. So we assume that you already
 have the keys and secrets for the S3 bucket. The plan is as follows:
 
