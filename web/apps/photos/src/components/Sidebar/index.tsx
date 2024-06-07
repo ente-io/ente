@@ -1,10 +1,6 @@
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
-import { clientPackageName } from "@/next/types/app";
-import {
-    configurePasskeyRecovery,
-    isPasskeyRecoveryEnabled,
-} from "@ente/accounts/services/passkey";
+import { openAccountsManagePasskeysPage } from "@ente/accounts/services/passkey";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -12,14 +8,7 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import {
-    encryptToB64,
-    generateEncryptionKey,
-} from "@ente/shared/crypto/internal/libsodium";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { accountsAppURL } from "@ente/shared/network/api";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { downloadAsFile } from "@ente/shared/utils";
@@ -65,7 +54,7 @@ import { Trans } from "react-i18next";
 import billingService from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
-import { getAccountsToken, getUserDetailsV2 } from "services/userService";
+import { getUserDetailsV2 } from "services/userService";
 import { CollectionSummaries } from "types/collection";
 import { UserDetails } from "types/user";
 import {
@@ -439,6 +428,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
     const appContext = useContext(AppContext);
     const {
+        appName,
         setDialogMessage,
         startLoading,
         watchFolderView,
@@ -483,34 +473,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         closeSidebar();
 
         try {
-            // check if the user has passkey recovery enabled
-            const recoveryEnabled = await isPasskeyRecoveryEnabled();
-            if (!recoveryEnabled) {
-                // let's create the necessary recovery information
-                const recoveryKey = await getRecoveryKey();
-
-                const resetSecret = await generateEncryptionKey();
-
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-                const encryptionResult = await encryptToB64(
-                    resetSecret,
-                    await cryptoWorker.fromHex(recoveryKey),
-                );
-
-                await configurePasskeyRecovery(
-                    resetSecret,
-                    encryptionResult.encryptedData,
-                    encryptionResult.nonce,
-                );
-            }
-
-            // Ente Accounts specific JWT token.
-            const accountsToken = await getAccountsToken();
-            const client = clientPackageName["photos"];
-
-            window.open(
-                `${accountsAppURL()}/passkeys/handoff?token=${accountsToken}&client=${client}`,
-            );
+            await openAccountsManagePasskeysPage(appName);
         } catch (e) {
             log.error("failed to redirect to accounts page", e);
         }
