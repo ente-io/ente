@@ -10,7 +10,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import InfoIcon from "@mui/icons-material/Info";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -53,7 +52,7 @@ const PasskeysFlow = () => {
             pkg = clientPackageName["accounts"];
         }
 
-        setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
+        localStorage.setItem("clientPackage", pkg);
         // The server needs to know the app on whose behalf we're trying to log in
         HTTPService.setHeaders({
             "X-Client-Package": pkg,
