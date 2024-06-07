@@ -1,7 +1,15 @@
 import log from "@/next/log";
+import type { AppName } from "@/next/types/app";
+import { clientPackageName } from "@/next/types/app";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { getRecoveryKey } from "@ente/shared/crypto/helpers";
+import {
+    encryptToB64,
+    generateEncryptionKey,
+} from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { accountsAppURL, getEndpoint } from "@ente/shared/network/api";
+import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
@@ -22,12 +30,47 @@ export const redirectUserToPasskeyVerificationFlow = (
     window.location.href = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
 };
 
+/**
+ * Redirect user to a accounts.ente.io (or its equivalent), to a page where they
+ * can see their manage their passkeys.
+ *
+ * @param appName The {@link AppName} of the app which is calling this function.
+ */
+export const redirectUserToManagePasskeysPage = async (appName: AppName) => {
+    // check if the user has passkey recovery enabled
+    const recoveryEnabled = await isPasskeyRecoveryEnabled();
+    if (!recoveryEnabled) {
+        // let's create the necessary recovery information
+        const recoveryKey = await getRecoveryKey();
+
+        const resetSecret = await generateEncryptionKey();
+
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const encryptionResult = await encryptToB64(
+            resetSecret,
+            await cryptoWorker.fromHex(recoveryKey),
+        );
+
+        await configurePasskeyRecovery(
+            resetSecret,
+            encryptionResult.encryptedData,
+            encryptionResult.nonce,
+        );
+    }
+
+    const token = await getAccountsToken();
+    const client = clientPackageName[appName];
+    const params = new URLSearchParams({ token, client });
+
+    window.open(`${accountsAppURL()}/passkeys/handoff?${params.toString()}`);
+};
+
 export const isPasskeyRecoveryEnabled = async () => {
     try {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${getEndpoint()}/users/two-factor/recovery-status`,
+            `${apiOrigin()}/users/two-factor/recovery-status`,
             {},
             {
                 "X-Auth-Token": token,
@@ -45,7 +88,7 @@ export const isPasskeyRecoveryEnabled = async () => {
     }
 };
 
-export const configurePasskeyRecovery = async (
+const configurePasskeyRecovery = async (
     secret: string,
     userSecretCipher: string,
     userSecretNonce: string,
@@ -54,7 +97,7 @@ export const configurePasskeyRecovery = async (
         const token = getToken();
 
         const resp = await HTTPService.post(
-            `${getEndpoint()}/users/two-factor/passkeys/configure-recovery`,
+            `${apiOrigin()}/users/two-factor/passkeys/configure-recovery`,
             {
                 secret,
                 userSecretCipher,
@@ -73,4 +116,23 @@ export const configurePasskeyRecovery = async (
         log.error("failed to configure passkey recovery", e);
         throw e;
     }
+};
+
+/**
+ * Fetch an Ente Accounts specific JWT token.
+ *
+ * Fetch a (JWT) token that can be used to authenticate with accounts.ente.io
+ * (or its equivalent).
+ */
+const getAccountsToken = async () => {
+    const token = getToken();
+
+    const resp = await HTTPService.get(
+        `${apiOrigin()}/users/accounts-token`,
+        undefined,
+        {
+            "X-Auth-Token": token,
+        },
+    );
+    return resp.data["accountsToken"];
 };
