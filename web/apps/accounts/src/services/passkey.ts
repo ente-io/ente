@@ -1,9 +1,11 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import _sodium from "libsodium-wrappers";
 
 const ENDPOINT = getEndpoint();
 
@@ -15,19 +17,14 @@ export interface Passkey {
 }
 
 export const getPasskeys = async () => {
-    try {
-        const token = getToken();
-        if (!token) return;
-        const response = await HTTPService.get(
-            `${ENDPOINT}/passkeys`,
-            {},
-            { "X-Auth-Token": token },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("get passkeys failed", e);
-        throw e;
-    }
+    const token = getToken();
+    if (!token) return;
+    const response = await HTTPService.get(
+        `${ENDPOINT}/passkeys`,
+        {},
+        { "X-Auth-Token": token },
+    );
+    return await response.data;
 };
 
 export const renamePasskey = async (id: string, name: string) => {
@@ -88,62 +85,91 @@ export const getPasskeyRegistrationOptions = async () => {
  * the whitelisted URLs that we allow redirecting to on success.
  */
 export const isWhitelistedRedirect = (redirectURL: URL) =>
-    (isDevBuild && redirectURL.host.endsWith("localhost")) ||
+    (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh") ||
     redirectURL.protocol == "ente:" ||
     redirectURL.protocol == "enteauth:";
 
-export const finishPasskeyRegistration = async (
+/**
+ * Add a new passkey as the second factor to the user's account.
+ *
+ * @param name An arbitrary name that the user wishes to label this passkey with
+ * (aka "friendly name").
+ */
+export const registerPasskey = async (name: string) => {
+    const response: {
+        options: {
+            publicKey: PublicKeyCredentialCreationOptions;
+        };
+        sessionID: string;
+    } = await getPasskeyRegistrationOptions();
+
+    const options = response.options;
+
+    // TODO-PK: The types don't match.
+    options.publicKey.challenge = _sodium.from_base64(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        options.publicKey.challenge,
+    );
+    options.publicKey.user.id = _sodium.from_base64(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        options.publicKey.user.id,
+    );
+
+    // create new credential
+    const credential = ensure(await navigator.credentials.create(options));
+
+    await finishPasskeyRegistration(name, credential, response.sessionID);
+};
+
+const finishPasskeyRegistration = async (
     friendlyName: string,
     credential: Credential,
-    sessionId: string,
+    sessionID: string,
 ) => {
-    try {
-        const attestationObjectB64 = await toB64URLSafeNoPadding(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            new Uint8Array(credential.response.attestationObject),
-        );
-        const clientDataJSONB64 = await toB64URLSafeNoPadding(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            new Uint8Array(credential.response.clientDataJSON),
-        );
+    const attestationObjectB64 = await toB64URLSafeNoPadding(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        new Uint8Array(credential.response.attestationObject),
+    );
+    const clientDataJSONB64 = await toB64URLSafeNoPadding(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        new Uint8Array(credential.response.clientDataJSON),
+    );
 
-        const token = getToken();
-        if (!token) return;
+    const token = ensure(getToken());
 
-        const response = await HTTPService.post(
-            `${ENDPOINT}/passkeys/registration/finish`,
-            JSON.stringify({
-                id: credential.id,
-                rawId: credential.id,
-                type: credential.type,
-                response: {
-                    attestationObject: attestationObjectB64,
-                    clientDataJSON: clientDataJSONB64,
-                },
-            }),
-            {
-                friendlyName,
-                sessionID: sessionId,
+    const response = await HTTPService.post(
+        `${ENDPOINT}/passkeys/registration/finish`,
+        JSON.stringify({
+            id: credential.id,
+            rawId: credential.id,
+            type: credential.type,
+            response: {
+                attestationObject: attestationObjectB64,
+                clientDataJSON: clientDataJSONB64,
             },
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("finish passkey registration failed", e);
-        throw e;
-    }
+        }),
+        {
+            friendlyName,
+            sessionID,
+        },
+        {
+            "X-Auth-Token": token,
+        },
+    );
+    return await response.data;
 };
 
 export interface BeginPasskeyAuthenticationResponse {
     ceremonySessionID: string;
     options: Options;
 }
+
 interface Options {
     publicKey: PublicKeyCredentialRequestOptions;
 }

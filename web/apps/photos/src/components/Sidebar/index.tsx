@@ -11,10 +11,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
-import {
-    ACCOUNTS_PAGES,
-    PHOTOS_PAGES as PAGES,
-} from "@ente/shared/constants/pages";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
@@ -509,11 +506,10 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
             // Ente Accounts specific JWT token.
             const accountsToken = await getAccountsToken();
+            const client = clientPackageName["photos"];
 
             window.open(
-                `${accountsAppURL()}${
-                    ACCOUNTS_PAGES.ACCOUNT_HANDOFF
-                }?package=${clientPackageName["photos"]}&token=${accountsToken}`,
+                `${accountsAppURL()}/passkeys/handoff?token=${accountsToken}&client=${client}`,
             );
         } catch (e) {
             log.error("failed to redirect to accounts page", e);

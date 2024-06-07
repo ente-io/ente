@@ -1,9 +1,5 @@
 import type { AppName } from "@/next/types/app";
-import {
-    ACCOUNTS_PAGES,
-    AUTH_PAGES,
-    PHOTOS_PAGES,
-} from "@ente/shared/constants/pages";
+import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
 
 /**
  * The default page ("home route") for each of our apps.
@@ -13,7 +9,7 @@ import {
 export const appHomeRoute = (appName: AppName): string => {
     switch (appName) {
         case "accounts":
-            return ACCOUNTS_PAGES.PASSKEYS;
+            return "/passkeys";
         case "auth":
             return AUTH_PAGES.AUTH;
         case "photos":
