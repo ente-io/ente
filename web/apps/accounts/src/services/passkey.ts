@@ -66,21 +66,18 @@ export const renamePasskey = async (id: string, name: string) => {
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 };
 
+/**
+ * Delete one of the user's existing passkeys.
+ *
+ * @param id The `id` of the existing passkey to delete.
+ */
 export const deletePasskey = async (id: string) => {
-    try {
-        const token = getToken();
-        if (!token) return;
-        const response = await HTTPService.delete(
-            `${ENDPOINT}/passkeys/${id}`,
-            {},
-            {},
-            { "X-Auth-Token": token },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("delete passkey failed", e);
-        throw e;
-    }
+    const url = `${apiOrigin()}/passkeys/${id}`;
+    const res = await fetch(url, {
+        method: "DELETE",
+        headers: accountsAuthenticatedRequestHeaders(),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 };
 
 /**
