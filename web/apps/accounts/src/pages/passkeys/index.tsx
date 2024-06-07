@@ -89,8 +89,16 @@ const Page: React.FC = () => {
             await registerPasskey(inputValue);
         } catch (e) {
             log.error("Failed to register a new passkey", e);
-            // TODO-PK: localize
-            setFieldError("Could not add passkey");
+            // If the user cancels the operation, then an error with name
+            // "NotAllowedError" is thrown.
+            //
+            // Ignore this, but in other cases add an error indicator to the add
+            // passkey text field. The browser is expected to already have shown
+            // an error dialog to the user.
+            if (!(e instanceof Error && e.name == "NotAllowedError")) {
+                // TODO-PK: localize
+                setFieldError("Could not add passkey");
+            }
             return;
         }
         await refreshPasskeys();
