@@ -61,36 +61,6 @@ export const deletePasskey = async (id: string) => {
     }
 };
 
-export const getPasskeyRegistrationOptions = async () => {
-    try {
-        const token = getToken();
-        if (!token) return;
-        const response = await HTTPService.get(
-            `${ENDPOINT}/passkeys/registration/begin`,
-            {},
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("get passkey registration options failed", e);
-        throw e;
-    }
-};
-
-/**
- * Return `true` if the given {@link redirectURL} (obtained from the redirect
- * query parameter passed around during the passkey verification flow) is one of
- * the whitelisted URLs that we allow redirecting to on success.
- */
-export const isWhitelistedRedirect = (redirectURL: URL) =>
-    (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
-    redirectURL.host.endsWith(".ente.io") ||
-    redirectURL.host.endsWith(".ente.sh") ||
-    redirectURL.protocol == "ente:" ||
-    redirectURL.protocol == "enteauth:";
-
 /**
  * Add a new passkey as the second factor to the user's account.
  *
@@ -123,6 +93,24 @@ export const registerPasskey = async (name: string) => {
     const credential = ensure(await navigator.credentials.create(options));
 
     await finishPasskeyRegistration(name, credential, response.sessionID);
+};
+
+export const getPasskeyRegistrationOptions = async () => {
+    try {
+        const token = getToken();
+        if (!token) return;
+        const response = await HTTPService.get(
+            `${ENDPOINT}/passkeys/registration/begin`,
+            {},
+            {
+                "X-Auth-Token": token,
+            },
+        );
+        return await response.data;
+    } catch (e) {
+        log.error("get passkey registration options failed", e);
+        throw e;
+    }
 };
 
 const finishPasskeyRegistration = async (
@@ -164,6 +152,18 @@ const finishPasskeyRegistration = async (
     );
     return await response.data;
 };
+
+/**
+ * Return `true` if the given {@link redirectURL} (obtained from the redirect
+ * query parameter passed around during the passkey verification flow) is one of
+ * the whitelisted URLs that we allow redirecting to on success.
+ */
+export const isWhitelistedRedirect = (redirectURL: URL) =>
+    (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
+    redirectURL.host.endsWith(".ente.io") ||
+    redirectURL.host.endsWith(".ente.sh") ||
+    redirectURL.protocol == "ente:" ||
+    redirectURL.protocol == "enteauth:";
 
 export interface BeginPasskeyAuthenticationResponse {
     ceremonySessionID: string;
