@@ -19,14 +19,18 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
+ * @param appName The {@link AppName} of the app which is calling this function.
+ *
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
 export const redirectUserToPasskeyVerificationFlow = (
+    appName: AppName,
     passkeySessionID: string,
 ) => {
+    const client = clientPackageName[appName];
     const redirect = `${window.location.origin}/passkeys/finish`;
-    const params = new URLSearchParams({ passkeySessionID, redirect });
+    const params = new URLSearchParams({ client, passkeySessionID, redirect });
     window.location.href = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
 };
 

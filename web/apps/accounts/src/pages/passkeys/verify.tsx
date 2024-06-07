@@ -46,11 +46,16 @@ const PasskeysFlow = () => {
             return;
         }
 
-        let clientPackage = clientPackageName["photos"];
-        if (redirectURL.protocol === "enteauth:") {
-            clientPackage = clientPackageName["auth"];
-        } else if (redirectURL.hostname.startsWith("accounts")) {
-            clientPackage = clientPackageName["accounts"];
+        let clientPackage = nullToUndefined(searchParams.get("client"));
+        // Mobile apps don't pass the client header, deduce their client package
+        // name from the redirect URL that they provide. TODO-PK: Pass?
+        if (!clientPackage) {
+            clientPackage = clientPackageName["photos"];
+            if (redirectURL.protocol === "enteauth:") {
+                clientPackage = clientPackageName["auth"];
+            } else if (redirectURL.hostname.startsWith("accounts")) {
+                clientPackage = clientPackageName["accounts"];
+            }
         }
 
         localStorage.setItem("clientPackage", clientPackage);

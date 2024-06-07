@@ -85,7 +85,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                redirectUserToPasskeyVerificationFlow(passkeySessionID);
+                redirectUserToPasskeyVerificationFlow(
+                    appName,
+                    passkeySessionID,
+                );
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
