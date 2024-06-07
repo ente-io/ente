@@ -163,10 +163,23 @@ const beginPasskeyRegistration = async () => {
     //     one that has `PublicKeyCredentialCreationOptions`.
     //
     // 2.  Convert the two binary data fields that are expected to be in the
-    //     response from URLEncodedBase64 strings to Uint8Arrays.
+    //     response from URLEncodedBase64 strings to Uint8Arrays. There is a
+    //     third possibility, excludedCredentials[].id, but that we don't
+    //     currently use.
     //
-    // To further complicate things, the libdom.ts typings included with the
-    // current TypeScript version (5.4) indicate these binary types as a
+    // The web.dev guide calls this out too:
+    //
+    // > ArrayBuffer values transferred from the server such as `challenge`,
+    // > `user.id` and credential `id` for `excludeCredentials` need to be
+    // > encoded on transmission. Don't forget to decode them on the frontend
+    // > before passing to the WebAuthn API call. We recommend using Base64URL
+    // > encode.
+    // >
+    // > https://web.dev/articles/passkey-registration
+    //
+    // So that's that. But to further complicate things, the libdom.ts typings
+    // included with the current TypeScript version (5.4) indicate these binary
+    // types as a:
     //
     //     type BufferSource = ArrayBufferView | ArrayBuffer
     //
