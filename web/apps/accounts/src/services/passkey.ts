@@ -49,21 +49,21 @@ export const getPasskeys = async () => {
     return await response.data;
 };
 
+/**
+ * Rename one of the user's existing passkey with the given {@link id}.
+ *
+ * @param id The `id` of the existing passkey to rename.
+ *
+ * @param name The new name. aka "friendly name".
+ */
 export const renamePasskey = async (id: string, name: string) => {
-    try {
-        const token = getToken();
-        if (!token) return;
-        const response = await HTTPService.patch(
-            `${ENDPOINT}/passkeys/${id}`,
-            {},
-            { friendlyName: name },
-            { "X-Auth-Token": token },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("rename passkey failed", e);
-        throw e;
-    }
+    const params = new URLSearchParams({ friendlyName: name });
+    const url = `${apiOrigin()}/passkeys/${id}`;
+    const res = await fetch(`${url}?${params.toString()}`, {
+        method: "PATCH",
+        headers: accountsAuthenticatedRequestHeaders(),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 };
 
 export const deletePasskey = async (id: string) => {
@@ -253,8 +253,8 @@ const finishPasskeyRegistration = async (
     );
 
     const params = new URLSearchParams({ friendlyName, sessionID });
-    const baseURL = `${apiOrigin()}/passkeys/registration/finish`;
-    const res = await fetch(`${baseURL}?${params.toString()}`, {
+    const url = `${apiOrigin()}/passkeys/registration/finish`;
+    const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(),
         body: JSON.stringify({
@@ -270,8 +270,7 @@ const finishPasskeyRegistration = async (
             },
         }),
     });
-    if (!res.ok)
-        throw new Error(`Failed to fetch ${baseURL}: HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 };
 
 /**
