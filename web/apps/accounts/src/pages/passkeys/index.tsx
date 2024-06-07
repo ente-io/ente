@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -190,10 +189,7 @@ interface ManagePasskeyDrawerProps {
     /**
      * The {@link Passkey} whose details should be shown in the drawer.
      *
-     * The cannot be undefined logically, but the types don't currently reflect
-     * that reality and indicate this as undefined (this is mostly to retain the
-     * identity of the drawer component in a way that it animates when opening
-     * and closing instead of instantly getting removed from the DOM).
+     * It is guaranteed that this will be defined when `open` is true.
      */
     passkey: Passkey | undefined;
     refreshPasskeys: () => void;
@@ -205,68 +201,72 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     refreshPasskeys,
 }) => {
-    const selectedPasskey = ensure(passkey);
-
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showRenameDialog, setShowRenameDialog] = useState(false);
-
-    const createdAt = formatDateTimeFull(selectedPasskey.createdAt / 1000);
 
     return (
         <>
             <EnteDrawer anchor="right" {...{ open, onClose }}>
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
-                        onClose={onClose}
-                        // TODO-PK: Localize (more below too)
-                        title="Manage Passkey"
-                        onRootClose={onClose}
-                    />
-                    <InfoItem
-                        icon={<CalendarTodayIcon />}
-                        title={t("CREATED_AT")}
-                        caption={createdAt}
-                        loading={false}
-                        hideEditOption
-                    />
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            onClick={() => {
-                                setShowRenameDialog(true);
-                            }}
-                            startIcon={<EditIcon />}
-                            label={"Rename Passkey"}
+                {passkey && (
+                    <Stack spacing={"4px"} py={"12px"}>
+                        <Titlebar
+                            onClose={onClose}
+                            // TODO-PK: Localize (more below too)
+                            title="Manage Passkey"
+                            onRootClose={onClose}
                         />
-                        <MenuItemDivider />
-                        <EnteMenuItem
-                            onClick={() => {
-                                setShowDeleteDialog(true);
-                            }}
-                            startIcon={<DeleteIcon />}
-                            label={"Delete Passkey"}
-                            color="critical"
+                        <InfoItem
+                            icon={<CalendarTodayIcon />}
+                            title={t("CREATED_AT")}
+                            caption={formatDateTimeFull(
+                                passkey.createdAt / 1000,
+                            )}
+                            loading={false}
+                            hideEditOption
                         />
-                    </MenuItemGroup>
-                </Stack>
+                        <MenuItemGroup>
+                            <EnteMenuItem
+                                onClick={() => {
+                                    setShowRenameDialog(true);
+                                }}
+                                startIcon={<EditIcon />}
+                                label={"Rename Passkey"}
+                            />
+                            <MenuItemDivider />
+                            <EnteMenuItem
+                                onClick={() => {
+                                    setShowDeleteDialog(true);
+                                }}
+                                startIcon={<DeleteIcon />}
+                                label={"Delete Passkey"}
+                                color="critical"
+                            />
+                        </MenuItemGroup>
+                    </Stack>
+                )}
             </EnteDrawer>
 
-            <DeletePasskeyDialog
-                open={showDeleteDialog}
-                onClose={() => {
-                    setShowDeleteDialog(false);
-                    refreshPasskeys();
-                }}
-                passkey={selectedPasskey}
-            />
+            {passkey && (
+                <DeletePasskeyDialog
+                    open={showDeleteDialog}
+                    onClose={() => {
+                        setShowDeleteDialog(false);
+                        refreshPasskeys();
+                    }}
+                    passkey={passkey}
+                />
+            )}
 
-            <RenamePasskeyDialog
-                open={showRenameDialog}
-                onClose={() => {
-                    setShowRenameDialog(false);
-                    refreshPasskeys();
-                }}
-                passkey={selectedPasskey}
-            />
+            {passkey && (
+                <RenamePasskeyDialog
+                    open={showRenameDialog}
+                    onClose={() => {
+                        setShowRenameDialog(false);
+                        refreshPasskeys();
+                    }}
+                    passkey={passkey}
+                />
+            )}
         </>
     );
 };
