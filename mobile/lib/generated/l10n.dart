@@ -8774,16 +8774,6 @@ class S {
     );
   }
 
-  /// `Saving Edits!`
-  String get savingEdits {
-    return Intl.message(
-      'Saving Edits!',
-      name: 'savingEdits',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Auto pair`
   String get autoPair {
     return Intl.message(
@@ -8839,6 +8829,16 @@ class S {
     return Intl.message(
       'Indexing is paused. It will automatically resume when device is ready.',
       name: 'indexingIsPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saving Edits!`
+  String get savingEdits {
+    return Intl.message(
+      'Saving Edits!',
+      name: 'savingEdits',
       desc: '',
       args: [],
     );
