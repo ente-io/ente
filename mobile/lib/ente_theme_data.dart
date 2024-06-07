@@ -220,6 +220,8 @@ TextTheme _buildTextTheme(Color textColor) {
 }
 
 extension CustomColorScheme on ColorScheme {
+  Color get videoPlayerPrimaryColor => const Color.fromRGBO(1, 222, 77, 1);
+
   Color get defaultBackgroundColor =>
       brightness == Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
@@ -392,7 +394,9 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
 }) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      foregroundColor: onPrimary, backgroundColor: primary, elevation: elevation,
+      foregroundColor: onPrimary,
+      backgroundColor: primary,
+      elevation: elevation,
       alignment: Alignment.center,
       textStyle: const TextStyle(
         fontWeight: FontWeight.w600,

@@ -13,6 +13,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
+import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
@@ -368,6 +369,21 @@ class _DetailPageState extends State<DetailPage> {
       if (ioFile == null) {
         showShortToast(context, S.of(context).failedToFetchOriginalForEdit);
         await dialog.hide();
+        return;
+      }
+      if (file.fileType == FileType.video) {
+        await dialog.hide();
+        replacePage(
+          context,
+          VideoEditorPage(
+            file: file,
+            ioFile: ioFile,
+            detailPageConfig: widget.config.copyWith(
+              files: _files,
+              selectedIndex: _selectedIndexNotifier.value,
+            ),
+          ),
+        );
         return;
       }
       final imageProvider =
