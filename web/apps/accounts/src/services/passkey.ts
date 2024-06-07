@@ -23,7 +23,9 @@ const accountsAuthenticatedRequestHeaders = (): Record<string, string> => {
     const token = getToken();
     if (!token) throw new Error("Missing accounts token");
     const headers: Record<string, string> = { "X-Auth-Token": token };
-    const clientPackage = nullToUndefined(localStorage.get("clientPackage"));
+    const clientPackage = nullToUndefined(
+        localStorage.getItem("clientPackage"),
+    );
     if (clientPackage) headers["X-Client-Package"] = clientPackage;
     return headers;
 };
@@ -122,6 +124,13 @@ export const getPasskeyRegistrationOptions = async () => {
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return await res.json();
 };
+
+interface PasskeyRegistrationOptions {
+    sessionID: string;
+    options: {
+        publicKey: PublicKeyCredentialCreationOptions;
+    };
+}
 
 const finishPasskeyRegistration = async (
     friendlyName: string,
