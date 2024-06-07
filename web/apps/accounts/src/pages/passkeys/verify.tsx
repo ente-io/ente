@@ -40,6 +40,7 @@ const PasskeysFlow = () => {
         // Ensure that redirectURL is whitelisted, otherwise show an invalid
         // "login" URL error to the user.
         if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
+            log.error(`Redirect URL '${redirectURL}' is not whitelisted`);
             setInvalidInfo(true);
             setLoading(false);
             return;
