@@ -2,6 +2,7 @@ import { isDevBuild } from "@/next/env";
 import { authenticatedRequestHeaders } from "@/next/http";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
+import { nullToUndefined } from "@/utils/transform";
 import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
@@ -9,6 +10,23 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import _sodium from "libsodium-wrappers";
 
 const ENDPOINT = getEndpoint();
+
+/**
+ * Variant of {@link authenticatedRequestHeaders} but for authenticated requests
+ * made by the accounts app.
+ *
+ * We cannot use {@link authenticatedRequestHeaders} directly because the
+ * accounts app does not save a full user and instead only saves the user's
+ * token (and that token too is scoped to the accounts APIs).
+ */
+const accountsAuthenticatedRequestHeaders = (): Record<string, string> => {
+    const token = getToken();
+    if (!token) throw new Error("Missing accounts token");
+    const headers: Record<string, string> = { "X-Auth-Token": token };
+    const clientPackage = nullToUndefined(localStorage.get("clientPackage"));
+    if (clientPackage) headers["X-Client-Package"] = clientPackage;
+    return headers;
+};
 
 export interface Passkey {
     id: string;
@@ -99,7 +117,7 @@ export const registerPasskey = async (name: string) => {
 export const getPasskeyRegistrationOptions = async () => {
     const url = `${apiOrigin()}/passkeys/registration/begin`;
     const res = await fetch(url, {
-        headers: authenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return await res.json();
