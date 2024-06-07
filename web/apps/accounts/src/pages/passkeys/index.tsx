@@ -43,8 +43,7 @@ const Page: React.FC = () => {
 
     const refreshPasskeys = async () => {
         try {
-            const { passkeys } = await getPasskeys();
-            setPasskeys(passkeys || []);
+            setPasskeys(await getPasskeys());
         } catch (e) {
             log.error("Failed to fetch passkeys", e);
         }

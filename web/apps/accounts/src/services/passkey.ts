@@ -9,6 +9,7 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { z } from "zod";
 
 const ENDPOINT = getEndpoint();
 
@@ -31,22 +32,40 @@ const accountsAuthenticatedRequestHeaders = (): Record<string, string> => {
     return headers;
 };
 
-export interface Passkey {
-    id: string;
-    userID: number;
-    friendlyName: string;
-    createdAt: number;
-}
+const Passkey = z.object({
+    /** A unique ID for the passkey */
+    id: z.string(),
+    /**
+     * An arbitrary name associated by the user with the passkey (a.k.a
+     * its "friendly name").
+     */
+    friendlyName: z.string(),
+    /**
+     * Epoch milliseconds when this passkey was created.
+     */
+    createdAt: z.number(),
+});
 
+export type Passkey = z.infer<typeof Passkey>;
+
+const GetPasskeysResponse = z.object({
+    passkeys: z.array(Passkey),
+});
+
+/**
+ * Fetch the existing passkeys for the user.
+ *
+ * @returns An array of {@link Passkey}s. The array will be empty if the user
+ * has no passkeys.
+ */
 export const getPasskeys = async () => {
-    const token = getToken();
-    if (!token) return;
-    const response = await HTTPService.get(
-        `${ENDPOINT}/passkeys`,
-        {},
-        { "X-Auth-Token": token },
-    );
-    return await response.data;
+    const url = `${apiOrigin()}/passkeys`;
+    const res = await fetch(url, {
+        headers: accountsAuthenticatedRequestHeaders(),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const { passkeys } = GetPasskeysResponse.parse(await res.json());
+    return passkeys;
 };
 
 /**
@@ -54,7 +73,7 @@ export const getPasskeys = async () => {
  *
  * @param id The `id` of the existing passkey to rename.
  *
- * @param name The new name. aka "friendly name".
+ * @param name The new name (a.k.a. "friendly name").
  */
 export const renamePasskey = async (id: string, name: string) => {
     const params = new URLSearchParams({ friendlyName: name });
@@ -84,7 +103,7 @@ export const deletePasskey = async (id: string) => {
  * Add a new passkey as the second factor to the user's account.
  *
  * @param name An arbitrary name that the user wishes to label this passkey with
- * (aka "friendly name").
+ * (a.k.a. "friendly name").
  */
 export const registerPasskey = async (name: string) => {
     // Get options (and sessionID) from the backend.
