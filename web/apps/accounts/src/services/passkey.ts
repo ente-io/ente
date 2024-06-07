@@ -1,9 +1,10 @@
 import { isDevBuild } from "@/next/env";
+import { authenticatedRequestHeaders } from "@/next/http";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
+import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import _sodium from "libsodium-wrappers";
 
@@ -96,21 +97,12 @@ export const registerPasskey = async (name: string) => {
 };
 
 export const getPasskeyRegistrationOptions = async () => {
-    try {
-        const token = getToken();
-        if (!token) return;
-        const response = await HTTPService.get(
-            `${ENDPOINT}/passkeys/registration/begin`,
-            {},
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return await response.data;
-    } catch (e) {
-        log.error("get passkey registration options failed", e);
-        throw e;
-    }
+    const url = `${apiOrigin()}/passkeys/registration/begin`;
+    const res = await fetch(url, {
+        headers: authenticatedRequestHeaders(),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    return await res.json();
 };
 
 const finishPasskeyRegistration = async (
