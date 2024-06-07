@@ -1,10 +1,9 @@
 import { isDevBuild } from "@/next/env";
+import { authenticatedRequestHeaders } from "@/next/http";
 import { localUser } from "@/next/local-user";
 import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { apiOrigin } from "@ente/shared/network/api";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
 
 let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -68,9 +67,7 @@ const fetchAndSaveFeatureFlags = () =>
 const fetchFeatureFlags = async () => {
     const url = `${apiOrigin()}/remote-store/feature-flags`;
     const res = await fetch(url, {
-        headers: {
-            "X-Auth-Token": ensure(getToken()),
-        },
+        headers: authenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return res;

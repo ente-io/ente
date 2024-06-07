@@ -6,11 +6,10 @@ import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";
 
 export class PublicAlbumsDownloadClient implements DownloadClient {
-    constructor(
-        private token: string,
-        private passwordToken: string,
-        private timeout: number,
-    ) {}
+    private token: string;
+    private passwordToken: string;
+
+    constructor(private timeout: number) {}
 
     updateTokens(token: string, passwordToken: string) {
         this.token = token;

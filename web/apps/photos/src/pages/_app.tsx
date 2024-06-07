@@ -1,19 +1,20 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
+import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import {
+    appTitle,
+    clientPackageName,
+    type AppName,
+    type BaseAppContextT,
+} from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
-import {
-    APPS,
-    APP_TITLES,
-    CLIENT_PACKAGE_NAMES,
-} from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -153,10 +154,11 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(APPS.PHOTOS, userId);
+        logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
+        setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
-            "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
+            "X-Client-Package": clientPackageName[appName],
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -212,7 +214,7 @@ export default function App({ Component, pageProps }: AppProps) {
         const initExport = async () => {
             const token = getToken();
             if (!token) return;
-            await DownloadManager.init(APPS.PHOTOS, { token });
+            await DownloadManager.init(token);
             await resumeExportsIfNeeded();
         };
         initExport();
@@ -363,13 +365,13 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const title = isI18nReady
         ? t("title", { context: "photos" })
-        : APP_TITLES.get(APPS.PHOTOS);
+        : appTitle[appName];
 
     return (
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
+            <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>

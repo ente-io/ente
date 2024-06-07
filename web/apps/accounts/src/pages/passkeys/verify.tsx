@@ -1,5 +1,7 @@
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
-import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
+import { clientPackageName } from "@/next/types/app";
+import { nullToUndefined } from "@/utils/transform";
 import {
     CenteredFlex,
     VerticallyCentered,
@@ -7,8 +9,8 @@ import {
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
+import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import InfoIcon from "@mui/icons-material/Info";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -17,8 +19,9 @@ import { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
+    isWhitelistedRedirect,
     type BeginPasskeyAuthenticationResponse,
-} from "services/passkeysService";
+} from "services/passkey";
 
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
@@ -30,37 +33,37 @@ const PasskeysFlow = () => {
     const init = async () => {
         const searchParams = new URLSearchParams(window.location.search);
 
-        // get redirect from the query params
-        const redirect = searchParams.get("redirect") as string;
+        // Extract redirect from the query params.
+        const redirect = nullToUndefined(searchParams.get("redirect"));
+        const redirectURL = redirect ? new URL(redirect) : undefined;
 
-        const redirectURL = new URL(redirect);
-        if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== "true") {
-            if (
-                redirect !== "" &&
-                !(
-                    redirectURL.host.endsWith(".ente.io") ||
-                    redirectURL.host.endsWith(".ente.sh") ||
-                    redirectURL.host.endsWith("bada-frame.pages.dev")
-                ) &&
-                redirectURL.protocol !== "ente:" &&
-                redirectURL.protocol !== "enteauth:"
-            ) {
-                setInvalidInfo(true);
-                setLoading(false);
-                return;
+        // Ensure that redirectURL is whitelisted, otherwise show an invalid
+        // "login" URL error to the user.
+        if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
+            log.error(`Redirect URL '${redirectURL}' is not whitelisted`);
+            setInvalidInfo(true);
+            setLoading(false);
+            return;
+        }
+
+        let clientPackage = nullToUndefined(searchParams.get("client"));
+        // Mobile apps don't pass the client header, deduce their client package
+        // name from the redirect URL that they provide. TODO-PK: Pass?
+        if (!clientPackage) {
+            clientPackage = clientPackageName["photos"];
+            if (redirectURL.protocol === "enteauth:") {
+                clientPackage = clientPackageName["auth"];
+            } else if (redirectURL.hostname.startsWith("accounts")) {
+                clientPackage = clientPackageName["accounts"];
             }
         }
 
-        let pkg = CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS);
-        if (redirectURL.protocol === "enteauth:") {
-            pkg = CLIENT_PACKAGE_NAMES.get(APPS.AUTH);
-        } else if (redirectURL.hostname.startsWith("accounts")) {
-            pkg = CLIENT_PACKAGE_NAMES.get(APPS.ACCOUNTS);
-        }
-
-        setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
+        localStorage.setItem("clientPackage", clientPackage);
+        // The server needs to know the app on whose behalf we're trying to
+        // authenticate.
+        setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
-            "X-Client-Package": pkg,
+            "X-Client-Package": clientPackage,
         });
 
         // get passkeySessionID from the query params
@@ -125,6 +128,7 @@ const PasskeysFlow = () => {
 
         const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
 
+        // TODO-PK: Shouldn't this be URL encoded?
         window.location.href = `${redirect}?response=${encodedResponse}`;
     };
 
@@ -144,20 +148,16 @@ const PasskeysFlow = () => {
         publicKey: any,
         timeoutMillis: number = 60000, // Default timeout of 60 seconds
     ): Promise<Credential | null> => {
-        publicKey.challenge = _sodium.from_base64(
+        publicKey.challenge = await fromB64URLSafeNoPadding(
             publicKey.challenge,
-            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
-        publicKey.allowCredentials?.forEach(function (listItem: any) {
-            listItem.id = _sodium.from_base64(
-                listItem.id,
-                _sodium.base64_variants.URLSAFE_NO_PADDING,
-            );
+        for (const listItem of publicKey.allowCredentials ?? []) {
+            listItem.id = await fromB64URLSafeNoPadding(listItem.id);
             // note: we are orverwriting the transports array with all possible values.
             // This is because the browser will only prompt the user for the transport that is available.
             // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
             listItem.transports = ["usb", "nfc", "ble", "internal"];
-        });
+        }
         publicKey.timeout = timeoutMillis;
         const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
             publicKey: publicKey,
@@ -257,7 +257,7 @@ const PasskeysFlow = () => {
                             {t("TRY_AGAIN")}
                         </EnteButton>
                         <EnteButton
-                            href="/passkeys/flow/recover"
+                            href="/passkeys/recover"
                             fullWidth
                             style={{
                                 marginTop: "1rem",

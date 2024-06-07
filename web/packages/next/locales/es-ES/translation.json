@@ -85,6 +85,7 @@
     "NEXT": "Siguiente (→)",
     "title_photos": "ente Fotos",
     "title_auth": "ente Auth",
+    "title_accounts": "",
     "UPLOAD_FIRST_PHOTO": "Carga tu primer archivo",
     "IMPORT_YOUR_FOLDERS": "Importar tus carpetas",
     "UPLOAD_DROPZONE_MESSAGE": "Soltar para respaldar tus archivos",

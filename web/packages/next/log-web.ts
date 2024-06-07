@@ -1,21 +1,19 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import type { AppName } from "./types/app";
 
 /**
  * Log a standard startup banner.
  *
  * This helps us identify app starts and other environment details in the logs.
  *
- * @param appId An identifier of the app that is starting.
+ * @param appName The {@link AppName} of the app that is starting.
  * @param userId The uid for the currently logged in user, if any.
  */
-export const logStartupBanner = (appId: string, userId?: number) => {
-    // TODO (MR): Remove the need to lowercase it, change the enum itself.
-    const appIdL = appId.toLowerCase();
+export const logStartupBanner = (appName: AppName, userId?: number) => {
     const sha = process.env.GIT_SHA;
     const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
-
-    log.info(`Starting ente-${appIdL}-web ${buildId}uid ${userId ?? 0}`);
+    log.info(`Starting ente-${appName}-web ${buildId}uid ${userId ?? 0}`);
 };
 
 /**

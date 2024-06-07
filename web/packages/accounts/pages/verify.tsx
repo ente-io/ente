@@ -1,6 +1,5 @@
 import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -11,7 +10,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
-import { getAccountsURL } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
@@ -29,14 +27,13 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
+import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -88,10 +85,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
-                    window.location.origin
-                }/passkeys/finish`;
-                router.push(PAGES.CREDENTIALS);
+                redirectUserToPasskeyVerificationFlow(
+                    appName,
+                    passkeySessionID,
+                );
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
@@ -151,7 +148,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appNameOld, email);
+        await sendOtt(appName, email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };

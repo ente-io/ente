@@ -1,11 +1,11 @@
 import { CustomHead } from "@/next/components/Head";
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import type { AppName, BaseAppContextT } from "@/next/types/app";
+import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
-import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -13,7 +13,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -34,7 +34,7 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
-    const appName: AppName = "account";
+    const appName: AppName = "accounts";
 
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
@@ -65,10 +65,11 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     const setupPackageName = () => {
-        const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
-        if (!pkg) return;
+        const clientPackage = localStorage.getItem("clientPackage");
+        if (!clientPackage) return;
+        setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
-            "X-Client-Package": pkg.name,
+            "X-Client-Package": clientPackage,
         });
     };
 
@@ -81,7 +82,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
-    const theme = getTheme(themeColor, APPS.PHOTOS);
+    const theme = getTheme(themeColor, "photos");
 
     const logout = () => {
         void accountLogout().then(() => router.push(PAGES.ROOT));
@@ -95,12 +96,9 @@ export default function App({ Component, pageProps }: AppProps) {
         setDialogBoxAttributesV2,
     };
 
-    // TODO: This string doesn't actually exist
-    // TODO-PK: Fix ||
-    const title =
-        (isI18nReady
-            ? t("title", { context: "accounts" })
-            : APP_TITLES.get(APPS.ACCOUNTS)) || "Ente Accounts";
+    const title = isI18nReady
+        ? t("title", { context: "accounts" })
+        : appTitle[appName];
 
     return (
         <>

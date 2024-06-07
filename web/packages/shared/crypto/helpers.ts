@@ -34,7 +34,7 @@ export async function decryptAndStoreToken(
         const decryptedTokenBytes = await cryptoWorker.fromB64(
             urlUnsafeB64DecryptedToken,
         );
-        decryptedToken = await cryptoWorker.toURLSafeB64(decryptedTokenBytes);
+        decryptedToken = await cryptoWorker.toB64URLSafe(decryptedTokenBytes);
         setData(LS_KEYS.USER, {
             ...user,
             token: decryptedToken,

@@ -2,7 +2,6 @@ import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
-import { APPS } from "@ente/shared/apps/constants";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
@@ -81,15 +80,12 @@ class DownloadManagerImpl {
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
 
-    async init(
-        app: APPS,
-        tokens?: { token: string; passwordToken?: string } | { token: string },
-    ) {
+    async init(token?: string) {
         if (this.ready) {
             log.info("DownloadManager already initialized");
             return;
         }
-        this.downloadClient = createDownloadClient(app, tokens);
+        this.downloadClient = createDownloadClient(token);
         try {
             this.thumbnailCache = await blobCache("thumbs");
         } catch (e) {
@@ -422,25 +418,14 @@ const DownloadManager = new DownloadManagerImpl();
 
 export default DownloadManager;
 
-function createDownloadClient(
-    app: APPS,
-    tokens?: { token: string; passwordToken?: string } | { token: string },
-): DownloadClient {
+const createDownloadClient = (token: string): DownloadClient => {
     const timeout = 300000; // 5 minute
-    if (app === APPS.ALBUMS) {
-        if (!tokens) {
-            tokens = { token: undefined, passwordToken: undefined };
-        }
-        const { token, passwordToken } = tokens as {
-            token: string;
-            passwordToken: string;
-        };
-        return new PublicAlbumsDownloadClient(token, passwordToken, timeout);
-    } else {
-        const { token } = tokens;
+    if (token) {
         return new PhotosDownloadClient(token, timeout);
+    } else {
+        return new PublicAlbumsDownloadClient(timeout);
     }
-}
+};
 
 async function getRenderableFileURL(
     file: EnteFile,

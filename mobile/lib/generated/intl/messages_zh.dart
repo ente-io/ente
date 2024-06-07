@@ -41,6 +41,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(versionValue) => "版本: ${versionValue}";
 
+  static String m8(freeAmount, storageUnit) =>
+      "${freeAmount} ${storageUnit} 空闲";
+
   static String m9(paymentProvider) => "请先取消您现有的订阅 ${paymentProvider}";
 
   static String m10(user) => "${user} 将无法添加更多照片到此相册\n\n他们仍然能够删除他们添加的现有照片";
@@ -328,6 +331,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPairDesc":
             MessageLookupByLibrary.simpleMessage("自动配对仅适用于支持 Chromecast 的设备。"),
         "available": MessageLookupByLibrary.simpleMessage("可用"),
+        "availableStorageSpace": m8,
         "backedUpFolders": MessageLookupByLibrary.simpleMessage("已备份的文件夹"),
         "backup": MessageLookupByLibrary.simpleMessage("备份"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("备份失败"),
@@ -637,6 +641,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpAccessPostDelete": m28,
         "freeUpAmount": m29,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage("释放设备空间"),
+        "freeUpDeviceSpaceDesc":
+            MessageLookupByLibrary.simpleMessage("通过清除已备份的文件来节省设备空间。"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("释放空间"),
         "freeUpSpaceSaving": m30,
         "galleryMemoryLimitInfo":
@@ -968,6 +974,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "remoteVideos": MessageLookupByLibrary.simpleMessage("云端视频"),
         "remove": MessageLookupByLibrary.simpleMessage("移除"),
         "removeDuplicates": MessageLookupByLibrary.simpleMessage("移除重复内容"),
+        "removeDuplicatesDesc":
+            MessageLookupByLibrary.simpleMessage("检查并删除完全重复的文件。"),
         "removeFromAlbum": MessageLookupByLibrary.simpleMessage("从相册中移除"),
         "removeFromAlbumTitle":
             MessageLookupByLibrary.simpleMessage("要从相册中移除吗？"),
@@ -1275,6 +1283,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewAddOnButton": MessageLookupByLibrary.simpleMessage("查看附加组件"),
         "viewAll": MessageLookupByLibrary.simpleMessage("查看全部"),
         "viewAllExifData": MessageLookupByLibrary.simpleMessage("查看所有 EXIF 数据"),
+        "viewLargeFiles": MessageLookupByLibrary.simpleMessage("大文件"),
+        "viewLargeFilesDesc":
+            MessageLookupByLibrary.simpleMessage("查看占用存储空间最多的文件"),
         "viewLogs": MessageLookupByLibrary.simpleMessage("查看日志"),
         "viewRecoveryKey": MessageLookupByLibrary.simpleMessage("查看恢复密钥"),
         "viewer": MessageLookupByLibrary.simpleMessage("查看者"),

@@ -1,7 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
-import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -19,7 +18,7 @@ import {
 } from "@ente/shared/crypto/helpers";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
-import { getAccountsURL, getEndpoint } from "@ente/shared/network/api";
+import { apiOrigin } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -45,6 +44,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
+import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
+import { appHomeRoute } from "../services/redirect";
 import {
     configureSRP,
     generateSRPSetupAttributes,
@@ -55,8 +56,6 @@ import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -89,8 +88,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const token = getToken();
             if (key && token) {
-                // TODO: Refactor the type of APP_HOMES to not require the ??
-                router.push(APP_HOMES.get(appNameOld) ?? "/");
+                router.push(appHomeRoute(appName));
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -169,10 +167,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
-                        window.location.origin
-                    }/passkeys/finish`;
-                    return undefined;
+                    redirectUserToPasskeyVerificationFlow(
+                        appName,
+                        passkeySessionID,
+                    );
+                    throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
@@ -250,7 +249,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? APP_HOMES.get(appNameOld));
+            router.push(redirectURL ?? appHomeRoute(appName));
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }
@@ -316,12 +315,12 @@ const Header_ = styled("div")`
 `;
 
 const ConnectionDetails: React.FC = () => {
-    const apiOrigin = new URL(getEndpoint());
+    const host = new URL(apiOrigin()).host;
 
     return (
         <ConnectionDetails_>
             <Typography variant="small" color="text.faint">
-                {apiOrigin.host}
+                {host}
             </Typography>
         </ConnectionDetails_>
     );

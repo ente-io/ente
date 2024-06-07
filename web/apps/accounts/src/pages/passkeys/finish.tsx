@@ -1,6 +1,4 @@
-import PasskeysFinishPage from "@ente/accounts/pages/passkeys/finish";
-const PasskeysFinish = () => {
-    return <PasskeysFinishPage />;
-};
+import Page from "@ente/accounts/pages/passkeys/finish";
 
-export default PasskeysFinish;
+// See: [Note: Finish passkey flow in the requesting app]
+export default Page;
