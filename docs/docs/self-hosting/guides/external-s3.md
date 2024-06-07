@@ -7,7 +7,7 @@ description:
 
 # Hosting server and web app using external S3
 
-This guide is for self hosting the server and the web application of Ente Photos
+This guide is cat for self hosting the server and the web application of Ente Photos
 using docker compose and an external S3 bucket. So we assume that you already
 have the keys and secrets for the S3 bucket. The plan is as follows:
 
@@ -213,6 +213,8 @@ ENTE_INTERNAL_HARDCODED-OTT_LOCAL-DOMAIN-VALUE=123456
 # it can be changed later
 ENDPOINT=http://localhost:8080
 ALBUMS_ENDPOINT=http://localhost:8082
+# This is used to generate sharable URLs
+ENTE_APPS_PUBLIC-ALBUMS=http://localhost:8082
 ```
 
 ## 3. Run `docker-compose up`
