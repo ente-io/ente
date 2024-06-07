@@ -41,8 +41,7 @@ enum ResultType {
 enum SectionType {
   face,
   location,
-  // Grouping based on ML or manual tagging
-  content,
+  magic,
   // includes year, month , day, event ResultType
   moment,
   album,
@@ -58,8 +57,8 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
         return S.of(context).people;
-      case SectionType.content:
-        return S.of(context).contents;
+      case SectionType.magic:
+        return "Magic";
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
@@ -79,8 +78,8 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
         return S.of(context).searchFaceEmptySection;
-      case SectionType.content:
-        return "Contents";
+      case SectionType.magic:
+        return "Magic";
       case SectionType.moment:
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
@@ -102,7 +101,7 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
         return false;
-      case SectionType.content:
+      case SectionType.magic:
         return false;
       case SectionType.moment:
         return false;
@@ -125,7 +124,7 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
         return false;
-      case SectionType.content:
+      case SectionType.magic:
         return false;
       case SectionType.moment:
         return false;
@@ -147,9 +146,9 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         // todo: later
         return "Setup";
-      case SectionType.content:
+      case SectionType.magic:
         // todo: later
-        return "Add tags";
+        return "temp";
       case SectionType.moment:
         return S.of(context).addNew;
       case SectionType.location:
@@ -169,7 +168,7 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
         return Icons.adaptive.arrow_forward_outlined;
-      case SectionType.content:
+      case SectionType.magic:
         return null;
       case SectionType.moment:
         return null;
@@ -250,7 +249,7 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllFace(limit);
-      case SectionType.content:
+      case SectionType.magic:
         return SearchService.instance.getMagicSectionResutls();
 
       case SectionType.moment:
@@ -293,7 +292,7 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
-      case SectionType.content:
+      case SectionType.magic:
         return [Bus.instance.on<MLFrameworkInitializationUpdateEvent>()];
       default:
         return [];

@@ -42,7 +42,7 @@ class _MagicSectionState extends State<MagicSection> {
     //this widget but the event with InitializationState.initialized would have
     //already been fired in the above case.
     if (_magicSearchResults.isEmpty) {
-      SectionType.content
+      SectionType.magic
           .getData(
         context,
         limit: kSearchSectionLimit,
@@ -56,14 +56,14 @@ class _MagicSectionState extends State<MagicSection> {
       });
     }
 
-    final streamsToListenTo = SectionType.content.sectionUpdateEvents();
+    final streamsToListenTo = SectionType.magic.sectionUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
           final mlFrameWorkEvent =
               event as MLFrameworkInitializationUpdateEvent;
           if (mlFrameWorkEvent.state == InitializationState.initialized) {
-            _magicSearchResults = (await SectionType.content.getData(
+            _magicSearchResults = (await SectionType.magic.getData(
               context,
               limit: kSearchSectionLimit,
             )) as List<GenericSearchResult>;
@@ -82,12 +82,14 @@ class _MagicSectionState extends State<MagicSection> {
     super.dispose();
   }
 
-  // @override
-  // void didUpdateWidget(covariant MagicSection oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   //widget.magicSearch is empty when doing a hot reload
-  //   _magicSearchResults = widget.magicSearchResults;
-  // }
+  @override
+  void didUpdateWidget(covariant MagicSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    //widget.magicSearch is empty when doing a hot reload
+    if (widget.magicSearchResults.isNotEmpty) {
+      _magicSearchResults = widget.magicSearchResults;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,14 +104,14 @@ class _MagicSectionState extends State<MagicSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    SectionType.content.sectionTitle(context),
+                    SectionType.magic.sectionTitle(context),
                     style: textTheme.largeBold,
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      SectionType.content.getEmptyStateText(context),
+                      SectionType.magic.getEmptyStateText(context),
                       style: textTheme.smallMuted,
                     ),
                   ),
@@ -117,7 +119,7 @@ class _MagicSectionState extends State<MagicSection> {
               ),
             ),
             const SizedBox(width: 8),
-            const SearchSectionEmptyCTAIcon(SectionType.content),
+            const SearchSectionEmptyCTAIcon(SectionType.magic),
           ],
         ),
       );
@@ -128,7 +130,7 @@ class _MagicSectionState extends State<MagicSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SectionHeader(
-              SectionType.content,
+              SectionType.magic,
               hasMore: (_magicSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 2),

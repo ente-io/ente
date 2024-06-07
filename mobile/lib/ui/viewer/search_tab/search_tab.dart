@@ -153,7 +153,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
-                      case SectionType.content:
+                      case SectionType.magic:
                         return MagicSection(
                           snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
