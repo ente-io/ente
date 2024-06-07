@@ -13,10 +13,10 @@ import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
- * Redirect user to accounts.ente.io (or its equivalent), to a page where they
- * can authenticate using their second factor, a passkey they've configured.
+ * Redirect user to Ente accounts app to authenticate using their second factor,
+ * a passkey they've configured.
  *
- * On successful verification, accounts.ente.io will redirect back to our
+ * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
  * @param passkeySessionID An identifier provided by museum for this passkey
@@ -31,8 +31,8 @@ export const redirectUserToPasskeyVerificationFlow = (
 };
 
 /**
- * Redirect user to a accounts.ente.io (or its equivalent), to a page where they
- * can see their manage their passkeys.
+ * Open a new window showing a page on the Ente accounts app where the user can
+ * see and their manage their passkeys.
  *
  * @param appName The {@link AppName} of the app which is calling this function.
  */
