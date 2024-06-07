@@ -24,10 +24,11 @@ import { useAppContext } from "pages/_app";
 import React, { useEffect, useState } from "react";
 import {
     deletePasskey,
+    getPasskeys,
     registerPasskey,
     renamePasskey,
+    type Passkey,
 } from "services/passkey";
-import { getPasskeys, type Passkey } from "../../services/passkey";
 
 const Page: React.FC = () => {
     const { showNavBar } = useAppContext();
@@ -71,6 +72,12 @@ const Page: React.FC = () => {
         //
         // The value will get overwritten the next time we open the drawer for a
         // different passkey, so this will not have a functional impact.
+    };
+
+    const handleUpdateOrDeletePasskey = () => {
+        setShowPasskeyDrawer(false);
+        setSelectedPasskey(undefined);
+        void refreshPasskeys();
     };
 
     const handleSubmit = async (
@@ -119,7 +126,7 @@ const Page: React.FC = () => {
                 open={showPasskeyDrawer}
                 onClose={handleDrawerClose}
                 passkey={selectedPasskey}
-                refreshPasskeys={() => void refreshPasskeys}
+                onUpdateOrDeletePasskey={handleUpdateOrDeletePasskey}
             />
         </>
     );
@@ -185,7 +192,7 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
 interface ManagePasskeyDrawerProps {
     /** If `true`, then the drawer is shown. */
     open: boolean;
-    /*** Callback to invoke when the drawer wants to be closed. */
+    /** Callback to invoke when the drawer wants to be closed. */
     onClose: () => void;
     /**
      * The {@link Passkey} whose details should be shown in the drawer.
@@ -193,14 +200,20 @@ interface ManagePasskeyDrawerProps {
      * It is guaranteed that this will be defined when `open` is true.
      */
     passkey: Passkey | undefined;
-    refreshPasskeys: () => void;
+    /**
+     * Callback to invoke when the passkey in the modifed or deleted.
+     *
+     * The passkey that the drawer is showing will be out of date at this point,
+     * so the list of passkeys should be refreshed and the drawer closed.
+     */
+    onUpdateOrDeletePasskey: () => void;
 }
 
 const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     open,
     onClose,
     passkey,
-    refreshPasskeys,
+    onUpdateOrDeletePasskey,
 }) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showRenameDialog, setShowRenameDialog] = useState(false);
@@ -250,22 +263,18 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             {passkey && (
                 <DeletePasskeyDialog
                     open={showDeleteDialog}
-                    onClose={() => {
-                        setShowDeleteDialog(false);
-                        refreshPasskeys();
-                    }}
+                    onClose={() => setShowDeleteDialog(false)}
                     passkey={passkey}
+                    onDeletePasskey={onUpdateOrDeletePasskey}
                 />
             )}
 
             {passkey && (
                 <RenamePasskeyDialog
                     open={showRenameDialog}
-                    onClose={() => {
-                        setShowRenameDialog(false);
-                        refreshPasskeys();
-                    }}
+                    onClose={() => setShowRenameDialog(false)}
                     passkey={passkey}
+                    onRenamePasskey={onUpdateOrDeletePasskey}
                 />
             )}
         </>
@@ -275,16 +284,19 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
 interface DeletePasskeyDialogProps {
     /** If `true`, then the dialog is shown. */
     open: boolean;
-    /*** Callback to invoke when the dialog wants to be closed. */
+    /** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
     /** The {@link Passkey} to delete. */
     passkey: Passkey;
+    /** Callback to invoke when the passkey is deleted. */
+    onDeletePasskey: () => void;
 }
 
 const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
     open,
     onClose,
     passkey,
+    onDeletePasskey,
 }) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const fullScreen = useMediaQuery("(max-width: 428px)");
@@ -293,7 +305,7 @@ const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
         setIsDeleting(true);
         try {
             await deletePasskey(passkey.id);
-            onClose();
+            onDeletePasskey();
         } catch (e) {
             log.error("Failed to delete passkey", e);
         } finally {
@@ -329,23 +341,26 @@ const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
 interface RenamePasskeyDialogProps {
     /** If `true`, then the dialog is shown. */
     open: boolean;
-    /*** Callback to invoke when the dialog wants to be closed. */
+    /** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
     /** The {@link Passkey} to rename. */
     passkey: Passkey;
+    /** Callback to invoke when the passkey is renamed. */
+    onRenamePasskey: () => void;
 }
 
 const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     open,
     onClose,
     passkey,
+    onRenamePasskey,
 }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
     const onSubmit = async (inputValue: string) => {
         try {
             await renamePasskey(passkey.id, inputValue);
-            onClose();
+            onRenamePasskey();
         } catch (e) {
             log.error("Failed to rename passkey", e);
             return;
