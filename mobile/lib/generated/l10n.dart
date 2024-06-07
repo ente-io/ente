@@ -8774,6 +8774,16 @@ class S {
     );
   }
 
+  /// `Saving Edits!`
+  String get savingEdits {
+    return Intl.message(
+      'Saving Edits!',
+      name: 'savingEdits',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Auto pair`
   String get autoPair {
     return Intl.message(
