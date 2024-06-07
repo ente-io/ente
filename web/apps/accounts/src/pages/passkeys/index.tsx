@@ -43,8 +43,7 @@ const Page: React.FC = () => {
 
     const refreshPasskeys = async () => {
         try {
-            const { passkeys } = await getPasskeys();
-            setPasskeys(passkeys || []);
+            setPasskeys(await getPasskeys());
         } catch (e) {
             log.error("Failed to fetch passkeys", e);
         }
@@ -89,8 +88,16 @@ const Page: React.FC = () => {
             await registerPasskey(inputValue);
         } catch (e) {
             log.error("Failed to register a new passkey", e);
-            // TODO-PK: localize
-            setFieldError("Could not add passkey");
+            // If the user cancels the operation, then an error with name
+            // "NotAllowedError" is thrown.
+            //
+            // Ignore this, but in other cases add an error indicator to the add
+            // passkey text field. The browser is expected to already have shown
+            // an error dialog to the user.
+            if (!(e instanceof Error && e.name == "NotAllowedError")) {
+                // TODO-PK: localize
+                setFieldError("Could not add passkey");
+            }
             return;
         }
         await refreshPasskeys();
@@ -215,8 +222,8 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showRenameDialog, setShowRenameDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     return (
         <>
@@ -261,18 +268,6 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             </EnteDrawer>
 
             {passkey && (
-                <DeletePasskeyDialog
-                    open={showDeleteDialog}
-                    onClose={() => setShowDeleteDialog(false)}
-                    passkey={passkey}
-                    onDeletePasskey={() => {
-                        setShowDeleteDialog(false);
-                        onUpdateOrDeletePasskey();
-                    }}
-                />
-            )}
-
-            {passkey && (
                 <RenamePasskeyDialog
                     open={showRenameDialog}
                     onClose={() => setShowRenameDialog(false)}
@@ -283,7 +278,66 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     }}
                 />
             )}
+
+            {passkey && (
+                <DeletePasskeyDialog
+                    open={showDeleteDialog}
+                    onClose={() => setShowDeleteDialog(false)}
+                    passkey={passkey}
+                    onDeletePasskey={() => {
+                        setShowDeleteDialog(false);
+                        onUpdateOrDeletePasskey();
+                    }}
+                />
+            )}
         </>
+    );
+};
+
+interface RenamePasskeyDialogProps {
+    /** If `true`, then the dialog is shown. */
+    open: boolean;
+    /** Callback to invoke when the dialog wants to be closed. */
+    onClose: () => void;
+    /** The {@link Passkey} to rename. */
+    passkey: Passkey;
+    /** Callback to invoke when the passkey is renamed. */
+    onRenamePasskey: () => void;
+}
+
+const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
+    open,
+    onClose,
+    passkey,
+    onRenamePasskey,
+}) => {
+    const fullScreen = useMediaQuery("(max-width: 428px)");
+
+    const handleSubmit = async (inputValue: string) => {
+        try {
+            await renamePasskey(passkey.id, inputValue);
+            onRenamePasskey();
+        } catch (e) {
+            log.error("Failed to rename passkey", e);
+        }
+    };
+
+    return (
+        <DialogBoxV2
+            fullWidth
+            {...{ open, onClose, fullScreen }}
+            attributes={{ title: t("RENAME_PASSKEY") }}
+        >
+            <SingleInputForm
+                initialValue={passkey.friendlyName}
+                callback={handleSubmit}
+                placeholder={t("ENTER_PASSKEY_NAME")}
+                buttonText={t("RENAME")}
+                fieldType="text"
+                secondaryButtonAction={onClose}
+                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+            />
+        </DialogBoxV2>
     );
 };
 
@@ -340,54 +394,6 @@ const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
                     {t("CANCEL")}
                 </Button>
             </Stack>
-        </DialogBoxV2>
-    );
-};
-
-interface RenamePasskeyDialogProps {
-    /** If `true`, then the dialog is shown. */
-    open: boolean;
-    /** Callback to invoke when the dialog wants to be closed. */
-    onClose: () => void;
-    /** The {@link Passkey} to rename. */
-    passkey: Passkey;
-    /** Callback to invoke when the passkey is renamed. */
-    onRenamePasskey: () => void;
-}
-
-const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
-    open,
-    onClose,
-    passkey,
-    onRenamePasskey,
-}) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
-
-    const onSubmit = async (inputValue: string) => {
-        try {
-            await renamePasskey(passkey.id, inputValue);
-            onRenamePasskey();
-        } catch (e) {
-            log.error("Failed to rename passkey", e);
-            return;
-        }
-    };
-
-    return (
-        <DialogBoxV2
-            fullWidth
-            {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("RENAME_PASSKEY") }}
-        >
-            <SingleInputForm
-                initialValue={passkey?.friendlyName}
-                callback={onSubmit}
-                placeholder={t("ENTER_PASSKEY_NAME")}
-                buttonText={t("RENAME")}
-                fieldType="text"
-                secondaryButtonAction={onClose}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-            />
         </DialogBoxV2>
     );
 };

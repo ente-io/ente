@@ -167,7 +167,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    redirectUserToPasskeyVerificationFlow(passkeySessionID);
+                    redirectUserToPasskeyVerificationFlow(
+                        appName,
+                        passkeySessionID,
+                    );
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =

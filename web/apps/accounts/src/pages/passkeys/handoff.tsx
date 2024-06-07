@@ -1,3 +1,4 @@
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -16,12 +17,13 @@ const Page: React.FC = () => {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
 
-        const client = urlParams.get("client");
-        if (client) {
+        const clientPackage = urlParams.get("client");
+        if (clientPackage) {
             // TODO-PK: mobile is not passing it. is that expected?
-            setData(LS_KEYS.CLIENT_PACKAGE, { name: client });
+            localStorage.setItem("clientPackage", clientPackage);
+            setClientPackageForAuthenticatedRequests(clientPackage);
             HTTPService.setHeaders({
-                "X-Client-Package": client,
+                "X-Client-Package": clientPackage,
             });
         }
 
@@ -34,7 +36,6 @@ const Page: React.FC = () => {
 
         const user = getData(LS_KEYS.USER) || {};
         user.token = token;
-
         setData(LS_KEYS.USER, user);
 
         router.push("/passkeys");

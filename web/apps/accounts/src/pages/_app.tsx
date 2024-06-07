@@ -1,4 +1,5 @@
 import { CustomHead } from "@/next/components/Head";
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
@@ -12,7 +13,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -64,10 +65,11 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     const setupPackageName = () => {
-        const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
-        if (!pkg) return;
+        const clientPackage = localStorage.getItem("clientPackage");
+        if (!clientPackage) return;
+        setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
-            "X-Client-Package": pkg.name,
+            "X-Client-Package": clientPackage,
         });
     };
 

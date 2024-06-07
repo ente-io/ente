@@ -1,5 +1,6 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
+import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
 import {
@@ -155,6 +156,7 @@ export default function App({ Component, pageProps }: AppProps) {
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
+        setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackageName[appName],
         });

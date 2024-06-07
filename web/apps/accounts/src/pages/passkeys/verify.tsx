@@ -1,3 +1,4 @@
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import { nullToUndefined } from "@/utils/transform";
@@ -10,7 +11,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import InfoIcon from "@mui/icons-material/Info";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -46,17 +46,24 @@ const PasskeysFlow = () => {
             return;
         }
 
-        let pkg = clientPackageName["photos"];
-        if (redirectURL.protocol === "enteauth:") {
-            pkg = clientPackageName["auth"];
-        } else if (redirectURL.hostname.startsWith("accounts")) {
-            pkg = clientPackageName["accounts"];
+        let clientPackage = nullToUndefined(searchParams.get("client"));
+        // Mobile apps don't pass the client header, deduce their client package
+        // name from the redirect URL that they provide. TODO-PK: Pass?
+        if (!clientPackage) {
+            clientPackage = clientPackageName["photos"];
+            if (redirectURL.protocol === "enteauth:") {
+                clientPackage = clientPackageName["auth"];
+            } else if (redirectURL.hostname.startsWith("accounts")) {
+                clientPackage = clientPackageName["accounts"];
+            }
         }
 
-        setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
-        // The server needs to know the app on whose behalf we're trying to log in
+        localStorage.setItem("clientPackage", clientPackage);
+        // The server needs to know the app on whose behalf we're trying to
+        // authenticate.
+        setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
-            "X-Client-Package": pkg,
+            "X-Client-Package": clientPackage,
         });
 
         // get passkeySessionID from the query params
