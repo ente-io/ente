@@ -265,7 +265,10 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     open={showDeleteDialog}
                     onClose={() => setShowDeleteDialog(false)}
                     passkey={passkey}
-                    onDeletePasskey={onUpdateOrDeletePasskey}
+                    onDeletePasskey={() => {
+                        setShowDeleteDialog(false);
+                        onUpdateOrDeletePasskey();
+                    }}
                 />
             )}
 
@@ -274,7 +277,10 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     open={showRenameDialog}
                     onClose={() => setShowRenameDialog(false)}
                     passkey={passkey}
-                    onRenamePasskey={onUpdateOrDeletePasskey}
+                    onRenamePasskey={() => {
+                        setShowRenameDialog(false);
+                        onUpdateOrDeletePasskey();
+                    }}
                 />
             )}
         </>
