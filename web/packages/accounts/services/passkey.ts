@@ -36,7 +36,7 @@ export const redirectUserToPasskeyVerificationFlow = (
  *
  * @param appName The {@link AppName} of the app which is calling this function.
  */
-export const redirectUserToManagePasskeysPage = async (appName: AppName) => {
+export const openAccountsManagePasskeysPage = async (appName: AppName) => {
     // check if the user has passkey recovery enabled
     const recoveryEnabled = await isPasskeyRecoveryEnabled();
     if (!recoveryEnabled) {

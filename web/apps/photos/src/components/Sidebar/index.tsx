@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
-import { redirectUserToManagePasskeysPage } from "@ente/accounts/services/passkey";
+import { openAccountsManagePasskeysPage } from "@ente/accounts/services/passkey";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -473,7 +473,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         closeSidebar();
 
         try {
-            await redirectUserToManagePasskeysPage(appName);
+            await openAccountsManagePasskeysPage(appName);
         } catch (e) {
             log.error("failed to redirect to accounts page", e);
         }
