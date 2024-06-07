@@ -295,6 +295,53 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     );
 };
 
+interface RenamePasskeyDialogProps {
+    /** If `true`, then the dialog is shown. */
+    open: boolean;
+    /** Callback to invoke when the dialog wants to be closed. */
+    onClose: () => void;
+    /** The {@link Passkey} to rename. */
+    passkey: Passkey;
+    /** Callback to invoke when the passkey is renamed. */
+    onRenamePasskey: () => void;
+}
+
+const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
+    open,
+    onClose,
+    passkey,
+    onRenamePasskey,
+}) => {
+    const fullScreen = useMediaQuery("(max-width: 428px)");
+
+    const handleSubmit = async (inputValue: string) => {
+        try {
+            await renamePasskey(passkey.id, inputValue);
+            onRenamePasskey();
+        } catch (e) {
+            log.error("Failed to rename passkey", e);
+        }
+    };
+
+    return (
+        <DialogBoxV2
+            fullWidth
+            {...{ open, onClose, fullScreen }}
+            attributes={{ title: t("RENAME_PASSKEY") }}
+        >
+            <SingleInputForm
+                initialValue={passkey.friendlyName}
+                callback={handleSubmit}
+                placeholder={t("ENTER_PASSKEY_NAME")}
+                buttonText={t("RENAME")}
+                fieldType="text"
+                secondaryButtonAction={onClose}
+                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+            />
+        </DialogBoxV2>
+    );
+};
+
 interface DeletePasskeyDialogProps {
     /** If `true`, then the dialog is shown. */
     open: boolean;
@@ -348,53 +395,6 @@ const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
                     {t("CANCEL")}
                 </Button>
             </Stack>
-        </DialogBoxV2>
-    );
-};
-
-interface RenamePasskeyDialogProps {
-    /** If `true`, then the dialog is shown. */
-    open: boolean;
-    /** Callback to invoke when the dialog wants to be closed. */
-    onClose: () => void;
-    /** The {@link Passkey} to rename. */
-    passkey: Passkey;
-    /** Callback to invoke when the passkey is renamed. */
-    onRenamePasskey: () => void;
-}
-
-const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
-    open,
-    onClose,
-    passkey,
-    onRenamePasskey,
-}) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
-
-    const handleSubmit = async (inputValue: string) => {
-        try {
-            await renamePasskey(passkey.id, inputValue);
-            onRenamePasskey();
-        } catch (e) {
-            log.error("Failed to rename passkey", e);
-        }
-    };
-
-    return (
-        <DialogBoxV2
-            fullWidth
-            {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("RENAME_PASSKEY") }}
-        >
-            <SingleInputForm
-                initialValue={passkey.friendlyName}
-                callback={handleSubmit}
-                placeholder={t("ENTER_PASSKEY_NAME")}
-                buttonText={t("RENAME")}
-                fieldType="text"
-                secondaryButtonAction={onClose}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-            />
         </DialogBoxV2>
     );
 };
