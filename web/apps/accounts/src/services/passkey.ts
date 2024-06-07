@@ -1,5 +1,4 @@
 import { isDevBuild } from "@/next/env";
-import { authenticatedRequestHeaders } from "@/next/http";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -116,21 +115,72 @@ export const registerPasskey = async (name: string) => {
     await finishPasskeyRegistration(name, credential, response.sessionID);
 };
 
-export const getPasskeyRegistrationOptions = async () => {
+interface BeginPasskeyRegistrationResponse {
+    /**
+     * An identifier for this registration ceremony / session.
+     *
+     * This sessionID is subsequently passed to the API when finish credential
+     * creation to tie things together.
+     */
+    sessionID: string;
+    /**
+     * Options that should be passed to `navigator.credential.create` when
+     * creating the new {@link Credential}.
+     */
+    options: {
+        publicKey: PublicKeyCredentialCreationOptions;
+    };
+}
+
+const beginPasskeyRegistration = async () => {
     const url = `${apiOrigin()}/passkeys/registration/begin`;
     const res = await fetch(url, {
         headers: accountsAuthenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+
+    // [Note: Converting binary data in WebAuthn API payloads]
+    //
+    // The server returns a JSON containing a "sessionID" (to tie together the
+    // beginning and the end of the registration), and "options" that we should
+    // pass on to the browser when asking it to create credentials.
+    //
+    // However, some massaging needs to be done first. On the backend, we use
+    // the [go-webauthn](https://github.com/go-webauthn/webauthn) library to
+    // begin the registration ceremony, and we verbatim credential creation
+    // options that the library returns to us. These are meant to plug directly
+    // into `CredentialCreationOptions` that `navigator.credential.create`
+    // expects. Specifically, since we're creating a public key credential, the
+    // `publicKey` attribute of the returned options will be in the shape of the
+    // `PublicKeyCredentialCreationOptions` expected by the browser). Except,
+    // binary data.
+    //
+    // Binary data in the returned `PublicKeyCredentialCreationOptions` are
+    // serialized as a "URLEncodedBase64", which is a URL-encoded Base64 string
+    // without any padding. The library is following the WebAuthn recommendation
+    // when it does this:
+    //
+    // > The term "Base64url Encoding refers" to the base64 encoding using the
+    // > URL- and filename-safe character set defined in Section 5 of RFC4648,
+    // > which all trailing '=' characters omitted (as permitted by Section 3.2)
+    // >
+    // > https://www.w3.org/TR/webauthn-3/#base64url-encoding
+    //
+    // However, the browser expects binary data as an "ArrayBuffer, TypedArray
+    // or DataView".
+    // https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialCreationOptions
+    //
+    // So we do the conversion here.
+    //
+    // 1. To avoid inventing an intermediary type and the boilerplate that'd
+    //    come with it, we do a force typecast the options in the response to
+    //    one that has `PublicKeyCredentialCreationOptions`.
+    //
+    // 2. Convert the two binary data fields that are expected to be in the
+    //    response from URLEncodedBase64 strings to Uint8Arrays.
+
     return await res.json();
 };
-
-interface PasskeyRegistrationOptions {
-    sessionID: string;
-    options: {
-        publicKey: PublicKeyCredentialCreationOptions;
-    };
-}
 
 const finishPasskeyRegistration = async (
     friendlyName: string,
