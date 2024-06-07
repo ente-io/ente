@@ -85,7 +85,7 @@ export const getPasskeyRegistrationOptions = async () => {
  * the whitelisted URLs that we allow redirecting to on success.
  */
 export const isWhitelistedRedirect = (redirectURL: URL) =>
-    (isDevBuild && redirectURL.host.endsWith("localhost")) ||
+    (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh") ||
     redirectURL.protocol == "ente:" ||
