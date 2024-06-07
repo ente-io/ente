@@ -1,3 +1,4 @@
+import { setClientPackageNameForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -20,6 +21,7 @@ const Page: React.FC = () => {
         if (clientPackage) {
             // TODO-PK: mobile is not passing it. is that expected?
             localStorage.setItem("clientPackage", clientPackage);
+            setClientPackageNameForAuthenticatedRequests(clientPackage);
             HTTPService.setHeaders({
                 "X-Client-Package": clientPackage,
             });
@@ -34,7 +36,6 @@ const Page: React.FC = () => {
 
         const user = getData(LS_KEYS.USER) || {};
         user.token = token;
-
         setData(LS_KEYS.USER, user);
 
         router.push("/passkeys");

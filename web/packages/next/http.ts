@@ -22,6 +22,14 @@ export const setAppNameForAuthenticatedRequests = (appName: AppName) => {
 };
 
 /**
+ * Variant of {@link setAppNameForAuthenticatedRequests} that sets directly sets
+ * the client package name to the provided string.
+ */
+export const setClientPackageNameForAuthenticatedRequests = (p: string) => {
+    _clientPackageName = p;
+};
+
+/**
  * Forget the effects of a previous {@link setAppNameForAuthenticatedRequests}.
  */
 export const clearHTTPState = () => {
