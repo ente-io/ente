@@ -12,7 +12,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -64,10 +64,10 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     const setupPackageName = () => {
-        const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
+        const pkg = localStorage.getItem("clientPackage");
         if (!pkg) return;
         HTTPService.setHeaders({
-            "X-Client-Package": pkg.name,
+            "X-Client-Package": pkg,
         });
     };
 

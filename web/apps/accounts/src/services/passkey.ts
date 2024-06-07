@@ -96,6 +96,9 @@ export const registerPasskey = async (name: string) => {
 };
 
 export const getPasskeyRegistrationOptions = async () => {
+    const clientPackage = localStorage.getItem("clientPackage")
+    const token = ensure(getToken());
+
     try {
         const token = getToken();
         if (!token) return;

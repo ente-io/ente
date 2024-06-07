@@ -33,6 +33,7 @@ import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
+import { setAppNameForAuthenticatedRequests } from "@/next/http";
 
 /**
  * Properties available via the {@link AppContext} to the Auth app's React tree.
@@ -78,6 +79,7 @@ export default function App({ Component, pageProps }: AppProps) {
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
+        setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackageName[appName],
         });
