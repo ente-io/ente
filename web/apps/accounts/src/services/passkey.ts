@@ -2,11 +2,13 @@ import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
-import { toB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
+import {
+    fromB64URLSafeNoPadding,
+    toB64URLSafeNoPadding,
+} from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import _sodium from "libsodium-wrappers";
 
 const ENDPOINT = getEndpoint();
 
@@ -88,31 +90,15 @@ export const deletePasskey = async (id: string) => {
  * (aka "friendly name").
  */
 export const registerPasskey = async (name: string) => {
-    const response: {
-        options: {
-            publicKey: PublicKeyCredentialCreationOptions;
-        };
-        sessionID: string;
-    } = await getPasskeyRegistrationOptions();
+    // Get options (and sessionID) from the backend.
+    const { sessionID, options } = await beginPasskeyRegistration();
 
-    const options = response.options;
-
-    // TODO-PK: The types don't match.
-    options.publicKey.challenge = _sodium.from_base64(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        options.publicKey.challenge,
-    );
-    options.publicKey.user.id = _sodium.from_base64(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        options.publicKey.user.id,
-    );
-
-    // create new credential
+    // Ask the browser to new (public key) credentials using these options.
     const credential = ensure(await navigator.credentials.create(options));
 
-    await finishPasskeyRegistration(name, credential, response.sessionID);
+    // Finish by letting the backend know about these credentials so that it can
+    // save the public key for future authentication.
+    await finishPasskeyRegistration(name, credential, sessionID);
 };
 
 interface BeginPasskeyRegistrationResponse {
@@ -172,14 +158,49 @@ const beginPasskeyRegistration = async () => {
     //
     // So we do the conversion here.
     //
-    // 1. To avoid inventing an intermediary type and the boilerplate that'd
-    //    come with it, we do a force typecast the options in the response to
-    //    one that has `PublicKeyCredentialCreationOptions`.
+    // 1.  To avoid inventing an intermediary type and the boilerplate that'd
+    //     come with it, we do a force typecast the options in the response to
+    //     one that has `PublicKeyCredentialCreationOptions`.
     //
-    // 2. Convert the two binary data fields that are expected to be in the
-    //    response from URLEncodedBase64 strings to Uint8Arrays.
+    // 2.  Convert the two binary data fields that are expected to be in the
+    //     response from URLEncodedBase64 strings to Uint8Arrays.
+    //
+    // To further complicate things, the libdom.ts typings included with the
+    // current TypeScript version (5.4) indicate these binary types as a
+    //
+    //     type BufferSource = ArrayBufferView | ArrayBuffer
+    //
+    // However MDN documentation states that they can be TypedArrays (e.g.
+    // Uint8Arrays), and using Uint8Arrays works in practice too. So another
+    // force cast is needed.
 
-    return await res.json();
+    const { sessionID, options } =
+        (await res.json()) as BeginPasskeyRegistrationResponse;
+
+    options.publicKey.challenge = await serverB64ToBinary(
+        options.publicKey.challenge,
+    );
+
+    options.publicKey.user.id = await serverB64ToBinary(
+        options.publicKey.user.id,
+    );
+
+    return { sessionID, options };
+};
+
+/**
+ * This is the function that does the dirty work for the binary conversion,
+ * including the unfortunate typecasts.
+ *
+ * See: [Note: Converting binary data in WebAuthn API payloads]
+ */
+const serverB64ToBinary = async (b: BufferSource) => {
+    // This is actually a URL-safe B64 string without trailing padding.
+    const b64String = b as unknown as string;
+    // Convert it to a Uint8Array by doing the appropriate B64 decoding.
+    const bytes = await fromB64URLSafeNoPadding(b64String);
+    // Cast again to satisfy the incomplete BufferSource type.
+    return bytes as unknown as BufferSource;
 };
 
 const finishPasskeyRegistration = async (
