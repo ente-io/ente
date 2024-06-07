@@ -98,7 +98,7 @@ export const registerPasskey = async (name: string) => {
 
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.
-    await finishPasskeyRegistration(name, credential, sessionID);
+    await finishPasskeyRegistration(name, sessionID, credential);
 };
 
 interface BeginPasskeyRegistrationResponse {
@@ -186,6 +186,13 @@ const beginPasskeyRegistration = async () => {
     // However MDN documentation states that they can be TypedArrays (e.g.
     // Uint8Arrays), and using Uint8Arrays works in practice too. So another
     // force cast is needed.
+    //
+    // ----
+    //
+    // Finally, the same process needs to happen, in reverse, when we're sending
+    // the browser's response to credential creation to our backend for storing
+    // that credential (for future authentication). Binary fields need to be
+    // converted to URL-safe B64 before transmission.
 
     const { sessionID, options } =
         (await res.json()) as BeginPasskeyRegistrationResponse;
@@ -216,46 +223,81 @@ const serverB64ToBinary = async (b: BufferSource) => {
     return bytes as unknown as BufferSource;
 };
 
+/**
+ * This is the sibling of {@link serverB64ToBinary} that does the conversions in
+ * the other direction.
+ *
+ * See: [Note: Converting binary data in WebAuthn API payloads]
+ */
+const binaryToServerB64 = async (b: ArrayBuffer) => {
+    // Convert it to a Uint8Array
+    const bytes = new Uint8Array(b);
+    // Convert to a URL-safe B64 string without any trailing padding.
+    const b64String = await toB64URLSafeNoPadding(bytes);
+    // Lie about the types to make the compiler happy.
+    return b64String as unknown as BufferSource;
+};
+
 const finishPasskeyRegistration = async (
+    sessionID: string,
     friendlyName: string,
     credential: Credential,
-    sessionID: string,
 ) => {
-    const attestationObjectB64 = await toB64URLSafeNoPadding(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        new Uint8Array(credential.response.attestationObject),
+    const attestationResponse = authenticatorAttestationResponse(credential);
+
+    const attestationObject = await binaryToServerB64(
+        attestationResponse.attestationObject,
     );
-    const clientDataJSONB64 = await toB64URLSafeNoPadding(
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        new Uint8Array(credential.response.clientDataJSON),
+    const clientDataJSON = await binaryToServerB64(
+        attestationResponse.clientDataJSON,
     );
 
-    const token = ensure(getToken());
-
-    const response = await HTTPService.post(
-        `${ENDPOINT}/passkeys/registration/finish`,
-        JSON.stringify({
+    const params = new URLSearchParams({ friendlyName, sessionID });
+    const baseURL = `${apiOrigin()}/passkeys/registration/finish`;
+    const res = await fetch(`${baseURL}?${params.toString()}`, {
+        method: "POST",
+        headers: accountsAuthenticatedRequestHeaders(),
+        body: JSON.stringify({
             id: credential.id,
+            // This is meant to be the ArrayBuffer version of the (base64
+            // encoded) `id`, but since we then would need to base64 encode it
+            // anyways for transmission, we can just reuse the same string.
             rawId: credential.id,
             type: credential.type,
             response: {
-                attestationObject: attestationObjectB64,
-                clientDataJSON: clientDataJSONB64,
+                attestationObject,
+                clientDataJSON,
             },
         }),
-        {
-            friendlyName,
-            sessionID,
-        },
-        {
-            "X-Auth-Token": token,
-        },
-    );
-    return await response.data;
+    });
+    if (!res.ok)
+        throw new Error(`Failed to fetch ${baseURL}: HTTP ${res.status}`);
 };
 
+/**
+ * A function to hide the type casts necessary to extract an
+ * {@link AuthenticatorAttestationResponse} from the {@link Credential} we
+ * obtain during a new passkey registration.
+ */
+const authenticatorAttestationResponse = (credential: Credential) => {
+    // We passed `options: { publicKey }` to `navigator.credentials.create`, and
+    // so we will get back an `PublicKeyCredential`:
+    // https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredentialCreationOptions#creating_a_public_key_credential
+    //
+    // However, the return type of `create` is the base `Credential`, so we need
+    // to cast.
+    const pkCredential = credential as PublicKeyCredential;
+
+    // Further, since this was a `create` and not a `get`, the
+    // PublicKeyCredential.response will be an
+    // `AuthenticatorAttestationResponse` (See same MDN reference).
+    //
+    // We need to cast again.
+    const attestationResponse =
+        pkCredential.response as AuthenticatorAttestationResponse;
+
+    return attestationResponse;
+};
 /**
  * Return `true` if the given {@link redirectURL} (obtained from the redirect
  * query parameter passed around during the passkey verification flow) is one of
