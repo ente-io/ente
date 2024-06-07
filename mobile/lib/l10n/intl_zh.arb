@@ -478,9 +478,13 @@
   "backedUpFolders": "已备份的文件夹",
   "backup": "备份",
   "freeUpDeviceSpace": "释放设备空间",
+  "freeUpDeviceSpaceDesc": "通过清除已备份的文件来节省设备空间。",
   "allClear": "✨ 全部清除",
   "noDeviceThatCanBeDeleted": "您在此设备上没有可被删除的文件",
   "removeDuplicates": "移除重复内容",
+  "removeDuplicatesDesc": "检查并删除完全重复的文件。",
+  "viewLargeFiles": "大文件",
+  "viewLargeFilesDesc": "查看占用存储空间最多的文件",
   "noDuplicates": "✨ 没有重复内容",
   "youveNoDuplicateFilesThatCanBeCleared": "您没有可以被清除的重复文件",
   "success": "成功",
@@ -1042,6 +1046,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
+  "availableStorageSpace": "{freeAmount} {storageUnit} 空闲",
   "appVersion": "版本: {versionValue}",
   "verifyIDLabel": "验证",
   "fileInfoAddDescHint": "添加说明...",
