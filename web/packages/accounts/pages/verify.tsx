@@ -31,6 +31,7 @@ import { PAGES } from "../constants/pages";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
+import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
@@ -85,9 +86,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&redirect=${
-                    window.location.origin
-                }/passkeys/finish`;
+                redirectUserToPasskeyVerificationFlow(passkeySessionID);
                 router.push(PAGES.CREDENTIALS);
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
