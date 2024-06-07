@@ -1,3 +1,4 @@
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import { nullToUndefined } from "@/utils/transform";
@@ -45,17 +46,19 @@ const PasskeysFlow = () => {
             return;
         }
 
-        let pkg = clientPackageName["photos"];
+        let clientPackage = clientPackageName["photos"];
         if (redirectURL.protocol === "enteauth:") {
-            pkg = clientPackageName["auth"];
+            clientPackage = clientPackageName["auth"];
         } else if (redirectURL.hostname.startsWith("accounts")) {
-            pkg = clientPackageName["accounts"];
+            clientPackage = clientPackageName["accounts"];
         }
 
-        localStorage.setItem("clientPackage", pkg);
-        // The server needs to know the app on whose behalf we're trying to log in
+        localStorage.setItem("clientPackage", clientPackage);
+        // The server needs to know the app on whose behalf we're trying to
+        // authenticate.
+        setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
-            "X-Client-Package": pkg,
+            "X-Client-Package": clientPackage,
         });
 
         // get passkeySessionID from the query params

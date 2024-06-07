@@ -1,5 +1,5 @@
 import { CustomHead } from "@/next/components/Head";
-import { setClientPackageNameForAuthenticatedRequests } from "@/next/http";
+import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
@@ -67,7 +67,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const setupPackageName = () => {
         const clientPackage = localStorage.getItem("clientPackage");
         if (!clientPackage) return;
-        setClientPackageNameForAuthenticatedRequests(clientPackage);
+        setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackage,
         });
