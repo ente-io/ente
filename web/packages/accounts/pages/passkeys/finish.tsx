@@ -1,10 +1,11 @@
-import { PAGES } from "@ente/accounts/constants/pages";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { appHomeRoute } from "../../services/redirect";
+import type { PageProps } from "../../types/page";
 
 /**
  * [Note: Finish passkey flow in the requesting app]
@@ -13,7 +14,9 @@ import React, { useEffect } from "react";
  * invoked the passkey flow since it needs to save the obtained credentials
  * in local storage (which is tied to the current origin).
  */
-const Page: React.FC = () => {
+const Page: React.FC<PageProps> = ({ appContext }) => {
+    const { appName } = appContext;
+
     const router = useRouter();
 
     useEffect(() => {
@@ -26,7 +29,7 @@ const Page: React.FC = () => {
 
         const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
         InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-        router.push(redirectURL ?? PAGES.ROOT);
+        router.push(redirectURL ?? appHomeRoute(appName));
     }, []);
 
     return (
