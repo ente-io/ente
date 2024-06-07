@@ -8784,6 +8784,16 @@ class S {
     );
   }
 
+  /// `Saving Edits!`
+  String get savingEdits {
+    return Intl.message(
+      'Saving Edits!',
+      name: 'savingEdits',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Pair with PIN`
   String get pairWithPin {
     return Intl.message(
@@ -8829,16 +8839,6 @@ class S {
     return Intl.message(
       'Indexing is paused. It will automatically resume when device is ready.',
       name: 'indexingIsPaused',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Saving Edits!`
-  String get savingEdits {
-    return Intl.message(
-      'Saving Edits!',
-      name: 'savingEdits',
       desc: '',
       args: [],
     );
