@@ -1,7 +1,7 @@
 import "package:ffmpeg_kit_flutter_min/media_information.dart";
 import "package:logging/logging.dart";
-import "package:photos/models/ffprobe_keys.dart";
-import "package:photos/models/ffprobe_props.dart";
+import "package:photos/models/ffmpeg/ffprobe_keys.dart";
+import "package:photos/models/ffmpeg/ffprobe_props.dart";
 
 class FFProbeUtil {
   static final _logger = Logger('FFProbeUtil');

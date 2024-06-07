@@ -1,11 +1,11 @@
 import "package:collection/collection.dart";
 import "package:intl/intl.dart";
-import "package:photos/models/channel_layouts.dart";
-import "package:photos/models/codecs.dart";
-import "package:photos/models/ffprobe_keys.dart";
-import "package:photos/models/language.dart";
+import "package:photos/models/ffmpeg/channel_layouts.dart";
+import "package:photos/models/ffmpeg/codecs.dart";
+import "package:photos/models/ffmpeg/ffprobe_keys.dart";
+import "package:photos/models/ffmpeg/language.dart";
+import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
-import "package:photos/models/mp4.dart";
 
 class FFProbeProps {
   final double? captureFps;
