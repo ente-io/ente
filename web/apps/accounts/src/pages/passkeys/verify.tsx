@@ -23,7 +23,7 @@ import {
     type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
 
-const PasskeysFlow = () => {
+const Page = () => {
     const [errored, setErrored] = useState(false);
 
     const [invalidInfo, setInvalidInfo] = useState(false);
@@ -310,4 +310,4 @@ const PasskeysFlow = () => {
     );
 };
 
-export default PasskeysFlow;
+export default Page;
