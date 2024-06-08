@@ -193,10 +193,12 @@ const Page = () => {
         void authenticate();
     }, []);
 
+    const handleRetry = () => void authenticate();
+
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
         unknownRedirect: <UnknownRedirect />,
-        failed: <Failed onRetry={() => void authenticate()} />,
+        failed: <RetriableFailed onRetry={handleRetry} />,
         waitingForUser: <WaitingForUser />,
     };
 
@@ -214,27 +216,39 @@ const Loading: React.FC = () => {
 };
 
 const UnknownRedirect: React.FC = () => {
+    return <Failed message={t("PASSKEY_LOGIN_URL_INVALID")} />;
+};
+
+interface FailedProps {
+    message: string;
+}
+
+const Failed: React.FC<FailedProps> = ({ message }) => {
     return (
-        <UnknownRedirect_>
-            <UnknownRedirectPaper>
-                <InfoIcon color="secondary" />
-                <Typography variant="h3">
-                    {t("PASSKEY_LOGIN_FAILED")}
-                </Typography>
-                <Typography>{t("PASSKEY_LOGIN_URL_INVALID")}</Typography>
-            </UnknownRedirectPaper>
-        </UnknownRedirect_>
+        <Content>
+            <InfoIcon color="secondary" />
+            <Typography variant="h3">{t("PASSKEY_LOGIN_FAILED")}</Typography>
+            <Typography color="text.muted">{message}</Typography>
+        </Content>
     );
 };
 
-const UnknownRedirect_ = styled("div")`
+const Content: React.FC<React.PropsWithChildren> = ({ children }) => {
+    return (
+        <Content_>
+            <ContentPaper>{children}</ContentPaper>
+        </Content_>
+    );
+};
+
+const Content_ = styled("div")`
     display: flex;
     height: 100%;
     justify-content: center;
     align-items: center;
 `;
 
-const UnknownRedirectPaper = styled(Paper)`
+const ContentPaper = styled(Paper)`
     width: 100%;
     max-width: 24rem;
     padding: 1rem;
@@ -244,59 +258,46 @@ const UnknownRedirectPaper = styled(Paper)`
     gap: 1rem;
 `;
 
-interface FailedProps {
+interface RetriableFailedProps {
     /** Callback invoked when the user presses the try again button. */
     onRetry: () => void;
 }
 
-const Failed: React.FC<FailedProps> = ({ onRetry }) => {
+const RetriableFailed: React.FC<RetriableFailedProps> = ({ onRetry }) => {
     return (
-        <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-        >
-            <Box maxWidth="30rem">
-                <FormPaper
+        <Content>
+            <InfoIcon color="secondary" fontSize="large" />
+            <Typography variant="h3">{t("PASSKEY_LOGIN_FAILED")}</Typography>
+            <Typography color="text.muted">
+                {t("PASSKEY_LOGIN_ERRORED")}
+            </Typography>
+            <div>
+                <EnteButton
+                    onClick={onRetry}
+                    fullWidth
                     style={{
-                        padding: "1rem",
+                        marginTop: "1rem",
                     }}
+                    color="secondary"
+                    type="button"
+                    variant="contained"
                 >
-                    <InfoIcon />
-                    <Typography fontWeight="bold" variant="h1">
-                        {t("PASSKEY_LOGIN_FAILED")}
-                    </Typography>
-                    <Typography marginTop="1rem">
-                        {t("PASSKEY_LOGIN_ERRORED")}
-                    </Typography>
-                    <EnteButton
-                        onClick={onRetry}
-                        fullWidth
-                        style={{
-                            marginTop: "1rem",
-                        }}
-                        color="primary"
-                        type="button"
-                        variant="contained"
-                    >
-                        {t("TRY_AGAIN")}
-                    </EnteButton>
-                    <EnteButton
-                        href="/passkeys/recover"
-                        fullWidth
-                        style={{
-                            marginTop: "1rem",
-                        }}
-                        color="primary"
-                        type="button"
-                        variant="text"
-                    >
-                        {t("RECOVER_TWO_FACTOR")}
-                    </EnteButton>
-                </FormPaper>
-            </Box>
-        </Box>
+                    {t("TRY_AGAIN")}
+                </EnteButton>
+                <EnteButton
+                    href="/passkeys/recover"
+                    fullWidth
+                    style={{
+                        marginTop: "1rem",
+                    }}
+                    color="primary"
+                    type="button"
+                    variant="text"
+                >
+                    {t("RECOVER_TWO_FACTOR")}
+                </EnteButton>
+            </div>
+        </Content>
     );
 };
 
