@@ -271,13 +271,10 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({ onRetry }) => {
             <Typography color="text.muted">
                 {t("PASSKEY_LOGIN_ERRORED")}
             </Typography>
-            <div>
+            <ButtonStack>
                 <EnteButton
                     onClick={onRetry}
                     fullWidth
-                    style={{
-                        marginTop: "1rem",
-                    }}
                     color="secondary"
                     type="button"
                     variant="contained"
@@ -287,19 +284,23 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({ onRetry }) => {
                 <EnteButton
                     href="/passkeys/recover"
                     fullWidth
-                    style={{
-                        marginTop: "1rem",
-                    }}
                     color="primary"
                     type="button"
                     variant="text"
                 >
                     {t("RECOVER_TWO_FACTOR")}
                 </EnteButton>
-            </div>
+            </ButtonStack>
         </Content>
     );
 };
+
+const ButtonStack = styled("div")`
+    display: flex;
+    flex-direction: column;
+    margin-block-start: 1rem;
+    gap: 1rem;
+`;
 
 const WaitingForUser: React.FC = () => {
     return (
