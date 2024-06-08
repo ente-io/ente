@@ -24,6 +24,9 @@
       "title": "BitMEX"
     },
     {
+      "title": "BitSkins"
+    },
+    {
       "title": "Bitvavo",
       "hex": "0051FF"
     },
@@ -82,6 +85,9 @@
     },
     {
       "title": "Discourse"
+    },
+    {
+      "title": "DMarket"
     },
     {
       "title": "Doppler"
@@ -201,6 +207,10 @@
       "title": "Local",
       "slug": "local_wp",
       "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
+    },
+    {
+      "title": "Marketplace.tf",
+      "slug": "marketplacedottf"
     },
     {
       "title": "Mastodon",
@@ -340,6 +350,9 @@
     {
       "title": "Skiff",
       "hex": "EF5A3C"
+    },
+    {
+      "title": "Skinport"
     },
     {
       "title": "Snapchat"
