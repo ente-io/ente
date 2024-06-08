@@ -2,17 +2,13 @@ import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import { nullToUndefined } from "@/utils/transform";
-import {
-    CenteredFlex,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
-import { Box, Paper, Typography, styled } from "@mui/material";
+import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
@@ -304,37 +300,27 @@ const ButtonStack = styled("div")`
 
 const WaitingForUser: React.FC = () => {
     return (
-        <>
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-            >
-                <Box maxWidth="30rem">
-                    <FormPaper
-                        style={{
-                            padding: "1rem",
-                        }}
-                    >
-                        <InfoIcon />
-                        <Typography fontWeight="bold" variant="h1">
-                            {t("LOGIN_WITH_PASSKEY")}
-                        </Typography>
-                        <Typography marginTop="1rem">
-                            {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
-                        </Typography>
-                        <CenteredFlex marginTop="1rem">
-                            <img
-                                alt="ente Logo Circular"
-                                height={150}
-                                width={150}
-                                src="/images/ente-circular.png"
-                            />
-                        </CenteredFlex>
-                    </FormPaper>
-                </Box>
-            </Box>
-        </>
+        <Content>
+            <Typography fontWeight="bold" variant="h2">
+                {t("LOGIN_WITH_PASSKEY")}
+            </Typography>
+            <Typography color="text.muted">
+                {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
+            </Typography>
+            <WaitingImgContainer>
+                <img
+                    alt=""
+                    height={150}
+                    width={150}
+                    src="/images/ente-circular.png"
+                />
+            </WaitingImgContainer>
+        </Content>
     );
 };
+
+const WaitingImgContainer = styled("div")`
+    display: flex;
+    justify-content: center;
+    margin-block-start: 1rem;
+`;
