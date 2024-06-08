@@ -43,6 +43,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
     super.dispose();
     _pinController.dispose();
     _focusNode.dispose();
+    print("PIN");
   }
 
   Future<bool> confirmPinAuth(String code) async {

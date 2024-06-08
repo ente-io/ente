@@ -9,8 +9,12 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 
 class LockScreenOptionConfirmPassword extends StatefulWidget {
-  const LockScreenOptionConfirmPassword({super.key, required this.password});
+  const LockScreenOptionConfirmPassword({
+    super.key,
+    required this.password,
+  });
   final String password;
+
   @override
   State<LockScreenOptionConfirmPassword> createState() =>
       _LockScreenOptionConfirmPasswordState();
@@ -18,7 +22,6 @@ class LockScreenOptionConfirmPassword extends StatefulWidget {
 
 class _LockScreenOptionConfirmPasswordState
     extends State<LockScreenOptionConfirmPassword> {
-  String _confirmPassword = "";
   final _confirmPasswordController = TextEditingController(text: null);
   final Configuration _configuration = Configuration.instance;
   final _focusNode = FocusNode();
@@ -34,14 +37,14 @@ class _LockScreenOptionConfirmPasswordState
 
   @override
   void dispose() {
-    super.dispose();
     _focusNode.dispose();
-    _confirmPasswordController.dispose();
+    // print("CONFIRM DISPOSE");
+    super.dispose();
   }
 
   Future<void> _confirmPasswordMatch() async {
-    if (widget.password == _confirmPassword) {
-      await _configuration.savePassword(_confirmPassword);
+    if (widget.password == _confirmPasswordController.text) {
+      await _configuration.savePassword(_confirmPasswordController.text);
       await showDialogWidget(
         context: context,
         title: 'Password has been set',
@@ -136,11 +139,6 @@ class _LockScreenOptionConfirmPasswordState
                 textEditingController: _confirmPasswordController,
                 prefixIcon: Icons.lock_outline,
                 isPasswordInput: true,
-                onChange: (String p0) {
-                  setState(() {
-                    _confirmPassword = p0;
-                  });
-                },
               ),
             ),
             const Spacer(),
@@ -148,9 +146,7 @@ class _LockScreenOptionConfirmPasswordState
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
                 labelText: 'Next',
-                buttonType: _confirmPassword.length > 3
-                    ? ButtonType.primary
-                    : ButtonType.secondary,
+                buttonType: ButtonType.secondary,
                 buttonSize: ButtonSize.large,
                 onTap: () => _confirmPasswordMatch(),
               ),

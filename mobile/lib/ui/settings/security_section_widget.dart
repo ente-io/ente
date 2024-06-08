@@ -21,6 +21,7 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
+import "package:photos/ui/settings/TEMP/lock_screen_option.dart";
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -140,24 +141,38 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).lockscreen,
+        captionedTextWidget: const CaptionedTextWidget(
+          title: 'App lock',
         ),
-        trailingWidget: ToggleSwitchWidget(
-          value: () => _config.shouldShowLockScreen(),
-          onChanged: () async {
-            await LocalAuthenticationService.instance
-                .requestLocalAuthForLockScreen(
-              context,
-              !_config.shouldShowLockScreen(),
-              S.of(context).authToChangeLockscreenSetting,
-              S.of(context).lockScreenEnablePreSteps,
-            );
-
-            ///try here also once about the material page route
-          },
-        ),
+        onTap: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return const LockScreenOption();
+              },
+            ),
+          );
+        },
       ),
+      // MenuItemWidget(
+      //   captionedTextWidget: const CaptionedTextWidget(
+      //     title: 'App lock',
+      //   ),
+      //   trailingWidget: ToggleSwitchWidget(
+      //     value: () => _config.shouldShowLockScreen(),
+      //     onChanged: () async {
+      // await LocalAuthenticationService.instance
+      //     .requestLocalAuthForLockScreen(
+      //   context,
+      //   !_config.shouldShowLockScreen(),
+      //   S.of(context).authToChangeLockscreenSetting,
+      //   S.of(context).lockScreenEnablePreSteps,
+      // );
+
+      //       ///try here also once about the material page route
+      //     },
+      //   ),
+      // ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(

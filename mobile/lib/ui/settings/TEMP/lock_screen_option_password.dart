@@ -37,8 +37,9 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   @override
   void dispose() {
     super.dispose();
-    _passwordController.dispose();
+    // _passwordController.dispose();
     _focusNode.dispose();
+    // print("DISPOSE");
   }
 
   Future<bool> confirmPasswordAuth(String code) async {

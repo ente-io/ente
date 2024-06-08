@@ -175,6 +175,14 @@ class Configuration {
     await _preferences.remove(password);
   }
 
+  bool isPinSet() {
+    return _preferences.containsKey(pin);
+  }
+
+  bool isPasswordSet() {
+    return _preferences.containsKey(password);
+  }
+
   // _cleanUpStaleFiles deletes all files in the temp directory that are older
   // than kTempFolderDeletionTimeBuffer except the the temp encrypted files for upload.
   // Those file are deleted by file uploader after the upload is complete or those

@@ -7,7 +7,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/settings/TEMP/lock_screen_option.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_password.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_pin.dart";
 import 'package:photos/ui/tools/app_lock.dart';
@@ -42,13 +41,7 @@ class LocalAuthenticationService {
     return true;
   }
 
-  Future<bool> requestLocalAuthForLockScreen(
-    BuildContext context,
-    bool shouldEnableLockScreen,
-    String infoMessage,
-    String errorDialogContent, [
-    String errorDialogTitle = "",
-  ]) async {
+  Future<bool> requestEnteAuthForLockScreen(BuildContext context) async {
     final String? savedPin = await _configuration.loadSavedPin();
     final String? savedPassword = await _configuration.loadSavedPassword();
 
@@ -64,13 +57,6 @@ class LocalAuthenticationService {
         ),
       );
       if (result) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const LockScreenOption();
-            },
-          ),
-        );
         return true;
       } else {
         await showDialogWidget(
@@ -88,9 +74,10 @@ class LocalAuthenticationService {
             ),
           ],
         );
+        return false;
       }
-      return false;
-    } else if (savedPin != null) {
+    }
+    if (savedPin != null) {
       final result = await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
@@ -102,13 +89,6 @@ class LocalAuthenticationService {
         ),
       );
       if (result) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const LockScreenOption();
-            },
-          ),
-        );
         return true;
       } else {
         await showDialogWidget(
@@ -126,9 +106,22 @@ class LocalAuthenticationService {
             ),
           ],
         );
+        return false;
       }
-      return false;
     }
+    return false;
+  }
+
+  Future<bool> requestLocalAuthForLockScreen(
+    BuildContext context,
+    bool shouldEnableLockScreen,
+    String infoMessage,
+    String errorDialogContent, [
+    String errorDialogTitle = "",
+  ]) async {
+    // if (await requestEnteAuthForLockScreen(context)) {
+    //   return true;
+    // }
 
     if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.disable();
@@ -140,15 +133,7 @@ class LocalAuthenticationService {
         AppLock.of(context)!.setEnabled(shouldEnableLockScreen);
         await Configuration.instance
             .setShouldShowLockScreen(shouldEnableLockScreen);
-        if (shouldEnableLockScreen) {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return const LockScreenOption();
-              },
-            ),
-          );
-        }
+
         return true;
       } else {
         AppLock.of(context)!
