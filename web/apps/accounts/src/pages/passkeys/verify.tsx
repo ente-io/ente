@@ -30,6 +30,7 @@ const Page = () => {
         | "loading" /* Can happen multiple times in the flow */
         | "webAuthnNotSupported" /* Unrecoverable error */
         | "unknownRedirect" /* Unrecoverable error */
+        | "unrecoverableFailure" /* Unrocevorable error - generic */
         | "failed" /* Recoverable error */
         | "waitingForUser"; /* ...to authenticate with their passkey */
 
@@ -75,21 +76,28 @@ const Page = () => {
             "X-Client-Package": clientPackage,
         });
 
-        // get passkeySessionID from the query params
-        const passkeySessionID = searchParams.get("passkeySessionID") as string;
-
         setStatus("loading");
+
+        // Extract passkeySessionID from the query params.
+        const passkeySessionID = nullToUndefined(
+            searchParams.get("passkeySessionID"),
+        );
+        if (!passkeySessionID) {
+            setStatus("unrecoverableFailure");
+            return;
+        }
 
         let beginData: BeginPasskeyAuthenticationResponse;
 
         try {
             beginData = await beginAuthentication(passkeySessionID);
-            setStatus("waitingForUser");
         } catch (e) {
             log.error("Couldn't begin passkey authentication", e);
             setStatus("failed");
             return;
         }
+
+        setStatus("waitingForUser");
 
         let credential: Credential | null = null;
 
@@ -189,8 +197,9 @@ const Page = () => {
 
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
-        webAuthnNotSupported: <WebAuthnNotSupported />,
         unknownRedirect: <UnknownRedirect />,
+        webAuthnNotSupported: <WebAuthnNotSupported />,
+        unrecoverableFailure: <UnrecoverableFailure />,
         failed: <RetriableFailed onRetry={handleRetry} />,
         waitingForUser: <WaitingForUser />,
     };
@@ -215,6 +224,10 @@ const UnknownRedirect: React.FC = () => {
 const WebAuthnNotSupported: React.FC = () => {
     // TODO-PK(MR): Translate
     return <Failed message={"Passkeys are not supported in this browser"} />;
+};
+
+const UnrecoverableFailure: React.FC = () => {
+    return <Failed message={t("PASSKEY_LOGIN_ERRORED")} />;
 };
 
 interface FailedProps {
