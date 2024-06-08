@@ -90,7 +90,7 @@ const Page = () => {
         let beginData: BeginPasskeyAuthenticationResponse;
 
         try {
-            beginData = await beginAuthentication(passkeySessionID);
+            beginData = await beginPasskeyAuthentication(passkeySessionID);
         } catch (e) {
             log.error("Couldn't begin passkey authentication", e);
             setStatus("failed");
@@ -127,7 +127,7 @@ const Page = () => {
         let finishData;
 
         try {
-            finishData = await finishAuthentication(
+            finishData = await finishPasskeyAuthentication(
                 credential,
                 passkeySessionID,
                 beginData.ceremonySessionID,
@@ -145,11 +145,6 @@ const Page = () => {
 
         // TODO-PK: Shouldn't this be URL encoded?
         window.location.href = `${redirect}?response=${encodedResponse}`;
-    };
-
-    const beginAuthentication = async (sessionId: string) => {
-        const data = await beginPasskeyAuthentication(sessionId);
-        return data;
     };
 
     const getCredential = async (
@@ -174,19 +169,6 @@ const Page = () => {
             publicKeyCredentialCreationOptions,
         );
         return credential;
-    };
-
-    const finishAuthentication = async (
-        credential: Credential,
-        sessionId: string,
-        ceremonySessionId: string,
-    ) => {
-        const data = await finishPasskeyAuthentication(
-            credential,
-            sessionId,
-            ceremonySessionId,
-        );
-        return data;
     };
 
     useEffect(() => {
