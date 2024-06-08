@@ -24,13 +24,21 @@ import {
 } from "services/passkey";
 
 const Page = () => {
-    const [errored, setErrored] = useState(false);
+    /**
+     * The state of our component as we go through the passkey authentication
+     * flow.
+     *
+     * To avoid confusion with useState, we call it status instead. */
+    type Status =
+        | "loading" /* Can happen multiple times in the flow */
+        | "unknownRedirect" /* Unrecoverable error */
+        | "failed" /* Generic error */
+        | "waitingForUser"; /* ...to authenticate with their passkey */
 
-    const [invalidInfo, setInvalidInfo] = useState(false);
+    const [status, setStatus] = useState<Status>("loading");
 
-    const [loading, setLoading] = useState(true);
-
-    const init = async () => {
+    /** (re)start the authentication flow */
+    const authenticate = async () => {
         const searchParams = new URLSearchParams(window.location.search);
 
         // Extract redirect from the query params.
@@ -41,8 +49,7 @@ const Page = () => {
         // "login" URL error to the user.
         if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
             log.error(`Redirect URL '${redirectURL}' is not whitelisted`);
-            setInvalidInfo(true);
-            setLoading(false);
+            setStatus("unknownRedirect");
             return;
         }
 
@@ -69,18 +76,17 @@ const Page = () => {
         // get passkeySessionID from the query params
         const passkeySessionID = searchParams.get("passkeySessionID") as string;
 
-        setLoading(true);
+        setStatus("loading");
 
         let beginData: BeginPasskeyAuthenticationResponse;
 
         try {
             beginData = await beginAuthentication(passkeySessionID);
+            setStatus("waitingForUser");
         } catch (e) {
             log.error("Couldn't begin passkey authentication", e);
-            setErrored(true);
+            setStatus("failed");
             return;
-        } finally {
-            setLoading(false);
         }
 
         let credential: Credential | null = null;
@@ -105,11 +111,11 @@ const Page = () => {
             if (!isWebAuthnSupported()) {
                 alert("WebAuthn is not supported in this browser");
             }
-            setErrored(true);
+            setStatus("failed");
             return;
         }
 
-        setLoading(true);
+        setStatus("loading");
 
         let finishData;
 
@@ -121,10 +127,12 @@ const Page = () => {
             );
         } catch (e) {
             log.error("Couldn't finish passkey authentication", e);
-            setErrored(true);
-            setLoading(false);
+            setStatus("failed");
             return;
         }
+
+        // Conceptually we can `setStatus("done")` at this point, but we'll
+        // leave this page anyway, so no need to tickle React.
 
         const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
 
@@ -182,98 +190,113 @@ const Page = () => {
     };
 
     useEffect(() => {
-        init();
+        void authenticate();
     }, []);
 
-    if (loading) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
+    const components: Record<Status, React.ReactNode> = {
+        loading: <Loading />,
+        unknownRedirect: <UnknownRedirect />,
+        failed: <Failed onRetry={() => void authenticate()} />,
+        waitingForUser: <WaitingForUser />,
+    };
 
-    if (invalidInfo) {
-        return (
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-            >
-                <Box maxWidth="30rem">
-                    <FormPaper
-                        style={{
-                            padding: "1rem",
-                        }}
-                    >
-                        <InfoIcon />
-                        <Typography fontWeight="bold" variant="h1">
-                            {t("PASSKEY_LOGIN_FAILED")}
-                        </Typography>
-                        <Typography marginTop="1rem">
-                            {t("PASSKEY_LOGIN_URL_INVALID")}
-                        </Typography>
-                    </FormPaper>
-                </Box>
+    return components[status];
+};
+
+export default Page;
+
+const Loading: React.FC = () => {
+    return (
+        <VerticallyCentered>
+            <EnteSpinner />
+        </VerticallyCentered>
+    );
+};
+
+const UnknownRedirect: React.FC = () => {
+    return (
+        <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+        >
+            <Box maxWidth="30rem">
+                <FormPaper
+                    style={{
+                        padding: "1rem",
+                    }}
+                >
+                    <InfoIcon />
+                    <Typography fontWeight="bold" variant="h1">
+                        {t("PASSKEY_LOGIN_FAILED")}
+                    </Typography>
+                    <Typography marginTop="1rem">
+                        {t("PASSKEY_LOGIN_URL_INVALID")}
+                    </Typography>
+                </FormPaper>
             </Box>
-        );
-    }
+        </Box>
+    );
+};
 
-    if (errored) {
-        return (
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-            >
-                <Box maxWidth="30rem">
-                    <FormPaper
+interface FailedProps {
+    /** Callback invoked when the user presses the try again button. */
+    onRetry: () => void;
+}
+
+const Failed: React.FC<FailedProps> = ({ onRetry }) => {
+    return (
+        <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+        >
+            <Box maxWidth="30rem">
+                <FormPaper
+                    style={{
+                        padding: "1rem",
+                    }}
+                >
+                    <InfoIcon />
+                    <Typography fontWeight="bold" variant="h1">
+                        {t("PASSKEY_LOGIN_FAILED")}
+                    </Typography>
+                    <Typography marginTop="1rem">
+                        {t("PASSKEY_LOGIN_ERRORED")}
+                    </Typography>
+                    <EnteButton
+                        onClick={onRetry}
+                        fullWidth
                         style={{
-                            padding: "1rem",
+                            marginTop: "1rem",
                         }}
+                        color="primary"
+                        type="button"
+                        variant="contained"
                     >
-                        <InfoIcon />
-                        <Typography fontWeight="bold" variant="h1">
-                            {t("PASSKEY_LOGIN_FAILED")}
-                        </Typography>
-                        <Typography marginTop="1rem">
-                            {t("PASSKEY_LOGIN_ERRORED")}
-                        </Typography>
-                        <EnteButton
-                            onClick={() => {
-                                setErrored(false);
-                                init();
-                            }}
-                            fullWidth
-                            style={{
-                                marginTop: "1rem",
-                            }}
-                            color="primary"
-                            type="button"
-                            variant="contained"
-                        >
-                            {t("TRY_AGAIN")}
-                        </EnteButton>
-                        <EnteButton
-                            href="/passkeys/recover"
-                            fullWidth
-                            style={{
-                                marginTop: "1rem",
-                            }}
-                            color="primary"
-                            type="button"
-                            variant="text"
-                        >
-                            {t("RECOVER_TWO_FACTOR")}
-                        </EnteButton>
-                    </FormPaper>
-                </Box>
+                        {t("TRY_AGAIN")}
+                    </EnteButton>
+                    <EnteButton
+                        href="/passkeys/recover"
+                        fullWidth
+                        style={{
+                            marginTop: "1rem",
+                        }}
+                        color="primary"
+                        type="button"
+                        variant="text"
+                    >
+                        {t("RECOVER_TWO_FACTOR")}
+                    </EnteButton>
+                </FormPaper>
             </Box>
-        );
-    }
+        </Box>
+    );
+};
 
+const WaitingForUser: React.FC = () => {
     return (
         <>
             <Box
@@ -309,5 +332,3 @@ const Page = () => {
         </>
     );
 };
-
-export default Page;
