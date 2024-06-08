@@ -12,7 +12,7 @@ import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
@@ -215,30 +215,36 @@ const Loading: React.FC = () => {
 
 const UnknownRedirect: React.FC = () => {
     return (
-        <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="100%"
-        >
-            <Box maxWidth="30rem">
+        <UnknownRedirect_>
+            <div>
                 <FormPaper
                     style={{
                         padding: "1rem",
                     }}
                 >
                     <InfoIcon />
-                    <Typography fontWeight="bold" variant="h1">
+                    <Typography variant="h3">
                         {t("PASSKEY_LOGIN_FAILED")}
                     </Typography>
                     <Typography marginTop="1rem">
                         {t("PASSKEY_LOGIN_URL_INVALID")}
                     </Typography>
                 </FormPaper>
-            </Box>
-        </Box>
+            </div>
+        </UnknownRedirect_>
     );
 };
+
+const UnknownRedirect_ = styled(Box)`
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+
+    & > div {
+        max-width: 30rem;
+    }
+`;
 
 interface FailedProps {
     /** Callback invoked when the user presses the try again button. */
