@@ -13,6 +13,9 @@ import { z } from "zod";
 
 const ENDPOINT = getEndpoint();
 
+/** Return true if the user's browser supports WebAuthn (Passkeys). */
+export const isWebAuthnSupported = () => !!navigator.credentials;
+
 /**
  * Variant of {@link authenticatedRequestHeaders} but for authenticated requests
  * made by the accounts app.
