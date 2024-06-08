@@ -56,21 +56,20 @@ const Page = () => {
             return;
         }
 
+        // The server needs to know the app on whose behalf we're trying to
+        // authenticate.
         let clientPackage = nullToUndefined(searchParams.get("client"));
         // Mobile apps don't pass the client header, deduce their client package
-        // name from the redirect URL that they provide. TODO-PK: Pass?
+        // name from the redirect URL that they provide.
         if (!clientPackage) {
-            clientPackage = clientPackageName["photos"];
-            if (redirectURL.protocol === "enteauth:") {
-                clientPackage = clientPackageName["auth"];
-            } else if (redirectURL.hostname.startsWith("accounts")) {
-                clientPackage = clientPackageName["accounts"];
-            }
+            // TODO-PK: Pass from mobile app too?
+            clientPackage =
+                clientPackageName[
+                    redirectURL.protocol == "enteauth:" ? "auth" : "photos"
+                ];
         }
 
         localStorage.setItem("clientPackage", clientPackage);
-        // The server needs to know the app on whose behalf we're trying to
-        // authenticate.
         setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackage,
