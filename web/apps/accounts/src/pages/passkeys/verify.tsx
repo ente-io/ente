@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
+    isWebAuthnSupported,
     isWhitelistedRedirect,
     type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
@@ -27,14 +28,20 @@ const Page = () => {
      * To avoid confusion with useState, we call it status instead. */
     type Status =
         | "loading" /* Can happen multiple times in the flow */
+        | "webAuthnNotSupported" /* Unrecoverable error */
         | "unknownRedirect" /* Unrecoverable error */
-        | "failed" /* Generic error */
+        | "failed" /* Recoverable error */
         | "waitingForUser"; /* ...to authenticate with their passkey */
 
     const [status, setStatus] = useState<Status>("loading");
 
     /** (re)start the authentication flow */
     const authenticate = async () => {
+        if (!isWebAuthnSupported()) {
+            setStatus("webAuthnNotSupported");
+            return;
+        }
+
         const searchParams = new URLSearchParams(window.location.search);
 
         // Extract redirect from the query params.
@@ -104,9 +111,6 @@ const Page = () => {
         }
 
         if (!credential) {
-            if (!isWebAuthnSupported()) {
-                alert("WebAuthn is not supported in this browser");
-            }
             setStatus("failed");
             return;
         }
@@ -140,13 +144,6 @@ const Page = () => {
         const data = await beginPasskeyAuthentication(sessionId);
         return data;
     };
-
-    function isWebAuthnSupported(): boolean {
-        if (!navigator.credentials) {
-            return false;
-        }
-        return true;
-    }
 
     const getCredential = async (
         publicKey: any,
@@ -193,6 +190,7 @@ const Page = () => {
 
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
+        webAuthnNotSupported: <WebAuthnNotSupported />,
         unknownRedirect: <UnknownRedirect />,
         failed: <RetriableFailed onRetry={handleRetry} />,
         waitingForUser: <WaitingForUser />,
@@ -213,6 +211,11 @@ const Loading: React.FC = () => {
 
 const UnknownRedirect: React.FC = () => {
     return <Failed message={t("PASSKEY_LOGIN_URL_INVALID")} />;
+};
+
+const WebAuthnNotSupported: React.FC = () => {
+    // TODO-PK(MR): Translate
+    return <Failed message={"Passkeys are not supported in this browser"} />;
 };
 
 interface FailedProps {
