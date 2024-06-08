@@ -12,7 +12,7 @@ import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
-import { Box, Typography, styled } from "@mui/material";
+import { Box, Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
@@ -216,34 +216,30 @@ const Loading: React.FC = () => {
 const UnknownRedirect: React.FC = () => {
     return (
         <UnknownRedirect_>
-            <div>
-                <FormPaper
-                    style={{
-                        padding: "1rem",
-                    }}
-                >
-                    <InfoIcon />
-                    <Typography variant="h3">
-                        {t("PASSKEY_LOGIN_FAILED")}
-                    </Typography>
-                    <Typography marginTop="1rem">
-                        {t("PASSKEY_LOGIN_URL_INVALID")}
-                    </Typography>
-                </FormPaper>
-            </div>
+            <UnknownRedirectPaper>
+                <InfoIcon />
+                <Typography variant="h3">
+                    {t("PASSKEY_LOGIN_FAILED")}
+                </Typography>
+                <Typography marginTop="1rem">
+                    {t("PASSKEY_LOGIN_URL_INVALID")}
+                </Typography>
+            </UnknownRedirectPaper>
         </UnknownRedirect_>
     );
 };
 
-const UnknownRedirect_ = styled(Box)`
+const UnknownRedirect_ = styled("div")`
     display: flex;
     height: 100%;
     justify-content: center;
     align-items: center;
+`;
 
-    & > div {
-        max-width: 30rem;
-    }
+const UnknownRedirectPaper = styled(Paper)`
+    width: 100%;
+    max-width: 24rem;
+    padding: 1rem;
 `;
 
 interface FailedProps {
