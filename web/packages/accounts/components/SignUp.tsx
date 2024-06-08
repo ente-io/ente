@@ -6,7 +6,6 @@ import { PAGES } from "@ente/accounts/constants/pages";
 import { isWeakPassword } from "@ente/accounts/utils";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
 import { LS_KEYS } from "@ente/shared//storage/localStorage";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -57,8 +56,6 @@ interface SignUpProps {
 }
 
 export function SignUp({ router, appName, login }: SignUpProps) {
-    const appNameOld = appNameToAppNameOld(appName);
-
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -86,7 +83,7 @@ export function SignUp({ router, appName, login }: SignUpProps) {
             try {
                 setData(LS_KEYS.USER, { email });
                 setLocalReferralSource(referral);
-                await sendOtt(appNameOld, email);
+                await sendOtt(appName, email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
                 setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);

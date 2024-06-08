@@ -1,8 +1,8 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
+import { clientPackageNamePhotosDesktop } from "@/next/types/app";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { clientPackageNamePhotosDesktop } from "@ente/shared/apps/constants";
 import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";

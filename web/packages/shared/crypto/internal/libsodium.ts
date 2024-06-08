@@ -340,14 +340,18 @@ export async function generateSaltToDeriveKey() {
     return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
 }
 
-export async function generateKeyPair() {
+/**
+ * Generate a new public/private keypair, and return their Base64
+ * representations.
+ */
+export const generateKeyPair = async () => {
     await sodium.ready;
-    const keyPair: sodium.KeyPair = sodium.crypto_box_keypair();
+    const keyPair = sodium.crypto_box_keypair();
     return {
-        privateKey: await toB64(keyPair.privateKey),
         publicKey: await toB64(keyPair.publicKey),
+        privateKey: await toB64(keyPair.privateKey),
     };
-}
+};
 
 export async function boxSealOpen(
     input: string,
@@ -398,10 +402,34 @@ export async function toB64(input: Uint8Array) {
     return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
 }
 
-export async function toURLSafeB64(input: Uint8Array) {
+/** Convert a {@link Uint8Array} to a URL safe Base64 encoded string. */
+export const toB64URLSafe = async (input: Uint8Array) => {
     await sodium.ready;
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
-}
+};
+
+/**
+ * Convert a {@link Uint8Array} to a URL safe Base64 encoded string.
+ *
+ * This differs from {@link toB64URLSafe} in that it does not append any
+ * trailing padding character(s) "=" to make the resultant string's length be an
+ * integer multiple of 4.
+ */
+export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
+
+/**
+ * Convert a Base64 encoded string to a {@link Uint8Array}.
+ *
+ * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
+ * its input string's length to be a an integer multiple of 4.
+ */
+export const fromB64URLSafeNoPadding = async (input: string) => {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
 
 export async function fromUTF8(input: string) {
     await sodium.ready;

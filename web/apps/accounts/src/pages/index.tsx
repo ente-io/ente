@@ -1,13 +1,14 @@
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
-const Index = () => {
+const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
         router.push("/login");
     }, []);
+
     return <></>;
 };
 
-export default Index;
+export default Page;

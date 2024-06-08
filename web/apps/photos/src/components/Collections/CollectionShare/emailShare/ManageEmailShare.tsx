@@ -1,3 +1,4 @@
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -5,7 +6,6 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import Photo from "@mui/icons-material/Photo";
 import { DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";

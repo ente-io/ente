@@ -1,13 +1,15 @@
-import { APPS } from "@ente/shared/apps/constants";
 import { createTheme } from "@mui/material";
-import { getColors } from "./colors";
+import { getColors, type ColorAccentType } from "./colors";
 import { getComponents } from "./components";
 import { THEME_COLOR } from "./constants";
 import { getPallette } from "./palette";
 import { typography } from "./typography";
 
-export const getTheme = (themeColor: THEME_COLOR, appName: APPS) => {
-    const colors = getColors(themeColor, appName);
+export const getTheme = (
+    themeColor: THEME_COLOR,
+    colorAccentType: ColorAccentType,
+) => {
+    const colors = getColors(themeColor, colorAccentType);
     const palette = getPallette(themeColor, colors);
     const components = getComponents(colors, typography);
     const theme = createTheme({

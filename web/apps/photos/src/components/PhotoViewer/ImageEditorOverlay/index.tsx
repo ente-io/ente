@@ -6,6 +6,7 @@ import {
     HorizontalFlex,
 } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -24,7 +25,6 @@ import {
     Typography,
 } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";

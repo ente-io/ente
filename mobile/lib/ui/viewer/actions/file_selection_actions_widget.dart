@@ -84,6 +84,7 @@ class _FileSelectionActionsWidgetState
   // few files. This link is reset on any selection changed;
   Collection? _cachedCollectionForSharedLink;
   final GlobalKey shareButtonKey = GlobalKey();
+  final GlobalKey sendLinkButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -172,6 +173,7 @@ class _FileSelectionActionsWidgetState
             labelText: S.of(context).sendLink,
             onTap: anyUploadedFiles ? _onSendLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
+            key: sendLinkButtonKey,
           ),
         );
       }
@@ -414,6 +416,7 @@ class _FileSelectionActionsWidgetState
       SelectionActionButton(
         labelText: S.of(context).share,
         icon: Icons.adaptive.share_outlined,
+        key: shareButtonKey,
         onTap: () => shareSelected(
           context,
           shareButtonKey,
@@ -774,7 +777,12 @@ class _FileSelectionActionsWidgetState
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       unawaited(Clipboard.setData(ClipboardData(text: url)));
-      await shareImageAndUrl(placeholderPath!, url);
+      await shareImageAndUrl(
+        placeholderPath!,
+        url,
+        context: context,
+        key: sendLinkButtonKey,
+      );
       if (placeholderPath != null) {
         final file = File(placeholderPath!);
         try {

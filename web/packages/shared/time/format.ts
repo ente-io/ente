@@ -1,7 +1,5 @@
 import i18n, { t } from "i18next";
 
-const A_DAY = 24 * 60 * 60 * 1000;
-
 const dateTimeFullFormatter1 = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
     month: "short",
@@ -23,7 +21,7 @@ const timeFormatter = new Intl.DateTimeFormat(i18n.language, {
     timeStyle: "short",
 });
 
-export function formatDateFull(date: number | Date) {
+function formatDateFull(date: number | Date) {
     return [dateTimeFullFormatter1, dateTimeFullFormatter2]
         .map((f) => f.format(date))
         .join(" ");
@@ -34,7 +32,7 @@ export function formatDate(date: number | Date) {
         new Date().getFullYear() === new Date(date).getFullYear();
     const dateTimeFormat2 = !withinYear ? dateTimeFullFormatter2 : null;
     return [dateTimeFullFormatter1, dateTimeFormat2]
-        .filter((f) => !!f)
+        .filter((f): f is Intl.DateTimeFormat => !!f)
         .map((f) => f.format(date))
         .join(" ");
 }
@@ -54,46 +52,3 @@ export function formatDateTimeFull(dateTime: number | Date): string {
 export function formatDateTime(dateTime: number | Date): string {
     return [formatDate(dateTime), t("at"), formatTime(dateTime)].join(" ");
 }
-
-export function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
-        localeMatcher: "best fit",
-        numeric: "always",
-        style: "long",
-    });
-    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
-
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === "second")
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit,
-            );
-}
-
-export const isSameDay = (first, second) => {
-    return (
-        first.getFullYear() === second.getFullYear() &&
-        first.getMonth() === second.getMonth() &&
-        first.getDate() === second.getDate()
-    );
-};
-
-export const getDate = (item) => {
-    const currentDate = item.metadata.creationTime / 1000;
-    const date = isSameDay(new Date(currentDate), new Date())
-        ? t("TODAY")
-        : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
-          ? t("YESTERDAY")
-          : formatDate(currentDate);
-
-    return date;
-};

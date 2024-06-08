@@ -431,7 +431,8 @@ class CollectionsService {
     for (final collection in collections) {
       if (collection.type == CollectionType.uncategorized ||
           collection.isQuickLinkCollection() ||
-          collection.isHidden()) {
+          collection.isHidden() ||
+          collection.isArchived()) {
         continue;
       }
       if (collection.type == CollectionType.favorites) {
