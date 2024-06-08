@@ -217,13 +217,11 @@ const UnknownRedirect: React.FC = () => {
     return (
         <UnknownRedirect_>
             <UnknownRedirectPaper>
-                <InfoIcon />
+                <InfoIcon color="secondary" />
                 <Typography variant="h3">
                     {t("PASSKEY_LOGIN_FAILED")}
                 </Typography>
-                <Typography marginTop="1rem">
-                    {t("PASSKEY_LOGIN_URL_INVALID")}
-                </Typography>
+                <Typography>{t("PASSKEY_LOGIN_URL_INVALID")}</Typography>
             </UnknownRedirectPaper>
         </UnknownRedirect_>
     );
@@ -240,6 +238,10 @@ const UnknownRedirectPaper = styled(Paper)`
     width: 100%;
     max-width: 24rem;
     padding: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 `;
 
 interface FailedProps {
