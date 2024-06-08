@@ -355,6 +355,52 @@ export const beginPasskeyAuthentication = async (
     }
 };
 
+/**
+ * Authenticate using a passkey that the user has previously created for the
+ * current domain.
+ *
+ * @param options
+ */
+export const authenticatePasskey = async (
+    publicKey: PublicKeyCredentialRequestOptions,
+) => {
+    let tries = 0;
+    const maxTries = 3;
+
+    while (tries < maxTries) {
+        try {
+            return await getCredential(publicKey);
+        } catch (e) {
+            log.error("Couldn't get credential", e);
+            continue;
+        } finally {
+            tries++;
+        }
+    }
+
+    return undefined;
+};
+
+const getCredential = async (publicKey: any): Promise<Credential | null> => {
+    const timeoutMillis: number = 60000; // Default timeout of 60 seconds
+    publicKey.challenge = await fromB64URLSafeNoPadding(publicKey.challenge);
+    for (const listItem of publicKey.allowCredentials ?? []) {
+        listItem.id = await fromB64URLSafeNoPadding(listItem.id);
+        // note: we are orverwriting the transports array with all possible values.
+        // This is because the browser will only prompt the user for the transport that is available.
+        // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
+        listItem.transports = ["usb", "nfc", "ble", "internal"];
+    }
+    publicKey.timeout = timeoutMillis;
+    const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
+        publicKey: publicKey,
+    };
+    const credential = await navigator.credentials.get(
+        publicKeyCredentialCreationOptions,
+    );
+    return credential;
+};
+
 export const finishPasskeyAuthentication = async (
     credential: Credential,
     sessionId: string,
