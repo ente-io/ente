@@ -11,12 +11,12 @@ import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import {
-    attestChallenge,
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     isWebAuthnSupported,
     isWhitelistedRedirect,
     redirectAfterPasskeyAuthentication,
+    signChallenge,
     type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
 
@@ -98,7 +98,8 @@ const Page = () => {
 
         setStatus("waitingForUser");
 
-        const credential = await attestChallenge(beginData.options.publicKey);
+        const { ceremonySessionID, options } = beginData;
+        const credential = await signChallenge(options.publicKey);
         if (!credential) {
             setStatus("failed");
             return;
@@ -110,7 +111,7 @@ const Page = () => {
         try {
             authenticationResult = await finishPasskeyAuthentication(
                 passkeySessionID,
-                beginData.ceremonySessionID,
+                ceremonySessionID,
                 credential,
             );
         } catch (e) {
