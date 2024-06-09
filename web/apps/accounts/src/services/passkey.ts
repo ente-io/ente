@@ -346,6 +346,18 @@ export interface BeginPasskeyAuthenticationResponse {
     };
 }
 
+/**
+ * Create a authentication ceremony session and return a challenge and a list of
+ * public key credentials that can be used to attest that challenge.
+ *
+ * [Note: WebAuthn authentication flow]
+ *
+ * This is step 1 of passkey authentication flow as described in
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#authenticating_a_user
+ *
+ * @param passkeySessionID A session created by the requesting app that can be
+ * used to initiate a passkey authentication ceremony on the accounts app.
+ */
 export const beginPasskeyAuthentication = async (
     passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
@@ -374,14 +386,19 @@ export const beginPasskeyAuthentication = async (
 };
 
 /**
- * Authenticate the user with a passkey that the they had previously created for
- * the current domain.
+ * Authenticate the user by asking them to use a Passkey that the they had
+ * previously created for the current domain to attest a challenge.
  *
- * @param publicKey
+ * This function implements step 2 and 3 of the passkey authentication flow. See
+ * [Note: WebAuthn authentication flow].
  *
- * @returns A {@link PublicKeyCredential} whose response contains
+ * @param publicKey A challenge and a list of public key credentials
+ * ("passkeys") that can be used to attest that challenge.
+ *
+ * @returns A {@link PublicKeyCredential} whose response contains the attested
+ * challenge.
  */
-export const authenticatePasskey = async (
+export const attestChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
 ) => {
     const timeoutMillis: number = 60000; // Default timeout of 60 seconds

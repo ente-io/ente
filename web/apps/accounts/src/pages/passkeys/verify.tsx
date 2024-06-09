@@ -12,7 +12,7 @@ import { t } from "i18next";
 import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
 import {
-    authenticatePasskey,
+    attestChallenge,
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     isWebAuthnSupported,
@@ -99,9 +99,7 @@ const Page = () => {
 
         setStatus("waitingForUser");
 
-        const credential = await authenticatePasskey(
-            beginData.options.publicKey,
-        );
+        const credential = await attestChallenge(beginData.options.publicKey);
 
         if (!credential) {
             setStatus("failed");
