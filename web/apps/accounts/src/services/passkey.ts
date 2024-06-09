@@ -443,9 +443,9 @@ export const finishPasskeyAuthentication = async (
         response.authenticatorData,
     );
     const clientDataJSON = await binaryToServerB64(response.clientDataJSON);
-    const signature = binaryToServerB64(response.signature);
+    const signature = await binaryToServerB64(response.signature);
     const userHandle = response.userHandle
-        ? binaryToServerB64(response.userHandle)
+        ? await binaryToServerB64(response.userHandle)
         : null;
 
     const params = new URLSearchParams({
