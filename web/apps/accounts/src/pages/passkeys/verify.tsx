@@ -18,7 +18,6 @@ import {
     isWhitelistedRedirect,
     redirectAfterPasskeyAuthentication,
     signChallenge,
-    type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
 
 const Page = () => {
@@ -88,35 +87,28 @@ const Page = () => {
             return;
         }
 
-        let beginData: BeginPasskeyAuthenticationResponse;
-        try {
-            beginData = await beginPasskeyAuthentication(passkeySessionID);
-        } catch (e) {
-            log.error("Couldn't begin passkey authentication", e);
-            setStatus("failed");
-            return;
-        }
-
-        setStatus("waitingForUser");
-
-        const { ceremonySessionID, options } = beginData;
-        const credential = await signChallenge(options.publicKey);
-        if (!credential) {
-            setStatus("failed");
-            return;
-        }
-
-        setStatus("loading");
-
         let authorizationResponse: TwoFactorAuthorizationResponse;
         try {
+            const { ceremonySessionID, options } =
+                await beginPasskeyAuthentication(passkeySessionID);
+
+            setStatus("waitingForUser");
+
+            const credential = await signChallenge(options.publicKey);
+            if (!credential) {
+                setStatus("failed");
+                return;
+            }
+
+            setStatus("loading");
+
             authorizationResponse = await finishPasskeyAuthentication(
                 passkeySessionID,
                 ceremonySessionID,
                 credential,
             );
         } catch (e) {
-            log.error("Couldn't finish passkey authentication", e);
+            log.error("Passkey authentication failed", e);
             setStatus("failed");
             return;
         }
