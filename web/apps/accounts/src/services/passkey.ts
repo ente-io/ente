@@ -1,6 +1,5 @@
 import { isDevBuild } from "@/next/env";
 import { clientPackageHeaderIfPresent } from "@/next/http";
-import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import {
@@ -10,6 +9,7 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import _sodium from "libsodium-wrappers";
 import { z } from "zod";
 
 const ENDPOINT = getEndpoint();
@@ -389,8 +389,8 @@ export const beginPasskeyAuthentication = async (
  * Authenticate the user by asking them to use a Passkey that the they had
  * previously created for the current domain to attest a challenge.
  *
- * This function implements step 2 and 3 of the passkey authentication flow. See
- * [Note: WebAuthn authentication flow].
+ * This function implements steps 2 and 3 of the passkey authentication flow.
+ * See [Note: WebAuthn authentication flow].
  *
  * @param publicKey A challenge and a list of public key credentials
  * ("passkeys") that can be used to attest that challenge.
@@ -423,50 +423,78 @@ export const attestChallenge = async (
     return await navigator.credentials.get({ publicKey });
 };
 
+/**
+ * Finish the authentication by providing the attested challenge to the backend.
+ *
+ * This function implements steps 4 and 5 of the passkey authentication flow.
+ * See [Note: WebAuthn authentication flow].
+ *
+ * @returns The result of successful authentication. This is an meant to be an
+ * opaque JavaScript that should be returned back to the calling app by invoking
+ * {@link redirectAfterPasskeyAuthentication}.
+ */
 export const finishPasskeyAuthentication = async (
+    passkeySessionID: string,
+    ceremonySessionID: string,
     credential: Credential,
-    sessionId: string,
-    ceremonySessionId: string,
 ) => {
-    try {
-        const data = await HTTPService.post(
-            `${ENDPOINT}/users/two-factor/passkeys/finish`,
-            {
-                id: credential.id,
-                rawId: credential.id,
-                type: credential.type,
-                response: {
-                    authenticatorData: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.authenticatorData),
-                    ),
-                    clientDataJSON: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.clientDataJSON),
-                    ),
-                    signature: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.signature),
-                    ),
-                    userHandle: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.userHandle),
-                    ),
-                },
+    const data = await HTTPService.post(
+        `${ENDPOINT}/users/two-factor/passkeys/finish`,
+        {
+            id: credential.id,
+            rawId: credential.id,
+            type: credential.type,
+            response: {
+                authenticatorData: await toB64URLSafeNoPadding(
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    new Uint8Array(credential.response.authenticatorData),
+                ),
+                clientDataJSON: await toB64URLSafeNoPadding(
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    new Uint8Array(credential.response.clientDataJSON),
+                ),
+                signature: await toB64URLSafeNoPadding(
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    new Uint8Array(credential.response.signature),
+                ),
+                userHandle: await toB64URLSafeNoPadding(
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    new Uint8Array(credential.response.userHandle),
+                ),
             },
-            {
-                sessionID: sessionId,
-                ceremonySessionID: ceremonySessionId,
-            },
-        );
+        },
+        {
+            sessionID: passkeySessionID,
+            ceremonySessionID: ceremonySessionID,
+        },
+    );
 
-        return data.data;
-    } catch (e) {
-        log.error("finish passkey authentication failed", e);
-        throw e;
-    }
+    return data.data;
+};
+
+/**
+ * Redirect back to the calling app that initiated the passkey authentication
+ * flow with the result of the authentication (Ente "credentials" that the
+ * calling app that calling app can use to continue with the user journey).
+ *
+ * @param redirectURL The URL to redirect to. Provided by the calling app that
+ * initiated the passkey authentication.
+ *
+ * @param authenticationResult The result of {@link finishPasskeyAuthentication}
+ * returned by the backend.
+ */
+export const redirectAfterPasskeyAuthentication = (
+    redirectURL: URL,
+    authenticationResult: any,
+) => {
+    const encodedResponse = _sodium.to_base64(
+        JSON.stringify(authenticationResult),
+    );
+
+    // TODO-PK: Shouldn't this be URL encoded?
+    window.location.href = `${redirectURL}?response=${encodedResponse}`;
 };

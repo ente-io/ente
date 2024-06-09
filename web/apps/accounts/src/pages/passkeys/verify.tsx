@@ -9,7 +9,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
 import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
 import {
     attestChallenge,
@@ -17,6 +16,7 @@ import {
     finishPasskeyAuthentication,
     isWebAuthnSupported,
     isWhitelistedRedirect,
+    redirectAfterPasskeyAuthentication,
     type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
 
@@ -88,7 +88,6 @@ const Page = () => {
         }
 
         let beginData: BeginPasskeyAuthenticationResponse;
-
         try {
             beginData = await beginPasskeyAuthentication(passkeySessionID);
         } catch (e) {
@@ -100,7 +99,6 @@ const Page = () => {
         setStatus("waitingForUser");
 
         const credential = await attestChallenge(beginData.options.publicKey);
-
         if (!credential) {
             setStatus("failed");
             return;
@@ -108,13 +106,12 @@ const Page = () => {
 
         setStatus("loading");
 
-        let finishData;
-
+        let authenticationResult;
         try {
-            finishData = await finishPasskeyAuthentication(
-                credential,
+            authenticationResult = await finishPasskeyAuthentication(
                 passkeySessionID,
                 beginData.ceremonySessionID,
+                credential,
             );
         } catch (e) {
             log.error("Couldn't finish passkey authentication", e);
@@ -125,10 +122,7 @@ const Page = () => {
         // Conceptually we can `setStatus("done")` at this point, but we'll
         // leave this page anyway, so no need to tickle React.
 
-        const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
-
-        // TODO-PK: Shouldn't this be URL encoded?
-        window.location.href = `${redirect}?response=${encodedResponse}`;
+        redirectAfterPasskeyAuthentication(redirectURL, authenticationResult);
     };
 
     useEffect(() => {
