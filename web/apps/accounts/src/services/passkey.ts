@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import { clientPackageHeaderIfPresent } from "@/next/http";
+import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import {
@@ -428,9 +429,8 @@ export const signChallenge = async (
  * This function implements steps 4 and 5 of the passkey authentication flow.
  * See [Note: WebAuthn authentication flow].
  *
- * @returns The result of successful authentication. This is an meant to be an
- * opaque JavaScript that should be returned back to the calling app by invoking
- * {@link redirectAfterPasskeyAuthentication}.
+ * @returns The result of successful authentication, a
+ * {@link TwoFactorAuthorizationResponse}.
  */
 export const finishPasskeyAuthentication = async (
     passkeySessionID: string,
@@ -473,8 +473,7 @@ export const finishPasskeyAuthentication = async (
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 
-    const data = await res.json();
-    return data.data;
+    return TwoFactorAuthorizationResponse.parse(await res.json());
 };
 
 /**
@@ -504,21 +503,20 @@ const authenticatorAssertionResponse = (credential: Credential) => {
 
 /**
  * Redirect back to the calling app that initiated the passkey authentication
- * flow with the result of the authentication (Ente "credentials" that the
- * calling app that calling app can use to continue with the user journey).
+ * flow with the result of the authentication.
  *
  * @param redirectURL The URL to redirect to. Provided by the calling app that
  * initiated the passkey authentication.
  *
- * @param authenticationResult The result of {@link finishPasskeyAuthentication}
- * returned by the backend.
+ * @param twoFactorAuthorizationResponse The result of
+ * {@link finishPasskeyAuthentication} returned by the backend.
  */
 export const redirectAfterPasskeyAuthentication = (
     redirectURL: URL,
-    authenticationResult: any,
+    twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
     const encodedResponse = _sodium.to_base64(
-        JSON.stringify(authenticationResult),
+        JSON.stringify(twoFactorAuthorizationResponse),
     );
 
     // TODO-PK: Shouldn't this be URL encoded?

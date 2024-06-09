@@ -1,6 +1,7 @@
 import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
+import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -107,9 +108,9 @@ const Page = () => {
 
         setStatus("loading");
 
-        let authenticationResult;
+        let authorizationResponse: TwoFactorAuthorizationResponse;
         try {
-            authenticationResult = await finishPasskeyAuthentication(
+            authorizationResponse = await finishPasskeyAuthentication(
                 passkeySessionID,
                 ceremonySessionID,
                 credential,
@@ -123,7 +124,7 @@ const Page = () => {
         // Conceptually we can `setStatus("done")` at this point, but we'll
         // leave this page anyway, so no need to tickle React.
 
-        redirectAfterPasskeyAuthentication(redirectURL, authenticationResult);
+        redirectAfterPasskeyAuthentication(redirectURL, authorizationResponse);
     };
 
     useEffect(() => {
