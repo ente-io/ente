@@ -1,4 +1,5 @@
 import { isDevBuild } from "@/next/env";
+import { clientPackageHeaderIfPresent } from "@/next/http";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -329,63 +330,63 @@ export const isWhitelistedRedirect = (redirectURL: URL) =>
     redirectURL.protocol == "enteauth:";
 
 export interface BeginPasskeyAuthenticationResponse {
+    /**
+     * An identifier for this authentication ceremony / session.
+     *
+     * This `ceremonySessionID` is subsequently passed to the API when finish
+     * credential creation to tie things together.
+     */
     ceremonySessionID: string;
-    options: Options;
-}
-
-interface Options {
-    publicKey: PublicKeyCredentialRequestOptions;
+    /**
+     * Options that should be passed to `navigator.credential.get` to obtain the
+     * attested {@link Credential}.
+     */
+    options: {
+        publicKey: PublicKeyCredentialRequestOptions;
+    };
 }
 
 export const beginPasskeyAuthentication = async (
-    sessionId: string,
+    passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
-    try {
-        const data = await HTTPService.post(
-            `${ENDPOINT}/users/two-factor/passkeys/begin`,
-            {
-                sessionID: sessionId,
-            },
-        );
+    const params = new URLSearchParams({ sessionID: passkeySessionID });
+    const url = `${apiOrigin()}/users/two-factor/passkeys/begin`;
+    const res = await fetch(`${url}?${params.toString()}`, {
+        method: "POST",
+        headers: clientPackageHeaderIfPresent(),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 
-        return data.data;
-    } catch (e) {
-        log.error("begin passkey authentication failed", e);
-        throw e;
+    // See: [Note: Converting binary data in WebAuthn API payloads]
+
+    const { ceremonySessionID, options } =
+        (await res.json()) as BeginPasskeyAuthenticationResponse;
+
+    options.publicKey.challenge = await serverB64ToBinary(
+        options.publicKey.challenge,
+    );
+
+    for (const credential of options.publicKey.allowCredentials ?? []) {
+        credential.id = await serverB64ToBinary(credential.id);
     }
+
+    return { ceremonySessionID, options };
 };
 
 /**
- * Authenticate using a passkey that the user has previously created for the
- * current domain.
+ * Authenticate the user with a passkey that the they had previously created for
+ * the current domain.
  *
- * @param options
+ * @param publicKey
+ *
+ * @returns A {@link PublicKeyCredential} whose response contains
  */
 export const authenticatePasskey = async (
     publicKey: PublicKeyCredentialRequestOptions,
 ) => {
-    let tries = 0;
-    const maxTries = 3;
-
-    while (tries < maxTries) {
-        try {
-            return await getCredential(publicKey);
-        } catch (e) {
-            log.error("Couldn't get credential", e);
-            continue;
-        } finally {
-            tries++;
-        }
-    }
-
-    return undefined;
-};
-
-const getCredential = async (publicKey: any): Promise<Credential | null> => {
     const timeoutMillis: number = 60000; // Default timeout of 60 seconds
-    publicKey.challenge = await fromB64URLSafeNoPadding(publicKey.challenge);
+
     for (const listItem of publicKey.allowCredentials ?? []) {
-        listItem.id = await fromB64URLSafeNoPadding(listItem.id);
         // note: we are orverwriting the transports array with all possible values.
         // This is because the browser will only prompt the user for the transport that is available.
         // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
