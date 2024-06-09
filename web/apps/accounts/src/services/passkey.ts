@@ -360,11 +360,11 @@ export interface BeginPasskeyAuthenticationResponse {
 export const beginPasskeyAuthentication = async (
     passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
-    const params = new URLSearchParams({ sessionID: passkeySessionID });
     const url = `${apiOrigin()}/users/two-factor/passkeys/begin`;
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const res = await fetch(url, {
         method: "POST",
         headers: clientPackageHeaderIfPresent(),
+        body: JSON.stringify({ sessionID: passkeySessionID }),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 
