@@ -401,22 +401,26 @@ export const beginPasskeyAuthentication = async (
 export const attestChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
 ) => {
-    const timeoutMillis: number = 60000; // Default timeout of 60 seconds
-
     for (const listItem of publicKey.allowCredentials ?? []) {
+        // From MDN:
+        //
+        // > The `transports` property is hint of the methods that the client
+        // > could use to communicate with the relevant authenticator of the
+        // > public key credential to retrieve. Possible values are ["ble",
+        // > "hybrid", "internal", "nfc", "usb"].
+        //
+        // TODO-PK: Better document why + why not "hybrid"
+        //
         // note: we are orverwriting the transports array with all possible values.
         // This is because the browser will only prompt the user for the transport that is available.
         // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
         listItem.transports = ["usb", "nfc", "ble", "internal"];
     }
-    publicKey.timeout = timeoutMillis;
-    const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
-        publicKey: publicKey,
-    };
-    const credential = await navigator.credentials.get(
-        publicKeyCredentialCreationOptions,
-    );
-    return credential;
+
+    // Allow up to 60 seconds to wait for the retrieval
+    publicKey.timeout = 60 * 1000;
+
+    return await navigator.credentials.get({ publicKey });
 };
 
 export const finishPasskeyAuthentication = async (
