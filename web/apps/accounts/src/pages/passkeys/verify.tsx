@@ -1,23 +1,23 @@
 import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
+import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
 import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import _sodium from "libsodium-wrappers";
 import { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     isWebAuthnSupported,
     isWhitelistedRedirect,
-    type BeginPasskeyAuthenticationResponse,
+    redirectAfterPasskeyAuthentication,
+    signChallenge,
 } from "services/passkey";
 
 const Page = () => {
@@ -30,6 +30,7 @@ const Page = () => {
         | "loading" /* Can happen multiple times in the flow */
         | "webAuthnNotSupported" /* Unrecoverable error */
         | "unknownRedirect" /* Unrecoverable error */
+        | "unrecoverableFailure" /* Unrocevorable error - generic */
         | "failed" /* Recoverable error */
         | "waitingForUser"; /* ...to authenticate with their passkey */
 
@@ -56,77 +57,58 @@ const Page = () => {
             return;
         }
 
+        // The server needs to know the app on whose behalf we're trying to
+        // authenticate.
         let clientPackage = nullToUndefined(searchParams.get("client"));
         // Mobile apps don't pass the client header, deduce their client package
-        // name from the redirect URL that they provide. TODO-PK: Pass?
+        // name from the redirect URL that they provide.
         if (!clientPackage) {
-            clientPackage = clientPackageName["photos"];
-            if (redirectURL.protocol === "enteauth:") {
-                clientPackage = clientPackageName["auth"];
-            } else if (redirectURL.hostname.startsWith("accounts")) {
-                clientPackage = clientPackageName["accounts"];
-            }
+            // TODO-PK: Pass from mobile app too?
+            clientPackage =
+                clientPackageName[
+                    redirectURL.protocol == "enteauth:" ? "auth" : "photos"
+                ];
         }
 
         localStorage.setItem("clientPackage", clientPackage);
-        // The server needs to know the app on whose behalf we're trying to
-        // authenticate.
         setClientPackageForAuthenticatedRequests(clientPackage);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackage,
         });
 
-        // get passkeySessionID from the query params
-        const passkeySessionID = searchParams.get("passkeySessionID") as string;
-
         setStatus("loading");
 
-        let beginData: BeginPasskeyAuthenticationResponse;
-
-        try {
-            beginData = await beginAuthentication(passkeySessionID);
-            setStatus("waitingForUser");
-        } catch (e) {
-            log.error("Couldn't begin passkey authentication", e);
-            setStatus("failed");
+        // Extract passkeySessionID from the query params.
+        const passkeySessionID = nullToUndefined(
+            searchParams.get("passkeySessionID"),
+        );
+        if (!passkeySessionID) {
+            setStatus("unrecoverableFailure");
             return;
         }
 
-        let credential: Credential | null = null;
+        let authorizationResponse: TwoFactorAuthorizationResponse;
+        try {
+            const { ceremonySessionID, options } =
+                await beginPasskeyAuthentication(passkeySessionID);
 
-        let tries = 0;
-        const maxTries = 3;
+            setStatus("waitingForUser");
 
-        while (tries < maxTries) {
-            try {
-                credential = await getCredential(beginData.options.publicKey);
-            } catch (e) {
-                log.error("Couldn't get credential", e);
-                continue;
-            } finally {
-                tries++;
+            const credential = await signChallenge(options.publicKey);
+            if (!credential) {
+                setStatus("failed");
+                return;
             }
 
-            break;
-        }
+            setStatus("loading");
 
-        if (!credential) {
-            setStatus("failed");
-            return;
-        }
-
-        setStatus("loading");
-
-        let finishData;
-
-        try {
-            finishData = await finishAuthentication(
-                credential,
+            authorizationResponse = await finishPasskeyAuthentication(
                 passkeySessionID,
-                beginData.ceremonySessionID,
+                ceremonySessionID,
+                credential,
             );
         } catch (e) {
-            log.error("Couldn't finish passkey authentication", e);
+            log.error("Passkey authentication failed", e);
             setStatus("failed");
             return;
         }
@@ -134,52 +116,7 @@ const Page = () => {
         // Conceptually we can `setStatus("done")` at this point, but we'll
         // leave this page anyway, so no need to tickle React.
 
-        const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
-
-        // TODO-PK: Shouldn't this be URL encoded?
-        window.location.href = `${redirect}?response=${encodedResponse}`;
-    };
-
-    const beginAuthentication = async (sessionId: string) => {
-        const data = await beginPasskeyAuthentication(sessionId);
-        return data;
-    };
-
-    const getCredential = async (
-        publicKey: any,
-        timeoutMillis: number = 60000, // Default timeout of 60 seconds
-    ): Promise<Credential | null> => {
-        publicKey.challenge = await fromB64URLSafeNoPadding(
-            publicKey.challenge,
-        );
-        for (const listItem of publicKey.allowCredentials ?? []) {
-            listItem.id = await fromB64URLSafeNoPadding(listItem.id);
-            // note: we are orverwriting the transports array with all possible values.
-            // This is because the browser will only prompt the user for the transport that is available.
-            // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
-            listItem.transports = ["usb", "nfc", "ble", "internal"];
-        }
-        publicKey.timeout = timeoutMillis;
-        const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
-            publicKey: publicKey,
-        };
-        const credential = await navigator.credentials.get(
-            publicKeyCredentialCreationOptions,
-        );
-        return credential;
-    };
-
-    const finishAuthentication = async (
-        credential: Credential,
-        sessionId: string,
-        ceremonySessionId: string,
-    ) => {
-        const data = await finishPasskeyAuthentication(
-            credential,
-            sessionId,
-            ceremonySessionId,
-        );
-        return data;
+        redirectAfterPasskeyAuthentication(redirectURL, authorizationResponse);
     };
 
     useEffect(() => {
@@ -190,8 +127,9 @@ const Page = () => {
 
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
-        webAuthnNotSupported: <WebAuthnNotSupported />,
         unknownRedirect: <UnknownRedirect />,
+        webAuthnNotSupported: <WebAuthnNotSupported />,
+        unrecoverableFailure: <UnrecoverableFailure />,
         failed: <RetriableFailed onRetry={handleRetry} />,
         waitingForUser: <WaitingForUser />,
     };
@@ -216,6 +154,10 @@ const UnknownRedirect: React.FC = () => {
 const WebAuthnNotSupported: React.FC = () => {
     // TODO-PK(MR): Translate
     return <Failed message={"Passkeys are not supported in this browser"} />;
+};
+
+const UnrecoverableFailure: React.FC = () => {
+    return <Failed message={t("PASSKEY_LOGIN_ERRORED")} />;
 };
 
 interface FailedProps {

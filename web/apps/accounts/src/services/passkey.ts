@@ -1,17 +1,16 @@
 import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
+import { clientPackageHeaderIfPresent } from "@/next/http";
+import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
 } from "@ente/shared/crypto/internal/libsodium";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
+import { apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import _sodium from "libsodium-wrappers";
 import { z } from "zod";
-
-const ENDPOINT = getEndpoint();
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
 export const isWebAuthnSupported = () => !!navigator.credentials;
@@ -316,6 +315,7 @@ const authenticatorAttestationResponse = (credential: Credential) => {
 
     return attestationResponse;
 };
+
 /**
  * Return `true` if the given {@link redirectURL} (obtained from the redirect
  * query parameter passed around during the passkey verification flow) is one of
@@ -329,76 +329,196 @@ export const isWhitelistedRedirect = (redirectURL: URL) =>
     redirectURL.protocol == "enteauth:";
 
 export interface BeginPasskeyAuthenticationResponse {
+    /**
+     * An identifier for this authentication ceremony / session.
+     *
+     * This `ceremonySessionID` is subsequently passed to the API when finish
+     * credential creation to tie things together.
+     */
     ceremonySessionID: string;
-    options: Options;
+    /**
+     * Options that should be passed to `navigator.credential.get` to obtain the
+     * attested {@link Credential}.
+     */
+    options: {
+        publicKey: PublicKeyCredentialRequestOptions;
+    };
 }
 
-interface Options {
-    publicKey: PublicKeyCredentialRequestOptions;
-}
-
+/**
+ * Create a authentication ceremony session and return a challenge and a list of
+ * public key credentials that can be used to attest that challenge.
+ *
+ * [Note: WebAuthn authentication flow]
+ *
+ * This is step 1 of passkey authentication flow as described in
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#authenticating_a_user
+ *
+ * @param passkeySessionID A session created by the requesting app that can be
+ * used to initiate a passkey authentication ceremony on the accounts app.
+ */
 export const beginPasskeyAuthentication = async (
-    sessionId: string,
+    passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
-    try {
-        const data = await HTTPService.post(
-            `${ENDPOINT}/users/two-factor/passkeys/begin`,
-            {
-                sessionID: sessionId,
-            },
-        );
+    const url = `${apiOrigin()}/users/two-factor/passkeys/begin`;
+    const res = await fetch(url, {
+        method: "POST",
+        headers: clientPackageHeaderIfPresent(),
+        body: JSON.stringify({ sessionID: passkeySessionID }),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 
-        return data.data;
-    } catch (e) {
-        log.error("begin passkey authentication failed", e);
-        throw e;
+    // See: [Note: Converting binary data in WebAuthn API payloads]
+
+    const { ceremonySessionID, options } =
+        (await res.json()) as BeginPasskeyAuthenticationResponse;
+
+    options.publicKey.challenge = await serverB64ToBinary(
+        options.publicKey.challenge,
+    );
+
+    for (const credential of options.publicKey.allowCredentials ?? []) {
+        credential.id = await serverB64ToBinary(credential.id);
     }
+
+    return { ceremonySessionID, options };
 };
 
-export const finishPasskeyAuthentication = async (
-    credential: Credential,
-    sessionId: string,
-    ceremonySessionId: string,
+/**
+ * Authenticate the user by asking them to use a passkey that the they had
+ * previously created for the current domain to sign a challenge.
+ *
+ * This function implements steps 2 and 3 of the passkey authentication flow.
+ * See [Note: WebAuthn authentication flow].
+ *
+ * @param publicKey A challenge and a list of public key credentials
+ * ("passkeys") that can be used to attest that challenge.
+ *
+ * @returns A {@link PublicKeyCredential} that contains the signed
+ * {@link AuthenticatorAssertionResponse}. Note that the type does not reflect
+ * this specialization, and the result is a base {@link Credential}.
+ */
+export const signChallenge = async (
+    publicKey: PublicKeyCredentialRequestOptions,
 ) => {
-    try {
-        const data = await HTTPService.post(
-            `${ENDPOINT}/users/two-factor/passkeys/finish`,
-            {
-                id: credential.id,
-                rawId: credential.id,
-                type: credential.type,
-                response: {
-                    authenticatorData: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.authenticatorData),
-                    ),
-                    clientDataJSON: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.clientDataJSON),
-                    ),
-                    signature: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.signature),
-                    ),
-                    userHandle: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.userHandle),
-                    ),
-                },
-            },
-            {
-                sessionID: sessionId,
-                ceremonySessionID: ceremonySessionId,
-            },
-        );
-
-        return data.data;
-    } catch (e) {
-        log.error("finish passkey authentication failed", e);
-        throw e;
+    for (const listItem of publicKey.allowCredentials ?? []) {
+        // From MDN:
+        //
+        // > The `transports` property is hint of the methods that the client
+        // > could use to communicate with the relevant authenticator of the
+        // > public key credential to retrieve. Possible values are ["ble",
+        // > "hybrid", "internal", "nfc", "usb"].
+        //
+        // TODO-PK: Better document why + why not "hybrid"
+        //
+        // note: we are orverwriting the transports array with all possible values.
+        // This is because the browser will only prompt the user for the transport that is available.
+        // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
+        listItem.transports = ["usb", "nfc", "ble", "internal"];
     }
+
+    // Allow up to 60 seconds to wait for the retrieval
+    publicKey.timeout = 60 * 1000;
+
+    return await navigator.credentials.get({ publicKey });
+};
+
+/**
+ * Finish the authentication by providing the signed assertion to the backend.
+ *
+ * This function implements steps 4 and 5 of the passkey authentication flow.
+ * See [Note: WebAuthn authentication flow].
+ *
+ * @returns The result of successful authentication, a
+ * {@link TwoFactorAuthorizationResponse}.
+ */
+export const finishPasskeyAuthentication = async (
+    passkeySessionID: string,
+    ceremonySessionID: string,
+    credential: Credential,
+) => {
+    const response = authenticatorAssertionResponse(credential);
+
+    const authenticatorData = await binaryToServerB64(
+        response.authenticatorData,
+    );
+    const clientDataJSON = await binaryToServerB64(response.clientDataJSON);
+    const signature = await binaryToServerB64(response.signature);
+    const userHandle = response.userHandle
+        ? await binaryToServerB64(response.userHandle)
+        : null;
+
+    const params = new URLSearchParams({
+        sessionID: passkeySessionID,
+        ceremonySessionID,
+    });
+    const url = `${apiOrigin()}/users/two-factor/passkeys/finish`;
+    const res = await fetch(`${url}?${params.toString()}`, {
+        method: "POST",
+        headers: clientPackageHeaderIfPresent(),
+        body: JSON.stringify({
+            id: credential.id,
+            // This is meant to be the ArrayBuffer version of the (base64
+            // encoded) `id`, but since we then would need to base64 encode it
+            // anyways for transmission, we can just reuse the same string.
+            rawId: credential.id,
+            type: credential.type,
+            response: {
+                authenticatorData,
+                clientDataJSON,
+                signature,
+                userHandle,
+            },
+        }),
+    });
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+
+    return TwoFactorAuthorizationResponse.parse(await res.json());
+};
+
+/**
+ * A function to hide the type casts necessary to extract a
+ * {@link AuthenticatorAssertionResponse} from the {@link Credential} we obtain
+ * during a passkey attestation.
+ */
+const authenticatorAssertionResponse = (credential: Credential) => {
+    // We passed `options: { publicKey }` to `navigator.credentials.get`, and so
+    // we will get back an `PublicKeyCredential`:
+    // https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/get#web_authentication_api
+    //
+    // However, the return type of `get` is the base `Credential`, so we need to
+    // cast.
+    const pkCredential = credential as PublicKeyCredential;
+
+    // Further, since this was a `get` and not a `create`, the
+    // PublicKeyCredential.response will be an `AuthenticatorAssertionResponse`
+    // (See same MDN reference).
+    //
+    // We need to cast again.
+    const assertionResponse =
+        pkCredential.response as AuthenticatorAssertionResponse;
+
+    return assertionResponse;
+};
+
+/**
+ * Redirect back to the calling app that initiated the passkey authentication
+ * flow with the result of the authentication.
+ *
+ * @param redirectURL The URL to redirect to. Provided by the calling app that
+ * initiated the passkey authentication.
+ *
+ * @param twoFactorAuthorizationResponse The result of
+ * {@link finishPasskeyAuthentication} returned by the backend.
+ */
+export const redirectAfterPasskeyAuthentication = (
+    redirectURL: URL,
+    twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
+) => {
+    const encodedResponse = _sodium.to_base64(
+        JSON.stringify(twoFactorAuthorizationResponse),
+    );
+
+    // TODO-PK: Shouldn't this be URL encoded?
+    window.location.href = `${redirectURL}?response=${encodedResponse}`;
 };
