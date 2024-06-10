@@ -46,7 +46,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ## 🧑‍💻 Building from source
 
-1. [Install Flutter v3.22.0](https://flutter.dev/docs/get-started/install).
+1. [Install Flutter v3.22.2](https://flutter.dev/docs/get-started/install).
 
 2. Pull in all submodules with `git submodule update --init --recursive`
 
