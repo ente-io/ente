@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { apiOrigin } from "./services/support";
 import S from "./utils/strings";
 
 export const App: React.FC = () => {
-    const [serverUrl /*, setServerUrl */] = useState(
-        import.meta.env.VITE_ENTE_ENDPOINT || "",
-    );
     const [token, setToken] = useState("");
     const [email, setEmail] = useState("");
     const [userData, setUserData] = useState<any>(null);
@@ -15,7 +13,6 @@ export const App: React.FC = () => {
         if (storedToken) {
             setToken(storedToken);
         }
-        console.log(import.meta.env.VITE_ENTE_ENDPOINT);
     }, []);
 
     useEffect(() => {
@@ -28,7 +25,7 @@ export const App: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const url = `${serverUrl}/admin/user?email=${email}&token=${token}`;
+            const url = `${apiOrigin}/admin/user?email=${email}&token=${token}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error("Network response was not ok");
