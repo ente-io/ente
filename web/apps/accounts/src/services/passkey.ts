@@ -116,7 +116,11 @@ export const registerPasskey = async (name: string) => {
 
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.
-    await finishPasskeyRegistration(name, sessionID, credential);
+    await finishPasskeyRegistration({
+        friendlyName: name,
+        sessionID,
+        credential,
+    });
 };
 
 interface BeginPasskeyRegistrationResponse {
@@ -256,11 +260,17 @@ const binaryToServerB64 = async (b: ArrayBuffer) => {
     return b64String as unknown as BufferSource;
 };
 
-const finishPasskeyRegistration = async (
-    sessionID: string,
-    friendlyName: string,
-    credential: Credential,
-) => {
+interface FinishPasskeyRegistrationOptions {
+    sessionID: string;
+    friendlyName: string;
+    credential: Credential;
+}
+
+const finishPasskeyRegistration = async ({
+    sessionID,
+    friendlyName,
+    credential,
+}: FinishPasskeyRegistrationOptions) => {
     const attestationResponse = authenticatorAttestationResponse(credential);
 
     const attestationObject = await binaryToServerB64(
@@ -423,6 +433,11 @@ export const signChallenge = async (
     return await navigator.credentials.get({ publicKey });
 };
 
+interface FinishPasskeyAuthenticationOptions {
+    passkeySessionID: string;
+    ceremonySessionID: string;
+    credential: Credential;
+}
 /**
  * Finish the authentication by providing the signed assertion to the backend.
  *
@@ -432,11 +447,11 @@ export const signChallenge = async (
  * @returns The result of successful authentication, a
  * {@link TwoFactorAuthorizationResponse}.
  */
-export const finishPasskeyAuthentication = async (
-    passkeySessionID: string,
-    ceremonySessionID: string,
-    credential: Credential,
-) => {
+export const finishPasskeyAuthentication = async ({
+    passkeySessionID,
+    ceremonySessionID,
+    credential,
+}: FinishPasskeyAuthenticationOptions) => {
     const response = authenticatorAssertionResponse(credential);
 
     const authenticatorData = await binaryToServerB64(
@@ -519,6 +534,6 @@ export const redirectAfterPasskeyAuthentication = async (
         JSON.stringify(twoFactorAuthorizationResponse),
     );
 
-    redirectURL.searchParams.set("response", encodedResponse)
+    redirectURL.searchParams.set("response", encodedResponse);
     window.location.href = redirectURL.href;
 };

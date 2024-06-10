@@ -102,11 +102,11 @@ const Page = () => {
 
             setStatus("loading");
 
-            authorizationResponse = await finishPasskeyAuthentication(
+            authorizationResponse = await finishPasskeyAuthentication({
                 passkeySessionID,
                 ceremonySessionID,
                 credential,
-            );
+            });
         } catch (e) {
             log.error("Passkey authentication failed", e);
             setStatus("failed");
