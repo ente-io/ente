@@ -143,6 +143,9 @@ const registerPrivilegedSchemes = () => {
  * This window will show the HTML served from {@link rendererURL}.
  */
 const createMainWindow = () => {
+    const icon = nativeImage.createFromPath(
+        path.join(isDev ? "build" : process.resourcesPath, "window-icon.png"),
+    );
     const bounds = windowBounds();
 
     // Create the main window. This'll show our web content.
@@ -151,12 +154,11 @@ const createMainWindow = () => {
             preload: path.join(__dirname, "preload.js"),
             sandbox: true,
         },
+        icon,
         // Set the window's position and size (if we have one saved).
         ...(bounds ?? {}),
         // Enforce a minimum size
         ...minimumWindowSize(),
-        // (Maybe) fix the dock icon on Linux.
-        ...windowIconOptions(),
         // The color to show in the window until the web content gets loaded.
         // See: https://www.electronjs.org/docs/latest/api/browser-window#setting-the-backgroundcolor-property
         backgroundColor: "black",
@@ -220,12 +222,27 @@ const createMainWindow = () => {
 };
 
 /**
- * The position and size of the window the last time it was closed.
+ * The position and size to use when showing the main window.
  *
- * The return value of `undefined` is taken to mean that the app's main window
- * should be maximized.
+ * The return value is `undefined` if the app's window was maximized the last
+ * time around, and so if we should restore it to the maximized state.
+ *
+ * Otherwise it returns the position and size of the window the last time the
+ * app quit.
+ *
+ * If there is no such saved value (or if it is the first time the user is
+ * running the app), return a default size.
  */
-const windowBounds = () => userPreferences.get("windowBounds");
+const windowBounds = () => {
+    if (userPreferences.get("isWindowMaximized")) return undefined;
+
+    const bounds = userPreferences.get("windowBounds");
+    if (bounds) return bounds;
+
+    // Default size. Picked arbitrarily as something that should look good on
+    // first launch. We don't provide a position to let Electron center the app.
+    return { width: 1170, height: 710 };
+};
 
 /**
  * If for some reason {@link windowBounds} is outside the screen's bounds (e.g.
@@ -233,10 +250,11 @@ const windowBounds = () => userPreferences.get("windowBounds");
  * bounds might not be appropriate.
  *
  * Luckily, if we try to set an x/y position that is outside the screen's
- * bounds, then Electron automatically clamps them to the screen's available
- * space, and we do not need to tackle it specifically.
+ * bounds, then Electron automatically clamps x + width and y + height to lie
+ * within the screen's available space, and we do not need to tackle such out of
+ * bounds cases specifically.
  *
- * However, there is no minimum window size the Electron enforces by default. As
+ * However there is no minimum window size the Electron enforces by default. As
  * a safety valve, provide an (arbitrary) minimum size so that the user can
  * resize it back to sanity if something I cannot currently anticipate happens.
  */
@@ -247,55 +265,13 @@ const minimumWindowSize = () => ({ minWidth: 200, minHeight: 200 });
  * details.
  */
 const saveWindowBounds = (window: BrowserWindow) => {
-    if (window.isMaximized()) userPreferences.delete("windowBounds");
-    else userPreferences.set("windowBounds", window.getBounds());
-};
-
-/**
- * On Linux the app does not show a dock icon by default, attempt to fix this by
- * returning the path to an icon as the "icon" property that can be passed to
- * the BrowserWindow during creation.
- */
-const windowIconOptions = () => {
-    if (process.platform != "linux") return {};
-
-    // There are two, possibly three, different issues with icons on Linux.
-    //
-    // Firstly, the AppImage itself doesn't show an icon. There does not seem to
-    // be a reasonable workaround either currently. See:
-    // https://github.com/AppImage/AppImageKit/issues/346
-    //
-    // Secondly, and this is the problem we're trying to fix here, when the app
-    // is started it does not show a dock icon (Ubuntu 22) or shows the generic
-    // gear icon (Ubuntu 24). The issue possibly exists on other distributions
-    // too.
-    //
-    // Electron provides a `BrowserWindow.setIcon` function which should solve
-    // our issue, we could call it selectively on Linux. There is also an
-    // apparently undocumented "icon" option that can be passed when creating a
-    // new BrowserWindow, and that is what most of the other code I saw on
-    // GitHub seems to be doing.
-    //
-    // However, try what I may, I can't get either of these to work. Which leads
-    // me to believe there is a third issue: I can't get it to work because I'm
-    // testing on an Ubuntu 24 VM, where this might just not be working:
-    // https://askubuntu.com/questions/1511534/ubuntu-24-04-skype-logo-on-the-dock-not-showing-skype-logo
-    //
-    // 24 isn't likely the year of the Linux desktop either.
-    //
-    // For now, I'm adding a very specific incantation taken from
-    // https://github.com/arduino/arduino-ide/blob/main/arduino-ide-extension/src/electron-main/fix-app-image-icon.ts
-    //
-    // Possibly all this specific naming of the file etc is superstition, and
-    // just any name would do as long as the path is correct, but let me try it
-    // this way and see if this gets the icon to appear on Ubuntu 22 etc.
-
-    const icon = path.join(
-        isDev ? "build" : process.resourcesPath,
-        "icons/512x512.png",
-    );
-
-    return { icon };
+    if (window.isMaximized()) {
+        userPreferences.set("isWindowMaximized", true);
+        userPreferences.delete("windowBounds");
+    } else {
+        userPreferences.delete("isWindowMaximized");
+        userPreferences.set("windowBounds", window.getBounds());
+    }
 };
 
 /**

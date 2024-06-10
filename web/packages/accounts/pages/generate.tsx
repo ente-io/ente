@@ -7,7 +7,6 @@ import SetPasswordForm, {
 import { PAGES } from "@ente/accounts/constants/pages";
 import { configureSRP } from "@ente/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import { APP_HOMES, appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -29,12 +28,11 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
-
-    const appNameOld = appNameToAppNameOld(appName);
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
@@ -58,8 +56,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    // TODO: Refactor the type of APP_HOMES to not require the ??
-                    router.push(APP_HOMES.get(appNameOld) ?? "/");
+                    router.push(appHomeRoute(appName));
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -109,8 +106,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        // TODO: Refactor the type of APP_HOMES to not require the ??
-                        router.push(APP_HOMES.get(appNameOld) ?? "/");
+                        router.push(appHomeRoute(appName));
                     }}
                     /* TODO: Why is this error being ignored */
                     somethingWentWrong={() => {}}

@@ -285,12 +285,12 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 }
 
 // GetFileURL verifies permissions and returns a presigned url to the requested file
-func (c *FileController) GetFileURL(userID int64, fileID int64) (string, error) {
+func (c *FileController) GetFileURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
 	err := c.verifyFileAccess(userID, fileID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	url, err := c.getSignedURLForType(fileID, ente.FILE)
+	url, err := c.getSignedURLForType(ctx, fileID, ente.FILE)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			go c.CleanUpStaleCollectionFiles(userID, fileID)
@@ -301,12 +301,12 @@ func (c *FileController) GetFileURL(userID int64, fileID int64) (string, error) 
 }
 
 // GetThumbnailURL verifies permissions and returns a presigned url to the requested thumbnail
-func (c *FileController) GetThumbnailURL(userID int64, fileID int64) (string, error) {
+func (c *FileController) GetThumbnailURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
 	err := c.verifyFileAccess(userID, fileID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	url, err := c.getSignedURLForType(fileID, ente.THUMBNAIL)
+	url, err := c.getSignedURLForType(ctx, fileID, ente.THUMBNAIL)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			go c.CleanUpStaleCollectionFiles(userID, fileID)
@@ -356,7 +356,7 @@ func (c *FileController) GetPublicFileURL(ctx *gin.Context, fileID int64, objTyp
 	if !accessible {
 		return "", stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	return c.getSignedURLForType(fileID, objType)
+	return c.getSignedURLForType(ctx, fileID, objType)
 }
 
 // GetCastFileUrl verifies permissions and returns a presigned url to the requested file
@@ -369,15 +369,43 @@ func (c *FileController) GetCastFileUrl(ctx *gin.Context, fileID int64, objType 
 	if !accessible {
 		return "", stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	return c.getSignedURLForType(fileID, objType)
+	return c.getSignedURLForType(ctx, fileID, objType)
 }
 
-func (c *FileController) getSignedURLForType(fileID int64, objType ente.ObjectType) (string, error) {
+func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
+	if isCliRequest(ctx) {
+		return c.getWasabiSignedUrlIfAvailable(fileID, objType)
+	}
 	s3Object, err := c.ObjectRepo.GetObject(fileID, objType)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	return c.getPreSignedURL(s3Object.ObjectKey)
+	return c.getHotDcSignedUrl(s3Object.ObjectKey)
+}
+
+func isCliRequest(ctx *gin.Context) bool {
+	// check if user-agent contains go-resty
+	userAgent := ctx.Request.Header.Get("User-Agent")
+	return strings.Contains(userAgent, "go-resty")
+}
+
+// getWasabiSignedUrlIfAvailable returns a signed URL for the given fileID and objectType. It prefers wasabi over b2
+// if the file is not found in wasabi, it will return signed url from B2
+func (c *FileController) getWasabiSignedUrlIfAvailable(fileID int64, objType ente.ObjectType) (string, error) {
+	s3Object, dcs, err := c.ObjectRepo.GetObjectWithDCs(fileID, objType)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	for _, dc := range dcs {
+		if dc == c.S3Config.GetHotWasabiDC() {
+			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc)
+		}
+	}
+	// todo: (neeraj) remove this log after some time
+	log.WithFields(log.Fields{
+		"fileID": fileID}).Info("File not found in wasabi, returning signed url from B2")
+	// return signed url from default hot bucket
+	return c.getHotDcSignedUrl(s3Object.ObjectKey)
 }
 
 // Trash deletes file and move them to trash
@@ -704,10 +732,19 @@ func (c *FileController) cleanupDeletedFile(qItem repo.QueueItem) {
 	ctxLogger.Info("Successfully deleted item")
 }
 
-func (c *FileController) getPreSignedURL(objectKey string) (string, error) {
+func (c *FileController) getHotDcSignedUrl(objectKey string) (string, error) {
 	s3Client := c.S3Config.GetHotS3Client()
 	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
+		Key:    &objectKey,
+	})
+	return r.Presign(PreSignedRequestValidityDuration)
+}
+
+func (c *FileController) getPreSignedURLForDC(objectKey string, dc string) (string, error) {
+	s3Client := c.S3Config.GetS3Client(dc)
+	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,
 	})
 	return r.Presign(PreSignedRequestValidityDuration)

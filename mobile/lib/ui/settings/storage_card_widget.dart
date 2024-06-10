@@ -272,7 +272,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         )
                       : const SizedBox.shrink(),
                   Text(
-                    S.of(context).freeStorageSpace(freeSpace, freeSpaceUnit),
+                    S.of(context).availableStorageSpace(freeSpace, freeSpaceUnit),
                     style: getEnteTextTheme(context)
                         .mini
                         .copyWith(color: textFaintDark),

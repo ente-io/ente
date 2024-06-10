@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import "dart:isolate";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -208,11 +207,13 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
     await Configuration.instance.init();
+    _logger.info("Configuration done");
     await NetworkClient.instance.init();
     ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
     await UserService.instance.init();
     await EntityService.instance.init();
     LocationService.instance.init(preferences);
+    _logger.info("LocationServiceInit done");
 
     await UserRemoteFlagService.instance.init();
     await UpdateService.instance.init();
@@ -230,6 +231,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     SearchService.instance.init();
     StorageBonusService.instance.init(preferences);
     RemoteFileMLService.instance.init(preferences);
+    _logger.info("RemoteFileMLService done");
     if (!isBackground &&
         Platform.isAndroid &&
         await HomeWidgetService.instance.countHomeWidgets() == 0) {
@@ -244,9 +246,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         );
       });
     }
-
+    _logger.info("PushService/HomeWidget done");
     unawaited(SemanticSearchService.instance.init());
     MachineLearningController.instance.init();
+
+    _logger.info("MachineLearningController done");
     if (flagService.faceSearchEnabled) {
       unawaited(FaceMlService.instance.init());
     } else {
@@ -359,15 +363,10 @@ Future<void> _killBGTask([String? taskId]) async {
     DateTime.now().microsecondsSinceEpoch,
   );
   final prefs = await SharedPreferences.getInstance();
-
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
-
-  ///Band aid for background process not getting killed. Should migrate to using
-  ///workmanager instead of background_fetch.
-  Isolate.current.kill();
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

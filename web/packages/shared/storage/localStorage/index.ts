@@ -26,7 +26,6 @@ export enum LS_KEYS {
     SRP_ATTRIBUTES = "srpAttributes",
     CF_PROXY_DISABLED = "cfProxyDisabled",
     REFERRAL_SOURCE = "referralSource",
-    CLIENT_PACKAGE = "clientPackage",
 }
 
 export const setData = (key: LS_KEYS, value: object) =>

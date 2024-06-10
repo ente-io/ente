@@ -65,24 +65,6 @@ export const getFamiliesToken = async () => {
     }
 };
 
-export const getAccountsToken = async () => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.get(
-            `${ENDPOINT}/users/accounts-token`,
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return resp.data["accountsToken"];
-    } catch (e) {
-        log.error("failed to get accounts token", e);
-        throw e;
-    }
-};
-
 export const getRoadmapRedirectURL = async () => {
     try {
         const token = getToken();
