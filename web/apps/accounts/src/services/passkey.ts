@@ -6,10 +6,10 @@ import { nullToUndefined } from "@/utils/transform";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
+    toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
 import { apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import _sodium from "libsodium-wrappers";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -116,7 +116,11 @@ export const registerPasskey = async (name: string) => {
 
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.
-    await finishPasskeyRegistration(name, sessionID, credential);
+    await finishPasskeyRegistration({
+        friendlyName: name,
+        sessionID,
+        credential,
+    });
 };
 
 interface BeginPasskeyRegistrationResponse {
@@ -256,11 +260,17 @@ const binaryToServerB64 = async (b: ArrayBuffer) => {
     return b64String as unknown as BufferSource;
 };
 
-const finishPasskeyRegistration = async (
-    sessionID: string,
-    friendlyName: string,
-    credential: Credential,
-) => {
+interface FinishPasskeyRegistrationOptions {
+    sessionID: string;
+    friendlyName: string;
+    credential: Credential;
+}
+
+const finishPasskeyRegistration = async ({
+    sessionID,
+    friendlyName,
+    credential,
+}: FinishPasskeyRegistrationOptions) => {
     const attestationResponse = authenticatorAttestationResponse(credential);
 
     const attestationObject = await binaryToServerB64(
@@ -269,6 +279,7 @@ const finishPasskeyRegistration = async (
     const clientDataJSON = await binaryToServerB64(
         attestationResponse.clientDataJSON,
     );
+    const transports = attestationResponse.getTransports();
 
     const params = new URLSearchParams({ friendlyName, sessionID });
     const url = `${apiOrigin()}/passkeys/registration/finish`;
@@ -285,6 +296,7 @@ const finishPasskeyRegistration = async (
             response: {
                 attestationObject,
                 clientDataJSON,
+                transports,
             },
         }),
     });
@@ -423,6 +435,11 @@ export const signChallenge = async (
     return await navigator.credentials.get({ publicKey });
 };
 
+interface FinishPasskeyAuthenticationOptions {
+    passkeySessionID: string;
+    ceremonySessionID: string;
+    credential: Credential;
+}
 /**
  * Finish the authentication by providing the signed assertion to the backend.
  *
@@ -432,11 +449,11 @@ export const signChallenge = async (
  * @returns The result of successful authentication, a
  * {@link TwoFactorAuthorizationResponse}.
  */
-export const finishPasskeyAuthentication = async (
-    passkeySessionID: string,
-    ceremonySessionID: string,
-    credential: Credential,
-) => {
+export const finishPasskeyAuthentication = async ({
+    passkeySessionID,
+    ceremonySessionID,
+    credential,
+}: FinishPasskeyAuthenticationOptions) => {
     const response = authenticatorAssertionResponse(credential);
 
     const authenticatorData = await binaryToServerB64(
@@ -511,14 +528,14 @@ const authenticatorAssertionResponse = (credential: Credential) => {
  * @param twoFactorAuthorizationResponse The result of
  * {@link finishPasskeyAuthentication} returned by the backend.
  */
-export const redirectAfterPasskeyAuthentication = (
+export const redirectAfterPasskeyAuthentication = async (
     redirectURL: URL,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
-    const encodedResponse = _sodium.to_base64(
+    const encodedResponse = await toB64URLSafeNoPaddingString(
         JSON.stringify(twoFactorAuthorizationResponse),
     );
 
-    // TODO-PK: Shouldn't this be URL encoded?
-    window.location.href = `${redirectURL}?response=${encodedResponse}`;
+    redirectURL.searchParams.set("response", encodedResponse);
+    window.location.href = redirectURL.href;
 };

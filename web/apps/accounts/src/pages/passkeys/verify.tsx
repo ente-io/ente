@@ -102,11 +102,11 @@ const Page = () => {
 
             setStatus("loading");
 
-            authorizationResponse = await finishPasskeyAuthentication(
+            authorizationResponse = await finishPasskeyAuthentication({
                 passkeySessionID,
                 ceremonySessionID,
                 credential,
-            );
+            });
         } catch (e) {
             log.error("Passkey authentication failed", e);
             setStatus("failed");
@@ -116,7 +116,10 @@ const Page = () => {
         // Conceptually we can `setStatus("done")` at this point, but we'll
         // leave this page anyway, so no need to tickle React.
 
-        redirectAfterPasskeyAuthentication(redirectURL, authorizationResponse);
+        await redirectAfterPasskeyAuthentication(
+            redirectURL,
+            authorizationResponse,
+        );
     };
 
     useEffect(() => {
@@ -152,8 +155,7 @@ const UnknownRedirect: React.FC = () => {
 };
 
 const WebAuthnNotSupported: React.FC = () => {
-    // TODO-PK(MR): Translate
-    return <Failed message={"Passkeys are not supported in this browser"} />;
+    return <Failed message={t("passkeys_not_supported")} />;
 };
 
 const UnrecoverableFailure: React.FC = () => {
