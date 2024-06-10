@@ -60,7 +60,9 @@ const Page = () => {
 
         // The server needs to know the app on whose behalf we're trying to
         // authenticate.
-        const clientPackage = nullToUndefined(searchParams.get("client"));
+        const clientPackage = nullToUndefined(
+            searchParams.get("clientPackage"),
+        );
         if (!clientPackage) {
             setStatus("unrecoverableFailure");
             return;
