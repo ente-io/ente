@@ -614,7 +614,7 @@ class _FileSelectionActionsWidgetState
     final Widget imageWidget = LinkPlaceholder(
       files: ownedSelectedFiles,
     );
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 200));
     final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
     final bytesOfImageToWidget = await screenshotController.captureFromWidget(
       imageWidget,
