@@ -91,12 +91,11 @@ const Page: React.FC = () => {
             // If the user cancels the operation, then an error with name
             // "NotAllowedError" is thrown.
             //
-            // Ignore this, but in other cases add an error indicator to the add
-            // passkey text field. The browser is expected to already have shown
-            // an error dialog to the user.
+            // Ignore these, but in other cases add an error indicator to the
+            // add passkey text field. The browser is expected to already have
+            // shown an error dialog to the user.
             if (!(e instanceof Error && e.name == "NotAllowedError")) {
-                // TODO-PK: localize
-                setFieldError("Could not add passkey");
+                setFieldError(t("passkey_add_failed"));
             }
             return;
         }
@@ -232,8 +231,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     <Stack spacing={"4px"} py={"12px"}>
                         <Titlebar
                             onClose={onClose}
-                            // TODO-PK: Localize (more below too)
-                            title="Manage Passkey"
+                            title={t("manage_passkey")}
                             onRootClose={onClose}
                         />
                         <InfoItem
@@ -251,7 +249,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                                     setShowRenameDialog(true);
                                 }}
                                 startIcon={<EditIcon />}
-                                label={"Rename Passkey"}
+                                label={t("RENAME_PASSKEY")}
                             />
                             <MenuItemDivider />
                             <EnteMenuItem
@@ -259,7 +257,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                                     setShowDeleteDialog(true);
                                 }}
                                 startIcon={<DeleteIcon />}
-                                label={"Delete Passkey"}
+                                label={t("DELETE_PASSKEY")}
                                 color="critical"
                             />
                         </MenuItemGroup>

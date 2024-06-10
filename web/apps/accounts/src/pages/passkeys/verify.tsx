@@ -152,8 +152,7 @@ const UnknownRedirect: React.FC = () => {
 };
 
 const WebAuthnNotSupported: React.FC = () => {
-    // TODO-PK(MR): Translate
-    return <Failed message={"Passkeys are not supported in this browser"} />;
+    return <Failed message={t("passkeys_not_supported")} />;
 };
 
 const UnrecoverableFailure: React.FC = () => {
