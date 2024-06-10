@@ -143,6 +143,7 @@ interface BeginPasskeyRegistrationResponse {
 const beginPasskeyRegistration = async () => {
     const url = `${apiOrigin()}/passkeys/registration/begin`;
     const res = await fetch(url, {
+        method: "POST",
         headers: accountsAuthenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);

@@ -487,7 +487,7 @@ func main() {
 	accountsJwtAuthAPI.GET("/passkeys", passkeysHandler.GetPasskeys)
 	accountsJwtAuthAPI.PATCH("/passkeys/:passkeyID", passkeysHandler.RenamePasskey)
 	accountsJwtAuthAPI.DELETE("/passkeys/:passkeyID", passkeysHandler.DeletePasskey)
-	accountsJwtAuthAPI.GET("/passkeys/registration/begin", passkeysHandler.BeginRegistration)
+	accountsJwtAuthAPI.POST("/passkeys/registration/begin", passkeysHandler.BeginRegistration)
 	accountsJwtAuthAPI.POST("/passkeys/registration/finish", passkeysHandler.FinishRegistration)
 
 	collectionHandler := &api.CollectionHandler{

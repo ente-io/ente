@@ -107,7 +107,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
 }
 ```
 
-#### GET /passkeys/registration/begin
+#### POST /passkeys/registration/begin
 
 ##### Headers
 
@@ -348,7 +348,7 @@ window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${p
 
 ### Requesting publicKey options (begin)
 
-#### GET /users/two-factor/passkeys/begin
+#### POST /users/two-factor/passkeys/begin
 
 ##### Query parameters
 
