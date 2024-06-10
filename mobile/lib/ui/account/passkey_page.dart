@@ -44,7 +44,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
       "https://accounts.ente.io/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
       "&redirect=ente://passkey"
-      "&client=io.ente.photos",
+      "&clientPackage=io.ente.photos",
       mode: LaunchMode.externalApplication,
     );
   }

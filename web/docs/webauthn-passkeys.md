@@ -341,7 +341,7 @@ is needed anyways to service credential authentication from mobile clients, so
 we use the same flow for other (web, desktop) clients too.
 
 ```tsx
-window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&client=io.ente.photos.web&redirect=${
+window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&clientPackage=io.ente.photos.web&redirect=${
     window.location.origin
 }/passkeys/finish`;
 ```

@@ -422,8 +422,17 @@ export const signChallenge = async (
 interface FinishPasskeyAuthenticationOptions {
     passkeySessionID: string;
     ceremonySessionID: string;
+    /**
+     * The package name of the client on whose behalf we're authenticating with
+     * the user's passkey.
+     *
+     * This is used by the backend to generate an appropriately scoped auth
+     * token for used by (and only by) the authenticating app.
+     */
+    clientPackage: string;
     credential: Credential;
 }
+
 /**
  * Finish the authentication by providing the signed assertion to the backend.
  *
@@ -436,6 +445,7 @@ interface FinishPasskeyAuthenticationOptions {
 export const finishPasskeyAuthentication = async ({
     passkeySessionID,
     ceremonySessionID,
+    clientPackage,
     credential,
 }: FinishPasskeyAuthenticationOptions) => {
     const response = authenticatorAssertionResponse(credential);
@@ -452,11 +462,14 @@ export const finishPasskeyAuthentication = async ({
     const params = new URLSearchParams({
         sessionID: passkeySessionID,
         ceremonySessionID,
+        clientPackage,
     });
     const url = `${apiOrigin()}/users/two-factor/passkeys/finish`;
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
-        headers: clientPackageHeaderIfPresent(),
+        headers: {
+            "X-Client-Package": clientPackage,
+        },
         body: JSON.stringify({
             id: credential.id,
             // This is meant to be the ArrayBuffer version of the (base64
