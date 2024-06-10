@@ -413,12 +413,7 @@ export const beginPasskeyAuthentication = async (
  */
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
-) => {
-    // Allow up to 60 seconds to wait for the retrieval
-    publicKey.timeout = 60 * 1000;
-
-    return navigator.credentials.get({ publicKey });
-};
+) => navigator.credentials.get({ publicKey });
 
 interface FinishPasskeyAuthenticationOptions {
     passkeySessionID: string;

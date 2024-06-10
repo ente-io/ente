@@ -69,7 +69,7 @@ func NewRepository(
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
 				Enforce: true,
-				Timeout: time.Duration(5) * time.Minute,
+				Timeout: time.Duration(2) * time.Minute,
 			},
 			Registration: webauthn.TimeoutConfig{
 				Enforce: true,
