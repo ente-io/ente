@@ -76,7 +76,7 @@ class _FileSelectionActionsWidgetState
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
   final ScreenshotController screenshotController = ScreenshotController();
-  late Uint8List? placeholderBytes;
+  late Uint8List placeholderBytes;
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -756,7 +756,7 @@ class _FileSelectionActionsWidgetState
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       unawaited(Clipboard.setData(ClipboardData(text: url)));
       await shareImageAndUrl(
-        placeholderBytes!,
+        placeholderBytes,
         url,
         context: context,
         key: sendLinkButtonKey,
