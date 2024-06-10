@@ -14,7 +14,10 @@ class VideoRotatePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final rotation = controller.rotation;
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: SafeArea(
         child: Column(
           children: [

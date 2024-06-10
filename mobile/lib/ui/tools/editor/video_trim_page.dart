@@ -21,7 +21,10 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
     final maxTrim = widget.controller.maxTrim;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: SafeArea(
         child: Column(
           children: [

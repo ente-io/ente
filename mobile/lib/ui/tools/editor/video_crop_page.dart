@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/ui/tools/editor/video_editor/crop_value.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
@@ -20,7 +19,10 @@ class _VideoCropPageState extends State<VideoCropPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -114,9 +116,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
           widget.controller.preferredCropAspectRatio = f?.toDouble();
         }
       },
-      child: SvgPicture.asset(
-        "assets/video-editor/video-crop-${value.name}-action.svg",
-      ),
+      svgPath: "assets/video-editor/video-crop-${value.name}-action.svg",
     );
   }
 }

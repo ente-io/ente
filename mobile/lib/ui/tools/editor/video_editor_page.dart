@@ -2,7 +2,6 @@ import 'dart:io';
 import "dart:math";
 
 import 'package:flutter/material.dart';
-import "package:flutter_svg/flutter_svg.dart";
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import "package:pedantic/pedantic.dart";
@@ -49,37 +48,51 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   final _isExporting = ValueNotifier<bool>(false);
   final _logger = Logger("VideoEditor");
 
-  late final VideoEditorController _controller;
+  VideoEditorController? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoEditorController.file(
-      widget.ioFile,
-      minDuration: const Duration(seconds: 1),
-      cropStyle: CropGridStyle(
-        selectedBoundariesColor:
-            const ColorScheme.dark().videoPlayerPrimaryColor,
-      ),
-      trimStyle: TrimSliderStyle(
-        onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-        onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-      ),
-    );
-    _controller.initialize().then((_) => setState(() {})).catchError(
-      (error) {
-        // handle minumum duration bigger than video duration error
-        Navigator.pop(context);
-      },
-      test: (e) => e is VideoMinDurationError,
-    );
+
+    Future.microtask(() {
+      _controller = VideoEditorController.file(
+        widget.ioFile,
+        minDuration: const Duration(seconds: 1),
+        cropStyle: CropGridStyle(
+          selectedBoundariesColor:
+              const ColorScheme.dark().videoPlayerPrimaryColor,
+        ),
+        trimStyle: TrimSliderStyle(
+          onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+          onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+          background: Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFFF5F5F5)
+              : const Color(0xFF252525),
+          positionLineColor: Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF424242)
+              : const Color(0xFFFFFFFF),
+          lineColor: (Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFF424242)
+                  : const Color(0xFFFFFFFF))
+              .withOpacity(0.6),
+        ),
+      );
+
+      _controller!.initialize().then((_) => setState(() {})).catchError(
+        (error) {
+          // handle minumum duration bigger than video duration error
+          Navigator.pop(context);
+        },
+        test: (e) => e is VideoMinDurationError,
+      );
+    });
   }
 
   @override
   void dispose() async {
     _exportingProgress.dispose();
     _isExporting.dispose();
-    _controller.dispose().ignore();
+    _controller?.dispose().ignore();
     ExportService.dispose().ignore();
     super.dispose();
   }
@@ -89,8 +102,11 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: _controller.initialized
+        appBar: AppBar(
+          elevation: 0,
+          toolbarHeight: 0,
+        ),
+        body: _controller != null && _controller!.initialized
             ? SafeArea(
                 child: Stack(
                   children: [
@@ -103,25 +119,24 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 child: Hero(
                                   tag: "video-editor-preview",
                                   child: CropGridViewer.preview(
-                                    controller: _controller,
+                                    controller: _controller!,
                                   ),
                                 ),
                               ),
                               VideoEditorPlayerControl(
-                                controller: _controller,
+                                controller: _controller!,
                               ),
                               VideoEditorMainActions(
                                 children: [
                                   VideoEditorBottomAction(
                                     label: "Trim",
-                                    child: SvgPicture.asset(
-                                      "assets/video-editor/video-editor-trim-action.svg",
-                                    ),
+                                    svgPath:
+                                        "assets/video-editor/video-editor-trim-action.svg",
                                     onPressed: () => Navigator.push(
                                       context,
                                       MaterialPageRoute<void>(
                                         builder: (context) => VideoTrimPage(
-                                          controller: _controller,
+                                          controller: _controller!,
                                         ),
                                       ),
                                     ),
@@ -129,14 +144,13 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
                                     label: "Crop",
-                                    child: SvgPicture.asset(
-                                      "assets/video-editor/video-editor-crop-action.svg",
-                                    ),
+                                    svgPath:
+                                        "assets/video-editor/video-editor-crop-action.svg",
                                     onPressed: () => Navigator.push(
                                       context,
                                       MaterialPageRoute<void>(
                                         builder: (context) => VideoCropPage(
-                                          controller: _controller,
+                                          controller: _controller!,
                                         ),
                                       ),
                                     ),
@@ -144,14 +158,13 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
                                     label: "Rotate",
-                                    child: SvgPicture.asset(
-                                      "assets/video-editor/video-editor-rotate-action.svg",
-                                    ),
+                                    svgPath:
+                                        "assets/video-editor/video-editor-rotate-action.svg",
                                     onPressed: () => Navigator.push(
                                       context,
                                       MaterialPageRoute<void>(
                                         builder: (context) => VideoRotatePage(
-                                          controller: _controller,
+                                          controller: _controller!,
                                         ),
                                       ),
                                     ),
@@ -183,7 +196,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     _isExporting.value = true;
 
     final config = VideoFFmpegVideoEditorConfig(
-      _controller,
+      _controller!,
       format: VideoExportFormat.mp4,
       // commandBuilder: (config, videoPath, outputPath) {
       //   final List<String> filters = config.getExportFilters();

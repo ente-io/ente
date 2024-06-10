@@ -57,7 +57,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
 
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
-  bool _isImage = false;
+  bool _isImage =  false;
   late int _currentUserID;
   bool showExifListTile = false;
   final ValueNotifier<bool> hasLocationData = ValueNotifier(false);

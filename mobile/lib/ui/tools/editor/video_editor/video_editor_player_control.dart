@@ -42,7 +42,9 @@ class VideoEditorPlayerControl extends StatelessWidget {
                 vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFF252525),
+                color: Theme.of(context).brightness == Brightness.light
+                    ? const Color(0xFFF5F5F5)
+                    : const Color(0xFF252525),
                 borderRadius: BorderRadius.circular(56),
               ),
               child: Row(
