@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { Sidebar } from "./components/Sidebar";
 import S from "./utils/strings";
 
 export const App: React.FC = () => {
+    const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        fetchData();
+    };
     const [serverUrl /*, setServerUrl */] = useState(
         import.meta.env.VITE_ENTE_ENDPOINT || "",
     );
+
     const [token, setToken] = useState("");
     const [email, setEmail] = useState("");
     const [userData, setUserData] = useState<any>(null);
@@ -132,96 +138,99 @@ export const App: React.FC = () => {
     };
 
     return (
-        <div className="container center-table">
-            <h1>{S.hello}</h1>
+        <>
+            <Sidebar />
+            <div className="container center-table">
+                <h1>{S.hello}</h1>
 
-            <form className="input-form">
-                <div className="input-group">
-                    <label>
-                        Token:
-                        <input
-                            type="text"
-                            value={token}
-                            onChange={(e) => setToken(e.target.value)}
-                            style={{
-                                padding: "10px",
-                                margin: "10px",
-                                width: "100%",
-                            }}
-                        />
-                    </label>
+                <form className="input-form" onSubmit={handleFormSubmit}>
+                    <div className="input-group">
+                        <label>
+                            Token:
+                            <input
+                                type="text"
+                                value={token}
+                                onChange={(e) => setToken(e.target.value)}
+                                style={{
+                                    padding: "10px",
+                                    margin: "10px",
+                                    width: "100%",
+                                }}
+                            />
+                        </label>
+                    </div>
+                    <div className="input-group">
+                        <label>
+                            Email id:
+                            <input
+                                type="text"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                style={{
+                                    padding: "10px",
+                                    margin: "10px",
+                                    width: "100%",
+                                }}
+                            />
+                        </label>
+                    </div>
+                </form>
+                <div className="fetch-button">
+                    <button
+                        onClick={fetchData}
+                        style={{
+                            padding: "10px 20px",
+                            fontSize: "16px",
+                            cursor: "pointer",
+                            backgroundColor: "#009879",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "5px",
+                        }}
+                    >
+                        FETCH
+                    </button>
                 </div>
-                <div className="input-group">
-                    <label>
-                        Email id:
-                        <input
-                            type="text"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            style={{
-                                padding: "10px",
-                                margin: "10px",
-                                width: "100%",
-                            }}
-                        />
-                    </label>
-                </div>
-            </form>
-            <div className="fetch-button">
-                <button
-                    onClick={fetchData}
-                    style={{
-                        padding: "10px 20px",
-                        fontSize: "16px",
-                        cursor: "pointer",
-                        backgroundColor: "#009879",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                    }}
-                >
-                    FETCH
-                </button>
+                <br />
+                {error && <p style={{ color: "red" }}>{`Error: ${error}`}</p>}
+                {userData && (
+                    <table
+                        style={{
+                            width: "100%",
+                            borderCollapse: "collapse",
+                            margin: "20px 0",
+                            fontSize: "1em",
+                            minWidth: "400px",
+                            boxShadow: "0 0 20px rgba(0, 0, 0, 0.15)",
+                        }}
+                    >
+                        <tbody>
+                            {Object.keys(userData).map((category) => (
+                                <React.Fragment key={category}>
+                                    <tr>
+                                        <td
+                                            colSpan={2}
+                                            style={{
+                                                fontWeight: "bold",
+                                                backgroundColor: "#f1f1f1",
+                                                padding: "10px",
+                                            }}
+                                        >
+                                            {category.toUpperCase()}
+                                        </td>
+                                    </tr>
+                                    {renderAttributes(userData[category])}
+                                </React.Fragment>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+                <footer className="footer">
+                    <p>
+                        <a href="https://help.ente.io">help.ente.io</a>
+                    </p>
+                </footer>
             </div>
-            <br />
-            {error && <p style={{ color: "red" }}>{`Error: ${error}`}</p>}
-            {userData && (
-                <table
-                    style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        margin: "20px 0",
-                        fontSize: "1em",
-                        minWidth: "400px",
-                        boxShadow: "0 0 20px rgba(0, 0, 0, 0.15)",
-                    }}
-                >
-                    <tbody>
-                        {Object.keys(userData).map((category) => (
-                            <React.Fragment key={category}>
-                                <tr>
-                                    <td
-                                        colSpan={2}
-                                        style={{
-                                            fontWeight: "bold",
-                                            backgroundColor: "#f1f1f1",
-                                            padding: "10px",
-                                        }}
-                                    >
-                                        {category.toUpperCase()}
-                                    </td>
-                                </tr>
-                                {renderAttributes(userData[category])}
-                            </React.Fragment>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-            <footer className="footer">
-                <p>
-                    <a href="https://help.ente.io">help.ente.io</a>
-                </p>
-            </footer>
-        </div>
+        </>
     );
 };
