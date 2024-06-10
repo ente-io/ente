@@ -6,10 +6,10 @@ import { nullToUndefined } from "@/utils/transform";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
+    toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
 import { apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import _sodium from "libsodium-wrappers";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -511,14 +511,14 @@ const authenticatorAssertionResponse = (credential: Credential) => {
  * @param twoFactorAuthorizationResponse The result of
  * {@link finishPasskeyAuthentication} returned by the backend.
  */
-export const redirectAfterPasskeyAuthentication = (
+export const redirectAfterPasskeyAuthentication = async (
     redirectURL: URL,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
-    const encodedResponse = _sodium.to_base64(
+    const encodedResponse = await toB64URLSafeNoPaddingString(
         JSON.stringify(twoFactorAuthorizationResponse),
     );
 
-    // TODO-PK: Shouldn't this be URL encoded?
-    window.location.href = `${redirectURL}?response=${encodedResponse}`;
+    redirectURL.searchParams.set("response", encodedResponse)
+    window.location.href = redirectURL.href;
 };

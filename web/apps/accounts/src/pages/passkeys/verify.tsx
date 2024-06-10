@@ -116,7 +116,10 @@ const Page = () => {
         // Conceptually we can `setStatus("done")` at this point, but we'll
         // leave this page anyway, so no need to tickle React.
 
-        redirectAfterPasskeyAuthentication(redirectURL, authorizationResponse);
+        await redirectAfterPasskeyAuthentication(
+            redirectURL,
+            authorizationResponse,
+        );
     };
 
     useEffect(() => {

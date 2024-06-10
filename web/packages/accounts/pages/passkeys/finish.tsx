@@ -1,5 +1,6 @@
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { fromB64URLSafeNoPaddingString } from "@ente/shared/crypto/internal/libsodium";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
@@ -23,11 +24,11 @@ const Page: React.FC<PageProps> = () => {
         const response = searchParams.get("response");
         if (!response) return;
 
-        saveCredentials(response);
-
-        const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
-        InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-        router.push(redirectURL ?? PAGES.CREDENTIALS);
+        saveCredentials(response).then(() => {
+            const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
+            InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
+            router.push(redirectURL ?? PAGES.CREDENTIALS);
+        });
     }, []);
 
     return (
@@ -47,9 +48,12 @@ export default Page;
  * @param response The string that is passed as the response query parameter to
  * us (we're the final "finish" page in the passkey flow).
  */
-const saveCredentials = (response: string) => {
-    // Decode response string.
-    const decodedResponse = JSON.parse(atob(response));
+const saveCredentials = async (response: string) => {
+    // Decode response string (inverse of the steps we perform in
+    // `redirectAfterPasskeyAuthentication`).
+    const decodedResponse = JSON.parse(
+        await fromB64URLSafeNoPaddingString(response),
+    );
 
     // Only one of `encryptedToken` or `token` will be present depending on the
     // account's lifetime:
