@@ -609,7 +609,7 @@
     "FREEHAND": "Freihand",
     "APPLY_CROP": "Zuschnitt anwenden",
     "PHOTO_EDIT_REQUIRED_TO_SAVE": "Es muss mindestens eine Transformation oder Farbanpassung vorgenommen werden, bevor gespeichert werden kann.",
-    "passkeys": "Passkeys",
+    "passkeys": "",
     "passkey_fetch_failed": "",
     "manage_passkey": "",
     "delete_passkey": "Passkey löschen",
