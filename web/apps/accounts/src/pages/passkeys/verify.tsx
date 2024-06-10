@@ -1,6 +1,5 @@
 import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
-import { clientPackageName } from "@/next/types/app";
 import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -61,15 +60,12 @@ const Page = () => {
 
         // The server needs to know the app on whose behalf we're trying to
         // authenticate.
-        let clientPackage = nullToUndefined(searchParams.get("client"));
-        // Mobile apps don't pass the client header, deduce their client package
-        // name from the redirect URL that they provide.
+        const clientPackage = nullToUndefined(
+            searchParams.get("clientPackage"),
+        );
         if (!clientPackage) {
-            // TODO-PK: Pass from mobile app too?
-            clientPackage =
-                clientPackageName[
-                    redirectURL.protocol == "enteauth:" ? "auth" : "photos"
-                ];
+            setStatus("unrecoverableFailure");
+            return;
         }
 
         localStorage.setItem("clientPackage", clientPackage);
@@ -107,6 +103,7 @@ const Page = () => {
             authorizationResponse = await finishPasskeyAuthentication({
                 passkeySessionID,
                 ceremonySessionID,
+                clientPackage,
                 credential,
             });
         } catch (e) {

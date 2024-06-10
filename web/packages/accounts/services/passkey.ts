@@ -28,9 +28,13 @@ export const redirectUserToPasskeyVerificationFlow = (
     appName: AppName,
     passkeySessionID: string,
 ) => {
-    const client = clientPackageName[appName];
+    const clientPackage = clientPackageName[appName];
     const redirect = `${window.location.origin}/passkeys/finish`;
-    const params = new URLSearchParams({ client, passkeySessionID, redirect });
+    const params = new URLSearchParams({
+        clientPackage,
+        passkeySessionID,
+        redirect,
+    });
     window.location.href = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
 };
 
