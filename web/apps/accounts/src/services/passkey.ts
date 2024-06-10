@@ -279,6 +279,7 @@ const finishPasskeyRegistration = async ({
     const clientDataJSON = await binaryToServerB64(
         attestationResponse.clientDataJSON,
     );
+    const transports = attestationResponse.getTransports();
 
     const params = new URLSearchParams({ friendlyName, sessionID });
     const url = `${apiOrigin()}/passkeys/registration/finish`;
@@ -295,6 +296,7 @@ const finishPasskeyRegistration = async ({
             response: {
                 attestationObject,
                 clientDataJSON,
+                transports,
             },
         }),
     });
