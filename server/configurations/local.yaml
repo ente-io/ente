@@ -241,9 +241,8 @@ webauthn:
     rpid: localhost
     # Whitelist of origins from where we will accept WebAuthn requests.
     # See: https://github.com/go-webauthn/webauthn
-    rporigins: [
-        "http://account.localhost",
-    ]
+    rporigins:
+        - "http://localhost:3001"
 
 # Roadmap SSO (optional)
 #
