@@ -227,50 +227,57 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           //Disabling notifications for assets changing to insert the file into
           //files db before triggering a sync.
           await PhotoManager.stopChangeNotify();
-          final AssetEntity? newAsset =
-              await (PhotoManager.editor.saveVideo(result, title: fileName));
-          result.deleteSync();
-          (await newAsset?.file)
-              ?.setLastModifiedSync(widget.ioFile.lastModifiedSync());
-          final newFile = await EnteFile.fromAsset(
-            widget.file.deviceFolder ?? '',
-            newAsset!,
-          );
 
-          newFile.generatedID =
-              await FilesDB.instance.insertAndGetId(widget.file);
-          Bus.instance
-              .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-          unawaited(SyncService.instance.sync());
-          showShortToast(context, S.of(context).editsSaved);
-          _logger.info("Original file " + widget.file.toString());
-          _logger.info("Saved edits to file " + newFile.toString());
-          final existingFiles = widget.detailPageConfig.files;
-          final files = (await widget.detailPageConfig.asyncLoader!(
-            existingFiles[existingFiles.length - 1].creationTime!,
-            existingFiles[0].creationTime!,
-          ))
-              .files;
-          // the index could be -1 if the files fetched doesn't contain the newly
-          // edited files
-          int selectionIndex = files
-              .indexWhere((file) => file.generatedID == newFile.generatedID);
-          if (selectionIndex == -1) {
-            files.add(newFile);
-            selectionIndex = files.length - 1;
-          }
-          replacePage(
-            context,
-            DetailPage(
-              widget.detailPageConfig.copyWith(
-                files: files,
-                selectedIndex: min(selectionIndex, files.length - 1),
+          try {
+            final AssetEntity? newAsset =
+                await (PhotoManager.editor.saveVideo(result, title: fileName));
+            result.deleteSync();
+            (await newAsset?.file)
+                ?.setLastModifiedSync(widget.ioFile.lastModifiedSync());
+            final newFile = await EnteFile.fromAsset(
+              widget.file.deviceFolder ?? '',
+              newAsset!,
+            );
+
+            newFile.generatedID =
+                await FilesDB.instance.insertAndGetId(widget.file);
+            Bus.instance
+                .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
+            unawaited(SyncService.instance.sync());
+            showShortToast(context, S.of(context).editsSaved);
+            _logger.info("Original file " + widget.file.toString());
+            _logger.info("Saved edits to file " + newFile.toString());
+            final existingFiles = widget.detailPageConfig.files;
+            final files = (await widget.detailPageConfig.asyncLoader!(
+              existingFiles[existingFiles.length - 1].creationTime!,
+              existingFiles[0].creationTime!,
+            ))
+                .files;
+            // the index could be -1 if the files fetched doesn't contain the newly
+            // edited files
+            int selectionIndex = files
+                .indexWhere((file) => file.generatedID == newFile.generatedID);
+            if (selectionIndex == -1) {
+              files.add(newFile);
+              selectionIndex = files.length - 1;
+            }
+            await dialog.hide();
+
+            replacePage(
+              context,
+              DetailPage(
+                widget.detailPageConfig.copyWith(
+                  files: files,
+                  selectedIndex: min(selectionIndex, files.length - 1),
+                ),
               ),
-            ),
-          );
+            );
+          } catch (_) {
+            await dialog.hide();
+          }
         },
       );
-    } finally {
+    } catch (_) {
       await dialog.hide();
     }
   }
