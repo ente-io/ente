@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
@@ -87,8 +88,18 @@ class _LockScreenOptionConfirmPinState
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+
+    FloatingActionButtonLocation? fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -101,6 +112,17 @@ class _LockScreenOptionConfirmPinState
           ),
         ),
       ),
+      floatingActionButton: DynamicFAB(
+        isKeypadOpen: isKeypadOpen,
+        buttonText: S.of(context).confirm,
+        isFormValid: _confirmPinController.text.isNotEmpty,
+        onPressedFunction: () async {
+          await _confirmPinMatch();
+          FocusScope.of(context).unfocus();
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
       body: Center(
         child: Column(
           children: [
@@ -175,19 +197,6 @@ class _LockScreenOptionConfirmPinState
                 },
               ),
             ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: ButtonWidget(
-                labelText: S.of(context).confirm,
-                buttonType: _confirmPinController.text.length == 4
-                    ? ButtonType.primary
-                    : ButtonType.secondary,
-                buttonSize: ButtonSize.large,
-                onTap: () => _confirmPinMatch(),
-              ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 24)),
           ],
         ),
       ),

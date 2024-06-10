@@ -83,7 +83,6 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
           ),
         ),
       ),
-      // resizeToAvoidBottomInset: false,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

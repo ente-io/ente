@@ -1,9 +1,8 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_password.dart";
 
@@ -68,7 +67,18 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+
+    FloatingActionButtonLocation? fabLocation() {
+      if (isKeypadOpen) {
+        return null;
+      } else {
+        return FloatingActionButtonLocation.centerFloat;
+      }
+    }
+
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -81,6 +91,17 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
           ),
         ),
       ),
+      floatingActionButton: DynamicFAB(
+        isKeypadOpen: isKeypadOpen,
+        buttonText: S.of(context).ok,
+        isFormValid: _passwordController.text.isNotEmpty,
+        onPressedFunction: () async {
+          await _confirmPassword();
+          FocusScope.of(context).unfocus();
+        },
+      ),
+      floatingActionButtonLocation: fabLocation(),
+      floatingActionButtonAnimator: NoScalingAnimation(),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,17 +157,6 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
                 isPasswordInput: true,
               ),
             ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: ButtonWidget(
-                labelText: 'Next',
-                buttonType: ButtonType.secondary,
-                buttonSize: ButtonSize.large,
-                onTap: () => _confirmPassword(),
-              ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 24)),
           ],
         ),
       ),

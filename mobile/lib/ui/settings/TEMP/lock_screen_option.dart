@@ -33,6 +33,81 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     super.initState();
   }
 
+  Future<void> _deviceLock() async {
+    await _configuration.removePinAndPassword();
+    setState(() {
+      isPasswordEnabled = _configuration.isPasswordSet();
+      isPinEnabled = _configuration.isPinSet();
+    });
+  }
+
+  Future<void> _pinLock() async {
+    final bool result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return const LockScreenOptionPin();
+        },
+      ),
+    );
+    setState(() {
+      isPasswordEnabled = _configuration.isPasswordSet();
+      isPinEnabled = _configuration.isPinSet();
+      if (result == false) {
+        appLock = appLock;
+      } else {
+        appLock = isPinEnabled || isPasswordEnabled;
+      }
+    });
+  }
+
+  Future<void> _passwordLock() async {
+    final bool result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return const LockScreenOptionPassword();
+        },
+      ),
+    );
+    setState(() {
+      isPasswordEnabled = _configuration.isPasswordSet();
+      isPinEnabled = _configuration.isPinSet();
+      if (result == false) {
+        appLock = appLock;
+      } else {
+        appLock = isPinEnabled || isPasswordEnabled;
+      }
+    });
+  }
+
+  Future<void> _onToggleSwitch() async {
+    bool result;
+    if ((isPinEnabled || isPasswordEnabled) && appLock == true) {
+      result = await LocalAuthenticationService.instance
+          .requestEnteAuthForLockScreen(context);
+      await _configuration.removePinAndPassword();
+      isPasswordEnabled = _configuration.isPasswordSet();
+      isPinEnabled = _configuration.isPinSet();
+    } else {
+      result = await LocalAuthenticationService.instance
+          .requestLocalAuthForLockScreen(
+        context,
+        !_configuration.shouldShowLockScreen(),
+        S.of(context).authToChangeLockscreenSetting,
+        S.of(context).lockScreenEnablePreSteps,
+      );
+      await _configuration.removePinAndPassword();
+      isPasswordEnabled = _configuration.isPasswordSet();
+      isPinEnabled = _configuration.isPinSet();
+    }
+    setState(() {
+      if (result) {
+        appLock = !appLock!;
+      } else {
+        appLock = appLock;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
@@ -68,41 +143,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                               menuItemColor: colorTheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
                                 value: () => appLock!,
-                                onChanged: () async {
-                                  bool result;
-                                  if ((isPinEnabled || isPasswordEnabled) &&
-                                      appLock == true) {
-                                    result = await LocalAuthenticationService
-                                        .instance
-                                        .requestEnteAuthForLockScreen(context);
-                                    await _configuration.removePinAndPassword();
-                                    isPasswordEnabled =
-                                        _configuration.isPasswordSet();
-                                    isPinEnabled = _configuration.isPinSet();
-                                  } else {
-                                    result = await LocalAuthenticationService
-                                        .instance
-                                        .requestLocalAuthForLockScreen(
-                                      context,
-                                      !_configuration.shouldShowLockScreen(),
-                                      S
-                                          .of(context)
-                                          .authToChangeLockscreenSetting,
-                                      S.of(context).lockScreenEnablePreSteps,
-                                    );
-                                    await _configuration.removePinAndPassword();
-                                    isPasswordEnabled =
-                                        _configuration.isPasswordSet();
-                                    isPinEnabled = _configuration.isPinSet();
-                                  }
-                                  setState(() {
-                                    if (result) {
-                                      appLock = !appLock!;
-                                    } else {
-                                      appLock = appLock;
-                                    }
-                                  });
-                                },
+                                onChanged: () => _onToggleSwitch(),
                               ),
                             ),
                             const Padding(
@@ -137,15 +178,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                                             ? Icons.check
                                             : null,
                                     trailingIconColor: colorTheme.tabIcon,
-                                    onTap: () async {
-                                      setState(() {
-                                        _configuration.removePinAndPassword();
-                                        isPasswordEnabled =
-                                            _configuration.isPasswordSet();
-                                        isPinEnabled =
-                                            _configuration.isPinSet();
-                                      });
-                                    },
+                                    onTap: () => _deviceLock(),
                                   ),
                                   DividerWidget(
                                     dividerType: DividerType.menuNoIcon,
@@ -163,28 +196,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                                     trailingIcon:
                                         isPinEnabled ? Icons.check : null,
                                     trailingIconColor: colorTheme.tabIcon,
-                                    onTap: () async {
-                                      final bool result =
-                                          await Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (BuildContext context) {
-                                            return const LockScreenOptionPin();
-                                          },
-                                        ),
-                                      );
-                                      setState(() {
-                                        isPasswordEnabled =
-                                            _configuration.isPasswordSet();
-                                        isPinEnabled =
-                                            _configuration.isPinSet();
-                                        if (result == false) {
-                                          appLock = appLock;
-                                        } else {
-                                          appLock =
-                                              isPinEnabled || isPasswordEnabled;
-                                        }
-                                      });
-                                    },
+                                    onTap: () => _pinLock(),
                                   ),
                                   DividerWidget(
                                     dividerType: DividerType.menuNoIcon,
@@ -202,28 +214,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                                     trailingIcon:
                                         isPasswordEnabled ? Icons.check : null,
                                     trailingIconColor: colorTheme.tabIcon,
-                                    onTap: () async {
-                                      final bool result =
-                                          await Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (BuildContext context) {
-                                            return const LockScreenOptionPassword();
-                                          },
-                                        ),
-                                      );
-                                      setState(() {
-                                        isPasswordEnabled =
-                                            _configuration.isPasswordSet();
-                                        isPinEnabled =
-                                            _configuration.isPinSet();
-                                        if (result == false) {
-                                          appLock = appLock;
-                                        } else {
-                                          appLock =
-                                              isPinEnabled || isPasswordEnabled;
-                                        }
-                                      });
-                                    },
+                                    onTap: () => _passwordLock(),
                                   ),
                                 ],
                               )
