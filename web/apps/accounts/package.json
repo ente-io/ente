@@ -5,7 +5,6 @@
     "dependencies": {
         "@/next": "*",
         "@ente/accounts": "*",
-        "@ente/eslint-config": "*",
         "@ente/shared": "*"
     },
     "devDependencies": {

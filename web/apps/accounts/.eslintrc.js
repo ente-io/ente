@@ -1,21 +1,6 @@
-/*
-module.exports = {
-    // When root is set to true, ESLint will stop looking for configuration files in parent directories.
-    // This is required here to ensure desktop picks the right eslint config, where this app is
-    // packaged as a submodule.
-    root: true,
-    extends: ["@ente/eslint-config"],
-    parser: "@typescript-eslint/parser",
-    parserOptions: {
-        tsconfigRootDir: __dirname,
-        project: "./tsconfig.json",
-    },
-    ignorePatterns: [".eslintrc.js", "out", "next.config.js", "next-env.d.ts"],
-};
-*/
 module.exports = {
     extends: ["@/build-config/eslintrc-next"],
-    ignorePatterns: ["next.config.base.js"],
+    ignorePatterns: ["next.config.js", "next-env.d.ts"],
     /* TODO: Temporary overrides */
     rules: {
         "react/react-in-jsx-scope": "off",
