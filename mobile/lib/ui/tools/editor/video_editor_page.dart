@@ -194,6 +194,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   void exportVideo() async {
     _exportingProgress.value = 0;
     _isExporting.value = true;
+    final dialog = createProgressDialog(context, S.of(context).savingEdits);
+    await dialog.show();
 
     final config = VideoFFmpegVideoEditorConfig(
       _controller!,
@@ -206,67 +208,70 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       // },
     );
 
-    await ExportService.runFFmpegCommand(
-      await config.getExecuteConfig(),
-      onProgress: (stats) {
-        _exportingProgress.value =
-            config.getFFmpegProgress(stats.getTime().toInt());
-      },
-      onError: (e, s) => _logger.severe("Error exporting video", e, s),
-      onCompleted: (result) async {
-        _isExporting.value = false;
-        final dialog = createProgressDialog(context, S.of(context).savingEdits);
-        await dialog.show();
-        if (!mounted) return;
+    try {
+      await ExportService.runFFmpegCommand(
+        await config.getExecuteConfig(),
+        onProgress: (stats) {
+          _exportingProgress.value =
+              config.getFFmpegProgress(stats.getTime().toInt());
+        },
+        onError: (e, s) => _logger.severe("Error exporting video", e, s),
+        onCompleted: (result) async {
+          _isExporting.value = false;
+          if (!mounted) return;
 
-        final fileName = path.basenameWithoutExtension(widget.file.title!) +
-            "_edited_" +
-            DateTime.now().microsecondsSinceEpoch.toString() +
-            ".mp4";
-        //Disabling notifications for assets changing to insert the file into
-        //files db before triggering a sync.
-        await PhotoManager.stopChangeNotify();
-        final AssetEntity? newAsset =
-            await (PhotoManager.editor.saveVideo(result, title: fileName));
-        result.deleteSync();
-        final newFile = await EnteFile.fromAsset(
-          widget.file.deviceFolder ?? '',
-          newAsset!,
-        );
+          final fileName = path.basenameWithoutExtension(widget.file.title!) +
+              "_edited_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              ".mp4";
+          //Disabling notifications for assets changing to insert the file into
+          //files db before triggering a sync.
+          await PhotoManager.stopChangeNotify();
+          final AssetEntity? newAsset =
+              await (PhotoManager.editor.saveVideo(result, title: fileName));
+          result.deleteSync();
+          (await newAsset?.file)
+              ?.setLastModifiedSync(widget.ioFile.lastModifiedSync());
+          final newFile = await EnteFile.fromAsset(
+            widget.file.deviceFolder ?? '',
+            newAsset!,
+          );
 
-        newFile.generatedID =
-            await FilesDB.instance.insertAndGetId(widget.file);
-        Bus.instance
-            .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-        unawaited(SyncService.instance.sync());
-        showShortToast(context, S.of(context).editsSaved);
-        _logger.info("Original file " + widget.file.toString());
-        _logger.info("Saved edits to file " + newFile.toString());
-        final existingFiles = widget.detailPageConfig.files;
-        final files = (await widget.detailPageConfig.asyncLoader!(
-          existingFiles[existingFiles.length - 1].creationTime!,
-          existingFiles[0].creationTime!,
-        ))
-            .files;
-        // the index could be -1 if the files fetched doesn't contain the newly
-        // edited files
-        int selectionIndex =
-            files.indexWhere((file) => file.generatedID == newFile.generatedID);
-        if (selectionIndex == -1) {
-          files.add(newFile);
-          selectionIndex = files.length - 1;
-        }
-        replacePage(
-          context,
-          DetailPage(
-            widget.detailPageConfig.copyWith(
-              files: files,
-              selectedIndex: min(selectionIndex, files.length - 1),
+          newFile.generatedID =
+              await FilesDB.instance.insertAndGetId(widget.file);
+          Bus.instance
+              .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
+          unawaited(SyncService.instance.sync());
+          showShortToast(context, S.of(context).editsSaved);
+          _logger.info("Original file " + widget.file.toString());
+          _logger.info("Saved edits to file " + newFile.toString());
+          final existingFiles = widget.detailPageConfig.files;
+          final files = (await widget.detailPageConfig.asyncLoader!(
+            existingFiles[existingFiles.length - 1].creationTime!,
+            existingFiles[0].creationTime!,
+          ))
+              .files;
+          // the index could be -1 if the files fetched doesn't contain the newly
+          // edited files
+          int selectionIndex = files
+              .indexWhere((file) => file.generatedID == newFile.generatedID);
+          if (selectionIndex == -1) {
+            files.add(newFile);
+            selectionIndex = files.length - 1;
+          }
+          replacePage(
+            context,
+            DetailPage(
+              widget.detailPageConfig.copyWith(
+                files: files,
+                selectedIndex: min(selectionIndex, files.length - 1),
+              ),
             ),
-          ),
-        );
-        await dialog.hide();
-      },
-    );
+          );
+        },
+      );
+    } finally {
+      await dialog.hide();
+    }
   }
 }
