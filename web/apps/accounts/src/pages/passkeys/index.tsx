@@ -31,7 +31,7 @@ import {
 } from "services/passkey";
 
 const Page: React.FC = () => {
-    const { showNavBar } = useAppContext();
+    const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();
 
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
     const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
@@ -46,6 +46,11 @@ const Page: React.FC = () => {
             setPasskeys(await getPasskeys());
         } catch (e) {
             log.error("Failed to fetch passkeys", e);
+            setDialogBoxAttributesV2({
+                title: t("ERROR"),
+                content: t("passkey_fetch_failed"),
+                close: {},
+            });
         }
     };
 

@@ -610,6 +610,7 @@
     "APPLY_CROP": "Apply Crop",
     "PHOTO_EDIT_REQUIRED_TO_SAVE": "At least one transformation or color adjustment must be performed before saving.",
     "PASSKEYS": "Passkeys",
+    "passkey_fetch_failed": "Could not get your passkeys.",
     "manage_passkey": "Manage passkey",
     "DELETE_PASSKEY": "Delete passkey",
     "DELETE_PASSKEY_CONFIRMATION": "Are you sure you want to delete this passkey? This action is irreversible.",
