@@ -2,6 +2,7 @@ import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -17,6 +18,7 @@ import {
     isWebAuthnSupported,
     isWhitelistedRedirect,
     redirectAfterPasskeyAuthentication,
+    redirectToPasskeyRecoverPage,
     signChallenge,
 } from "services/passkey";
 
@@ -128,12 +130,22 @@ const Page = () => {
 
     const handleRetry = () => void authenticate();
 
+    const handleRecover = () => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const redirect = nullToUndefined(searchParams.get("redirect"));
+        const redirectURL = new URL(ensure(redirect));
+
+        redirectToPasskeyRecoverPage(redirectURL);
+    };
+
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
         unknownRedirect: <UnknownRedirect />,
         webAuthnNotSupported: <WebAuthnNotSupported />,
         unrecoverableFailure: <UnrecoverableFailure />,
-        failed: <RetriableFailed onRetry={handleRetry} />,
+        failed: (
+            <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
+        ),
         waitingForUser: <WaitingForUser />,
     };
 
@@ -204,9 +216,17 @@ const ContentPaper = styled(Paper)`
 interface RetriableFailedProps {
     /** Callback invoked when the user presses the try again button. */
     onRetry: () => void;
+    /**
+     * Callback invoked when the user presses the button to recover their
+     * second factor, e.g. if they cannot login using it.
+     */
+    onRecover: () => void;
 }
 
-const RetriableFailed: React.FC<RetriableFailedProps> = ({ onRetry }) => {
+const RetriableFailed: React.FC<RetriableFailedProps> = ({
+    onRetry,
+    onRecover,
+}) => {
     return (
         <Content>
             <InfoIcon color="secondary" fontSize="large" />
@@ -225,7 +245,7 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({ onRetry }) => {
                     {t("TRY_AGAIN")}
                 </EnteButton>
                 <EnteButton
-                    href="/passkeys/recover"
+                    onClick={onRecover}
                     fullWidth
                     color="primary"
                     type="button"

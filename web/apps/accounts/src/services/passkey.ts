@@ -51,7 +51,7 @@ const Passkey = z.object({
 export type Passkey = z.infer<typeof Passkey>;
 
 const GetPasskeysResponse = z.object({
-    passkeys: z.array(Passkey),
+    passkeys: z.array(Passkey).nullish().transform(nullToUndefined),
 });
 
 /**
@@ -67,7 +67,7 @@ export const getPasskeys = async () => {
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
-    return passkeys;
+    return passkeys ?? [];
 };
 
 /**
@@ -413,26 +413,10 @@ export const beginPasskeyAuthentication = async (
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
 ) => {
-    for (const listItem of publicKey.allowCredentials ?? []) {
-        // From MDN:
-        //
-        // > The `transports` property is hint of the methods that the client
-        // > could use to communicate with the relevant authenticator of the
-        // > public key credential to retrieve. Possible values are ["ble",
-        // > "hybrid", "internal", "nfc", "usb"].
-        //
-        // TODO-PK: Better document why + why not "hybrid"
-        //
-        // note: we are orverwriting the transports array with all possible values.
-        // This is because the browser will only prompt the user for the transport that is available.
-        // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
-        listItem.transports = ["usb", "nfc", "ble", "internal"];
-    }
-
     // Allow up to 60 seconds to wait for the retrieval
     publicKey.timeout = 60 * 1000;
 
-    return await navigator.credentials.get({ publicKey });
+    return navigator.credentials.get({ publicKey });
 };
 
 interface FinishPasskeyAuthenticationOptions {
@@ -538,4 +522,23 @@ export const redirectAfterPasskeyAuthentication = async (
 
     redirectURL.searchParams.set("response", encodedResponse);
     window.location.href = redirectURL.href;
+};
+
+/**
+ * Redirect back to the calling app that initiated the passkey authentication,
+ * navigating the user to a page where they can reset their second factor using
+ * their recovery key (e.g. if they have lost access to their passkey).
+ *
+ * The same considerations mentioned in [Note: Finish passkey flow in the
+ * requesting app] apply to recovery too, which is why we need to redirect back
+ * to the app on whose behalf we're authenticating.
+ *
+ * @param redirectURL The URL we were meant to redirect to after successful
+ * passkey authentication. Provided as a calling app as a query parameter.
+ */
+export const redirectToPasskeyRecoverPage = (redirectURL: URL) => {
+    // Extract the origin from the given `redirectURL`, and redirect to the
+    // `/passkeys/recover` page on that origin.
+
+    window.location.href = `${redirectURL.origin}/passkeys/recover`;
 };

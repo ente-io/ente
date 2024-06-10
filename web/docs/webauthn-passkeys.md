@@ -71,10 +71,7 @@ The registration ceremony starts in the browser. When the user clicks the "Add
 new passkey" button, a request is sent to the server for "public key" creation
 options. Although named "public key" options, they actually define customizable
 parameters for the entire credential creation process. They're like an
-instructional sheet that defines exactly what we want. As of the creation of
-this document, the plan is to restrict user authenticators to cross-platform
-ones, like hardware keys. Platform authenticators, such as TPM, are not portable
-and are prone to loss.
+instructional sheet that defines exactly what we want.
 
 On the server side, the WebAuthn library generates this information based on
 data provided from a `webauthn.User` interface. As a result, we satisfy this
