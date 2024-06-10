@@ -6,8 +6,8 @@
     "scripts": {
         "build": "tsc && vite build",
         "dev": "vite",
-        "lint": "yarn prettier --check --log-level warn . && yarn eslint && yarn tsc",
-        "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint --fix && yarn tsc",
+        "lint": "yarn prettier --check --log-level warn . && yarn eslint . && yarn tsc",
+        "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint --fix . && yarn tsc",
         "preview": "vite preview"
     },
     "dependencies": {
