@@ -608,19 +608,18 @@ class _FileSelectionActionsWidgetState
     }
   }
 
-  Future<Uint8List?> _createPlaceholder(
+  Future<Uint8List> _createPlaceholder(
     List<EnteFile> ownedSelectedFiles,
   ) async {
     final Widget imageWidget = LinkPlaceholder(
       files: ownedSelectedFiles,
     );
-    await Future.delayed(const Duration(milliseconds: 200));
-    final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
     final bytesOfImageToWidget = await screenshotController.captureFromWidget(
       imageWidget,
       pixelRatio: pixelRatio,
       targetSize: MediaQuery.sizeOf(context),
-      delay: const Duration(milliseconds: 100),
+      delay: const Duration(milliseconds: 300),
     );
     return bytesOfImageToWidget;
   }
