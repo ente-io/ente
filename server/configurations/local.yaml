@@ -303,7 +303,8 @@ internal:
     #     local-domain-suffix: "@example.org"
     #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
-    admins: []
+    admins:
+        - 1580559962386438
 
 # Replication config
 #

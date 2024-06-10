@@ -1,0 +1,47 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+.sidebar {
+    width: 200px;
+    height: 100%;
+    background-color: #009879;
+    color: white;
+    padding-top: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.sidebar ul li:hover {
+    background-color: lightgreen;
+    color: black;
+}
+
+.main-content {
+    margin-left: 200px;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.input-form,
+.fetch-button,
+table,
+.footer {
+    margin-top: 20px;
+}
