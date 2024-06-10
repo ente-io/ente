@@ -55,9 +55,8 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 ### Automatically logging into Ente Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/passkeys/handoff?client=<clientPackageName>&token=<accountsToken>`.
-This page will parse the token and client package name for usage in subsequent
-Accounts-related API calls.
+`https://accounts.ente.io/passkeys/handoff?token=<accountsToken>`. This page
+will parse the token for usage in subsequent Accounts-related API calls.
 
 If the token is valid, the user will be automatically redirected to the passkeys
 management page. Otherwise, they will be required to login with their Ente
@@ -342,7 +341,7 @@ is needed anyways to service credential authentication from mobile clients, so
 we use the same flow for other (web, desktop) clients too.
 
 ```tsx
-window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&redirect=${
+window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&client=io.ente.photos.web&redirect=${
     window.location.origin
 }/passkeys/finish`;
 ```

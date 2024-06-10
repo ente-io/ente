@@ -42,7 +42,7 @@ class PasskeyService {
   Future<void> openPasskeyPage(BuildContext context) async {
     try {
       final jwtToken = await getJwtToken();
-      final url = "https://accounts.ente.io/account-handoff?token=$jwtToken";
+      final url = "https://accounts.ente.io/passkeys/handoff?token=$jwtToken";
       await launchUrlString(
         url,
         mode: LaunchMode.externalApplication,
