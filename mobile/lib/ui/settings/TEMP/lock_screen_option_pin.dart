@@ -1,8 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_pin.dart";
 import "package:pinput/pin_put/pin_put.dart";
 
@@ -21,7 +19,6 @@ class LockScreenOptionPin extends StatefulWidget {
 
 class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
-  String _code = "";
   final _focusNode = FocusNode();
 
   final _pinPutDecoration = BoxDecoration(
@@ -43,7 +40,6 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
     super.dispose();
     _pinController.dispose();
     _focusNode.dispose();
-    print("PIN");
   }
 
   Future<bool> confirmPinAuth(String code) async {
@@ -66,6 +62,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               LockScreenOptionConfirmPin(pin: code),
         ),
       );
+      _pinController.clear();
     }
   }
 
@@ -74,13 +71,25 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color: colorTheme.tabIcon,
+          ),
+        ),
+      ),
       // resizeToAvoidBottomInset: false,
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 120,
+              height: 60,
             ),
             SizedBox(
               height: 120,
@@ -118,9 +127,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               ),
             ),
             Text(
-              widget.isAuthenticating
-                  ? 'Enter the pin to change Lockscreen settings.'
-                  : 'Enter the pin to lock the app',
+              widget.isAuthenticating ? 'Enter PIN' : 'Set new PIN',
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
@@ -147,29 +154,12 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                 ),
                 textStyle: textTheme.h3,
                 obscureText: '*',
-                onChanged: (String pin) {
-                  setState(() {
-                    _code = pin;
-                  });
-                },
                 onSubmit: (value) {
                   FocusScope.of(context).unfocus();
+                  _confirmPin(_pinController.text);
                 },
               ),
             ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: ButtonWidget(
-                labelText: 'Next',
-                buttonType: _code.length == 4
-                    ? ButtonType.primary
-                    : ButtonType.secondary,
-                buttonSize: ButtonSize.large,
-                onTap: () => _confirmPin(_code),
-              ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 24)),
           ],
         ),
       ),

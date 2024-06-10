@@ -22,7 +22,6 @@ class LockScreenOptionPassword extends StatefulWidget {
 
 class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   final _passwordController = TextEditingController(text: null);
-  String password = "";
   final _focusNode = FocusNode();
 
   @override
@@ -37,9 +36,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   @override
   void dispose() {
     super.dispose();
-    // _passwordController.dispose();
     _focusNode.dispose();
-    // print("DISPOSE");
   }
 
   Future<bool> confirmPasswordAuth(String code) async {
@@ -53,16 +50,17 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
 
   Future<void> _confirmPassword() async {
     if (widget.isAuthenticating) {
-      await confirmPasswordAuth(password);
+      await confirmPasswordAuth(_passwordController.text);
       return;
     } else {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) => LockScreenOptionConfirmPassword(
-            password: password,
+            password: _passwordController.text,
           ),
         ),
       );
+      _passwordController.clear();
     }
   }
 
@@ -71,12 +69,24 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color: colorTheme.tabIcon,
+          ),
+        ),
+      ),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 120,
+              height: 60,
             ),
             SizedBox(
               height: 120,
@@ -108,9 +118,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               ),
             ),
             Text(
-              widget.isAuthenticating
-                  ? 'Enter the password to change \nLockscreen settings.'
-                  : 'Enter the password to lock the app',
+              widget.isAuthenticating ? 'Enter Password' : 'Set new Password',
               textAlign: TextAlign.center,
               style: textTheme.bodyBold,
             ),
@@ -126,11 +134,6 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
                 textEditingController: _passwordController,
                 prefixIcon: Icons.lock_outline,
                 isPasswordInput: true,
-                onChange: (String p0) {
-                  setState(() {
-                    password = p0;
-                  });
-                },
               ),
             ),
             const Spacer(),
@@ -138,9 +141,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
                 labelText: 'Next',
-                buttonType: password.length > 8
-                    ? ButtonType.primary
-                    : ButtonType.secondary,
+                buttonType: ButtonType.secondary,
                 buttonSize: ButtonSize.large,
                 onTap: () => _confirmPassword(),
               ),

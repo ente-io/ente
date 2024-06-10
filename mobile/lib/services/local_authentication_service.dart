@@ -119,10 +119,6 @@ class LocalAuthenticationService {
     String errorDialogContent, [
     String errorDialogTitle = "",
   ]) async {
-    // if (await requestEnteAuthForLockScreen(context)) {
-    //   return true;
-    // }
-
     if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.disable();
       final result = await requestAuthentication(

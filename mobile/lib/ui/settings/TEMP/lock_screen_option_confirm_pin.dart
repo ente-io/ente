@@ -19,7 +19,6 @@ class LockScreenOptionConfirmPin extends StatefulWidget {
 class _LockScreenOptionConfirmPinState
     extends State<LockScreenOptionConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
-  String _confirmPin = "";
   final Configuration _configuration = Configuration.instance;
   final _focusNode = FocusNode();
 
@@ -45,8 +44,8 @@ class _LockScreenOptionConfirmPinState
   }
 
   Future<void> _confirmPinMatch() async {
-    if (widget.pin == _confirmPin) {
-      await _configuration.savePin(_confirmPin);
+    if (widget.pin == _confirmPinController.text) {
+      await _configuration.savePin(_confirmPinController.text);
       await showDialogWidget(
         context: context,
         title: 'Pin has been set',
@@ -62,8 +61,8 @@ class _LockScreenOptionConfirmPinState
           ),
         ],
       );
-      Navigator.of(context).pop();
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
+      Navigator.of(context).pop(true);
     } else {
       await showDialogWidget(
         context: context,
@@ -89,13 +88,24 @@ class _LockScreenOptionConfirmPinState
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color: colorTheme.tabIcon,
+          ),
+        ),
+      ),
       body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 120,
+              height: 60,
             ),
             SizedBox(
               height: 120,
@@ -133,7 +143,7 @@ class _LockScreenOptionConfirmPinState
               ),
             ),
             Text(
-              'Re-enter to confirm the pin',
+              'Re-enter PIN',
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
@@ -160,11 +170,6 @@ class _LockScreenOptionConfirmPinState
                 ),
                 textStyle: textTheme.h3,
                 obscureText: '*',
-                onChanged: (String pin) {
-                  setState(() {
-                    _confirmPin = pin;
-                  });
-                },
                 onSubmit: (value) {
                   FocusScope.of(context).unfocus();
                 },
@@ -175,7 +180,7 @@ class _LockScreenOptionConfirmPinState
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
                 labelText: S.of(context).confirm,
-                buttonType: _confirmPin.length == 4
+                buttonType: _confirmPinController.text.length == 4
                     ? ButtonType.primary
                     : ButtonType.secondary,
                 buttonSize: ButtonSize.large,

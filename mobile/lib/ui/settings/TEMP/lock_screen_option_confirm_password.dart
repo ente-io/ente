@@ -38,7 +38,6 @@ class _LockScreenOptionConfirmPasswordState
   @override
   void dispose() {
     _focusNode.dispose();
-    // print("CONFIRM DISPOSE");
     super.dispose();
   }
 
@@ -60,8 +59,8 @@ class _LockScreenOptionConfirmPasswordState
           ),
         ],
       );
-      Navigator.of(context).pop();
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
+      Navigator.of(context).pop(true);
     } else {
       await showDialogWidget(
         context: context,
@@ -87,12 +86,24 @@ class _LockScreenOptionConfirmPasswordState
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color: colorTheme.tabIcon,
+          ),
+        ),
+      ),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 120,
+              height: 60,
             ),
             SizedBox(
               height: 120,
@@ -124,7 +135,7 @@ class _LockScreenOptionConfirmPasswordState
               ),
             ),
             Text(
-              'Enter the password to lock the app',
+              'Re-enter Password',
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(24)),
@@ -145,7 +156,7 @@ class _LockScreenOptionConfirmPasswordState
             Padding(
               padding: const EdgeInsets.all(18.0),
               child: ButtonWidget(
-                labelText: 'Next',
+                labelText: S.of(context).confirm,
                 buttonType: ButtonType.secondary,
                 buttonSize: ButtonSize.large,
                 onTap: () => _confirmPasswordMatch(),
