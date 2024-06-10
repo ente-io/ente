@@ -50,7 +50,12 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
-        if (!user || !user.email || !user.twoFactorSessionID) {
+        if (
+            !user ||
+            !user.email ||
+            !user.passkeySessionID ||
+            !user.twoFactorSessionID
+        ) {
             router.push(PAGES.ROOT);
         } else if (
             !user.isTwoFactorEnabled &&
@@ -63,7 +68,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
         const main = async () => {
             try {
                 const resp = await recoverTwoFactor(
-                    user.twoFactorSessionID,
+                    user.passkeySessionID || user.twoFactorSessionID,
                     twoFactorType,
                 );
                 setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
