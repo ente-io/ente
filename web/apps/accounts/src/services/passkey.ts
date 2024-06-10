@@ -51,7 +51,7 @@ const Passkey = z.object({
 export type Passkey = z.infer<typeof Passkey>;
 
 const GetPasskeysResponse = z.object({
-    passkeys: z.array(Passkey),
+    passkeys: z.array(Passkey).nullish().transform(nullToUndefined),
 });
 
 /**
@@ -67,7 +67,7 @@ export const getPasskeys = async () => {
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
-    return passkeys;
+    return passkeys ?? [];
 };
 
 /**
