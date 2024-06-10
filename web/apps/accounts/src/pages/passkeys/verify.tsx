@@ -151,7 +151,7 @@ const Loading: React.FC = () => {
 };
 
 const UnknownRedirect: React.FC = () => {
-    return <Failed message={t("PASSKEY_LOGIN_URL_INVALID")} />;
+    return <Failed message={t("passkey_login_invalid_url")} />;
 };
 
 const WebAuthnNotSupported: React.FC = () => {
@@ -159,7 +159,7 @@ const WebAuthnNotSupported: React.FC = () => {
 };
 
 const UnrecoverableFailure: React.FC = () => {
-    return <Failed message={t("PASSKEY_LOGIN_ERRORED")} />;
+    return <Failed message={t("passkey_login_generic_error")} />;
 };
 
 interface FailedProps {
@@ -170,7 +170,7 @@ const Failed: React.FC<FailedProps> = ({ message }) => {
     return (
         <Content>
             <InfoIcon color="secondary" />
-            <Typography variant="h3">{t("PASSKEY_LOGIN_FAILED")}</Typography>
+            <Typography variant="h3">{t("passkey_login_failed")}</Typography>
             <Typography color="text.muted">{message}</Typography>
         </Content>
     );
@@ -210,9 +210,9 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({ onRetry }) => {
     return (
         <Content>
             <InfoIcon color="secondary" fontSize="large" />
-            <Typography variant="h3">{t("PASSKEY_LOGIN_FAILED")}</Typography>
+            <Typography variant="h3">{t("passkey_login_failed")}</Typography>
             <Typography color="text.muted">
-                {t("PASSKEY_LOGIN_ERRORED")}
+                {t("passkey_login_generic_error")}
             </Typography>
             <ButtonStack>
                 <EnteButton
@@ -249,10 +249,10 @@ const WaitingForUser: React.FC = () => {
     return (
         <Content>
             <Typography fontWeight="bold" variant="h2">
-                {t("LOGIN_WITH_PASSKEY")}
+                {t("passkey_login")}
             </Typography>
             <Typography color="text.muted">
-                {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
+                {t("passkey_login_instructions")}
             </Typography>
             <WaitingImgContainer>
                 <img

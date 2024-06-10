@@ -533,7 +533,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 <EnteMenuItem
                     variant="secondary"
                     onClick={redirectToAccountsPage}
-                    label={t("PASSKEYS")}
+                    label={t("passkeys")}
                 />
             )}
 
