@@ -270,10 +270,11 @@ class FolderWatcher {
             }
 
             const [removed, rest] = watch.syncedFiles.reduce(
-                ([removed, rest], { path }) => {
-                    (event.filePaths.includes(path) ? rest : removed).push(
-                        watch,
-                    );
+                ([removed, rest], syncedFile) => {
+                    (event.filePaths.includes(syncedFile.path)
+                        ? removed
+                        : rest
+                    ).push(syncedFile);
                     return [removed, rest];
                 },
                 [[], []],
