@@ -184,6 +184,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     bool initComplete = false;
     Future.delayed(const Duration(seconds: 15), () {
       if (!initComplete && !isBackground) {
+        _logger.severe("Stuck on splash screen for >= 15 seconds");
         sendLogsForInit(
           "support@ente.io",
           "Stuck on splash screen for >= 15 seconds",
@@ -191,6 +192,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         );
       }
     });
+    if (!isBackground) _heartBeatOnInit(0);
     _isProcessRunning = true;
     _logger.info("Initializing...  inBG =$isBackground via: $via");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -207,7 +209,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
-
+    await Future.delayed(const Duration(seconds: 16));
     await Configuration.instance.init();
     _logger.info("Configuration done");
 
@@ -293,6 +295,15 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } catch (e, s) {
     _logger.severe("Error in init", e, s);
     rethrow;
+  }
+}
+
+void _heartBeatOnInit(int i) {
+  if (i <= 15) {
+    Future.delayed(const Duration(seconds: 1), () {
+      _logger.info("init Heartbeat $i");
+      _heartBeatOnInit(i + 1);
+    });
   }
 }
 
