@@ -76,7 +76,10 @@ func NewClient(p Params) *Client {
 			AddRetryCondition(func(r *resty.Response, err error) bool {
 				shouldRetry := r.StatusCode() == 429 || r.StatusCode() >= 500
 				if shouldRetry {
-					log.Printf("retrying download due to %d code", r.StatusCode())
+					amxRequestID := r.Header().Get("X-Amz-Request-Id")
+					cfRayID := r.Header().Get("CF-Ray")
+					wasabiRefID := r.Header().Get("X-Wasabi-Cm-Reference-Id")
+					log.Printf("Retry scheduled. error statusCode: %d, X-Amz-Request-Id: %s, CF-Ray: %s, X-Wasabi-Cm-Reference-Id: %s", r.StatusCode(), amxRequestID, cfRayID, wasabiRefID)
 				}
 				return shouldRetry
 			}),
