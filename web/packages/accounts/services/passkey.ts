@@ -29,14 +29,16 @@ export const redirectUserToPasskeyVerificationFlow = (
     passkeySessionID: string,
 ) => {
     const clientPackage = clientPackageName[appName];
-    // The returned URL begins with `window.location.origin` and will work both
-    // when we're running in a web browser, and in our desktop / mobile app.
-    // See: [Note: Using deeplinks to navigate in desktop app]
+    // Using `window.location.origin` will work both when we're running in a web
+    // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
+    // in desktop app]
     const redirect = `${window.location.origin}/passkeys/finish`;
+    const recover = `${window.location.origin}/passkeys/recover`;
     const params = new URLSearchParams({
         clientPackage,
         passkeySessionID,
         redirect,
+        recover,
     });
     const url = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
     // [Note: Passkey verification in the desktop app]

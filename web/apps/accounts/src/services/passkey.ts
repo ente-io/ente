@@ -534,20 +534,17 @@ export const redirectAfterPasskeyAuthentication = async (
 };
 
 /**
- * Redirect back to the calling app that initiated the passkey authentication,
- * navigating the user to a page where they can reset their second factor using
+ * Redirect back to the app that initiated the passkey authentication,
+ * navigating the user to a place where they can reset their second factor using
  * their recovery key (e.g. if they have lost access to their passkey).
  *
  * The same considerations mentioned in [Note: Finish passkey flow in the
  * requesting app] apply to recovery too, which is why we need to redirect back
  * to the app on whose behalf we're authenticating.
  *
- * @param redirectURL The URL we were meant to redirect to after successful
- * passkey authentication. Provided as a calling app as a query parameter.
+ * @param recoverURL The recovery URL provided as a query parameter by the app
+ * that called us.
  */
-export const redirectToPasskeyRecoverPage = (redirectURL: URL) => {
-    // Extract the origin from the given `redirectURL`, and redirect to the
-    // `/passkeys/recover` page on that origin.
-
-    window.location.href = `${redirectURL.origin}/passkeys/recover`;
+export const redirectToPasskeyRecoverPage = (recoverURL: URL) => {
+    window.location.href = recoverURL.href;
 };
