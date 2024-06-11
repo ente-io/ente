@@ -75,7 +75,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     useEffect(() => {
-        setupI18n().finally(() => setIsI18nReady(true));
+        void setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);

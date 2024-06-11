@@ -57,7 +57,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
-        setupI18n().finally(() => setIsI18nReady(true));
+        void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);

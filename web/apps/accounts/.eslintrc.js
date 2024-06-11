@@ -8,7 +8,6 @@ module.exports = {
         "react-hooks/exhaustive-deps": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-misused-promises": "off",
-        "@typescript-eslint/no-floating-promises": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "react-refresh/only-export-components": "off",
     },
