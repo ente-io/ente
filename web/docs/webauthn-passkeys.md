@@ -336,8 +336,10 @@ if (passkeySessionID) {
 The client should redirect the user to the Ente Accounts web app with this
 session ID to prompt credential authentication.
 
-```html
-https://accounts.ente.io/passkeys?passkeySessionID=<sid>&clientPackage=<pkg>&redirect=<redirect>&recover=<recover-redirect>
+```
+https://accounts.ente.io/passkeys?
+    passkeySessionID=<sid>&clientPackage=<pkg>&
+    redirect=<redirect>&recover=<recover-redirect>
 ```
 
 We use Ente Accounts as the central WebAuthn hub since it allows us to handle
