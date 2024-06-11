@@ -4,6 +4,5 @@ module.exports = {
     /* TODO: Temporary overrides */
     rules: {
         "react-hooks/exhaustive-deps": "off",
-        "react-refresh/only-export-components": "off",
     },
 };

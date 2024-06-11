@@ -1,8 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
-import { ensure } from "@/utils/ensure";
+import { appTitle, type AppName } from "@/next/types/app";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";
@@ -16,20 +15,13 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { AppContext } from "components/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import "styles/global.css";
-
-/** The accounts app has no extra properties on top of the base context. */
-type AppContextT = BaseAppContextT;
-
-/** The React {@link Context} available to all pages. */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
-
-/** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => ensure(useContext(AppContext));
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appName: AppName = "accounts";
