@@ -1,7 +1,6 @@
 import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -129,10 +128,13 @@ const Page = () => {
 
     const handleRecover = () => {
         const searchParams = new URLSearchParams(window.location.search);
-        const redirect = nullToUndefined(searchParams.get("redirect"));
-        const redirectURL = new URL(ensure(redirect));
+        const recover = nullToUndefined(searchParams.get("recover"));
+        if (!recover) {
+            log.error("No recover URL was provided");
+            return;
+        }
 
-        redirectToPasskeyRecoverPage(redirectURL);
+        redirectToPasskeyRecoverPage(new URL(recover));
     };
 
     const components: Record<Status, React.ReactNode> = {
