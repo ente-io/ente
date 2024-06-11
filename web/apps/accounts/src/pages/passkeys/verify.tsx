@@ -1,11 +1,9 @@
-import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
 import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
 import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
@@ -67,12 +65,6 @@ const Page = () => {
             return;
         }
 
-        localStorage.setItem("clientPackage", clientPackage);
-        setClientPackageForAuthenticatedRequests(clientPackage);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackage,
-        });
-
         setStatus("loading");
 
         // Extract passkeySessionID from the query params.
@@ -90,6 +82,10 @@ const Page = () => {
                 await beginPasskeyAuthentication(passkeySessionID);
 
             setStatus("waitingForUser");
+
+            // Safari throws "NotAllowedError: The document is not focused" if
+            // the console is open when we call `navigator.credentials.create`.
+            // Not adding any workarounds, just documenting their incompetence.
 
             const credential = await signChallenge(options.publicKey);
             if (!credential) {

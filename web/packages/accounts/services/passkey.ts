@@ -69,11 +69,12 @@ export const redirectUserToPasskeyVerificationFlow = (
  *
  * @param appName The {@link AppName} of the app which is calling this function.
  */
-export const openAccountsManagePasskeysPage = async (appName: AppName) => {
-    // check if the user has passkey recovery enabled
+export const openAccountsManagePasskeysPage = async () => {
+    // Check if the user has passkey recovery enabled
     const recoveryEnabled = await isPasskeyRecoveryEnabled();
     if (!recoveryEnabled) {
-        // let's create the necessary recovery information
+        // If not, enable it for them by creating the necessary recovery
+        // information to prevent them from getting locked out.
         const recoveryKey = await getRecoveryKey();
 
         const resetSecret = await generateEncryptionKey();
@@ -91,11 +92,12 @@ export const openAccountsManagePasskeysPage = async (appName: AppName) => {
         );
     }
 
+    // Redirect to the Ente Accounts app where they can view and add and manage
+    // their passkeys.
     const token = await getAccountsToken();
-    const client = clientPackageName[appName];
-    const params = new URLSearchParams({ token, client });
+    const params = new URLSearchParams({ token });
 
-    window.open(`${accountsAppURL()}/passkeys/handoff?${params.toString()}`);
+    window.open(`${accountsAppURL()}/passkeys?${params.toString()}`);
 };
 
 export const isPasskeyRecoveryEnabled = async () => {

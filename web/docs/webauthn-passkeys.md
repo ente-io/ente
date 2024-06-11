@@ -21,9 +21,9 @@ some operating system restrictions.
 
 ## Getting to the passkeys manager
 
-As of Feb 2024, Ente clients have a button to navigate to a WebView of Ente
+As of Jun 2024, Ente clients have a button to navigate to a WebView of Ente
 Accounts. Ente Accounts allows users to add and manage their registered
-passkeys.
+passkeys, and later authenticate with them as a second factor.
 
 > [!NOTE]
 >
@@ -55,12 +55,10 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 ### Automatically logging into Ente Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/passkeys/handoff?token=<accountsToken>`. This page
-will parse the token for usage in subsequent Accounts-related API calls.
+`https://accounts.ente.io/passkeys?token=<accountsToken>`.
 
-If the token is valid, the user will be automatically redirected to the passkeys
-management page. Otherwise, they will be required to login with their Ente
-credentials.
+If the token is valid, the user will be show a list of their passkeys, and they
+can edit / delete them, or add new ones.
 
 ## Registering a WebAuthn credential
 
@@ -128,7 +126,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
         "publicKey": {
             "rp": {
                 "name": "Ente",
-                "id": "accounts.ente.io"
+                "id": "ente.io"
             },
             "user": {
                 "name": "james@example.org",
@@ -335,16 +333,17 @@ if (passkeySessionID) {
 }
 ```
 
-The client should redirect the user to Accounts with this session ID to prompt
-credential authentication. We use Accounts as the central WebAuthn hub since it
-is needed anyways to service credential authentication from mobile clients, so
-we use the same flow for other (web, desktop) clients too.
+The client should redirect the user to the Ente Accounts web app with this
+session ID to prompt credential authentication.
 
-```tsx
-window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&clientPackage=io.ente.photos.web&redirect=${
-    window.location.origin
-}/passkeys/finish`;
 ```
+https://accounts.ente.io/passkeys?
+    passkeySessionID=<sid>&clientPackage=<pkg>&
+    redirect=<redirect>&recover=<recover-redirect>
+```
+
+We use Ente Accounts as the central WebAuthn hub since it allows us to handle
+mobile and desktop clients too.
 
 ### Requesting publicKey options (begin)
 
@@ -367,7 +366,7 @@ window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${p
         "publicKey": {
             "challenge": "dF-mmdZSBxP6Z7OhZrmQ4h-k-BkuuX6ERnW_ckYdkvc",
             "timeout": 300000,
-            "rpId": "accounts.ente.io",
+            "rpId": "ente.io",
             "allowCredentials": [
                 {
                     "type": "public-key",
