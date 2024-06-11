@@ -7,7 +7,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InfoIcon from "@mui/icons-material/Info";
 import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
