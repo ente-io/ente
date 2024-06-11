@@ -173,8 +173,11 @@ export default function App({ Component, pageProps }: AppProps) {
         // the user is logged in.
 
         const handleOpenURL = (url: string) => {
-            if (url == passkeyAuthenticationFinishRedirect()) router.push(url);
-            else log.info(`Ignoring unhandled open request for URL ${url}`);
+            if (url.startsWith(passkeyAuthenticationFinishRedirect())) {
+                router.push(url);
+            } else {
+                log.info(`Ignoring unhandled open request for URL ${url}`);
+            }
         };
 
         const showUpdateDialog = (update: AppUpdate) => {
