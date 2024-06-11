@@ -92,7 +92,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2 as any}
+                    attributes={dialogBoxAttributeV2}
                 />
 
                 <AppContext.Provider value={appContext}>
