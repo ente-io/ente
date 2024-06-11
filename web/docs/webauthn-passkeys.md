@@ -334,12 +334,14 @@ if (passkeySessionID) {
 ```
 
 The client should redirect the user to the Ente Accounts web app with this
-session ID to prompt credential authentication. We use Accounts as the central
-WebAuthn hub since it allows us to handle mobile and desktop clients too.
+session ID to prompt credential authentication.
 
-```tsx
-window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&clientPackage=io.ente.photos.web&redirect=${window.location.origin}/passkeys/finish`;
+```html
+https://accounts.ente.io/passkeys?passkeySessionID=<sid>&clientPackage=<pkg>&redirect=<redirect>&recover=<recover-redirect>
 ```
+
+We use Ente Accounts as the central WebAuthn hub since it allows us to handle
+mobile and desktop clients too.
 
 ### Requesting publicKey options (begin)
 

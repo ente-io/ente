@@ -1,5 +1,4 @@
 import { CustomHead } from "@/next/components/Head";
-import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
@@ -12,7 +11,6 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
@@ -63,22 +61,6 @@ export default function App({ Component, pageProps }: AppProps) {
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
-
-    const setupPackageName = () => {
-        const clientPackage = localStorage.getItem("clientPackage");
-        if (!clientPackage) return;
-        setClientPackageForAuthenticatedRequests(clientPackage);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackage,
-        });
-    };
-
-    useEffect(() => {
-        router.events.on("routeChangeComplete", setupPackageName);
-        return () => {
-            router.events.off("routeChangeComplete", setupPackageName);
-        };
-    }, [router.events]);
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
