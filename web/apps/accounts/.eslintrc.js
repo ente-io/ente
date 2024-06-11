@@ -13,7 +13,6 @@ module.exports = {
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unsafe-argument": "off",
-        "@typescript-eslint/restrict-template-expressions": "off",
         "react-refresh/only-export-components": "off",
     },
 };
