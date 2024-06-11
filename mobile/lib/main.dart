@@ -209,7 +209,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
-    await Future.delayed(const Duration(seconds: 16));
     await Configuration.instance.init();
     _logger.info("Configuration done");
 
