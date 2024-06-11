@@ -71,8 +71,8 @@ func NewClient(p Params) *Client {
 		restClient: enteAPI,
 		downloadClient: resty.New().
 			SetRetryCount(3).
-			SetRetryWaitTime(5 * time.Second).
-			SetRetryMaxWaitTime(10 * time.Second).
+			SetRetryWaitTime(10 * time.Second).
+			SetRetryMaxWaitTime(20 * time.Second).
 			AddRetryCondition(func(r *resty.Response, err error) bool {
 				shouldRetry := r.StatusCode() == 429 || r.StatusCode() >= 500
 				if shouldRetry {
