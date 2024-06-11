@@ -6,6 +6,9 @@ files:
 extraFiles:
     - from: build
       to: resources
+protocols:
+    - name: Ente
+      schemes: ["ente"]
 win:
     target:
         - target: nsis

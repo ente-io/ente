@@ -13,6 +13,17 @@ import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
+ * Return a URL that can be passed to the accounts app to serve as the redirect
+ * back to us on successful passkey authentication.
+ *
+ * The returned URL begins with `window.location.origin` and will work both when
+ * we're running in a web browser (of course), but also in the desktop app
+ * (See: [Note: Using deeplinks to navigate in desktop app]).
+ */
+export const passkeyAuthenticationFinishRedirect = () =>
+    `${window.location.origin}/passkeys/finish`;
+
+/**
  * Redirect user to Ente accounts app to authenticate using their second factor,
  * a passkey they've configured.
  *
@@ -29,13 +40,33 @@ export const redirectUserToPasskeyVerificationFlow = (
     passkeySessionID: string,
 ) => {
     const clientPackage = clientPackageName[appName];
-    const redirect = `${window.location.origin}/passkeys/finish`;
+    const redirect = passkeyAuthenticationFinishRedirect();
     const params = new URLSearchParams({
         clientPackage,
         passkeySessionID,
         redirect,
     });
-    window.location.href = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
+    const url = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
+    // [Note: Passkey verification in the desktop app]
+    //
+    // Our desktop app bundles the web app and serves it over a custom protocol.
+    // Passkeys are tied to origins, and will not work with this custom protocol
+    // even if we move the passkey creation and authentication inline to within
+    // the Photos web app.
+    //
+    // Thus, passkey creation and authentication in the desktop app works the
+    // same way it works in the mobile app - the system browser is invoked to
+    // open accounts.ente.io.
+    //
+    // -   For passkey creation, this is a one-way open. Passkeys get created at
+    //     accounts.ente.io, and that's it.
+    //
+    // -   For passkey verification, the flow is two-way. We register a custom
+    //     protocol and provide that as a return path redirect. Passkey
+    //     authentication happens at accounts.ente.io, and on success there is
+    //     redirected back to the desktop app.
+    if (globalThis.electron) window.open(url);
+    else window.location.href = url;
 };
 
 /**

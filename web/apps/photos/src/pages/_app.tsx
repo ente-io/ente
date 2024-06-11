@@ -15,6 +15,7 @@ import {
 } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
+import { passkeyAuthenticationFinishRedirect } from "@ente/accounts/services/passkey";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -167,6 +168,18 @@ export default function App({ Component, pageProps }: AppProps) {
         const electron = globalThis.electron;
         if (!electron) return;
 
+        // Attach various listeners for events sent to us by the Node.js layer.
+        // This is for events that we should listen for always, not just when
+        // the user is logged in.
+
+        const handleOpenURL = (url: string) => {
+            if (url.startsWith(passkeyAuthenticationFinishRedirect())) {
+                router.push(url);
+            } else {
+                log.info(`Ignoring unhandled open request for URL ${url}`);
+            }
+        };
+
         const showUpdateDialog = (update: AppUpdate) => {
             if (update.autoUpdatable) {
                 setDialogMessage(getUpdateReadyToInstallMessage(update));
@@ -182,9 +195,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 });
             }
         };
+
+        electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
-        return () => electron.onAppUpdateAvailable(undefined);
+        return () => {
+            electron.onOpenURL(undefined);
+            electron.onAppUpdateAvailable(undefined);
+        };
     }, []);
 
     useEffect(() => {
