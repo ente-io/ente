@@ -103,8 +103,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                 justifyContent: "center",
                                 alignItems: "center",
                                 zIndex: 2000,
-                                backgroundColor: (theme as any).colors
-                                    .background.base,
+                                backgroundColor: theme.colors.background.base,
                             })}
                         >
                             <EnteSpinner />
