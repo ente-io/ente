@@ -196,6 +196,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
 
     await _logFGHeartBeatInfo();
+    _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
@@ -206,25 +207,48 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
+
     await Configuration.instance.init();
     _logger.info("Configuration done");
+
     await NetworkClient.instance.init();
+    _logger.info("NetworkClient init done");
+
     ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
     await UserService.instance.init();
+    _logger.info("UserService init done");
+
     await EntityService.instance.init();
+    _logger.info("EntityService init done");
+
     LocationService.instance.init(preferences);
     _logger.info("LocationServiceInit done");
 
     await UserRemoteFlagService.instance.init();
+    _logger.info("UserRemoteFlagService init done");
+
     await UpdateService.instance.init();
+    _logger.info("UpdateService init done");
+
     BillingService.instance.init();
+    _logger.info("BillingService init done");
+
     await CollectionsService.instance.init(preferences);
+    _logger.info("CollectionsService init done");
+
     FavoritesService.instance.initFav().ignore();
     await FileUploader.instance.init(preferences, isBackground);
+    _logger.info("FileUploader init done");
+
     await LocalSyncService.instance.init(preferences);
+    _logger.info("LocalSyncService init done");
+
     TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
+
     await SyncService.instance.init(preferences);
+    _logger.info("SyncService init done");
+
     MemoriesService.instance.init(preferences);
     LocalSettings.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
