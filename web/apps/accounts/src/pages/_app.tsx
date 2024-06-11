@@ -1,8 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { appTitle, type AppName, type BaseAppContextT } from "@/next/types/app";
-import { ensure } from "@/utils/ensure";
+import { appTitle, type AppName } from "@/next/types/app";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";
@@ -16,22 +15,15 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { AppContext } from "components/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import "styles/global.css";
 
-/** The accounts app has no extra properties on top of the base context. */
-type AppContextT = BaseAppContextT;
-
-/** The React {@link Context} available to all pages. */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
-
-/** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => ensure(useContext(AppContext));
-
-export default function App({ Component, pageProps }: AppProps) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appName: AppName = "accounts";
 
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
@@ -57,7 +49,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
-        setupI18n().finally(() => setIsI18nReady(true));
+        void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -92,7 +84,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2 as any}
+                    attributes={dialogBoxAttributeV2}
                 />
 
                 <AppContext.Provider value={appContext}>
@@ -103,8 +95,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                 justifyContent: "center",
                                 alignItems: "center",
                                 zIndex: 2000,
-                                backgroundColor: (theme as any).colors
-                                    .background.base,
+                                backgroundColor: theme.colors.background.base,
                             })}
                         >
                             <EnteSpinner />
@@ -116,4 +107,6 @@ export default function App({ Component, pageProps }: AppProps) {
             </ThemeProvider>
         </>
     );
-}
+};
+
+export default App;

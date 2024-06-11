@@ -7,7 +7,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InfoIcon from "@mui/icons-material/Info";
 import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
@@ -50,7 +50,7 @@ const Page = () => {
         // Ensure that redirectURL is whitelisted, otherwise show an invalid
         // "login" URL error to the user.
         if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
-            log.error(`Redirect URL '${redirectURL}' is not whitelisted`);
+            log.error(`Redirect '${redirect}' is not whitelisted`);
             setStatus("unknownRedirect");
             return;
         }

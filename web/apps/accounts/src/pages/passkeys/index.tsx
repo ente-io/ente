@@ -18,8 +18,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
+import { useAppContext } from "components/context";
 import { t } from "i18next";
-import { useAppContext } from "pages/_app";
 import React, { useEffect, useState } from "react";
 import {
     deletePasskey,

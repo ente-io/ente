@@ -25,5 +25,20 @@ module.exports = {
                 ignoreArrowShorthand: true,
             },
         ],
+        /*
+          Allow async functions to be passed as JSX attributes expected to be
+          functions that return void (typically onFoo event handlers).
+
+          This should be safe since we have registered global unhandled Promise
+          handlers.
+         */
+        "@typescript-eslint/no-misused-promises": [
+            "error",
+            {
+                checksVoidReturn: {
+                    attributes: false,
+                },
+            },
+        ],
     },
 };
