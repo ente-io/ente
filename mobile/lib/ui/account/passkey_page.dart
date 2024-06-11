@@ -41,9 +41,11 @@ class _PasskeyPageState extends State<PasskeyPage> {
 
   Future<void> launchPasskey() async {
     await launchUrlString(
-      "https://accounts.ente.io/passkeys/flow?"
+      "https://accounts.ente.io/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
-      "&redirect=ente://passkey",
+      "&redirect=ente://passkey"
+      "&recover=ente://passkey/recover"
+      "&clientPackage=io.ente.photos",
       mode: LaunchMode.externalApplication,
     );
   }

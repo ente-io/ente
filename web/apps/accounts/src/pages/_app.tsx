@@ -11,8 +11,7 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -62,21 +61,6 @@ export default function App({ Component, pageProps }: AppProps) {
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
-
-    const setupPackageName = () => {
-        const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
-        if (!pkg) return;
-        HTTPService.setHeaders({
-            "X-Client-Package": pkg.name,
-        });
-    };
-
-    useEffect(() => {
-        router.events.on("routeChangeComplete", setupPackageName);
-        return () => {
-            router.events.off("routeChangeComplete", setupPackageName);
-        };
-    }, [router.events]);
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 

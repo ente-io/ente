@@ -1,5 +1,6 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
+import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
 import {
@@ -155,6 +156,7 @@ export default function App({ Component, pageProps }: AppProps) {
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
+        setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
             "X-Client-Package": clientPackageName[appName],
         });
@@ -164,6 +166,15 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         const electron = globalThis.electron;
         if (!electron) return;
+
+        // Attach various listeners for events sent to us by the Node.js layer.
+        // This is for events that we should listen for always, not just when
+        // the user is logged in.
+
+        const handleOpenURL = (url: string) => {
+            if (url.startsWith("ente://app")) router.push(url);
+            else log.info(`Ignoring unhandled open request for URL ${url}`);
+        };
 
         const showUpdateDialog = (update: AppUpdate) => {
             if (update.autoUpdatable) {
@@ -180,9 +191,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 });
             }
         };
+
+        electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
-        return () => electron.onAppUpdateAvailable(undefined);
+        return () => {
+            electron.onOpenURL(undefined);
+            electron.onAppUpdateAvailable(undefined);
+        };
     }, []);
 
     useEffect(() => {

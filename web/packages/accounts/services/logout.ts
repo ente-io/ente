@@ -1,4 +1,5 @@
 import { clearBlobCaches } from "@/next/blob-cache";
+import { clearHTTPState } from "@/next/http";
 import log from "@/next/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
@@ -49,5 +50,10 @@ export const accountLogout = async () => {
         await clearBlobCaches();
     } catch (e) {
         ignoreError("cache", e);
+    }
+    try {
+        clearHTTPState();
+    } catch (e) {
+        ignoreError("http", e);
     }
 };

@@ -16,6 +16,9 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale('fr'),
   Locale('it'),
   Locale("nl"),
+  Locale("pt", "BR"),
+  Locale("ru"),
+  Locale("tr"),
   Locale("zh", "CN"),
 ];
 

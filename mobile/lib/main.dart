@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import "dart:isolate";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -187,7 +186,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       if (!initComplete && !isBackground) {
         sendLogsForInit(
           "support@ente.io",
-          "Stuck on splash screen for >= 15 seconds",
+          "Stuck on splash screen for >= 15 seconds on ${Platform.operatingSystem}",
           null,
         );
       }
@@ -364,15 +363,10 @@ Future<void> _killBGTask([String? taskId]) async {
     DateTime.now().microsecondsSinceEpoch,
   );
   final prefs = await SharedPreferences.getInstance();
-
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
-
-  ///Band aid for background process not getting killed. Should migrate to using
-  ///workmanager instead of background_fetch.
-  Isolate.current.kill();
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import "dart:io";
+import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -18,19 +19,8 @@ import 'package:share_plus/share_plus.dart';
 import "package:uuid/uuid.dart";
 
 final _logger = Logger("ShareUtil");
-// Set of possible image extensions
-final _imageExtension = {"jpg", "jpeg", "png", "heic", "heif", "webp", ".gif"};
-final _videoExtension = {
-  "mp4",
-  "mov",
-  "avi",
-  "mkv",
-  "webm",
-  "wmv",
-  "flv",
-  "3gp",
-};
-// share is used to share media/files from ente to other apps
+
+/// share is used to share media/files from ente to other apps
 Future<void> share(
   BuildContext context,
   List<EnteFile> files, {
@@ -62,9 +52,13 @@ Future<void> share(
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
     paths.removeWhere((element) => element == null);
-    final List<String> nonNullPaths = paths.map((element) => element!).toList();
-    return Share.shareFiles(
-      nonNullPaths,
+    final xFiles = <XFile>[];
+    for (String? path in paths) {
+      if (path == null) continue;
+      xFiles.add(XFile(path));
+    }
+    await Share.shareXFiles(
+      xFiles,
       // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
       sharePositionOrigin: shareButtonRect(context, shareButtonKey),
     );
@@ -79,8 +73,10 @@ Future<void> share(
   }
 }
 
+/// Returns the rect of button if context and key are not null
+/// If key is null, returned rect will be at the center of the screen
 Rect shareButtonRect(BuildContext context, GlobalKey? shareButtonKey) {
-  Size size = MediaQuery.of(context).size;
+  Size size = MediaQuery.sizeOf(context);
   final RenderObject? renderObject =
       shareButtonKey?.currentContext?.findRenderObject();
   RenderBox? renderBox;
@@ -99,8 +95,21 @@ Rect shareButtonRect(BuildContext context, GlobalKey? shareButtonKey) {
   );
 }
 
-Future<void> shareText(String text) async {
-  return Share.share(text);
+Future<ShareResult> shareText(
+  String text, {
+  BuildContext? context,
+  GlobalKey? key,
+}) async {
+  try {
+    final sharePosOrigin = _sharePosOrigin(context, key);
+    return Share.share(
+      text,
+      sharePositionOrigin: sharePosOrigin,
+    );
+  } catch (e, s) {
+    _logger.severe("failed to share text", e, s);
+    return ShareResult.unavailable;
+  }
 }
 
 Future<List<EnteFile>> convertIncomingSharedMediaToFile(
@@ -217,4 +226,38 @@ void shareSelected(
     selectedFiles.toList(),
     shareButtonKey: shareButtonKey,
   );
+}
+
+Future<void> shareImageAndUrl(
+  Uint8List imageBytes,
+  String url, {
+  BuildContext? context,
+  GlobalKey? key,
+}) async {
+  final sharePosOrigin = _sharePosOrigin(context, key);
+  await Share.shareXFiles(
+    [
+      XFile.fromData(
+        imageBytes,
+        name: 'placeholder_image.png',
+        mimeType: 'image/png',
+      ),
+    ],
+    text: url,
+    sharePositionOrigin: sharePosOrigin,
+  );
+}
+
+/// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
+/// This returns the position of the share button if context and key are not null
+/// and if not, it returns a default position so that the share sheet on iPad has
+/// some position to show up.
+Rect _sharePosOrigin(BuildContext? context, GlobalKey? key) {
+  late final Rect rect;
+  if (context != null) {
+    rect = shareButtonRect(context, key);
+  } else {
+    rect = const Offset(20.0, 20.0) & const Size(10, 10);
+  }
+  return rect;
 }
