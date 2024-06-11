@@ -74,7 +74,7 @@ func NewClient(p Params) *Client {
 			SetRetryWaitTime(5 * time.Second).
 			SetRetryMaxWaitTime(10 * time.Second).
 			AddRetryCondition(func(r *resty.Response, err error) bool {
-				shouldRetry := r.StatusCode() == 429 || r.StatusCode() > 500
+				shouldRetry := r.StatusCode() == 429 || r.StatusCode() >= 500
 				if shouldRetry {
 					log.Printf("retrying download due to %d code", r.StatusCode())
 				}
