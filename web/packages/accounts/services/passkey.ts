@@ -29,6 +29,13 @@ export const redirectUserToPasskeyVerificationFlow = (
     passkeySessionID: string,
 ) => {
     const clientPackage = clientPackageName[appName];
+    const redirect = `${window.location.origin}/passkeys/finish`;
+    const params = new URLSearchParams({
+        clientPackage,
+        passkeySessionID,
+        redirect,
+    });
+    const url = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
     // [Note: Passkey verification in the desktop app]
     //
     // Our desktop app bundles the web app and serves it over a custom protocol.
@@ -47,16 +54,6 @@ export const redirectUserToPasskeyVerificationFlow = (
     //     protocol and provide that as a return path redirect. Passkey
     //     authentication happens at accounts.ente.io, and on success there is
     //     redirected back to the desktop app.
-    const redirectOrigin = globalThis.electron
-        ? "ente://"
-        : window.location.origin;
-    const redirect = `${redirectOrigin}/passkeys/finish`;
-    const params = new URLSearchParams({
-        clientPackage,
-        passkeySessionID,
-        redirect,
-    });
-    const url = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
     if (globalThis.electron) window.open(url);
     else window.location.href = url;
 };
