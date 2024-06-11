@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import { clientPackageHeaderIfPresent } from "@/next/http";
+import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -9,7 +10,6 @@ import {
     toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
 import { apiOrigin } from "@ente/shared/network/api";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -19,19 +19,15 @@ export const isWebAuthnSupported = () => !!navigator.credentials;
  * Variant of {@link authenticatedRequestHeaders} but for authenticated requests
  * made by the accounts app.
  *
- * We cannot use {@link authenticatedRequestHeaders} directly because the
- * accounts app does not save a full user and instead only saves the user's
- * token (and that token too is scoped to the accounts APIs).
+ * @param token The accounts specific auth token to use for making API requests.
  */
-const accountsAuthenticatedRequestHeaders = (): Record<string, string> => {
-    const token = getToken();
-    if (!token) throw new Error("Missing accounts token");
-    const headers: Record<string, string> = { "X-Auth-Token": token };
-    const clientPackage = nullToUndefined(
-        localStorage.getItem("clientPackage"),
-    );
-    if (clientPackage) headers["X-Client-Package"] = clientPackage;
-    return headers;
+const accountsAuthenticatedRequestHeaders = (
+    token: string,
+): Record<string, string> => {
+    return {
+        "X-Auth-Token": token,
+        "X-Client-Package": clientPackageName.accounts,
+    };
 };
 
 const Passkey = z.object({
@@ -57,13 +53,15 @@ const GetPasskeysResponse = z.object({
 /**
  * Fetch the existing passkeys for the user.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @returns An array of {@link Passkey}s. The array will be empty if the user
  * has no passkeys.
  */
-export const getPasskeys = async () => {
+export const getPasskeys = async (token: string) => {
     const url = `${apiOrigin()}/passkeys`;
     const res = await fetch(url, {
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
@@ -73,16 +71,22 @@ export const getPasskeys = async () => {
 /**
  * Rename one of the user's existing passkey with the given {@link id}.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @param id The `id` of the existing passkey to rename.
  *
  * @param name The new name (a.k.a. "friendly name").
  */
-export const renamePasskey = async (id: string, name: string) => {
+export const renamePasskey = async (
+    token: string,
+    id: string,
+    name: string,
+) => {
     const params = new URLSearchParams({ friendlyName: name });
     const url = `${apiOrigin()}/passkeys/${id}`;
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "PATCH",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 };
@@ -90,13 +94,15 @@ export const renamePasskey = async (id: string, name: string) => {
 /**
  * Delete one of the user's existing passkeys.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @param id The `id` of the existing passkey to delete.
  */
-export const deletePasskey = async (id: string) => {
+export const deletePasskey = async (token: string, id: string) => {
     const url = `${apiOrigin()}/passkeys/${id}`;
     const res = await fetch(url, {
         method: "DELETE",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 };
@@ -104,12 +110,14 @@ export const deletePasskey = async (id: string) => {
 /**
  * Add a new passkey as the second factor to the user's account.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @param name An arbitrary name that the user wishes to label this passkey with
  * (a.k.a. "friendly name").
  */
-export const registerPasskey = async (name: string) => {
+export const registerPasskey = async (token: string, name: string) => {
     // Get options (and sessionID) from the backend.
-    const { sessionID, options } = await beginPasskeyRegistration();
+    const { sessionID, options } = await beginPasskeyRegistration(token);
 
     // Ask the browser to new (public key) credentials using these options.
     const credential = ensure(await navigator.credentials.create(options));
@@ -117,6 +125,7 @@ export const registerPasskey = async (name: string) => {
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.
     await finishPasskeyRegistration({
+        token,
         friendlyName: name,
         sessionID,
         credential,
@@ -140,11 +149,11 @@ interface BeginPasskeyRegistrationResponse {
     };
 }
 
-const beginPasskeyRegistration = async () => {
+const beginPasskeyRegistration = async (token: string) => {
     const url = `${apiOrigin()}/passkeys/registration/begin`;
     const res = await fetch(url, {
         method: "POST",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
 
@@ -262,12 +271,14 @@ const binaryToServerB64 = async (b: ArrayBuffer) => {
 };
 
 interface FinishPasskeyRegistrationOptions {
+    token: string;
     sessionID: string;
     friendlyName: string;
     credential: Credential;
 }
 
 const finishPasskeyRegistration = async ({
+    token,
     sessionID,
     friendlyName,
     credential,
@@ -286,7 +297,7 @@ const finishPasskeyRegistration = async ({
     const url = `${apiOrigin()}/passkeys/registration/finish`;
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
         body: JSON.stringify({
             id: credential.id,
             // This is meant to be the ArrayBuffer version of the (base64
