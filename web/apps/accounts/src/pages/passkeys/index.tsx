@@ -41,20 +41,26 @@ const Page: React.FC = () => {
 
     const router = useRouter();
 
-    const refreshPasskeys = async () => {
-        try {
-            setPasskeys(await getPasskeys());
-        } catch (e) {
-            log.error("Failed to fetch passkeys", e);
-            setDialogBoxAttributesV2({
-                title: t("ERROR"),
-                content: t("passkey_fetch_failed"),
-                close: {},
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const clientPackage = urlParams.get("client");
+        if (clientPackage) {
+            // TODO-PK: mobile is not passing it. is that expected?
+            localStorage.setItem("clientPackage", clientPackage);
+            setClientPackageForAuthenticatedRequests(clientPackage);
+            HTTPService.setHeaders({
+                "X-Client-Package": clientPackage,
             });
         }
-    };
 
-    useEffect(() => {
+        const token = urlParams.get("token");
+        if (!token) {
+            log.error("Missing accounts token");
+            router.push("/login");
+            return;
+        }
+
         if (!getToken()) {
             router.push("/login");
             return;
@@ -63,6 +69,23 @@ const Page: React.FC = () => {
         showNavBar(true);
         void refreshPasskeys();
     }, []);
+
+    const refreshPasskeys = async () => {
+        try {
+            setPasskeys(await getPasskeys());
+        } catch (e) {
+            log.error("Failed to fetch passkeys", e);
+            showPasskeyFetchFailedErrorDialog();
+        }
+    };
+
+    const showPasskeyFetchFailedErrorDialog = () => {
+        setDialogBoxAttributesV2({
+            title: t("ERROR"),
+            content: t("passkey_fetch_failed"),
+            close: {},
+        });
+    };
 
     const handleSelectPasskey = (passkey: Passkey) => {
         setSelectedPasskey(passkey);

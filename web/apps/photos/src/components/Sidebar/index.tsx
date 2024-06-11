@@ -428,7 +428,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
     const appContext = useContext(AppContext);
     const {
-        appName,
         setDialogMessage,
         startLoading,
         watchFolderView,
@@ -473,7 +472,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         closeSidebar();
 
         try {
-            await openAccountsManagePasskeysPage(appName);
+            await openAccountsManagePasskeysPage();
         } catch (e) {
             log.error("failed to redirect to accounts page", e);
         }
