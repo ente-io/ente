@@ -3,10 +3,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/dialog_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import "package:pinput/pin_put/pin_put.dart";
 
 class LockScreenOptionConfirmPin extends StatefulWidget {
@@ -22,7 +19,6 @@ class _LockScreenOptionConfirmPinState
   final _confirmPinController = TextEditingController(text: null);
   final Configuration _configuration = Configuration.instance;
   final _focusNode = FocusNode();
-
   final _pinPutDecoration = BoxDecoration(
     border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
     borderRadius: BorderRadius.circular(15.0),
@@ -47,39 +43,9 @@ class _LockScreenOptionConfirmPinState
   Future<void> _confirmPinMatch() async {
     if (widget.pin == _confirmPinController.text) {
       await _configuration.savePin(_confirmPinController.text);
-      await showDialogWidget(
-        context: context,
-        title: 'Pin has been set',
-        icon: Icons.lock,
-        body: 'Hereafter pin has been required while opening the app.',
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.secondary,
-            labelText: S.of(context).ok,
-            isInAlert: true,
-            buttonAction: ButtonAction.first,
-          ),
-        ],
-      );
+
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
-    } else {
-      await showDialogWidget(
-        context: context,
-        title: 'Pin does not match',
-        icon: Icons.lock,
-        body: 'Please re-enter the pin.',
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.secondary,
-            labelText: S.of(context).ok,
-            isInAlert: true,
-            buttonAction: ButtonAction.first,
-          ),
-        ],
-      );
     }
     _confirmPinController.clear();
   }

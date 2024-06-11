@@ -3,10 +3,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/dialog_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 
 class LockScreenOptionConfirmPassword extends StatefulWidget {
@@ -26,6 +23,7 @@ class _LockScreenOptionConfirmPasswordState
   final _confirmPasswordController = TextEditingController(text: null);
   final Configuration _configuration = Configuration.instance;
   final _focusNode = FocusNode();
+  final _isFormValid = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -38,46 +36,16 @@ class _LockScreenOptionConfirmPasswordState
 
   @override
   void dispose() {
-    _focusNode.dispose();
     super.dispose();
+    _focusNode.dispose();
   }
 
   Future<void> _confirmPasswordMatch() async {
     if (widget.password == _confirmPasswordController.text) {
       await _configuration.savePassword(_confirmPasswordController.text);
-      await showDialogWidget(
-        context: context,
-        title: 'Password has been set',
-        icon: Icons.lock,
-        body: 'Hereafter password has been required while opening the app.',
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.secondary,
-            labelText: S.of(context).ok,
-            isInAlert: true,
-            buttonAction: ButtonAction.first,
-          ),
-        ],
-      );
+
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
-    } else {
-      await showDialogWidget(
-        context: context,
-        title: 'Password does not match',
-        icon: Icons.lock,
-        body: 'Please re-enter the password.',
-        isDismissible: true,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.secondary,
-            labelText: S.of(context).ok,
-            isInAlert: true,
-            buttonAction: ButtonAction.first,
-          ),
-        ],
-      );
     }
     _confirmPasswordController.clear();
   }
@@ -110,13 +78,18 @@ class _LockScreenOptionConfirmPasswordState
           ),
         ),
       ),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        buttonText: S.of(context).confirm,
-        isFormValid: _confirmPasswordController.text.isNotEmpty,
-        onPressedFunction: () async {
-          await _confirmPasswordMatch();
-          FocusScope.of(context).unfocus();
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _isFormValid,
+        builder: (context, isFormValid, child) {
+          return DynamicFAB(
+            isKeypadOpen: isKeypadOpen,
+            buttonText: S.of(context).confirm,
+            isFormValid: isFormValid,
+            onPressedFunction: () async {
+              await _confirmPasswordMatch();
+              FocusScope.of(context).unfocus();
+            },
+          );
         },
       ),
       floatingActionButtonLocation: fabLocation(),
@@ -173,6 +146,10 @@ class _LockScreenOptionConfirmPasswordState
                 textEditingController: _confirmPasswordController,
                 prefixIcon: Icons.lock_outline,
                 isPasswordInput: true,
+                onChange: (p0) {
+                  _isFormValid.value =
+                      _confirmPasswordController.text.isNotEmpty;
+                },
               ),
             ),
           ],

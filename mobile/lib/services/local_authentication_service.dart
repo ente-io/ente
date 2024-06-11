@@ -3,10 +3,6 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/generated/l10n.dart";
-import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/dialog_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_password.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_pin.dart";
 import 'package:photos/ui/tools/app_lock.dart';
@@ -58,23 +54,6 @@ class LocalAuthenticationService {
       );
       if (result) {
         return true;
-      } else {
-        await showDialogWidget(
-          context: context,
-          title: 'Password does not match',
-          icon: Icons.lock,
-          body: 'Please re-enter the password.',
-          isDismissible: true,
-          buttons: [
-            ButtonWidget(
-              buttonType: ButtonType.secondary,
-              labelText: S.of(context).ok,
-              isInAlert: true,
-              buttonAction: ButtonAction.first,
-            ),
-          ],
-        );
-        return false;
       }
     }
     if (savedPin != null) {
@@ -90,23 +69,6 @@ class LocalAuthenticationService {
       );
       if (result) {
         return true;
-      } else {
-        await showDialogWidget(
-          context: context,
-          title: 'Pin does not match',
-          icon: Icons.lock,
-          body: 'Please re-enter the pin.',
-          isDismissible: true,
-          buttons: [
-            ButtonWidget(
-              buttonType: ButtonType.secondary,
-              labelText: S.of(context).ok,
-              isInAlert: true,
-              buttonAction: ButtonAction.first,
-            ),
-          ],
-        );
-        return false;
       }
     }
     return false;

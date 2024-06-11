@@ -23,6 +23,7 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import "package:photos/ui/settings/TEMP/lock_screen_option.dart";
 import 'package:photos/ui/settings/common_settings.dart';
+import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -145,13 +146,20 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           title: 'App lock',
         ),
         onTap: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return const LockScreenOption();
-              },
-            ),
+          final bool result = await requestAuthentication(
+            context,
+            S.of(context).authToChangeLockscreenSetting,
           );
+
+          if (result) {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const LockScreenOption();
+                },
+              ),
+            );
+          }
         },
       ),
       // MenuItemWidget(

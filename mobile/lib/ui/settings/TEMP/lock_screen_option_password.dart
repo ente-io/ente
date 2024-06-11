@@ -22,6 +22,7 @@ class LockScreenOptionPassword extends StatefulWidget {
 class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   final _passwordController = TextEditingController(text: null);
   final _focusNode = FocusNode();
+  final _isFormValid = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   void dispose() {
     super.dispose();
     _focusNode.dispose();
+    _isFormValid.dispose();
   }
 
   Future<bool> confirmPasswordAuth(String code) async {
@@ -91,13 +93,18 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
           ),
         ),
       ),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        buttonText: S.of(context).ok,
-        isFormValid: _passwordController.text.isNotEmpty,
-        onPressedFunction: () async {
-          await _confirmPassword();
-          FocusScope.of(context).unfocus();
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _isFormValid,
+        builder: (context, isFormValid, child) {
+          return DynamicFAB(
+            isKeypadOpen: isKeypadOpen,
+            buttonText: S.of(context).ok,
+            isFormValid: isFormValid,
+            onPressedFunction: () async {
+              await _confirmPassword();
+              FocusScope.of(context).unfocus();
+            },
+          );
         },
       ),
       floatingActionButtonLocation: fabLocation(),
@@ -155,6 +162,9 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
                 textEditingController: _passwordController,
                 prefixIcon: Icons.lock_outline,
                 isPasswordInput: true,
+                onChange: (p0) {
+                  _isFormValid.value = _passwordController.text.isNotEmpty;
+                },
               ),
             ),
           ],
