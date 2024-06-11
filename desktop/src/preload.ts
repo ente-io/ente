@@ -77,6 +77,11 @@ const onMainWindowFocus = (cb?: () => void) => {
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
 };
 
+const onOpenURL = (cb?: (url: string) => void) => {
+    ipcRenderer.removeAllListeners("openURL");
+    if (cb) ipcRenderer.on("openURL", (_, url: string) => cb(url));
+};
+
 // - App update
 
 const onAppUpdateAvailable = (
@@ -307,6 +312,7 @@ contextBridge.exposeInMainWorld("electron", {
     encryptionKey,
     saveEncryptionKey,
     onMainWindowFocus,
+    onOpenURL,
 
     // - App update
 

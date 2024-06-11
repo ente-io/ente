@@ -167,6 +167,17 @@ export default function App({ Component, pageProps }: AppProps) {
         const electron = globalThis.electron;
         if (!electron) return;
 
+        // Attach various listeners for events sent to us by the Node.js layer.
+        // This is for events that we should listen for always, not just when
+        // the user is logged in.
+
+        const handleOpenURL = (url: string) => {
+            // `url` begins with "ente://", which is also the scheme our desktop
+            // app uses to serve the bundled web app, so it can be directly
+            // opened.
+            window.location.href = url;
+        };
+
         const showUpdateDialog = (update: AppUpdate) => {
             if (update.autoUpdatable) {
                 setDialogMessage(getUpdateReadyToInstallMessage(update));
@@ -182,9 +193,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 });
             }
         };
+
+        electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
-        return () => electron.onAppUpdateAvailable(undefined);
+        return () => {
+            electron.onOpenURL(undefined);
+            electron.onAppUpdateAvailable(undefined);
+        };
     }, []);
 
     useEffect(() => {

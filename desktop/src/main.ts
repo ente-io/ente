@@ -150,10 +150,13 @@ const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
 
 /** Sibling of {@link registerForEnteLinks}. */
 const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
-    // Both (a) our deeplink protocol, and (b) the protocol we're using to serve
-    // our bundled web app, are the same ("ente://"), so the URL can directly be
-    // loaded.
-    mainWindow.webContents.loadURL(url);
+    // Both
+    //
+    // - our deeplink protocol, and
+    // - the protocol we're using to serve/ our bundled web app
+    //
+    // use the same scheme ("ente://"), so the URL can directly be forwarded.
+    mainWindow.webContents.send("openURL", url);
 };
 
 /**
