@@ -138,6 +138,22 @@ const registerPrivilegedSchemes = () => {
 };
 
 /**
+ * Register a handler for deeplinks, for the "ente://" protocol.
+ *
+ * See: [Note: Passkey verification in the desktop app].
+ *
+ * Implementation notes:
+ * -   https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
+ * -   This works only when the app is packaged.
+ */
+const handleEnteLinks = () => {
+    app.setAsDefaultProtocolClient("ente");
+    app.on("open-url", (_, url) => {
+        log.info(`open-url: ${url}`);
+    });
+};
+
+/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
@@ -451,6 +467,7 @@ const main = () => {
 
     initLogging();
     logStartupBanner();
+    handleEnteLinks();
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
