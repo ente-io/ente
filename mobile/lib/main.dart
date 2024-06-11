@@ -209,44 +209,59 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
+
+    _logger.info("Configuration init");
     await Configuration.instance.init();
     _logger.info("Configuration done");
 
+    _logger.info("NetworkClient init");
     await NetworkClient.instance.init();
     _logger.info("NetworkClient init done");
 
     ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
+
+    _logger.info("UserService init");
     await UserService.instance.init();
     _logger.info("UserService init done");
 
+    _logger.info("EntityService init");
     await EntityService.instance.init();
     _logger.info("EntityService init done");
 
+    _logger.info("LocationService init");
     LocationService.instance.init(preferences);
-    _logger.info("LocationServiceInit done");
+    _logger.info("LocationService init done");
 
+    _logger.info("UserRemoteFlagService init");
     await UserRemoteFlagService.instance.init();
     _logger.info("UserRemoteFlagService init done");
 
+    _logger.info("UpdateService init");
     await UpdateService.instance.init();
     _logger.info("UpdateService init done");
 
+    _logger.info("BillingService init");
     BillingService.instance.init();
     _logger.info("BillingService init done");
 
+    _logger.info("CollectionsService init");
     await CollectionsService.instance.init(preferences);
     _logger.info("CollectionsService init done");
 
     FavoritesService.instance.initFav().ignore();
+
+    _logger.info("FileUploader init");
     await FileUploader.instance.init(preferences, isBackground);
     _logger.info("FileUploader init done");
 
+    _logger.info("LocalSyncService init");
     await LocalSyncService.instance.init(preferences);
     _logger.info("LocalSyncService init done");
 
     TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
 
+    _logger.info("SyncService init");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done");
 
