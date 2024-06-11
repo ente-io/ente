@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_svg/flutter_svg.dart";
+import "package:photos/ente_theme_data.dart";
 
 class VideoEditorBottomAction extends StatelessWidget {
   const VideoEditorBottomAction({
@@ -30,15 +31,11 @@ class VideoEditorBottomAction extends StatelessWidget {
             height: 48,
             width: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFFF5F5F5)
-                  : const Color(0xFF252525),
+              color: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected
-                    ? Theme.of(context).brightness == Brightness.light
-                        ? const Color(0xFF424242)
-                        : const Color(0xFFFFFFFF)
+                    ? Theme.of(context).colorScheme.videoPlayerBorderColor
                     : Colors.transparent,
                 width: 1,
               ),

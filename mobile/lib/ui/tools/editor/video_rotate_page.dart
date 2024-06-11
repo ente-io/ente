@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/ente_theme_data.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
@@ -51,6 +52,7 @@ class VideoRotatePage extends StatelessWidget {
             ),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
+              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
               secondaryText: "Done",
               onPrimaryPressed: () {
                 while (controller.rotation != rotation) {

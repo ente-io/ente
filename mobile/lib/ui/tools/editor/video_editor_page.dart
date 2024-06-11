@@ -12,6 +12,7 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
@@ -65,15 +66,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         trimStyle: TrimSliderStyle(
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-          background: Theme.of(context).brightness == Brightness.light
-              ? const Color(0xFFF5F5F5)
-              : const Color(0xFF252525),
-          positionLineColor: Theme.of(context).brightness == Brightness.light
-              ? const Color(0xFF424242)
-              : const Color(0xFFFFFFFF),
-          lineColor: (Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF424242)
-                  : const Color(0xFFFFFFFF))
+          background: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
+          positionLineColor:
+              Theme.of(context).colorScheme.videoPlayerBorderColor,
+          lineColor: Theme.of(context)
+              .colorScheme
+              .videoPlayerBorderColor
               .withOpacity(0.6),
         ),
       );
@@ -173,6 +171,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               ),
                               const SizedBox(height: 40),
                               VideoEditorNavigationOptions(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .videoPlayerPrimaryColor,
                                 secondaryText: "Save copy",
                                 onSecondaryPressed: () {
                                   exportVideo();
@@ -232,12 +233,24 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             final AssetEntity? newAsset =
                 await (PhotoManager.editor.saveVideo(result, title: fileName));
             result.deleteSync();
-            (await newAsset?.file)
-                ?.setLastModifiedSync(widget.ioFile.lastModifiedSync());
             final newFile = await EnteFile.fromAsset(
               widget.file.deviceFolder ?? '',
               newAsset!,
             );
+
+            newFile.creationTime = widget.file.creationTime;
+            newFile.collectionID = widget.file.collectionID;
+            newFile.location = widget.file.location;
+            if (!newFile.hasLocation && widget.file.localID != null) {
+              final assetEntity = await widget.file.getAsset;
+              if (assetEntity != null) {
+                final latLong = await assetEntity.latlngAsync();
+                newFile.location = Location(
+                  latitude: latLong.latitude,
+                  longitude: latLong.longitude,
+                );
+              }
+            }
 
             newFile.generatedID =
                 await FilesDB.instance.insertAndGetId(widget.file);

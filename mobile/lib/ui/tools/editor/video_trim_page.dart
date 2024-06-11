@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/ente_theme_data.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import 'package:video_editor/video_editor.dart';
@@ -42,6 +43,7 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             ..._trimSlider(),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
+              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
               secondaryText: "Done",
               onPrimaryPressed: () {
                 // reset trim
