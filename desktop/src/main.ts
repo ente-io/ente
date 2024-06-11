@@ -146,11 +146,13 @@ const registerPrivilegedSchemes = () => {
  * -   https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
  * -   This works only when the app is packaged.
  */
-const handleEnteLinks = () => {
-    app.setAsDefaultProtocolClient("ente");
-    app.on("open-url", (_, url) => {
-        log.info(`open-url: ${url}`);
-    });
+const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
+
+/** Sibling of {@link registerForEnteLinks}. */
+const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
+    // Replace "ente://" (our deeplink protocol) in the url with "next://" (the
+    // protocol we're using to serve our bundled web app).
+    mainWindow.webContents.loadURL(url.replace("ente://", "next://"));
 };
 
 /**
@@ -467,7 +469,7 @@ const main = () => {
 
     initLogging();
     logStartupBanner();
-    handleEnteLinks();
+    registerForEnteLinks();
     // The order of the next two calls is important
     setupRendererServer();
     registerPrivilegedSchemes();
@@ -530,6 +532,13 @@ const main = () => {
         if (mainWindow) saveWindowBounds(mainWindow);
         allowWindowClose();
     });
+
+    const handleOpenURLWithWindow = (url: string) => {
+        log.info(`Attempting to handle request to open URL: ${url}`);
+        if (mainWindow) handleEnteLinks(mainWindow, url);
+        else setTimeout(() => handleOpenURLWithWindow(url), 1000);
+    };
+    app.on("open-url", (_, url) => handleOpenURLWithWindow(url));
 };
 
 main();
