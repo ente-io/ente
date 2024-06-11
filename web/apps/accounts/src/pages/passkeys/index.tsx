@@ -45,15 +45,19 @@ const Page: React.FC = () => {
         const urlParams = new URLSearchParams(window.location.search);
 
         const token = urlParams.get("token");
-        if (!token) {
+        if (token) {
+            setToken(token);
+        } else {
             log.error("Missing accounts token");
             showPasskeyFetchFailedErrorDialog();
-            return;
         }
-
-        setToken(token);
-        void refreshPasskeys();
     }, []);
+
+    useEffect(() => {
+        if (token) {
+            void refreshPasskeys();
+        }
+    }, [token]);
 
     const refreshPasskeys = async () => {
         try {
@@ -141,15 +145,14 @@ const Page: React.FC = () => {
                     </Box>
                 </Box>
             </CenteredFlex>
-            {token && (
-                <ManagePasskeyDrawer
-                    open={showPasskeyDrawer}
-                    onClose={handleDrawerClose}
-                    passkey={selectedPasskey}
-                    token={token}
-                    onUpdateOrDeletePasskey={handleUpdateOrDeletePasskey}
-                />
-            )}
+
+            <ManagePasskeyDrawer
+                open={showPasskeyDrawer}
+                onClose={handleDrawerClose}
+                passkey={selectedPasskey}
+                token={token}
+                onUpdateOrDeletePasskey={handleUpdateOrDeletePasskey}
+            />
         </>
     );
 };
