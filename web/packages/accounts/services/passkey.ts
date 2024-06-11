@@ -13,6 +13,17 @@ import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
+ * Return a URL that can be passed to the accounts app to serve as the redirect
+ * back to us on successful passkey authentication.
+ *
+ * The returned URL begins with `window.location.origin` and will work both when
+ * we're running in a web browser (of course), but also in the desktop app
+ * (See: [Note: Using deeplinks to navigate in desktop app]).
+ */
+export const passkeyAuthenticationFinishRedirect = () =>
+    `${window.location.origin}/passkeys/finish`;
+
+/**
  * Redirect user to Ente accounts app to authenticate using their second factor,
  * a passkey they've configured.
  *
@@ -29,7 +40,7 @@ export const redirectUserToPasskeyVerificationFlow = (
     passkeySessionID: string,
 ) => {
     const clientPackage = clientPackageName[appName];
-    const redirect = `${window.location.origin}/passkeys/finish`;
+    const redirect = passkeyAuthenticationFinishRedirect();
     const params = new URLSearchParams({
         clientPackage,
         passkeySessionID,

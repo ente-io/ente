@@ -150,6 +150,8 @@ const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
 
 /** Sibling of {@link registerForEnteLinks}. */
 const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
+    // [Note: Using deeplinks to navigate in desktop app]
+    //
     // Both
     //
     // - our deeplink protocol, and

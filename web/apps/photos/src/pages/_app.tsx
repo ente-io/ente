@@ -15,6 +15,7 @@ import {
 } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
+import { passkeyAuthenticationFinishRedirect } from "@ente/accounts/services/passkey";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -172,10 +173,8 @@ export default function App({ Component, pageProps }: AppProps) {
         // the user is logged in.
 
         const handleOpenURL = (url: string) => {
-            // `url` begins with "ente://", which is also the scheme our desktop
-            // app uses to serve the bundled web app, so it can be directly
-            // opened.
-            window.location.href = url;
+            if (url == passkeyAuthenticationFinishRedirect()) router.push(url);
+            else log.info(`Ignoring unhandled open request for URL ${url}`);
         };
 
         const showUpdateDialog = (update: AppUpdate) => {
