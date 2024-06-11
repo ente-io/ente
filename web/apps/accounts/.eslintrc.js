@@ -6,7 +6,6 @@ module.exports = {
         "react/react-in-jsx-scope": "off",
         "react/prop-types": "off",
         "react-hooks/exhaustive-deps": "off",
-        "@typescript-eslint/no-misused-promises": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "react-refresh/only-export-components": "off",
     },
