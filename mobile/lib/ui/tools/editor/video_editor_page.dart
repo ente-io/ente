@@ -4,7 +4,6 @@ import "dart:math";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
-import "package:pedantic/pedantic.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -253,10 +252,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             }
 
             newFile.generatedID =
-                await FilesDB.instance.insertAndGetId(widget.file);
+                await FilesDB.instance.insertAndGetId(newFile);
             Bus.instance
                 .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-            unawaited(SyncService.instance.sync());
+            SyncService.instance.sync().ignore();
             showShortToast(context, S.of(context).editsSaved);
             _logger.info("Original file " + widget.file.toString());
             _logger.info("Saved edits to file " + newFile.toString());
