@@ -13,15 +13,15 @@ import (
 const ValidForDays = 1
 
 func (c *UserController) GetJWTToken(userID int64, scope enteJWT.ClaimScope) (string, error) {
-	tokenExpirty := time.NDaysFromNow(1)
+	tokenExpiry := time.NDaysFromNow(1)
 	if scope == enteJWT.ACCOUNTS {
-		tokenExpirty = time.NMinFromNow(30)
+		tokenExpiry = time.NMinFromNow(30)
 	}
 	// Create a new token object, specifying signing method and the claims
 	// you would like it to contain.
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &enteJWT.WebCommonJWTClaim{
 		UserID:     userID,
-		ExpiryTime: tokenExpirty,
+		ExpiryTime: tokenExpiry,
 		ClaimScope: &scope,
 	})
 	// Sign and get the complete encoded token as a string using the secret
