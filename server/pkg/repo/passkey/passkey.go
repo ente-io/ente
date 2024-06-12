@@ -167,6 +167,16 @@ func (r *Repository) GetUserIDWithPasskeyTwoFactorSession(sessionID string) (use
 	return
 }
 
+// StoreTokenData takes a sessionID, and tokenData, and updates the tokenData in the database
+func (r *Repository) StoreTokenData(sessionID string, tokenData ente.TwoFactorAuthorizationResponse) error {
+	tokenDataJson, err := json.Marshal(tokenData)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	_, err = r.DB.Exec(`UPDATE passkey_login_sessions SET token_data = $1, verified_at = now_utc_micro_seconds() WHERE session_id = $2`, tokenDataJson, sessionID)
+	return stacktrace.Propagate(err, "")
+}
+
 func (r *Repository) CreateBeginAuthenticationData(user *ente.User) (options *protocol.CredentialAssertion, session *webauthn.SessionData, id uuid.UUID, err error) {
 	passkeyUser := &PasskeyUser{
 		User: user,

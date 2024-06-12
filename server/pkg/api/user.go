@@ -374,6 +374,12 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
+	err = h.UserController.PasskeyRepo.StoreTokenData(request.SessionID, response)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to store token data"))
+		return
+	}
+
 	c.JSON(http.StatusOK, response)
 }
 
