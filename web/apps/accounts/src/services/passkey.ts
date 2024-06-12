@@ -521,25 +521,24 @@ const authenticatorAssertionResponse = (credential: Credential) => {
 };
 
 /**
- * Redirect back to the calling app that initiated the passkey authentication
- * flow with the result of the authentication.
+ * Create a redirection URL to get back to the calling app that initiated the
+ * passkey authentication flow with the result of the authentication.
  *
- * @param redirectURL The URL to redirect to. Provided by the calling app that
- * initiated the passkey authentication.
+ * @param redirectURL The base URL to redirect to. Provided by the calling app
+ * that initiated the passkey authentication.
  *
  * @param twoFactorAuthorizationResponse The result of
  * {@link finishPasskeyAuthentication} returned by the backend.
  */
-export const redirectAfterPasskeyAuthentication = async (
+export const redirectURLWithPasskeyAuthentication = async (
     redirectURL: URL,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
     const encodedResponse = await toB64URLSafeNoPaddingString(
         JSON.stringify(twoFactorAuthorizationResponse),
     );
-
     redirectURL.searchParams.set("response", encodedResponse);
-    window.location.href = redirectURL.href;
+    return redirectURL;
 };
 
 /**
