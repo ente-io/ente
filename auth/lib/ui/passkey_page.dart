@@ -8,6 +8,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -61,6 +62,11 @@ class _PasskeyPageState extends State<PasskeyPage> {
     }
     try {
       if (mounted && link.toLowerCase().startsWith("enteauth://passkey")) {
+        if (Configuration.instance.isLoggedIn()) {
+          _logger.info('ignored deeplink: already configured');
+          showToast(context, 'Account is already configured.');
+          return;
+        }
         final String? uri = Uri.parse(link).queryParameters['response'];
         String base64String = uri!.toString();
         while (base64String.length % 4 != 0) {
