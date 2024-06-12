@@ -32,13 +32,14 @@ const Page = () => {
         | "unrecoverableFailure" /* Unrocevorable error - generic */
         | "failed" /* Recoverable error */
         | "waitingForUser" /* ...to authenticate with their passkey */
-        | "redirecting"; /* The user back to the calling app */
+        | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
+        | "redirectingApp"; /* Other redirects (mobile / desktop redirect) */
 
     const [status, setStatus] = useState<Status>("loading");
 
     // The URL we're redirecting to on success.
     //
-    // This will only be set when status is "redirecting".
+    // This will only be set when status is "redirecting*".
     const [redirectURLWithData, setRedirectURLWithData] = useState<
         URL | undefined
     >();
@@ -116,7 +117,7 @@ const Page = () => {
             return;
         }
 
-        setStatus("redirecting");
+        setStatus(isHTTP(redirectURL) ? "redirectingWeb" : "redirectingApp");
 
         setRedirectURLWithData(
             await redirectURLWithPasskeyAuthentication(
@@ -159,13 +160,16 @@ const Page = () => {
             <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
         ),
         waitingForUser: <WaitingForUser />,
-        redirecting: <Redirecting onRetry={handleRedirectAgain} />,
+        redirectingWeb: <RedirectingWeb />,
+        redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
     return components[status];
 };
 
 export default Page;
+
+const isHTTP = (url: URL) => url.protocol == "http" || url.protocol == "https";
 
 const redirectToURL = (url: URL) => {
     log.info(`Redirecting to ${url.href}`);
@@ -310,12 +314,24 @@ const WaitingImgContainer = styled("div")`
     margin-block-start: 1rem;
 `;
 
-interface RedirectingProps {
+const RedirectingWeb: React.FC = () => {
+    return (
+        <Content>
+            <InfoIcon color="accent" fontSize="large" />
+            <Typography variant="h3">{t("passkey_verified")}</Typography>
+            <Typography color="text.muted">
+                {t("redirecting_back_to_app")}
+            </Typography>
+        </Content>
+    );
+};
+
+interface RedirectingAppProps {
     /** Called when the user presses the button to redirect again */
     onRetry: () => void;
 }
 
-const Redirecting: React.FC<RedirectingProps> = ({ onRetry }) => {
+const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
     const handleClose = window.close;
 
     return (
