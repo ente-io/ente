@@ -62,6 +62,94 @@ export const allowWindowClose = (): void => {
 };
 
 /**
+ * The app's entry point.
+ *
+ * We call this at the end of this file.
+ */
+const main = () => {
+    const gotTheLock = app.requestSingleInstanceLock();
+    if (!gotTheLock) {
+        app.quit();
+        return;
+    }
+
+    let mainWindow: BrowserWindow | undefined;
+
+    initLogging();
+    logStartupBanner();
+    registerForEnteLinks();
+    // The order of the next two calls is important
+    setupRendererServer();
+    registerPrivilegedSchemes();
+    migrateLegacyWatchStoreIfNeeded();
+
+    app.on("second-instance", () => {
+        // Someone tried to run a second instance, we should focus our window.
+        if (mainWindow) {
+            mainWindow.show();
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+        }
+    });
+
+    // Emitted once, when Electron has finished initializing.
+    //
+    // Note that some Electron APIs can only be used after this event occurs.
+    void app.whenReady().then(() => {
+        void (async () => {
+            // Create window and prepare for the renderer.
+            mainWindow = createMainWindow();
+
+            // Setup IPC and streams.
+            const watcher = createWatcher(mainWindow);
+            attachIPCHandlers();
+            attachFSWatchIPCHandlers(watcher);
+            attachLogoutIPCHandler(watcher);
+            registerStreamProtocol();
+
+            // Configure the renderer's environment.
+            const webContents = mainWindow.webContents;
+            setDownloadPath(webContents);
+            allowExternalLinks(webContents);
+            allowAllCORSOrigins(webContents);
+
+            // Start loading the renderer.
+            void mainWindow.loadURL(rendererURL);
+
+            // Continue on with the rest of the startup sequence.
+            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            setupTrayItem(mainWindow);
+            setupAutoUpdater(mainWindow);
+
+            try {
+                await deleteLegacyDiskCacheDirIfExists();
+                await deleteLegacyKeysStoreIfExists();
+            } catch (e) {
+                // Log but otherwise ignore errors during non-critical startup
+                // actions.
+                log.error("Ignoring startup error", e);
+            }
+        })();
+    });
+
+    // This is a macOS only event. Show our window when the user activates the
+    // app, e.g. by clicking on its dock icon.
+    app.on("activate", () => mainWindow?.show());
+
+    app.on("before-quit", () => {
+        if (mainWindow) saveWindowBounds(mainWindow);
+        allowWindowClose();
+    });
+
+    const handleOpenURLWithWindow = (url: string) => {
+        log.info(`Attempting to handle request to open URL: ${url}`);
+        if (mainWindow) handleEnteLinks(mainWindow, url);
+        else setTimeout(() => handleOpenURLWithWindow(url), 1000);
+    };
+    app.on("open-url", (_, url) => handleOpenURLWithWindow(url));
+};
+
+/**
  * Log a standard startup banner.
  *
  * This helps us identify app starts and other environment details in the logs.
@@ -464,87 +552,5 @@ const deleteLegacyKeysStoreIfExists = async () => {
     }
 };
 
-const main = () => {
-    const gotTheLock = app.requestSingleInstanceLock();
-    if (!gotTheLock) {
-        app.quit();
-        return;
-    }
-
-    let mainWindow: BrowserWindow | undefined;
-
-    initLogging();
-    logStartupBanner();
-    registerForEnteLinks();
-    // The order of the next two calls is important
-    setupRendererServer();
-    registerPrivilegedSchemes();
-    migrateLegacyWatchStoreIfNeeded();
-
-    app.on("second-instance", () => {
-        // Someone tried to run a second instance, we should focus our window.
-        if (mainWindow) {
-            mainWindow.show();
-            if (mainWindow.isMinimized()) mainWindow.restore();
-            mainWindow.focus();
-        }
-    });
-
-    // Emitted once, when Electron has finished initializing.
-    //
-    // Note that some Electron APIs can only be used after this event occurs.
-    void app.whenReady().then(() => {
-        void (async () => {
-            // Create window and prepare for the renderer.
-            mainWindow = createMainWindow();
-
-            // Setup IPC and streams.
-            const watcher = createWatcher(mainWindow);
-            attachIPCHandlers();
-            attachFSWatchIPCHandlers(watcher);
-            attachLogoutIPCHandler(watcher);
-            registerStreamProtocol();
-
-            // Configure the renderer's environment.
-            const webContents = mainWindow.webContents;
-            setDownloadPath(webContents);
-            allowExternalLinks(webContents);
-            allowAllCORSOrigins(webContents);
-
-            // Start loading the renderer.
-            void mainWindow.loadURL(rendererURL);
-
-            // Continue on with the rest of the startup sequence.
-            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-            setupTrayItem(mainWindow);
-            setupAutoUpdater(mainWindow);
-
-            try {
-                await deleteLegacyDiskCacheDirIfExists();
-                await deleteLegacyKeysStoreIfExists();
-            } catch (e) {
-                // Log but otherwise ignore errors during non-critical startup
-                // actions.
-                log.error("Ignoring startup error", e);
-            }
-        })();
-    });
-
-    // This is a macOS only event. Show our window when the user activates the
-    // app, e.g. by clicking on its dock icon.
-    app.on("activate", () => mainWindow?.show());
-
-    app.on("before-quit", () => {
-        if (mainWindow) saveWindowBounds(mainWindow);
-        allowWindowClose();
-    });
-
-    const handleOpenURLWithWindow = (url: string) => {
-        log.info(`Attempting to handle request to open URL: ${url}`);
-        if (mainWindow) handleEnteLinks(mainWindow, url);
-        else setTimeout(() => handleOpenURLWithWindow(url), 1000);
-    };
-    app.on("open-url", (_, url) => handleOpenURLWithWindow(url));
-};
-
+// Go for it.
 main();
