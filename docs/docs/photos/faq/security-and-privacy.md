@@ -98,4 +98,5 @@ Note that both Ente photos and Ente auth data will be deleted when you delete
 your account (irrespective of which app you delete it from) since both photos
 and auth use the same underlying account.
 
-To know details of how your data is deleted, including when you delete your account, please see https://ente.io/blog/how-ente-deletes-data/.
+To know details of how your data is deleted, including when you delete your
+account, please see https://ente.io/blog/how-ente-deletes-data/.
