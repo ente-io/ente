@@ -27,6 +27,9 @@
       "title": "BitSkins"
     },
     {
+      "title": "Bitstamp"
+    },
+    {
       "title": "Bitvavo",
       "hex": "0051FF"
     },
@@ -436,9 +439,7 @@
     {
       "title": "WorkOS",
       "slug": "workos",
-      "altNames": [
-        "Work OS"
-      ]
+      "altNames": ["Work OS"]
     },
     {
       "title": "X",
