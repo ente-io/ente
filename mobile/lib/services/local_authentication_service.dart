@@ -38,8 +38,8 @@ class LocalAuthenticationService {
   }
 
   Future<bool> requestEnteAuthForLockScreen(BuildContext context) async {
-    final String? savedPin = await _configuration.loadSavedPin();
-    final String? savedPassword = await _configuration.loadSavedPassword();
+    final String? savedPin = await _configuration.getPin();
+    final String? savedPassword = await _configuration.getPassword();
 
     if (savedPassword != null) {
       final result = await Navigator.of(context).push(

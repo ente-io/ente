@@ -134,7 +134,7 @@ dependencies:
   permission_handler: ^11.0.1
   photo_manager: ^3.0.0
   photo_view: ^0.14.0
-  pinput: ^1.2.2
+  pinput: ^2.0.2
   pointycastle: ^3.7.3
   pool: ^1.5.1
   protobuf: ^3.1.0

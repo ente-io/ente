@@ -152,21 +152,21 @@ class Configuration {
     }
   }
 
-  Future<void> savePin(String userPin) async {
+  Future<void> setPin(String userPin) async {
     await _preferences.setString(pin, userPin);
     await _preferences.remove(password);
   }
 
-  Future<String?> loadSavedPin() async {
+  Future<String?> getPin() async {
     return _preferences.getString(pin);
   }
 
-  Future<void> savePassword(String pass) async {
+  Future<void> setPassword(String pass) async {
     await _preferences.setString(password, pass);
     await _preferences.remove(pin);
   }
 
-  Future<String?> loadSavedPassword() async {
+  Future<String?> getPassword() async {
     return _preferences.getString(password);
   }
 

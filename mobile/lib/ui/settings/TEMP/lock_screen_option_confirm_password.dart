@@ -42,7 +42,7 @@ class _LockScreenOptionConfirmPasswordState
 
   Future<void> _confirmPasswordMatch() async {
     if (widget.password == _confirmPasswordController.text) {
-      await _configuration.savePassword(_confirmPasswordController.text);
+      await _configuration.setPassword(_confirmPasswordController.text);
 
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
@@ -70,6 +70,7 @@ class _LockScreenOptionConfirmPasswordState
         elevation: 0,
         leading: IconButton(
           onPressed: () {
+            FocusScope.of(context).unfocus();
             Navigator.of(context).pop();
           },
           icon: Icon(

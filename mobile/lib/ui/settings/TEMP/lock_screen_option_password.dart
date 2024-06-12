@@ -85,6 +85,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
         elevation: 0,
         leading: IconButton(
           onPressed: () {
+            FocusScope.of(context).unfocus();
             Navigator.of(context).pop(false);
           },
           icon: Icon(

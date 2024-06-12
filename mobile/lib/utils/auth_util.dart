@@ -11,8 +11,8 @@ Future<bool> requestAuthentication(BuildContext context, String reason) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
   final Configuration configuration = Configuration.instance;
-  final String? savedPin = await configuration.loadSavedPin();
-  final String? savedPassword = await configuration.loadSavedPassword();
+  final String? savedPin = await configuration.getPin();
+  final String? savedPassword = await configuration.getPassword();
   if (savedPassword != null || savedPin != null) {
     return await LocalAuthenticationService.instance
         .requestEnteAuthForLockScreen(context);

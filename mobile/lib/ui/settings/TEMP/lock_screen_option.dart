@@ -9,6 +9,7 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_password.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_pin.dart";
+import "package:photos/ui/tools/app_lock.dart";
 
 class LockScreenOption extends StatefulWidget {
   const LockScreenOption({super.key});
@@ -29,7 +30,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     isPinEnabled = _configuration.isPinSet();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
-        !_configuration.shouldShowLockScreen();
+        _configuration.shouldShowLockScreen();
     super.initState();
   }
 
@@ -55,7 +56,9 @@ class _LockScreenOptionState extends State<LockScreenOption> {
       if (result == false) {
         appLock = appLock;
       } else {
-        appLock = isPinEnabled || isPasswordEnabled;
+        appLock = isPinEnabled ||
+            isPasswordEnabled ||
+            _configuration.shouldShowLockScreen();
       }
     });
   }
@@ -79,38 +82,21 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     });
   }
 
-  // Future<void> _onToggleSwitch() async {
-  //   bool result;
-  //   if ((isPinEnabled || isPasswordEnabled) && appLock == true) {
-  //     // result = await LocalAuthenticationService.instance
-  //     //     .requestEnteAuthForLockScreen(context);
-  //     result = await requestAuthentication(
-  //       context,
-  //       S.of(context).authToChangeLockscreenSetting,
-  //     );
-  //     await _configuration.removePinAndPassword();
-  //     isPasswordEnabled = _configuration.isPasswordSet();
-  //     isPinEnabled = _configuration.isPinSet();
-  //   } else {
-  //     result = await LocalAuthenticationService.instance
-  //         .requestLocalAuthForLockScreen(
-  //       context,
-  //       !_configuration.shouldShowLockScreen(),
-  //       S.of(context).authToChangeLockscreenSetting,
-  //       S.of(context).lockScreenEnablePreSteps,
-  //     );
-  //     await _configuration.removePinAndPassword();
-  //     isPasswordEnabled = _configuration.isPasswordSet();
-  //     isPinEnabled = _configuration.isPinSet();
-  //   }
-  //   setState(() {
-  //     if (result) {
-  //       appLock = !appLock!;
-  //     } else {
-  //       appLock = appLock;
-  //     }
-  //   });
-  // }
+  Future<void> _onToggleSwitch() async {
+    if (appLock == false && !(isPasswordEnabled || isPinEnabled)) {
+      AppLock.of(context)!.setEnabled(!appLock!);
+      await Configuration.instance.setShouldShowLockScreen(!appLock!);
+    } else {
+      AppLock.of(context)!.setEnabled(!appLock!);
+      await Configuration.instance.setShouldShowLockScreen(!appLock!);
+    }
+    setState(() {
+      _configuration.removePinAndPassword();
+      isPasswordEnabled = _configuration.isPasswordSet();
+      isPinEnabled = _configuration.isPinSet();
+      appLock = !appLock!;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,15 +133,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                               menuItemColor: colorTheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
                                 value: () => appLock!,
-                                onChanged: () async {
-                                  setState(() {
-                                    _configuration.removePinAndPassword();
-                                    isPasswordEnabled =
-                                        _configuration.isPasswordSet();
-                                    isPinEnabled = _configuration.isPinSet();
-                                    appLock = !appLock!;
-                                  });
-                                },
+                                onChanged: () => _onToggleSwitch(),
                               ),
                             ),
                             const Padding(

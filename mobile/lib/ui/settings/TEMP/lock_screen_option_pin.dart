@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_pin.dart";
-import "package:pinput/pin_put/pin_put.dart";
+import 'package:pinput/pinput.dart';
 
 class LockScreenOptionPin extends StatefulWidget {
   const LockScreenOptionPin({
@@ -20,11 +20,6 @@ class LockScreenOptionPin extends StatefulWidget {
 class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
   final _focusNode = FocusNode();
-
-  final _pinPutDecoration = BoxDecoration(
-    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
-    borderRadius: BorderRadius.circular(15.0),
-  );
 
   @override
   void initState() {
@@ -66,6 +61,14 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
     }
   }
 
+  final _pinPutDecoration = PinTheme(
+    height: 50,
+    width: 50,
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
+      borderRadius: BorderRadius.circular(15.0),
+    ),
+  );
   @override
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
@@ -75,6 +78,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
         elevation: 0,
         leading: IconButton(
           onPressed: () {
+            FocusScope.of(context).unfocus();
             Navigator.of(context).pop(false);
           },
           icon: Icon(
@@ -130,34 +134,52 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
-              child: PinPut(
-                focusNode: _focusNode,
-                fieldsCount: 4,
-                controller: _pinController,
-                submittedFieldDecoration: _pinPutDecoration.copyWith(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                selectedFieldDecoration: _pinPutDecoration,
-                followingFieldDecoration: _pinPutDecoration.copyWith(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(
-                    color: const Color.fromRGBO(45, 194, 98, 0.5),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(70, 0, 70, 0),
+                  child: Pinput(
+                    length: 4,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    focusNode: _focusNode,
+                    controller: _pinController,
+                    defaultPinTheme: _pinPutDecoration,
+                    submittedPinTheme: _pinPutDecoration.copyWith(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                          color: const Color.fromRGBO(45, 194, 98, 0.5),
+                        ),
+                      ),
+                    ),
+                    followingPinTheme: _pinPutDecoration.copyWith(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        border: Border.all(
+                          color: const Color.fromRGBO(45, 194, 98, 0.5),
+                        ),
+                      ),
+                    ),
+                    focusedPinTheme: _pinPutDecoration,
+                    errorPinTheme: _pinPutDecoration.copyWith(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: colorTheme.warning400,
+                        ),
+                      ),
+                    ),
+                    autofocus: true,
+                    errorText: '*',
+                    obscureText: true,
+                    obscuringCharacter: '*',
+                    onCompleted: (value) {
+                      FocusScope.of(context).unfocus();
+                      _confirmPin(_pinController.text);
+                    },
                   ),
                 ),
-                inputDecoration: const InputDecoration(
-                  focusedBorder: InputBorder.none,
-                  border: InputBorder.none,
-                  counterText: '',
-                ),
-                textStyle: textTheme.h3,
-                obscureText: '*',
-                onSubmit: (value) {
-                  FocusScope.of(context).unfocus();
-                  _confirmPin(_pinController.text);
-                },
-              ),
+              ],
             ),
           ],
         ),
