@@ -83,13 +83,26 @@ const main = () => {
     registerPrivilegedSchemes();
     migrateLegacyWatchStoreIfNeeded();
 
-    app.on("second-instance", () => {
+    /**
+     * Handle an open URL request, but ensuring that we have a mainWindow.
+     */
+    const handleOpenURLEnsuringWindow = (url: string) => {
+        log.info(`Attempting to handle request to open URL: ${url}`);
+        if (mainWindow) handleEnteLinks(mainWindow, url);
+        else setTimeout(() => handleOpenURLEnsuringWindow(url), 1000);
+    };
+
+    app.on("second-instance", (_, argv: string[]) => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {
             mainWindow.show();
             if (mainWindow.isMinimized()) mainWindow.restore();
             mainWindow.focus();
         }
+        // On Windows and Linux, this is how we get deeplinks.
+        // See: registerForEnteLinks
+        const url = argv.pop();
+        if (url) handleOpenURLEnsuringWindow(url);
     });
 
     // Emitted once, when Electron has finished initializing.
@@ -141,12 +154,8 @@ const main = () => {
         allowWindowClose();
     });
 
-    const handleOpenURLWithWindow = (url: string) => {
-        log.info(`Attempting to handle request to open URL: ${url}`);
-        if (mainWindow) handleEnteLinks(mainWindow, url);
-        else setTimeout(() => handleOpenURLWithWindow(url), 1000);
-    };
-    app.on("open-url", (_, url) => handleOpenURLWithWindow(url));
+    // On macOS, this is how we get deeplinks. See: registerForEnteLinks
+    app.on("open-url", (_, url) => handleOpenURLEnsuringWindow(url));
 };
 
 /**
@@ -233,6 +242,8 @@ const registerPrivilegedSchemes = () => {
  * Implementation notes:
  * -   https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
  * -   This works only when the app is packaged.
+ * -   On Windows and Linux, we get the deeplink in the "second-instance" event.
+ * -   On macOS, we get the deeplink in the "open-url" event.
  */
 const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
 
