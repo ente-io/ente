@@ -45,6 +45,10 @@ export const sidebar = [
                     },
                     { text: "Map", link: "/photos/features/map" },
                     {
+                        text: "Passkeys",
+                        link: "/photos/features/passkeys",
+                    },
+                    {
                         text: "Public link",
                         link: "/photos/features/public-link",
                     },
@@ -166,6 +170,10 @@ export const sidebar = [
                     {
                         text: "From Steam",
                         link: "/auth/migration-guides/steam/",
+                    },
+                    {
+                        text: "From others",
+                        link: "/auth/migration-guides/import",
                     },
                     {
                         text: "Exporting your data",

@@ -66,8 +66,6 @@ Future<void> initSystemTray() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  initSystemTray().ignore();
-
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
@@ -77,8 +75,10 @@ void main() async {
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
+      initSystemTray().ignore();
     });
   }
+
   await _runInForeground();
   await _setupPrivacyScreen();
   if (Platform.isAndroid) {

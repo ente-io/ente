@@ -8,4 +8,5 @@ description:
 
 -   [Migrating from Authy](authy/)
 -   [Importing codes from Steam](steam/)
+-   [Migrating from other apps](import)
 -   [Exporting your data out of Ente Auth](export)

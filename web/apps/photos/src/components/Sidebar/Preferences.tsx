@@ -4,11 +4,11 @@ import {
     supportedLocales,
     type SupportedLocale,
 } from "@/next/i18n";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { EnteDrawer } from "components/EnteDrawer";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { useRouter } from "next/router";

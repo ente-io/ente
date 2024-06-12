@@ -24,6 +24,9 @@
       "title": "BitMEX"
     },
     {
+      "title": "BitSkins"
+    },
+    {
       "title": "Bitvavo",
       "hex": "0051FF"
     },
@@ -78,7 +81,13 @@
       "title": "DEGIRO"
     },
     {
+      "title": "DirectAdmin"
+    },
+    {
       "title": "Discourse"
+    },
+    {
+      "title": "DMarket"
     },
     {
       "title": "Doppler"
@@ -134,6 +143,9 @@
     {
       "title": "Healthchecks.io",
       "slug": "healthchecks"
+    },
+    {
+      "title": "Hivelocity"
     },
     {
       "title": "IceDrive",
@@ -195,6 +207,10 @@
       "title": "Local",
       "slug": "local_wp",
       "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
+    },
+    {
+      "title": "Marketplace.tf",
+      "slug": "marketplacedottf"
     },
     {
       "title": "Mastodon",
@@ -299,6 +315,10 @@
       "slug": "real_debrid"
     },
     {
+      "title": "Registro.br",
+      "slug": "registro_br"
+    },
+    {
       "title": "Revolt",
       "hex": "858585"
     },
@@ -330,6 +350,9 @@
     {
       "title": "Skiff",
       "hex": "EF5A3C"
+    },
+    {
+      "title": "Skinport"
     },
     {
       "title": "Snapchat"

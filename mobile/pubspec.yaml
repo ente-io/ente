@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.131+651
+version: 0.8.135+655
 publish_to: none
 
 environment:
@@ -138,10 +138,11 @@ dependencies:
   provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.7.0
+  screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0
-  share_plus: 7.2.2
+  share_plus: ^9.0.0 
   shared_preferences: ^2.0.5
   simple_cluster: ^0.3.0
   sqflite: ^2.3.0

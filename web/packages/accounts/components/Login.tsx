@@ -1,6 +1,5 @@
 import log from "@/next/log";
 import type { AppName } from "@/next/types/app";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -20,9 +19,7 @@ interface LoginProps {
     appName: AppName;
 }
 
-export function Login(props: LoginProps) {
-    const appNameOld = appNameToAppNameOld(props.appName);
-
+export function Login({ appName, signUp }: LoginProps) {
     const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
@@ -34,7 +31,7 @@ export function Login(props: LoginProps) {
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ` srpAttributes: ${JSON.stringify(srpAttributes)}`);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
-                await sendOtt(appNameOld, email);
+                await sendOtt(appName, email);
                 router.push(PAGES.VERIFY);
             } else {
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
@@ -66,9 +63,7 @@ export function Login(props: LoginProps) {
             />
 
             <FormPaperFooter>
-                <LinkButton onClick={props.signUp}>
-                    {t("NO_ACCOUNT")}
-                </LinkButton>
+                <LinkButton onClick={signUp}>{t("NO_ACCOUNT")}</LinkButton>
             </FormPaperFooter>
         </>
     );

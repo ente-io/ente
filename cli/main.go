@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var AppVersion = "0.1.14"
+var AppVersion = "0.1.15"
 
 func main() {
 	cliDBPath, err := GetCLIConfigPath()
@@ -23,7 +23,7 @@ func main() {
 		cliDBPath = constants.CliDataPath
 		_, err := internal.ValidateDirForWrite(cliDBPath)
 		if err != nil {
-			log.Fatalf("Please mount a volume to %s to persist cli data\n%v\n", cliDBPath, err)
+			log.Fatalf("Please mount a volume to %s\n%v\n", cliDBPath, err)
 		}
 	}
 	if err != nil {

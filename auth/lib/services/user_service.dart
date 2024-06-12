@@ -267,31 +267,41 @@ class UserService {
   }
 
   Future<void> onPassKeyVerified(BuildContext context, Map response) async {
-    final userPassword = Configuration.instance.getVolatilePassword();
-    if (userPassword == null) throw Exception("volatile password is null");
+    final ProgressDialog dialog =
+        createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
+    try {
+      final userPassword = _config.getVolatilePassword();
+      if (userPassword == null) throw Exception("volatile password is null");
 
-    await _saveConfiguration(response);
+      await _saveConfiguration(response);
 
-    Widget page;
-    if (Configuration.instance.getEncryptedToken() != null) {
-      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-        userPassword,
-        Configuration.instance.getKeyAttributes()!,
+      Widget page;
+      if (_config.getEncryptedToken() != null) {
+        await _config.decryptSecretsAndGetKeyEncKey(
+          userPassword,
+          _config.getKeyAttributes()!,
+        );
+        page = const HomePage();
+      } else {
+        throw Exception("unexpected response during passkey verification");
+      }
+      await dialog.hide();
+
+      // ignore: unawaited_futures
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return page;
+          },
+        ),
+        (route) => route.isFirst,
       );
-      page = const HomePage();
-    } else {
-      throw Exception("unexpected response during passkey verification");
+    } catch (e) {
+      _logger.severe(e);
+      await dialog.hide();
+      rethrow;
     }
-
-    // ignore: unawaited_futures
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
-        },
-      ),
-      (route) => route.isFirst,
-    );
   }
 
   Future<void> verifyEmail(

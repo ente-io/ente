@@ -6,11 +6,13 @@ class TitleBarTitleWidget extends StatelessWidget {
   final bool isTitleH2;
   final IconData? icon;
   final VoidCallback? onTap;
+  final String? heroTag;
   const TitleBarTitleWidget({
     this.title,
     this.isTitleH2 = false,
     this.icon,
     this.onTap,
+    this.heroTag,
     super.key,
   });
 
@@ -51,7 +53,10 @@ class TitleBarTitleWidget extends StatelessWidget {
           maxLines: 1,
         );
       }
-      return GestureDetector(onTap: onTap, child: widget);
+      return GestureDetector(
+        onTap: onTap,
+        child: heroTag != null ? Hero(tag: heroTag!, child: widget) : widget,
+      );
     }
 
     return const SizedBox.shrink();
