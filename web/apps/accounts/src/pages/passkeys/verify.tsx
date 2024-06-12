@@ -1,5 +1,6 @@
 import log from "@/next/log";
 import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -13,8 +14,8 @@ import {
     finishPasskeyAuthentication,
     isWebAuthnSupported,
     isWhitelistedRedirect,
-    redirectAfterPasskeyAuthentication,
     redirectToPasskeyRecoverPage,
+    redirectURLWithPasskeyAuthentication,
     signChallenge,
 } from "services/passkey";
 
@@ -30,9 +31,18 @@ const Page = () => {
         | "unknownRedirect" /* Unrecoverable error */
         | "unrecoverableFailure" /* Unrocevorable error - generic */
         | "failed" /* Recoverable error */
-        | "waitingForUser"; /* ...to authenticate with their passkey */
+        | "waitingForUser" /* ...to authenticate with their passkey */
+        | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
+        | "redirectingApp"; /* Other redirects (mobile / desktop redirect) */
 
     const [status, setStatus] = useState<Status>("loading");
+
+    // The URL we're redirecting to on success.
+    //
+    // This will only be set when status is "redirecting*".
+    const [redirectURLWithData, setRedirectURLWithData] = useState<
+        URL | undefined
+    >();
 
     /** (re)start the authentication flow */
     const authenticate = async () => {
@@ -107,18 +117,23 @@ const Page = () => {
             return;
         }
 
-        // Conceptually we can `setStatus("done")` at this point, but we'll
-        // leave this page anyway, so no need to tickle React.
+        setStatus(isHTTP(redirectURL) ? "redirectingWeb" : "redirectingApp");
 
-        await redirectAfterPasskeyAuthentication(
-            redirectURL,
-            authorizationResponse,
+        setRedirectURLWithData(
+            await redirectURLWithPasskeyAuthentication(
+                redirectURL,
+                authorizationResponse,
+            ),
         );
     };
 
     useEffect(() => {
         void authenticate();
     }, []);
+
+    useEffect(() => {
+        if (redirectURLWithData) redirectToURL(redirectURLWithData);
+    }, [redirectURLWithData]);
 
     const handleRetry = () => void authenticate();
 
@@ -133,6 +148,9 @@ const Page = () => {
         redirectToPasskeyRecoverPage(new URL(recover));
     };
 
+    const handleRedirectAgain = () =>
+        redirectToURL(ensure(redirectURLWithData));
+
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
         unknownRedirect: <UnknownRedirect />,
@@ -142,12 +160,22 @@ const Page = () => {
             <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
         ),
         waitingForUser: <WaitingForUser />,
+        redirectingWeb: <RedirectingWeb />,
+        redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
     };
 
     return components[status];
 };
 
 export default Page;
+
+// Not 100% accurate, but good enough for our purposes.
+const isHTTP = (url: URL) => url.protocol.startsWith("http");
+
+const redirectToURL = (url: URL) => {
+    log.info(`Redirecting to ${url.href}`);
+    window.location.href = url.href;
+};
 
 const Loading: React.FC = () => {
     return (
@@ -286,3 +314,57 @@ const WaitingImgContainer = styled("div")`
     justify-content: center;
     margin-block-start: 1rem;
 `;
+
+const RedirectingWeb: React.FC = () => {
+    return (
+        <Content>
+            <InfoIcon color="accent" fontSize="large" />
+            <Typography variant="h3">{t("passkey_verified")}</Typography>
+            <Typography color="text.muted">
+                {t("redirecting_back_to_app")}
+            </Typography>
+        </Content>
+    );
+};
+
+interface RedirectingAppProps {
+    /** Called when the user presses the button to redirect again */
+    onRetry: () => void;
+}
+
+const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
+    const handleClose = window.close;
+
+    return (
+        <Content>
+            <InfoIcon color="accent" fontSize="large" />
+            <Typography variant="h3">{t("passkey_verified")}</Typography>
+            <Typography color="text.muted">
+                {t("redirecting_back_to_app")}
+            </Typography>
+            <Typography color="text.muted">
+                {t("redirect_close_instructions")}
+            </Typography>
+            <ButtonStack>
+                <EnteButton
+                    onClick={handleClose}
+                    fullWidth
+                    color="secondary"
+                    type="button"
+                    variant="contained"
+                >
+                    {t("CLOSE")}
+                </EnteButton>
+                <EnteButton
+                    onClick={onRetry}
+                    fullWidth
+                    color="primary"
+                    type="button"
+                    variant="text"
+                >
+                    {t("redirect_again")}
+                </EnteButton>
+            </ButtonStack>
+        </Content>
+    );
+};

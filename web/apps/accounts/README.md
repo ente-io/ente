@@ -2,11 +2,15 @@
 
 Code that runs on `accounts.ente.io`.
 
-Primarily, this serves a common domain where our clients (mobile and web / auth
-and photos) can create and authenticate using shared passkeys tied to the user's
-Ente account. Passkeys can be shared by multiple domains, so we didn't strictly
-need a separate web origin for sharing passkeys across our web clients, but we
-do need a web origin to handle the passkey flow for the mobile clients.
+Primarily, this serves a common domain where our clients can create and
+authenticate using shared passkeys tied to the user's Ente account.
+
+> [!NOTE]
+>
+> Passkeys can be shared by multiple subdomains, so we didn't strictly need a
+> separate web origin for sharing passkeys between our (photos and auth) web
+> clients, but we do need a web origin to handle the passkey flow for the
+> desktop and mobile clients.
 
 For more details about the Passkey flows,
 [docs/webauthn-passkeys.md](../../docs/webauthn-passkeys.md).
