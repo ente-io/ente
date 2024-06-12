@@ -271,16 +271,16 @@ class UserService {
         createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
-      final userPassword = Configuration.instance.getVolatilePassword();
+      final userPassword = _config.getVolatilePassword();
       if (userPassword == null) throw Exception("volatile password is null");
 
       await _saveConfiguration(response);
 
       Widget page;
-      if (Configuration.instance.getEncryptedToken() != null) {
-        await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+      if (_config.getEncryptedToken() != null) {
+        await _config.decryptSecretsAndGetKeyEncKey(
           userPassword,
-          Configuration.instance.getKeyAttributes()!,
+          _config.getKeyAttributes()!,
         );
         page = const HomePage();
       } else {
