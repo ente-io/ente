@@ -169,7 +169,8 @@ const Page = () => {
 
 export default Page;
 
-const isHTTP = (url: URL) => url.protocol == "http" || url.protocol == "https";
+// Not 100% accurate, but good enough for our purposes.
+const isHTTP = (url: URL) => url.protocol.startsWith("http");
 
 const redirectToURL = (url: URL) => {
     log.info(`Redirecting to ${url.href}`);
