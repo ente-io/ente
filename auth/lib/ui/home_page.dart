@@ -238,6 +238,8 @@ class _HomePageState extends State<HomePage> {
           title: !_showSearchBox
               ? const Text('Ente Auth')
               : TextField(
+                  autocorrect: false,
+                  enableSuggestions: false,
                   focusNode: searchInputFocusNode,
                   autofocus: _searchText.isEmpty,
                   controller: _textController,
