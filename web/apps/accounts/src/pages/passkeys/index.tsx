@@ -18,9 +18,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
+import { useAppContext } from "components/context";
 import { t } from "i18next";
-import { useAppContext } from "pages/_app";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     deletePasskey,
     getPasskeys,
@@ -39,6 +39,14 @@ const Page: React.FC = () => {
         Passkey | undefined
     >();
 
+    const showPasskeyFetchFailedErrorDialog = useCallback(() => {
+        setDialogBoxAttributesV2({
+            title: t("ERROR"),
+            content: t("passkey_fetch_failed"),
+            close: {},
+        });
+    }, [setDialogBoxAttributesV2]);
+
     useEffect(() => {
         showNavBar(true);
 
@@ -51,30 +59,22 @@ const Page: React.FC = () => {
             log.error("Missing accounts token");
             showPasskeyFetchFailedErrorDialog();
         }
-    }, []);
+    }, [showNavBar, showPasskeyFetchFailedErrorDialog]);
 
-    useEffect(() => {
-        if (token) {
-            void refreshPasskeys();
-        }
-    }, [token]);
-
-    const refreshPasskeys = async () => {
+    const refreshPasskeys = useCallback(async () => {
         try {
             setPasskeys(await getPasskeys(ensure(token)));
         } catch (e) {
             log.error("Failed to fetch passkeys", e);
             showPasskeyFetchFailedErrorDialog();
         }
-    };
+    }, [token, showPasskeyFetchFailedErrorDialog]);
 
-    const showPasskeyFetchFailedErrorDialog = () => {
-        setDialogBoxAttributesV2({
-            title: t("ERROR"),
-            content: t("passkey_fetch_failed"),
-            close: {},
-        });
-    };
+    useEffect(() => {
+        if (token) {
+            void refreshPasskeys();
+        }
+    }, [token, refreshPasskeys]);
 
     const handleSelectPasskey = (passkey: Passkey) => {
         setSelectedPasskey(passkey);
