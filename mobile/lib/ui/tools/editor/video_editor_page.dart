@@ -59,6 +59,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         widget.ioFile,
         minDuration: const Duration(seconds: 1),
         cropStyle: CropGridStyle(
+          background: Theme.of(context).colorScheme.surface,
           selectedBoundariesColor:
               const ColorScheme.dark().videoPlayerPrimaryColor,
         ),
