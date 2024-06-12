@@ -19,7 +19,7 @@ import { AppContext } from "components/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import "styles/global.css";
 
@@ -28,7 +28,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
-    const [showNavbar, setShowNavBar] = useState(false);
+    const [showNavbar, setShowNavbar] = useState(false);
 
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
         DialogBoxAttributesV2 | undefined
@@ -39,8 +39,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         setDialogBoxV2View(true);
     }, [dialogBoxAttributeV2]);
-
-    const showNavBar = (show: boolean) => setShowNavBar(show);
 
     const isMobile = useMediaQuery("(max-width: 428px)");
 
@@ -58,14 +56,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const theme = getTheme(themeColor, "photos");
 
-    const logout = () => {
+    const logout = useCallback(() => {
         void accountLogout().then(() => router.push(PAGES.ROOT));
-    };
+    }, [router]);
 
     const appContext = {
         appName,
         logout,
-        showNavBar,
+        showNavBar: setShowNavbar,
         isMobile,
         setDialogBoxAttributesV2,
     };
