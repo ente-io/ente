@@ -32,7 +32,7 @@ class CodeDisplayStore {
       if (code.hasError) continue;
       tags.addAll(code.display.tags);
     }
-    return tags.toList();
+    return tags.toList()..sort();
   }
 
   Future<void> showDeleteTagDialog(BuildContext context, String tag) async {
