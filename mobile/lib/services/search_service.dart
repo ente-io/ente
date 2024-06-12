@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
@@ -31,6 +32,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -40,39 +42,15 @@ import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
-const magicPromptsData = [
-  {
-    "prompt": "identity document",
-    "title": "Identity Document",
-    "minimumScore": 0.269,
-    "minimumSize": 0.0,
-  },
-  {
-    "prompt": "sunset at the beach",
-    "title": "Sunset",
-    "minimumScore": 0.25,
-    "minimumSize": 0.0,
-  },
-  {
-    "prompt": "roadtrip",
-    "title": "Roadtrip",
-    "minimumScore": 0.26,
-    "minimumSize": 0.0,
-  },
-  {
-    "prompt": "pizza pasta burger",
-    "title": "Food",
-    "minimumScore": 0.27,
-    "minimumSize": 0.0,
-  }
-];
-
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
+  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v1.json";
+
+  var magicPromptsData = [];
 
   SearchService._privateConstructor();
 
@@ -84,6 +62,15 @@ class SearchService {
       _cachedFilesFuture = null;
       _cachedHiddenFilesFuture = null;
     });
+    _loadMagicPrompts();
+  }
+
+  Future<dynamic> _loadMagicPrompts() async {
+    final file = await RemoteAssetsService.instance
+        .getAsset(_kMagicPromptsDataUrl, refetch: true);
+
+    final json = jsonDecode(await file.readAsString());
+    magicPromptsData = json["prompts"];
   }
 
   Set<int> ignoreCollections() {
