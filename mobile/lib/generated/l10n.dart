@@ -8843,6 +8843,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Trim`
+  String get trim {
+    return Intl.message(
+      'Trim',
+      name: 'trim',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crop`
+  String get crop {
+    return Intl.message(
+      'Crop',
+      name: 'crop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotate`
+  String get rotate {
+    return Intl.message(
+      'Rotate',
+      name: 'rotate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Left`
+  String get left {
+    return Intl.message(
+      'Left',
+      name: 'left',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Right`
+  String get right {
+    return Intl.message(
+      'Right',
+      name: 'right',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

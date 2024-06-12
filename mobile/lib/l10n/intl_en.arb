@@ -1240,6 +1240,11 @@
   "faceRecognition": "Face recognition",
   "foundFaces": "Found faces",
   "clusteringProgress": "Clustering progress",
-  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready."
+  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready.",
+  "trim": "Trim",
+  "crop": "Crop",
+  "rotate": "Rotate",
+  "left": "Left",
+  "right": "Right"
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import 'package:video_editor/video_editor.dart';
@@ -44,7 +45,7 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
               color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
-              secondaryText: "Done",
+              secondaryText: S.of(context).done,
               onPrimaryPressed: () {
                 // reset trim
                 widget.controller.updateTrim(minTrim, maxTrim);

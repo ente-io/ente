@@ -127,7 +127,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               VideoEditorMainActions(
                                 children: [
                                   VideoEditorBottomAction(
-                                    label: "Trim",
+                                    label: S.of(context).trim,
                                     svgPath:
                                         "assets/video-editor/video-editor-trim-action.svg",
                                     onPressed: () => Navigator.push(
@@ -141,7 +141,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   ),
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
-                                    label: "Crop",
+                                    label: S.of(context).crop,
                                     svgPath:
                                         "assets/video-editor/video-editor-crop-action.svg",
                                     onPressed: () => Navigator.push(
@@ -155,7 +155,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   ),
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
-                                    label: "Rotate",
+                                    label: S.of(context).rotate,
                                     svgPath:
                                         "assets/video-editor/video-editor-rotate-action.svg",
                                     onPressed: () => Navigator.push(
@@ -174,7 +174,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .videoPlayerPrimaryColor,
-                                secondaryText: "Save copy",
+                                secondaryText: S.of(context).saveCopy,
                                 onSecondaryPressed: () {
                                   exportVideo();
                                 },
