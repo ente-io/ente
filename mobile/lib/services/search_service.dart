@@ -27,6 +27,7 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
@@ -62,7 +63,9 @@ class SearchService {
       _cachedFilesFuture = null;
       _cachedHiddenFilesFuture = null;
     });
-    _loadMagicPrompts();
+    if (flagService.internalUser) {
+      _loadMagicPrompts();
+    }
   }
 
   Future<dynamic> _loadMagicPrompts() async {
