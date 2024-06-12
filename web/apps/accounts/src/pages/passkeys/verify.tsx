@@ -321,12 +321,12 @@ const Redirecting: React.FC<RedirectingProps> = ({ onRetry }) => {
     return (
         <Content>
             <InfoIcon color="accent" fontSize="large" />
-            <Typography variant="h3">Passkey verified</Typography>
+            <Typography variant="h3">{t("passkey_verified")}</Typography>
             <Typography color="text.muted">
-                Redirecting you back to the app...
+                {t("redirecting_back_to_app")}
             </Typography>
             <Typography color="text.muted">
-                You can close this window after the app opens.
+                {t("redirect_close_instructions")}
             </Typography>
             <ButtonStack>
                 <EnteButton
@@ -345,7 +345,7 @@ const Redirecting: React.FC<RedirectingProps> = ({ onRetry }) => {
                     type="button"
                     variant="text"
                 >
-                    Redirect again
+                    {t("redirect_again")}
                 </EnteButton>
             </ButtonStack>
         </Content>
