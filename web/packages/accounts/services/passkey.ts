@@ -28,10 +28,39 @@ export const redirectUserToPasskeyVerificationFlow = (
     appName: AppName,
     passkeySessionID: string,
 ) => {
-    const client = clientPackageName[appName];
+    const clientPackage = clientPackageName[appName];
+    // Using `window.location.origin` will work both when we're running in a web
+    // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
+    // in desktop app]
     const redirect = `${window.location.origin}/passkeys/finish`;
-    const params = new URLSearchParams({ client, passkeySessionID, redirect });
-    window.location.href = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
+    const recover = `${window.location.origin}/passkeys/recover`;
+    const params = new URLSearchParams({
+        clientPackage,
+        passkeySessionID,
+        redirect,
+        recover,
+    });
+    const url = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
+    // [Note: Passkey verification in the desktop app]
+    //
+    // Our desktop app bundles the web app and serves it over a custom protocol.
+    // Passkeys are tied to origins, and will not work with this custom protocol
+    // even if we move the passkey creation and authentication inline to within
+    // the Photos web app.
+    //
+    // Thus, passkey creation and authentication in the desktop app works the
+    // same way it works in the mobile app - the system browser is invoked to
+    // open accounts.ente.io.
+    //
+    // -   For passkey creation, this is a one-way open. Passkeys get created at
+    //     accounts.ente.io, and that's it.
+    //
+    // -   For passkey verification, the flow is two-way. We register a custom
+    //     protocol and provide that as a return path redirect. Passkey
+    //     authentication happens at accounts.ente.io, and on success there is
+    //     redirected back to the desktop app.
+    if (globalThis.electron) window.open(url);
+    else window.location.href = url;
 };
 
 /**
@@ -40,11 +69,12 @@ export const redirectUserToPasskeyVerificationFlow = (
  *
  * @param appName The {@link AppName} of the app which is calling this function.
  */
-export const openAccountsManagePasskeysPage = async (appName: AppName) => {
-    // check if the user has passkey recovery enabled
+export const openAccountsManagePasskeysPage = async () => {
+    // Check if the user has passkey recovery enabled
     const recoveryEnabled = await isPasskeyRecoveryEnabled();
     if (!recoveryEnabled) {
-        // let's create the necessary recovery information
+        // If not, enable it for them by creating the necessary recovery
+        // information to prevent them from getting locked out.
         const recoveryKey = await getRecoveryKey();
 
         const resetSecret = await generateEncryptionKey();
@@ -62,11 +92,12 @@ export const openAccountsManagePasskeysPage = async (appName: AppName) => {
         );
     }
 
+    // Redirect to the Ente Accounts app where they can view and add and manage
+    // their passkeys.
     const token = await getAccountsToken();
-    const client = clientPackageName[appName];
-    const params = new URLSearchParams({ token, client });
+    const params = new URLSearchParams({ token });
 
-    window.open(`${accountsAppURL()}/passkeys/handoff?${params.toString()}`);
+    window.open(`${accountsAppURL()}/passkeys?${params.toString()}`);
 };
 
 export const isPasskeyRecoveryEnabled = async () => {

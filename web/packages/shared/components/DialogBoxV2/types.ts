@@ -13,7 +13,7 @@ export interface DialogBoxAttributesV2 {
     title?: React.ReactNode;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
-    content?: any;
+    content?: React.ReactNode;
     close?: {
         text?: string;
         variant?: ButtonProps["color"];

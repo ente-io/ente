@@ -45,6 +45,10 @@ export const sidebar = [
                     },
                     { text: "Map", link: "/photos/features/map" },
                     {
+                        text: "Passkeys",
+                        link: "/photos/features/passkeys",
+                    },
+                    {
                         text: "Public link",
                         link: "/photos/features/public-link",
                     },

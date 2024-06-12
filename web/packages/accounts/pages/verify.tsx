@@ -84,6 +84,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorEnabled: true,
                     isTwoFactorPasskeysEnabled: true,
                 });
+                // TODO: This is not the first login though if they already have
+                // 2FA. Does this flag mean first login on this device?
                 setIsFirstLogin(true);
                 redirectUserToPasskeyVerificationFlow(
                     appName,

@@ -1,36 +1,56 @@
-import { setClientPackageForAuthenticatedRequests } from "@/next/http";
 import log from "@/next/log";
-import { clientPackageName } from "@/next/types/app";
+import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
-import {
-    CenteredFlex,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import { fromB64URLSafeNoPadding } from "@ente/shared/crypto/internal/libsodium";
-import HTTPService from "@ente/shared/network/HTTPService";
 import InfoIcon from "@mui/icons-material/Info";
-import { Box, Typography } from "@mui/material";
+import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import _sodium from "libsodium-wrappers";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
+    isWebAuthnSupported,
     isWhitelistedRedirect,
-    type BeginPasskeyAuthenticationResponse,
+    redirectToPasskeyRecoverPage,
+    redirectURLWithPasskeyAuthentication,
+    signChallenge,
 } from "services/passkey";
 
-const PasskeysFlow = () => {
-    const [errored, setErrored] = useState(false);
+const Page = () => {
+    /**
+     * The state of our component as we go through the passkey authentication
+     * flow.
+     *
+     * To avoid confusion with useState, we call it status instead. */
+    type Status =
+        | "loading" /* Can happen multiple times in the flow */
+        | "webAuthnNotSupported" /* Unrecoverable error */
+        | "unknownRedirect" /* Unrecoverable error */
+        | "unrecoverableFailure" /* Unrocevorable error - generic */
+        | "failed" /* Recoverable error */
+        | "waitingForUser" /* ...to authenticate with their passkey */
+        | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
+        | "redirectingApp"; /* Other redirects (mobile / desktop redirect) */
 
-    const [invalidInfo, setInvalidInfo] = useState(false);
+    const [status, setStatus] = useState<Status>("loading");
 
-    const [loading, setLoading] = useState(true);
+    // The URL we're redirecting to on success.
+    //
+    // This will only be set when status is "redirecting*".
+    const [redirectURLWithData, setRedirectURLWithData] = useState<
+        URL | undefined
+    >();
 
-    const init = async () => {
+    /** (re)start the authentication flow */
+    const authenticate = async () => {
+        if (!isWebAuthnSupported()) {
+            setStatus("webAuthnNotSupported");
+            return;
+        }
+
         const searchParams = new URLSearchParams(window.location.search);
 
         // Extract redirect from the query params.
@@ -40,274 +60,311 @@ const PasskeysFlow = () => {
         // Ensure that redirectURL is whitelisted, otherwise show an invalid
         // "login" URL error to the user.
         if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
-            log.error(`Redirect URL '${redirectURL}' is not whitelisted`);
-            setInvalidInfo(true);
-            setLoading(false);
+            log.error(`Redirect '${redirect}' is not whitelisted`);
+            setStatus("unknownRedirect");
             return;
         }
 
-        let clientPackage = nullToUndefined(searchParams.get("client"));
-        // Mobile apps don't pass the client header, deduce their client package
-        // name from the redirect URL that they provide. TODO-PK: Pass?
-        if (!clientPackage) {
-            clientPackage = clientPackageName["photos"];
-            if (redirectURL.protocol === "enteauth:") {
-                clientPackage = clientPackageName["auth"];
-            } else if (redirectURL.hostname.startsWith("accounts")) {
-                clientPackage = clientPackageName["accounts"];
-            }
-        }
-
-        localStorage.setItem("clientPackage", clientPackage);
         // The server needs to know the app on whose behalf we're trying to
         // authenticate.
-        setClientPackageForAuthenticatedRequests(clientPackage);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackage,
-        });
-
-        // get passkeySessionID from the query params
-        const passkeySessionID = searchParams.get("passkeySessionID") as string;
-
-        setLoading(true);
-
-        let beginData: BeginPasskeyAuthenticationResponse;
-
-        try {
-            beginData = await beginAuthentication(passkeySessionID);
-        } catch (e) {
-            log.error("Couldn't begin passkey authentication", e);
-            setErrored(true);
-            return;
-        } finally {
-            setLoading(false);
-        }
-
-        let credential: Credential | null = null;
-
-        let tries = 0;
-        const maxTries = 3;
-
-        while (tries < maxTries) {
-            try {
-                credential = await getCredential(beginData.options.publicKey);
-            } catch (e) {
-                log.error("Couldn't get credential", e);
-                continue;
-            } finally {
-                tries++;
-            }
-
-            break;
-        }
-
-        if (!credential) {
-            if (!isWebAuthnSupported()) {
-                alert("WebAuthn is not supported in this browser");
-            }
-            setErrored(true);
+        const clientPackage = nullToUndefined(
+            searchParams.get("clientPackage"),
+        );
+        if (!clientPackage) {
+            setStatus("unrecoverableFailure");
             return;
         }
 
-        setLoading(true);
+        setStatus("loading");
 
-        let finishData;
+        // Extract passkeySessionID from the query params.
+        const passkeySessionID = nullToUndefined(
+            searchParams.get("passkeySessionID"),
+        );
+        if (!passkeySessionID) {
+            setStatus("unrecoverableFailure");
+            return;
+        }
 
+        let authorizationResponse: TwoFactorAuthorizationResponse;
         try {
-            finishData = await finishAuthentication(
-                credential,
+            const { ceremonySessionID, options } =
+                await beginPasskeyAuthentication(passkeySessionID);
+
+            setStatus("waitingForUser");
+
+            // Safari throws "NotAllowedError: The document is not focused" if
+            // the console is open when we call `navigator.credentials.create`.
+            // Not adding any workarounds, just documenting their incompetence.
+
+            const credential = await signChallenge(options.publicKey);
+            if (!credential) {
+                setStatus("failed");
+                return;
+            }
+
+            setStatus("loading");
+
+            authorizationResponse = await finishPasskeyAuthentication({
                 passkeySessionID,
-                beginData.ceremonySessionID,
-            );
+                ceremonySessionID,
+                clientPackage,
+                credential,
+            });
         } catch (e) {
-            log.error("Couldn't finish passkey authentication", e);
-            setErrored(true);
-            setLoading(false);
+            log.error("Passkey authentication failed", e);
+            setStatus("failed");
             return;
         }
 
-        const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
+        setStatus(isHTTP(redirectURL) ? "redirectingWeb" : "redirectingApp");
 
-        // TODO-PK: Shouldn't this be URL encoded?
-        window.location.href = `${redirect}?response=${encodedResponse}`;
-    };
-
-    const beginAuthentication = async (sessionId: string) => {
-        const data = await beginPasskeyAuthentication(sessionId);
-        return data;
-    };
-
-    function isWebAuthnSupported(): boolean {
-        if (!navigator.credentials) {
-            return false;
-        }
-        return true;
-    }
-
-    const getCredential = async (
-        publicKey: any,
-        timeoutMillis: number = 60000, // Default timeout of 60 seconds
-    ): Promise<Credential | null> => {
-        publicKey.challenge = await fromB64URLSafeNoPadding(
-            publicKey.challenge,
+        setRedirectURLWithData(
+            await redirectURLWithPasskeyAuthentication(
+                redirectURL,
+                authorizationResponse,
+            ),
         );
-        for (const listItem of publicKey.allowCredentials ?? []) {
-            listItem.id = await fromB64URLSafeNoPadding(listItem.id);
-            // note: we are orverwriting the transports array with all possible values.
-            // This is because the browser will only prompt the user for the transport that is available.
-            // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
-            listItem.transports = ["usb", "nfc", "ble", "internal"];
-        }
-        publicKey.timeout = timeoutMillis;
-        const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
-            publicKey: publicKey,
-        };
-        const credential = await navigator.credentials.get(
-            publicKeyCredentialCreationOptions,
-        );
-        return credential;
-    };
-
-    const finishAuthentication = async (
-        credential: Credential,
-        sessionId: string,
-        ceremonySessionId: string,
-    ) => {
-        const data = await finishPasskeyAuthentication(
-            credential,
-            sessionId,
-            ceremonySessionId,
-        );
-        return data;
     };
 
     useEffect(() => {
-        init();
+        void authenticate();
     }, []);
 
-    if (loading) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
+    useEffect(() => {
+        if (redirectURLWithData) redirectToURL(redirectURLWithData);
+    }, [redirectURLWithData]);
 
-    if (invalidInfo) {
-        return (
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-            >
-                <Box maxWidth="30rem">
-                    <FormPaper
-                        style={{
-                            padding: "1rem",
-                        }}
-                    >
-                        <InfoIcon />
-                        <Typography fontWeight="bold" variant="h1">
-                            {t("PASSKEY_LOGIN_FAILED")}
-                        </Typography>
-                        <Typography marginTop="1rem">
-                            {t("PASSKEY_LOGIN_URL_INVALID")}
-                        </Typography>
-                    </FormPaper>
-                </Box>
-            </Box>
-        );
-    }
+    const handleRetry = () => void authenticate();
 
-    if (errored) {
-        return (
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-            >
-                <Box maxWidth="30rem">
-                    <FormPaper
-                        style={{
-                            padding: "1rem",
-                        }}
-                    >
-                        <InfoIcon />
-                        <Typography fontWeight="bold" variant="h1">
-                            {t("PASSKEY_LOGIN_FAILED")}
-                        </Typography>
-                        <Typography marginTop="1rem">
-                            {t("PASSKEY_LOGIN_ERRORED")}
-                        </Typography>
-                        <EnteButton
-                            onClick={() => {
-                                setErrored(false);
-                                init();
-                            }}
-                            fullWidth
-                            style={{
-                                marginTop: "1rem",
-                            }}
-                            color="primary"
-                            type="button"
-                            variant="contained"
-                        >
-                            {t("TRY_AGAIN")}
-                        </EnteButton>
-                        <EnteButton
-                            href="/passkeys/recover"
-                            fullWidth
-                            style={{
-                                marginTop: "1rem",
-                            }}
-                            color="primary"
-                            type="button"
-                            variant="text"
-                        >
-                            {t("RECOVER_TWO_FACTOR")}
-                        </EnteButton>
-                    </FormPaper>
-                </Box>
-            </Box>
-        );
-    }
+    const handleRecover = () => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const recover = nullToUndefined(searchParams.get("recover"));
+        if (!recover) {
+            log.error("No recover URL was provided");
+            return;
+        }
 
+        redirectToPasskeyRecoverPage(new URL(recover));
+    };
+
+    const handleRedirectAgain = () =>
+        redirectToURL(ensure(redirectURLWithData));
+
+    const components: Record<Status, React.ReactNode> = {
+        loading: <Loading />,
+        unknownRedirect: <UnknownRedirect />,
+        webAuthnNotSupported: <WebAuthnNotSupported />,
+        unrecoverableFailure: <UnrecoverableFailure />,
+        failed: (
+            <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
+        ),
+        waitingForUser: <WaitingForUser />,
+        redirectingWeb: <RedirectingWeb />,
+        redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
+    };
+
+    return components[status];
+};
+
+export default Page;
+
+// Not 100% accurate, but good enough for our purposes.
+const isHTTP = (url: URL) => url.protocol.startsWith("http");
+
+const redirectToURL = (url: URL) => {
+    log.info(`Redirecting to ${url.href}`);
+    window.location.href = url.href;
+};
+
+const Loading: React.FC = () => {
     return (
-        <>
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-            >
-                <Box maxWidth="30rem">
-                    <FormPaper
-                        style={{
-                            padding: "1rem",
-                        }}
-                    >
-                        <InfoIcon />
-                        <Typography fontWeight="bold" variant="h1">
-                            {t("LOGIN_WITH_PASSKEY")}
-                        </Typography>
-                        <Typography marginTop="1rem">
-                            {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
-                        </Typography>
-                        <CenteredFlex marginTop="1rem">
-                            <img
-                                alt="ente Logo Circular"
-                                height={150}
-                                width={150}
-                                src="/images/ente-circular.png"
-                            />
-                        </CenteredFlex>
-                    </FormPaper>
-                </Box>
-            </Box>
-        </>
+        <VerticallyCentered>
+            <EnteSpinner />
+        </VerticallyCentered>
     );
 };
 
-export default PasskeysFlow;
+const UnknownRedirect: React.FC = () => {
+    return <Failed message={t("passkey_login_invalid_url")} />;
+};
+
+const WebAuthnNotSupported: React.FC = () => {
+    return <Failed message={t("passkeys_not_supported")} />;
+};
+
+const UnrecoverableFailure: React.FC = () => {
+    return <Failed message={t("passkey_login_generic_error")} />;
+};
+
+interface FailedProps {
+    message: string;
+}
+
+const Failed: React.FC<FailedProps> = ({ message }) => {
+    return (
+        <Content>
+            <InfoIcon color="secondary" />
+            <Typography variant="h3">{t("passkey_login_failed")}</Typography>
+            <Typography color="text.muted">{message}</Typography>
+        </Content>
+    );
+};
+
+const Content: React.FC<React.PropsWithChildren> = ({ children }) => {
+    return (
+        <Content_>
+            <ContentPaper>{children}</ContentPaper>
+        </Content_>
+    );
+};
+
+const Content_ = styled("div")`
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+`;
+
+const ContentPaper = styled(Paper)`
+    width: 100%;
+    max-width: 24rem;
+    padding: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+`;
+
+interface RetriableFailedProps {
+    /** Callback invoked when the user presses the try again button. */
+    onRetry: () => void;
+    /**
+     * Callback invoked when the user presses the button to recover their
+     * second factor, e.g. if they cannot login using it.
+     */
+    onRecover: () => void;
+}
+
+const RetriableFailed: React.FC<RetriableFailedProps> = ({
+    onRetry,
+    onRecover,
+}) => {
+    return (
+        <Content>
+            <InfoIcon color="secondary" fontSize="large" />
+            <Typography variant="h3">{t("passkey_login_failed")}</Typography>
+            <Typography color="text.muted">
+                {t("passkey_login_generic_error")}
+            </Typography>
+            <ButtonStack>
+                <EnteButton
+                    onClick={onRetry}
+                    fullWidth
+                    color="secondary"
+                    type="button"
+                    variant="contained"
+                >
+                    {t("TRY_AGAIN")}
+                </EnteButton>
+                <EnteButton
+                    onClick={onRecover}
+                    fullWidth
+                    color="primary"
+                    type="button"
+                    variant="text"
+                >
+                    {t("RECOVER_TWO_FACTOR")}
+                </EnteButton>
+            </ButtonStack>
+        </Content>
+    );
+};
+
+const ButtonStack = styled("div")`
+    display: flex;
+    flex-direction: column;
+    margin-block-start: 1rem;
+    gap: 1rem;
+`;
+
+const WaitingForUser: React.FC = () => {
+    return (
+        <Content>
+            <Typography fontWeight="bold" variant="h2">
+                {t("passkey_login")}
+            </Typography>
+            <Typography color="text.muted">
+                {t("passkey_login_instructions")}
+            </Typography>
+            <WaitingImgContainer>
+                <img
+                    alt=""
+                    height={150}
+                    width={150}
+                    src="/images/ente-circular.png"
+                />
+            </WaitingImgContainer>
+        </Content>
+    );
+};
+
+const WaitingImgContainer = styled("div")`
+    display: flex;
+    justify-content: center;
+    margin-block-start: 1rem;
+`;
+
+const RedirectingWeb: React.FC = () => {
+    return (
+        <Content>
+            <InfoIcon color="accent" fontSize="large" />
+            <Typography variant="h3">{t("passkey_verified")}</Typography>
+            <Typography color="text.muted">
+                {t("redirecting_back_to_app")}
+            </Typography>
+        </Content>
+    );
+};
+
+interface RedirectingAppProps {
+    /** Called when the user presses the button to redirect again */
+    onRetry: () => void;
+}
+
+const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
+    const handleClose = window.close;
+
+    return (
+        <Content>
+            <InfoIcon color="accent" fontSize="large" />
+            <Typography variant="h3">{t("passkey_verified")}</Typography>
+            <Typography color="text.muted">
+                {t("redirecting_back_to_app")}
+            </Typography>
+            <Typography color="text.muted">
+                {t("redirect_close_instructions")}
+            </Typography>
+            <ButtonStack>
+                <EnteButton
+                    onClick={handleClose}
+                    fullWidth
+                    color="secondary"
+                    type="button"
+                    variant="contained"
+                >
+                    {t("CLOSE")}
+                </EnteButton>
+                <EnteButton
+                    onClick={onRetry}
+                    fullWidth
+                    color="primary"
+                    type="button"
+                    variant="text"
+                >
+                    {t("redirect_again")}
+                </EnteButton>
+            </ButtonStack>
+        </Content>
+    );
+};
