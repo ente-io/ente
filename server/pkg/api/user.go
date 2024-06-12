@@ -383,6 +383,20 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *UserHandler) GetTokenForPasskeySession(c *gin.Context) {
+	sessionID := c.Query("sessionID")
+	if sessionID == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("sessionID is required"), ""))
+		return
+	}
+	response, err := h.UserController.PasskeyRepo.GetTokenData(sessionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get token data"))
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *UserHandler) IsPasskeyRecoveryEnabled(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	response, err := h.UserController.GetKeyAttributeAndToken(c, userID)
