@@ -8774,10 +8774,10 @@ class S {
     );
   }
 
-  /// `Saving Edits!`
+  /// `Saving Edits...`
   String get savingEdits {
     return Intl.message(
-      'Saving Edits!',
+      'Saving Edits...',
       name: 'savingEdits',
       desc: '',
       args: [],

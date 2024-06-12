@@ -1216,7 +1216,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Save your recovery key if you haven\'t already"),
         "saving": MessageLookupByLibrary.simpleMessage("Saving..."),
-        "savingEdits": MessageLookupByLibrary.simpleMessage("Saving Edits!"),
+        "savingEdits": MessageLookupByLibrary.simpleMessage("Saving Edits..."),
         "scanCode": MessageLookupByLibrary.simpleMessage("Scan code"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
