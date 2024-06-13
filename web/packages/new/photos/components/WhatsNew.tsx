@@ -30,8 +30,8 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
     useEffect(() => {
-        void didShowWhatsNew();
-    }, []);
+        if (open) void didShowWhatsNew();
+    }, [open]);
 
     return (
         <Dialog
@@ -42,25 +42,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             <DialogTitle>{"What's new"}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    <StyledUL>
-                        <li>
-                            <Typography>
-                                <Typography color="primary">
-                                    Support for Passkeys
-                                </Typography>
-                                Passkeys can now be used as a second factor
-                                authentication mechanism.
-                            </Typography>
-                        </li>
-                        <li>
-                            <Typography color="primary">Window size</Typography>
-                            <Typography>
-                                {
-                                    "The app's window will remember its size and position."
-                                }
-                            </Typography>
-                        </li>
-                    </StyledUL>
+                    <ChangelogContent />
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -86,6 +68,31 @@ const SlideTransition = React.forwardRef(function Transition(
 ) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
+
+const ChangelogContent: React.FC = () => {
+    // NOTE: Remember to update changelogVersion when changing the content
+    // below.
+
+    return (
+        <StyledUL>
+            <li>
+                <Typography>
+                    <Typography color="primary">
+                        Support for Passkeys
+                    </Typography>
+                    Passkeys can now be used as a second factor authentication
+                    mechanism.
+                </Typography>
+            </li>
+            <li>
+                <Typography color="primary">Window size</Typography>
+                <Typography>
+                    {"The app's window will remember its size and position."}
+                </Typography>
+            </li>
+        </StyledUL>
+    );
+};
 
 const StyledUL = styled("ul")`
     padding-inline: 1rem;
