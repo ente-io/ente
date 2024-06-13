@@ -45,7 +45,10 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
-import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "../services/passkey";
 import { appHomeRoute } from "../services/redirect";
 import {
     configureSRP,
@@ -61,6 +64,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
+    const [passkeyVerificationURL, setPasskeyVerificationURL] = useState<
+        string | undefined
+    >();
 
     const router = useRouter();
     useEffect(() => {
@@ -168,10 +174,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    redirectUserToPasskeyVerificationFlow(
+                    const url = passkeyVerificationRedirectURL(
                         appName,
                         passkeySessionID,
                     );
+                    setPasskeyVerificationURL(url);
+                    openPasskeyVerificationURL(url);
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
@@ -266,13 +274,23 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
-    return (
-        <VerifyingPasskey
-            email={user?.email}
-            onRecover={redirectToRecoverPage}
-            onLogout={logout}
-        />
-    );
+    if (passkeyVerificationURL) {
+        // We reach this case only when running in the desktop app, because in
+        // the web app we already would've redirected to passkeyVerificationURL.
+        //
+        // See: [Note: Passkey verification in the desktop app]
+
+        return (
+            <VerifyingPasskey
+                email={user?.email}
+                onRetry={() =>
+                    openPasskeyVerificationURL(passkeyVerificationURL)
+                }
+                onRecover={redirectToRecoverPage}
+                onLogout={logout}
+            />
+        );
+    }
 
     // TODO: Handle the case when user is not present, or exclude that
     // possibility using types.
@@ -319,9 +337,7 @@ const PasswordHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
 const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
         <Header_>
-            <Typography variant="h3" >
-                {"Passkey"}
-            </Typography>
+            <Typography variant="h3">{"Passkey"}</Typography>
             <Typography color="text.faint">{children}</Typography>
         </Header_>
     );
