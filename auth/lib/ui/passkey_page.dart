@@ -126,7 +126,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
             const SizedBox(height: 16),
             ButtonWidget(
               buttonType: ButtonType.primary,
-              labelText: context.l10n.verifyPasskey,
+              labelText: context.l10n.tryAgain,
               onTap: () => launchPasskey(),
             ),
             const Padding(padding: EdgeInsets.all(30)),
