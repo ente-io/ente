@@ -552,16 +552,23 @@ const authenticatorAssertionResponse = (credential: Credential) => {
  * @param redirectURL The base URL to redirect to. Provided by the calling app
  * that initiated the passkey authentication.
  *
+ * @param passkeySessionID The passkeySessionID that was provided by the calling
+ * app that initiated the passkey authentication. It is returned back in the
+ * response so that the calling app has a way to ensure that this is indeed a
+ * redirect for the session that they initiated and are waiting for.
+ *
  * @param twoFactorAuthorizationResponse The result of
  * {@link finishPasskeyAuthentication} returned by the backend.
  */
-export const redirectURLWithPasskeyAuthentication = async (
+export const passkeyAuthenticationSuccessRedirectURL = async (
     redirectURL: URL,
+    passkeySessionID: string,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
     const encodedResponse = await toB64URLSafeNoPaddingString(
         JSON.stringify(twoFactorAuthorizationResponse),
     );
+    redirectURL.searchParams.set("passkeySessionID", passkeySessionID);
     redirectURL.searchParams.set("response", encodedResponse);
     return redirectURL;
 };
