@@ -266,8 +266,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         }
     };
 
-    const redirectToRecoverPage = () => router.push(PAGES.RECOVER);
-
     if (!keyAttributes && !srpAttributes) {
         return (
             <VerticallyCentered>
@@ -299,7 +297,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationURL)
                 }
-                onRecover={redirectToRecoverPage}
+                onRecover={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
                 onLogout={logout}
             />
         );
@@ -322,7 +320,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 />
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={redirectToRecoverPage}>
+                    <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
                         {t("FORGOT_PASSWORD")}
                     </LinkButton>
                     <LinkButton onClick={logout}>

@@ -164,8 +164,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setTimeout(() => setResend(0), 3000);
     };
 
-    const redirectToRecoverPage = () => router.push(PAGES.RECOVER);
-
     if (!email) {
         return (
             <VerticallyCentered>
@@ -197,7 +195,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationURL)
                 }
-                onRecover={redirectToRecoverPage}
+                onRecover={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
                 onLogout={logout}
             />
         );
