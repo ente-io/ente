@@ -74,11 +74,29 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                 <PasskeyHeader>{email ?? ""}</PasskeyHeader>
 
                 <VerifyingPasskeyMiddle>
-                    <Typography>{t("waiting_for_verification")}</Typography>
+                    <Typography color="text.muted">
+                        {t("waiting_for_verification")}
+                    </Typography>
 
-                    <EnteButton onClick={onRetry} color="accent" type="button">
-                        {t("try_again")}
-                    </EnteButton>
+                    <ButtonStack>
+                        <EnteButton
+                            onClick={onRetry}
+                            fullWidth
+                            color="secondary"
+                            type="button"
+                        >
+                            {t("try_again")}
+                        </EnteButton>
+
+                        <EnteButton
+                            onClick={() => {}}
+                            fullWidth
+                            color="accent"
+                            type="button"
+                        >
+                            {"Check status"}
+                        </EnteButton>
+                    </ButtonStack>
                 </VerifyingPasskeyMiddle>
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
@@ -100,7 +118,13 @@ const VerifyingPasskeyMiddle = styled("div")`
     display: flex;
     flex-direction: column;
 
-    margin-block: 3rem;
-    gap: 3rem;
-    align-items: center;
+    padding-block: 1rem;
+    gap: 4rem;
+    text-align: center;
+`;
+
+const ButtonStack = styled("div")`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 `;
