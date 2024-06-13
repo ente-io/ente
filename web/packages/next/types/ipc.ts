@@ -87,12 +87,12 @@ export interface Electron {
      * into the foreground. More precisely, the callback gets invoked when the
      * main window gets focus.
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      *
      * @param cb The function to call when the main window gets focus. Pass
      * `undefined` to clear the callback.
      */
-    onMainWindowFocus: (cb?: () => void) => void;
+    onMainWindowFocus: (cb: (() => void) | undefined) => void;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
@@ -103,13 +103,13 @@ export interface Electron {
      * In particular, this is necessary for handling passkey authentication.
      * See: [Note: Passkey verification in the desktop app]
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      *
      * @param cb The function to call when the app gets asked to open a
      * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
      * is passed to the function verbatim.
      */
-    onOpenURL: (cb?: (url: string) => void) => void;
+    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
 
     // - App update
 
@@ -118,10 +118,10 @@ export interface Electron {
      * (actionable) app update is available. This allows the Node.js layer to
      * ask the renderer to show an "Update available" dialog to the user.
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      */
     onAppUpdateAvailable: (
-        cb?: ((update: AppUpdate) => void) | undefined,
+        cb: ((update: AppUpdate) => void) | undefined,
     ) => void;
 
     /**
@@ -147,6 +147,28 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
+
+    /**
+     * Set or clear the callback {@link cb} to invoke when the app should show
+     * the "What's new" screen for the current version.
+     *
+     * Setting a callback clears any previous callbacks.
+     *
+     * [Note: Conditions for showing the "What's new" screen]
+     *
+     * This screen is shown only once per update, and only when the current
+     * version is (sem-versionally) greater than the previous version for which
+     * this dialog was shown (if any). The state about whether or not this
+     * dialog has already been shown is persisted on the Node.js, in the user
+     * preferences store (which is not cleared on logout).
+     *
+     * If the Node.js layer notices an attached callback (and the above
+     * conditions are satisfied), then it invokes the callback. The callback
+     * should return `true` to indicate that the whats new screen was shown so
+     * that the Node.js layer can update the persisted state to avoid showing it
+     * again.
+     */
+    onShowWhatsNew: (cb?: (() => boolean) | undefined) => void;
 
     // - FS
 
