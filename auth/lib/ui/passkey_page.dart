@@ -56,10 +56,10 @@ class _PasskeyPageState extends State<PasskeyPage> {
     try {
       response = await UserService.instance
           .getTokenForPasskeySession(widget.sessionID);
-    } on PassKeySessionNotVerifiedError catch (e) {
+    } on PassKeySessionNotVerifiedError {
       showToast(context, context.l10n.passKeyPendingVerification);
       return;
-    } on PassKeySessionExpiredError catch (e) {
+    } on PassKeySessionExpiredError {
       await showErrorDialog(
         context,
         context.l10n.loginSessionExpired,
