@@ -87,12 +87,12 @@ export interface Electron {
      * into the foreground. More precisely, the callback gets invoked when the
      * main window gets focus.
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      *
      * @param cb The function to call when the main window gets focus. Pass
      * `undefined` to clear the callback.
      */
-    onMainWindowFocus: (cb?: () => void) => void;
+    onMainWindowFocus: (cb: (() => void) | undefined) => void;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
@@ -103,13 +103,13 @@ export interface Electron {
      * In particular, this is necessary for handling passkey authentication.
      * See: [Note: Passkey verification in the desktop app]
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      *
      * @param cb The function to call when the app gets asked to open a
      * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
      * is passed to the function verbatim.
      */
-    onOpenURL: (cb?: (url: string) => void) => void;
+    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
 
     // - App update
 
@@ -118,10 +118,10 @@ export interface Electron {
      * (actionable) app update is available. This allows the Node.js layer to
      * ask the renderer to show an "Update available" dialog to the user.
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      */
     onAppUpdateAvailable: (
-        cb?: ((update: AppUpdate) => void) | undefined,
+        cb: ((update: AppUpdate) => void) | undefined,
     ) => void;
 
     /**
@@ -147,6 +147,23 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
+
+    /**
+     * Get the persisted version for the last shown changelog.
+     *
+     * See: [Note: Conditions for showing "What's new"]
+     */
+    lastShownChangelogVersion: () => Promise<number | undefined>;
+
+    /**
+     * Save the given {@link version} to disk as the version of the last shown
+     * changelog.
+     *
+     * The value is saved to a store which is not cleared during logout.
+     *
+     * @see {@link lastShownChangelogVersion}
+     */
+    setLastShownChangelogVersion: (version: number) => Promise<void>;
 
     // - FS
 
