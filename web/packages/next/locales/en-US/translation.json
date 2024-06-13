@@ -624,7 +624,7 @@
     "passkey_login_invalid_url": "The login URL is invalid.",
     "passkey_login_generic_error": "An error occurred while logging in with passkey.",
     "passkeys_not_supported": "Passkeys are not supported in this browser",
-    "TRY_AGAIN": "Try again",
+    "try_again": "Try again",
     "passkey_login_instructions": "Follow the steps from your browser to continue logging in.",
     "passkey_login": "Login with passkey",
     "passkey": "Passkey",

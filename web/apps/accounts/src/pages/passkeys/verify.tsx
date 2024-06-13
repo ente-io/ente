@@ -273,7 +273,7 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
                     type="button"
                     variant="contained"
                 >
-                    {t("TRY_AGAIN")}
+                    {t("try_again")}
                 </EnteButton>
                 {onRecover && (
                     <EnteButton
