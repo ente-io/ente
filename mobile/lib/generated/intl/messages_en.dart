@@ -418,6 +418,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Check for updates"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Please check your inbox (and spam) to complete verification"),
+        "checkStatus": MessageLookupByLibrary.simpleMessage("Check status"),
         "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim free storage"),
@@ -906,6 +907,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockscreen": MessageLookupByLibrary.simpleMessage("Lockscreen"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logging out..."),
+        "loginSessionExpired":
+            MessageLookupByLibrary.simpleMessage("Session expired"),
+        "loginSessionExpiredDetails": MessageLookupByLibrary.simpleMessage(
+            "Your session has expired. Please login again."),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
@@ -1018,6 +1023,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Pairing complete"),
+        "passKeyPendingVerification": MessageLookupByLibrary.simpleMessage(
+            "Verification is still pending"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
             MessageLookupByLibrary.simpleMessage("Passkey verification"),

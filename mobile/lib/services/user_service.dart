@@ -308,6 +308,31 @@ class UserService {
     }
   }
 
+  Future<dynamic> getTokenForPasskeySession(String sessionID) async {
+    try {
+      final response = await _dio.get(
+        "${_config.getHttpEndpoint()}/users/two-factor/passkeys/get-token",
+        queryParameters: {
+          "sessionID": sessionID,
+        },
+      );
+      return response.data;
+    } on DioError catch (e) {
+      if (e.response != null) {
+        if (e.response!.statusCode == 404 || e.response!.statusCode == 410) {
+          throw PassKeySessionExpiredError();
+        }
+        if (e.response!.statusCode == 400) {
+          throw PassKeySessionNotVerifiedError();
+        }
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("unexpected error", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> onPassKeyVerified(BuildContext context, Map response) async {
     final userPassword = Configuration.instance.getVolatilePassword();
     if (userPassword == null) throw Exception("volatile password is null");
