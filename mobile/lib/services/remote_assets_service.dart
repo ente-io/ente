@@ -18,10 +18,10 @@ class RemoteAssetsService {
   static final RemoteAssetsService instance =
       RemoteAssetsService._privateConstructor();
 
-  Future<File> getAsset(String remotePath) async {
+  Future<File> getAsset(String remotePath, {bool refetch = false}) async {
     final path = await _getLocalPath(remotePath);
     final file = File(path);
-    if (await file.exists()) {
+    if (await file.exists() && !refetch) {
       _logger.info("Returning cached file for $remotePath");
       return file;
     } else {
