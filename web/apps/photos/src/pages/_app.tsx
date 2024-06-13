@@ -1,4 +1,3 @@
-import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
 import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
@@ -130,10 +129,6 @@ export default function App({ Component, pageProps }: AppProps) {
     >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
-    // TODO(MR): This is never true currently, this is the WIP ability to show
-    // what's new dialog on desktop app updates. The UI is done, need to hook
-    // this up to logic to trigger it.
-    const [openWhatsNew, setOpenWhatsNew] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -405,11 +400,6 @@ export default function App({ Component, pageProps }: AppProps) {
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
-                />
-
-                <WhatsNew
-                    open={openWhatsNew}
-                    onClose={() => setOpenWhatsNew(false)}
                 />
 
                 <Notification

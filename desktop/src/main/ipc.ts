@@ -46,7 +46,12 @@ import {
     computeCLIPTextEmbeddingIfAvailable,
 } from "./services/ml-clip";
 import { computeFaceEmbeddings, detectFaces } from "./services/ml-face";
-import { encryptionKey, saveEncryptionKey } from "./services/store";
+import {
+    encryptionKey,
+    lastShownChangelogVersion,
+    saveEncryptionKey,
+    setLastShownChangelogVersion,
+} from "./services/store";
 import {
     clearPendingUploads,
     listZipItems,
@@ -101,11 +106,19 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
+    ipcMain.handle("encryptionKey", () => encryptionKey());
+
     ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),
     );
 
-    ipcMain.handle("encryptionKey", () => encryptionKey());
+    ipcMain.handle("lastShownChangelogVersion", () =>
+        lastShownChangelogVersion(),
+    );
+
+    ipcMain.handle("setLastShownChangelogVersion", (_, version: number) =>
+        setLastShownChangelogVersion(version),
+    );
 
     // - App update
 

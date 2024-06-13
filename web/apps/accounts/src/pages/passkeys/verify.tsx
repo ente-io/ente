@@ -14,8 +14,8 @@ import {
     finishPasskeyAuthentication,
     isWebAuthnSupported,
     isWhitelistedRedirect,
+    passkeyAuthenticationSuccessRedirectURL,
     redirectToPasskeyRecoverPage,
-    redirectURLWithPasskeyAuthentication,
     signChallenge,
 } from "services/passkey";
 
@@ -40,7 +40,7 @@ const Page = () => {
     // The URL we're redirecting to on success.
     //
     // This will only be set when status is "redirecting*".
-    const [redirectURLWithData, setRedirectURLWithData] = useState<
+    const [successRedirectURL, setSuccessRedirectURL] = useState<
         URL | undefined
     >();
 
@@ -115,9 +115,10 @@ const Page = () => {
 
         setStatus(isHTTP(redirectURL) ? "redirectingWeb" : "redirectingApp");
 
-        setRedirectURLWithData(
-            await redirectURLWithPasskeyAuthentication(
+        setSuccessRedirectURL(
+            await passkeyAuthenticationSuccessRedirectURL(
                 redirectURL,
+                passkeySessionID,
                 authorizationResponse,
             ),
         );
@@ -128,8 +129,8 @@ const Page = () => {
     }, []);
 
     useEffect(() => {
-        if (redirectURLWithData) redirectToURL(redirectURLWithData);
-    }, [redirectURLWithData]);
+        if (successRedirectURL) redirectToURL(successRedirectURL);
+    }, [successRedirectURL]);
 
     const handleRetry = () => void authenticate();
 
@@ -149,8 +150,7 @@ const Page = () => {
         return () => redirectToPasskeyRecoverPage(new URL(recover));
     })();
 
-    const handleRedirectAgain = () =>
-        redirectToURL(ensure(redirectURLWithData));
+    const handleRedirectAgain = () => redirectToURL(ensure(successRedirectURL));
 
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
