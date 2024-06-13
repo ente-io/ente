@@ -195,7 +195,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationURL)
                 }
-                onRecover={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
+                onRecover={() => router.push("/passkeys/recover")}
                 onLogout={logout}
             />
         );
