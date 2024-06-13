@@ -2,11 +2,15 @@ import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
+import {
+    ConnectionDetails,
+    PasswordHeader,
+    VerifyingPasskey,
+} from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -19,7 +23,6 @@ import {
 } from "@ente/shared/crypto/helpers";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
-import { apiOrigin } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -39,7 +42,6 @@ import {
     setKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -324,97 +326,3 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 };
 
 export default Page;
-
-const PasswordHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <Header_>
-            <Typography variant="h2">{t("password")}</Typography>
-            <Typography color="text.faint">{children}</Typography>
-        </Header_>
-    );
-};
-
-const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <Header_>
-            <Typography variant="h3">{"Passkey"}</Typography>
-            <Typography color="text.faint">{children}</Typography>
-        </Header_>
-    );
-};
-
-const Header_ = styled("div")`
-    margin-block-end: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const ConnectionDetails: React.FC = () => {
-    const host = new URL(apiOrigin()).host;
-
-    return (
-        <ConnectionDetails_>
-            <Typography variant="small" color="text.faint">
-                {host}
-            </Typography>
-        </ConnectionDetails_>
-    );
-};
-
-const ConnectionDetails_ = styled("div")`
-    margin-block-start: 1rem;
-`;
-
-interface VerifyingPasskeyProps {
-    /** The email of the user whose passkey we're verifying */
-    email: string | undefined;
-    /** Called when the user wants to redirect again. */
-    onRetry: () => void;
-    /** Called when the user presses the "Recover account" button. */
-    onRecover: () => void;
-    /** Called when the user presses the "Change email" button. */
-    onLogout: () => void;
-}
-const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
-    email,
-    onRetry,
-    onRecover,
-    onLogout,
-}) => {
-    return (
-        <VerticallyCentered>
-            <FormPaper style={{ minWidth: "320px" }}>
-                <PasskeyHeader>{email ?? ""} </PasskeyHeader>
-
-                <VerifyingPasskeyMiddle>
-                    <Typography>{t("waiting_for_verification")}</Typography>
-
-                    <EnteButton onClick={onRetry} color="accent" type="button">
-                        {t("redirect_again")}
-                    </EnteButton>
-                </VerifyingPasskeyMiddle>
-
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={onRecover}>
-                        {t("RECOVER_ACCOUNT")}
-                    </LinkButton>
-                    <LinkButton onClick={onLogout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
-                </FormPaperFooter>
-
-                {isDevBuild && <ConnectionDetails />}
-            </FormPaper>
-        </VerticallyCentered>
-    );
-};
-
-const VerifyingPasskeyMiddle = styled("div")`
-    display: flex;
-    flex-direction: column;
-
-    margin-block: 3rem;
-    gap: 3rem;
-    align-items: center;
-`;
