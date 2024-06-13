@@ -129,7 +129,6 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
     await _sync('bgTaskActiveProcess');
     BackgroundFetch.finish(taskId);
   } else {
-    // ignore: unawaited_futures
     _runWithLogs(
       () async {
         _logger.info("Starting background task in $mode mode");
@@ -137,7 +136,7 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
         _runInBackground(taskId);
       },
       prefix: "[bg]",
-    );
+    ).ignore();
   }
 }
 
