@@ -71,13 +71,13 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <PasskeyHeader>{email ?? ""} </PasskeyHeader>
+                <PasskeyHeader>{email ?? ""}</PasskeyHeader>
 
                 <VerifyingPasskeyMiddle>
                     <Typography>{t("waiting_for_verification")}</Typography>
 
                     <EnteButton onClick={onRetry} color="accent" type="button">
-                        {t("redirect_again")}
+                        {t("try_again")}
                     </EnteButton>
                 </VerifyingPasskeyMiddle>
 
