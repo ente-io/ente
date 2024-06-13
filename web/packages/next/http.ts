@@ -16,7 +16,7 @@ let _clientPackage: string | undefined;
  * @param appName The {@link AppName} of the current app.
  */
 export const setAppNameForAuthenticatedRequests = (appName: AppName) => {
-    _clientPackage = clientPackageName[appName];
+    _clientPackage = clientPackageName(appName);
 };
 
 /**

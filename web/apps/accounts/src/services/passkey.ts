@@ -25,7 +25,7 @@ const accountsAuthenticatedRequestHeaders = (
 ): Record<string, string> => {
     return {
         "X-Auth-Token": token,
-        "X-Client-Package": clientPackageName.accounts,
+        "X-Client-Package": clientPackageName("accounts"),
     };
 };
 

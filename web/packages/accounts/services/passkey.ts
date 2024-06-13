@@ -28,7 +28,7 @@ export const passkeyVerificationRedirectURL = (
     appName: AppName,
     passkeySessionID: string,
 ) => {
-    const clientPackage = clientPackageName[appName];
+    const clientPackage = clientPackageName(appName);
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
     // in desktop app]
