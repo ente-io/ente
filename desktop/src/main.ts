@@ -21,7 +21,6 @@ import {
     attachFSWatchIPCHandlers,
     attachIPCHandlers,
     attachLogoutIPCHandler,
-    attachWindowIPCHandlers,
 } from "./main/ipc";
 import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
@@ -117,7 +116,6 @@ const main = () => {
             // Setup IPC and streams.
             const watcher = createWatcher(mainWindow);
             attachIPCHandlers();
-            attachWindowIPCHandlers(mainWindow);
             attachFSWatchIPCHandlers(watcher);
             attachLogoutIPCHandler(watcher);
             registerStreamProtocol();

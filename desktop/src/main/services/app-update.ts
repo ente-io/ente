@@ -180,26 +180,3 @@ export const updateOnNextRestart = (version: string) =>
 
 export const skipAppUpdate = (version: string) =>
     userPreferences.set("skipAppVersion", version);
-
-/**
- * Invoked when the renderer attaches a callback for {@link onShowWhatsNew}.
- * This can be taken as a signal that the UI is ready and will be able to show
- * the What's New screen if we need to tell it to.
- *
- * See: [Note: Conditions for showing the "What's new" screen]
- */
-export const canShowWhatsNew = (mainWindow: BrowserWindow) => {
-    const version = userPreferences.get("whatsNewShownVersion");
-    if (version && compareVersions(app.getVersion(), version) <= 0) {
-        // We have shown What's New earlier, but it was for a version same as or
-        // newer than the current version. Nothing to do now.
-        return;
-    }
-    mainWindow.webContents.send("showWhatsNew");
-};
-
-/**
- * End the sequence started by {@link canShowWhatsNew}.
- */
-export const didShowWhatsNew = () =>
-    userPreferences.set("whatsNewShownVersion", app.getVersion());

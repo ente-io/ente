@@ -149,26 +149,21 @@ export interface Electron {
     skipAppUpdate: (version: string) => void;
 
     /**
-     * Set or clear the callback {@link cb} to invoke when the app should show
-     * the "What's new" screen for the current version.
+     * Get the persisted version for the last shown changelog.
      *
-     * Setting a callback clears any previous callbacks.
-     *
-     * [Note: Conditions for showing the "What's new" screen]
-     *
-     * This screen is shown only once per update, and only when the current
-     * version is (sem-versionally) greater than the previous version for which
-     * this dialog was shown (if any). The state about whether or not this
-     * dialog has already been shown is persisted on the Node.js, in the user
-     * preferences store (which is not cleared on logout).
-     *
-     * If the Node.js layer notices an attached callback (and the above
-     * conditions are satisfied), then it invokes the callback. The callback
-     * should return `true` to indicate that the whats new screen was shown so
-     * that the Node.js layer can update the persisted state to avoid showing it
-     * again.
+     * See: [Note: Conditions for showing "What's new"]
      */
-    onShowWhatsNew: (cb: (() => boolean) | undefined) => void;
+    lastShownChangelogVersion: () => Promise<number | undefined>;
+
+    /**
+     * Save the given {@link version} to disk as the version of the last shown
+     * changelog.
+     *
+     * The value is saved to a store which is not cleared during logout.
+     *
+     * @see {@link lastShownChangelogVersion}
+     */
+    setLastShownChangelogVersion: (version: number) => Promise<void>;
 
     // - FS
 

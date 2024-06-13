@@ -72,6 +72,12 @@ const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 const saveEncryptionKey = (encryptionKey: string) =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
+const lastShownChangelogVersion = () =>
+    ipcRenderer.invoke("lastShownChangelogVersion");
+
+const setLastShownChangelogVersion = (version: number) =>
+    ipcRenderer.invoke("setLastShownChangelogVersion", version);
+
 const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
@@ -102,18 +108,6 @@ const updateOnNextRestart = (version: string) =>
 
 const skipAppUpdate = (version: string) => {
     ipcRenderer.send("skipAppUpdate", version);
-};
-
-const onShowWhatsNew = (cb: (() => boolean) | undefined) => {
-    ipcRenderer.removeAllListeners("showWhatsNew");
-    if (cb) {
-        ipcRenderer.on("showWhatsNew", () => {
-            if (cb()) {
-                ipcRenderer.send("didShowWhatsNew");
-            }
-        });
-        ipcRenderer.send("canShowWhatsNew");
-    }
 };
 
 // - FS
@@ -323,6 +317,8 @@ contextBridge.exposeInMainWorld("electron", {
     logout,
     encryptionKey,
     saveEncryptionKey,
+    lastShownChangelogVersion,
+    setLastShownChangelogVersion,
     onMainWindowFocus,
     onOpenURL,
 
@@ -332,7 +328,6 @@ contextBridge.exposeInMainWorld("electron", {
     updateAndRestart,
     updateOnNextRestart,
     skipAppUpdate,
-    onShowWhatsNew,
 
     // - FS
 

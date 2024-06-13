@@ -1,4 +1,5 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
+import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
 import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -391,17 +392,13 @@ export default function Gallery() {
             if (electron) {
                 // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                electron.onShowWhatsNew(() => {
-                    setOpenWhatsNew(true);
-                    return true;
-                });
+                if (await shouldShowWhatsNew()) setOpenWhatsNew(true);
             }
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
             if (electron) {
-                electron.onShowWhatsNew(undefined);
                 electron.onMainWindowFocus(undefined);
                 clipService.removeOnFileUploadListener();
             }

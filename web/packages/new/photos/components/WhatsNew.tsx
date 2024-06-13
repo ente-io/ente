@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import Slide from "@mui/material/Slide";
 import type { TransitionProps } from "@mui/material/transitions";
-import React from "react";
+import React, { useEffect } from "react";
+import { didShowWhatsNew } from "../services/changelog";
 
 interface WhatsNewProps {
     /** If `true`, then the dialog is shown. */
@@ -22,11 +23,15 @@ interface WhatsNewProps {
 }
 
 /**
- * Show a dialog showing a short summary of interesting-for-the-user things in
- * this release of the desktop app.
+ * Show a dialog showing a short summary of interesting-for-the-user things
+ * since the last time this dialog was shown.
  */
 export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
+
+    useEffect(() => {
+        void didShowWhatsNew();
+    }, []);
 
     return (
         <Dialog

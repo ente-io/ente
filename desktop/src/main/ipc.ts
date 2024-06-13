@@ -9,7 +9,7 @@
  */
 
 import type { FSWatcher } from "chokidar";
-import { ipcMain, type BrowserWindow } from "electron/main";
+import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
     FolderWatch,
@@ -19,8 +19,6 @@ import type {
 import { logToDisk } from "./log";
 import {
     appVersion,
-    canShowWhatsNew,
-    didShowWhatsNew,
     skipAppUpdate,
     updateAndRestart,
     updateOnNextRestart,
@@ -48,7 +46,12 @@ import {
     computeCLIPTextEmbeddingIfAvailable,
 } from "./services/ml-clip";
 import { computeFaceEmbeddings, detectFaces } from "./services/ml-face";
-import { encryptionKey, saveEncryptionKey } from "./services/store";
+import {
+    encryptionKey,
+    lastShownChangelogVersion,
+    saveEncryptionKey,
+    setLastShownChangelogVersion,
+} from "./services/store";
 import {
     clearPendingUploads,
     listZipItems,
@@ -103,11 +106,19 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
+    ipcMain.handle("encryptionKey", () => encryptionKey());
+
     ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
         saveEncryptionKey(encryptionKey),
     );
 
-    ipcMain.handle("encryptionKey", () => encryptionKey());
+    ipcMain.handle("lastShownChangelogVersion", () =>
+        lastShownChangelogVersion(),
+    );
+
+    ipcMain.handle("setLastShownChangelogVersion", (_, version: number) =>
+        setLastShownChangelogVersion(version),
+    );
 
     // - App update
 
@@ -118,8 +129,6 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.on("skipAppUpdate", (_, version: string) => skipAppUpdate(version));
-
-    ipcMain.on("didShowWhatsNew", () => didShowWhatsNew());
 
     // - FS
 
@@ -218,19 +227,6 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
-};
-
-/**
- * Sibling of {@link attachIPCHandlers} that attaches handlers that need access
- * to the main window for their functioning.
- *
- * @param mainWindow Our app's main {@link BrowserWindow}. It is usually needed
- * by these handler to send messages back to the main window's `webContents`.
- */
-export const attachWindowIPCHandlers = (mainWindow: BrowserWindow) => {
-    // - App update
-
-    ipcMain.on("canShowWhatsNew", () => canShowWhatsNew(mainWindow));
 };
 
 /**

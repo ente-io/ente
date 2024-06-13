@@ -10,9 +10,11 @@ interface UserPreferences {
     skipAppVersion?: string;
     muteUpdateNotificationVersion?: string;
     /**
-     * The app version for which we last showed the What's New screen.
+     * The changelog version for which we last showed the "What's new" screen.
+     *
+     * See: [Note: Conditions for showing "What's new"]
      */
-    whatsNewShownVersion?: string;
+    lastShownChangelogVersion?: number;
     /**
      * The last position and size of our app's window.
      *
@@ -37,7 +39,7 @@ const userPreferencesSchema: Schema<UserPreferences> = {
     hideDockIcon: { type: "boolean" },
     skipAppVersion: { type: "string" },
     muteUpdateNotificationVersion: { type: "string" },
-    whatsNewShownVersion: { type: "string" },
+    lastShownChangelogVersion: { type: "number" },
     windowBounds: {
         properties: {
             x: { type: "number" },
