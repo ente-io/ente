@@ -1,3 +1,4 @@
+import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
 import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -193,6 +194,10 @@ export default function Gallery() {
     const [search, setSearch] = useState<Search>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
+    // TODO(MR): This is never true currently, this is the WIP ability to show
+    // what's new dialog on desktop app updates. The UI is done, need to hook
+    // this up to logic to trigger it.
+    const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
         // A function to call to get the props we should apply to the container,
@@ -1153,6 +1158,10 @@ export default function Gallery() {
                     collectionSummaries={collectionSummaries}
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
+                />
+                <WhatsNew
+                    open={openWhatsNew}
+                    onClose={() => setOpenWhatsNew(false)}
                 />
                 {!isInSearchMode &&
                 !isFirstLoad &&
