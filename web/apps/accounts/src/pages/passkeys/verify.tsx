@@ -93,10 +93,6 @@ const Page = () => {
 
             setStatus("waitingForUser");
 
-            // Safari throws "NotAllowedError: The document is not focused" if
-            // the console is open when we call `navigator.credentials.create`.
-            // Not adding any workarounds, just documenting their incompetence.
-
             const credential = await signChallenge(options.publicKey);
             if (!credential) {
                 setStatus("failed");
