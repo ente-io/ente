@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -49,6 +50,24 @@ class _PasskeyPageState extends State<PasskeyPage> {
       "&clientPackage=io.ente.auth",
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  Future<void> checkStatus() async {
+    late dynamic response;
+    try {
+      response = await UserService.instance
+          .getTokenForPasskeySession(widget.sessionID);
+    } on PassKeySessionNotVerifiedError catch (e) {
+      showToast(context, "Verification is still pending.");
+    } on PassKeySessionExpiredError catch (e) {
+      showToast(context, "Passkey session expired. Please try again.");
+      return;
+    } catch (e, s) {
+      _logger.severe("failed to check status", e, s);
+      showGenericErrorDialog(context: context).ignore();
+      return;
+    }
+    await UserService.instance.onPassKeyVerified(context, response);
   }
 
   Future<void> _handleDeeplink(String? link) async {
@@ -128,6 +147,13 @@ class _PasskeyPageState extends State<PasskeyPage> {
               buttonType: ButtonType.primary,
               labelText: context.l10n.tryAgain,
               onTap: () => launchPasskey(),
+            ),
+            const SizedBox(height: 16),
+            ButtonWidget(
+              buttonType: ButtonType.neutral,
+              labelText: context.l10n.checkForUpdates,
+              onTap: checkStatus,
+              shouldSurfaceExecutionStates: true,
             ),
             const Padding(padding: EdgeInsets.all(30)),
             GestureDetector(
