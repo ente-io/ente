@@ -174,6 +174,19 @@ func (r *Repository) GetUserIDWithPasskeyTwoFactorSession(sessionID string) (use
 	return
 }
 
+// IsSessionAlreadyClaimed checks if the both token_data and verified_at are not null for a given session ID
+func (r *Repository) IsSessionAlreadyClaimed(sessionID string) (bool, error) {
+	var verifiedAt sql.NullInt64
+	err := r.DB.QueryRow(`SELECT verified_at FROM passkey_login_sessions WHERE session_id = $1`, sessionID).Scan(&verifiedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, stacktrace.Propagate(err, "")
+	}
+	return verifiedAt.Valid, nil
+}
+
 // StoreTokenData takes a sessionID, and tokenData, and updates the tokenData in the database
 func (r *Repository) StoreTokenData(sessionID string, tokenData ente.TwoFactorAuthorizationResponse) error {
 	tokenDataJson, err := json.Marshal(tokenData)

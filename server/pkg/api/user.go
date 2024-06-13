@@ -325,6 +325,17 @@ func (h *UserHandler) BeginPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
+	isSessionAlreadyClaimed, err := h.UserController.PasskeyRepo.IsSessionAlreadyClaimed(request.SessionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+
+	if isSessionAlreadyClaimed {
+		handler.Error(c, stacktrace.Propagate(&ente.ErrSessionAlreadyClaimed, "Session already claimed"))
+		return
+	}
+
 	user, err := h.UserController.UserRepo.Get(userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
