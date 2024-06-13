@@ -8,7 +8,6 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -87,8 +86,7 @@ class FileBottomBarState extends State<FileBottomBar> {
     if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto ||
-          (flagService.internalUser &&
-              widget.file.fileType == FileType.video)) {
+          (widget.file.fileType == FileType.video)) {
         children.add(
           Tooltip(
             message: "Edit",
