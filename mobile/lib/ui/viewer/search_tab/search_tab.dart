@@ -18,6 +18,7 @@ import "package:photos/ui/viewer/search_tab/contacts_section.dart";
 import "package:photos/ui/viewer/search_tab/descriptions_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
+import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/moments_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/utils/local_settings.dart";
@@ -82,7 +83,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);
-    searchTypes.remove(SectionType.content);
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -150,6 +150,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         );
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
+                          snapshot.data!.elementAt(index)
+                              as List<GenericSearchResult>,
+                        );
+                      case SectionType.magic:
+                        return MagicSection(
                           snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
