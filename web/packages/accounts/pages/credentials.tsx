@@ -2,6 +2,7 @@ import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -265,12 +266,20 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
+    return (
+        <VerifyingPasskey
+            email={user?.email}
+            onRecover={redirectToRecoverPage}
+            onLogout={logout}
+        />
+    );
+
     // TODO: Handle the case when user is not present, or exclude that
     // possibility using types.
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <Header>{user?.email ?? ""}</Header>
+                <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
 
                 <VerifyMasterPasswordForm
                     buttonText={t("VERIFY_PASSPHRASE")}
@@ -298,10 +307,21 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
 export default Page;
 
-const Header: React.FC<React.PropsWithChildren> = ({ children }) => {
+const PasswordHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
     return (
         <Header_>
             <Typography variant="h2">{t("password")}</Typography>
+            <Typography color="text.faint">{children}</Typography>
+        </Header_>
+    );
+};
+
+const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
+    return (
+        <Header_>
+            <Typography variant="h3" >
+                {"Passkey"}
+            </Typography>
             <Typography color="text.faint">{children}</Typography>
         </Header_>
     );
@@ -328,4 +348,57 @@ const ConnectionDetails: React.FC = () => {
 
 const ConnectionDetails_ = styled("div")`
     margin-block-start: 1rem;
+`;
+
+interface VerifyingPasskeyProps {
+    /** The email of the user whose passkey we're verifying */
+    email: string | undefined;
+    /** Called when the user wants to redirect again. */
+    onRetry: () => void;
+    /** Called when the user presses the "Recover account" button. */
+    onRecover: () => void;
+    /** Called when the user presses the "Change email" button. */
+    onLogout: () => void;
+}
+const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
+    email,
+    onRetry,
+    onRecover,
+    onLogout,
+}) => {
+    return (
+        <VerticallyCentered>
+            <FormPaper style={{ minWidth: "320px" }}>
+                <PasskeyHeader>{email ?? ""} </PasskeyHeader>
+
+                <VerifyingPasskeyMiddle>
+                    <Typography>{t("waiting_for_verification")}</Typography>
+
+                    <EnteButton onClick={onRetry} color="accent" type="button">
+                        {t("redirect_again")}
+                    </EnteButton>
+                </VerifyingPasskeyMiddle>
+
+                <FormPaperFooter style={{ justifyContent: "space-between" }}>
+                    <LinkButton onClick={onRecover}>
+                        {t("RECOVER_ACCOUNT")}
+                    </LinkButton>
+                    <LinkButton onClick={onLogout}>
+                        {t("CHANGE_EMAIL")}
+                    </LinkButton>
+                </FormPaperFooter>
+
+                {isDevBuild && <ConnectionDetails />}
+            </FormPaper>
+        </VerticallyCentered>
+    );
+};
+
+const VerifyingPasskeyMiddle = styled("div")`
+    display: flex;
+    flex-direction: column;
+
+    margin-block: 3rem;
+    gap: 3rem;
+    align-items: center;
 `;

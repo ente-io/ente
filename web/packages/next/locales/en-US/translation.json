@@ -627,6 +627,8 @@
     "TRY_AGAIN": "Try again",
     "passkey_login_instructions": "Follow the steps from your browser to continue logging in.",
     "passkey_login": "Login with passkey",
+    "passkey": "Passkey",
+    "waiting_for_verification": "Waiting for verification...",
     "passkey_verified": "Passkey verified",
     "redirecting_back_to_app": "Redirecting you back to the app...",
     "redirect_close_instructions": "You can close this window after the app opens.",
