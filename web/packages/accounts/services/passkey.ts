@@ -33,12 +33,15 @@ export const passkeyVerificationRedirectURL = (
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
     // in desktop app]
     const redirect = `${window.location.origin}/passkeys/finish`;
-    const recover = `${window.location.origin}/passkeys/recover`;
+    // See: [Note: Conditional passkey recover option on accounts]
+    const recoverOption: Record<string, string> = globalThis.electron
+        ? {}
+        : { recover: `${window.location.origin}/passkeys/recover` };
     const params = new URLSearchParams({
         clientPackage,
         passkeySessionID,
         redirect,
-        recover,
+        ...recoverOption,
     });
     return `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
 };

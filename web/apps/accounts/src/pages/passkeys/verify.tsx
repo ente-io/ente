@@ -137,16 +137,21 @@ const Page = () => {
 
     const handleRetry = () => void authenticate();
 
-    const handleRecover = () => {
+    const handleRecover = (() => {
         const searchParams = new URLSearchParams(window.location.search);
         const recover = nullToUndefined(searchParams.get("recover"));
         if (!recover) {
-            log.error("No recover URL was provided");
-            return;
+            // [Note: Conditional passkey recover option on accounts]
+            //
+            // Only show the recover option if the calling app provided us with
+            // the "recover" query parameter. For example, the mobile app does
+            // not pass it since it already shows a recovery option within the
+            // waiting screen that it shows.
+            return undefined;
         }
 
-        redirectToPasskeyRecoverPage(new URL(recover));
-    };
+        return () => redirectToPasskeyRecoverPage(new URL(recover));
+    })();
 
     const handleRedirectAgain = () =>
         redirectToURL(ensure(redirectURLWithData));
@@ -240,10 +245,13 @@ interface RetriableFailedProps {
     /** Callback invoked when the user presses the try again button. */
     onRetry: () => void;
     /**
-     * Callback invoked when the user presses the button to recover their
-     * second factor, e.g. if they cannot login using it.
+     * Callback invoked when the user presses the button to recover their second
+     * factor, e.g. if they cannot login using it.
+     *
+     * This is optional. See [Note: Conditional passkey recover option on
+     * accounts].
      */
-    onRecover: () => void;
+    onRecover: (() => void) | undefined;
 }
 
 const RetriableFailed: React.FC<RetriableFailedProps> = ({
@@ -267,15 +275,17 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
                 >
                     {t("TRY_AGAIN")}
                 </EnteButton>
-                <EnteButton
-                    onClick={onRecover}
-                    fullWidth
-                    color="primary"
-                    type="button"
-                    variant="text"
-                >
-                    {t("RECOVER_TWO_FACTOR")}
-                </EnteButton>
+                {onRecover && (
+                    <EnteButton
+                        onClick={onRecover}
+                        fullWidth
+                        color="primary"
+                        type="button"
+                        variant="text"
+                    >
+                        {t("RECOVER_TWO_FACTOR")}
+                    </EnteButton>
+                )}
             </ButtonStack>
         </Content>
     );
