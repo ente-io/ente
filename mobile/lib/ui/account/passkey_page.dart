@@ -91,8 +91,15 @@ class _PasskeyPageState extends State<PasskeyPage> {
           showToast(context, 'Account is already configured.');
           return;
         }
-        final String? uri = Uri.parse(link).queryParameters['response'];
-        String base64String = uri!.toString();
+        final parsedUri = Uri.parse(link);
+        final sessionID = parsedUri.queryParameters['passkeySessionID'];
+        if (sessionID != widget.sessionID) {
+          showToast(context, "Session ID mismatch");
+          _logger.warning('ignored deeplink: sessionID mismatch');
+          return;
+        }
+        final String? authResponse = parsedUri.queryParameters['response'];
+        String base64String = authResponse!.toString();
         while (base64String.length % 4 != 0) {
           base64String += '=';
         }
