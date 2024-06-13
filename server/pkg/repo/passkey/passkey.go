@@ -208,7 +208,7 @@ func (r *Repository) GetTokenData(sessionID string) (*ente.TwoFactorAuthorizatio
 		}
 		return nil, stacktrace.Propagate(err, "")
 	}
-	if verifiedAt.Valid == false {
+	if !verifiedAt.Valid {
 		return nil, &ente.ApiError{
 			Code:           "SESSION_NOT_VERIFIED",
 			Message:        "Session is not verified yet",
