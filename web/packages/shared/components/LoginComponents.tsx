@@ -88,6 +88,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                             {t("try_again")}
                         </EnteButton>
 
+                        {/* TODO-PK: Uncomment once the API is ready
                         <EnteButton
                             onClick={() => {}}
                             fullWidth
@@ -95,7 +96,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                             type="button"
                         >
                             {"Check status"}
-                        </EnteButton>
+                        </EnteButton> */}
                     </ButtonStack>
                 </VerifyingPasskeyMiddle>
 
