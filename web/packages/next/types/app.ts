@@ -18,12 +18,24 @@ export const appTitle: Record<AppName, string> = {
 };
 
 /**
- * Client "package names" for each of the apps.
+ * Client "package names" for each of our apps.
  *
  * These are used as the identifier in the user agent strings that we send to
  * our own servers.
+ *
+ * In cases where this code works for both a web and a desktop app for the same
+ * app (currently only photos), return the platform specific package name.
  */
-export const clientPackageName: Record<AppName, string> = {
+export const clientPackageName = (appName: AppName): string => {
+    if (globalThis.electron) {
+        if (appName != "photos")
+            throw new Error(`Unsupported desktop appName ${appName}`);
+        return clientPackageNamePhotosDesktop;
+    }
+    return _clientPackageName[appName];
+};
+
+export const _clientPackageName: Record<AppName, string> = {
     accounts: "io.ente.accounts.web",
     auth: "io.ente.auth.web",
     photos: "io.ente.photos.web",

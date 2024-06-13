@@ -6,6 +6,7 @@ import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
+import { VerifyingPasskey } from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -27,7 +28,10 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
-import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "../services/passkey";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
@@ -37,6 +41,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
+    const [passkeyVerificationURL, setPasskeyVerificationURL] = useState<
+        string | undefined
+    >();
 
     const router = useRouter();
 
@@ -87,10 +94,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 // TODO: This is not the first login though if they already have
                 // 2FA. Does this flag mean first login on this device?
                 setIsFirstLogin(true);
-                redirectUserToPasskeyVerificationFlow(
+                const url = passkeyVerificationRedirectURL(
                     appName,
                     passkeySessionID,
                 );
+                setPasskeyVerificationURL(url);
+                openPasskeyVerificationURL(url);
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
@@ -160,6 +169,35 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             <VerticallyCentered>
                 <EnteSpinner />
             </VerticallyCentered>
+        );
+    }
+
+    if (passkeyVerificationURL) {
+        // We only need when running in the desktop app, because in the web app
+        // we just redirect to passkeyVerificationURL. However, still we add an
+        // additional `globalThis.electron` check to show a spinner to prevent
+        // all these details from being disorientingly shown for a fraction of a
+        // second as the redirect happens on the web app.
+        //
+        // See: [Note: Passkey verification in the desktop app]
+
+        if (!globalThis.electron) {
+            return (
+                <VerticallyCentered>
+                    <EnteSpinner />
+                </VerticallyCentered>
+            );
+        }
+
+        return (
+            <VerifyingPasskey
+                email={email}
+                onRetry={() =>
+                    openPasskeyVerificationURL(passkeyVerificationURL)
+                }
+                onRecover={() => router.push("/passkeys/recover")}
+                onLogout={logout}
+            />
         );
     }
 

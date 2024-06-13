@@ -10,6 +10,7 @@ export enum PAGES {
     TWO_FACTOR_SETUP = "/two-factor/setup",
     TWO_FACTOR_VERIFY = "/two-factor/verify",
     TWO_FACTOR_RECOVER = "/two-factor/recover",
+    // PASSKEY_RECOVER = "/passkeys/recover",
     VERIFY = "/verify",
     SHARED_ALBUMS = "/shared-albums",
 }
