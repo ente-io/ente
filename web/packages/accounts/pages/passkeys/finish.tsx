@@ -50,7 +50,7 @@ export default Page;
  */
 const saveCredentials = async (response: string) => {
     // Decode response string (inverse of the steps we perform in
-    // `redirectAfterPasskeyAuthentication`).
+    // `passkeyAuthenticationSuccessRedirectURL`).
     const decodedResponse = JSON.parse(
         await fromB64URLSafeNoPaddingString(response),
     );

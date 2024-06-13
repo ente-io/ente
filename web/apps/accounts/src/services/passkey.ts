@@ -560,7 +560,7 @@ const authenticatorAssertionResponse = (credential: Credential) => {
  * @param twoFactorAuthorizationResponse The result of
  * {@link finishPasskeyAuthentication} returned by the backend.
  */
-export const redirectURLWithPasskeyAuthentication = async (
+export const passkeyAuthenticationSuccessRedirectURL = async (
     redirectURL: URL,
     passkeySessionID: string,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
