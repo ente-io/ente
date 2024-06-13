@@ -6,6 +6,7 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Typography,
     styled,
     useMediaQuery,
 } from "@mui/material";
@@ -38,8 +39,21 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
                 <DialogContentText>
                     <StyledUL>
                         <li>
-                            The app will remember its position and size when it
-                            is closed, and will reopen the same way.
+                            <Typography>
+                                <Typography color="primary">
+                                    Support for Passkeys
+                                </Typography>
+                                Passkeys can now be used as a second factor
+                                authentication mechanism.
+                            </Typography>
+                        </li>
+                        <li>
+                            <Typography color="primary">Window size</Typography>
+                            <Typography>
+                                {
+                                    "The app's window will remember its size and position."
+                                }
+                            </Typography>
                         </li>
                     </StyledUL>
                 </DialogContentText>
@@ -70,9 +84,10 @@ const SlideTransition = React.forwardRef(function Transition(
 
 const StyledUL = styled("ul")`
     padding-inline: 1rem;
-    list-style-type: circle;
 
-    margin-block-end: 20px;
+    li {
+        margin-block: 2rem;
+    }
 `;
 
 const StyledButton = styled(Button)`
