@@ -276,9 +276,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
-    if (passkeyVerificationURL) {
-        // We reach this case only when running in the desktop app, because in
-        // the web app we already would've redirected to passkeyVerificationURL.
+    if (passkeyVerificationURL && globalThis.electron) {
+        // We only need when running in the desktop app, because in the web app
+        // we just redirect to passkeyVerificationURL. However, still we add an
+        // additional `globalThis.electron` check is to prevent this state from
+        // being shown for a fraction of a second as the redirect happens on the
+        // web app.
         //
         // See: [Note: Passkey verification in the desktop app]
 

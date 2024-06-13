@@ -6,6 +6,7 @@ import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
+import { VerifyingPasskey } from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -34,7 +35,6 @@ import {
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
-import { VerifyingPasskey } from "@ente/shared/components/LoginComponents";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
@@ -174,9 +174,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
-    if (passkeyVerificationURL) {
-        // We reach this case only when running in the desktop app, because in
-        // the web app we already would've redirected to passkeyVerificationURL.
+    if (passkeyVerificationURL && globalThis.electron) {
+        // We only need when running in the desktop app, because in the web app
+        // we just redirect to passkeyVerificationURL. However, still we add an
+        // additional `globalThis.electron` check is to prevent this state from
+        // being shown for a fraction of a second as the redirect happens on the
+        // web app.
         //
         // See: [Note: Passkey verification in the desktop app]
 
