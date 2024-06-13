@@ -118,6 +118,7 @@ const Page = () => {
         setRedirectURLWithData(
             await redirectURLWithPasskeyAuthentication(
                 redirectURL,
+                passkeySessionID,
                 authorizationResponse,
             ),
         );
