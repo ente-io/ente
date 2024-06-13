@@ -87,7 +87,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         logUnhandledErrorsAndRejections(true);
         setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName[appName],
+            "X-Client-Package": clientPackageName(appName),
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);

@@ -46,7 +46,6 @@ class _PasskeyPageState extends State<PasskeyPage> {
       "https://accounts.ente.io/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
       "&redirect=enteauth://passkey"
-      "&recover=enteauth://passkey/recover"
       "&clientPackage=io.ente.auth",
       mode: LaunchMode.externalApplication,
     );

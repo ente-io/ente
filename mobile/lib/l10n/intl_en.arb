@@ -1238,10 +1238,17 @@
   "castIPMismatchTitle": "Failed to cast album",
   "castIPMismatchBody": "Please make sure you are on the same network as the TV.",
   "pairingComplete": "Pairing complete",
+  "savingEdits": "Saving edits...",
   "autoPair": "Auto pair",
   "pairWithPin": "Pair with PIN",
   "faceRecognition": "Face recognition",
   "foundFaces": "Found faces",
   "clusteringProgress": "Clustering progress",
-  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready."
+  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready.",
+  "trim": "Trim",
+  "crop": "Crop",
+  "rotate": "Rotate",
+  "left": "Left",
+  "right": "Right"
 }
+

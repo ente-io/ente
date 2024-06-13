@@ -13,8 +13,8 @@ import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
- * Redirect user to Ente accounts app to authenticate using their second factor,
- * a passkey they've configured.
+ * Construct a redirect URL to take the user to Ente accounts app to
+ * authenticate using their second factor, a passkey they've configured.
  *
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
@@ -24,41 +24,54 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
-export const redirectUserToPasskeyVerificationFlow = (
+export const passkeyVerificationRedirectURL = (
     appName: AppName,
     passkeySessionID: string,
 ) => {
-    const clientPackage = clientPackageName[appName];
+    const clientPackage = clientPackageName(appName);
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
     // in desktop app]
     const redirect = `${window.location.origin}/passkeys/finish`;
-    const recover = `${window.location.origin}/passkeys/recover`;
+    // See: [Note: Conditional passkey recover option on accounts]
+    const recoverOption: Record<string, string> = globalThis.electron
+        ? {}
+        : { recover: `${window.location.origin}/passkeys/recover` };
     const params = new URLSearchParams({
         clientPackage,
         passkeySessionID,
         redirect,
-        recover,
+        ...recoverOption,
     });
-    const url = `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
-    // [Note: Passkey verification in the desktop app]
-    //
-    // Our desktop app bundles the web app and serves it over a custom protocol.
-    // Passkeys are tied to origins, and will not work with this custom protocol
-    // even if we move the passkey creation and authentication inline to within
-    // the Photos web app.
-    //
-    // Thus, passkey creation and authentication in the desktop app works the
-    // same way it works in the mobile app - the system browser is invoked to
-    // open accounts.ente.io.
-    //
-    // -   For passkey creation, this is a one-way open. Passkeys get created at
-    //     accounts.ente.io, and that's it.
-    //
-    // -   For passkey verification, the flow is two-way. We register a custom
-    //     protocol and provide that as a return path redirect. Passkey
-    //     authentication happens at accounts.ente.io, and on success there is
-    //     redirected back to the desktop app.
+    return `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
+};
+
+/**
+ * Open or redirect to a passkey verification URL previously constructed using
+ * {@link passkeyVerificationRedirectURL}.
+ *
+ * @param url The URL to redirect to or open in the system browser.
+ *
+ * [Note: Passkey verification in the desktop app]
+ *
+ * Our desktop app bundles the web app and serves it over a custom protocol.
+ * Passkeys are tied to origins, and will not work with this custom protocol
+ * even if we move the passkey creation and authentication inline to within the
+ * Photos web app.
+ *
+ * Thus, passkey creation and authentication in the desktop app works the same
+ * way it works in the mobile app - the system browser is invoked to open
+ * accounts.ente.io.
+ *
+ * -   For passkey creation, this is a one-way open. Passkeys get created at
+ *     accounts.ente.io, and that's it.
+ *
+ * -   For passkey verification, the flow is two-way. We register a custom
+ *     protocol and provide that as a return path redirect. Passkey
+ *     authentication happens at accounts.ente.io, and on success there is
+ *     redirected back to the desktop app.
+ */
+export const openPasskeyVerificationURL = (url: string) => {
     if (globalThis.electron) window.open(url);
     else window.location.href = url;
 };

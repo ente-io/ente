@@ -523,6 +523,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Creating link..."),
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("Critical update available"),
+        "crop": MessageLookupByLibrary.simpleMessage("Crop"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Current usage is "),
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
@@ -856,6 +857,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
         "leaveSharedAlbum":
             MessageLookupByLibrary.simpleMessage("Leave shared album?"),
+        "left": MessageLookupByLibrary.simpleMessage("Left"),
         "light": MessageLookupByLibrary.simpleMessage("Light"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Light"),
         "linkCopiedToClipboard":
@@ -1208,6 +1210,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
+        "right": MessageLookupByLibrary.simpleMessage("Right"),
+        "rotate": MessageLookupByLibrary.simpleMessage("Rotate"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Rotate left"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
@@ -1219,6 +1223,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Save your recovery key if you haven\'t already"),
         "saving": MessageLookupByLibrary.simpleMessage("Saving..."),
+        "savingEdits": MessageLookupByLibrary.simpleMessage("Saving edits..."),
         "scanCode": MessageLookupByLibrary.simpleMessage("Scan code"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
@@ -1465,6 +1470,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "totalSize": MessageLookupByLibrary.simpleMessage("Total size"),
         "trash": MessageLookupByLibrary.simpleMessage("Trash"),
         "trashDaysLeft": m64,
+        "trim": MessageLookupByLibrary.simpleMessage("Trim"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Turn on backup to automatically upload files added to this device folder to Ente."),
