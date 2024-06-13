@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/user_details.dart';
-import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/passkey_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -66,20 +65,17 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         // We don't know if the user can disable MFA yet, so we fetch the info
         UserService.instance.getUserDetailsV2().ignore();
       }
-      final bool isInternalUser =
-          FeatureFlagService.instance.isInternalUserOrDebugBuild();
       children.addAll([
-        if (isInternalUser) sectionOptionSpacing,
-        if (isInternalUser)
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: l10n.passkey,
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async => await onPasskeyClick(context),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.passkey,
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => await onPasskeyClick(context),
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
