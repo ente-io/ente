@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -79,6 +80,9 @@ const saveCredentialsAndNavigateTo = async (response: string) => {
         // This is not the princess we were looking for. However, we have
         // already entered this castle. Redirect back to home without changing
         // any state, hopefully this will get the user back to where they were.
+        log.info(
+            `Ignoring redirect for unexpected passkeySessionID ${passkeySessionID}`,
+        );
         return "/";
     }
 
