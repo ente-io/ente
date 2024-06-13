@@ -58,6 +58,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
           .getTokenForPasskeySession(widget.sessionID);
     } on PassKeySessionNotVerifiedError catch (e) {
       showToast(context, context.l10n.passKeyPendingVerification);
+      return;
     } on PassKeySessionExpiredError catch (e) {
       await showErrorDialog(
         context,
@@ -156,7 +157,14 @@ class _PasskeyPageState extends State<PasskeyPage> {
             ButtonWidget(
               buttonType: ButtonType.secondary,
               labelText: context.l10n.checkStatus,
-              onTap: checkStatus,
+              onTap: () async {
+                try {
+                  await checkStatus();
+                } catch (e) {
+                  debugPrint('failed to check status %e');
+                  showGenericErrorDialog(context: context).ignore();
+                }
+              },
               shouldSurfaceExecutionStates: true,
             ),
             const Padding(padding: EdgeInsets.all(30)),
