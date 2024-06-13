@@ -566,8 +566,9 @@ export const passkeyAuthenticationSuccessRedirectURL = async (
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
     const encodedResponse = await toB64URLSafeNoPaddingString(
-        JSON.stringify({ ...twoFactorAuthorizationResponse, passkeySessionID }),
+        JSON.stringify(twoFactorAuthorizationResponse),
     );
+    redirectURL.searchParams.set("passkeySessionID", passkeySessionID);
     redirectURL.searchParams.set("response", encodedResponse);
     return redirectURL;
 };
