@@ -72,12 +72,12 @@ const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 const saveEncryptionKey = (encryptionKey: string) =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
-const onMainWindowFocus = (cb?: () => void) => {
+const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
 };
 
-const onOpenURL = (cb?: (url: string) => void) => {
+const onOpenURL = (cb: ((url: string) => void) | undefined) => {
     ipcRenderer.removeAllListeners("openURL");
     if (cb) ipcRenderer.on("openURL", (_, url: string) => cb(url));
 };
@@ -85,7 +85,7 @@ const onOpenURL = (cb?: (url: string) => void) => {
 // - App update
 
 const onAppUpdateAvailable = (
-    cb?: ((update: AppUpdate) => void) | undefined,
+    cb: ((update: AppUpdate) => void) | undefined,
 ) => {
     ipcRenderer.removeAllListeners("appUpdateAvailable");
     if (cb) {
@@ -102,6 +102,18 @@ const updateOnNextRestart = (version: string) =>
 
 const skipAppUpdate = (version: string) => {
     ipcRenderer.send("skipAppUpdate", version);
+};
+
+const onShowWhatsNew = (cb: (() => boolean) | undefined) => {
+    ipcRenderer.removeAllListeners("showWhatsNew");
+    if (cb) {
+        ipcRenderer.on("showWhatsNew", () => {
+            if (cb()) {
+                ipcRenderer.send("didShowWhatsNew");
+            }
+        });
+        ipcRenderer.send("canShowWhatsNew");
+    }
 };
 
 // - FS
@@ -320,6 +332,7 @@ contextBridge.exposeInMainWorld("electron", {
     updateAndRestart,
     updateOnNextRestart,
     skipAppUpdate,
+    onShowWhatsNew,
 
     // - FS
 

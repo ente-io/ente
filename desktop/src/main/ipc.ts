@@ -9,7 +9,7 @@
  */
 
 import type { FSWatcher } from "chokidar";
-import { ipcMain } from "electron/main";
+import { ipcMain, type BrowserWindow } from "electron/main";
 import type {
     CollectionMapping,
     FolderWatch,
@@ -19,6 +19,8 @@ import type {
 import { logToDisk } from "./log";
 import {
     appVersion,
+    canShowWhatsNew,
+    didShowWhatsNew,
     skipAppUpdate,
     updateAndRestart,
     updateOnNextRestart,
@@ -117,6 +119,8 @@ export const attachIPCHandlers = () => {
 
     ipcMain.on("skipAppUpdate", (_, version: string) => skipAppUpdate(version));
 
+    ipcMain.on("didShowWhatsNew", () => didShowWhatsNew());
+
     // - FS
 
     ipcMain.handle("fsExists", (_, path: string) => fsExists(path));
@@ -214,6 +218,19 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
+};
+
+/**
+ * Sibling of {@link attachIPCHandlers} that attaches handlers that need access
+ * to the main window for their functioning.
+ *
+ * @param mainWindow Our app's main {@link BrowserWindow}. It is usually needed
+ * by these handler to send messages back to the main window's `webContents`.
+ */
+export const attachWindowIPCHandlers = (mainWindow: BrowserWindow) => {
+    // - App update
+
+    ipcMain.on("canShowWhatsNew", () => canShowWhatsNew(mainWindow));
 };
 
 /**

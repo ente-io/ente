@@ -168,7 +168,7 @@ export interface Electron {
      * that the Node.js layer can update the persisted state to avoid showing it
      * again.
      */
-    onShowWhatsNew: (cb?: (() => boolean) | undefined) => void;
+    onShowWhatsNew: (cb: (() => boolean) | undefined) => void;
 
     // - FS
 
