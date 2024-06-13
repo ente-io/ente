@@ -190,11 +190,10 @@ export const skipAppUpdate = (version: string) =>
  */
 export const canShowWhatsNew = (mainWindow: BrowserWindow) => {
     const version = userPreferences.get("whatsNewShownVersion");
-    if (version) {
-        if (compareVersions(version, app.getVersion()) <= 0) {
-            log.debug(() => `Downgrade from ${version}, skipping what's new`);
-            return;
-        }
+    if (version && compareVersions(app.getVersion(), version) <= 0) {
+        // We have shown What's New earlier, but it was for a version same as or
+        // newer than the current version. Nothing to do now.
+        return;
     }
     mainWindow.webContents.send("showWhatsNew");
 };
