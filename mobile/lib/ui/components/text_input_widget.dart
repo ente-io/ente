@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:logging/logging.dart";
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -81,6 +82,7 @@ class TextInputWidget extends StatefulWidget {
 }
 
 class _TextInputWidgetState extends State<TextInputWidget> {
+  final _logger = Logger("TextInputWidget");
   ExecutionState executionState = ExecutionState.idle;
   late final TextEditingController _textController;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
@@ -271,6 +273,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       _debouncer.cancelDebounce();
       _exception = e as Exception;
       if (e.toString().contains("Incorrect password")) {
+        _logger.warning("Incorrect password");
         _surfaceWrongPasswordState();
       }
       if (!widget.popNavAfterSubmission) {
