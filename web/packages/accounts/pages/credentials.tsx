@@ -67,10 +67,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
-        [string, string] | undefined
+        { passkeySessionID: string; url: string } | undefined
     >();
 
     const router = useRouter();
+
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
@@ -180,8 +181,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         appName,
                         passkeySessionID,
                     );
-                    setPasskeyVerificationData([passkeySessionID, url]);
-                    openPasskeyVerificationURL(passkeySessionID, url);
+                    setPasskeyVerificationData({ passkeySessionID, url });
+                    openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
@@ -295,11 +296,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         return (
             <VerifyingPasskey
                 email={user?.email}
+                passkeySessionID={passkeyVerificationData?.passkeySessionID}
                 onRetry={() =>
-                    openPasskeyVerificationURL(...passkeyVerificationData)
+                    openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                onRecover={() => router.push("/passkeys/recover")}
-                onLogout={logout}
+                appContext={appContext}
             />
         );
     }

@@ -48,3 +48,13 @@ export const authenticatedRequestHeaders = (): Record<string, string> => {
     if (_clientPackage) headers["X-Client-Package"] = _clientPackage;
     return headers;
 };
+
+/**
+ * Return a headers object with "X-Client-Package" header if we have the client
+ * package value available to us from local storage.
+ */
+export const clientPackageHeaderIfPresent = (): Record<string, string> => {
+    const headers: Record<string, string> = {};
+    if (_clientPackage) headers["X-Client-Package"] = _clientPackage;
+    return headers;
+};

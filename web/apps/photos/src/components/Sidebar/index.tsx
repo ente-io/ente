@@ -528,13 +528,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 label={t("TWO_FACTOR")}
             />
 
-            {isInternalUserViaEmailCheck() && (
-                <EnteMenuItem
-                    variant="secondary"
-                    onClick={redirectToAccountsPage}
-                    label={t("passkeys")}
-                />
-            )}
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToAccountsPage}
+                label={t("passkeys")}
+            />
 
             <EnteMenuItem
                 variant="secondary"
