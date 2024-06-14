@@ -51,15 +51,22 @@ export const passkeyVerificationRedirectURL = (
     return `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
 };
 
+interface OpenPasskeyVerificationURLOptions {
+    /**
+     * The passkeySessionID for which we are redirecting.
+     *
+     * This is compared to the saved session id in the browser's session storage
+     * to allow us to ignore redirects to the passkey flow finish page except
+     * the ones for this specific session we're awaiting.
+     */
+    passkeySessionID: string;
+    /** The URL to redirect to or open in the system browser. */
+    url: string;
+}
+
 /**
  * Open or redirect to a passkey verification URL previously constructed using
  * {@link passkeyVerificationRedirectURL}.
- *
- * @param passkeySessionID The passkeySessionID for which we are redirecting.
- * This is saved to session storage to allow us to ignore subsequent redirects
- * to the passkey flow finish page except the ones for this specific session.
- *
- * @param url The URL to redirect to or open in the system browser.
  *
  * [Note: Passkey verification in the desktop app]
  *
@@ -80,10 +87,10 @@ export const passkeyVerificationRedirectURL = (
  *     authentication happens at accounts.ente.io, and on success there is
  *     redirected back to the desktop app.
  */
-export const openPasskeyVerificationURL = (
-    passkeySessionID: string,
-    url: string,
-) => {
+export const openPasskeyVerificationURL = ({
+    passkeySessionID,
+    url,
+}: OpenPasskeyVerificationURLOptions) => {
     sessionStorage.setItem("inflightPasskeySessionID", passkeySessionID);
 
     if (globalThis.electron) window.open(url);
