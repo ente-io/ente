@@ -3,7 +3,6 @@ import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
 import {
     fromB64URLSafeNoPadding,
@@ -425,28 +424,33 @@ export const beginPasskeyAuthentication = async (
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
 ) => {
-    const go = async () => await navigator.credentials.get({ publicKey });
+    // Safari throws "NotAllowedError: The document is not focused" sometimes
+    // (no reason, just to show their incompetence). The retry doesn't seem to
+    // help mostly, but cargo cult anyway.
 
-    try {
-        return await go();
-    } catch (e) {
-        // Safari throws "NotAllowedError: The document is not focused" for the
-        // first request sometimes (no reason, just to show their incompetence).
-        // "NotAllowedError" is also the error name that is thrown when the user
-        // explicitly cancels, so we can't even filter it out by name and also
-        // to do a message match.
-        if (
-            e instanceof Error &&
-            e.name == "NotAllowedError" &&
-            e.message == "The document is not focused."
-        ) {
-            log.warn("Working around Safari bug by retrying after failure", e);
-            await wait(2000);
-            return await go();
-        } else {
-            throw e;
+    let tries = 0;
+    const maxTries = 3;
+
+    while (tries < maxTries) {
+        try {
+            return await navigator.credentials.get({ publicKey });
+        } catch (e) {
+            if (
+                e instanceof Error &&
+                e.name == "NotAllowedError" &&
+                e.message == "The document is not focused."
+            ) {
+                log.warn("Safari workaround for", e);
+                continue;
+            } else {
+                throw e;
+            }
+        } finally {
+            tries++;
         }
     }
+
+    return undefined;
 };
 
 interface FinishPasskeyAuthenticationOptions {
