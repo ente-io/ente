@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import type { BaseAppContextT } from "@/next/types/app";
 import {
     checkPasskeyVerificationStatus,
     passKeySessionExpiredErrorMessage,
@@ -10,7 +11,6 @@ import { apiOrigin } from "@ente/shared/network/api";
 import { CircularProgress, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import type { BaseAppContextT } from "packages/next/types/app";
 import React, { useState } from "react";
 import { VerticallyCentered } from "./Container";
 import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
