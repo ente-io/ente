@@ -1,8 +1,9 @@
 import { isDevBuild } from "@/next/env";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { apiOrigin } from "@ente/shared/network/api";
-import { Typography, styled } from "@mui/material";
+import { CircularProgress, Typography, styled } from "@mui/material";
 import { t } from "i18next";
+import React, { useState } from "react";
 import { VerticallyCentered } from "./Container";
 import FormPaper from "./Form/FormPaper";
 import FormPaperFooter from "./Form/FormPaper/Footer";
@@ -68,15 +69,37 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     onRecover,
     onLogout,
 }) => {
+    type VerificationStatus = "waiting" | "checking" | "pending";
+    const [verificationStatus, setVerificationStatus] =
+        useState<VerificationStatus>("waiting");
+
+    const checkStatus = async () => {
+        setVerificationStatus("checking");
+        setTimeout(() => setVerificationStatus("pending"), 2000);
+        // try {
+        //     // const t = await checkPasskeyVerificationStatus("TODO");
+        // } catch (e) {}
+    };
+
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
                 <PasskeyHeader>{email ?? ""}</PasskeyHeader>
 
                 <VerifyingPasskeyMiddle>
-                    <Typography color="text.muted">
-                        {t("waiting_for_verification")}
-                    </Typography>
+                    <VerifyingPasskeyStatus>
+                        {verificationStatus == "checking" ? (
+                            <Typography>
+                                <CircularProgress color="accent" size="1.5em" />
+                            </Typography>
+                        ) : (
+                            <Typography color="text.muted">
+                                {verificationStatus == "waiting"
+                                    ? t("waiting_for_verification")
+                                    : t("verification_still_pending")}
+                            </Typography>
+                        )}
+                    </VerifyingPasskeyStatus>
 
                     <ButtonStack>
                         <EnteButton
@@ -88,15 +111,14 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                             {t("try_again")}
                         </EnteButton>
 
-                        {/* TODO-PK: Uncomment once the API is ready
                         <EnteButton
-                            onClick={() => {}}
+                            onClick={checkStatus}
                             fullWidth
                             color="accent"
                             type="button"
                         >
-                            {"Check status"}
-                        </EnteButton> */}
+                            {t("check_status")}
+                        </EnteButton>
                     </ButtonStack>
                 </VerifyingPasskeyMiddle>
 
@@ -121,7 +143,13 @@ const VerifyingPasskeyMiddle = styled("div")`
 
     padding-block: 1rem;
     gap: 4rem;
+`;
+
+const VerifyingPasskeyStatus = styled("div")`
     text-align: center;
+    /* Size of the CircularProgress (+ some margin) so that there is no layout
+       shift when it is shown */
+    min-height: 1.75em;
 `;
 
 const ButtonStack = styled("div")`
