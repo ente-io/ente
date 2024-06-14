@@ -1,6 +1,8 @@
+import { clientPackageHeaderIfPresent } from "@/next/http";
 import log from "@/next/log";
 import type { AppName } from "@/next/types/app";
 import { clientPackageName } from "@/next/types/app";
+import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
@@ -191,4 +193,47 @@ const getAccountsToken = async () => {
         },
     );
     return resp.data["accountsToken"];
+};
+
+/**
+ * The passkey session whose status we are trying to check has already expired.
+ * The user should attempt to login again.
+ */
+export const passKeySessionExpiredErrorMessage = "Passkey session has expired";
+
+/**
+ * Check if the user has already authenticated using their passkey for the given
+ * session.
+ *
+ * This is useful in case the automatic redirect back from accounts.ente.io to
+ * the desktop app does not work for some reason. In such cases, the user can
+ * press the "Check status" button: we'll make an API call to see if the
+ * authentication has already completed, and if so, get the same "response"
+ * object we'd have gotten as a query parameter in a redirect in
+ * {@link saveCredentialsAndNavigateTo} on the "/passkeys/finish" page.
+ *
+ * @param sessionID The passkey session whose session we wish to check the
+ * status of.
+ *
+ * @returns A {@link TwoFactorAuthorizationResponse} if the passkey
+ * authentication has completed, and `undefined` otherwise.
+ *
+ * @throws In addition to arbitrary errors, it throws errors with the message
+ * {@link passKeySessionExpiredErrorMessage}.
+ */
+export const checkPasskeyVerificationStatus = async (
+    sessionID: string,
+): Promise<TwoFactorAuthorizationResponse | undefined> => {
+    const url = `${apiOrigin()}/users/two-factor/passkeys/get-token`;
+    const params = new URLSearchParams({ sessionID });
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: clientPackageHeaderIfPresent(),
+    });
+    if (!res.ok) {
+        if (res.status == 404 || res.status == 410)
+            throw new Error(passKeySessionExpiredErrorMessage);
+        if (res.status == 400) return undefined; /* verification pending */
+        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    }
+    return TwoFactorAuthorizationResponse.parse(await res.json());
 };
