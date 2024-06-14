@@ -4,7 +4,9 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
   final GalleryType galleryType;
@@ -66,18 +68,25 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond,
             duration: const Duration(milliseconds: 400),
-            firstChild: BottomActionBarWidget(
-              selectedFiles: widget.selectedFiles,
-              galleryType: widget.galleryType,
-              collection: widget.collection,
-              person: widget.person,
-              clusterID: widget.clusterID,
-              onCancel: () {
-                if (widget.selectedFiles.files.isNotEmpty) {
-                  widget.selectedFiles.clearAll();
-                }
-              },
-              backgroundColor: widget.backgroundColor,
+            firstChild: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SelectAllButton(backgroundColor: widget.backgroundColor),
+                BottomActionBarWidget(
+                  selectedFiles: widget.selectedFiles,
+                  galleryType: widget.galleryType,
+                  collection: widget.collection,
+                  person: widget.person,
+                  clusterID: widget.clusterID,
+                  onCancel: () {
+                    if (widget.selectedFiles.files.isNotEmpty) {
+                      widget.selectedFiles.clearAll();
+                    }
+                  },
+                  backgroundColor: widget.backgroundColor,
+                ),
+              ],
             ),
             secondChild: const SizedBox(width: double.infinity),
           );
@@ -88,5 +97,50 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   _selectedFilesListener() {
     _hasSelectedFilesNotifier.value = widget.selectedFiles.files.isNotEmpty;
+  }
+}
+
+class SelectAllButton extends StatefulWidget {
+  final Color? backgroundColor;
+  const SelectAllButton({super.key, required this.backgroundColor});
+
+  @override
+  State<SelectAllButton> createState() => _SelectAllButtonState();
+}
+
+class _SelectAllButtonState extends State<SelectAllButton> {
+  bool _selectAll = false;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          final selectionState = SelectionState.of(context);
+          if (_selectAll) {
+            selectionState?.selectedFiles.clearAll();
+          } else {
+            selectionState?.selectedFiles
+                .selectAll(selectionState.allGalleryFiles!.toSet());
+          }
+          _selectAll = !_selectAll;
+        });
+      },
+      child: Container(
+        color: getEnteColorScheme(context).backgroundElevated2,
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("All"),
+            Icon(
+              _selectAll ? Icons.check_circle : Icons.check_circle_outline,
+              color:
+                  _selectAll ? getEnteColorScheme(context).strokeMuted : null,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
