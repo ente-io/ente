@@ -51,8 +51,7 @@ class _LockScreenOptionConfirmPasswordState
       Navigator.of(context).pop(true);
       return;
     }
-    await HapticFeedback.vibrate();
-    _confirmPasswordController.clear();
+    throw Exception("Incorrect password");
   }
 
   @override
@@ -92,8 +91,7 @@ class _LockScreenOptionConfirmPasswordState
             buttonText: S.of(context).confirm,
             isFormValid: isFormValid,
             onPressedFunction: () async {
-              await _confirmPasswordMatch();
-              FocusScope.of(context).unfocus();
+              _submitNotifier.value = !_submitNotifier.value;
             },
           );
         },
@@ -152,8 +150,11 @@ class _LockScreenOptionConfirmPasswordState
                 onChange: (p0) {
                   _isFormValid.value =
                       _confirmPasswordController.text.isNotEmpty;
-                  _submitNotifier.value = !_submitNotifier.value;
                 },
+                onSubmit: (p0) {
+                  return _confirmPasswordMatch();
+                },
+                submitNotifier: _submitNotifier,
               ),
             ),
           ],

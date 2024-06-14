@@ -7,6 +7,8 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
 
+///To show wrong password state, throw an exception with the message
+///"Incorrect password" in onSubmit.
 class TextInputWidget extends StatefulWidget {
   final String? label;
   final String? message;
@@ -19,7 +21,7 @@ class TextInputWidget extends StatefulWidget {
   final double borderRadius;
 
   ///TextInputWidget will listen to this notifier and executes onSubmit when
-  ///notified.
+  ///notified. Value of this notifier is irrelevant.
   final ValueNotifier? submitNotifier;
 
   ///TextInputWidget will listen to this notifier and clears and unfocuses the
@@ -87,6 +89,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   ///This is to pass if the TextInputWidget is in a dialog and an error is
   ///thrown in executing onSubmit by passing it as arg in Navigator.pop()
   Exception? _exception;
+  bool _incorrectPassword = false;
 
   @override
   void initState() {
@@ -168,7 +171,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: colorScheme.strokeFaint),
+                borderSide: BorderSide(
+                  color: _incorrectPassword
+                      ? const Color.fromRGBO(245, 42, 42, 1)
+                      : colorScheme.strokeFaint,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               suffixIcon: Padding(
@@ -263,6 +270,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       executionState = ExecutionState.error;
       _debouncer.cancelDebounce();
       _exception = e as Exception;
+      if (e.toString().contains("Incorrect password")) {
+        _surfaceWrongPasswordState();
+      }
       if (!widget.popNavAfterSubmission) {
         rethrow;
       }
@@ -380,6 +390,20 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
 
     return formattedValue;
+  }
+
+  void _surfaceWrongPasswordState() {
+    setState(() {
+      _incorrectPassword = true;
+      HapticFeedback.vibrate();
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          setState(() {
+            _incorrectPassword = false;
+          });
+        }
+      });
+    });
   }
 }
 
