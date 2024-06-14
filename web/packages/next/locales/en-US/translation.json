@@ -622,6 +622,7 @@
     "passkey_add_failed": "Could not add passkey",
     "passkey_login_failed": "Passkey login failed",
     "passkey_login_invalid_url": "The login URL is invalid.",
+    "passkey_login_already_claimed_session": "This session has already been verified.",
     "passkey_login_generic_error": "An error occurred while logging in with passkey.",
     "passkey_login_credential_hint": "If your passkeys are on a different device, you can open this page on that device to verify.",
     "passkeys_not_supported": "Passkeys are not supported in this browser",

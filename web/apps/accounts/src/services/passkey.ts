@@ -369,6 +369,13 @@ export interface BeginPasskeyAuthenticationResponse {
 }
 
 /**
+ * The passkey session which we are trying to start an authentication ceremony
+ * for has already finished elsewhere.
+ */
+export const passkeySessionAlreadyClaimedErrorMessage =
+    "Passkey session already claimed";
+
+/**
  * Create a authentication ceremony session and return a challenge and a list of
  * public key credentials that can be used to attest that challenge.
  *
@@ -379,6 +386,9 @@ export interface BeginPasskeyAuthenticationResponse {
  *
  * @param passkeySessionID A session created by the requesting app that can be
  * used to initiate a passkey authentication ceremony on the accounts app.
+ *
+ * @throws In addition to arbitrary errors, it throws errors with the message
+ * {@link passkeySessionAlreadyClaimedErrorMessage}.
  */
 export const beginPasskeyAuthentication = async (
     passkeySessionID: string,
@@ -388,7 +398,11 @@ export const beginPasskeyAuthentication = async (
         method: "POST",
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    if (!res.ok) {
+        if (res.status == 409)
+            throw new Error(passkeySessionAlreadyClaimedErrorMessage);
+        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    }
 
     // See: [Note: Converting binary data in WebAuthn API payloads]
 

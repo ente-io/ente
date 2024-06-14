@@ -3,7 +3,7 @@ import log from "@/next/log";
 import type { BaseAppContextT } from "@/next/types/app";
 import {
     checkPasskeyVerificationStatus,
-    passKeySessionExpiredErrorMessage,
+    passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@ente/accounts/services/passkey";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -108,7 +108,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             log.error("Passkey verification status check failed", e);
             setDialogBoxAttributesV2(
                 e instanceof Error &&
-                    e.message == passKeySessionExpiredErrorMessage
+                    e.message == passkeySessionExpiredErrorMessage
                     ? sessionExpiredDialogAttributes(logout)
                     : genericErrorAttributes(),
             );
