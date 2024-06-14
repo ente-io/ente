@@ -209,7 +209,7 @@ const getAccountsToken = async () => {
  * The passkey session whose status we are trying to check has already expired.
  * The user should attempt to login again.
  */
-export const passKeySessionExpiredErrorMessage = "Passkey session has expired";
+export const passkeySessionExpiredErrorMessage = "Passkey session has expired";
 
 /**
  * Check if the user has already authenticated using their passkey for the given
@@ -229,7 +229,7 @@ export const passKeySessionExpiredErrorMessage = "Passkey session has expired";
  * authentication has completed, and `undefined` otherwise.
  *
  * @throws In addition to arbitrary errors, it throws errors with the message
- * {@link passKeySessionExpiredErrorMessage}.
+ * {@link passkeySessionExpiredErrorMessage}.
  */
 export const checkPasskeyVerificationStatus = async (
     sessionID: string,
@@ -241,7 +241,7 @@ export const checkPasskeyVerificationStatus = async (
     });
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)
-            throw new Error(passKeySessionExpiredErrorMessage);
+            throw new Error(passkeySessionExpiredErrorMessage);
         if (res.status == 400) return undefined; /* verification pending */
         throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     }

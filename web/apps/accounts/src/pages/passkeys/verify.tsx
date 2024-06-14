@@ -16,6 +16,7 @@ import {
     isWebAuthnSupported,
     isWhitelistedRedirect,
     passkeyAuthenticationSuccessRedirectURL,
+    passkeySessionAlreadyClaimedErrorMessage,
     redirectToPasskeyRecoverPage,
     signChallenge,
     type BeginPasskeyAuthenticationResponse,
@@ -31,6 +32,7 @@ const Page = () => {
         | "loading" /* Can happen multiple times in the flow */
         | "webAuthnNotSupported" /* Unrecoverable error */
         | "unknownRedirect" /* Unrecoverable error */
+        | "sessionAlreadyClaimed" /* Unrecoverable error */
         | "unrecoverableFailure" /* Unrecoverable error - generic */
         | "failedDuringSignChallenge" /* Recoverable error in signChallenge */
         | "failed" /* Recoverable error otherwise */
@@ -117,7 +119,12 @@ const Page = () => {
             beginResponse = await beginPasskeyAuthentication(passkeySessionID);
         } catch (e) {
             log.error("Failed to begin passkey authentication", e);
-            setStatus("failed");
+            setStatus(
+                e instanceof Error &&
+                    e.message == passkeySessionAlreadyClaimedErrorMessage
+                    ? "sessionAlreadyClaimed"
+                    : "failed",
+            );
             return;
         }
 
@@ -231,6 +238,7 @@ const Page = () => {
         loading: <Loading />,
         unknownRedirect: <UnknownRedirect />,
         webAuthnNotSupported: <WebAuthnNotSupported />,
+        sessionAlreadyClaimed: <SessionAlreadyClaimed />,
         unrecoverableFailure: <UnrecoverableFailure />,
         failedDuringSignChallenge: (
             <RetriableFailed
@@ -276,6 +284,26 @@ const UnknownRedirect: React.FC = () => {
 const WebAuthnNotSupported: React.FC = () => {
     return <Failed message={t("passkeys_not_supported")} />;
 };
+
+const SessionAlreadyClaimed: React.FC = () => {
+    return (
+        <Content>
+            <SessionAlreadyClaimed_>
+                <InfoIcon color="secondary" />
+                <Typography>
+                    {t("passkey_login_already_claimed_session")}
+                </Typography>
+            </SessionAlreadyClaimed_>
+        </Content>
+    );
+};
+
+const SessionAlreadyClaimed_ = styled("div")`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+`;
 
 const UnrecoverableFailure: React.FC = () => {
     return <Failed message={t("passkey_login_generic_error")} />;
@@ -465,8 +493,6 @@ interface RedirectingAppProps {
 }
 
 const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
-    const handleClose = window.close;
-
     return (
         <Content>
             <InfoIcon color="accent" fontSize="large" />
@@ -478,15 +504,6 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
                 {t("redirect_close_instructions")}
             </Typography>
             <ButtonStack>
-                <EnteButton
-                    onClick={handleClose}
-                    fullWidth
-                    color="secondary"
-                    type="button"
-                    variant="contained"
-                >
-                    {t("CLOSE")}
-                </EnteButton>
                 <EnteButton
                     onClick={onRetry}
                     fullWidth
