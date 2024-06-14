@@ -8933,6 +8933,16 @@ class S {
       args: [],
     );
   }
+
+  /// `What's new`
+  String get whatsNew {
+    return Intl.message(
+      'What\'s new',
+      name: 'whatsNew',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
