@@ -1,13 +1,19 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import { checkPasskeyVerificationStatus } from "@ente/accounts/services/passkey";
+import {
+    checkPasskeyVerificationStatus,
+    passKeySessionExpiredErrorMessage,
+} from "@ente/accounts/services/passkey";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { apiOrigin } from "@ente/shared/network/api";
 import { CircularProgress, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
+import type { BaseAppContextT } from "packages/next/types/app";
 import React, { useState } from "react";
 import { VerticallyCentered } from "./Container";
+import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
+import { genericErrorAttributes } from "./ErrorComponents";
 import FormPaper from "./Form/FormPaper";
 import FormPaperFooter from "./Form/FormPaper/Footer";
 import LinkButton from "./LinkButton";
@@ -62,16 +68,23 @@ interface VerifyingPasskeyProps {
     email: string | undefined;
     /** Called when the user wants to redirect again. */
     onRetry: () => void;
-        /** Called when the user presses the "Change email" button. */
-    onLogout: () => void;
+    /**
+     * The appContext.
+     *
+     * Needs to be explicitly passed since this component is used in a package
+     * where the pages are not wrapped in the provider.
+     */
+    appContext: BaseAppContextT;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     passkeySessionID,
     email,
     onRetry,
-    onLogout,
+    appContext,
 }) => {
+    const { logout, setDialogBoxAttributesV2 } = appContext;
+
     type VerificationStatus = "waiting" | "checking" | "pending";
     const [verificationStatus, setVerificationStatus] =
         useState<VerificationStatus>("waiting");
@@ -82,6 +95,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
         setVerificationStatus("waiting");
         onRetry();
     };
+
     const handleCheckStatus = async () => {
         setVerificationStatus("checking");
         try {
@@ -94,7 +108,12 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             }
         } catch (e) {
             log.error("Passkey verification status check failed", e);
-            // TODO-PK:
+            setDialogBoxAttributesV2(
+                e instanceof Error &&
+                    e.message == passKeySessionExpiredErrorMessage
+                    ? sessionExpiredDialogAttributes(logout)
+                    : genericErrorAttributes(),
+            );
         }
     };
 
@@ -147,7 +166,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                     <LinkButton onClick={handleRecover}>
                         {t("RECOVER_ACCOUNT")}
                     </LinkButton>
-                    <LinkButton onClick={onLogout}>
+                    <LinkButton onClick={logout}>
                         {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>
@@ -178,3 +197,26 @@ const ButtonStack = styled("div")`
     flex-direction: column;
     gap: 1rem;
 `;
+
+/**
+ * {@link DialogBoxAttributesV2} for showing the error when the user's session
+ * has expired.
+ *
+ * It asks them to login again. There is one button, which allows them to
+ * logout.
+ *
+ * @param onLogin Called when the user presses the "Login" button on the error
+ * dialog.
+ */
+export const sessionExpiredDialogAttributes = (
+    onLogin: () => void,
+): DialogBoxAttributesV2 => ({
+    title: t("SESSION_EXPIRED"),
+    content: t("SESSION_EXPIRED_MESSAGE"),
+    nonClosable: true,
+    proceed: {
+        text: t("LOGIN"),
+        action: onLogin,
+        variant: "accent",
+    },
+});

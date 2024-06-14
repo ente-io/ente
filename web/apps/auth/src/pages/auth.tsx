@@ -3,9 +3,9 @@ import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { sessionExpiredDialogAttributes } from "@ente/shared/components/LoginComponents";
 import NavbarBase from "@ente/shared/components/Navbar/base";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
@@ -139,19 +139,6 @@ const Page: React.FC = () => {
 };
 
 export default Page;
-
-const sessionExpiredDialogAttributes = (
-    action: () => void,
-): DialogBoxAttributesV2 => ({
-    title: t("SESSION_EXPIRED"),
-    content: t("SESSION_EXPIRED_MESSAGE"),
-    nonClosable: true,
-    proceed: {
-        text: t("LOGIN"),
-        action,
-        variant: "accent",
-    },
-});
 
 const AuthNavbar: React.FC = () => {
     const { isMobile, logout } = ensure(useContext(AppContext));
