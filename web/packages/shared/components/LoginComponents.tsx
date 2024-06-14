@@ -1,8 +1,11 @@
 import { isDevBuild } from "@/next/env";
+import log from "@/next/log";
+import { checkPasskeyVerificationStatus } from "@ente/accounts/services/passkey";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { apiOrigin } from "@ente/shared/network/api";
 import { CircularProgress, Typography, styled } from "@mui/material";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { VerticallyCentered } from "./Container";
 import FormPaper from "./Form/FormPaper";
@@ -53,32 +56,50 @@ const ConnectionDetails_ = styled("div")`
 `;
 
 interface VerifyingPasskeyProps {
-    /** The email of the user whose passkey we're verifying */
+    /** ID of the current passkey verification session. */
+    passkeySessionID: string;
+    /** The email of the user whose passkey we're verifying. */
     email: string | undefined;
     /** Called when the user wants to redirect again. */
     onRetry: () => void;
-    /** Called when the user presses the "Recover account" button. */
-    onRecover: () => void;
-    /** Called when the user presses the "Change email" button. */
+        /** Called when the user presses the "Change email" button. */
     onLogout: () => void;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
+    passkeySessionID,
     email,
     onRetry,
-    onRecover,
     onLogout,
 }) => {
     type VerificationStatus = "waiting" | "checking" | "pending";
     const [verificationStatus, setVerificationStatus] =
         useState<VerificationStatus>("waiting");
 
-    const checkStatus = async () => {
+    const router = useRouter();
+
+    const handleRetry = () => {
+        setVerificationStatus("waiting");
+        onRetry();
+    };
+    const handleCheckStatus = async () => {
         setVerificationStatus("checking");
-        setTimeout(() => setVerificationStatus("pending"), 2000);
-        // try {
-        //     // const t = await checkPasskeyVerificationStatus("TODO");
-        // } catch (e) {}
+        try {
+            const response =
+                await checkPasskeyVerificationStatus(passkeySessionID);
+            if (!response) {
+                setVerificationStatus("pending");
+            } else {
+                // TODO-PK:
+            }
+        } catch (e) {
+            log.error("Passkey verification status check failed", e);
+            // TODO-PK:
+        }
+    };
+
+    const handleRecover = () => {
+        router.push("/passkeys/recover");
     };
 
     return (
@@ -103,7 +124,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
 
                     <ButtonStack>
                         <EnteButton
-                            onClick={onRetry}
+                            onClick={handleRetry}
                             fullWidth
                             color="secondary"
                             type="button"
@@ -112,7 +133,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                         </EnteButton>
 
                         <EnteButton
-                            onClick={checkStatus}
+                            onClick={handleCheckStatus}
                             fullWidth
                             color="accent"
                             type="button"
@@ -123,7 +144,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                 </VerifyingPasskeyMiddle>
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={onRecover}>
+                    <LinkButton onClick={handleRecover}>
                         {t("RECOVER_ACCOUNT")}
                     </LinkButton>
                     <LinkButton onClick={onLogout}>
@@ -149,7 +170,7 @@ const VerifyingPasskeyStatus = styled("div")`
     text-align: center;
     /* Size of the CircularProgress (+ some margin) so that there is no layout
        shift when it is shown */
-    min-height: 1.75em;
+    min-height: 2em;
 `;
 
 const ButtonStack = styled("div")`
