@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -50,6 +51,30 @@ class _PasskeyPageState extends State<PasskeyPage> {
     );
   }
 
+  Future<void> checkStatus() async {
+    late dynamic response;
+    try {
+      response = await UserService.instance
+          .getTokenForPasskeySession(widget.sessionID);
+    } on PassKeySessionNotVerifiedError {
+      showToast(context, context.l10n.passKeyPendingVerification);
+      return;
+    } on PassKeySessionExpiredError {
+      await showErrorDialog(
+        context,
+        context.l10n.loginSessionExpired,
+        context.l10n.loginSessionExpiredDetails,
+      );
+      Navigator.of(context).pop();
+      return;
+    } catch (e, s) {
+      _logger.severe("failed to check status", e, s);
+      showGenericErrorDialog(context: context).ignore();
+      return;
+    }
+    await UserService.instance.onPassKeyVerified(context, response);
+  }
+
   Future<void> _handleDeeplink(String? link) async {
     if (!context.mounted ||
         Configuration.instance.hasConfiguredAccount() ||
@@ -66,8 +91,15 @@ class _PasskeyPageState extends State<PasskeyPage> {
           showToast(context, 'Account is already configured.');
           return;
         }
-        final String? uri = Uri.parse(link).queryParameters['response'];
-        String base64String = uri!.toString();
+        final parsedUri = Uri.parse(link);
+        final sessionID = parsedUri.queryParameters['passkeySessionID'];
+        if (sessionID != widget.sessionID) {
+          showToast(context, "Session ID mismatch");
+          _logger.warning('ignored deeplink: sessionID mismatch');
+          return;
+        }
+        final String? authResponse = parsedUri.queryParameters['response'];
+        String base64String = authResponse!.toString();
         while (base64String.length % 4 != 0) {
           base64String += '=';
         }
@@ -125,8 +157,22 @@ class _PasskeyPageState extends State<PasskeyPage> {
             const SizedBox(height: 16),
             ButtonWidget(
               buttonType: ButtonType.primary,
-              labelText: context.l10n.verifyPasskey,
+              labelText: context.l10n.tryAgain,
               onTap: () => launchPasskey(),
+            ),
+            const SizedBox(height: 16),
+            ButtonWidget(
+              buttonType: ButtonType.secondary,
+              labelText: context.l10n.checkStatus,
+              onTap: () async {
+                try {
+                  await checkStatus();
+                } catch (e) {
+                  debugPrint('failed to check status %e');
+                  showGenericErrorDialog(context: context).ignore();
+                }
+              },
+              shouldSurfaceExecutionStates: true,
             ),
             const Padding(padding: EdgeInsets.all(30)),
             GestureDetector(
