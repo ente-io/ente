@@ -1,5 +1,4 @@
 import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
@@ -423,35 +422,7 @@ export const beginPasskeyAuthentication = async (
  */
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
-) => {
-    // Safari throws "NotAllowedError: The document is not focused" sometimes
-    // (no reason, just to show their incompetence). The retry doesn't seem to
-    // help mostly, but cargo cult anyway.
-
-    let tries = 0;
-    const maxTries = 3;
-
-    while (tries < maxTries) {
-        try {
-            return await navigator.credentials.get({ publicKey });
-        } catch (e) {
-            if (
-                e instanceof Error &&
-                e.name == "NotAllowedError" &&
-                e.message == "The document is not focused."
-            ) {
-                log.warn("Safari workaround for", e);
-                continue;
-            } else {
-                throw e;
-            }
-        } finally {
-            tries++;
-        }
-    }
-
-    return undefined;
-};
+) => nullToUndefined(await navigator.credentials.get({ publicKey }));
 
 interface FinishPasskeyAuthenticationOptions {
     passkeySessionID: string;

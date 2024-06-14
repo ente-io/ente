@@ -6,9 +6,10 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InfoIcon from "@mui/icons-material/Info";
+import KeyIcon from "@mui/icons-material/Key";
 import { Paper, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
@@ -17,6 +18,7 @@ import {
     passkeyAuthenticationSuccessRedirectURL,
     redirectToPasskeyRecoverPage,
     signChallenge,
+    type BeginPasskeyAuthenticationResponse,
 } from "services/passkey";
 
 const Page = () => {
@@ -29,13 +31,36 @@ const Page = () => {
         | "loading" /* Can happen multiple times in the flow */
         | "webAuthnNotSupported" /* Unrecoverable error */
         | "unknownRedirect" /* Unrecoverable error */
-        | "unrecoverableFailure" /* Unrocevorable error - generic */
+        | "unrecoverableFailure" /* Unrecoverable error - generic */
         | "failed" /* Recoverable error */
+        | "needUserFocus" /* See docs for `Continuation` */
         | "waitingForUser" /* ...to authenticate with their passkey */
         | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
         | "redirectingApp"; /* Other redirects (mobile / desktop redirect) */
 
     const [status, setStatus] = useState<Status>("loading");
+
+    /**
+     * Safari keeps on saying "NotAllowedError: The document is not focused"
+     * even though it just opened the page and brought it to the front.
+     *
+     * Because of their incompetence, we need to break our entire flow into two
+     * parts, and stash away a lot of state when we're in the "needUserFocus"
+     * state.
+     */
+    interface Continuation {
+        redirectURL: URL;
+        clientPackage: string;
+        passkeySessionID: string;
+        beginResponse: BeginPasskeyAuthenticationResponse;
+    }
+    const [continuation, setContinuation] = useState<
+        Continuation | undefined
+    >();
+
+    // Safari throws  sometimes
+    // (no reason, just to show their incompetence). The retry doesn't seem to
+    // help mostly, but cargo cult anyway.
 
     // The URL we're redirecting to on success.
     //
@@ -44,8 +69,8 @@ const Page = () => {
         URL | undefined
     >();
 
-    /** (re)start the authentication flow */
-    const authenticate = async () => {
+    /** Phase 1 of {@link authenticate}. */
+    const authenticateBegin = useCallback(async () => {
         if (!isWebAuthnSupported()) {
             setStatus("webAuthnNotSupported");
             return;
@@ -86,21 +111,59 @@ const Page = () => {
             return;
         }
 
-        let authorizationResponse: TwoFactorAuthorizationResponse;
+        let beginResponse: BeginPasskeyAuthenticationResponse;
         try {
-            const { ceremonySessionID, options } =
-                await beginPasskeyAuthentication(passkeySessionID);
+            beginResponse = await beginPasskeyAuthentication(passkeySessionID);
+        } catch (e) {
+            log.error("Failed to begin passkey authentication", e);
+            setStatus("failed");
+            return;
+        }
 
-            setStatus("waitingForUser");
+        return {
+            redirectURL,
+            passkeySessionID,
+            clientPackage,
+            beginResponse,
+        };
+    }, []);
 
-            const credential = await signChallenge(options.publicKey);
+    /**
+     * Phase 2 of {@link authenticate}, separated by a potential user
+     * interaction.
+     */
+    const authenticateContinue = useCallback(async (cont: Continuation) => {
+        const { redirectURL, passkeySessionID, clientPackage, beginResponse } =
+            cont;
+        const { ceremonySessionID, options } = beginResponse;
+
+        setStatus("waitingForUser");
+
+        let credential: Credential | undefined;
+        try {
+            credential = await signChallenge(options.publicKey);
             if (!credential) {
                 setStatus("failed");
                 return;
             }
+        } catch (e) {
+            log.error("Failed to get credentials", e);
+            if (
+                e instanceof Error &&
+                e.name == "NotAllowedError" &&
+                e.message == "The document is not focused."
+            ) {
+                setStatus("needUserFocus");
+            } else {
+                setStatus("failed");
+            }
+            return;
+        }
 
-            setStatus("loading");
+        setStatus("loading");
 
+        let authorizationResponse: TwoFactorAuthorizationResponse;
+        try {
             authorizationResponse = await finishPasskeyAuthentication({
                 passkeySessionID,
                 ceremonySessionID,
@@ -108,7 +171,7 @@ const Page = () => {
                 credential,
             });
         } catch (e) {
-            log.error("Passkey authentication failed", e);
+            log.error("Failed to finish passkey authentication", e);
             setStatus("failed");
             return;
         }
@@ -122,15 +185,26 @@ const Page = () => {
                 authorizationResponse,
             ),
         );
-    };
+    }, []);
+
+    /** (re)start the authentication flow */
+    const authenticate = useCallback(async () => {
+        const cont = await authenticateBegin();
+        if (cont) {
+            setContinuation(cont);
+            await authenticateContinue(cont);
+        }
+    }, [authenticateBegin, authenticateContinue]);
 
     useEffect(() => {
         void authenticate();
-    }, []);
+    }, [authenticate]);
 
     useEffect(() => {
         if (successRedirectURL) redirectToURL(successRedirectURL);
     }, [successRedirectURL]);
+
+    const handleVerify = () => void authenticateContinue(ensure(continuation));
 
     const handleRetry = () => void authenticate();
 
@@ -160,6 +234,7 @@ const Page = () => {
         failed: (
             <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
         ),
+        needUserFocus: <Verify onVerify={handleVerify} />,
         waitingForUser: <WaitingForUser />,
         redirectingWeb: <RedirectingWeb />,
         redirectingApp: <RedirectingApp onRetry={handleRedirectAgain} />,
@@ -236,6 +311,37 @@ const ContentPaper = styled(Paper)`
     flex-direction: column;
     gap: 1rem;
 `;
+
+interface VerifyProps {
+    /** Called when the user presses the "Verify" button. */
+    onVerify: () => void;
+}
+/**
+ * Gain focus for the current page by requesting the user to explicitly click a
+ * button. For more details, see the documentation for `Continuation`.
+ */
+const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
+    return (
+        <Content>
+            <KeyIcon color="secondary" fontSize="large" />
+            <Typography variant="h3">{t("passkey")}</Typography>
+            <Typography color="text.muted">
+                {t("passkey_login_generic_error")}
+            </Typography>
+            <ButtonStack>
+                <EnteButton
+                    onClick={onVerify}
+                    fullWidth
+                    color="accent"
+                    type="button"
+                    variant="contained"
+                >
+                    {t("VERIFY")}
+                </EnteButton>
+            </ButtonStack>
+        </Content>
+    );
+};
 
 interface RetriableFailedProps {
     /** Callback invoked when the user presses the try again button. */
