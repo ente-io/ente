@@ -32,7 +32,8 @@ const Page = () => {
         | "webAuthnNotSupported" /* Unrecoverable error */
         | "unknownRedirect" /* Unrecoverable error */
         | "unrecoverableFailure" /* Unrecoverable error - generic */
-        | "failed" /* Recoverable error */
+        | "failedDuringSignChallenge" /* Recoverable error in signChallenge */
+        | "failed" /* Recoverable error otherwise */
         | "needUserFocus" /* See docs for `Continuation` */
         | "waitingForUser" /* ...to authenticate with their passkey */
         | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
@@ -143,7 +144,7 @@ const Page = () => {
         try {
             credential = await signChallenge(options.publicKey);
             if (!credential) {
-                setStatus("failed");
+                setStatus("failedDuringSignChallenge");
                 return;
             }
         } catch (e) {
@@ -155,7 +156,7 @@ const Page = () => {
             ) {
                 setStatus("needUserFocus");
             } else {
-                setStatus("failed");
+                setStatus("failedDuringSignChallenge");
             }
             return;
         }
@@ -231,6 +232,13 @@ const Page = () => {
         unknownRedirect: <UnknownRedirect />,
         webAuthnNotSupported: <WebAuthnNotSupported />,
         unrecoverableFailure: <UnrecoverableFailure />,
+        failedDuringSignChallenge: (
+            <RetriableFailed
+                duringSignChallenge
+                onRetry={handleRetry}
+                onRecover={handleRecover}
+            />
+        ),
         failed: (
             <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
         ),
@@ -345,6 +353,14 @@ const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
 };
 
 interface RetriableFailedProps {
+    /**
+     * Set this attribute to indicate that this failure occurred during the
+     * actual passkey verification (`navigator.credentials.get`).
+     *
+     * We customize the error message for such cases to give a hint to the user
+     * that they can try on their other devices too.
+     */
+    duringSignChallenge?: boolean;
     /** Callback invoked when the user presses the try again button. */
     onRetry: () => void;
     /**
@@ -358,6 +374,7 @@ interface RetriableFailedProps {
 }
 
 const RetriableFailed: React.FC<RetriableFailedProps> = ({
+    duringSignChallenge,
     onRetry,
     onRecover,
 }) => {
@@ -366,7 +383,9 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
             <InfoIcon color="secondary" fontSize="large" />
             <Typography variant="h3">{t("passkey_login_failed")}</Typography>
             <Typography color="text.muted">
-                {t("passkey_login_generic_error")}
+                {duringSignChallenge
+                    ? t("passkey_login_credential_hint")
+                    : t("passkey_login_generic_error")}
             </Typography>
             <ButtonStack>
                 <EnteButton
