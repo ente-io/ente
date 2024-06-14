@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
@@ -45,6 +46,8 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
       Navigator.of(context).pop(true);
       return true;
     }
+    await HapticFeedback.vibrate();
+
     Navigator.of(context).pop(false);
     return false;
   }
@@ -156,12 +159,9 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextInputWidget(
                 hintText: S.of(context).password,
-                borderRadius: 2,
-                isClearable: true,
                 focusNode: _focusNode,
                 textCapitalization: TextCapitalization.words,
                 textEditingController: _passwordController,
-                prefixIcon: Icons.lock_outline,
                 isPasswordInput: true,
                 onChange: (p0) {
                   _isFormValid.value = _passwordController.text.isNotEmpty;

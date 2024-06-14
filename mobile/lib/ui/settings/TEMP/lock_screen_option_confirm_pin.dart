@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -50,9 +51,9 @@ class _LockScreenOptionConfirmPinState
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
       return;
-    } else {
-      _confirmPinController.clear();
     }
+    await HapticFeedback.vibrate();
+    _confirmPinController.clear();
   }
 
   @override
@@ -149,28 +150,36 @@ class _LockScreenOptionConfirmPinState
                 crossAxisAlignment: CrossAxisAlignment.center,
                 controller: _confirmPinController,
                 focusNode: _focusNode,
+                defaultPinTheme: _pinPutDecoration,
                 submittedPinTheme: _pinPutDecoration.copyWith(
+                  textStyle: textTheme.h3Bold,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.0),
                     border: Border.all(
-                      color: const Color.fromRGBO(45, 194, 98, 0.5),
+                      color: colorTheme.fillBase,
                     ),
                   ),
                 ),
-                defaultPinTheme: _pinPutDecoration,
                 followingPinTheme: _pinPutDecoration.copyWith(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5.0),
                     border: Border.all(
-                      color: const Color.fromRGBO(45, 194, 98, 0.5),
+                      color: colorTheme.fillMuted,
                     ),
                   ),
                 ),
+                focusedPinTheme: _pinPutDecoration,
                 errorPinTheme: _pinPutDecoration.copyWith(
-                  textStyle: TextStyle(color: colorTheme.warning400),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(
+                      color: colorTheme.fillBase,
+                    ),
+                  ),
+                  textStyle:
+                      textTheme.h3Bold.copyWith(color: colorTheme.warning400),
                 ),
                 errorText: '',
-                focusedPinTheme: _pinPutDecoration,
                 obscureText: true,
                 obscuringCharacter: '*',
                 validator: (value) {

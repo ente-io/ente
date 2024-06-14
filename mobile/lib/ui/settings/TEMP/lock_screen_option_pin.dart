@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_pin.dart";
@@ -42,7 +43,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
       Navigator.of(context).pop(true);
       return true;
     }
-    Navigator.of(context).pop(false);
+    await HapticFeedback.vibrate();
     return false;
   }
 
@@ -62,8 +63,8 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   }
 
   final _pinPutDecoration = PinTheme(
-    height: 50,
-    width: 50,
+    height: 48,
+    width: 48,
     decoration: BoxDecoration(
       border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
       borderRadius: BorderRadius.circular(15.0),
@@ -146,10 +147,11 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     controller: _pinController,
                     defaultPinTheme: _pinPutDecoration,
                     submittedPinTheme: _pinPutDecoration.copyWith(
+                      textStyle: textTheme.h3Bold,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.0),
                         border: Border.all(
-                          color: const Color.fromRGBO(45, 194, 98, 0.5),
+                          color: colorTheme.fillBase,
                         ),
                       ),
                     ),
@@ -157,20 +159,31 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.0),
                         border: Border.all(
-                          color: const Color.fromRGBO(45, 194, 98, 0.5),
+                          color: colorTheme.fillMuted,
                         ),
                       ),
                     ),
                     focusedPinTheme: _pinPutDecoration,
                     errorPinTheme: _pinPutDecoration.copyWith(
                       decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
                         border: Border.all(
-                          color: colorTheme.warning400,
+                          color: colorTheme.fillBase,
                         ),
                       ),
+                      textStyle: textTheme.h3Bold
+                          .copyWith(color: colorTheme.warning400),
                     ),
+                    validator: widget.isAuthenticating
+                        ? (value) {
+                            if (widget.authPin == value) {
+                              return null;
+                            }
+                            return 'Invalid PIN';
+                          }
+                        : null,
                     autofocus: true,
-                    errorText: '*',
+                    errorText: '',
                     obscureText: true,
                     obscuringCharacter: '*',
                     onCompleted: (value) {

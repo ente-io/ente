@@ -150,7 +150,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             context,
             S.of(context).authToChangeLockscreenSetting,
           );
-
           if (result) {
             await Navigator.of(context).push(
               MaterialPageRoute(
@@ -162,25 +161,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           }
         },
       ),
-      // MenuItemWidget(
-      //   captionedTextWidget: const CaptionedTextWidget(
-      //     title: 'App lock',
-      //   ),
-      //   trailingWidget: ToggleSwitchWidget(
-      //     value: () => _config.shouldShowLockScreen(),
-      //     onChanged: () async {
-      // await LocalAuthenticationService.instance
-      //     .requestLocalAuthForLockScreen(
-      //   context,
-      //   !_config.shouldShowLockScreen(),
-      //   S.of(context).authToChangeLockscreenSetting,
-      //   S.of(context).lockScreenEnablePreSteps,
-      // );
-
-      //       ///try here also once about the material page route
-      //     },
-      //   ),
-      // ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(

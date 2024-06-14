@@ -90,8 +90,8 @@ class _LockScreenOptionState extends State<LockScreenOption> {
       AppLock.of(context)!.setEnabled(!appLock!);
       await Configuration.instance.setShouldShowLockScreen(!appLock!);
     }
+    await _configuration.removePinAndPassword();
     setState(() {
-      _configuration.removePinAndPassword();
       isPasswordEnabled = _configuration.isPasswordSet();
       isPinEnabled = _configuration.isPinSet();
       appLock = !appLock!;

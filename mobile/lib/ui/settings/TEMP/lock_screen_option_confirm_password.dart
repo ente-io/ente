@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -25,6 +26,7 @@ class _LockScreenOptionConfirmPasswordState
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
 
+  final _submitNotifier = ValueNotifier(false);
   @override
   void initState() {
     super.initState();
@@ -36,8 +38,9 @@ class _LockScreenOptionConfirmPasswordState
 
   @override
   void dispose() {
-    super.dispose();
+    _submitNotifier.dispose();
     _focusNode.dispose();
+    super.dispose();
   }
 
   Future<void> _confirmPasswordMatch() async {
@@ -46,7 +49,9 @@ class _LockScreenOptionConfirmPasswordState
 
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);
+      return;
     }
+    await HapticFeedback.vibrate();
     _confirmPasswordController.clear();
   }
 
@@ -140,16 +145,14 @@ class _LockScreenOptionConfirmPasswordState
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextInputWidget(
                 hintText: S.of(context).confirmPassword,
-                borderRadius: 2,
                 focusNode: _focusNode,
-                isClearable: true,
                 textCapitalization: TextCapitalization.words,
                 textEditingController: _confirmPasswordController,
-                prefixIcon: Icons.lock_outline,
                 isPasswordInput: true,
                 onChange: (p0) {
                   _isFormValid.value =
                       _confirmPasswordController.text.isNotEmpty;
+                  _submitNotifier.value = !_submitNotifier.value;
                 },
               ),
             ),
