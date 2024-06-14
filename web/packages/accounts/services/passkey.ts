@@ -3,6 +3,7 @@ import log from "@/next/log";
 import type { AppName } from "@/next/types/app";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
@@ -12,6 +13,8 @@ import {
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
@@ -236,4 +239,36 @@ export const checkPasskeyVerificationStatus = async (
         throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     }
     return TwoFactorAuthorizationResponse.parse(await res.json());
+};
+
+/**
+ * Extract credentials from a successful passkey verification response and save
+ * them to local storage for use by subsequent steps (or normal functioning) of
+ * the app.
+ *
+ * @param response The result of a successful
+ * {@link checkPasskeyVerificationStatus}.
+ *
+ * @returns the slug that we should navigate to now.
+ */
+export const saveCredentialsAndNavigateTo = (
+    response: TwoFactorAuthorizationResponse,
+) => {
+    // This method somewhat duplicates `saveCredentialsAndNavigateTo` in the
+    // /passkeys/finish page.
+    const { id, encryptedToken, keyAttributes } = response;
+
+    setData(LS_KEYS.USER, {
+        ...getData(LS_KEYS.USER),
+        encryptedToken,
+        id,
+    });
+    setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
+
+    // TODO(MR): Remove the cast.
+    const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL) as
+        | string
+        | undefined;
+    InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
+    return redirectURL ?? "/credentials";
 };

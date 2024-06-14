@@ -3,6 +3,7 @@ import log from "@/next/log";
 import {
     checkPasskeyVerificationStatus,
     passKeySessionExpiredErrorMessage,
+    saveCredentialsAndNavigateTo,
 } from "@ente/accounts/services/passkey";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { apiOrigin } from "@ente/shared/network/api";
@@ -101,11 +102,8 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
         try {
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
-            if (!response) {
-                setVerificationStatus("pending");
-            } else {
-                // TODO-PK:
-            }
+            if (!response) setVerificationStatus("pending");
+            else router.push(saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             setDialogBoxAttributesV2(
@@ -114,6 +112,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                     ? sessionExpiredDialogAttributes(logout)
                     : genericErrorAttributes(),
             );
+            setVerificationStatus("waiting");
         }
     };
 
