@@ -38,10 +38,10 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             ),
             Container(
               alignment: Alignment.centerLeft,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
-                  title: "What's new",
+                  title: S.of(context).whatsNew,
                 ),
               ),
             ),
@@ -119,20 +119,20 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Cast albums to TV ✨",
-        "View a slideshow of your albums on any big screen! Open an album and click on the Cast button to get started.",
+        "Send links ✨",
+        'Introducing a beautiful way to share photos in original quality, end-to-end encrypted. Select your photos and click on "Send link" to see the magic!',
       ),
       ChangeLogEntry(
-        "Organize shared photos",
-        "You can now add shared items to your favorites or to any of your personal albums. Ente will create a copy that is fully owned by you and can be organized to your liking.",
+        "Video editor",
+        "Crop, clip and flip your videos, with Ente's in-built video editor. The editor works fully offline and will help with all your basic editing tasks.",
       ),
       ChangeLogEntry(
-        "Download multiple items",
-        "You can now download multiple items to your gallery at once. Select the items you want to download and click on the download button.",
+        "Passkeys",
+        "Now secure your Ente account with passkeys or hardware keys. You can add your keys within Settings > Security > Passkeys.",
       ),
       ChangeLogEntry(
-        "Performance improvements",
-        "This release also brings in major changes that should improve responsiveness. If you discover room for improvement, please let us know!",
+        "View large files",
+        "Find those items that take up the most amount of storage, and easily declutter your library. Open Settings > Backup > Free up space to learn more.",
       ),
     ]);
 
