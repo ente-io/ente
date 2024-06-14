@@ -451,6 +451,7 @@
   "privacy": "Privacy",
   "terms": "Terms",
   "checkForUpdates": "Check for updates",
+  "checkStatus": "Check status",
   "checking": "Checking...",
   "youAreOnTheLatestVersion": "You are on the latest version",
   "account": "Account",
@@ -1198,6 +1199,9 @@
   "waitingForVerification": "Waiting for verification...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
+  "passKeyPendingVerification": "Verification is still pending",
+  "loginSessionExpired" : "Session expired",
+  "loginSessionExpiredDetails": "Your session has expired. Please login again.",
   "verifyPasskey": "Verify passkey",
   "playOnTv": "Play album on TV",
   "pair": "Pair",
@@ -1234,10 +1238,18 @@
   "castIPMismatchTitle": "Failed to cast album",
   "castIPMismatchBody": "Please make sure you are on the same network as the TV.",
   "pairingComplete": "Pairing complete",
+  "savingEdits": "Saving edits...",
   "autoPair": "Auto pair",
   "pairWithPin": "Pair with PIN",
   "faceRecognition": "Face recognition",
   "foundFaces": "Found faces",
   "clusteringProgress": "Clustering progress",
-  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready."
+  "indexingIsPaused": "Indexing is paused. It will automatically resume when device is ready.",
+  "trim": "Trim",
+  "crop": "Crop",
+  "rotate": "Rotate",
+  "left": "Left",
+  "right": "Right",
+  "whatsNew": "What's new"
 }
+

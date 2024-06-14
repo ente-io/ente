@@ -131,11 +131,15 @@ class SemanticSearchService {
     _isSyncing = false;
   }
 
+  bool isMagicSearchEnabledAndReady() {
+    return LocalSettings.instance.hasEnabledMagicSearch() &&
+        _frameworkInitialization.isCompleted;
+  }
+
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !_frameworkInitialization.isCompleted) {
+    if (!isMagicSearchEnabledAndReady()) {
       return (query, <EnteFile>[]);
     }
     // If there's an ongoing request, just update the last query and return its future.
@@ -144,7 +148,7 @@ class SemanticSearchService {
       return _searchScreenRequest!;
     } else {
       // No ongoing request, start a new search.
-      _searchScreenRequest = _getMatchingFiles(query).then((result) {
+      _searchScreenRequest = getMatchingFiles(query).then((result) {
         // Search completed, reset the ongoing request.
         _searchScreenRequest = null;
         // If there was a new query during the last search, start a new search with the last query.
@@ -236,18 +240,24 @@ class SemanticSearchService {
     _queue.clear();
   }
 
-  Future<List<EnteFile>> _getMatchingFiles(String query) async {
+  Future<List<EnteFile>> getMatchingFiles(
+    String query, {
+    double? scoreThreshold,
+  }) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults = await _getScores(textEmbedding);
+    final queryResults =
+        await _getScores(textEmbedding, scoreThreshold: scoreThreshold);
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
-    final results = <EnteFile>[];
 
     final ignoredCollections =
         CollectionsService.instance.getHiddenCollectionIds();
+
     final deletedEntries = <int>[];
+    final results = <EnteFile>[];
+
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
@@ -355,13 +365,17 @@ class SemanticSearchService {
     }
   }
 
-  Future<List<QueryResult>> _getScores(List<double> textEmbedding) async {
+  Future<List<QueryResult>> _getScores(
+    List<double> textEmbedding, {
+    double? scoreThreshold,
+  }) async {
     final startTime = DateTime.now();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkScore,
       param: {
         "imageEmbeddings": _cachedEmbeddings,
         "textEmbedding": textEmbedding,
+        "scoreThreshold": scoreThreshold,
       },
       taskName: "computeBulkScore",
     );
@@ -402,12 +416,14 @@ List<QueryResult> computeBulkScore(Map args) {
   final queryResults = <QueryResult>[];
   final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
+  final scoreThreshold =
+      args["scoreThreshold"] ?? SemanticSearchService.kScoreThreshold;
   for (final imageEmbedding in imageEmbeddings) {
     final score = computeScore(
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (score >= SemanticSearchService.kScoreThreshold) {
+    if (score >= scoreThreshold) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
   }
@@ -422,7 +438,8 @@ double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
     "The two embeddings should have the same length",
   );
   double score = 0;
-  for (int index = 0; index < imageEmbedding.length; index++) {
+  final length = imageEmbedding.length;
+  for (int index = 0; index < length; index++) {
     score += imageEmbedding[index] * textEmbedding[index];
   }
   return score;

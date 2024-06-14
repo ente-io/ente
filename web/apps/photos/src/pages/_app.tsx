@@ -1,4 +1,3 @@
-import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { CustomHead } from "@/next/components/Head";
 import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
@@ -130,10 +129,6 @@ export default function App({ Component, pageProps }: AppProps) {
     >();
     useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
-    // TODO(MR): This is never true currently, this is the WIP ability to show
-    // what's new dialog on desktop app updates. The UI is done, need to hook
-    // this up to logic to trigger it.
-    const [openWhatsNew, setOpenWhatsNew] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -152,13 +147,13 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     useEffect(() => {
-        setupI18n().finally(() => setIsI18nReady(true));
+        void setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
         setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName[appName],
+            "X-Client-Package": clientPackageName(appName),
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -166,6 +161,15 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         const electron = globalThis.electron;
         if (!electron) return;
+
+        // Attach various listeners for events sent to us by the Node.js layer.
+        // This is for events that we should listen for always, not just when
+        // the user is logged in.
+
+        const handleOpenURL = (url: string) => {
+            if (url.startsWith("ente://app")) router.push(url);
+            else log.info(`Ignoring unhandled open request for URL ${url}`);
+        };
 
         const showUpdateDialog = (update: AppUpdate) => {
             if (update.autoUpdatable) {
@@ -182,9 +186,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 });
             }
         };
+
+        electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
-        return () => electron.onAppUpdateAvailable(undefined);
+        return () => {
+            electron.onOpenURL(undefined);
+            electron.onAppUpdateAvailable(undefined);
+        };
     }, []);
 
     useEffect(() => {
@@ -391,11 +400,6 @@ export default function App({ Component, pageProps }: AppProps) {
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
-                />
-
-                <WhatsNew
-                    open={openWhatsNew}
-                    onClose={() => setOpenWhatsNew(false)}
                 />
 
                 <Notification

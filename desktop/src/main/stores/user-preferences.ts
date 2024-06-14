@@ -10,6 +10,12 @@ interface UserPreferences {
     skipAppVersion?: string;
     muteUpdateNotificationVersion?: string;
     /**
+     * The changelog version for which we last showed the "What's new" screen.
+     *
+     * See: [Note: Conditions for showing "What's new"]
+     */
+    lastShownChangelogVersion?: number;
+    /**
      * The last position and size of our app's window.
      *
      * This value is saved when the app is about to quit, and is used to restore
@@ -33,6 +39,7 @@ const userPreferencesSchema: Schema<UserPreferences> = {
     hideDockIcon: { type: "boolean" },
     skipAppVersion: { type: "string" },
     muteUpdateNotificationVersion: { type: "string" },
+    lastShownChangelogVersion: { type: "number" },
     windowBounds: {
         properties: {
             x: { type: "number" },

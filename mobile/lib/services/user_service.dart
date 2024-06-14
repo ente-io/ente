@@ -16,6 +16,7 @@ import "package:photos/events/account_configured_event.dart";
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
@@ -308,23 +309,57 @@ class UserService {
     }
   }
 
-  Future<void> onPassKeyVerified(BuildContext context, Map response) async {
-    final userPassword = Configuration.instance.getVolatilePassword();
-    if (userPassword == null) throw Exception("volatile password is null");
-
-    await _saveConfiguration(response);
-
-    if (Configuration.instance.getEncryptedToken() != null) {
-      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-        userPassword,
-        Configuration.instance.getKeyAttributes()!,
+  Future<dynamic> getTokenForPasskeySession(String sessionID) async {
+    try {
+      final response = await _dio.get(
+        "${_config.getHttpEndpoint()}/users/two-factor/passkeys/get-token",
+        queryParameters: {
+          "sessionID": sessionID,
+        },
       );
-    } else {
-      throw Exception("unexpected response during passkey verification");
+      return response.data;
+    } on DioError catch (e) {
+      if (e.response != null) {
+        if (e.response!.statusCode == 404 || e.response!.statusCode == 410) {
+          throw PassKeySessionExpiredError();
+        }
+        if (e.response!.statusCode == 400) {
+          throw PassKeySessionNotVerifiedError();
+        }
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("unexpected error", e, s);
+      rethrow;
     }
+  }
 
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    Bus.instance.fire(AccountConfiguredEvent());
+  Future<void> onPassKeyVerified(BuildContext context, Map response) async {
+    final ProgressDialog dialog =
+        createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
+    try {
+      final userPassword = Configuration.instance.getVolatilePassword();
+      if (userPassword == null) throw Exception("volatile password is null");
+
+      await _saveConfiguration(response);
+
+      if (Configuration.instance.getEncryptedToken() != null) {
+        await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+          userPassword,
+          Configuration.instance.getKeyAttributes()!,
+        );
+      } else {
+        throw Exception("unexpected response during passkey verification");
+      }
+      await dialog.hide();
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Bus.instance.fire(AccountConfiguredEvent());
+    } catch (e) {
+      _logger.severe(e);
+      await dialog.hide();
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 
   Future<void> verifyEmail(

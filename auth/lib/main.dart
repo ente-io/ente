@@ -66,8 +66,6 @@ Future<void> initSystemTray() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  initSystemTray().ignore();
-
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
@@ -77,8 +75,10 @@ void main() async {
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
+      initSystemTray().ignore();
     });
   }
+
   await _runInForeground();
   await _setupPrivacyScreen();
   if (Platform.isAndroid) {
@@ -132,7 +132,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 void _registerWindowsProtocol() {
-  const kWindowsScheme = 'ente';
+  const kWindowsScheme = 'enteauth';
   // Register our protocol only on Windows platform
   if (!kIsWeb && Platform.isWindows) {
     WindowsProtocolHandler()

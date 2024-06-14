@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var AppVersion = "0.1.14"
+var AppVersion = "0.1.15"
 
 func main() {
 	cliDBPath, err := GetCLIConfigPath()

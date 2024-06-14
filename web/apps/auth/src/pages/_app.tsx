@@ -31,7 +31,13 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
@@ -52,7 +58,7 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 /** Utility hook to reduce amount of boilerplate in account related pages. */
 export const useAppContext = () => ensure(useContext(AppContext));
 
-export default function App({ Component, pageProps }: AppProps) {
+const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appName: AppName = "auth";
 
     const router = useRouter();
@@ -75,13 +81,13 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     useEffect(() => {
-        setupI18n().finally(() => setIsI18nReady(true));
+        void setupI18n().finally(() => setIsI18nReady(true));
         const userId = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(appName, userId);
         logUnhandledErrorsAndRejections(true);
         setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName[appName],
+            "X-Client-Package": clientPackageName(appName),
         });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
@@ -198,4 +204,6 @@ export default function App({ Component, pageProps }: AppProps) {
             </ThemeProvider>
         </>
     );
-}
+};
+
+export default App;

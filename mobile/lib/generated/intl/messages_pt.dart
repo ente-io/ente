@@ -783,6 +783,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeUpAmount": m29,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage(
             "Liberar espaço no dispositivo"),
+        "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
+            "Economize espaço no seu dispositivo limpando arquivos que já foram salvos em backup."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Liberar espaço"),
         "freeUpSpaceSaving": m30,
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
@@ -909,7 +911,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage7": MessageLookupByLibrary.simpleMessage(
             "Nossos aplicativos móveis são executados em segundo plano para criptografar e fazer backup de quaisquer novas fotos que você clique"),
         "loadMessage8": MessageLookupByLibrary.simpleMessage(
-            "web.ente.io tem um upload rápido"),
+            "web.ente.io tem um envio mais rápido"),
         "loadMessage9": MessageLookupByLibrary.simpleMessage(
             "Nós usamos Xchacha20Poly1305 para criptografar seus dados com segurança"),
         "loadingExifData":
@@ -1194,6 +1196,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "remove": MessageLookupByLibrary.simpleMessage("Remover"),
         "removeDuplicates":
             MessageLookupByLibrary.simpleMessage("Excluir duplicados"),
+        "removeDuplicatesDesc": MessageLookupByLibrary.simpleMessage(
+            "Revise e remova arquivos que sejam duplicatas exatas."),
         "removeFromAlbum":
             MessageLookupByLibrary.simpleMessage("Remover do álbum"),
         "removeFromAlbumTitle":
@@ -1588,6 +1592,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewAll": MessageLookupByLibrary.simpleMessage("Ver tudo"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("Ver todos os dados EXIF"),
+        "viewLargeFiles":
+            MessageLookupByLibrary.simpleMessage("Arquivos grandes"),
+        "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
+            "Ver arquivos que estão consumindo mais espaço de armazenamento"),
         "viewLogs": MessageLookupByLibrary.simpleMessage("Ver logs"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ver chave de recuperação"),

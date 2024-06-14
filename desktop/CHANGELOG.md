@@ -4,6 +4,8 @@
 
 -   Remember the window size across app restarts.
 -   Revert changes to the Linux icon.
+-   Fix an issue where deleted items in watched folders would not move to
+    uncategorized.
 
 ## v1.7.0
 

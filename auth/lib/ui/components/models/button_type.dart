@@ -33,7 +33,7 @@ enum ButtonType {
 
   Color defaultButtonColor(EnteColorScheme colorScheme) {
     if (isPrimary) {
-      return colorScheme.primary500;
+      return colorScheme.primary400;
     }
     if (isSecondary) {
       return colorScheme.fillFaint;

@@ -24,6 +24,12 @@
       "title": "BitMEX"
     },
     {
+      "title": "BitSkins"
+    },
+    {
+      "title": "Bitstamp"
+    },
+    {
       "title": "Bitvavo",
       "hex": "0051FF"
     },
@@ -49,6 +55,9 @@
     },
     {
       "title": "CERN"
+    },
+    {
+      "title": "ChangeNOW"
     },
     {
       "title": "Channel Island Hosting",
@@ -82,6 +91,9 @@
     },
     {
       "title": "Discourse"
+    },
+    {
+      "title": "DMarket"
     },
     {
       "title": "Doppler"
@@ -155,6 +167,10 @@
       "title": "INWX"
     },
     {
+      "title": "Itch.io",
+      "slug": "itch_io"
+    },
+    {
       "title": "IVPN",
       "slug": "IVPN"
     },
@@ -203,6 +219,10 @@
       "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
     },
     {
+      "title": "Marketplace.tf",
+      "slug": "marketplacedottf"
+    },
+    {
       "title": "Mastodon",
       "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
@@ -215,6 +235,9 @@
     },
     {
       "title": "Microsoft"
+    },
+    {
+      "title": "Migros"
     },
     {
       "title": "Mintos"
@@ -230,6 +253,10 @@
     {
       "title": "MyFRITZ!Net",
       "slug": "myfritz"
+    },
+    {
+      "title": "Name.com",
+      "slug": "name_com"
     },
     {
       "title": "NextDNS"
@@ -342,6 +369,9 @@
       "hex": "EF5A3C"
     },
     {
+      "title": "Skinport"
+    },
+    {
       "title": "Snapchat"
     },
     {
@@ -398,6 +428,10 @@
       "hex": "4285f4"
     },
     {
+      "title": "Ubuntu One",
+      "slug": "ubuntu_one"
+    },
+    {
       "title": "Unity",
       "hex": "858585"
     },
@@ -423,9 +457,7 @@
     {
       "title": "WorkOS",
       "slug": "workos",
-      "altNames": [
-        "Work OS"
-      ]
+      "altNames": ["Work OS"]
     },
     {
       "title": "X",

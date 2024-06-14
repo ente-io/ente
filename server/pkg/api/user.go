@@ -325,6 +325,17 @@ func (h *UserHandler) BeginPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
+	isSessionAlreadyClaimed, err := h.UserController.PasskeyRepo.IsSessionAlreadyClaimed(request.SessionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+
+	if isSessionAlreadyClaimed {
+		handler.Error(c, stacktrace.Propagate(&ente.ErrSessionAlreadyClaimed, "Session already claimed"))
+		return
+	}
+
 	user, err := h.UserController.UserRepo.Get(userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -374,6 +385,26 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
+	err = h.UserController.PasskeyRepo.StoreTokenData(request.SessionID, response)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to store token data"))
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *UserHandler) GetTokenForPasskeySession(c *gin.Context) {
+	sessionID := c.Query("sessionID")
+	if sessionID == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("sessionID is required"), ""))
+		return
+	}
+	response, err := h.UserController.PasskeyRepo.GetTokenData(sessionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get token data"))
+		return
+	}
 	c.JSON(http.StatusOK, response)
 }
 

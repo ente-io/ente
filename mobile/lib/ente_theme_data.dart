@@ -220,6 +220,18 @@ TextTheme _buildTextTheme(Color textColor) {
 }
 
 extension CustomColorScheme on ColorScheme {
+  Color get videoPlayerPrimaryColor => brightness == Brightness.light
+      ? const Color.fromRGBO(0, 179, 60, 1)
+      : const Color.fromRGBO(1, 222, 77, 1);
+
+  Color get videoPlayerBackgroundColor => brightness == Brightness.light
+      ? const Color(0xFFF5F5F5)
+      : const Color(0xFF252525);
+
+  Color get videoPlayerBorderColor => brightness == Brightness.light
+      ? const Color(0xFF424242)
+      : const Color(0xFFFFFFFF);
+
   Color get defaultBackgroundColor =>
       brightness == Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
@@ -392,7 +404,9 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
 }) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      foregroundColor: onPrimary, backgroundColor: primary, elevation: elevation,
+      foregroundColor: onPrimary,
+      backgroundColor: primary,
+      elevation: elevation,
       alignment: Alignment.center,
       textStyle: const TextStyle(
         fontWeight: FontWeight.w600,

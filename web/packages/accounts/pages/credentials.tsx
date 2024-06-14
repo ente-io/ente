@@ -6,6 +6,11 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
+import {
+    ConnectionDetails,
+    PasswordHeader,
+    VerifyingPasskey,
+} from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -18,7 +23,6 @@ import {
 } from "@ente/shared/crypto/helpers";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError } from "@ente/shared/error";
-import { apiOrigin } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
@@ -38,13 +42,15 @@ import {
     setKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
-import { redirectUserToPasskeyVerificationFlow } from "../services/passkey";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "../services/passkey";
 import { appHomeRoute } from "../services/redirect";
 import {
     configureSRP,
@@ -60,8 +66,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
+    const [passkeyVerificationData, setPasskeyVerificationData] = useState<
+        { passkeySessionID: string; url: string } | undefined
+    >();
 
     const router = useRouter();
+
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
@@ -167,10 +177,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    redirectUserToPasskeyVerificationFlow(
+                    const url = passkeyVerificationRedirectURL(
                         appName,
                         passkeySessionID,
                     );
+                    setPasskeyVerificationData({ passkeySessionID, url });
+                    openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
@@ -255,8 +267,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         }
     };
 
-    const redirectToRecoverPage = () => router.push(PAGES.RECOVER);
-
     if (!keyAttributes && !srpAttributes) {
         return (
             <VerticallyCentered>
@@ -265,12 +275,42 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
+    if (passkeyVerificationData) {
+        // We only need to handle this scenario when running in the desktop app
+        // because the web app will navigate to Passkey verification URL.
+        // However, still we add an additional `globalThis.electron` check to
+        // show a spinner. This prevents the VerifyingPasskey component from
+        // being disorientingly shown for a fraction of a second as the redirect
+        // happens on the web app.
+        //
+        // See: [Note: Passkey verification in the desktop app]
+
+        if (!globalThis.electron) {
+            return (
+                <VerticallyCentered>
+                    <EnteSpinner />
+                </VerticallyCentered>
+            );
+        }
+
+        return (
+            <VerifyingPasskey
+                email={user?.email}
+                passkeySessionID={passkeyVerificationData?.passkeySessionID}
+                onRetry={() =>
+                    openPasskeyVerificationURL(passkeyVerificationData)
+                }
+                appContext={appContext}
+            />
+        );
+    }
+
     // TODO: Handle the case when user is not present, or exclude that
     // possibility using types.
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: "320px" }}>
-                <Header>{user?.email ?? ""}</Header>
+                <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
 
                 <VerifyMasterPasswordForm
                     buttonText={t("VERIFY_PASSPHRASE")}
@@ -282,7 +322,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 />
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={redirectToRecoverPage}>
+                    <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
                         {t("FORGOT_PASSWORD")}
                     </LinkButton>
                     <LinkButton onClick={logout}>
@@ -297,35 +337,3 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 };
 
 export default Page;
-
-const Header: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <Header_>
-            <Typography variant="h2">{t("password")}</Typography>
-            <Typography color="text.faint">{children}</Typography>
-        </Header_>
-    );
-};
-
-const Header_ = styled("div")`
-    margin-block-end: 4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-`;
-
-const ConnectionDetails: React.FC = () => {
-    const host = new URL(apiOrigin()).host;
-
-    return (
-        <ConnectionDetails_>
-            <Typography variant="small" color="text.faint">
-                {host}
-            </Typography>
-        </ConnectionDetails_>
-    );
-};
-
-const ConnectionDetails_ = styled("div")`
-    margin-block-start: 1rem;
-`;

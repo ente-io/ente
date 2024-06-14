@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
@@ -26,11 +27,13 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -46,6 +49,9 @@ class SearchService {
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
+  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v1.json";
+
+  var magicPromptsData = [];
 
   SearchService._privateConstructor();
 
@@ -57,6 +63,17 @@ class SearchService {
       _cachedFilesFuture = null;
       _cachedHiddenFilesFuture = null;
     });
+    if (flagService.internalUser) {
+      _loadMagicPrompts();
+    }
+  }
+
+  Future<dynamic> _loadMagicPrompts() async {
+    final file = await RemoteAssetsService.instance
+        .getAsset(_kMagicPromptsDataUrl, refetch: true);
+
+    final json = jsonDecode(await file.readAsString());
+    magicPromptsData = json["prompts"];
   }
 
   Set<int> ignoreCollections() {
@@ -172,6 +189,29 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getMagicSectionResutls() async {
+    if (!SemanticSearchService.instance.isMagicSearchEnabledAndReady()) {
+      return <GenericSearchResult>[];
+    }
+    final searchResuts = <GenericSearchResult>[];
+    for (Map<String, dynamic> magicPrompt in magicPromptsData) {
+      final files = await SemanticSearchService.instance.getMatchingFiles(
+        magicPrompt["prompt"],
+        scoreThreshold: magicPrompt["minimumScore"],
+      );
+      if (files.isNotEmpty) {
+        searchResuts.add(
+          GenericSearchResult(
+            ResultType.magic,
+            magicPrompt["title"],
+            files,
+          ),
+        );
+      }
+    }
+    return searchResuts;
   }
 
   Future<List<GenericSearchResult>> getRandomMomentsSearchResults(
