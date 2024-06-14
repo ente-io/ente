@@ -465,8 +465,6 @@ interface RedirectingAppProps {
 }
 
 const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
-    const handleClose = window.close;
-
     return (
         <Content>
             <InfoIcon color="accent" fontSize="large" />
@@ -478,15 +476,6 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
                 {t("redirect_close_instructions")}
             </Typography>
             <ButtonStack>
-                <EnteButton
-                    onClick={handleClose}
-                    fullWidth
-                    color="secondary"
-                    type="button"
-                    variant="contained"
-                >
-                    {t("CLOSE")}
-                </EnteButton>
                 <EnteButton
                     onClick={onRetry}
                     fullWidth
