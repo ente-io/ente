@@ -316,6 +316,7 @@ interface VerifyProps {
     /** Called when the user presses the "Verify" button. */
     onVerify: () => void;
 }
+
 /**
  * Gain focus for the current page by requesting the user to explicitly click a
  * button. For more details, see the documentation for `Continuation`.
@@ -326,7 +327,7 @@ const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
             <KeyIcon color="secondary" fontSize="large" />
             <Typography variant="h3">{t("passkey")}</Typography>
             <Typography color="text.muted">
-                {t("passkey_login_generic_error")}
+                {t("passkey_verify_description")}
             </Typography>
             <ButtonStack>
                 <EnteButton
