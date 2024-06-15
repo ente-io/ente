@@ -6,12 +6,14 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Typography,
     styled,
     useMediaQuery,
 } from "@mui/material";
 import Slide from "@mui/material/Slide";
 import type { TransitionProps } from "@mui/material/transitions";
-import React from "react";
+import React, { useEffect } from "react";
+import { didShowWhatsNew } from "../services/changelog";
 
 interface WhatsNewProps {
     /** If `true`, then the dialog is shown. */
@@ -21,11 +23,15 @@ interface WhatsNewProps {
 }
 
 /**
- * Show a dialog showing a short summary of interesting-for-the-user things in
- * this release of the desktop app.
+ * Show a dialog showing a short summary of interesting-for-the-user things
+ * since the last time this dialog was shown.
  */
 export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
+
+    useEffect(() => {
+        if (open) void didShowWhatsNew();
+    }, [open]);
 
     return (
         <Dialog
@@ -36,12 +42,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             <DialogTitle>{"What's new"}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    <StyledUL>
-                        <li>
-                            The app will remember its position and size when it
-                            is closed, and will reopen the same way.
-                        </li>
-                    </StyledUL>
+                    <ChangelogContent />
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -68,11 +69,37 @@ const SlideTransition = React.forwardRef(function Transition(
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const ChangelogContent: React.FC = () => {
+    // NOTE: Remember to update changelogVersion when changing the content
+    // below.
+
+    return (
+        <StyledUL>
+            <li>
+                <Typography>
+                    <Typography color="primary">
+                        Support for Passkeys
+                    </Typography>
+                    Passkeys can now be used as a second factor authentication
+                    mechanism.
+                </Typography>
+            </li>
+            <li>
+                <Typography color="primary">Window size</Typography>
+                <Typography>
+                    {"The app's window will remember its size and position."}
+                </Typography>
+            </li>
+        </StyledUL>
+    );
+};
+
 const StyledUL = styled("ul")`
     padding-inline: 1rem;
-    list-style-type: circle;
 
-    margin-block-end: 20px;
+    li {
+        margin-block: 2rem;
+    }
 `;
 
 const StyledButton = styled(Button)`

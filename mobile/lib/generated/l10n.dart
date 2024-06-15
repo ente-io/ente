@@ -3162,6 +3162,16 @@ class S {
     );
   }
 
+  /// `Check status`
+  String get checkStatus {
+    return Intl.message(
+      'Check status',
+      name: 'checkStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Checking...`
   String get checking {
     return Intl.message(
@@ -8408,6 +8418,36 @@ class S {
     );
   }
 
+  /// `Verification is still pending`
+  String get passKeyPendingVerification {
+    return Intl.message(
+      'Verification is still pending',
+      name: 'passKeyPendingVerification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session expired`
+  String get loginSessionExpired {
+    return Intl.message(
+      'Session expired',
+      name: 'loginSessionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your session has expired. Please login again.`
+  String get loginSessionExpiredDetails {
+    return Intl.message(
+      'Your session has expired. Please login again.',
+      name: 'loginSessionExpiredDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verify passkey`
   String get verifyPasskey {
     return Intl.message(
@@ -8889,6 +8929,16 @@ class S {
     return Intl.message(
       'Right',
       name: 'right',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What's new`
+  String get whatsNew {
+    return Intl.message(
+      'What\'s new',
+      name: 'whatsNew',
       desc: '',
       args: [],
     );

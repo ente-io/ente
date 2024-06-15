@@ -1,9 +1,7 @@
 import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
 import {
     fromB64URLSafeNoPadding,
@@ -371,6 +369,13 @@ export interface BeginPasskeyAuthenticationResponse {
 }
 
 /**
+ * The passkey session which we are trying to start an authentication ceremony
+ * for has already finished elsewhere.
+ */
+export const passkeySessionAlreadyClaimedErrorMessage =
+    "Passkey session already claimed";
+
+/**
  * Create a authentication ceremony session and return a challenge and a list of
  * public key credentials that can be used to attest that challenge.
  *
@@ -381,6 +386,9 @@ export interface BeginPasskeyAuthenticationResponse {
  *
  * @param passkeySessionID A session created by the requesting app that can be
  * used to initiate a passkey authentication ceremony on the accounts app.
+ *
+ * @throws In addition to arbitrary errors, it throws errors with the message
+ * {@link passkeySessionAlreadyClaimedErrorMessage}.
  */
 export const beginPasskeyAuthentication = async (
     passkeySessionID: string,
@@ -390,7 +398,11 @@ export const beginPasskeyAuthentication = async (
         method: "POST",
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    if (!res.ok) {
+        if (res.status == 409)
+            throw new Error(passkeySessionAlreadyClaimedErrorMessage);
+        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    }
 
     // See: [Note: Converting binary data in WebAuthn API payloads]
 
@@ -424,30 +436,7 @@ export const beginPasskeyAuthentication = async (
  */
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
-) => {
-    const go = async () => await navigator.credentials.get({ publicKey });
-
-    try {
-        return await go();
-    } catch (e) {
-        // Safari throws "NotAllowedError: The document is not focused" for the
-        // first request sometimes (no reason, just to show their incompetence).
-        // "NotAllowedError" is also the error name that is thrown when the user
-        // explicitly cancels, so we can't even filter it out by name and also
-        // to do a message match.
-        if (
-            e instanceof Error &&
-            e.name == "NotAllowedError" &&
-            e.message == "The document is not focused."
-        ) {
-            log.warn("Working around Safari bug by retrying after failure", e);
-            await wait(2000);
-            return await go();
-        } else {
-            throw e;
-        }
-    }
-};
+) => nullToUndefined(await navigator.credentials.get({ publicKey }));
 
 interface FinishPasskeyAuthenticationOptions {
     passkeySessionID: string;
@@ -552,16 +541,23 @@ const authenticatorAssertionResponse = (credential: Credential) => {
  * @param redirectURL The base URL to redirect to. Provided by the calling app
  * that initiated the passkey authentication.
  *
+ * @param passkeySessionID The passkeySessionID that was provided by the calling
+ * app that initiated the passkey authentication. It is returned back in the
+ * response so that the calling app has a way to ensure that this is indeed a
+ * redirect for the session that they initiated and are waiting for.
+ *
  * @param twoFactorAuthorizationResponse The result of
  * {@link finishPasskeyAuthentication} returned by the backend.
  */
-export const redirectURLWithPasskeyAuthentication = async (
+export const passkeyAuthenticationSuccessRedirectURL = async (
     redirectURL: URL,
+    passkeySessionID: string,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
     const encodedResponse = await toB64URLSafeNoPaddingString(
         JSON.stringify(twoFactorAuthorizationResponse),
     );
+    redirectURL.searchParams.set("passkeySessionID", passkeySessionID);
     redirectURL.searchParams.set("response", encodedResponse);
     return redirectURL;
 };

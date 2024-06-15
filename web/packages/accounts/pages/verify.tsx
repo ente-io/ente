@@ -41,8 +41,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
-    const [passkeyVerificationURL, setPasskeyVerificationURL] = useState<
-        string | undefined
+    const [passkeyVerificationData, setPasskeyVerificationData] = useState<
+        { passkeySessionID: string; url: string } | undefined
     >();
 
     const router = useRouter();
@@ -98,8 +98,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     appName,
                     passkeySessionID,
                 );
-                setPasskeyVerificationURL(url);
-                openPasskeyVerificationURL(url);
+                setPasskeyVerificationData({ passkeySessionID, url });
+                openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
@@ -172,12 +172,13 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
-    if (passkeyVerificationURL) {
-        // We only need when running in the desktop app, because in the web app
-        // we just redirect to passkeyVerificationURL. However, still we add an
-        // additional `globalThis.electron` check to show a spinner to prevent
-        // all these details from being disorientingly shown for a fraction of a
-        // second as the redirect happens on the web app.
+    if (passkeyVerificationData) {
+        // We only need to handle this scenario when running in the desktop app
+        // because the web app will navigate to Passkey verification URL.
+        // However, still we add an additional `globalThis.electron` check to
+        // show a spinner. This prevents the VerifyingPasskey component from
+        // being disorientingly shown for a fraction of a second as the redirect
+        // happens on the web app.
         //
         // See: [Note: Passkey verification in the desktop app]
 
@@ -192,11 +193,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         return (
             <VerifyingPasskey
                 email={email}
+                passkeySessionID={passkeyVerificationData?.passkeySessionID}
                 onRetry={() =>
-                    openPasskeyVerificationURL(passkeyVerificationURL)
+                    openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                onRecover={() => router.push("/passkeys/recover")}
-                onLogout={logout}
+                appContext={appContext}
             />
         );
     }

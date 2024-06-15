@@ -451,6 +451,7 @@
   "privacy": "Privacy",
   "terms": "Terms",
   "checkForUpdates": "Check for updates",
+  "checkStatus": "Check status",
   "checking": "Checking...",
   "youAreOnTheLatestVersion": "You are on the latest version",
   "account": "Account",
@@ -1198,6 +1199,9 @@
   "waitingForVerification": "Waiting for verification...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
+  "passKeyPendingVerification": "Verification is still pending",
+  "loginSessionExpired" : "Session expired",
+  "loginSessionExpiredDetails": "Your session has expired. Please login again.",
   "verifyPasskey": "Verify passkey",
   "playOnTv": "Play album on TV",
   "pair": "Pair",
@@ -1245,6 +1249,7 @@
   "crop": "Crop",
   "rotate": "Rotate",
   "left": "Left",
-  "right": "Right"
+  "right": "Right",
+  "whatsNew": "What's new"
 }
 

@@ -1,3 +1,4 @@
 {
-    "tabWidth": 4
+    "tabWidth": 4,
+    "proseWrap": "always"
 }

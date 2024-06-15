@@ -4,7 +4,8 @@
 
 Data tied to the browser tab's lifetime.
 
-We store the user's encryption key here.
+The primary information store in session storage is the user's encryption key
+here. In addition, various other transient bits and bobs are also kept here.
 
 ## Local Storage
 

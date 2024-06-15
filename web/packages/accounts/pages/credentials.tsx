@@ -66,11 +66,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const [user, setUser] = useState<User>();
-    const [passkeyVerificationURL, setPasskeyVerificationURL] = useState<
-        string | undefined
+    const [passkeyVerificationData, setPasskeyVerificationData] = useState<
+        { passkeySessionID: string; url: string } | undefined
     >();
 
     const router = useRouter();
+
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
@@ -180,8 +181,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         appName,
                         passkeySessionID,
                     );
-                    setPasskeyVerificationURL(url);
-                    openPasskeyVerificationURL(url);
+                    setPasskeyVerificationData({ passkeySessionID, url });
+                    openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
@@ -274,12 +275,13 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
     }
 
-    if (passkeyVerificationURL) {
-        // We only need when running in the desktop app, because in the web app
-        // we just redirect to passkeyVerificationURL. However, still we add an
-        // additional `globalThis.electron` check to show a spinner to prevent
-        // all these details from being disorientingly shown for a fraction of a
-        // second as the redirect happens on the web app.
+    if (passkeyVerificationData) {
+        // We only need to handle this scenario when running in the desktop app
+        // because the web app will navigate to Passkey verification URL.
+        // However, still we add an additional `globalThis.electron` check to
+        // show a spinner. This prevents the VerifyingPasskey component from
+        // being disorientingly shown for a fraction of a second as the redirect
+        // happens on the web app.
         //
         // See: [Note: Passkey verification in the desktop app]
 
@@ -294,11 +296,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         return (
             <VerifyingPasskey
                 email={user?.email}
+                passkeySessionID={passkeyVerificationData?.passkeySessionID}
                 onRetry={() =>
-                    openPasskeyVerificationURL(passkeyVerificationURL)
+                    openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                onRecover={() => router.push("/passkeys/recover")}
-                onLogout={logout}
+                appContext={appContext}
             />
         );
     }
