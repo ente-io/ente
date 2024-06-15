@@ -53,27 +53,31 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       '$runtimeType building with ${widget.selectedFiles.files.length}',
     );
 
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: shadowFloatFaintLight,
-      ),
-      child: ValueListenableBuilder(
-        valueListenable: _hasSelectedFilesNotifier,
-        builder: (context, value, child) {
-          return AnimatedCrossFade(
-            firstCurve: Curves.easeInOutExpo,
-            secondCurve: Curves.easeInOutExpo,
-            sizeCurve: Curves.easeInOutExpo,
-            crossFadeState: _hasSelectedFilesNotifier.value
-                ? CrossFadeState.showFirst
-                : CrossFadeState.showSecond,
-            duration: const Duration(milliseconds: 400),
-            firstChild: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SelectAllButton(backgroundColor: widget.backgroundColor),
-                BottomActionBarWidget(
+    return ValueListenableBuilder(
+      valueListenable: _hasSelectedFilesNotifier,
+      builder: (context, value, child) {
+        return AnimatedCrossFade(
+          firstCurve: Curves.easeInOutExpo,
+          secondCurve: Curves.easeInOutExpo,
+          sizeCurve: Curves.easeInOutExpo,
+          crossFadeState: _hasSelectedFilesNotifier.value
+              ? CrossFadeState.showFirst
+              : CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 400),
+          firstChild: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: SelectAllButton(backgroundColor: widget.backgroundColor),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  boxShadow: shadowFloatFaintLight,
+                ),
+                child: BottomActionBarWidget(
                   selectedFiles: widget.selectedFiles,
                   galleryType: widget.galleryType,
                   collection: widget.collection,
@@ -86,12 +90,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                   },
                   backgroundColor: widget.backgroundColor,
                 ),
-              ],
-            ),
-            secondChild: const SizedBox(width: double.infinity),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+          secondChild: const SizedBox(width: double.infinity),
+        );
+      },
     );
   }
 
@@ -113,6 +117,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
   @override
   Widget build(BuildContext context) {
     final selectionState = SelectionState.of(context);
+    final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -125,32 +130,50 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           _selectAll = !_selectAll;
         });
       },
-      child: Container(
-        color: getEnteColorScheme(context).backgroundElevated2,
-        padding: const EdgeInsets.all(4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("All"),
-            ListenableBuilder(
-              listenable: selectionState.selectedFiles,
-              builder: (context, _) {
-                if (selectionState.selectedFiles.files.length ==
-                    selectionState.allGalleryFiles!.length) {
-                  _selectAll = true;
-                } else {
-                  _selectAll = false;
-                }
-                return Icon(
-                  _selectAll ? Icons.check_circle : Icons.check_circle_outline,
-                  color: _selectAll
-                      ? getEnteColorScheme(context).strokeMuted
-                      : null,
-                );
-              },
-            ),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, -1),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "All",
+                style: getEnteTextTheme(context).miniMuted,
+              ),
+              const SizedBox(width: 4),
+              ListenableBuilder(
+                listenable: selectionState.selectedFiles,
+                builder: (context, _) {
+                  if (selectionState.selectedFiles.files.length ==
+                      selectionState.allGalleryFiles?.length) {
+                    _selectAll = true;
+                  } else {
+                    _selectAll = false;
+                  }
+                  return Icon(
+                    _selectAll
+                        ? Icons.check_circle
+                        : Icons.check_circle_outline,
+                    color: _selectAll ? null : colorScheme.strokeMuted,
+                    size: 18,
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
