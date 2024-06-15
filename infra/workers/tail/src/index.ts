@@ -16,8 +16,20 @@ interface Env {
     LOKI_PUSH_URL: string;
 }
 
-const handleTail = async (events: TraceItem[], lokiPushURL: string) =>
-    pushLogLine(Date.now(), JSON.stringify(events), lokiPushURL);
+const handleTail = async (events: TraceItem[], lokiPushURL: string) => {
+    for (const event of events.filter(hasLogOrException)) {
+        await pushLogLine(Date.now(), JSON.stringify(event), lokiPushURL);
+    }
+};
+
+/**
+ * Return true if any of the events in {@link events} has at least one log or
+ * exception.
+ *
+ * These are the
+ */
+const hasLogOrException = (event: TraceItem) =>
+    event.logs.length ?? event.exceptions.length;
 
 /**
  * Send a log entry to (Grafana) Loki
@@ -45,7 +57,7 @@ const pushLogLine = async (
         body: JSON.stringify({
             streams: [
                 {
-                    stream: { job: "cf-worker" },
+                    stream: { job: "worker" },
                     values: [[`${timestampMs * 1e6}`, logLine]],
                 },
             ],
