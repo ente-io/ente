@@ -112,14 +112,14 @@ class _SelectAllButtonState extends State<SelectAllButton> {
   bool _selectAll = false;
   @override
   Widget build(BuildContext context) {
+    final selectionState = SelectionState.of(context);
     return GestureDetector(
       onTap: () {
         setState(() {
-          final selectionState = SelectionState.of(context);
           if (_selectAll) {
-            selectionState?.selectedFiles.clearAll();
+            selectionState.selectedFiles.clearAll();
           } else {
-            selectionState?.selectedFiles
+            selectionState.selectedFiles
                 .selectAll(selectionState.allGalleryFiles!.toSet());
           }
           _selectAll = !_selectAll;
@@ -133,10 +133,22 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text("All"),
-            Icon(
-              _selectAll ? Icons.check_circle : Icons.check_circle_outline,
-              color:
-                  _selectAll ? getEnteColorScheme(context).strokeMuted : null,
+            ListenableBuilder(
+              listenable: selectionState.selectedFiles,
+              builder: (context, _) {
+                if (selectionState.selectedFiles.files.length ==
+                    selectionState.allGalleryFiles!.length) {
+                  _selectAll = true;
+                } else {
+                  _selectAll = false;
+                }
+                return Icon(
+                  _selectAll ? Icons.check_circle : Icons.check_circle_outline,
+                  color: _selectAll
+                      ? getEnteColorScheme(context).strokeMuted
+                      : null,
+                );
+              },
             ),
           ],
         ),
