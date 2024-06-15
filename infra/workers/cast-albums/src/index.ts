@@ -8,25 +8,24 @@ export default {
             case "OPTIONS":
                 return handleOPTIONS(request);
             default:
-                throw new Error(
-                    `HTTP 405 Method Not Allowed: ${request.method}`
-                );
+                throw new Error(`Unsupported HTTP method ${request.method}`);
         }
     },
 } satisfies ExportedHandler;
 
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
-    const urlParams = new URLSearchParams(url.search);
-    const token =
+    const castToken =
         request.headers.get("X-Cast-Access-Token") ??
-        urlParams.get("castToken");
+        url.searchParams.get("castToken");
+    if (!castToken) throw new Error("No cast token provided");
 
-    const fileID = urlParams.get("fileID");
+    const fileID = url.searchParams.get("fileID");
     const pathname = url.pathname;
 
+    const params = new URLSearchParams({ castToken });
     let response = await fetch(
-        `https://api.ente.io/cast/files${pathname}${fileID}?castToken=${token}`
+        `https://api.ente.io/cast/files${pathname}${fileID}?${params.toString()}`
     );
 
     response = new Response(response.body, response);
@@ -37,7 +36,7 @@ const handleGET = async (request: Request) => {
 const handleOPTIONS = (request: Request) => {
     let corsHeaders: Record<string, string> = {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,OPTIONS",
+        "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Max-Age": "86400",
     };
 
