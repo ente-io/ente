@@ -11,6 +11,9 @@ Each worker is a self contained directory with its each `package.json`.
 
 -   Install dependencies (if needed) with `yarn`
 
+    > If you have previously deployed, then you will have an old `yarn.lock`. In
+    > this case it is safe to delete and recreate using `rm yarn.lock && yarn`.
+
 -   Login into wrangler (if needed) using `yarn wrangler login`
 
 -   Deploy! `yarn wrangler deploy`
