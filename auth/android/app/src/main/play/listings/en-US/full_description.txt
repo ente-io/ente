@@ -6,7 +6,7 @@ FEATURES
 
 - Secure Backups
 Auth provides end-to-end encrypted cloud backups so that you don't have to worry
-about losing your tokens. We use the same protocols ente Photos uses to encrypt
+about losing your tokens. We use the same protocols Ente Photos uses to encrypt
 and preserve your data.
 
 - Multi Device Synchronization
