@@ -3,30 +3,30 @@
     /* TSConfig docs: https://aka.ms/tsconfig.json */
     "compilerOptions": {
         /* tsc is used for by us for type checking, not compilation (the
-           Cloudflare workers runtime natively supports TypeScript) */
+           Cloudflare workers runtime natively supports TypeScript). */
         "noEmit": true,
 
-        /* The Workers runtime supports the latest and greatest */
+        /* The Workers runtime supports the latest and greatest. */
         /* https://developers.cloudflare.com/workers/reference/languages/#javascript--typescript */
         "lib": ["esnext"],
         "target": "esnext",
         "module": "esnext",
 
-        /* Types that are implicitly available */
+        /* Types that are implicitly available. */
         /* https://www.npmjs.com/package/@cloudflare/workers-types */
         "types": ["@cloudflare/workers-types"],
 
-        /* Tell TypeScript how to lookup the file for a given import */
+        /* Tell TypeScript how to lookup the file for a given import. */
         "moduleResolution": "node",
 
-        /* Speed things up by not type checking `node_modules` */
+        /* Speed things up by not type checking `node_modules`. */
         "skipLibCheck": true,
-        /* Require the `type` modifier when importing types */
+        /* Require the `type` modifier when importing types. */
         "verbatimModuleSyntax": true,
-        /* Enable importing .json files */
+        /* Enable importing .json files. */
         "resolveJsonModule": true,
 
-        /* strict and then some */
+        /* strict, and then some. */
         "strict": true,
         "noImplicitReturns": true,
         "noUnusedParameters": true,
