@@ -16,33 +16,8 @@ interface Env {
     LOKI_PUSH_URL: string;
 }
 
-const handleTail = async (events: TraceItem[], lokiPushURL: string) => {
-    for (const event of events) {
-        for (const log of event.logs) {
-            pushLogLine(log.timestamp, logLineForLog(log), lokiPushURL);
-        }
-        for (const e of event.exceptions) {
-            pushLogLine(e.timestamp, logLineForException(e), lokiPushURL);
-        }
-    }
-};
-
-const logLineForLog = ({ level, message }: TraceLog) =>
-    // https://developers.cloudflare.com/workers/runtime-apis/handlers/tail/#taillog
-    //
-    // - level: A string indicating the console function that was called. One
-    //   of: "debug", "info", "log", "warn", "error".
-    //
-    // - message: The array of parameters passed to the console function.
-    `[${level}] ${(Array.isArray(message) ? message : [message]).join(" ")}`;
-
-const logLineForException = ({ name, message }: TraceException) =>
-    // https://developers.cloudflare.com/workers/runtime-apis/handlers/tail/#tailexception
-    //
-    // - name: The error type (e.g. "Error", "TypeError")
-    //
-    // - message: The error description.
-    `${name}: ${message}`;
+const handleTail = async (events: TraceItem[], lokiPushURL: string) =>
+    pushLogLine(Date.now(), JSON.stringify(events), lokiPushURL);
 
 /**
  * Send a log entry to (Grafana) Loki
@@ -50,7 +25,7 @@ const logLineForException = ({ name, message }: TraceException) =>
  * For more details about the protocol, see
  * https://grafana.com/docs/loki/latest/reference/loki-http-api/#ingest-logs
  *
- * @param tsNano Unix epoch (in milliseconds) when the event occurred.
+ * @param timestampMs Unix epoch (in milliseconds) when the event occurred.
  *
  * @param logLine The message to log.
  *
