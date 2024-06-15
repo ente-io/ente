@@ -37,4 +37,4 @@ npm create cloudflare@2 existing-worker-name -- --type pre-existing --existing-s
 ## Logging
 
 Attach our tail worker (called `tail`) to your worker. Then, any `console.log`
-statements called by your worker will be forwarded to Grafana.
+(etc) statements called by your worker will be forwarded to Grafana.
