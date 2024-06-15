@@ -26,7 +26,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       _focusNode.requestFocus();
     });
   }
@@ -108,11 +108,20 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                       child: ValueListenableBuilder(
                         valueListenable: _pinController,
                         builder: (context, value, child) {
-                          return CircularProgressIndicator(
-                            backgroundColor: colorTheme.fillStrong,
-                            value: _pinController.text.length / 4,
-                            color: colorTheme.primary400,
-                            strokeWidth: 1.5,
+                          return TweenAnimationBuilder<double>(
+                            tween: Tween<double>(
+                              begin: 0,
+                              end: _pinController.text.length / 4,
+                            ),
+                            curve: Curves.ease,
+                            duration: const Duration(milliseconds: 250),
+                            builder: (context, value, _) =>
+                                CircularProgressIndicator(
+                              backgroundColor: colorTheme.fillStrong,
+                              value: value,
+                              color: colorTheme.primary400,
+                              strokeWidth: 1.5,
+                            ),
                           );
                         },
                       ),
@@ -122,7 +131,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     alignment: Alignment.center,
                     child: IconButtonWidget(
                       size: 30,
-                      icon: Icons.lock_outline,
+                      icon: Icons.lock,
                       iconButtonType: IconButtonType.primary,
                       iconColor: colorTheme.tabIcon,
                     ),
@@ -149,7 +158,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     submittedPinTheme: _pinPutDecoration.copyWith(
                       textStyle: textTheme.h3Bold,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
+                        borderRadius: BorderRadius.circular(10.0),
                         border: Border.all(
                           color: colorTheme.fillBase,
                         ),
@@ -157,7 +166,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     ),
                     followingPinTheme: _pinPutDecoration.copyWith(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
+                        borderRadius: BorderRadius.circular(10.0),
                         border: Border.all(
                           color: colorTheme.fillMuted,
                         ),
@@ -166,7 +175,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     focusedPinTheme: _pinPutDecoration,
                     errorPinTheme: _pinPutDecoration.copyWith(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
+                        borderRadius: BorderRadius.circular(10.0),
                         border: Border.all(
                           color: colorTheme.fillBase,
                         ),
@@ -186,9 +195,10 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                     errorText: '',
                     obscureText: true,
                     obscuringCharacter: '*',
-                    onCompleted: (value) {
+                    onCompleted: (value) async {
                       FocusScope.of(context).unfocus();
-                      _confirmPin(_pinController.text);
+                      await Future.delayed(const Duration(milliseconds: 250));
+                      await _confirmPin(_pinController.text);
                     },
                   ),
                 ),

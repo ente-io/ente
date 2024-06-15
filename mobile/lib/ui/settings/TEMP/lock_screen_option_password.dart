@@ -24,12 +24,12 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   final _passwordController = TextEditingController(text: null);
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
-
+  final _submitNotifier = ValueNotifier(false);
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       _focusNode.requestFocus();
     });
   }
@@ -37,6 +37,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   @override
   void dispose() {
     super.dispose();
+    _submitNotifier.dispose();
     _focusNode.dispose();
     _isFormValid.dispose();
   }
@@ -45,11 +46,10 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
     if (widget.authPass == code) {
       Navigator.of(context).pop(true);
       return true;
+    } else {
+      await HapticFeedback.vibrate();
+      throw Exception("Incorrect password");
     }
-    await HapticFeedback.vibrate();
-
-    Navigator.of(context).pop(false);
-    return false;
   }
 
   Future<void> _confirmPassword() async {
@@ -105,8 +105,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
             buttonText: S.of(context).ok,
             isFormValid: isFormValid,
             onPressedFunction: () async {
-              await _confirmPassword();
-              FocusScope.of(context).unfocus();
+              _submitNotifier.value = !_submitNotifier.value;
             },
           );
         },
@@ -141,7 +140,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
                     alignment: Alignment.center,
                     child: IconButtonWidget(
                       size: 30,
-                      icon: Icons.lock_outline,
+                      icon: Icons.lock,
                       iconButtonType: IconButtonType.primary,
                       iconColor: colorTheme.tabIcon,
                     ),
@@ -160,12 +159,16 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               child: TextInputWidget(
                 hintText: S.of(context).password,
                 focusNode: _focusNode,
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: TextCapitalization.none,
                 textEditingController: _passwordController,
                 isPasswordInput: true,
                 onChange: (p0) {
                   _isFormValid.value = _passwordController.text.isNotEmpty;
                 },
+                onSubmit: (p0) {
+                  return _confirmPassword();
+                },
+                submitNotifier: _submitNotifier,
               ),
             ),
           ],

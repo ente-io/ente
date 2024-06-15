@@ -31,7 +31,7 @@ class _LockScreenOptionConfirmPasswordState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       _focusNode.requestFocus();
     });
   }
@@ -51,6 +51,7 @@ class _LockScreenOptionConfirmPasswordState
       Navigator.of(context).pop(true);
       return;
     }
+    _confirmPasswordController.clear();
     throw Exception("Incorrect password");
   }
 
@@ -126,7 +127,7 @@ class _LockScreenOptionConfirmPasswordState
                     alignment: Alignment.center,
                     child: IconButtonWidget(
                       size: 30,
-                      icon: Icons.lock_outline,
+                      icon: Icons.lock,
                       iconButtonType: IconButtonType.primary,
                       iconColor: colorTheme.tabIcon,
                     ),
@@ -144,7 +145,7 @@ class _LockScreenOptionConfirmPasswordState
               child: TextInputWidget(
                 hintText: S.of(context).confirmPassword,
                 focusNode: _focusNode,
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: TextCapitalization.none,
                 textEditingController: _confirmPasswordController,
                 isPasswordInput: true,
                 onChange: (p0) {

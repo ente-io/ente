@@ -34,8 +34,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   late TabController _tabController;
   final _pinController = TextEditingController();
   final _pinPutDecoration = PinTheme(
-    height: 48,
-    width: 48,
+    height: 45,
+    width: 45,
     decoration: BoxDecoration(
       border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
       borderRadius: BorderRadius.circular(15.0),
@@ -235,7 +235,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             controller: _pinController,
             submittedPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
                   color: const Color.fromRGBO(45, 194, 98, 0.5),
                 ),
@@ -244,7 +244,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             defaultPinTheme: _pinPutDecoration,
             followingPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
                   color: const Color.fromRGBO(45, 194, 98, 0.5),
                 ),

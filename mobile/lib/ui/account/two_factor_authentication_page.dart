@@ -22,8 +22,8 @@ class _TwoFactorAuthenticationPageState
   final _pinController = TextEditingController();
 
   final _pinPutDecoration = PinTheme(
-    height: 48,
-    width: 48,
+    height: 45,
+    width: 45,
     decoration: BoxDecoration(
       border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
       borderRadius: BorderRadius.circular(15.0),
@@ -106,7 +106,7 @@ class _TwoFactorAuthenticationPageState
             ),
             followingPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
+                borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
                   color: const Color.fromRGBO(45, 194, 98, 0.5),
                 ),
@@ -114,7 +114,7 @@ class _TwoFactorAuthenticationPageState
             ),
             focusedPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.0),
+                borderRadius: BorderRadius.circular(15.0),
                 border: Border.all(
                   color: const Color.fromRGBO(45, 194, 98, 0.5),
                 ),
