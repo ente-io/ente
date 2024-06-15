@@ -33,3 +33,12 @@ To import an existing worker from the Cloudflare dashboard, use
 ```sh
 npm create cloudflare@2 existing-worker-name -- --type pre-existing --existing-script existing-worker-name
 ```
+
+## Logging
+
+Attach the tail worker to your worker by adding
+
+    tail_consumers = [{ service = "tail" }]
+
+in its `wrangler.toml`. Then any `console.(log|warn|error)` statements and
+uncaught exceptions in your worker will be logged to Grafana.
