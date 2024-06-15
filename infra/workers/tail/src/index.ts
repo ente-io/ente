@@ -8,7 +8,7 @@ export default {
         // If the tail worker itself throws an exception (it shouldn't, unless
         // Loki is down), we don't catch it so that it counts as an "error" in
         // the worker stats.
-        return handleTail(events, env.LOKI_PUSH_URL);
+        await handleTail(events, env.LOKI_PUSH_URL);
     },
 } satisfies ExportedHandler<Env>;
 
