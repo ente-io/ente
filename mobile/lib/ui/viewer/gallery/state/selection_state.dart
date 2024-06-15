@@ -18,8 +18,14 @@ class SelectionState extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
-  static SelectionState? of(BuildContext context) {
+  static SelectionState? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SelectionState>();
+  }
+
+  static SelectionState of(BuildContext context) {
+    final SelectionState? result = maybeOf(context);
+    assert(result != null, 'No SelectionState found in context');
+    return result!;
   }
 
   @override
