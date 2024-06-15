@@ -36,5 +36,9 @@ npm create cloudflare@2 existing-worker-name -- --type pre-existing --existing-s
 
 ## Logging
 
-Attach our tail worker (called `tail`) to your worker. Then, any `console.log`
-(etc) statements called by your worker will be forwarded to Grafana.
+Attach the tail worker to your worker by adding
+
+    tail_consumers = [{ service = "tail" }]
+
+in its `wrangler.toml`. Then any `console.(log|warn|error)` statements and
+uncaught exceptions in your worker will be logged to Grafana.
