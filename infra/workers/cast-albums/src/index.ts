@@ -2,6 +2,7 @@
 
 export default {
     async fetch(request: Request) {
+        console.log("This message should appear in the logs.");
         switch (request.method) {
             case "OPTIONS":
                 return handleOPTIONS(request);
@@ -9,6 +10,7 @@ export default {
                 return handleGET(request);
             default:
                 console.log(`Unsupported HTTP method ${request.method}`);
+                throw new Error("Unsupported HTTP method");
                 return new Response(null, { status: 405 });
         }
     },
@@ -28,6 +30,7 @@ const handleOPTIONS = (request: Request) => {
 };
 
 const isAllowedOrigin = (origin: string | null) => {
+    console.log(origin);
     if (!origin) return false;
     try {
         const url = new URL(origin);
