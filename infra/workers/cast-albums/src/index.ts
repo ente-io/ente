@@ -8,7 +8,8 @@ export default {
             case "GET":
                 return handleGET(request);
             default:
-                throw new Error(`Unsupported HTTP method ${request.method}`);
+                console.log(`Unsupported HTTP method ${request.method}`);
+                return new Response(null, { status: 405 });
         }
     },
 } satisfies ExportedHandler;
@@ -44,7 +45,10 @@ const handleGET = async (request: Request) => {
     const castToken =
         request.headers.get("X-Cast-Access-Token") ??
         url.searchParams.get("castToken");
-    if (!castToken) throw new Error("No cast token provided");
+    if (!castToken) {
+        console.error("No cast token provided");
+        return new Response(null, { status: 400 });
+    }
 
     const fileID = url.searchParams.get("fileID");
     const pathname = url.pathname;
