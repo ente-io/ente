@@ -32,18 +32,18 @@ const handleOPTIONS = (request: Request) => {
 };
 
 const isAllowedOrigin = (origin: string | null) => {
-    const allowed = [
+    const desktopApp = "ente://app";
+    const allowedHostname = [
         "web.ente.io",
         "photos.ente.io",
         "photos.ente.sh",
         "localhost",
-        "ente://app" /* Desktop app */,
     ];
 
     if (!origin) return false;
     try {
         const url = new URL(origin);
-        return allowed.includes(url.hostname);
+        return origin == desktopApp || allowedHostname.includes(url.hostname);
     } catch {
         // origin is likely an invalid URL
         return false;
