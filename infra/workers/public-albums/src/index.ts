@@ -55,5 +55,40 @@ const areAllowedHeaders = (headers: string | null) => {
 };
 
 const handleGET = async (request: Request) => {
-// TODO
+    const url = new URL(request.url);
+
+    let accessToken = request.headers.get("X-Auth-Access-Token");
+    if (accessToken === undefined) {
+        console.warn("Using deprecated accessToken query param");
+        accessToken = url.searchParams.get("accessToken");
+    }
+
+    if (!accessToken) {
+        console.error("No accessToken provided");
+        // return new Response(null, { status: 400 });
+    }
+
+    let accessTokenJWT = request.headers.get("X-Auth-Access-Token-JWT");
+    if (accessTokenJWT === undefined) {
+        console.warn("Using deprecated accessTokenJWT query param");
+        accessTokenJWT = url.searchParams.get("accessTokenJWT");
+    }
+
+    const pathname = url.pathname;
+    const fileID = url.searchParams.get("fileID");
+    if (!fileID) {
+        console.error("No fileID provided");
+        return new Response(null, { status: 400 });
+    }
+
+    const params = new URLSearchParams();
+    if (accessToken) params.set("accessToken", accessToken);
+    if (accessTokenJWT) params.set("accessTokenJWT", accessTokenJWT);
+
+    let response = await fetch(
+        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`
+    );
+    response = new Response(response.body, response);
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    return response;
 };
