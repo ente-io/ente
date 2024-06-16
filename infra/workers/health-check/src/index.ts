@@ -2,7 +2,7 @@
 
 export default {
     async scheduled(_, env: Env, ctx: ExecutionContext) {
-        ctx.waitUntil(ping(env));
+        ctx.waitUntil(ping(env, ctx));
     },
 } satisfies ExportedHandler<Env>;
 
@@ -11,12 +11,14 @@ interface Env {
     CHAT_ID: string;
 }
 
-const ping = async (env: Env) => {
+const ping = async (env: Env, ctx: ExecutionContext) => {
     const notify = async (msg: string) =>
         sendMessage(`${msg} on ${Date()}`, env);
 
     try {
-        let timeout = setTimeout(() => notify("Ping timed out"), 5000);
+        let timeout = setTimeout(() => {
+            ctx.waitUntil(notify("Ping timed out"));
+        }, 5000);
         const res = await fetch("https://api.ente.io/ping", {
             headers: {
                 "User-Agent": "health-check",
@@ -31,7 +33,7 @@ const ping = async (env: Env) => {
 
 const sendMessage = async (message: string, env: Env) => {
     console.log(message);
-    return fetch(env.NOTIFY_URL, {
+    const res = await fetch(env.NOTIFY_URL, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -42,4 +44,5 @@ const sendMessage = async (message: string, env: Env) => {
             text: message,
         }),
     });
+    if (!res.ok) throw new Error(`Failed to sendMessage (HTTP ${res.status})`);
 };
