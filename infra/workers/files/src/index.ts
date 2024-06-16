@@ -1,4 +1,4 @@
-/** Proxy requests for files and thumbnails in public albums. */
+/** Proxy requests for files. */
 
 export default {
     async fetch(request: Request) {
@@ -25,20 +25,25 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
             "Access-Control-Max-Age": "86400",
-            // "Access-Control-Allow-Headers": "X-Auth-Access-Token, X-Auth-Access-Token-JWT",
-            // "Access-Control-Allow-Headers": "X-Auth-Access-Token, X-Auth-Access-Token-JWT, x-client-package",
+            // "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package",
             "Access-Control-Allow-Headers": "*",
         },
     });
 };
 
 const isAllowedOrigin = (origin: string | null) => {
-    const allowed = ["albums.ente.io", "albums.ente.sh", "localhost"];
+    const desktopApp = "ente://app";
+    const allowedHostnames = [
+        "web.ente.io",
+        "photos.ente.io",
+        "photos.ente.sh",
+        "localhost",
+    ];
 
     if (!origin) return false;
     try {
         const url = new URL(origin);
-        return allowed.includes(url.hostname);
+        return origin == desktopApp || allowedHostnames.includes(url.hostname);
     } catch {
         // origin is likely an invalid URL
         return false;
@@ -46,12 +51,7 @@ const isAllowedOrigin = (origin: string | null) => {
 };
 
 const areAllowedHeaders = (headers: string | null) => {
-    // TODO(MR): Stop sending "x-client-package"
-    const allowed = [
-        "x-auth-access-token",
-        "x-auth-access-token-jwt",
-        "x-client-package",
-    ];
+    const allowed = ["x-auth-token", "x-client-package"];
 
     if (!headers) return true;
     for (const header of headers.split(",")) {
@@ -63,34 +63,37 @@ const areAllowedHeaders = (headers: string | null) => {
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
 
+    // Random bots keep trying to pentest causing noise in the logs. If the
+    // request doesn't have a fileID, we can just safely ignore it thereafter.
     const fileID = url.searchParams.get("fileID");
     if (!fileID) return new Response(null, { status: 400 });
 
-    let accessToken = request.headers.get("X-Auth-Access-Token");
-    if (accessToken === undefined) {
-        console.warn("Using deprecated accessToken query param");
-        accessToken = url.searchParams.get("accessToken");
+    let token = request.headers.get("X-Auth-Token");
+    if (!token) {
+        console.warn("Using deprecated token query param");
+        token = url.searchParams.get("token");
     }
 
-    if (!accessToken) {
-        console.error("No accessToken provided");
+    if (!token) {
+        console.error("No token provided");
         // return new Response(null, { status: 400 });
     }
 
-    let accessTokenJWT = request.headers.get("X-Auth-Access-Token-JWT");
-    if (accessTokenJWT === undefined) {
-        console.warn("Using deprecated accessTokenJWT query param");
-        accessTokenJWT = url.searchParams.get("accessTokenJWT");
-    }
-
-    const pathname = url.pathname;
-
+    // We forward the auth token as a query parameter to museum. This is so that
+    // it does not get preserved when museum does a redirect to the presigned S3
+    // URL that serves the actual thumbnail.
+    //
+    // See: [Note: Passing credentials for self-hosted file fetches]
     const params = new URLSearchParams();
-    if (accessToken) params.set("accessToken", accessToken);
-    if (accessTokenJWT) params.set("accessTokenJWT", accessTokenJWT);
+    if (token) params.set("token", token);
 
     let response = await fetch(
-        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`
+        `https://api.ente.io/files/download/${fileID}?${params.toString()}`,
+        {
+            headers: {
+                "User-Agent": request.headers.get("User-Agent") ?? "",
+            },
+        }
     );
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");

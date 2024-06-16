@@ -63,6 +63,9 @@ const areAllowedHeaders = (headers: string | null) => {
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
 
+    const fileID = url.searchParams.get("fileID");
+    if (!fileID) return new Response(null, { status: 400 });
+
     let token = request.headers.get("X-Auth-Token");
     if (!token) {
         console.warn("Using deprecated token query param");
@@ -74,17 +77,6 @@ const handleGET = async (request: Request) => {
         // return new Response(null, { status: 400 });
     }
 
-    const fileID = url.searchParams.get("fileID");
-    if (!fileID) {
-        console.error("No fileID provided");
-        return new Response(null, { status: 400 });
-    }
-
-    // We forward the auth token as a query parameter to museum. This is so that
-    // it does not get preserved when museum does a redirect to the presigned S3
-    // URL that serves the actual thumbnail.
-    //
-    // See: [Note: Passing credentials for self-hosted file fetches]
     const params = new URLSearchParams();
     if (token) params.set("token", token);
 

@@ -42,21 +42,22 @@ const isAllowedOrigin = (origin: string | null) => {
 
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
-    const castToken =
-        request.headers.get("X-Cast-Access-Token") ??
-        url.searchParams.get("castToken");
+
+    const fileID = url.searchParams.get("fileID");
+    if (!fileID) return new Response(null, { status: 400 });
+
+    let castToken = request.headers.get("X-Cast-Access-Token");
+    if (!castToken) {
+        console.warn("Using deprecated castToken query param");
+        castToken = url.searchParams.get("castToken");
+    }
+
     if (!castToken) {
         console.error("No cast token provided");
         return new Response(null, { status: 400 });
     }
 
     const pathname = url.pathname;
-    const fileID = url.searchParams.get("fileID");
-    if (!fileID) {
-        console.error("No fileID provided");
-        return new Response(null, { status: 400 });
-    }
-
     const params = new URLSearchParams({ castToken });
 
     let response = await fetch(
