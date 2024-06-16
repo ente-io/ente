@@ -28,12 +28,12 @@ const handleOPTIONS = (request: Request) => {
 };
 
 const isAllowedOrigin = (origin: string | null) => {
+    const allowed = ["cast.ente.io", "cast.ente.sh", "localhost"];
+
     if (!origin) return false;
     try {
         const url = new URL(origin);
-        return ["cast.ente.io", "cast.ente.sh", "localhost"].includes(
-            url.hostname
-        );
+        return allowed.includes(url.hostname);
     } catch {
         // origin is likely an invalid URL
         return false;
@@ -50,14 +50,18 @@ const handleGET = async (request: Request) => {
         return new Response(null, { status: 400 });
     }
 
-    const fileID = url.searchParams.get("fileID");
     const pathname = url.pathname;
+    const fileID = url.searchParams.get("fileID");
+    if (!fileID) {
+        console.error("No fileID provided");
+        return new Response(null, { status: 400 });
+    }
 
     const params = new URLSearchParams({ castToken });
+
     let response = await fetch(
         `https://api.ente.io/cast/files${pathname}${fileID}?${params.toString()}`
     );
-
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
     return response;
