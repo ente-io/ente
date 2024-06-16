@@ -24,12 +24,6 @@
       "title": "BitMEX"
     },
     {
-      "title": "BitSkins"
-    },
-    {
-      "title": "Bitstamp"
-    },
-    {
       "title": "Bitvavo",
       "hex": "0051FF"
     },
@@ -57,9 +51,6 @@
       "title": "CERN"
     },
     {
-      "title": "ChangeNOW"
-    },
-    {
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
@@ -68,7 +59,11 @@
       "title": "Cloudflare"
     },
     {
-      "title": "ConfigCat"
+      "title": "CloudAMQP"
+    },
+    {
+      "title": "ConfigCat",
+      "slug": "configcat"
     },
     {
       "title": "Control D",
@@ -91,9 +86,6 @@
     },
     {
       "title": "Discourse"
-    },
-    {
-      "title": "DMarket"
     },
     {
       "title": "Doppler"
@@ -167,10 +159,6 @@
       "title": "INWX"
     },
     {
-      "title": "Itch.io",
-      "slug": "itch_io"
-    },
-    {
       "title": "IVPN",
       "slug": "IVPN"
     },
@@ -219,10 +207,6 @@
       "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
     },
     {
-      "title": "Marketplace.tf",
-      "slug": "marketplacedottf"
-    },
-    {
       "title": "Mastodon",
       "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
@@ -235,9 +219,6 @@
     },
     {
       "title": "Microsoft"
-    },
-    {
-      "title": "Migros"
     },
     {
       "title": "Mintos"
@@ -255,10 +236,6 @@
       "slug": "myfritz"
     },
     {
-      "title": "Name.com",
-      "slug": "name_com"
-    },
-    {
       "title": "NextDNS"
     },
     {
@@ -273,6 +250,10 @@
     },
     {
       "title": "Notion"
+    },
+    {
+      "title": "NuCommunity",
+      "slug": "nucommunity"
     },
     {
       "title": "NVIDIA"
@@ -332,8 +313,12 @@
       "slug": "real_debrid"
     },
     {
-      "title": "Registro.br",
-      "slug": "registro_br"
+      "title": "Registro br",
+      "slug": "registro_br",
+      "altNames": ["Registro br", "registrobr", "Registro.br"]
+    },
+    {
+      "title": "Render"
     },
     {
       "title": "Revolt",
@@ -353,6 +338,9 @@
       "hex": "000000"
     },
     {
+      "title": "Samsung"
+    },
+    {
       "title": "Sendgrid"
     },
     {
@@ -367,9 +355,6 @@
     {
       "title": "Skiff",
       "hex": "EF5A3C"
-    },
-    {
-      "title": "Skinport"
     },
     {
       "title": "Snapchat"
@@ -420,16 +405,16 @@
       "title": "Tweakers"
     },
     {
+      "title": "Twitch",
+      "altNames": ["Twitch.tv", "Twitch tv"]
+    },
+    {
       "title": "Twingate",
       "hex": "858585"
     },
     {
       "title": "Ubisoft",
       "hex": "4285f4"
-    },
-    {
-      "title": "Ubuntu One",
-      "slug": "ubuntu_one"
     },
     {
       "title": "Unity",
@@ -457,7 +442,9 @@
     {
       "title": "WorkOS",
       "slug": "workos",
-      "altNames": ["Work OS"]
+      "altNames": [
+        "Work OS"
+      ]
     },
     {
       "title": "X",
