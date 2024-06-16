@@ -81,12 +81,7 @@ const handleGET = async (request: Request) => {
     if (token) params.set("token", token);
 
     let response = await fetch(
-        `https://api.ente.io/files/preview/${fileID}?${params.toString()}`,
-        {
-            headers: {
-                "User-Agent": request.headers.get("User-Agent") ?? "",
-            },
-        }
+        `https://api.ente.io/files/preview/${fileID}?${params.toString()}`
     );
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
