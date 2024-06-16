@@ -29,7 +29,7 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
             "Access-Control-Max-Age": "86400",
-            // "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package",
+            // "Access-Control-Allow-Headers": "UPLOAD-URL",
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Expose-Headers": "X-Request-ID, CF-Ray",
         },
@@ -56,7 +56,7 @@ const isAllowedOrigin = (origin: string | null) => {
 };
 
 const areAllowedHeaders = (headers: string | null) => {
-    const allowed = ["x-auth-token", "x-client-package"];
+    const allowed = ["UPLOAD-URL"];
 
     if (!headers) return true;
     for (const header of headers.split(",")) {
