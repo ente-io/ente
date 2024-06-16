@@ -63,8 +63,6 @@ const areAllowedHeaders = (headers: string | null) => {
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
 
-    // Random bots keep trying to pentest causing noise in the logs. If the
-    // request doesn't have a fileID, we can just safely ignore it thereafter.
     const fileID = url.searchParams.get("fileID");
     if (!fileID) return new Response(null, { status: 400 });
 
@@ -79,16 +77,16 @@ const handleGET = async (request: Request) => {
         // return new Response(null, { status: 400 });
     }
 
-    // We forward the auth token as a query parameter to museum. This is so that
-    // it does not get preserved when museum does a redirect to the presigned S3
-    // URL that serves the actual thumbnail.
-    //
-    // See: [Note: Passing credentials for self-hosted file fetches]
     const params = new URLSearchParams();
     if (token) params.set("token", token);
 
     let response = await fetch(
-        `https://api.ente.io/files/preview/${fileID}?${params.toString()}`
+        `https://api.ente.io/files/preview/${fileID}?${params.toString()}`,
+        {
+            headers: {
+                "User-Agent": request.headers.get("User-Agent") ?? "",
+            },
+        }
     );
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
