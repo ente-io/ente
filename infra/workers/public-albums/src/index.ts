@@ -26,6 +26,7 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Methods": "GET, OPTIONS",
             "Access-Control-Max-Age": "86400",
             // "Access-Control-Allow-Headers": "X-Auth-Access-Token, X-Auth-Access-Token-JWT",
+            // "Access-Control-Allow-Headers": "X-Auth-Access-Token, X-Auth-Access-Token-JWT, x-client-package",
             "Access-Control-Allow-Headers": "*",
         },
     });
@@ -45,7 +46,12 @@ const isAllowedOrigin = (origin: string | null) => {
 };
 
 const areAllowedHeaders = (headers: string | null) => {
-    const allowed = ["x-auth-access-token", "x-auth-access-token-jwt"];
+    // TODO(MR): Stop sending "x-client-package"
+    const allowed = [
+        "x-auth-access-token",
+        "x-auth-access-token-jwt",
+        "x-client-package",
+    ];
 
     if (!headers) return true;
     for (const header of headers.split(",")) {
