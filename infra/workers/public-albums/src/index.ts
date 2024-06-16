@@ -63,6 +63,9 @@ const areAllowedHeaders = (headers: string | null) => {
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
 
+    const fileID = url.searchParams.get("fileID");
+    if (!fileID) return new Response(null, { status: 400 });
+
     let accessToken = request.headers.get("X-Auth-Access-Token");
     if (accessToken === undefined) {
         console.warn("Using deprecated accessToken query param");
@@ -81,11 +84,6 @@ const handleGET = async (request: Request) => {
     }
 
     const pathname = url.pathname;
-    const fileID = url.searchParams.get("fileID");
-    if (!fileID) {
-        console.error("No fileID provided");
-        return new Response(null, { status: 400 });
-    }
 
     const params = new URLSearchParams();
     if (accessToken) params.set("accessToken", accessToken);

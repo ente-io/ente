@@ -63,6 +63,11 @@ const areAllowedHeaders = (headers: string | null) => {
 const handleGET = async (request: Request) => {
     const url = new URL(request.url);
 
+    // Random bots keep trying to pentest causing noise in the logs. If the
+    // request doesn't have a fileID, we can just safely ignore it thereafter.
+    const fileID = url.searchParams.get("fileID");
+    if (!fileID) return new Response(null, { status: 400 });
+
     let token = request.headers.get("X-Auth-Token");
     if (!token) {
         console.warn("Using deprecated token query param");
@@ -72,12 +77,6 @@ const handleGET = async (request: Request) => {
     if (!token) {
         console.error("No token provided");
         // return new Response(null, { status: 400 });
-    }
-
-    const fileID = url.searchParams.get("fileID");
-    if (!fileID) {
-        console.error("No fileID provided");
-        return new Response(null, { status: 400 });
     }
 
     // We forward the auth token as a query parameter to museum. This is so that
