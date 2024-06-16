@@ -86,7 +86,7 @@ const handleGET = async (request: Request) => {
     //
     // See: [Note: Passing credentials for self-hosted file fetches]
     const params = new URLSearchParams();
-    if (token) params.set("accessToken", token);
+    if (token) params.set("token", token);
 
     let response = await fetch(
         `https://api.ente.io/files/preview/${fileID}?${params.toString()}`
