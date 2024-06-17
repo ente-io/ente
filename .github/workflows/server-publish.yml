@@ -33,7 +33,7 @@ jobs:
                   registry: ghcr.io
                   enableBuildKit: true
                   multiPlatform: true
-                  platform: linux/amd64,linux/arm64,linux/arm/v7
+                  platform: linux/amd64,linux/arm64
                   buildArgs: GIT_COMMIT=${{ inputs.commit }}
                   tags: ${{ inputs.commit }}, latest
                   username: ${{ github.actor }}
