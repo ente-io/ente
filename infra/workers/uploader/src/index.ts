@@ -109,9 +109,10 @@ const handlePOSTOrPUT = async (request: Request) => {
             });
             break;
         default:
-            response = new Response(null, { status: 404 });
-            break;
+            return new Response(null, { status: 404 });
     }
+
+    if (!response.ok) console.log("Request failed", response.status);
 
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
