@@ -117,6 +117,10 @@ class _SelectAllButtonState extends State<SelectAllButton> {
   @override
   Widget build(BuildContext context) {
     final selectionState = SelectionState.of(context);
+    assert(
+      selectionState != null,
+      "SelectionState not found in context, SelectionState should be an ancestor of FileSelectionOverlayBar",
+    );
     final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () {
@@ -155,7 +159,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
               ),
               const SizedBox(width: 4),
               ListenableBuilder(
-                listenable: selectionState.selectedFiles,
+                listenable: selectionState!.selectedFiles,
                 builder: (context, _) {
                   if (selectionState.selectedFiles.files.length ==
                       selectionState.allGalleryFiles?.length) {

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 
@@ -22,10 +23,14 @@ class SelectionState extends InheritedWidget {
     return context.dependOnInheritedWidgetOfExactType<SelectionState>();
   }
 
-  static SelectionState of(BuildContext context) {
+  static SelectionState? of(BuildContext context) {
     final SelectionState? result = maybeOf(context);
-    assert(result != null, 'No SelectionState found in context');
-    return result!;
+    if (result == null) {
+      Logger("SelectionState").warning(
+        "No SelectionState found in context. Ignore this if file selection is disabled in the gallery used.",
+      );
+    }
+    return result;
   }
 
   @override
