@@ -65,7 +65,8 @@ subsequent nightly builds.
     git tag 1.x.x-rc
     git push origin 1.x.x-rc
     ```
-3.   Start a new run of the workflow (`gh workflow run desktop-release.yml`).
+
+3.  Start a new run of the workflow (`gh workflow run desktop-release.yml`).
 
 Once the workflow finishes and the 1.x.x-rc pre-release is created, edit its
 description to "Nightly builds". Subsequent scheduled nightly builds will update
