@@ -53,23 +53,22 @@ This'll trigger the workflow and create a new pre-release. We can edit this to
 add the release notes, convert it to a release. Once it is marked as latest, the
 release goes live.
 
-We are done at this point, and can now create a new pre-release to host
+We are done at this point, and can now update the other pre-release that hosts
 subsequent nightly builds.
 
 1.  Update `package.json` in the source repo to use version `1.x.x-rc`, and
     merge these changes into `main`.
 
-2.  In the release repo:
+2.  In the release repo, rename the title of the existing pre-release that
+    contains nightly builds to "1.x.x-rc`, then:
 
     ```sh
     git tag 1.x.x-rc
     git push origin 1.x.x-rc
     ```
 
-3.  Once the workflow finishes and the pre-release is created, edit its
-    description to "Nightly builds".
-
-4.  Delete the pre-release for the previous (already released) version.
+Once the workflow finishes, it'll update the assets attached to the existing
+pre-release.
 
 ## Workflow - Extra pre-releases
 
