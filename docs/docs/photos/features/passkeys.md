@@ -5,11 +5,6 @@ description: Using passkeys as a second factor for your Ente account
 
 # Passkeys
 
-> [!CAUTION]
->
-> This is preview documentation for an upcoming feature. This feature has not
-> yet been released yet, so the steps below will not work currently.
-
 Passkeys are a new authentication mechanism that uses strong cryptography built
 into devices, like Windows Hello or Apple's Touch ID. **You can use passkeys as
 a second factor to secure your Ente account.**
@@ -17,9 +12,13 @@ a second factor to secure your Ente account.**
 > [!TIP]
 >
 > Passkeys are the colloquial term for a WebAuthn (Web Authentication)
-> credentials. To know more technical details about how our passkey verification
-> works, you can see this
-> [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
+> credentials.
+>
+> -   More details about why and how are in the Passkeys announcement
+>     [blog post](https://ente.io/blog/introducing-passkeys-on-ente/).
+> -   And to know more technical details about how our passkey verification
+>     works, you can see this
+>     [technical note in our source code](https://github.com/ente-io/ente/blob/main/web/docs/webauthn-passkeys.md).
 
 ## Passkeys and TOTP
 

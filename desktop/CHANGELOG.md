@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## v1.7.1 (Unreleased)
+## v1.7.2 (Unreleased)
+
+-   .
+
+## v1.7.1
 
 -   Support for passkeys as a second factor authentication mechanism.
 -   Remember the window size across app restarts.
