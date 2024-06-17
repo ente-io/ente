@@ -7,6 +7,7 @@ import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import type { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { shuffled } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError } from "@ente/shared/error";
@@ -133,7 +134,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
             // The last to last element is the one that was shown prior to that,
             // and now can be safely revoked.
             if (previousURLs.length > 1)
-                URL.revokeObjectURL(previousURLs.shift());
+                URL.revokeObjectURL(ensure(previousURLs.shift()));
 
             previousURLs.push(url);
 
@@ -254,7 +255,7 @@ const isFileEligible = (file: EnteFile) => {
     // extension. To detect the actual type, we need to sniff the MIME type, but
     // that requires downloading and decrypting the file first.
     const [, extension] = nameAndExtension(file.metadata.title);
-    if (isNonWebImageFileExtension(extension)) {
+    if (extension && isNonWebImageFileExtension(extension)) {
         // Of the known non-web types, we support HEIC.
         return isHEICExtension(extension);
     }
