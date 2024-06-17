@@ -31,7 +31,7 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
             "Access-Control-Max-Age": "86400",
-            // "Access-Control-Allow-Headers": "UPLOAD-URL",
+            // "Access-Control-Allow-Headers": "Content-Type", "UPLOAD-URL, X-Client-Package",
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Expose-Headers": "X-Request-Id, CF-Ray",
         },
@@ -58,7 +58,7 @@ const isAllowedOrigin = (origin: string | null) => {
 };
 
 const areAllowedHeaders = (headers: string | null) => {
-    const allowed = ["UPLOAD-URL"];
+    const allowed = ["Content-Type", "UPLOAD-URL", "X-Client-Package"];
 
     if (!headers) return true;
     for (const header of headers.split(",")) {
