@@ -5,11 +5,6 @@ description: Using passkeys as a second factor for your Ente account
 
 # Passkeys
 
-> [!CAUTION]
->
-> This is preview documentation for an upcoming feature. This feature has not
-> yet been released yet, so the steps below will not work currently.
-
 Passkeys are a new authentication mechanism that uses strong cryptography built
 into devices, like Windows Hello or Apple's Touch ID. **You can use passkeys as
 a second factor to secure your Ente account.**
