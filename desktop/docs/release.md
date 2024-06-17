@@ -59,16 +59,17 @@ subsequent nightly builds.
 1.  Update `package.json` in the source repo to use version `1.x.x-rc`, and
     merge these changes into `main`.
 
-2.  In the release repo, rename the title of the existing pre-release that
-    contains nightly builds to "1.x.x-rc`, then:
+2.  In the release repo, delete the existing _nightly_ pre-release, then:
 
     ```sh
     git tag 1.x.x-rc
     git push origin 1.x.x-rc
     ```
+3.   Start a new run of the workflow (`gh workflow run desktop-release.yml`).
 
-Once the workflow finishes, it'll update the assets attached to the existing
-pre-release.
+Once the workflow finishes and the 1.x.x-rc pre-release is created, edit its
+description to "Nightly builds". Subsequent scheduled nightly builds will update
+this pre-release.
 
 ## Workflow - Extra pre-releases
 
