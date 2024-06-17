@@ -31,4 +31,4 @@ categories:
 startup_notify: false
 
 supported_mime_type:
-  - x-scheme-handler/ente
+  - x-scheme-handler/enteauth
