@@ -1,3 +1,4 @@
+import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import { ENCRYPTION_CHUNK_SIZE } from "../constants";
@@ -123,7 +124,7 @@ export async function encryptChaCha(data: Uint8Array) {
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
 
-    const encryptedData = [];
+    const encryptedChunks = [];
 
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
         let chunkSize = ENCRYPTION_CHUNK_SIZE;
@@ -140,14 +141,12 @@ export async function encryptChaCha(data: Uint8Array) {
             null,
             tag,
         );
-        for (let index = 0; index < pushResult.length; index++) {
-            encryptedData.push(pushResult[index]);
-        }
+        encryptedChunks.push(pushResult);
     }
     return {
         key: await toB64(uintkey),
         file: {
-            encryptedData: new Uint8Array(encryptedData),
+            encryptedData: mergeUint8Arrays(encryptedChunks),
             decryptionHeader: await toB64(header),
         },
     };
