@@ -71,7 +71,7 @@ export default function AuthenticateUserModal({
             onClose={onClose}
             sx={{ position: "absolute" }}
             attributes={{
-                title: t("PASSWORD"),
+                title: t("password"),
             }}
         >
             <VerifyMasterPasswordForm

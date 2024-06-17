@@ -72,7 +72,7 @@ Future<void> _pick2FasFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDesc,
+      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
     );
   }
 }
@@ -139,7 +139,10 @@ Future<int?> _process2FasExportFile(
   for (var item in decodedServices) {
     var kind = item['otp']['tokenType'];
     var account = item['otp']['account'] ?? '';
-    var issuer = item['otp']['issuer'] ?? item['name'] ?? '';
+    var issuer = item['otp']['issuer'];
+    if (issuer == null || (issuer as String).isEmpty) {
+      issuer = item['name'] ?? '';
+    }
     var algorithm = item['otp']['algorithm'];
     var secret = item['secret'];
     var timer = item['otp']['period'];

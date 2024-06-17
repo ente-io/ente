@@ -87,3 +87,16 @@ Yes, Ente Photos has undergone a thorough security audit conducted by Cure53, in
 collaboration with Symbolic Software. Cure53 is a prominent German cybersecurity
 firm, while Symbolic Software specializes in applied cryptography. Please find
 the full report here: https://ente.io/blog/cryptography-audit/
+
+## How can I delete my account?
+
+You can delete your account at any time by using the "Delete account" option in
+the settings. For security reasons, we request you to delete your account on
+your own instead of contacting support to ask them to delete your account.
+
+Note that both Ente photos and Ente auth data will be deleted when you delete
+your account (irrespective of which app you delete it from) since both photos
+and auth use the same underlying account.
+
+To know details of how your data is deleted, including when you delete your
+account, please see https://ente.io/blog/how-ente-deletes-data/.

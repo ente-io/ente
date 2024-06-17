@@ -6,6 +6,9 @@ files:
 extraFiles:
     - from: build
       to: resources
+protocols:
+    - name: Ente
+      schemes: ["ente"]
 win:
     target:
         - target: nsis
@@ -23,6 +26,7 @@ linux:
         - target: pacman
           arch: [x64, arm64]
     category: Photography
+    icon: ./build/icon.icns
 mac:
     target:
         target: default

@@ -1,17 +1,16 @@
 import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
-import { appNameToAppNameOld } from "@ente/shared/apps/constants";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
+import { VerifyingPasskey } from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
-import { getAccountsURL } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
@@ -29,6 +28,10 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
+import {
+    openPasskeyVerificationURL,
+    passkeyVerificationRedirectURL,
+} from "../services/passkey";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
@@ -36,10 +39,11 @@ import type { SRPSetupAttributes } from "../types/srp";
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName, logout } = appContext;
 
-    const appNameOld = appNameToAppNameOld(appName);
-
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
+    const [passkeyVerificationData, setPasskeyVerificationData] = useState<
+        { passkeySessionID: string; url: string } | undefined
+    >();
 
     const router = useRouter();
 
@@ -87,11 +91,15 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorEnabled: true,
                     isTwoFactorPasskeysEnabled: true,
                 });
+                // TODO: This is not the first login though if they already have
+                // 2FA. Does this flag mean first login on this device?
                 setIsFirstLogin(true);
-                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
-                    window.location.origin
-                }/passkeys/finish`;
-                router.push(PAGES.CREDENTIALS);
+                const url = passkeyVerificationRedirectURL(
+                    appName,
+                    passkeySessionID,
+                );
+                setPasskeyVerificationData({ passkeySessionID, url });
+                openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
@@ -151,7 +159,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appNameOld, email);
+        await sendOtt(appName, email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
@@ -161,6 +169,36 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             <VerticallyCentered>
                 <EnteSpinner />
             </VerticallyCentered>
+        );
+    }
+
+    if (passkeyVerificationData) {
+        // We only need to handle this scenario when running in the desktop app
+        // because the web app will navigate to Passkey verification URL.
+        // However, still we add an additional `globalThis.electron` check to
+        // show a spinner. This prevents the VerifyingPasskey component from
+        // being disorientingly shown for a fraction of a second as the redirect
+        // happens on the web app.
+        //
+        // See: [Note: Passkey verification in the desktop app]
+
+        if (!globalThis.electron) {
+            return (
+                <VerticallyCentered>
+                    <EnteSpinner />
+                </VerticallyCentered>
+            );
+        }
+
+        return (
+            <VerifyingPasskey
+                email={email}
+                passkeySessionID={passkeyVerificationData?.passkeySessionID}
+                onRetry={() =>
+                    openPasskeyVerificationURL(passkeyVerificationData)
+                }
+                appContext={appContext}
+            />
         );
     }
 

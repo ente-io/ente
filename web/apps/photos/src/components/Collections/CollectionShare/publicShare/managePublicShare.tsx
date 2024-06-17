@@ -1,10 +1,10 @@
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LinkIcon from "@mui/icons-material/Link";
 import PublicIcon from "@mui/icons-material/Public";
 import { Stack, Typography } from "@mui/material";
-import { EnteMenuItem } from "components/Menu/EnteMenuItem";
 import MenuItemDivider from "components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import { t } from "i18next";

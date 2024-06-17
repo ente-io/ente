@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="io.ente.photos">
-    <application android:name="${applicationName}"
+    <application
+            tools:replace="android:label"
+            android:name="${applicationName}"
         android:label="@string/app_name"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"

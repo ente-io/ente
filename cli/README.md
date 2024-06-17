@@ -107,11 +107,7 @@ docker-compose up -d
 
 `exec` into the container
 ```shell
-docker-compose exec ente /bin/sh
+docker-compose exec ente-cli /bin/sh -c "./ente-cli version"
+docker-compose exec ente-cli /bin/sh -c "./ente-cli account add" 
 ```
 
-#### Directly executing commands
-
-```shell
-docker run -it --rm ente:latest ls
-```

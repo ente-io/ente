@@ -2,7 +2,12 @@
 
 ## v1.7.1 (Unreleased)
 
+-   Support for passkeys as a second factor authentication mechanism.
 -   Remember the window size across app restarts.
+-   Revert changes to the Linux icon.
+-   Fix an issue causing deleted items in watched folders to not move to
+    uncategorized.
+-   Fix duplicate file uploads when initializing a folder watch (sometimes).
 
 ## v1.7.0
 

@@ -16,7 +16,7 @@ var ProviderToExpiryGracePeriodMap = map[ente.PaymentProvider]int64{
 	ente.AppStore:  time.MicroSecondsInOneHour * 120, // 5 days
 	ente.Paypal:    time.MicroSecondsInOneHour * 120,
 	ente.PlayStore: time.MicroSecondsInOneHour * 120,
-	ente.Stripe:    time.MicroSecondsInOneHour * 120,
+	ente.Stripe:    time.MicroSecondsInOneHour * 336, // 14 days
 }
 
 var CountriesInEU = []string{

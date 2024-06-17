@@ -23,6 +23,12 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
     const folderPaths = folderWatches().map((watch) => watch.folderPath);
 
     const watcher = chokidar.watch(folderPaths, {
+        // Don't emit "add" events for matching paths when instantiating the
+        // watch (we do a full disk scan on launch on our own, and also getting
+        // the same events from the watcher causes duplicates).
+        ignoreInitial: true,
+        // Ask the watcher to wait for a the file size to stabilize before
+        // telling us about a new file. By default, it waits for 2 seconds.
         awaitWriteFinish: true,
     });
 

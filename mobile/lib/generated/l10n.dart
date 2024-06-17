@@ -3162,6 +3162,16 @@ class S {
     );
   }
 
+  /// `Check status`
+  String get checkStatus {
+    return Intl.message(
+      'Check status',
+      name: 'checkStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Checking...`
   String get checking {
     return Intl.message(
@@ -3432,6 +3442,16 @@ class S {
     );
   }
 
+  /// `Save space on your device by clearing files that have been already backed up.`
+  String get freeUpDeviceSpaceDesc {
+    return Intl.message(
+      'Save space on your device by clearing files that have been already backed up.',
+      name: 'freeUpDeviceSpaceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `✨ All clear`
   String get allClear {
     return Intl.message(
@@ -3457,6 +3477,36 @@ class S {
     return Intl.message(
       'Remove duplicates',
       name: 'removeDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review and remove files that are exact duplicates.`
+  String get removeDuplicatesDesc {
+    return Intl.message(
+      'Review and remove files that are exact duplicates.',
+      name: 'removeDuplicatesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Large files`
+  String get viewLargeFiles {
+    return Intl.message(
+      'Large files',
+      name: 'viewLargeFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View files that are consuming the most amount of storage`
+  String get viewLargeFilesDesc {
+    return Intl.message(
+      'View files that are consuming the most amount of storage',
+      name: 'viewLargeFilesDesc',
       desc: '',
       args: [],
     );
@@ -6969,10 +7019,10 @@ class S {
     );
   }
 
-  /// `Persons will be shown here once indexing is done`
+  /// `People will be shown here once indexing is done`
   String get searchFaceEmptySection {
     return Intl.message(
-      'Persons will be shown here once indexing is done',
+      'People will be shown here once indexing is done',
       name: 'searchFaceEmptySection',
       desc: '',
       args: [],
@@ -7402,10 +7452,10 @@ class S {
   }
 
   /// `{freeAmount} {storageUnit} free`
-  String freeStorageSpace(Object freeAmount, Object storageUnit) {
+  String availableStorageSpace(Object freeAmount, Object storageUnit) {
     return Intl.message(
       '$freeAmount $storageUnit free',
-      name: 'freeStorageSpace',
+      name: 'availableStorageSpace',
       desc: '',
       args: [freeAmount, storageUnit],
     );
@@ -8368,6 +8418,36 @@ class S {
     );
   }
 
+  /// `Verification is still pending`
+  String get passKeyPendingVerification {
+    return Intl.message(
+      'Verification is still pending',
+      name: 'passKeyPendingVerification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session expired`
+  String get loginSessionExpired {
+    return Intl.message(
+      'Session expired',
+      name: 'loginSessionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your session has expired. Please login again.`
+  String get loginSessionExpiredDetails {
+    return Intl.message(
+      'Your session has expired. Please login again.',
+      name: 'loginSessionExpiredDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verify passkey`
   String get verifyPasskey {
     return Intl.message(
@@ -8734,6 +8814,16 @@ class S {
     );
   }
 
+  /// `Saving edits...`
+  String get savingEdits {
+    return Intl.message(
+      'Saving edits...',
+      name: 'savingEdits',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Auto pair`
   String get autoPair {
     return Intl.message(
@@ -8789,6 +8879,66 @@ class S {
     return Intl.message(
       'Indexing is paused. It will automatically resume when device is ready.',
       name: 'indexingIsPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trim`
+  String get trim {
+    return Intl.message(
+      'Trim',
+      name: 'trim',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crop`
+  String get crop {
+    return Intl.message(
+      'Crop',
+      name: 'crop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotate`
+  String get rotate {
+    return Intl.message(
+      'Rotate',
+      name: 'rotate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Left`
+  String get left {
+    return Intl.message(
+      'Left',
+      name: 'left',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Right`
+  String get right {
+    return Intl.message(
+      'Right',
+      name: 'right',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What's new`
+  String get whatsNew {
+    return Intl.message(
+      'What\'s new',
+      name: 'whatsNew',
       desc: '',
       args: [],
     );

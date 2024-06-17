@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>ente Photos</string>
+		<string>Ente Photos</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -23,7 +23,7 @@
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>MinimumOSVersion</key>
-		<string>12.0</string>
+		<string>12.1</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>googlegmail</string>

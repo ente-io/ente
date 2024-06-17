@@ -18,10 +18,16 @@
       "title": "AscendEX"
     },
     {
+      "title": "Bitfinex"
+    },
+    {
       "title": "BitMEX"
     },
     {
-      "title": "Bitfinex"
+      "title": "BitSkins"
+    },
+    {
+      "title": "Bitstamp"
     },
     {
       "title": "Bitvavo",
@@ -33,15 +39,11 @@
     {
       "title": "Bloom Host",
       "slug": "bloom_host",
-      "altNames": [
-        "Bloom Host Billing"
-      ]
+      "altNames": ["Bloom Host Billing"]
     },
     {
       "title": "BorgBase",
-      "altNames": [
-        "borg"
-      ],
+      "altNames": ["borg"],
       "slug": "BorgBase"
     },
     {
@@ -55,15 +57,18 @@
       "title": "CERN"
     },
     {
+      "title": "ChangeNOW"
+    },
+    {
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
     },
     {
-      "title": "ConfigCat"
+      "title": "Cloudflare"
     },
     {
-      "title": "Cloudflare"
+      "title": "ConfigCat"
     },
     {
       "title": "Control D",
@@ -75,16 +80,20 @@
     },
     {
       "title": "DCS",
-      "altNames": [
-        "Digital Combat Simulator"
-      ],
+      "altNames": ["Digital Combat Simulator"],
       "slug": "dcs"
     },
     {
       "title": "DEGIRO"
     },
     {
+      "title": "DirectAdmin"
+    },
+    {
       "title": "Discourse"
+    },
+    {
+      "title": "DMarket"
     },
     {
       "title": "Doppler"
@@ -124,13 +133,14 @@
       "title": "GitLab"
     },
     {
+      "title": "GMX"
+    },
+    {
       "title": "Google"
     },
     {
       "title": "Gosuslugi",
-      "altNames": [
-        "Госуслуги"
-      ],
+      "altNames": ["Госуслуги"],
       "slug": "Gosuslugi"
     },
     {
@@ -141,21 +151,28 @@
       "slug": "healthchecks"
     },
     {
-      "title": "ING"
+      "title": "Hivelocity"
     },
     {
-      "title": "INWX"
+      "title": "IceDrive",
+      "slug": "Icedrive"
+    },
+    {
+      "title": "ING"
     },
     {
       "title": "Instagram"
     },
     {
-      "title": "IVPN",
-      "slug": "IVPN"
+      "title": "INWX"
     },
     {
-      "title": "IceDrive",
-      "slug": "Icedrive"
+      "title": "Itch.io",
+      "slug": "itch_io"
+    },
+    {
+      "title": "IVPN",
+      "slug": "IVPN"
     },
     {
       "title": "Jagex",
@@ -163,10 +180,6 @@
     },
     {
       "title": "Kagi"
-    },
-    {
-      "title": "KPN",
-      "color": "00CC00"
     },
     {
       "title": "Kick",
@@ -177,6 +190,10 @@
     },
     {
       "title": "Koofr"
+    },
+    {
+      "title": "KPN",
+      "color": "00CC00"
     },
     {
       "title": "Kraken",
@@ -199,41 +216,28 @@
     {
       "title": "Local",
       "slug": "local_wp",
-      "altNames": [
-        "LocalWP",
-        "Local WP",
-        "Local Wordpress"
-      ]
+      "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
+    },
+    {
+      "title": "Marketplace.tf",
+      "slug": "marketplacedottf"
     },
     {
       "title": "Mastodon",
-      "altNames": [
-        "mstdn",
-        "fediscience",
-        "mathstodon",
-        "fosstodon"
-      ],
+      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
       "hex": "6364FF"
     },
     {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
-      "altNames": [
-        "Mercado Libre",
-        "MercadoLibre",
-        "MercadoLivre"
-      ]
-    },
-    {
-      "title": "Murena",
-      "altNames": [
-        "eCloud"
-      ],
-      "slug": "ecloud"
+      "altNames": ["Mercado Libre", "MercadoLibre", "MercadoLivre"]
     },
     {
       "title": "Microsoft"
+    },
+    {
+      "title": "Migros"
     },
     {
       "title": "Mintos"
@@ -242,8 +246,17 @@
       "title": "Mozilla"
     },
     {
+      "title": "Murena",
+      "altNames": ["eCloud"],
+      "slug": "ecloud"
+    },
+    {
       "title": "MyFRITZ!Net",
       "slug": "myfritz"
+    },
+    {
+      "title": "Name.com",
+      "slug": "name_com"
     },
     {
       "title": "NextDNS"
@@ -315,6 +328,14 @@
       "title": "Proxmox"
     },
     {
+      "title": "Real-Debrid",
+      "slug": "real_debrid"
+    },
+    {
+      "title": "Registro.br",
+      "slug": "registro_br"
+    },
+    {
       "title": "Revolt",
       "hex": "858585"
     },
@@ -348,12 +369,18 @@
       "hex": "EF5A3C"
     },
     {
+      "title": "Skinport"
+    },
+    {
       "title": "Snapchat"
     },
     {
       "title": "Standard Notes",
       "slug": "standardnotes",
       "hex": "2173E6"
+    },
+    {
+      "title": "Surfshark"
     },
     {
       "title": "Synology DSM",
@@ -366,9 +393,7 @@
     },
     {
       "title": "Techlore",
-      "altNames": [
-        "Techlore Courses"
-      ]
+      "altNames": ["Techlore Courses", "Techlore Forums"]
     },
     {
       "title": "Termius",
@@ -403,6 +428,10 @@
       "hex": "4285f4"
     },
     {
+      "title": "Ubuntu One",
+      "slug": "ubuntu_one"
+    },
+    {
       "title": "Unity",
       "hex": "858585"
     },
@@ -426,25 +455,23 @@
       "slug": "wyze"
     },
     {
+      "title": "WorkOS",
+      "slug": "workos",
+      "altNames": ["Work OS"]
+    },
+    {
       "title": "X",
-      "altNames": [
-        "twitter"
-      ],
+      "altNames": ["twitter"],
       "slug": "x"
     },
     {
       "title": "Yandex",
-      "altNames": [
-        "Ya",
-        "Яндекс"
-      ],
+      "altNames": ["Ya", "Яндекс"],
       "slug": "Yandex"
     },
     {
       "title": "YNAB",
-      "altNames": [
-        "You Need A Budget"
-      ],
+      "altNames": ["You Need A Budget"],
       "slug": "ynab",
       "hex": "3B5EDA"
     }

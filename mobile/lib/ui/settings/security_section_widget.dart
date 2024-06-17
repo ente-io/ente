@@ -10,7 +10,6 @@ import 'package:photos/events/two_factor_status_change_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/user_details.dart";
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import "package:photos/services/passkey_service.dart";
 import 'package:photos/services/user_service.dart';
@@ -101,17 +100,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               },
             ),
           ),
-          if (flagService.passKeyEnabled) sectionOptionSpacing,
-          if (flagService.passKeyEnabled)
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: context.l10n.passkey,
-              ),
-              pressedColor: getEnteColorScheme(context).fillFaint,
-              trailingIcon: Icons.chevron_right_outlined,
-              trailingIconIsMuted: true,
-              onTap: () async => await onPasskeyClick(context),
+          sectionOptionSpacing,
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: context.l10n.passkey,
             ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () async => await onPasskeyClick(context),
+          ),
           sectionOptionSpacing,
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(

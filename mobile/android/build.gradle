@@ -1,5 +1,5 @@
 ext {
-    appCompatVersion = '1.1.0' // for background_fetch
+    appCompatVersion = '1.4.2' // for background_fetch
 }
 
 allprojects {
@@ -7,14 +7,17 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
-        mavenLocal() /merge/ for FDroid
+        mavenLocal() // for FDroid
+//        maven {
+//            url "${project(':background_fetch').projectDir}/libs"
+//        }
     }
 }
 
 rootProject.buildDir = '../build'
 
 subprojects {
-    project.buildDir = "${mobile/lib/main.dartrootProject.buildDir}/${project.name}"
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
     project.evaluationDependsOn(':app')
 }
 

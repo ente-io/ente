@@ -20,6 +20,8 @@
   "codeIssuerHint": "Uitgever",
   "codeSecretKeyHint": "Geheime sleutel",
   "codeAccountHint": "Account (jij@domein.nl)",
+  "codeTagHint": "Label",
+  "accountKeyType": "Type sleutel",
   "sessionExpired": "Sessie verlopen",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -156,6 +158,7 @@
       }
     }
   },
+  "invalidQRCode": "Ongeldige QR-code",
   "noRecoveryKeyTitle": "Geen herstelsleutel?",
   "enterEmailHint": "Voer je e-mailadres in",
   "invalidEmailTitle": "Ongeldig e-mailadres",
@@ -420,5 +423,18 @@
   "invalidEndpoint": "Ongeldig eindpunt",
   "invalidEndpointMessage": "Sorry, het eindpunt dat u hebt ingevoerd is ongeldig. Voer een geldig eindpunt in en probeer het opnieuw.",
   "endpointUpdatedMessage": "Eindpunt met succes bijgewerkt",
-  "customEndpoint": "Verbonden met {endpoint}"
+  "customEndpoint": "Verbonden met {endpoint}",
+  "pinText": "Vastzetten",
+  "unpinText": "Losmaken",
+  "pinnedCodeMessage": "{code} is vastgezet",
+  "unpinnedCodeMessage": "{code} is losgemaakt",
+  "tags": "Labels",
+  "createNewTag": "Nieuw label maken",
+  "tag": "Label",
+  "create": "Creëren",
+  "editTag": "Bewerk label",
+  "deleteTagTitle": "Label verwijderen?",
+  "deleteTagMessage": "Weet je zeker dat je deze label wilt verwijderen? Deze actie is onomkeerbaar.",
+  "somethingWentWrongParsingCode": "We konden {x} codes niet verwerken.",
+  "updateNotAvailable": "Update niet beschikbaar"
 }

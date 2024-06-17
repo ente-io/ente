@@ -266,32 +266,77 @@ class UserService {
     }
   }
 
-  Future<void> onPassKeyVerified(BuildContext context, Map response) async {
-    final userPassword = Configuration.instance.getVolatilePassword();
-    if (userPassword == null) throw Exception("volatile password is null");
-
-    await _saveConfiguration(response);
-
-    Widget page;
-    if (Configuration.instance.getEncryptedToken() != null) {
-      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-        userPassword,
-        Configuration.instance.getKeyAttributes()!,
-      );
-      page = const HomePage();
-    } else {
-      throw Exception("unexpected response during passkey verification");
-    }
-
-    // ignore: unawaited_futures
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
+  Future<dynamic> getTokenForPasskeySession(String sessionID) async {
+    try {
+      final response = await _dio.get(
+        "${_config.getHttpEndpoint()}/users/two-factor/passkeys/get-token",
+        queryParameters: {
+          "sessionID": sessionID,
         },
-      ),
-      (route) => route.isFirst,
-    );
+      );
+      return response.data;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        if (e.response!.statusCode == 404 || e.response!.statusCode == 410) {
+          throw PassKeySessionExpiredError();
+        }
+        if (e.response!.statusCode == 400) {
+          throw PassKeySessionNotVerifiedError();
+        }
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("unexpected error", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> onPassKeyVerified(BuildContext context, Map response) async {
+    final ProgressDialog dialog =
+        createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
+    try {
+      final userPassword = _config.getVolatilePassword();
+      await _saveConfiguration(response);
+      if (userPassword == null) {
+        await dialog.hide();
+        // ignore: unawaited_futures
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const PasswordReentryPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        Widget page;
+        if (_config.getEncryptedToken() != null) {
+          await _config.decryptSecretsAndGetKeyEncKey(
+            userPassword,
+            _config.getKeyAttributes()!,
+          );
+          page = const HomePage();
+        } else {
+          throw Exception("unexpected response during passkey verification");
+        }
+        await dialog.hide();
+
+        // ignore: unawaited_futures
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      }
+    } catch (e) {
+      _logger.severe(e);
+      await dialog.hide();
+      rethrow;
+    }
   }
 
   Future<void> verifyEmail(
@@ -316,9 +361,12 @@ class UserService {
       await dialog.hide();
       if (response.statusCode == 200) {
         Widget page;
+        final String passkeySessionID = response.data["passkeySessionID"];
         final String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
+        } else if (passkeySessionID.isNotEmpty) {
+          page = PasskeyPage(passkeySessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {

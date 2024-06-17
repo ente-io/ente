@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { APPS } from "@ente/shared/apps/constants";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
@@ -212,7 +211,7 @@ export default function PublicCollectionGallery() {
             let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-                await downloadManager.init(APPS.ALBUMS);
+                await downloadManager.init();
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
@@ -487,14 +486,14 @@ export default function PublicCollectionGallery() {
             return (
                 <VerticallyCentered>
                     <FormPaper>
-                        <FormPaperTitle>{t("PASSWORD")}</FormPaperTitle>
+                        <FormPaperTitle>{t("password")}</FormPaperTitle>
                         <Typography color={"text.muted"} mb={2} variant="small">
-                            {t("LINK_PASSWORD")}
+                            {t("link_password_description")}
                         </Typography>
                         <SingleInputForm
                             callback={verifyLinkPassword}
-                            placeholder={t("RETURN_PASSPHRASE_HINT")}
-                            buttonText={t("UNLOCK")}
+                            placeholder={t("password")}
+                            buttonText={t("unlock")}
                             fieldType="password"
                         />
                     </FormPaper>

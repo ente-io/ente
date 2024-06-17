@@ -125,6 +125,12 @@ var ErrFileNotFoundInAlbum = ApiError{
 	Message:        "File is either deleted or moved to different collection",
 }
 
+var ErrSessionAlreadyClaimed = ApiError{
+	Code:           "SESSION_ALREADY_CLAIMED",
+	Message:        "Session is already claimed",
+	HttpStatusCode: http.StatusConflict,
+}
+
 var ErrPublicCollectDisabled = ApiError{
 	Code:           PublicCollectDisabled,
 	Message:        "User has not enabled public collect for this url",

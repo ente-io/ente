@@ -20,6 +20,13 @@ export interface VerifyMasterPasswordFormProps {
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
+    /**
+     * A callback invoked when the form wants to get {@link KeyAttributes}.
+     *
+     * This function can throw an `CustomError.TWO_FACTOR_ENABLED` to signal to
+     * the form that some other form of second factor is enabled and the user
+     * has been redirected to a two factor verification page.
+     */
     getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
 }
@@ -102,7 +109,7 @@ export default function VerifyMasterPasswordForm({
     return (
         <SingleInputForm
             callback={verifyPassphrase}
-            placeholder={t("RETURN_PASSPHRASE_HINT")}
+            placeholder={t("password")}
             buttonText={buttonText}
             submitButtonProps={submitButtonProps}
             hiddenPreInput={

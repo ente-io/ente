@@ -38,3 +38,14 @@ export const ensureLocalUser = (): LocalUser => {
     if (!user) throw new Error("Not logged in");
     return user;
 };
+
+/**
+ * Return the user's auth token, or throw an error.
+ *
+ * The user's auth token is stored in local storage after they have successfully
+ * logged in. This function returns that saved auth token.
+ *
+ * If no such token is found (which should only happen if the user is not logged
+ * in), then it throws an error.
+ */
+export const ensureAuthToken = (): string => ensureLocalUser().token;

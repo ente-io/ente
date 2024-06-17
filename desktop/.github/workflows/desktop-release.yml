@@ -1,6 +1,6 @@
 name: "Release"
 
-# Build the ente-io/ente's desktop/rc branch and create/update a draft release.
+# Build the desktop app with code from ente-io/ente and create/update a release.
 #
 # For more details, see `docs/release.md` in ente-io/ente.
 
