@@ -17,6 +17,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/search_service.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
@@ -127,44 +128,48 @@ class _PeoplePageState extends State<PeoplePage> {
             return Column(
               children: [
                 Expanded(
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Gallery(
-                        asyncLoader: (
-                          creationStartTime,
-                          creationEndTime, {
-                          limit,
-                          asc,
-                        }) async {
-                          final result = await loadPersonFiles();
-                          return Future.value(
-                            FileLoadResult(
-                              result,
-                              false,
-                            ),
-                          );
-                        },
-                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                        forceReloadEvents: [
-                          Bus.instance.on<PeopleChangedEvent>(),
-                        ],
-                        removalEventTypes: const {
-                          EventType.deletedFromRemote,
-                          EventType.deletedFromEverywhere,
-                          EventType.hide,
-                        },
-                        tagPrefix: widget.tagPrefix + widget.tagPrefix,
-                        selectedFiles: _selectedFiles,
-                        initialFiles:
-                            personFiles.isNotEmpty ? [personFiles.first] : [],
-                      ),
-                      FileSelectionOverlayBar(
-                        PeoplePage.overlayType,
-                        _selectedFiles,
-                        person: widget.person,
-                      ),
-                    ],
+                  child: SelectionState(
+                    selectedFiles: _selectedFiles,
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Gallery(
+                          asyncLoader: (
+                            creationStartTime,
+                            creationEndTime, {
+                            limit,
+                            asc,
+                          }) async {
+                            final result = await loadPersonFiles();
+                            return Future.value(
+                              FileLoadResult(
+                                result,
+                                false,
+                              ),
+                            );
+                          },
+                          reloadEvent:
+                              Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                          forceReloadEvents: [
+                            Bus.instance.on<PeopleChangedEvent>(),
+                          ],
+                          removalEventTypes: const {
+                            EventType.deletedFromRemote,
+                            EventType.deletedFromEverywhere,
+                            EventType.hide,
+                          },
+                          tagPrefix: widget.tagPrefix + widget.tagPrefix,
+                          selectedFiles: _selectedFiles,
+                          initialFiles:
+                              personFiles.isNotEmpty ? [personFiles.first] : [],
+                        ),
+                        FileSelectionOverlayBar(
+                          PeoplePage.overlayType,
+                          _selectedFiles,
+                          person: widget.person,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 showSuggestionBanner

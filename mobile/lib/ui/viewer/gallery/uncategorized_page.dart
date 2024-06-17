@@ -13,6 +13,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class UnCategorizedPage extends StatelessWidget {
   final String tagPrefix;
@@ -82,15 +83,18 @@ class UnCategorizedPage extends StatelessWidget {
           collection: collection,
         ),
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          gallery,
-          FileSelectionOverlayBar(
-            overlayType,
-            _selectedFiles,
-          ),
-        ],
+      body: SelectionState(
+        selectedFiles: _selectedFiles,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            gallery,
+            FileSelectionOverlayBar(
+              overlayType,
+              _selectedFiles,
+            ),
+          ],
+        ),
       ),
     );
   }
