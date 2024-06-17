@@ -58,7 +58,7 @@ const isAllowedOrigin = (origin: string | null) => {
 };
 
 const areAllowedHeaders = (headers: string | null) => {
-    const allowed = ["Content-Type", "UPLOAD-URL", "X-Client-Package"];
+    const allowed = ["content-type", "upload-url", "x-client-package"];
 
     if (!headers) return true;
     for (const header of headers.split(",")) {
@@ -109,9 +109,10 @@ const handlePOSTOrPUT = async (request: Request) => {
             });
             break;
         default:
-            response = new Response(null, { status: 404 });
-            break;
+            return new Response(null, { status: 404 });
     }
+
+    if (!response.ok) console.log("Request failed", response.status);
 
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
