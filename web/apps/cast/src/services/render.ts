@@ -208,8 +208,8 @@ const decryptEnteFile = async (
         metadata.decryptionHeader,
         fileKey,
     );
-    let fileMagicMetadata: FileMagicMetadata;
-    let filePubMagicMetadata: FilePublicMagicMetadata;
+    let fileMagicMetadata: FileMagicMetadata | undefined;
+    let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
@@ -243,6 +243,8 @@ const decryptEnteFile = async (
     if (file.pubMagicMetadata?.data.editedName) {
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
+    // @ts-expect-error TODO: The core types need to be updated to allow the
+    // possibility of missing metadata fiels.
     return file;
 };
 
