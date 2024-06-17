@@ -50,7 +50,7 @@ export default function Slideshow() {
         };
     }, []);
 
-    if (loading) return <PairingComplete />;
+    if (loading || !imageURL) return <PairingComplete />;
     if (isEmpty) return <NoItems />;
 
     return isChromecast() ? (

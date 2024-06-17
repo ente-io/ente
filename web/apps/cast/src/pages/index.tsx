@@ -38,6 +38,8 @@ export default function Index() {
     }, [publicKeyB64, privateKeyB64, pairingCode]);
 
     const pollTick = async () => {
+        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
+
         const registration = { publicKeyB64, privateKeyB64, pairingCode };
         try {
             const data = await getCastData(registration);

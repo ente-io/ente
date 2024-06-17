@@ -15,7 +15,7 @@ import { apiOrigin, customAPIOrigin } from "@ente/shared/network/api";
 import type { AxiosResponse } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
-import {
+import type {
     EncryptedEnteFile,
     EnteFile,
     FileMagicMetadata,
