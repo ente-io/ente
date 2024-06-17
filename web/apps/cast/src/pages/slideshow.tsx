@@ -9,9 +9,8 @@ import { isChromecast } from "services/chromecast";
 import { imageURLGenerator } from "services/render";
 
 export default function Slideshow() {
-    const [loading, setLoading] = useState(true);
-    const [imageURL, setImageURL] = useState<string | undefined>();
     const [isEmpty, setIsEmpty] = useState(false);
+    const [imageURL, setImageURL] = useState<string | undefined>();
 
     const router = useRouter();
 
@@ -35,7 +34,6 @@ export default function Slideshow() {
                     }
 
                     setImageURL(url);
-                    setLoading(false);
                 }
             } catch (e) {
                 log.error("Failed to prepare generator", e);
@@ -50,8 +48,8 @@ export default function Slideshow() {
         };
     }, []);
 
-    if (loading) return <PairingComplete />;
     if (isEmpty) return <NoItems />;
+    if (!imageURL) return <PairingComplete />;
 
     return isChromecast() ? (
         <SlideViewChromecast url={imageURL} />

@@ -141,6 +141,7 @@ const advertiseCode = (cast: Cast) => {
         const collectionID =
             data &&
             typeof data == "object" &&
+            "collectionID" in data &&
             typeof data["collectionID"] == "string"
                 ? data["collectionID"]
                 : undefined;
