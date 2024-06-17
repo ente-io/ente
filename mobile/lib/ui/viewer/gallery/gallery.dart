@@ -108,6 +108,7 @@ class GalleryState extends State<Gallery> {
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
   late String _logTag;
   bool _sortOrderAsc = false;
+  List<EnteFile> _allFiles = [];
 
   @override
   void initState() {
@@ -214,7 +215,7 @@ class GalleryState extends State<Gallery> {
   // group files into multiple groups and returns `true` if it resulted in a
   // gallery reload
   bool _onFilesLoaded(List<EnteFile> files) {
-    SelectionState.of(context)?.allGalleryFiles = files;
+    _allFiles = files;
 
     final updatedGroupedFiles =
         widget.enableFileGrouping && widget.groupType.timeGrouping()
@@ -249,6 +250,7 @@ class GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
+    SelectionState.of(context)?.allGalleryFiles = _allFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
