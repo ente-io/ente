@@ -58,7 +58,7 @@ const isAllowedOrigin = (origin: string | null) => {
 };
 
 const areAllowedHeaders = (headers: string | null) => {
-    const allowed = ["Content-Type", "UPLOAD-URL", "X-Client-Package"];
+    const allowed = ["content-type", "upload-url", "x-client-package"];
 
     if (!headers) return true;
     for (const header of headers.split(",")) {
