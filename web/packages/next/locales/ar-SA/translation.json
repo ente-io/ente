@@ -536,6 +536,7 @@
     "delete_account_feedback_placeholder": "",
     "delete_account_confirm_checkbox_label": "",
     "delete_account_confirm": "",
+    "delete_account_confirm_message": "",
     "feedback_required": "",
     "feedback_required_found_another_service": "",
     "RECOVER_TWO_FACTOR": "",

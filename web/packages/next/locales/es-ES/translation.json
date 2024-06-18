@@ -536,6 +536,7 @@
     "delete_account_feedback_placeholder": "Sugerencias",
     "delete_account_confirm_checkbox_label": "Sí, quiero eliminar permanentemente esta cuenta y todos sus datos",
     "delete_account_confirm": "Corfirmar borrado de cuenta",
+    "delete_account_confirm_message": "",
     "feedback_required": "Ayúdanos con esta información",
     "feedback_required_found_another_service": "Qué hace mejor el otro servicio?",
     "RECOVER_TWO_FACTOR": "Recuperar dos factores",
