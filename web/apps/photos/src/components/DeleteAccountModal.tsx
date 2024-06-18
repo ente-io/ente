@@ -244,9 +244,8 @@ const deleteReasons = [
 
 type DeleteReason = (typeof deleteReasons)[number];
 
-const deleteReasonOptions = (): DropdownOption<DeleteReason>[] => {
-    return deleteReasons.map((reason) => ({
-        label: t("delete_reason", { context: reason }),
+const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
+    deleteReasons.map((reason) => ({
+        label: t(`delete_reason.${reason}`),
         value: reason,
     }));
-};
