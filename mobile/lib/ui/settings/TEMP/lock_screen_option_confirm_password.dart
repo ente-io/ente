@@ -25,7 +25,6 @@ class _LockScreenOptionConfirmPasswordState
   final Configuration _configuration = Configuration.instance;
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
-
   final _submitNotifier = ValueNotifier(false);
   @override
   void initState() {
@@ -39,6 +38,7 @@ class _LockScreenOptionConfirmPasswordState
   void dispose() {
     _submitNotifier.dispose();
     _focusNode.dispose();
+    _isFormValid.dispose();
     super.dispose();
   }
 
@@ -58,7 +58,7 @@ class _LockScreenOptionConfirmPasswordState
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -144,7 +144,7 @@ class _LockScreenOptionConfirmPasswordState
               child: TextInputWidget(
                 hintText: S.of(context).confirmPassword,
                 focusNode: _focusNode,
-                fillColor: false,
+                enableFillColor: false,
                 textCapitalization: TextCapitalization.none,
                 textEditingController: _confirmPasswordController,
                 isPasswordInput: true,

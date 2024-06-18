@@ -20,18 +20,18 @@ class LockScreenOption extends StatefulWidget {
 
 class _LockScreenOptionState extends State<LockScreenOption> {
   final Configuration _configuration = Configuration.instance;
-  bool? appLock;
+  late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
 
   @override
   void initState() {
+    super.initState();
     isPasswordEnabled = _configuration.isPasswordSet();
     isPinEnabled = _configuration.isPinSet();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
         _configuration.shouldShowLockScreen();
-    super.initState();
   }
 
   Future<void> _deviceLock() async {
@@ -84,17 +84,17 @@ class _LockScreenOptionState extends State<LockScreenOption> {
 
   Future<void> _onToggleSwitch() async {
     if (appLock == false && !(isPasswordEnabled || isPinEnabled)) {
-      AppLock.of(context)!.setEnabled(!appLock!);
-      await Configuration.instance.setShouldShowLockScreen(!appLock!);
+      AppLock.of(context)!.setEnabled(!appLock);
+      await Configuration.instance.setShouldShowLockScreen(!appLock);
     } else {
-      AppLock.of(context)!.setEnabled(!appLock!);
-      await Configuration.instance.setShouldShowLockScreen(!appLock!);
+      AppLock.of(context)!.setEnabled(!appLock);
+      await Configuration.instance.setShouldShowLockScreen(!appLock);
     }
     await _configuration.removePinAndPassword();
     setState(() {
       isPasswordEnabled = _configuration.isPasswordSet();
       isPinEnabled = _configuration.isPinSet();
-      appLock = !appLock!;
+      appLock = !appLock;
     });
   }
 
@@ -132,14 +132,14 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                               isBottomBorderRadiusRemoved: false,
                               menuItemColor: colorTheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
-                                value: () => appLock!,
+                                value: () => appLock,
                                 onChanged: () => _onToggleSwitch(),
                               ),
                             ),
                             const Padding(
                               padding: EdgeInsets.only(top: 16),
                             ),
-                            appLock!
+                            appLock
                                 ? Container()
                                 : Padding(
                                     padding: const EdgeInsets.only(
@@ -154,7 +154,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                                   ),
                           ],
                         ),
-                        appLock!
+                        appLock
                             ? Column(
                                 children: [
                                   const SizedBox(

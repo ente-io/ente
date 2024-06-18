@@ -20,11 +20,6 @@ class LockScreenOptionPin extends StatefulWidget {
 
 class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
-  Key _pinputKey = UniqueKey();
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -32,17 +27,15 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
     _pinController.dispose();
   }
 
-  String _pin = "";
-
-  void onClick(String number) {
-    _pin += number;
-    _pinController.text = _pin;
+  void _onKeyTap(String number) {
+    _pinController.text += number;
+    return;
   }
 
-  void removeNum() {
-    if (_pin.isNotEmpty) {
-      _pin = _pin.substring(0, _pin.length - 1);
-      _pinController.text = _pin;
+  void _onBackspace() {
+    if (_pinController.text.isNotEmpty) {
+      _pinController.text =
+          _pinController.text.substring(0, _pinController.text.length - 1);
     }
     return;
   }
@@ -53,8 +46,6 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
       return true;
     }
     _pinController.clear();
-    _pin = "";
-    _pinputKey = UniqueKey();
     await HapticFeedback.vibrate();
     return false;
   }
@@ -71,7 +62,6 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
         ),
       );
       _pinController.clear();
-      _pin = "";
     }
   }
 
@@ -104,6 +94,8 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(
               height: 60,
@@ -157,195 +149,187 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(70, 0, 70, 0),
-                  child: Pinput(
-                    key: _pinputKey,
-                    length: 4,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    useNativeKeyboard: false,
-                    controller: _pinController,
-                    defaultPinTheme: _pinPutDecoration,
-                    submittedPinTheme: _pinPutDecoration.copyWith(
-                      textStyle: textTheme.h3Bold,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(
-                          color: colorTheme.fillBase,
-                        ),
-                      ),
-                    ),
-                    followingPinTheme: _pinPutDecoration.copyWith(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(
-                          color: colorTheme.fillMuted,
-                        ),
-                      ),
-                    ),
-                    focusedPinTheme: _pinPutDecoration,
-                    errorPinTheme: _pinPutDecoration.copyWith(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
-                        border: Border.all(
-                          color: colorTheme.fillBase,
-                        ),
-                      ),
-                      textStyle: textTheme.h3Bold
-                          .copyWith(color: colorTheme.warning400),
-                    ),
-                    validator: widget.isAuthenticating
-                        ? (value) {
-                            if (widget.authPin == value) {
-                              return null;
-                            }
-                            return 'Invalid PIN';
-                          }
-                        : null,
-                    errorText: '',
-                    obscureText: true,
-                    obscuringCharacter: '*',
-                    onCompleted: (value) async {
-                      await Future.delayed(const Duration(milliseconds: 250));
-                      await _confirmPin(_pinController.text);
-                    },
+            Pinput(
+              length: 4,
+              useNativeKeyboard: false,
+              controller: _pinController,
+              defaultPinTheme: _pinPutDecoration,
+              submittedPinTheme: _pinPutDecoration.copyWith(
+                textStyle: textTheme.h3Bold,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: colorTheme.fillBase,
                   ),
                 ),
-              ],
+              ),
+              followingPinTheme: _pinPutDecoration.copyWith(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: colorTheme.fillMuted,
+                  ),
+                ),
+              ),
+              focusedPinTheme: _pinPutDecoration,
+              errorPinTheme: _pinPutDecoration.copyWith(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: colorTheme.fillBase,
+                  ),
+                ),
+                textStyle:
+                    textTheme.h3Bold.copyWith(color: colorTheme.warning400),
+              ),
+              validator: widget.isAuthenticating
+                  ? (value) {
+                      if (widget.authPin == value) {
+                        return null;
+                      }
+                      return 'Invalid PIN';
+                    }
+                  : null,
+              errorText: '',
+              obscureText: true,
+              obscuringCharacter: '*',
+              onCompleted: (value) async {
+                await Future.delayed(const Duration(milliseconds: 250));
+                await _confirmPin(_pinController.text);
+              },
             ),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.all(2),
-              color: colorTheme.strokeFainter,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        text: '',
-                        number: '1',
-                        onTap: () {
-                          onClick('1');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        text: "ABC",
-                        number: '2',
-                        onTap: () {
-                          onClick('2');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        text: "DEF",
-                        number: '3',
-                        onTap: () {
-                          onClick('3');
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '4',
-                        text: "GHI",
-                        onTap: () {
-                          onClick('4');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '5',
-                        text: 'JKL',
-                        onTap: () {
-                          onClick('5');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '6',
-                        text: 'MNO',
-                        onTap: () {
-                          onClick('6');
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '7',
-                        text: 'PQRS',
-                        onTap: () {
-                          onClick('7');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '8',
-                        text: 'TUV',
-                        onTap: () {
-                          onClick('8');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '9',
-                        text: 'WXYZ',
-                        onTap: () {
-                          onClick('9');
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '',
-                        text: '',
-                        muteButton: true,
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '0',
-                        text: '',
-                        onTap: () {
-                          onClick('0');
-                        },
-                      ),
-                      buttonWidget(
-                        colorTheme: colorTheme,
-                        textTheme: textTheme,
-                        number: '',
-                        text: '',
-                        icons: const Icon(Icons.backspace_outlined),
-                        onTap: () {
-                          removeNum();
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+            SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                color: colorTheme.strokeFainter,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          text: '',
+                          number: '1',
+                          onTap: () {
+                            _onKeyTap('1');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          text: "ABC",
+                          number: '2',
+                          onTap: () {
+                            _onKeyTap('2');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          text: "DEF",
+                          number: '3',
+                          onTap: () {
+                            _onKeyTap('3');
+                          },
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '4',
+                          text: "GHI",
+                          onTap: () {
+                            _onKeyTap('4');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '5',
+                          text: 'JKL',
+                          onTap: () {
+                            _onKeyTap('5');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '6',
+                          text: 'MNO',
+                          onTap: () {
+                            _onKeyTap('6');
+                          },
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '7',
+                          text: 'PQRS',
+                          onTap: () {
+                            _onKeyTap('7');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '8',
+                          text: 'TUV',
+                          onTap: () {
+                            _onKeyTap('8');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '9',
+                          text: 'WXYZ',
+                          onTap: () {
+                            _onKeyTap('9');
+                          },
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '',
+                          text: '',
+                          muteButton: true,
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '0',
+                          text: '',
+                          onTap: () {
+                            _onKeyTap('0');
+                          },
+                        ),
+                        buttonWidget(
+                          colorTheme: colorTheme,
+                          textTheme: textTheme,
+                          number: '',
+                          text: '',
+                          icons: const Icon(Icons.backspace_outlined),
+                          onTap: () {
+                            _onBackspace();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -395,7 +379,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                             ),
                             Text(
                               text,
-                              style: textTheme.small,
+                              style: textTheme.miniBold,
                             ),
                           ],
                         ),

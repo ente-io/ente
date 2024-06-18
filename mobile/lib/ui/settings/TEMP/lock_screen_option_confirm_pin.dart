@@ -17,7 +17,6 @@ class _LockScreenOptionConfirmPinState
     extends State<LockScreenOptionConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
   final Configuration _configuration = Configuration.instance;
-  Key _pinputKey = UniqueKey();
   final _pinPutDecoration = PinTheme(
     height: 48,
     width: 48,
@@ -26,10 +25,6 @@ class _LockScreenOptionConfirmPinState
       borderRadius: BorderRadius.circular(15.0),
     ),
   );
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -37,17 +32,15 @@ class _LockScreenOptionConfirmPinState
     _confirmPinController.dispose();
   }
 
-  String _pin = "";
-
-  void onClick(String number) {
-    _pin += number;
-    _confirmPinController.text = _pin;
+  void _onKeyTap(String number) {
+    _confirmPinController.text += number;
+    return;
   }
 
-  void removeNum() {
-    if (_pin.isNotEmpty) {
-      _pin = _pin.substring(0, _pin.length - 1);
-      _confirmPinController.text = _pin;
+  void _onBackspace() {
+    if (_confirmPinController.text.isNotEmpty) {
+      _confirmPinController.text = _confirmPinController.text
+          .substring(0, _confirmPinController.text.length - 1);
     }
     return;
   }
@@ -62,8 +55,6 @@ class _LockScreenOptionConfirmPinState
     }
     await HapticFeedback.vibrate();
     _confirmPinController.clear();
-    _pin = "";
-    _pinputKey = UniqueKey();
   }
 
   @override
@@ -139,60 +130,54 @@ class _LockScreenOptionConfirmPinState
               style: textTheme.bodyBold,
             ),
             const Padding(padding: EdgeInsets.all(12)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(70, 0, 70, 0),
-              child: Pinput(
-                key: _pinputKey,
-                length: 4,
-                useNativeKeyboard: false,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                controller: _confirmPinController,
-                defaultPinTheme: _pinPutDecoration,
-                submittedPinTheme: _pinPutDecoration.copyWith(
-                  textStyle: textTheme.h3Bold,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: colorTheme.fillBase,
-                    ),
+            Pinput(
+              length: 4,
+              useNativeKeyboard: false,
+              controller: _confirmPinController,
+              defaultPinTheme: _pinPutDecoration,
+              submittedPinTheme: _pinPutDecoration.copyWith(
+                textStyle: textTheme.h3Bold,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: colorTheme.fillBase,
                   ),
                 ),
-                followingPinTheme: _pinPutDecoration.copyWith(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: colorTheme.fillMuted,
-                    ),
-                  ),
-                ),
-                focusedPinTheme: _pinPutDecoration,
-                errorPinTheme: _pinPutDecoration.copyWith(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: colorTheme.fillBase,
-                    ),
-                  ),
-                  textStyle:
-                      textTheme.h3Bold.copyWith(color: colorTheme.warning400),
-                ),
-                errorText: '',
-                obscureText: true,
-                obscuringCharacter: '*',
-                validator: (value) {
-                  if (value == widget.pin) {
-                    return null;
-                  } else {
-                    value = null;
-                    return 'PIN does not match';
-                  }
-                },
-                onCompleted: (value) async {
-                  await Future.delayed(const Duration(milliseconds: 250));
-                  await _confirmPinMatch();
-                },
               ),
+              followingPinTheme: _pinPutDecoration.copyWith(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: colorTheme.fillMuted,
+                  ),
+                ),
+              ),
+              focusedPinTheme: _pinPutDecoration,
+              errorPinTheme: _pinPutDecoration.copyWith(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: colorTheme.fillBase,
+                  ),
+                ),
+                textStyle:
+                    textTheme.h3Bold.copyWith(color: colorTheme.warning400),
+              ),
+              errorText: '',
+              obscureText: true,
+              obscuringCharacter: '*',
+              validator: (value) {
+                if (value == widget.pin) {
+                  return null;
+                } else {
+                  value = null;
+                  return 'PIN does not match';
+                }
+              },
+              onCompleted: (value) async {
+                await Future.delayed(const Duration(milliseconds: 250));
+                await _confirmPinMatch();
+              },
             ),
             const Spacer(),
             Container(
@@ -208,7 +193,7 @@ class _LockScreenOptionConfirmPinState
                         text: '',
                         number: '1',
                         onTap: () {
-                          onClick('1');
+                          _onKeyTap('1');
                         },
                       ),
                       buttonWidget(
@@ -217,7 +202,7 @@ class _LockScreenOptionConfirmPinState
                         text: "ABC",
                         number: '2',
                         onTap: () {
-                          onClick('2');
+                          _onKeyTap('2');
                         },
                       ),
                       buttonWidget(
@@ -226,7 +211,7 @@ class _LockScreenOptionConfirmPinState
                         text: "DEF",
                         number: '3',
                         onTap: () {
-                          onClick('3');
+                          _onKeyTap('3');
                         },
                       ),
                     ],
@@ -239,7 +224,7 @@ class _LockScreenOptionConfirmPinState
                         number: '4',
                         text: "GHI",
                         onTap: () {
-                          onClick('4');
+                          _onKeyTap('4');
                         },
                       ),
                       buttonWidget(
@@ -248,7 +233,7 @@ class _LockScreenOptionConfirmPinState
                         number: '5',
                         text: 'JKL',
                         onTap: () {
-                          onClick('5');
+                          _onKeyTap('5');
                         },
                       ),
                       buttonWidget(
@@ -257,7 +242,7 @@ class _LockScreenOptionConfirmPinState
                         number: '6',
                         text: 'MNO',
                         onTap: () {
-                          onClick('6');
+                          _onKeyTap('6');
                         },
                       ),
                     ],
@@ -270,7 +255,7 @@ class _LockScreenOptionConfirmPinState
                         number: '7',
                         text: 'PQRS',
                         onTap: () {
-                          onClick('7');
+                          _onKeyTap('7');
                         },
                       ),
                       buttonWidget(
@@ -279,7 +264,7 @@ class _LockScreenOptionConfirmPinState
                         number: '8',
                         text: 'TUV',
                         onTap: () {
-                          onClick('8');
+                          _onKeyTap('8');
                         },
                       ),
                       buttonWidget(
@@ -288,7 +273,7 @@ class _LockScreenOptionConfirmPinState
                         number: '9',
                         text: 'WXYZ',
                         onTap: () {
-                          onClick('9');
+                          _onKeyTap('9');
                         },
                       ),
                     ],
@@ -308,7 +293,7 @@ class _LockScreenOptionConfirmPinState
                         number: '0',
                         text: '',
                         onTap: () {
-                          onClick('0');
+                          _onKeyTap('0');
                         },
                       ),
                       buttonWidget(
@@ -318,7 +303,7 @@ class _LockScreenOptionConfirmPinState
                         text: '',
                         icons: const Icon(Icons.backspace_outlined),
                         onTap: () {
-                          removeNum();
+                          _onBackspace();
                         },
                       ),
                     ],

@@ -71,7 +71,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -158,7 +158,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               child: TextInputWidget(
                 hintText: S.of(context).password,
                 focusNode: _focusNode,
-                fillColor: false,
+                enableFillColor: false,
                 textCapitalization: TextCapitalization.none,
                 textEditingController: _passwordController,
                 isPasswordInput: true,

@@ -15,8 +15,6 @@ class LocalAuthenticationService {
   static final LocalAuthenticationService instance =
       LocalAuthenticationService._privateConstructor();
 
-  final Configuration _configuration = Configuration.instance;
-
   Future<bool> requestLocalAuthentication(
     BuildContext context,
     String infoMessage,
@@ -37,10 +35,11 @@ class LocalAuthenticationService {
     return true;
   }
 
-  Future<bool> requestEnteAuthForLockScreen(BuildContext context) async {
-    final String? savedPin = await _configuration.getPin();
-    final String? savedPassword = await _configuration.getPassword();
-
+  Future<bool> requestEnteAuthForLockScreen(
+    BuildContext context,
+    String? savedPin,
+    String? savedPassword,
+  ) async {
     if (savedPassword != null) {
       final result = await Navigator.of(context).push(
         MaterialPageRoute(
