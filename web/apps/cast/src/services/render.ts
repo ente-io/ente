@@ -1,11 +1,9 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
+import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { createHEICConvertComlinkWorker } from "@/media/worker/heic-convert";
-import type { DedicatedHEICConvertWorker } from "@/media/worker/heic-convert.worker";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import type { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -23,12 +21,6 @@ import type {
     FilePublicMagicMetadata,
 } from "types/file";
 import { isChromecast } from "./chromecast";
-
-/**
- * If we're using HEIC conversion, then this variable caches the comlink web
- * worker we're using to perform the actual conversion.
- */
-let heicWorker: ComlinkWorker<typeof DedicatedHEICConvertWorker> | undefined;
 
 /**
  * An async generator function that loops through all the files in the
@@ -268,12 +260,6 @@ const isFileEligible = (file: EnteFile) => {
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
     return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
-};
-
-export const heicToJPEG = async (heicBlob: Blob) => {
-    let worker = heicWorker;
-    if (!worker) heicWorker = worker = createHEICConvertComlinkWorker();
-    return await (await worker.remote).heicToJPEG(heicBlob);
 };
 
 /**
