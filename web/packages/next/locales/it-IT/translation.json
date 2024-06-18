@@ -527,18 +527,18 @@
     "EXPORT_STARTING": "",
     "delete_account_reason_label": "",
     "delete_account_reason_placeholder": "Seleziona un motivo",
-    "DELETE_REASON": {
-        "MISSING_FEATURE": "",
-        "BROKEN_BEHAVIOR": "",
-        "FOUND_ANOTHER_SERVICE": "",
-        "NOT_LISTED": ""
+    "delete_reason": {
+        "missing_feature": "",
+        "behaviour": "",
+        "found_another_service": "",
+        "not_listed": ""
     },
     "delete_account_feedback_label": "",
     "delete_account_feedback_placeholder": "",
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "",
     "CONFIRM_DELETE_ACCOUNT": "",
-    "FEEDBACK_REQUIRED": "",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "",
+    "feedback_required": "",
+    "feedback_required_found_another_service": "",
     "RECOVER_TWO_FACTOR": "",
     "at": "",
     "AUTH_NEXT": "",

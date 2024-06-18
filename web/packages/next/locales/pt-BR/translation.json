@@ -527,18 +527,18 @@
     "EXPORT_STARTING": "Iniciando a exportação...",
     "delete_account_reason_label": "Qual é o principal motivo para você excluir sua conta?",
     "delete_account_reason_placeholder": "Selecione um motivo",
-    "DELETE_REASON": {
-        "MISSING_FEATURE": "Está faltando um recurso que eu preciso",
-        "BROKEN_BEHAVIOR": "O aplicativo ou um determinado recurso não está funcionando como eu acredito que deveria",
-        "FOUND_ANOTHER_SERVICE": "Encontrei outro serviço que gosto mais",
-        "NOT_LISTED": "Meu motivo não está listado"
+    "delete_reason": {
+        "missing_feature": "Está faltando um recurso que eu preciso",
+        "behaviour": "O aplicativo ou um determinado recurso não está funcionando como eu acredito que deveria",
+        "found_another_service": "Encontrei outro serviço que gosto mais",
+        "not_listed": "Meu motivo não está listado"
     },
     "delete_account_feedback_label": "Sentimos muito em vê-lo partir. Explique por que você está partindo para nos ajudar a melhorar.",
     "delete_account_feedback_placeholder": "Comentários",
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Sim, desejo excluir permanentemente esta conta e todos os seus dados",
     "CONFIRM_DELETE_ACCOUNT": "Confirmar exclusão da conta",
-    "FEEDBACK_REQUIRED": "Por favor, ajude-nos com esta informação",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "O que o outro serviço faz melhor?",
+    "feedback_required": "Por favor, ajude-nos com esta informação",
+    "feedback_required_found_another_service": "O que o outro serviço faz melhor?",
     "RECOVER_TWO_FACTOR": "Recuperar dois fatores",
     "at": "em",
     "AUTH_NEXT": "próximo",

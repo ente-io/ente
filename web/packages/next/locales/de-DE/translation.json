@@ -527,18 +527,18 @@
     "EXPORT_STARTING": "Starte Export...",
     "delete_account_reason_label": "Was ist der Hauptgrund für die Löschung deines Kontos?",
     "delete_account_reason_placeholder": "Wähle einen Grund aus",
-    "DELETE_REASON": {
-        "MISSING_FEATURE": "Es fehlt eine wichtige Funktion die ich benötige",
-        "BROKEN_BEHAVIOR": "Die App oder eine bestimmte Funktion verhält sich nicht so wie gedacht",
-        "FOUND_ANOTHER_SERVICE": "Ich habe einen anderen Dienst gefunden, der mir mehr zusagt",
-        "NOT_LISTED": "Mein Grund ist nicht aufgeführt"
+    "delete_reason": {
+        "missing_feature": "Es fehlt eine wichtige Funktion die ich benötige",
+        "behaviour": "Die App oder eine bestimmte Funktion verhält sich nicht so wie gedacht",
+        "found_another_service": "Ich habe einen anderen Dienst gefunden, der mir mehr zusagt",
+        "not_listed": "Mein Grund ist nicht aufgeführt"
     },
     "delete_account_feedback_label": "Wir bedauern sehr, dass uns verlässt. Bitte hilf uns besser zu werden, indem du uns sagst warum du gehst.",
     "delete_account_feedback_placeholder": "Feedback",
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Ja, ich möchte dieses Konto und alle enthaltenen Daten endgültig und unwiderruflich löschen",
     "CONFIRM_DELETE_ACCOUNT": "Kontolöschung bestätigen",
-    "FEEDBACK_REQUIRED": "Bitte hilf uns durch das Angeben dieser Daten",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Was macht der andere Dienst besser?",
+    "feedback_required": "Bitte hilf uns durch das Angeben dieser Daten",
+    "feedback_required_found_another_service": "Was macht der andere Dienst besser?",
     "RECOVER_TWO_FACTOR": "Zwei-Faktor wiederherstellen",
     "at": "um",
     "AUTH_NEXT": "Weiter",

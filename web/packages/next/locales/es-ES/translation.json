@@ -527,18 +527,18 @@
     "EXPORT_STARTING": "Exportar iniciando...",
     "delete_account_reason_label": "¿Cuál es la razón principal por la que eliminas tu cuenta?",
     "delete_account_reason_placeholder": "Selecciona una razón",
-    "DELETE_REASON": {
-        "MISSING_FEATURE": "Falta una característica clave que necesito",
-        "BROKEN_BEHAVIOR": "La aplicación o una característica determinada no se comporta como creo que debería",
-        "FOUND_ANOTHER_SERVICE": "He encontrado otro servicio que me gusta más",
-        "NOT_LISTED": "Mi motivo no se encuentra en la lista"
+    "delete_reason": {
+        "missing_feature": "Falta una característica clave que necesito",
+        "behaviour": "La aplicación o una característica determinada no se comporta como creo que debería",
+        "found_another_service": "He encontrado otro servicio que me gusta más",
+        "not_listed": "Mi motivo no se encuentra en la lista"
     },
     "delete_account_feedback_label": "Lamentamos que te vayas. Explica por qué te vas para ayudarnos a mejorar.",
     "delete_account_feedback_placeholder": "Sugerencias",
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Sí, quiero eliminar permanentemente esta cuenta y todos sus datos",
     "CONFIRM_DELETE_ACCOUNT": "Corfirmar borrado de cuenta",
-    "FEEDBACK_REQUIRED": "Ayúdanos con esta información",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qué hace mejor el otro servicio?",
+    "feedback_required": "Ayúdanos con esta información",
+    "feedback_required_found_another_service": "Qué hace mejor el otro servicio?",
     "RECOVER_TWO_FACTOR": "Recuperar dos factores",
     "at": "a las",
     "AUTH_NEXT": "siguiente",

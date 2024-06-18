@@ -27,20 +27,6 @@ interface FormValues {
     feedback: string;
 }
 
-enum DELETE_REASON {
-    MISSING_FEATURE = "It's missing a key feature that I need",
-    BROKEN_BEHAVIOR = "The app or a certain feature does not behave as I think it should",
-    FOUND_ANOTHER_SERVICE = "I found another service that I like better",
-    NOT_LISTED = "My reason isn't listed",
-}
-
-const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
-    return Object.keys(DELETE_REASON).map((reason) => ({
-        label: t(`DELETE_REASON.${reason}`),
-        value: DELETE_REASON[reason],
-    }));
-};
-
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { setDialogBoxAttributesV2, isMobile, logout } =
         useContext(AppContext);
@@ -70,14 +56,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             feedback = feedback.trim();
             if (feedback.length === 0) {
                 switch (reason) {
-                    case DELETE_REASON.FOUND_ANOTHER_SERVICE:
+                    case "found_another_service":
                         setFieldError(
                             "feedback",
-                            t("FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE"),
+                            t("feedback_required_found_another_service"),
                         );
                         break;
                     default:
-                        setFieldError("feedback", t("FEEDBACK_REQUIRED"));
+                        setFieldError("feedback", t("feedback_required"));
                 }
                 return;
             }
@@ -188,7 +174,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         <form noValidate onSubmit={handleSubmit}>
                             <Stack spacing={"24px"}>
                                 <DropdownInput
-                                    options={getReasonOptions()}
+                                    options={deleteReasonOptions()}
                                     label={t("delete_account_reason_label")}
                                     placeholder={t(
                                         "delete_account_reason_placeholder",
@@ -244,3 +230,23 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 };
 
 export default DeleteAccountModal;
+
+/**
+ * All of these must have a corresponding localized string nested under the
+ * "delete_reason" key.
+ */
+const deleteReasons = [
+    "missing_feature",
+    "behaviour",
+    "found_another_service",
+    "not_listed",
+] as const;
+
+type DeleteReason = (typeof deleteReasons)[number];
+
+const deleteReasonOptions = (): DropdownOption<DeleteReason>[] => {
+    return deleteReasons.map((reason) => ({
+        label: t("delete_reason", { context: reason }),
+        value: reason,
+    }));
+};

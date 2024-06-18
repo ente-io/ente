@@ -527,18 +527,18 @@
     "EXPORT_STARTING": "Exporteren begonnen...",
     "delete_account_reason_label": "Wat is de belangrijkste reden waarom je jouw account verwijdert?",
     "delete_account_reason_placeholder": "Kies een reden",
-    "DELETE_REASON": {
-        "MISSING_FEATURE": "Ik mis een belangrijke functie",
-        "BROKEN_BEHAVIOR": "De app of een bepaalde functie functioneert niet zoals ik verwacht",
-        "FOUND_ANOTHER_SERVICE": "Ik heb een andere dienst gevonden die me beter bevalt",
-        "NOT_LISTED": "Mijn reden wordt niet vermeld"
+    "delete_reason": {
+        "missing_feature": "Ik mis een belangrijke functie",
+        "behaviour": "De app of een bepaalde functie functioneert niet zoals ik verwacht",
+        "found_another_service": "Ik heb een andere dienst gevonden die me beter bevalt",
+        "not_listed": "Mijn reden wordt niet vermeld"
     },
     "delete_account_feedback_label": "We vinden het jammer je te zien gaan. Deel alsjeblieft je feedback om ons te helpen verbeteren.",
     "delete_account_feedback_placeholder": "Feedback",
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen",
     "CONFIRM_DELETE_ACCOUNT": "Account verwijderen bevestigen",
-    "FEEDBACK_REQUIRED": "Help ons alsjeblieft met deze informatie",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Wat doet de andere dienst beter?",
+    "feedback_required": "Help ons alsjeblieft met deze informatie",
+    "feedback_required_found_another_service": "Wat doet de andere dienst beter?",
     "RECOVER_TWO_FACTOR": "Herstel tweestaps",
     "at": "om",
     "AUTH_NEXT": "volgende",
