@@ -3,6 +3,7 @@ import "./App.css";
 import { Sidebar } from "./components/Sidebar";
 import { apiOrigin } from "./services/support";
 import S from "./utils/strings";
+
 type User = Record<
     string,
     string | number | boolean | null | undefined | Record<string, unknown>
@@ -14,6 +15,7 @@ export const App: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [userData, setUserData] = useState<UserData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isDataFetched, setIsDataFetched] = useState<boolean>(false); // Track if data has been fetched successfully
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
@@ -44,9 +46,11 @@ export const App: React.FC = () => {
             console.log("API Response:", userDataResponse);
             setUserData(userDataResponse);
             setError(null);
+            setIsDataFetched(true); // Set to true when data is successfully fetched
         } catch (error) {
             console.error("Error fetching data:", error);
             setError((error as Error).message);
+            setIsDataFetched(false); // Set to false if there's an error fetching data
         }
     };
 
@@ -187,7 +191,7 @@ export const App: React.FC = () => {
                 </div>
             </form>
             <div className="content-wrapper">
-                <Sidebar email={email} token={token} />
+                {isDataFetched && <Sidebar token={token} email={email} />}
                 <div className="fetch-button-container">
                     <button
                         onClick={() => {

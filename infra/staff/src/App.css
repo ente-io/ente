@@ -1,23 +1,12 @@
-.sidebar button {
-    margin-right: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #009879;
-    color: white;
-    border: none;
-    border-radius: 5px;
+.fetch-button-container {
+    margin-right: 180px;
+    margin-left: 10px;
 }
 
 .content-wrapper {
     display: flex;
-    align-items: flex-start; /* Ensure items start at the top */
-    margin-left: 70px; /* Adjusts margin to move content towards the right */
-}
-
-/* Adjust .fetch-button-container margin to ensure proper spacing */
-.fetch-button-container {
-    margin-right: 20px; /* Adjust as needed */
+    align-items: flex-start;
+    margin-left: 175px;
 }
 
 .fetch-button-container button {
@@ -30,16 +19,14 @@
     border-radius: 5px;
     margin-top: 20px;
 }
+
 .fetch-button-container button:hover {
     background-color: #007c6c;
 }
 
-.sidebar button:hover {
-    background-color: #007c6c;
-}
 .sidebar {
     padding: 20px;
-    flex: 0 0 auto; /* Prevent sidebar from growing and affecting other elements */
+    flex: 0 0 auto;
 }
 
 .button-container {
@@ -56,6 +43,7 @@ button {
     margin-top: 20px;
     color: red;
 }
+
 .message {
     position: fixed;
     bottom: 10px;
@@ -75,4 +63,62 @@ button {
 .message.success {
     background-color: #4caf50;
     color: white;
+}
+
+.dropdown-container {
+    margin-bottom: 20px;
+    position: relative; /* Ensure relative positioning for dropdown menu */
+}
+
+.more-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #009879;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 1px;
+}
+
+.more-button:hover {
+    background-color: #007c6c;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 5px); /* Position right below the More button */
+    left: 0;
+    z-index: 100;
+    display: block;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    max-height: 150px; /* Example: Set max height for scrollability */
+    overflow-y: auto; /* Enable vertical scroll */
+}
+
+/* Remove bullets from unordered list */
+.dropdown-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #333;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu button:hover {
+    background-color: #f0f0f0;
 }

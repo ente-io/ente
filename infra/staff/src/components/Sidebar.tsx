@@ -17,6 +17,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
     const [, /*userId*/ setUserId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
+    const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+
     interface ApiResponse {
         data: {
             userId: string;
@@ -30,7 +32,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         }
 
         try {
-            const url = `${apiOrigin}/admin/user?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+            const url = `${apiOrigin}/admin/user?email=${encodeURIComponent(
+                email,
+            )}&token=${encodeURIComponent(token)}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -62,11 +66,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         try {
             const actionUrls: Record<string, string> = {
                 Disable2FA: "/admin/user/disable-2fa",
-                Passkeys: "/admin/user/disable-passkeys",
+                DisablePasskeys: "/admin/user/disable-passkeys",
                 Closefamily: "/admin/user/close-family",
             };
 
-            const url = `${apiOrigin}${actionUrls[action]}?id=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`;
+            const url = `${apiOrigin}${actionUrls[action]}?id=${encodeURIComponent(
+                userId,
+            )}&token=${encodeURIComponent(token)}`;
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -87,6 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
             setTimeout(() => {
                 setMessage(null);
             }, 1000);
+            setDropdownVisible(false);
         } catch (error) {
             console.error(`Error ${action}:`, error);
             setError(
@@ -125,36 +132,46 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         }
     };
 
+    const toggleDropdown = () => {
+        setDropdownVisible(!dropdownVisible);
+    };
+
+    const dropdownOptions = [
+        { value: "Disable2FA", label: "Disable 2FA" },
+        { value: "Closefamily", label: "Close Family" },
+        { value: "DisablePasskeys", label: "Disable Passkeys" },
+    ];
+
     return (
         <div className="sidebar">
-            <div className="button-container">
-                <button
-                    onClick={() => {
-                        handleActionClick("Disable2FA").catch((e: unknown) =>
-                            console.error(e),
-                        );
-                    }}
-                >
-                    Disable 2FA
+            <div className="dropdown-container">
+                <button className="more-button" onClick={toggleDropdown}>
+                    More
                 </button>
-                <button
-                    onClick={() => {
-                        handleActionClick("Closefamily").catch((e: unknown) =>
-                            console.error(e),
-                        );
-                    }}
-                >
-                    Close Family
-                </button>
-                <button
-                    onClick={() => {
-                        handleActionClick("Passkeys").catch((e: unknown) =>
-                            console.error(e),
-                        );
-                    }}
-                >
-                    Disable Passkeys
-                </button>
+                {dropdownVisible && (
+                    <div className="dropdown-menu">
+                        <ul>
+                            {dropdownOptions.map((option) => (
+                                <li key={option.value}>
+                                    <button
+                                        onClick={() => {
+                                            handleActionClick(
+                                                option.value,
+                                            ).catch((error: unknown) =>
+                                                console.error(
+                                                    "Error handling action:",
+                                                    error,
+                                                ),
+                                            );
+                                        }}
+                                    >
+                                        {option.label}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
             {(error ?? message) && (
                 <div className={`message ${error ? "error" : "success"}`}>
