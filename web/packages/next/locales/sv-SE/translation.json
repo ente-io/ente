@@ -130,7 +130,7 @@
     "CANCEL": "Avbryt",
     "LOGOUT": "Logga ut",
     "delete_account": "Radera konto",
-    "delete_account_message": "",
+    "delete_account_manually_message": "",
     "LOGOUT_MESSAGE": "",
     "CHANGE_EMAIL": "",
     "OK": "",

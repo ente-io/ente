@@ -105,7 +105,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             title: t("delete_account"),
             content: (
                 <Trans
-                    i18nKey="delete_account_message"
+                    i18nKey="delete_account_manually_message"
                     components={{ a: <Link href={`mailto:${emailID}`} /> }}
                     values={{ emailID }}
                 />

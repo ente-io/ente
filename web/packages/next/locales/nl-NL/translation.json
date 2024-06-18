@@ -130,7 +130,7 @@
     "CANCEL": "Annuleren",
     "LOGOUT": "Uitloggen",
     "delete_account": "Account verwijderen",
-    "delete_account_message": "<p>Stuur een e-mail naar <a>{{emailID}}</a> vanaf uw geregistreerde e-mailadres.</p><p>Uw aanvraag wordt binnen 72 uur verwerkt.</p>",
+    "delete_account_manually_message": "<p>Stuur een e-mail naar <a>{{emailID}}</a> vanaf uw geregistreerde e-mailadres.</p><p>Uw aanvraag wordt binnen 72 uur verwerkt.</p>",
     "LOGOUT_MESSAGE": "Weet u zeker dat u wilt uitloggen?",
     "CHANGE_EMAIL": "E-mail wijzigen",
     "OK": "Oké",

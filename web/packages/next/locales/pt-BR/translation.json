@@ -130,7 +130,7 @@
     "CANCEL": "Cancelar",
     "LOGOUT": "Encerrar sessão",
     "delete_account": "Excluir conta",
-    "delete_account_message": "<p>Por favor, envie um e-mail para <a>{{emailID}}</a> a partir do seu endereço de e-mail registrado.</p><p>Seu pedido será processado dentro de 72 horas.</p>",
+    "delete_account_manually_message": "<p>Por favor, envie um e-mail para <a>{{emailID}}</a> a partir do seu endereço de e-mail registrado.</p><p>Seu pedido será processado dentro de 72 horas.</p>",
     "LOGOUT_MESSAGE": "Você tem certeza que deseja encerrar a sessão?",
     "CHANGE_EMAIL": "Mudar e-mail",
     "OK": "Aceitar",
