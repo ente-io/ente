@@ -5,17 +5,18 @@ import "package:photos/core/cache/lru_map.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
-// import "package:photos/utils/face/face_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/image_ml_isolate.dart";
+import "package:photos/utils/image_isolate.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
 
 void resetPool({required bool fullFile}) {
   if (fullFile) {
-    poolFullFileFaceGenerations = Pool(20, timeout: const Duration(seconds: 15));
+    poolFullFileFaceGenerations =
+        Pool(20, timeout: const Duration(seconds: 15));
   } else {
-    poolThumbnailFaceGenerations = Pool(100, timeout: const Duration(seconds: 15));
+    poolThumbnailFaceGenerations =
+        Pool(100, timeout: const Duration(seconds: 15));
   }
 }
 
@@ -52,7 +53,7 @@ Future<Map<String, Uint8List>?> getFaceCrops(
     faceBoxes.add(e.value);
   }
   final List<Uint8List> faceCrop =
-      await ImageMlIsolate.instance.generateFaceThumbnailsForImageUsingCanvas(
+      await ImageIsolate.instance.generateFaceThumbnails(
     // await generateJpgFaceThumbnails(
     imagePath,
     faceBoxes,

@@ -46,7 +46,6 @@ import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.d
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
-import 'package:photos/utils/image_ml_isolate.dart';
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/network_util.dart";
@@ -76,11 +75,9 @@ class FaceMlService {
 
   bool _isIsolateSpawned = false;
 
-  // singleton pattern
+  // Singleton pattern
   FaceMlService._privateConstructor();
-
   static final instance = FaceMlService._privateConstructor();
-
   factory FaceMlService() => instance;
 
   final _initLock = Lock();
@@ -107,7 +104,7 @@ class FaceMlService {
   final int _kcooldownLimit = 300;
   static const Duration _kCooldownDuration = Duration(minutes: 3);
 
-  Future<void> init({bool initializeImageMlIsolate = false}) async {
+  Future<void> init() async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
       return;
     }
@@ -122,13 +119,6 @@ class FaceMlService {
         await FaceDetectionService.instance.init();
       } catch (e, s) {
         _logger.severe("Could not initialize yolo onnx", e, s);
-      }
-      if (initializeImageMlIsolate) {
-        try {
-          await ImageMlIsolate.instance.init();
-        } catch (e, s) {
-          _logger.severe("Could not initialize image ml isolate", e, s);
-        }
       }
       try {
         await FaceEmbeddingService.instance.init();
@@ -214,11 +204,6 @@ class FaceMlService {
         await FaceDetectionService.instance.release();
       } catch (e, s) {
         _logger.severe("Could not dispose yolo onnx", e, s);
-      }
-      try {
-        ImageMlIsolate.instance.dispose();
-      } catch (e, s) {
-        _logger.severe("Could not dispose image ml isolate", e, s);
       }
       try {
         await FaceEmbeddingService.instance.release();
