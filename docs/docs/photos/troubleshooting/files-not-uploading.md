@@ -14,10 +14,10 @@ If you are using VPN, please try disabling the VPN or switching your provider.
 
 ### Disable "Faster uploads"
 
-We use a Cloudflare proxy to speed up uploads ([blog
-post](https://ente.io/blog/tech/making-uploads-faster/)). However, in some
-network configurations (depending on the ISP) this might prevent uploads from
-going through, so if you're having trouble with uploads please try after
+We use a Cloudflare proxy to speed up uploads
+([blog post](https://ente.io/blog/tech/making-uploads-faster/)). However, in
+some network configurations (depending on the ISP) this might prevent uploads
+from going through, so if you're having trouble with uploads please try after
 disabling the "Faster uploads" setting in _Preferences > Advanced_.
 
 ### Certain file types are not uploading

@@ -1,7 +1,8 @@
 ---
 title: Missing thumbnails
 description:
-    Troubleshooting when thumbnails are not being generated when uploading images in Ente Photos
+    Troubleshooting when thumbnails are not being generated when uploading
+    images in Ente Photos
 ---
 
 # Missing thumbnails
