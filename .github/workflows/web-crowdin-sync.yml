@@ -17,7 +17,7 @@ on:
         #
         # See also: [Note: Run workflow every 24 hours]
         - cron: "20 1 * * 2"
-    # Also allow manually running the workflow
+    # Also allow manually running the workflow.
     workflow_dispatch:
 
 jobs:
