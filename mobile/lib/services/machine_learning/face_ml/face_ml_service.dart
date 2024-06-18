@@ -1144,7 +1144,7 @@ class FaceMlService {
     try {
       // Get the bounding boxes of the faces
       final (List<FaceDetectionRelative> faces, dataSize) =
-          await FaceDetectionService.predictSync(
+          await FaceDetectionService.predict(
         image,
         imageByteData,
         interpreterAddress,
