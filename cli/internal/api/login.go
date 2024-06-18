@@ -161,3 +161,22 @@ func (c *Client) VerifyTotp(
 	}
 	return &res, nil
 }
+
+func (c *Client) CheckPasskeyStatus(ctx context.Context,
+	sessionID string) (*AuthorizationResponse, error) {
+	var res AuthorizationResponse
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetResult(&res).
+		Get("/users/two-factor/passkeys/get-token?sessionID=" + sessionID)
+	if err != nil {
+		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return &res, nil
+}
