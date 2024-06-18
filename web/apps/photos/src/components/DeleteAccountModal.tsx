@@ -1,7 +1,7 @@
+import { initiateEmail } from "@/new/photos/utils/web";
 import log from "@/next/log";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { DELETE_ACCOUNT_EMAIL } from "@ente/shared/constants/urls";
 import { Button, Link, Stack } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -10,7 +10,7 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
-import { initiateEmail, preloadImage } from "utils/common";
+import { preloadImage } from "utils/common";
 import { decryptDeleteAccountChallenge } from "utils/crypto";
 import * as Yup from "yup";
 import { CheckboxInput } from "./CheckboxInput";
@@ -113,22 +113,20 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     };
 
     const askToMailForDeletion = () => {
+        const emailID = "account-deletion@ente.io";
+
         setDialogBoxAttributesV2({
             title: t("delete_account"),
             content: (
                 <Trans
                     i18nKey="delete_account_message"
-                    components={{
-                        a: <Link href={`mailto:${DELETE_ACCOUNT_EMAIL}`} />,
-                    }}
-                    values={{ emailID: DELETE_ACCOUNT_EMAIL }}
+                    components={{ a: <Link href={`mailto:${emailID}`} /> }}
+                    values={{ emailID }}
                 />
             ),
             proceed: {
                 text: t("DELETE"),
-                action: () => {
-                    initiateEmail("account-deletion@ente.io");
-                },
+                action: () => initiateEmail(emailID),
                 variant: "critical",
             },
             close: { text: t("CANCEL") },
