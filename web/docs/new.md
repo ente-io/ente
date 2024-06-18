@@ -29,7 +29,7 @@ development, here is a recommended workflow:
 
     ```sh
     $ yarn --version
-    1.22.21
+    1.22.22
     ```
 
 That's it. Enjoy coding!

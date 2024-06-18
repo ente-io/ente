@@ -55,6 +55,6 @@
         "typescript": "^5",
         "typescript-eslint": "8.0.0-alpha.10"
     },
-    "packageManager": "yarn@1.22.21",
+    "packageManager": "yarn@1.22.22",
     "productName": "ente"
 }
