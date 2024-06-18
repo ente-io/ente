@@ -61,13 +61,24 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       return;
     }
 
-    final dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
-      context,
-      showTitleActions: true,
-      currentTime: dateResult,
-      locale: localeType,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
+    late DateTime? dateWithTimeResult;
+    if (_showAmPmTimePicker(locale)) {
+      dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
+        context,
+        showTitleActions: true,
+        currentTime: dateResult,
+        locale: localeType,
+        theme: Theme.of(context).colorScheme.dateTimePickertheme,
+      );
+    } else {
+      dateWithTimeResult = await DatePickerBdaya.showTimePicker(
+        context,
+        showTitleActions: true,
+        currentTime: dateResult,
+        locale: localeType,
+        theme: Theme.of(context).colorScheme.dateTimePickertheme,
+      );
+    }
     if (dateWithTimeResult != null) {
       if (await editTime(
         context,
@@ -78,6 +89,12 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
         setState(() {});
       }
     }
+  }
+
+  bool _showAmPmTimePicker(Locale locale) {
+    return locale.languageCode == "en" ||
+        locale.languageCode == "es" ||
+        locale.languageCode == "pt";
   }
 
   LocaleType getFromLocalString(Locale locale) {
