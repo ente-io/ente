@@ -189,9 +189,9 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                             <Stack spacing={"24px"}>
                                 <DropdownInput
                                     options={getReasonOptions()}
-                                    label={t("DELETE_ACCOUNT_REASON_LABEL")}
+                                    label={t("delete_account_reason_label")}
                                     placeholder={t(
-                                        "DELETE_ACCOUNT_REASON_PLACEHOLDER",
+                                        "delete_account_reason_placeholder",
                                     )}
                                     selected={values.reason}
                                     setSelected={handleChange("reason")}
@@ -199,9 +199,9 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     message={errors.reason}
                                 />
                                 <MultilineInput
-                                    label={t("DELETE_ACCOUNT_FEEDBACK_LABEL")}
+                                    label={t("delete_account_feedback_label")}
                                     placeholder={t(
-                                        "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER",
+                                        "delete_account_feedback_placeholder",
                                     )}
                                     value={values.feedback}
                                     onChange={handleChange("feedback")}
