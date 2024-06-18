@@ -18,11 +18,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     interface ApiResponse {
-        // Define properties according to your API response structure
-        // For example:
+       
         data: {
-            // Define properties based on your API response
-            // For example:
+            
             userId: string;
         };
     }
@@ -86,11 +84,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
             const result = (await response.json()) as ApiResponse;
             console.log("API Response:", result);
 
-            // Set success message
+           
             setMessage(`${action} completed successfully`);
-            setError(null); // Clear any previous errors
-
-            // Clear success message after 3 seconds
+            setError(null); 
             setTimeout(() => {
                 setMessage(null);
             }, 1000);
@@ -101,11 +97,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                     ? error.message
                     : "An unexpected error occurred",
             );
-            // Clear error message after 3 seconds
+           
             setTimeout(() => {
                 setError(null);
             }, 1000);
-            setMessage(null); // Clear message on error
+            setMessage(null);
         }
     };
 
@@ -116,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                 throw new Error("Incorrect email id or token");
             }
 
-            // Perform action
+           
             await performAction(fetchedUserId, action);
         } catch (error) {
             console.error(`Error performing ${action}:`, error);
@@ -125,11 +121,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                     ? error.message
                     : "An unexpected error occurred",
             );
-            // Clear error message after 3 seconds
+           
             setTimeout(() => {
                 setError(null);
             }, 1000);
-            setMessage(null); // Clear message on error
+            setMessage(null);
         }
     };
 
