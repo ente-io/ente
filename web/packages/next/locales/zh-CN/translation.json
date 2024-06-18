@@ -453,7 +453,6 @@
     "CURRENT_USAGE": "当前使用量是 <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "您使用的网络浏览器功能不够强大，无法加密您的照片。 请尝试在电脑上登录Ente，或下载Ente移动/桌面应用程序。",
     "DRAG_AND_DROP_HINT": "或者拖动并拖动到 Ente 窗口",
-    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "您上传的数据将被安排删除，您的账户将被永久删除。<br/><br/>此操作不可逆。",
     "AUTHENTICATE": "身份认证",
     "UPLOADED_TO_SINGLE_COLLECTION": "已上传到单个收藏",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "已上传到单独收藏",

@@ -453,7 +453,6 @@
     "CURRENT_USAGE": "Aktuelle Nutzung ist <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "Dein Browser ist nicht leistungsstark genug, um deine Bilder zu verschlüsseln. Versuche, dich an einem Computer bei Ente anzumelden, oder lade dir die Ente-App für dein Gerät (Handy oder Desktop) herunter.",
     "DRAG_AND_DROP_HINT": "Oder ziehe Dateien per Drag-and-Drop in das Ente-Fenster",
-    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "Deine hochgeladenen Daten werden zur Löschung vorgemerkt und dein Konto wird endgültig gelöscht.<br/><br/>Dieser Vorgang kann nicht rückgängig gemacht werden.",
     "AUTHENTICATE": "Authentifizieren",
     "UPLOADED_TO_SINGLE_COLLECTION": "In einzelnes Album hochgeladen",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "In separate Alben hochgeladen",

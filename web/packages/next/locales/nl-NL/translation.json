@@ -453,7 +453,6 @@
     "CURRENT_USAGE": "Huidig gebruik is <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "De webbrowser die u gebruikt is niet krachtig genoeg om uw foto's te versleutelen. Probeer in te loggen op uw computer, of download de Ente mobiel/desktop app.",
     "DRAG_AND_DROP_HINT": "Of sleep en plaats in het Ente venster",
-    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "Uw geüploade gegevens worden gepland voor verwijdering, en uw account zal permanent worden verwijderd.<br/><br/>Deze actie is onomkeerbaar.",
     "AUTHENTICATE": "Verifiëren",
     "UPLOADED_TO_SINGLE_COLLECTION": "Geüpload naar enkele collectie",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Geüpload naar verschillende collecties",

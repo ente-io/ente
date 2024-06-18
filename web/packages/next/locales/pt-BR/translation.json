@@ -453,7 +453,6 @@
     "CURRENT_USAGE": "O uso atual é <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "O navegador da web que você está usando não é poderoso o suficiente para criptografar suas fotos. Por favor, tente entrar para o ente no computador ou baixe o aplicativo móvel.",
     "DRAG_AND_DROP_HINT": "Ou arraste e solte na janela ente",
-    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "Seus dados enviados serão agendados para exclusão e sua conta será excluída permanentemente.<br/><br/>Essa ação não é reversível.",
     "AUTHENTICATE": "Autenticar",
     "UPLOADED_TO_SINGLE_COLLECTION": "Enviado para coleção única",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Enviada para separar coleções",

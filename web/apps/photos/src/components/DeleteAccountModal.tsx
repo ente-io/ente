@@ -88,7 +88,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const confirmAccountDeletion = () => {
         setDialogBoxAttributesV2({
             title: t("delete_account"),
-            content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
+            content: <Trans i18nKey="delete_account_confirm_message" />,
             proceed: {
                 text: t("DELETE"),
                 action: solveChallengeAndDeleteAccount,
