@@ -75,6 +75,10 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) == 1 {
+		// If no arguments are passed, show help
+		os.Args = append(os.Args, "help")
+	}
 	cmd.Execute(&ctrl, AppVersion)
 }
 
