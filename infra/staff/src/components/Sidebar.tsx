@@ -146,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         <div className="sidebar">
             <div className="dropdown-container">
                 <button className="more-button" onClick={toggleDropdown}>
-                    More
+                    MORE
                 </button>
                 {dropdownVisible && (
                     <div className="dropdown-menu">
