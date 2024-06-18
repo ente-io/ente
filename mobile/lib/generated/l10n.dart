@@ -8943,6 +8943,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Review suggestions`
+  String get reviewSuggestions {
+    return Intl.message(
+      'Review suggestions',
+      name: 'reviewSuggestions',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -8961,6 +8971,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
+      Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }

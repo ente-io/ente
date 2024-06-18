@@ -4,10 +4,12 @@ import "dart:typed_data";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -45,6 +47,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   bool canGiveFeedback = true;
   List<SuggestionUserFeedback> pastUserFeedback = [];
   List<ClusterSuggestion> allSuggestions = [];
+  late final Logger _logger = Logger('_PersonClustersState');
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
@@ -68,7 +71,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Review suggestions'),
+        title: Text(context.l10n.reviewSuggestions),
         actions: [
           if (pastUserFeedback.isNotEmpty)
             IconButton(
@@ -164,7 +167,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               ),
             );
           } else if (snapshot.hasError) {
-            // log the error
+            _logger.severe(
+              "Error fetching suggestions",
+              snapshot.error!,
+              snapshot.stackTrace,
+            );
             return const Center(child: Text("Error"));
           } else {
             return const Center(child: CircularProgressIndicator());
@@ -298,7 +305,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               Expanded(
                 child: ButtonWidget(
                   buttonType: ButtonType.primary,
-                  labelText: 'Yes',
+                  labelText: context.l10n.yes,
                   buttonSize: ButtonSize.large,
                   onTap: () async => {
                     await _handleUserClusterChoice(
