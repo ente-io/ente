@@ -536,6 +536,7 @@
     "delete_account_feedback_placeholder": "Vos commentaires",
     "delete_account_confirm_checkbox_label": "Oui, je veux supprimer définitivement ce compte et toutes ses données",
     "delete_account_confirm": "Confirmer la suppression du compte",
+    "delete_account_confirm_message": "",
     "feedback_required": "Merci de nous aider avec cette information",
     "feedback_required_found_another_service": "Qu'est-ce que l'autre service fait de mieux ?",
     "RECOVER_TWO_FACTOR": "Récupérer la double-authentification",

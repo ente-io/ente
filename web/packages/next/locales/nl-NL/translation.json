@@ -533,9 +533,10 @@
         "not_listed": "Mijn reden wordt niet vermeld"
     },
     "delete_account_feedback_label": "We vinden het jammer je te zien gaan. Deel alsjeblieft je feedback om ons te helpen verbeteren.",
-    "delete_account_feedback_placeholder": "Feedback",
+    "delete_account_feedback_placeholder": "",
     "delete_account_confirm_checkbox_label": "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen",
     "delete_account_confirm": "Account verwijderen bevestigen",
+    "delete_account_confirm_message": "",
     "feedback_required": "Help ons alsjeblieft met deze informatie",
     "feedback_required_found_another_service": "Wat doet de andere dienst beter?",
     "RECOVER_TWO_FACTOR": "Herstel tweestaps",
