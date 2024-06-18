@@ -8,6 +8,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -68,7 +69,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Review suggestions'),
+        title: Text(S.of(context).reviewSuggestions),
         actions: [
           if (pastUserFeedback.isNotEmpty)
             IconButton(
@@ -298,7 +299,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               Expanded(
                 child: ButtonWidget(
                   buttonType: ButtonType.primary,
-                  labelText: 'Yes',
+                  labelText: context.l10n.yes,
                   buttonSize: ButtonSize.large,
                   onTap: () async => {
                     await _handleUserClusterChoice(
