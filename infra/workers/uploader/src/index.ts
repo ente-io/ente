@@ -110,7 +110,7 @@ const handlePOSTOrPUT = async (request: Request) => {
             return new Response(null, { status: 404 });
     }
 
-    if (!response.ok) console.log("Request failed", response.status);
+    if (!response.ok) console.log("Upstream error", response.status);
 
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
