@@ -27,6 +27,8 @@ class ThumbnailWidget extends StatefulWidget {
   final EnteFile file;
   final BoxFit fit;
 
+  /// Returns ThumbnailWidget without any overlay icons if true.
+  final bool rawThumbnail;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;
   final bool shouldShowPinIcon;
@@ -46,6 +48,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.file, {
     Key? key,
     this.fit = BoxFit.cover,
+    this.rawThumbnail = false,
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
@@ -137,6 +140,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     // If yes, parent thumbnail widget can be stateless
     Widget? content;
     if (image != null) {
+      if (widget.rawThumbnail) {
+        return image;
+      }
       final List<Widget> contentChildren = [image];
       if (widget.shouldShowFavoriteIcon) {
         if (FavoritesService.instance.isFavoriteCache(

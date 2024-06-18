@@ -76,6 +76,7 @@ class PersonFaceWidget extends StatelessWidget {
             return thumbnailFallback
                 ? ThumbnailWidget(
                     file,
+                    rawThumbnail: true,
                   )
                 : const EnteLoadingWidget();
           }
@@ -100,6 +101,7 @@ class PersonFaceWidget extends StatelessWidget {
             return thumbnailFallback
                 ? ThumbnailWidget(
                     file,
+                    rawThumbnail: true,
                   )
                 : const EnteLoadingWidget();
           }
