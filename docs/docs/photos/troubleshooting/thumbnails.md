@@ -1,28 +1,15 @@
 ---
-title: Files not uploading
+title: Missing thumbnails
 description:
-    Troubleshooting when files are not uploading from your Ente Photos app
+    Troubleshooting when thumbnails are not being generated when uploading images in Ente Photos
 ---
 
-# Files not uploading
+# Missing thumbnails
 
-## Network Issue
+## Black thumbnails
 
-If you are using VPN, please try disabling the VPN or switching your provider.
-
-## Web / Desktop
-
-### Disable "Faster uploads"
-
-We use a Cloudflare proxy to speed up uploads ([blog
-post](https://ente.io/blog/tech/making-uploads-faster/)). However, in some
-network configurations (depending on the ISP) this might prevent uploads from
-going through, so if you're having trouble with uploads please try after
-disabling the "Faster uploads" setting in _Preferences > Advanced_.
-
-### Certain file types are not uploading
-
-The desktop/web app tries to detect if a particular file is video or image. If
-the detection fails, then the app skips the upload. Please contact our
-[support](mailto:support@ente.io) if you find that a valid file did not get
-detected and uploaded.
+Users have reported an issue with Firefox which prevents the app from generating
+thumbnails if the "block canvas fingerprinting" setting in Firefox is enabled
+(i.e. `privacy.resistFingerprinting` is set to true in `about:config`). That
+feature blocks access to the canvas, and the app needs the canvas to generate
+thumbnails.
