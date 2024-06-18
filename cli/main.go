@@ -89,6 +89,7 @@ func initConfig(cliConfigPath string) {
 	viper.AddConfigPath(".")                 // optionally look for config in the working directory
 
 	viper.SetDefault("endpoint.api", constants.EnteApiUrl)
+	viper.SetDefault("endpoint.accounts", constants.EnteAccountUrl)
 	viper.SetDefault("log.http", false)
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
