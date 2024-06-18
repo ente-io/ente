@@ -99,7 +99,7 @@ export default function DropdownInput<T extends string>({
             >
                 {options.map((option, index) => (
                     <MenuItem
-                        key={option.label}
+                        key={option.value}
                         divider={index !== options.length - 1}
                         value={option.value}
                         sx={{
