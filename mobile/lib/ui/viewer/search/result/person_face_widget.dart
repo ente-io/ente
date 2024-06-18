@@ -74,7 +74,9 @@ class PersonFaceWidget extends StatelessWidget {
               log('Error getting cover face for person: ${snapshot.error}');
             }
             return thumbnailFallback
-                ? ThumbnailWidget(file)
+                ? ThumbnailWidget(
+                    file,
+                  )
                 : const EnteLoadingWidget();
           }
         },
@@ -96,7 +98,9 @@ class PersonFaceWidget extends StatelessWidget {
               log('Error getting cover face for person: ${snapshot.error}');
             }
             return thumbnailFallback
-                ? ThumbnailWidget(file)
+                ? ThumbnailWidget(
+                    file,
+                  )
                 : const EnteLoadingWidget();
           }
         },
@@ -188,7 +192,7 @@ class PersonFaceWidget extends StatelessWidget {
         stackTrace: s,
       );
       resetPool(fullFile: useFullFile);
-      if(fetchAttempt <= retryLimit) {
+      if (fetchAttempt <= retryLimit) {
         return getFaceCrop(fetchAttempt: fetchAttempt + 1);
       }
       return null;
