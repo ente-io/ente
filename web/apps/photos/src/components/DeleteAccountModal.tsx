@@ -199,7 +199,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     checked={acceptDataDeletion}
                                     onChange={setAcceptDataDeletion}
                                     label={t(
-                                        "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL",
+                                        "delete_account_confirm_checkbox_label",
                                     )}
                                 />
                                 <Stack spacing={"8px"}>
@@ -210,7 +210,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                         disabled={!acceptDataDeletion}
                                         loading={loading}
                                     >
-                                        {t("CONFIRM_DELETE_ACCOUNT")}
+                                        {t("delete_account_confirm")}
                                     </EnteButton>
                                     <Button
                                         size="large"
