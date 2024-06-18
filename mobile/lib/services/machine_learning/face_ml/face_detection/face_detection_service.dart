@@ -39,12 +39,6 @@ class FaceDetectionService {
 
   // Singleton pattern
   FaceDetectionService._privateConstructor();
-  /// Use this instance to access the FaceDetection service. Make sure to call `init()` before using it.
-  /// e.g. `await FaceDetection.instance.init();`
-  ///
-  /// Then you can use `predict()` to get the bounding boxes of the faces, so `FaceDetection.instance.predict(imageData)`
-  ///
-  /// config options: yoloV5FaceN //
   static final instance = FaceDetectionService._privateConstructor();
   factory FaceDetectionService() => instance;
 

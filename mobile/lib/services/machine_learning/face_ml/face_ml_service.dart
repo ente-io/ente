@@ -1215,7 +1215,7 @@ class FaceMlService {
     try {
       // Get the embedding of the faces
       final List<List<double>> embeddings =
-          await FaceEmbeddingService.predictSync(facesList, interpreterAddress);
+          await FaceEmbeddingService.predict(facesList, interpreterAddress);
 
       // Add the embeddings to the resultBuilder
       if (resultBuilder != null) {
