@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import "package:intl/intl.dart";
 import "package:photos/ente_theme_data.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -46,22 +47,25 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
   }
 
   void _showDateTimePicker(EnteFile file) async {
+    final Locale locale = await getLocale();
+    final localeType = getFromLocalString(locale);
     final dateResult = await DatePickerBdaya.showDatePicker(
       context,
       minTime: DateTime(1800, 1, 1),
       maxTime: DateTime.now(),
       currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
-      locale: LocaleType.en,
+      locale: localeType,
       theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateResult == null) {
       return;
     }
+
     final dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
       context,
       showTitleActions: true,
       currentTime: dateResult,
-      locale: LocaleType.en,
+      locale: localeType,
       theme: Theme.of(context).colorScheme.dateTimePickertheme,
     );
     if (dateWithTimeResult != null) {
@@ -73,6 +77,33 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
         widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
         setState(() {});
       }
+    }
+  }
+
+  LocaleType getFromLocalString(Locale locale) {
+    switch (locale.languageCode) {
+      case "en":
+        return LocaleType.en;
+      case "es":
+        return LocaleType.es;
+      case "de":
+        return LocaleType.de;
+      case "fr":
+        return LocaleType.fr;
+      case "it":
+        return LocaleType.it;
+      case "nl":
+        return LocaleType.nl;
+      case "pt":
+        return LocaleType.pt;
+      case "ru":
+        return LocaleType.ru;
+      case "tr":
+        return LocaleType.tr;
+      case "zh":
+        return LocaleType.zh;
+      default:
+        return LocaleType.en;
     }
   }
 }
