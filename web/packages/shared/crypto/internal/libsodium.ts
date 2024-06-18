@@ -22,11 +22,11 @@ export async function decryptChaChaOneShot(
     return pullResult.message;
 }
 
-export async function decryptChaCha(
+export const decryptChaCha = async (
     data: Uint8Array,
     header: Uint8Array,
     key: string,
-) {
+) => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         header,
@@ -36,7 +36,7 @@ export async function decryptChaCha(
         ENCRYPTION_CHUNK_SIZE +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     let bytesRead = 0;
-    const decryptedData = [];
+    const decryptedChunks = [];
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
         let chunkSize = decryptionChunkSize;
@@ -51,14 +51,12 @@ export async function decryptChaCha(
         if (!pullResult.message) {
             throw new Error(CustomError.PROCESSING_FAILED);
         }
-        for (let index = 0; index < pullResult.message.length; index++) {
-            decryptedData.push(pullResult.message[index]);
-        }
+        decryptedChunks.push(pullResult.message);
         tag = pullResult.tag;
         bytesRead += chunkSize;
     }
-    return Uint8Array.from(decryptedData);
-}
+    return mergeUint8Arrays(decryptedChunks);
+};
 
 export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
     await sodium.ready;
@@ -112,7 +110,7 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     };
 }
 
-export async function encryptChaCha(data: Uint8Array) {
+export const encryptChaCha = async (data: Uint8Array) => {
     await sodium.ready;
 
     const uintkey: Uint8Array =
@@ -150,7 +148,7 @@ export async function encryptChaCha(data: Uint8Array) {
             decryptionHeader: await toB64(header),
         },
     };
-}
+};
 
 export async function initChunkEncryption() {
     await sodium.ready;
