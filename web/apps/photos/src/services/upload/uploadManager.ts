@@ -567,8 +567,9 @@ class UploadManager {
         uploadResult: UPLOAD_RESULT,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
+        const key = UPLOAD_RESULT[uploadResult];
         log.info(
-            `Uploaded ${uploadableItem.fileName} with result ${uploadResult}`,
+            `Uploaded ${uploadableItem.fileName} with result ${uploadResult} (${key})`,
         );
         try {
             const electron = globalThis.electron;
