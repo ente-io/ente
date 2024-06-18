@@ -136,6 +136,10 @@ export const sidebar = [
                         link: "/photos/troubleshooting/files-not-uploading",
                     },
                     {
+                        text: "Missing thumbnails",
+                        link: "/photos/troubleshooting/thumbnails",
+                    },
+                    {
                         text: "Sharing debug logs",
                         link: "/photos/troubleshooting/sharing-logs",
                     },
