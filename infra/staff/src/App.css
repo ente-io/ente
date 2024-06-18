@@ -1,47 +1,78 @@
-body,
-html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
-}
-
-.sidebar {
-    width: 200px;
-    height: 100%;
+.sidebar button {
+    margin-right: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
     background-color: #009879;
     color: white;
-    padding-top: 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
+    border: none;
+    border-radius: 5px;
 }
 
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
+.content-wrapper {
+    display: flex;
+    align-items: flex-start; /* Ensure items start at the top */
+    margin-left: 70px; /* Adjusts margin to move content towards the right */
 }
 
-.sidebar ul li {
-    padding: 10px;
-    text-align: center;
+/* Adjust .fetch-button-container margin to ensure proper spacing */
+.fetch-button-container {
+    margin-right: 20px; /* Adjust as needed */
+}
+
+.fetch-button-container button {
+    padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
-}
-
-.sidebar ul li:hover {
-    background-color: lightgreen;
-    color: black;
-}
-
-.main-content {
-    margin-left: 200px;
-    padding: 20px;
-    flex-grow: 1;
-}
-
-.input-form,
-.fetch-button,
-table,
-.footer {
+    background-color: #009879;
+    color: white;
+    border: none;
+    border-radius: 5px;
     margin-top: 20px;
+}
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.sidebar button:hover {
+    background-color: #007c6c;
+}
+.sidebar {
+    padding: 20px;
+    flex: 0 0 auto; /* Prevent sidebar from growing and affecting other elements */
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.error-message {
+    margin-top: 20px;
+    color: red;
+}
+.message {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.message.error {
+    background-color: #f44336;
+    color: white;
+}
+
+.message.success {
+    background-color: #4caf50;
+    color: white;
 }
