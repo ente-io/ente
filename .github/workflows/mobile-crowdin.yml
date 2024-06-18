@@ -10,7 +10,7 @@ on:
             - ".github/workflows/mobile-crowdin.yml"
     schedule:
         # See: [Note: Run workflow on specific days of the week]
-        - cron: "40 1 * * 2,5"
+        - cron: "40 1 * * 2"
     # Also allow manually running the workflow
     workflow_dispatch:
 
