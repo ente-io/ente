@@ -129,7 +129,7 @@
     "CONFIRM": "Confirmer",
     "CANCEL": "Annuler",
     "LOGOUT": "Déconnexion",
-    "DELETE_ACCOUNT": "Supprimer le compte",
+    "delete_account": "Supprimer le compte",
     "DELETE_ACCOUNT_MESSAGE": "<p>Veuillez envoyer un e-mail à <a>{{emailID}}</a>depuis Votre adresse enregistrée.</p><p> Votre demande sera traitée dans les 72 heures.</p>",
     "LOGOUT_MESSAGE": "Voulez-vous vraiment vous déconnecter?",
     "CHANGE_EMAIL": "Modifier l'e-mail",

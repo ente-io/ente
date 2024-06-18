@@ -129,7 +129,7 @@
     "CONFIRM": "Bestätigen",
     "CANCEL": "Abbrechen",
     "LOGOUT": "Ausloggen",
-    "DELETE_ACCOUNT": "Konto löschen",
+    "delete_account": "Konto löschen",
     "DELETE_ACCOUNT_MESSAGE": "<p>Bitte sende eine E-Mail an <a>{{emailID}}</a> mit deiner registrierten E-Mail-Adresse.</p><p>Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.</p>",
     "LOGOUT_MESSAGE": "Sind sie sicher, dass sie sich ausloggen möchten?",
     "CHANGE_EMAIL": "E-Mail-Adresse ändern",

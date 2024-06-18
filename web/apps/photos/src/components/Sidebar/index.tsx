@@ -665,7 +665,7 @@ const ExitSection: React.FC = () => {
                 onClick={openDeleteAccountModal}
                 color="critical"
                 variant="secondary"
-                label={t("DELETE_ACCOUNT")}
+                label={t("delete_account")}
             />
             <DeleteAccountModal
                 open={deleteAccountModalView}

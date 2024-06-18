@@ -129,7 +129,7 @@
     "CONFIRM": "Confirm",
     "CANCEL": "Cancel",
     "LOGOUT": "Logout",
-    "DELETE_ACCOUNT": "Delete account",
+    "delete_account": "Delete account",
     "DELETE_ACCOUNT_MESSAGE": "<p>Please send an email to <a>{{emailID}}</a> from your registered email address.</p><p>Your request will be processed within 72 hours.</p>",
     "LOGOUT_MESSAGE": "Are you sure you want to logout?",
     "CHANGE_EMAIL": "Change email",

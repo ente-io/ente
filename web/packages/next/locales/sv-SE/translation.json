@@ -129,7 +129,7 @@
     "CONFIRM": "Bekräfta",
     "CANCEL": "Avbryt",
     "LOGOUT": "Logga ut",
-    "DELETE_ACCOUNT": "Radera konto",
+    "delete_account": "Radera konto",
     "DELETE_ACCOUNT_MESSAGE": "",
     "LOGOUT_MESSAGE": "",
     "CHANGE_EMAIL": "",

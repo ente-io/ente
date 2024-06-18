@@ -129,7 +129,7 @@
     "CONFIRM": "Confirmar",
     "CANCEL": "Cancelar",
     "LOGOUT": "Cerrar sesión",
-    "DELETE_ACCOUNT": "Eliminar cuenta",
+    "delete_account": "Eliminar cuenta",
     "DELETE_ACCOUNT_MESSAGE": "<p>Por favor, envíe un email a <a>{{emailID}}</a> desde su dirección de correo electrónico registrada</p><p>Su solicitud será procesada en 72 horas.</p>",
     "LOGOUT_MESSAGE": "Seguro que quiere cerrar la sesión?",
     "CHANGE_EMAIL": "Cambiar email",

@@ -129,7 +129,7 @@
     "CONFIRM": "",
     "CANCEL": "",
     "LOGOUT": "",
-    "DELETE_ACCOUNT": "",
+    "delete_account": "",
     "DELETE_ACCOUNT_MESSAGE": "",
     "LOGOUT_MESSAGE": "",
     "CHANGE_EMAIL": "",

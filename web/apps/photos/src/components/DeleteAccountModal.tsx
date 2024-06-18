@@ -101,7 +101,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const confirmAccountDeletion = () => {
         setDialogBoxAttributesV2({
-            title: t("DELETE_ACCOUNT"),
+            title: t("delete_account"),
             content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
             proceed: {
                 text: t("DELETE"),
@@ -114,7 +114,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const askToMailForDeletion = () => {
         setDialogBoxAttributesV2({
-            title: t("DELETE_ACCOUNT"),
+            title: t("delete_account"),
             content: (
                 <Trans
                     i18nKey="DELETE_ACCOUNT_MESSAGE"
@@ -162,7 +162,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 onClose={onClose}
                 fullScreen={isMobile}
                 attributes={{
-                    title: t("DELETE_ACCOUNT"),
+                    title: t("delete_account"),
                     secondary: {
                         action: onClose,
                         text: t("CANCEL"),
