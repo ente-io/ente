@@ -53,7 +53,7 @@ func (c *PasskeyController) RemovePasskey2FA(userID int64) (err error) {
 
 func (c *PasskeyController) RenamePasskey(userID int64, passkeyID uuid.UUID, newName string) (err error) {
 	if len(newName) < 1 || len(newName) > 32 {
-		err = ente.ErrInvalidName
+		err = ente.NewBadRequestWithMessage("friendlyName must be between 1 and 32 characters")
 		return
 	}
 

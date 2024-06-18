@@ -105,8 +105,6 @@ var ErrNotImplemented = errors.New("not implemented")
 
 var ErrInvalidApp = errors.New("invalid app")
 
-var ErrInvalidName = errors.New("invalid name")
-
 var ErrSubscriptionAlreadyClaimed = ApiError{
 	Code:           SubscriptionAlreadyClaimed,
 	HttpStatusCode: http.StatusConflict,
