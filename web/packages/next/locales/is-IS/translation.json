@@ -130,7 +130,7 @@
     "CANCEL": "Hætta við",
     "LOGOUT": "Útskrá",
     "delete_account": "Eyða aðgangi",
-    "DELETE_ACCOUNT_MESSAGE": "",
+    "delete_account_message": "",
     "LOGOUT_MESSAGE": "Ertu viss um að þú viljir skrá þig út?",
     "CHANGE_EMAIL": "Breyta netfangi",
     "OK": "Í lagi",
