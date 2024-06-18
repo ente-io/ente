@@ -122,8 +122,8 @@ function PlanSelectorCard(props: Props) {
 
     async function onPlanSelect(plan: Plan) {
         if (
-            !hasPaidSubscription(subscription) ||
-            isSubscriptionCancelled(subscription)
+            !hasPaidSubscription(subscription) &&
+            !isSubscriptionCancelled(subscription)
         ) {
             try {
                 props.setLoading(true);
