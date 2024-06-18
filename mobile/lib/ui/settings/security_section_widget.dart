@@ -143,6 +143,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: 'App lock',
         ),
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
         onTap: () async {
           final bool result = await requestAuthentication(
             context,

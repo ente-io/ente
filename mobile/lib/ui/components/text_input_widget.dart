@@ -46,6 +46,7 @@ class TextInputWidget extends StatefulWidget {
   final ValueNotifier? isEmptyNotifier;
   final List<TextInputFormatter>? textInputFormatter;
   final TextInputType? textInputType;
+  final bool? fillColor;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -74,6 +75,7 @@ class TextInputWidget extends StatefulWidget {
     this.isEmptyNotifier,
     this.textInputFormatter,
     this.textInputType,
+    this.fillColor = true,
     super.key,
   });
 
@@ -161,7 +163,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
-              filled: true,
+              filled: widget.fillColor,
               fillColor: colorScheme.fillFaint,
               contentPadding: const EdgeInsets.fromLTRB(
                 12,

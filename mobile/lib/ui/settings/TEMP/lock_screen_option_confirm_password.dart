@@ -31,7 +31,6 @@ class _LockScreenOptionConfirmPasswordState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 500));
       _focusNode.requestFocus();
     });
   }
@@ -51,7 +50,7 @@ class _LockScreenOptionConfirmPasswordState
       Navigator.of(context).pop(true);
       return;
     }
-    _confirmPasswordController.clear();
+    await HapticFeedback.vibrate();
     throw Exception("Incorrect password");
   }
 
@@ -145,6 +144,7 @@ class _LockScreenOptionConfirmPasswordState
               child: TextInputWidget(
                 hintText: S.of(context).confirmPassword,
                 focusNode: _focusNode,
+                fillColor: false,
                 textCapitalization: TextCapitalization.none,
                 textEditingController: _confirmPasswordController,
                 isPasswordInput: true,

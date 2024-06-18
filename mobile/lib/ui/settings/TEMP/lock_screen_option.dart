@@ -141,10 +141,16 @@ class _LockScreenOptionState extends State<LockScreenOption> {
                             ),
                             appLock!
                                 ? Container()
-                                : Text(
-                                    'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
-                                    style: textTheme.smallFaint,
-                                    textAlign: TextAlign.center,
+                                : Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
                           ],
                         ),

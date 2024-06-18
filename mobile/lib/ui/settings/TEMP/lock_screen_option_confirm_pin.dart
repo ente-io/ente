@@ -1,9 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:pinput/pinput.dart";
 
@@ -19,10 +17,10 @@ class _LockScreenOptionConfirmPinState
     extends State<LockScreenOptionConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
   final Configuration _configuration = Configuration.instance;
-  final _focusNode = FocusNode();
+  Key _pinputKey = UniqueKey();
   final _pinPutDecoration = PinTheme(
-    height: 50,
-    width: 50,
+    height: 48,
+    width: 48,
     decoration: BoxDecoration(
       border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
       borderRadius: BorderRadius.circular(15.0),
@@ -31,17 +29,27 @@ class _LockScreenOptionConfirmPinState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _focusNode.requestFocus();
-    });
   }
 
   @override
   void dispose() {
     super.dispose();
-    _focusNode.dispose();
     _confirmPinController.dispose();
+  }
+
+  String _pin = "";
+
+  void onClick(String number) {
+    _pin += number;
+    _confirmPinController.text = _pin;
+  }
+
+  void removeNum() {
+    if (_pin.isNotEmpty) {
+      _pin = _pin.substring(0, _pin.length - 1);
+      _confirmPinController.text = _pin;
+    }
+    return;
   }
 
   Future<void> _confirmPinMatch() async {
@@ -54,29 +62,20 @@ class _LockScreenOptionConfirmPinState
     }
     await HapticFeedback.vibrate();
     _confirmPinController.clear();
+    _pin = "";
+    _pinputKey = UniqueKey();
   }
 
   @override
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    FloatingActionButtonLocation? fabLocation() {
-      if (isKeypadOpen) {
-        return null;
-      } else {
-        return FloatingActionButtonLocation.centerFloat;
-      }
-    }
 
     return Scaffold(
-      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
           onPressed: () {
-            FocusScope.of(context).unfocus();
             Navigator.of(context).pop(false);
           },
           icon: Icon(
@@ -85,17 +84,6 @@ class _LockScreenOptionConfirmPinState
           ),
         ),
       ),
-      floatingActionButton: DynamicFAB(
-        isKeypadOpen: isKeypadOpen,
-        buttonText: S.of(context).confirm,
-        isFormValid: _confirmPinController.text.isNotEmpty,
-        onPressedFunction: () async {
-          await _confirmPinMatch();
-          FocusScope.of(context).unfocus();
-        },
-      ),
-      floatingActionButtonLocation: fabLocation(),
-      floatingActionButtonAnimator: NoScalingAnimation(),
       body: Center(
         child: Column(
           children: [
@@ -154,11 +142,12 @@ class _LockScreenOptionConfirmPinState
             Padding(
               padding: const EdgeInsets.fromLTRB(70, 0, 70, 0),
               child: Pinput(
+                key: _pinputKey,
                 length: 4,
+                useNativeKeyboard: false,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 controller: _confirmPinController,
-                focusNode: _focusNode,
                 defaultPinTheme: _pinPutDecoration,
                 submittedPinTheme: _pinPutDecoration.copyWith(
                   textStyle: textTheme.h3Bold,
@@ -195,16 +184,201 @@ class _LockScreenOptionConfirmPinState
                   if (value == widget.pin) {
                     return null;
                   } else {
+                    value = null;
                     return 'PIN does not match';
                   }
                 },
-                onSubmitted: (value) {
-                  _confirmPinMatch();
-                  FocusScope.of(context).unfocus();
+                onCompleted: (value) async {
+                  await Future.delayed(const Duration(milliseconds: 250));
+                  await _confirmPinMatch();
                 },
               ),
             ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.all(2),
+              color: colorTheme.strokeFainter,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        text: '',
+                        number: '1',
+                        onTap: () {
+                          onClick('1');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        text: "ABC",
+                        number: '2',
+                        onTap: () {
+                          onClick('2');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        text: "DEF",
+                        number: '3',
+                        onTap: () {
+                          onClick('3');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '4',
+                        text: "GHI",
+                        onTap: () {
+                          onClick('4');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '5',
+                        text: 'JKL',
+                        onTap: () {
+                          onClick('5');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '6',
+                        text: 'MNO',
+                        onTap: () {
+                          onClick('6');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '7',
+                        text: 'PQRS',
+                        onTap: () {
+                          onClick('7');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '8',
+                        text: 'TUV',
+                        onTap: () {
+                          onClick('8');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '9',
+                        text: 'WXYZ',
+                        onTap: () {
+                          onClick('9');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '',
+                        text: '',
+                        muteButton: true,
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '0',
+                        text: '',
+                        onTap: () {
+                          onClick('0');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '',
+                        text: '',
+                        icons: const Icon(Icons.backspace_outlined),
+                        onTap: () {
+                          removeNum();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buttonWidget({
+    colorTheme,
+    textTheme,
+    text,
+    number,
+    muteButton = false,
+    icons,
+    onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(6),
+            color: muteButton
+                ? colorTheme.fillFaintPressed
+                : icons == null
+                    ? colorTheme.backgroundElevated2
+                    : null,
+          ),
+          child: Center(
+            child: muteButton
+                ? Container()
+                : icons != null
+                    ? Container(
+                        child: icons,
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(4),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              number,
+                              style: textTheme.h3,
+                            ),
+                            Text(
+                              text,
+                              style: textTheme.small,
+                            ),
+                          ],
+                        ),
+                      ),
+          ),
         ),
       ),
     );

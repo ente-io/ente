@@ -29,7 +29,6 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 500));
       _focusNode.requestFocus();
     });
   }
@@ -159,6 +158,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
               child: TextInputWidget(
                 hintText: S.of(context).password,
                 focusNode: _focusNode,
+                fillColor: false,
                 textCapitalization: TextCapitalization.none,
                 textEditingController: _passwordController,
                 isPasswordInput: true,

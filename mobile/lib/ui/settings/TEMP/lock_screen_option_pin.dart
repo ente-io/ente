@@ -20,22 +20,31 @@ class LockScreenOptionPin extends StatefulWidget {
 
 class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
-  final _focusNode = FocusNode();
-
+  Key _pinputKey = UniqueKey();
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _focusNode.requestFocus();
-    });
   }
 
   @override
   void dispose() {
     super.dispose();
     _pinController.dispose();
-    _focusNode.dispose();
+  }
+
+  String _pin = "";
+
+  void onClick(String number) {
+    _pin += number;
+    _pinController.text = _pin;
+  }
+
+  void removeNum() {
+    if (_pin.isNotEmpty) {
+      _pin = _pin.substring(0, _pin.length - 1);
+      _pinController.text = _pin;
+    }
+    return;
   }
 
   Future<bool> confirmPinAuth(String code) async {
@@ -43,6 +52,9 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
       Navigator.of(context).pop(true);
       return true;
     }
+    _pinController.clear();
+    _pin = "";
+    _pinputKey = UniqueKey();
     await HapticFeedback.vibrate();
     return false;
   }
@@ -59,6 +71,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
         ),
       );
       _pinController.clear();
+      _pin = "";
     }
   }
 
@@ -70,6 +83,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
       borderRadius: BorderRadius.circular(15.0),
     ),
   );
+
   @override
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
@@ -79,7 +93,6 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
         elevation: 0,
         leading: IconButton(
           onPressed: () {
-            FocusScope.of(context).unfocus();
             Navigator.of(context).pop(false);
           },
           icon: Icon(
@@ -149,10 +162,11 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(70, 0, 70, 0),
                   child: Pinput(
+                    key: _pinputKey,
                     length: 4,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    focusNode: _focusNode,
+                    useNativeKeyboard: false,
                     controller: _pinController,
                     defaultPinTheme: _pinPutDecoration,
                     submittedPinTheme: _pinPutDecoration.copyWith(
@@ -191,12 +205,10 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                             return 'Invalid PIN';
                           }
                         : null,
-                    autofocus: true,
                     errorText: '',
                     obscureText: true,
                     obscuringCharacter: '*',
                     onCompleted: (value) async {
-                      FocusScope.of(context).unfocus();
                       await Future.delayed(const Duration(milliseconds: 250));
                       await _confirmPin(_pinController.text);
                     },
@@ -204,7 +216,191 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
                 ),
               ],
             ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.all(2),
+              color: colorTheme.strokeFainter,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        text: '',
+                        number: '1',
+                        onTap: () {
+                          onClick('1');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        text: "ABC",
+                        number: '2',
+                        onTap: () {
+                          onClick('2');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        text: "DEF",
+                        number: '3',
+                        onTap: () {
+                          onClick('3');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '4',
+                        text: "GHI",
+                        onTap: () {
+                          onClick('4');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '5',
+                        text: 'JKL',
+                        onTap: () {
+                          onClick('5');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '6',
+                        text: 'MNO',
+                        onTap: () {
+                          onClick('6');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '7',
+                        text: 'PQRS',
+                        onTap: () {
+                          onClick('7');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '8',
+                        text: 'TUV',
+                        onTap: () {
+                          onClick('8');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '9',
+                        text: 'WXYZ',
+                        onTap: () {
+                          onClick('9');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '',
+                        text: '',
+                        muteButton: true,
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '0',
+                        text: '',
+                        onTap: () {
+                          onClick('0');
+                        },
+                      ),
+                      buttonWidget(
+                        colorTheme: colorTheme,
+                        textTheme: textTheme,
+                        number: '',
+                        text: '',
+                        icons: const Icon(Icons.backspace_outlined),
+                        onTap: () {
+                          removeNum();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buttonWidget({
+    colorTheme,
+    textTheme,
+    text,
+    number,
+    muteButton = false,
+    icons,
+    onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.circular(6),
+            color: muteButton
+                ? colorTheme.fillFaintPressed
+                : icons == null
+                    ? colorTheme.backgroundElevated2
+                    : null,
+          ),
+          child: Center(
+            child: muteButton
+                ? Container()
+                : icons != null
+                    ? Container(
+                        child: icons,
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(4),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              number,
+                              style: textTheme.h3,
+                            ),
+                            Text(
+                              text,
+                              style: textTheme.small,
+                            ),
+                          ],
+                        ),
+                      ),
+          ),
         ),
       ),
     );
