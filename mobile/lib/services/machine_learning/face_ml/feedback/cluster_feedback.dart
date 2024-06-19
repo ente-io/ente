@@ -139,6 +139,7 @@ class ClusterFeedbackService {
     PersonEntity p,
   ) async {
     try {
+      _logger.info('removeFilesFromPerson called');
       // Get the relevant faces to be removed
       final faceIDs = await FaceMLDataDB.instance
           .getFaceIDsForPerson(p.remoteID)
@@ -161,7 +162,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.20,
       );
       if (clusterResult.isEmpty) {
-        _logger.warning('No clusters found or something went wrong');
+        _logger.severe('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
