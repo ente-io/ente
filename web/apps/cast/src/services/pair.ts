@@ -81,7 +81,7 @@ export const register = async (): Promise<Registration> => {
         await generateKeyPair();
 
     // Register keypair with museum to get a pairing code.
-    let pairingCode: string;
+    let pairingCode: string | undefined;
     // eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
     // https://github.com/eslint/eslint/pull/18286

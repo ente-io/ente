@@ -58,6 +58,10 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	if authResponse.IsMFARequired() {
 		authResponse, flowErr = c.validateTOTP(cxt, authResponse)
 	}
+
+	if authResponse.IsPasskeyRequired() {
+		authResponse, flowErr = c.verifyPassKey(cxt, authResponse)
+	}
 	if authResponse.EncryptedToken == "" || authResponse.KeyAttributes == nil {
 		log.Fatalf("missing key attributes or token.\nNote: Please use the mobile,web or desktop app to create a new account.\nIf you are trying to login to an existing account, report a bug.")
 	}

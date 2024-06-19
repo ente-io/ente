@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { isNonWebImageFileExtension } from "@/media/formats";
+import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
@@ -22,7 +23,6 @@ import {
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from "services/fileService";
-import { heicToJPEG } from "services/heic-convert";
 import {
     EncryptedEnteFile,
     EnteFile,

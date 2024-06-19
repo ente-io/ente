@@ -26,6 +26,9 @@ import 'package:photos/utils/thumbnail_util.dart';
 class ThumbnailWidget extends StatefulWidget {
   final EnteFile file;
   final BoxFit fit;
+
+  /// Returns ThumbnailWidget without any overlay icons if true.
+  final bool rawThumbnail;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;
   final bool shouldShowPinIcon;
@@ -37,10 +40,15 @@ class ThumbnailWidget extends StatefulWidget {
   final bool shouldShowOwnerAvatar;
   final bool shouldShowFavoriteIcon;
 
+  ///On video thumbnails, shows the video duration if true. If false,
+  ///shows a centered play icon.
+  final bool shouldShowVideoDuration;
+
   ThumbnailWidget(
     this.file, {
     Key? key,
     this.fit = BoxFit.cover,
+    this.rawThumbnail = false,
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
@@ -51,6 +59,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
     this.shouldShowFavoriteIcon = true,
+    this.shouldShowVideoDuration = false,
   }) : super(key: key ?? Key(file.tag));
 
   @override
@@ -131,6 +140,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     // If yes, parent thumbnail widget can be stateless
     Widget? content;
     if (image != null) {
+      if (widget.rawThumbnail) {
+        return image;
+      }
       final List<Widget> contentChildren = [image];
       if (widget.shouldShowFavoriteIcon) {
         if (FavoritesService.instance.isFavoriteCache(
@@ -142,8 +154,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
 
       if (widget.file.fileType == FileType.video) {
-        contentChildren
-            .add(VideoOverlayDuration(duration: widget.file.duration!));
+        if (widget.shouldShowVideoDuration) {
+          contentChildren
+              .add(VideoOverlayDuration(duration: widget.file.duration!));
+        } else {
+          contentChildren.add(const VideoOverlayIcon());
+        }
       } else if (widget.shouldShowLivePhotoOverlay &&
           widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());

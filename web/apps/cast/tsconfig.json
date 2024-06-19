@@ -1,25 +1,14 @@
 {
-    "extends": "../../tsconfig.base.json",
+    "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
+        /* Set the base directory from which to resolve bare module names. */
         "baseUrl": "./src",
-        "downlevelIteration": true,
-        "jsx": "preserve",
-        "jsxImportSource": "@emotion/react",
-        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-        "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "strictNullChecks": false,
-        "target": "es5",
-        "useUnknownInCatchVariables": false
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
+        "exactOptionalPropertyTypes": false
     },
     "include": [
-        "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "../../packages/shared/themes/mui-theme.d.ts",
-        "../../packages/accounts/**/*.tsx"
-    ],
-    "exclude": ["node_modules", "out", ".next", "thirdparty"]
+        "src",
+        "../../packages/next/global-electron.d.ts",
+        "../../packages/shared/themes/mui-theme.d.ts"
+    ]
 }

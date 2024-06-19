@@ -881,11 +881,12 @@ class FilesDB {
           ")";
       if (index != durations.length - 1) {
         whereClause += " OR ";
-      } else if (visibility != null) {
-        whereClause += ' AND $columnMMdVisibility = $visibility';
       }
     }
     whereClause += ")";
+    if (visibility != null) {
+      whereClause += ' AND $columnMMdVisibility = $visibility';
+    }
     final query =
         'SELECT * FROM $filesTable WHERE $whereClause ORDER BY $columnCreationTime $order';
     final results = await db.getAll(

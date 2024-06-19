@@ -96,6 +96,7 @@ class CroppedFaceImageView extends StatelessWidget {
           }
           return ThumbnailWidget(
             enteFile,
+            rawThumbnail: true,
           );
         }
       },

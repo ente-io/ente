@@ -349,7 +349,8 @@ export const isWhitelistedRedirect = (redirectURL: URL) =>
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh") ||
     redirectURL.protocol == "ente:" ||
-    redirectURL.protocol == "enteauth:";
+    redirectURL.protocol == "enteauth:" ||
+    redirectURL.protocol == "ente-cli:";
 
 export interface BeginPasskeyAuthenticationResponse {
     /**

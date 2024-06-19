@@ -1,11 +1,11 @@
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
 import log from "@/next/log";
 import { type Electron } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { withTimeout } from "@/utils/promise";
 import * as ffmpeg from "services/ffmpeg";
-import { heicToJPEG } from "services/heic-convert";
 import { toDataOrPathOrZipEntry, type DesktopUploadItem } from "./types";
 
 /** Maximum width or height of the generated thumbnail */
