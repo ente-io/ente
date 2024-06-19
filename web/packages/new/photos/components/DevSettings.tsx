@@ -8,6 +8,7 @@ import {
     DialogTitle,
     styled,
     useMediaQuery,
+    type ModalProps,
 } from "@mui/material";
 import React from "react";
 import { SlideTransition } from "./SlideTransition";
@@ -26,9 +27,18 @@ interface DevSettingsProps {
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
+    const handleDialogClose: ModalProps["onClose"] = (
+        event: Event,
+        reason: string,
+    ) => {
+        // Don't close on backdrop clicks.
+        if (reason != "backdropClick") onClose();
+    };
+
     return (
         <Dialog
             {...{ open, fullScreen }}
+            onClose={handleDialogClose}
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
