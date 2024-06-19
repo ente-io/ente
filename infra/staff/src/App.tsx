@@ -155,10 +155,19 @@ export const App: React.FC = () => {
         return rows;
     };
 
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLFormElement>) => {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent form submission
+            fetchData().catch((error: unknown) =>
+                console.error("Fetch data error:", error),
+            );
+        }
+    };
+
     return (
         <div className="container center-table">
             <h1>{S.hello}</h1>
-            <form className="input-form">
+            <form className="input-form" onKeyPress={handleKeyPress}>
                 <div className="input-group">
                     <label>
                         Token:
