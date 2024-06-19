@@ -103,7 +103,6 @@ class _AppState extends State<App>
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    debugPrint("AppLifecycleState: $state");
     if (state == AppLifecycleState.resumed) {
       if (Configuration.instance.hasConfiguredAccount()) {
         AuthenticatorService.instance.onlineSync().ignore();
