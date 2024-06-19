@@ -222,7 +222,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
   int alignedImageIndex = 0;
   for (final face in absoluteFaces) {
     final (alignmentResult, correctlyEstimated) =
-        SimilarityTransform.instance.estimate(face.allKeypoints);
+        SimilarityTransform.estimate(face.allKeypoints);
     if (!correctlyEstimated) {
       alignedImageIndex += 3 * width * height;
       alignmentResults.add(AlignmentResult.empty());
