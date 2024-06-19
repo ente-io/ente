@@ -151,6 +151,13 @@ class ClusterFeedbackService {
       final embeddings =
           await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
 
+      if (faceIDs.isEmpty || embeddings.isEmpty) {
+        _logger.severe(
+          'No faces or embeddings found for person ${p.remoteID} that match the given files',
+        );
+        return;
+      }
+
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
 
@@ -204,6 +211,13 @@ class ClusterFeedbackService {
       });
       final embeddings =
           await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      if (faceIDs.isEmpty || embeddings.isEmpty) {
+        _logger.severe(
+          'No faces or embeddings found for cluster $clusterID that match the given files',
+        );
+        return;
+      }
 
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
