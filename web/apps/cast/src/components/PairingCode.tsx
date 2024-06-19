@@ -1,4 +1,5 @@
 import { styled } from "@mui/material";
+import React from "react";
 
 const colors = [
     "#87CEFA", // Light Blue
