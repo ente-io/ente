@@ -3,7 +3,7 @@ import { ensure } from "@/utils/ensure";
 import { styled } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { readCastData } from "services/cast-data";
 import { isChromecast } from "services/chromecast";
 import { imageURLGenerator } from "services/render";
@@ -25,11 +25,11 @@ export default function Slideshow() {
                 const urlGenerator = imageURLGenerator(ensure(readCastData()));
                 while (!stop) {
                     const { value: url, done } = await urlGenerator.next();
-                    if (done || !url) {
+                    if (done == true || !url) {
                         // No items in this callection can be shown.
                         setIsEmpty(true);
                         // Go back to pairing screen after 5 seconds.
-                        setTimeout(pair, 5000);
+                        setTimeout(() => pair, 5000);
                         return;
                     }
 
@@ -37,7 +37,7 @@ export default function Slideshow() {
                 }
             } catch (e) {
                 log.error("Failed to prepare generator", e);
-                pair();
+                void pair();
             }
         };
 
@@ -64,7 +64,7 @@ const PairingComplete: React.FC = () => {
             <FilledCircleCheck />
             <h2>Pairing Complete</h2>
             <p>
-                We're preparing your album.
+                {"We're preparing your album"}.
                 <br /> This should only take a few seconds.
             </p>
         </Message>

@@ -3,7 +3,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { readCastData, storeCastData } from "services/cast-data";
 import { getCastData, register } from "services/pair";
 import { advertiseOnChromecast } from "../services/chromecast";
@@ -17,7 +17,7 @@ export default function Index() {
 
     useEffect(() => {
         if (!pairingCode) {
-            register().then((r) => {
+            void register().then((r) => {
                 setPublicKeyB64(r.publicKeyB64);
                 setPrivateKeyB64(r.privateKeyB64);
                 setPairingCode(r.pairingCode);
