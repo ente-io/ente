@@ -1,3 +1,8 @@
+/* TODO: Various lint issues in the decryptEnteFile function */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
