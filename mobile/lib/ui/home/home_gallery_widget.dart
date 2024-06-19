@@ -87,7 +87,6 @@ class HomeGalleryWidget extends StatelessWidget {
     );
     return SelectionState(
       selectedFiles: selectedFiles,
-      // ignore: prefer_const_literals_to_create_immutables
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
@@ -96,6 +95,5 @@ class HomeGalleryWidget extends StatelessWidget {
         ],
       ),
     );
-    // return gallery;
   }
 }

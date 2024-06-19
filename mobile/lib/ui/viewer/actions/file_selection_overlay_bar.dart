@@ -118,7 +118,7 @@ class SelectAllButton extends StatefulWidget {
 }
 
 class _SelectAllButtonState extends State<SelectAllButton> {
-  bool _selectAll = false;
+  bool _allSelected = false;
   @override
   Widget build(BuildContext context) {
     final selectionState = SelectionState.of(context);
@@ -130,13 +130,13 @@ class _SelectAllButtonState extends State<SelectAllButton> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          if (_selectAll) {
+          if (_allSelected) {
             selectionState.selectedFiles.clearAll();
           } else {
             selectionState.selectedFiles
                 .selectAll(selectionState.allGalleryFiles!.toSet());
           }
-          _selectAll = !_selectAll;
+          _allSelected = !_allSelected;
         });
       },
       child: Padding(
@@ -168,15 +168,15 @@ class _SelectAllButtonState extends State<SelectAllButton> {
                 builder: (context, _) {
                   if (selectionState.selectedFiles.files.length ==
                       selectionState.allGalleryFiles?.length) {
-                    _selectAll = true;
+                    _allSelected = true;
                   } else {
-                    _selectAll = false;
+                    _allSelected = false;
                   }
                   return Icon(
-                    _selectAll
+                    _allSelected
                         ? Icons.check_circle
                         : Icons.check_circle_outline,
-                    color: _selectAll ? null : colorScheme.strokeMuted,
+                    color: _allSelected ? null : colorScheme.strokeMuted,
                     size: 18,
                   );
                 },

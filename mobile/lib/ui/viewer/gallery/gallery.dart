@@ -175,7 +175,7 @@ class GalleryState extends State<Gallery> {
       if (result.hasMore) {
         final result = await _loadFiles();
         _setFilesAndReload(result.files);
-      } else {}
+      }
     });
   }
 

@@ -3,6 +3,8 @@ import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 
+///This is an inherited widget that needs to be wrapped around Gallery and
+///FileSelectionOverlayBar to make select all work.
 // ignore: must_be_immutable
 class SelectionState extends InheritedWidget {
   final SelectedFiles selectedFiles;
