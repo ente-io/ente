@@ -69,7 +69,7 @@ export default function Index() {
             {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
             <p>
                 Visit{" "}
-                <a href="https://ente.io/cast" target="_blank">
+                <a href="https://ente.io/cast" target="_blank" rel="noopener">
                     ente.io/cast
                 </a>{" "}
                 for help
