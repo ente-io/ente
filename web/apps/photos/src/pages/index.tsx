@@ -161,7 +161,10 @@ const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
 
     const handleClick = () => {
         setTapCount(tapCount + 1);
-        if (tapCount + 1 == 7) setShowDevSettings(true);
+        if (tapCount + 1 == 7) {
+            setTapCount(0);
+            setShowDevSettings(true);
+        }
     };
 
     return (
