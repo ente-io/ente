@@ -111,67 +111,67 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 60,
-            ),
-            SizedBox(
-              height: 120,
-              width: 120,
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      height: 75,
-                      width: 75,
-                      child: CircularProgressIndicator(
-                        backgroundColor: colorTheme.fillStrong,
-                        value: 1,
-                        strokeWidth: 1.5,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 120,
+                width: 120,
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        height: 75,
+                        width: 75,
+                        child: CircularProgressIndicator(
+                          backgroundColor: colorTheme.fillStrong,
+                          value: 1,
+                          strokeWidth: 1.5,
+                        ),
                       ),
                     ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: IconButtonWidget(
-                      size: 30,
-                      icon: Icons.lock,
-                      iconButtonType: IconButtonType.primary,
-                      iconColor: colorTheme.tabIcon,
+                    Align(
+                      alignment: Alignment.center,
+                      child: IconButtonWidget(
+                        size: 30,
+                        icon: Icons.lock,
+                        iconButtonType: IconButtonType.primary,
+                        iconColor: colorTheme.tabIcon,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Text(
-              widget.isAuthenticating ? 'Enter Password' : 'Set new Password',
-              textAlign: TextAlign.center,
-              style: textTheme.bodyBold,
-            ),
-            const Padding(padding: EdgeInsets.all(24)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextInputWidget(
-                hintText: S.of(context).password,
-                focusNode: _focusNode,
-                enableFillColor: false,
-                textCapitalization: TextCapitalization.none,
-                textEditingController: _passwordController,
-                isPasswordInput: true,
-                onChange: (p0) {
-                  _isFormValid.value = _passwordController.text.isNotEmpty;
-                },
-                onSubmit: (p0) {
-                  return _confirmPassword();
-                },
-                submitNotifier: _submitNotifier,
+              Text(
+                widget.isAuthenticating ? 'Enter Password' : 'Set new Password',
+                textAlign: TextAlign.center,
+                style: textTheme.bodyBold,
               ),
-            ),
-          ],
+              const Padding(padding: EdgeInsets.all(12)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextInputWidget(
+                  hintText: S.of(context).password,
+                  focusNode: _focusNode,
+                  enableFillColor: false,
+                  textCapitalization: TextCapitalization.none,
+                  textEditingController: _passwordController,
+                  isPasswordInput: true,
+                  onChange: (p0) {
+                    _isFormValid.value = _passwordController.text.isNotEmpty;
+                  },
+                  onSubmit: (p0) {
+                    return _confirmPassword();
+                  },
+                  submitNotifier: _submitNotifier,
+                ),
+              ),
+              const Padding(padding: EdgeInsets.all(12)),
+            ],
+          ),
         ),
       ),
     );
