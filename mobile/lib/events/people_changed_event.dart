@@ -19,4 +19,5 @@ class PeopleChangedEvent extends Event {
 enum PeopleEventType {
   defaultType,
   removedFilesFromCluster,
+  syncDone,
 }
