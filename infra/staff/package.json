@@ -13,6 +13,7 @@
     "dependencies": {
         "react": "^18",
         "react-dom": "^18",
+        "react-toastify": "^10.0.5",
         "zod": "^3"
     },
     "devDependencies": {
@@ -28,7 +29,7 @@
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3.2",
         "prettier-plugin-packagejson": "^2.5",
-        "typescript": "^5",
+        "typescript": "^5.4.5",
         "vite": "^5.2"
     },
     "packageManager": "yarn@1.22.22"
