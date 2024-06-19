@@ -187,6 +187,10 @@ class ClusterFeedbackService {
       await FaceMLDataDB.instance
           .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
 
+      // Update remote so new sync does not undo this change
+      await PersonService.instance
+          .removeFilesFromPerson(person: p, faceIDs: faceIDs.toSet());
+
       Bus.instance.fire(PeopleChangedEvent());
       _logger.info('removeFilesFromPerson done');
       return;
