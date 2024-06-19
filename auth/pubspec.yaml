@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 3.0.12+312
+version: 3.0.13+313
 publish_to: none
 
 environment:
@@ -92,8 +92,8 @@ dependencies:
       url: https://github.com/tekartik/sqflite
       path: sqflite
   sqflite_common_ffi: ^2.3.0+4
-  sqlite3: ^2.1.0
-  sqlite3_flutter_libs: ^0.5.19+1
+  sqlite3: ^2.4.3
+  sqlite3_flutter_libs: ^0.5.24
   steam_totp: ^0.0.1
   step_progress_indicator: ^1.0.2
   styled_text: ^8.1.0

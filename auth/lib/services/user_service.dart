@@ -165,7 +165,11 @@ class UserService {
       return userDetails;
     } catch (e) {
       _logger.warning("Failed to fetch", e);
-      rethrow;
+      if (e is DioException && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -213,6 +217,12 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      // check if token is already invalid
+      if (e is DioException && e.response?.statusCode == 401) {
+        await Configuration.instance.logout();
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return;
+      }
       //This future is for waiting for the dialog from which logout() is called
       //to close and only then to show the error dialog.
       Future.delayed(
