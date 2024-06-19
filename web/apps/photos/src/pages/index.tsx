@@ -1,3 +1,4 @@
+import { DevSettings } from "@/new/photos/components/DevSettings";
 import log from "@/next/log";
 import { Login } from "@ente/accounts/components/Login";
 import { SignUp } from "@ente/accounts/components/SignUp";
@@ -26,9 +27,11 @@ import { useAppContext } from "./_app";
 
 export default function LandingPage() {
     const { appName, showNavBar, setDialogMessage } = useAppContext();
-    const router = useRouter();
+
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
+
+    const router = useRouter();
 
     useEffect(() => {
         showNavBar(false);
@@ -145,7 +148,36 @@ export default function LandingPage() {
     );
 }
 
-const Container = styled("div")`
+const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
+    // [Note: Configuring custom server]
+    //
+    // Allow the user to tap 7 times anywhere on the onboarding screen to bring
+    // up a page where they can configure the endpoint that the app should
+    // connect to.
+    //
+    // See: https://help.ente.io/self-hosting/guides/custom-server/
+    const [tapCount, setTapCount] = useState(0);
+    const [showDevSettings, setShowDevSettings] = useState(false);
+
+    const handleClick = () => {
+        setTapCount(tapCount + 1);
+        if (tapCount + 1 == 7) setShowDevSettings(true);
+    };
+
+    return (
+        <Container_ onClick={handleClick}>
+            <>
+                <DevSettings
+                    open={showDevSettings}
+                    onClose={() => setShowDevSettings(false)}
+                />
+                {children}
+            </>
+        </Container_>
+    );
+};
+
+const Container_ = styled("div")`
     display: flex;
     flex: 1;
     align-items: center;

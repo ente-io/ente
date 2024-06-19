@@ -6,15 +6,13 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Typography,
     styled,
     useMediaQuery,
 } from "@mui/material";
-import React, { useEffect } from "react";
-import { didShowWhatsNew } from "../services/changelog";
+import React from "react";
 import { SlideTransition } from "./SlideTransition";
 
-interface WhatsNewProps {
+interface DevSettingsProps {
     /** If `true`, then the dialog is shown. */
     open: boolean;
     /** Called when the dialog wants to be closed. */
@@ -22,15 +20,11 @@ interface WhatsNewProps {
 }
 
 /**
- * A dialog showing a short summary of interesting-for-the-user things since the
- * last time this dialog was shown.
+ * A dialog allowing the user to set the API origin that the app connects to.
+ * See: [Note: Configuring custom server].
  */
-export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
+export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
-
-    useEffect(() => {
-        if (open) void didShowWhatsNew();
-    }, [open]);
 
     return (
         <Dialog
@@ -38,11 +32,9 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
-            <DialogTitle>{"What's new"}</DialogTitle>
+            <DialogTitle>{"Developer settings"}</DialogTitle>
             <DialogContent>
-                <DialogContentText>
-                    <ChangelogContent />
-                </DialogContentText>
+                <DialogContentText>WIP</DialogContentText>
             </DialogContent>
             <DialogActions>
                 <StyledButton
@@ -58,39 +50,6 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
         </Dialog>
     );
 };
-
-const ChangelogContent: React.FC = () => {
-    // NOTE: Remember to update changelogVersion when changing the content
-    // below.
-
-    return (
-        <StyledUL>
-            <li>
-                <Typography>
-                    <Typography color="primary">
-                        Support for Passkeys
-                    </Typography>
-                    Passkeys can now be used as a second factor authentication
-                    mechanism.
-                </Typography>
-            </li>
-            <li>
-                <Typography color="primary">Window size</Typography>
-                <Typography>
-                    {"The app's window will remember its size and position."}
-                </Typography>
-            </li>
-        </StyledUL>
-    );
-};
-
-const StyledUL = styled("ul")`
-    padding-inline: 1rem;
-
-    li {
-        margin-block: 2rem;
-    }
-`;
 
 const StyledButton = styled(Button)`
     /* Show an outline when the button gains keyboard focus, e.g. when the user
