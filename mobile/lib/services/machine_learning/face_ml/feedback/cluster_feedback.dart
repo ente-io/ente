@@ -247,13 +247,6 @@ class ClusterFeedbackService {
           source: "$clusterID",
         ),
       );
-      // Bus.instance.fire(
-      //   LocalPhotosUpdatedEvent(
-      //     files,
-      //     type: EventType.peopleClusterChanged,
-      //     source: "$clusterID",
-      //   ),
-      // );
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);

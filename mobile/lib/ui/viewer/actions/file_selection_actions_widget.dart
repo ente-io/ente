@@ -695,7 +695,6 @@ class _FileSelectionActionsWidgetState
           widget.person!,
         );
       }
-      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {
@@ -738,7 +737,6 @@ class _FileSelectionActionsWidgetState
           widget.clusterID!,
         );
       }
-      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {
