@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import "package:dio/dio.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -181,8 +180,7 @@ class RemoteSyncService {
           e is WiFiUnavailableError ||
           e is StorageLimitExceededError ||
           e is SyncStopRequestedError ||
-          e is NoMediaLocationAccessError ||
-          e is DioError) {
+          e is NoMediaLocationAccessError) {
         _logger.warning("Error executing remote sync", e, s);
         rethrow;
       } else {

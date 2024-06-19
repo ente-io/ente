@@ -205,7 +205,7 @@ class UserService {
 
   Future<Sessions> getActiveSessions() async {
     try {
-      final response = await _enteDio.get("/users/sessionsx");
+      final response = await _enteDio.get("/users/sessions");
       return Sessions.fromMap(response.data);
     } on DioError catch (e) {
       _logger.info(e);
