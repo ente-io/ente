@@ -188,6 +188,7 @@ class ClusterFeedbackService {
           .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
 
       Bus.instance.fire(PeopleChangedEvent());
+      _logger.info('removeFilesFromPerson done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromPerson", e, s);
@@ -247,6 +248,7 @@ class ClusterFeedbackService {
           source: "$clusterID",
         ),
       );
+      _logger.info('removeFilesFromCluster done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);
