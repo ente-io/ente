@@ -14,10 +14,10 @@ export default function Slideshow() {
 
     const router = useRouter();
 
-    /** Go back to pairing page */
-    const pair = () => router.push("/");
-
     useEffect(() => {
+        /** Go back to pairing page */
+        const pair = () => router.push("/");
+
         let stop = false;
 
         const loop = async () => {
@@ -46,7 +46,7 @@ export default function Slideshow() {
         return () => {
             stop = true;
         };
-    }, []);
+    }, [router]);
 
     if (isEmpty) return <NoItems />;
     if (!imageURL) return <PairingComplete />;
