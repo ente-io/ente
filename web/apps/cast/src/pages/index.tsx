@@ -33,32 +33,32 @@ export default function Index() {
     useEffect(() => {
         if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
 
-        const interval = setInterval(pollTick, 2000);
-        return () => clearInterval(interval);
-    }, [publicKeyB64, privateKeyB64, pairingCode]);
+        const pollTick = async () => {
+            const registration = { publicKeyB64, privateKeyB64, pairingCode };
+            try {
+                // TODO:
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const data = await getCastData(registration);
+                if (!data) {
+                    // No one has connected yet.
+                    return;
+                }
 
-    const pollTick = async () => {
-        if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
-
-        const registration = { publicKeyB64, privateKeyB64, pairingCode };
-        try {
-            const data = await getCastData(registration);
-            if (!data) {
-                // No one has connected yet.
-                return;
+                storeCastData(data);
+                await router.push("/slideshow");
+            } catch (e) {
+                // The pairing code becomes invalid after an hour, which will cause
+                // `getCastData` to fail. There might be other reasons this might
+                // fail too, but in all such cases, it is a reasonable idea to start
+                // again from the beginning.
+                log.warn("Failed to get cast data", e);
+                setPairingCode(undefined);
             }
+        };
 
-            storeCastData(data);
-            await router.push("/slideshow");
-        } catch (e) {
-            // The pairing code becomes invalid after an hour, which will cause
-            // `getCastData` to fail. There might be other reasons this might
-            // fail too, but in all such cases, it is a reasonable idea to start
-            // again from the beginning.
-            log.warn("Failed to get cast data", e);
-            setPairingCode(undefined);
-        }
-    };
+        const interval = setInterval(() => pollTick, 2000);
+        return () => clearInterval(interval);
+    }, [publicKeyB64, privateKeyB64, pairingCode, router]);
 
     return (
         <Container>
