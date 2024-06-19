@@ -165,6 +165,9 @@ const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
         // Ignore clicks on buttons when counting up towards 7.
         if (event.target instanceof HTMLButtonElement) return;
 
+        // Ignore clicks when the dialog is already open.
+        if (showDevSettings) return;
+
         // Otherwise increase the tap count,
         setTapCount(tapCount + 1);
         // And show the dev settings dialog when it reaches 7.
@@ -174,19 +177,12 @@ const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
     };
 
-    const handleDevSettingsClose = () => {
-        // Reset the count again to ignore any taps when we were open.
-        setTapCount(0);
-        // Hide the dialog.
-        setShowDevSettings(false);
-    };
-
     return (
         <Container_ onClick={handleClick}>
             <>
                 <DevSettings
                     open={showDevSettings}
-                    onClose={handleDevSettingsClose}
+                    onClose={() => setShowDevSettings(false)}
                 />
                 {children}
             </>

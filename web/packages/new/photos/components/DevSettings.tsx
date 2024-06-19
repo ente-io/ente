@@ -27,10 +27,7 @@ interface DevSettingsProps {
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
-    const handleDialogClose: ModalProps["onClose"] = (
-        event: Event,
-        reason: string,
-    ) => {
+    const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.
         if (reason != "backdropClick") onClose();
     };
