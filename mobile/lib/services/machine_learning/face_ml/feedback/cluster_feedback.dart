@@ -192,6 +192,7 @@ class ClusterFeedbackService {
     List<EnteFile> files,
     int clusterID,
   ) async {
+    _logger.info('removeFilesFromCluster called');
     try {
       // Get the relevant faces to be removed
       final faceIDs = await FaceMLDataDB.instance
@@ -215,6 +216,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.20,
       );
       if (clusterResult.isEmpty) {
+        _logger.severe('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
