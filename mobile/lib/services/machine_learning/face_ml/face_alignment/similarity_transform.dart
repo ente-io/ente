@@ -17,23 +17,23 @@ class SimilarityTransform {
   double _size = 1; // 1 / scale
   double _rotation = 0; // atan2(simRotation[1][0], simRotation[0][0]);
 
-  final arcface4Landmarks = [
+  final mobilefacenetIdeal4Landmarks = [
     <double>[38.2946, 51.6963],
     <double>[73.5318, 51.5014],
     <double>[56.0252, 71.7366],
     <double>[56.1396, 92.2848],
   ];
-  final arcface5Landmarks = [
+  final mobilefacenetIdeal5Landmarks = [
     <double>[38.2946, 51.6963],
     <double>[73.5318, 51.5014],
     <double>[56.0252, 71.7366],
     <double>[41.5493, 92.3655],
     <double>[70.7299, 92.2041],
   ];
-  get arcfaceNormalized4 => arcface4Landmarks
+  get mobilefacenetIdealNormalized4 => mobilefacenetIdeal4Landmarks
       .map((list) => list.map((value) => value / 112.0).toList())
       .toList();
-  get arcfaceNormalized5 => arcface5Landmarks
+  get mobilefacenetIdealNormalized5 => mobilefacenetIdeal5Landmarks
       .map((list) => list.map((value) => value / 112.0).toList())
       .toList();
 
@@ -69,7 +69,7 @@ class SimilarityTransform {
   (AlignmentResult, bool) estimate(List<List<double>> src) {
     _cleanParams();
     final (params, center, size, rotation) =
-        _umeyama(src, arcfaceNormalized5, true);
+        _umeyama(src, mobilefacenetIdealNormalized5, true);
     _params = params;
     _center = center;
     _size = size;

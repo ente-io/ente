@@ -39,13 +39,13 @@ class FaceAlignmentMethod extends VersionedMethod {
   /// Creates a [FaceAlignmentMethod] instance with 'Empty method' as the method, and a specific `version` (default `1`)
   const FaceAlignmentMethod.empty() : super.empty();
 
-  /// Creates a [FaceAlignmentMethod] instance with 'ArcFace' as the method, and a specific `version` (default `1`)
-  FaceAlignmentMethod.arcFace({int version = 1}) : super('ArcFace', version);
+  /// Creates a [FaceAlignmentMethod] instance with 'affineTransform' as the method, and a specific `version` (default `1`)
+  FaceAlignmentMethod.affineTransform({int version = 1}) : super('affineTransform', version);
 
   static FaceAlignmentMethod fromMlVersion(int version) {
     switch (version) {
       case 1:
-        return FaceAlignmentMethod.arcFace(version: version);
+        return FaceAlignmentMethod.affineTransform(version: version);
       default:
         return const FaceAlignmentMethod.empty();
     }
