@@ -3,10 +3,7 @@
     "compilerOptions": {
         /* Set the base directory from which to resolve bare module names */
         "baseUrl": "./src",
-
-        /* TODO(MR): Enable this */
-        "noUncheckedIndexedAccess": false,
-        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
         "exactOptionalPropertyTypes": false
     },
     "include": [
