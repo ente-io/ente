@@ -16,7 +16,7 @@ export default function Slideshow() {
 
     useEffect(() => {
         /** Go back to pairing page */
-        const pair = () => router.push("/");
+        const pair = () => void router.push("/");
 
         let stop = false;
 
@@ -29,7 +29,7 @@ export default function Slideshow() {
                         // No items in this callection can be shown.
                         setIsEmpty(true);
                         // Go back to pairing screen after 5 seconds.
-                        setTimeout(() => pair, 5000);
+                        setTimeout(pair, 5000);
                         return;
                     }
 
@@ -37,7 +37,7 @@ export default function Slideshow() {
                 }
             } catch (e) {
                 log.error("Failed to prepare generator", e);
-                void pair();
+                pair();
             }
         };
 

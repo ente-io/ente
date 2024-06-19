@@ -56,7 +56,7 @@ export default function Index() {
             }
         };
 
-        const interval = setInterval(() => pollTick, 2000);
+        const interval = setInterval(pollTick, 2000);
         return () => clearInterval(interval);
     }, [publicKeyB64, privateKeyB64, pairingCode, router]);
 
