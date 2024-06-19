@@ -31,7 +31,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
-import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
@@ -603,7 +603,7 @@ class FaceMlService {
         maxFaces: totalFaces,
       );
       final Set<int> missingFileIDs = {};
-      final allFaceInfoForClustering = <FaceInfoForClustering>[];
+      final allFaceInfoForClustering = <FaceDbInfoForClustering>[];
       for (final faceInfo in result) {
         if (!fileIDToCreationTime.containsKey(faceInfo.fileID)) {
           missingFileIDs.add(faceInfo.fileID);

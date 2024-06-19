@@ -11,7 +11,7 @@ import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/utils/ml_util.dart";
@@ -550,7 +550,7 @@ class FaceMLDataDB {
     });
   }
 
-  Future<List<FaceInfoForClustering>> getFaceInfoForClustering({
+  Future<List<FaceDbInfoForClustering>> getFaceInfoForClustering({
     double minScore = kMinimumQualityFaceScore,
     int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
@@ -564,7 +564,7 @@ class FaceMLDataDB {
       );
       final db = await instance.asyncDB;
 
-      final List<FaceInfoForClustering> result = <FaceInfoForClustering>[];
+      final List<FaceDbInfoForClustering> result = <FaceDbInfoForClustering>[];
       while (true) {
         // Query a batch of rows
         final List<Map<String, dynamic>> maps = await db.getAll(
@@ -584,7 +584,7 @@ class FaceMLDataDB {
         final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
         for (final map in maps) {
           final faceID = map[faceIDColumn] as String;
-          final faceInfo = FaceInfoForClustering(
+          final faceInfo = FaceDbInfoForClustering(
             faceID: faceID,
             clusterId: faceIdToClusterId[faceID],
             embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
