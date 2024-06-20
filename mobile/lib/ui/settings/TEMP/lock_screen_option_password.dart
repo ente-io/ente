@@ -21,6 +21,7 @@ class LockScreenOptionPassword extends StatefulWidget {
 }
 
 class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
+  /// _passwordController is disposed by the [TextInputWidget]
   final _passwordController = TextEditingController(text: null);
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);

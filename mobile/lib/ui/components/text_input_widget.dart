@@ -46,7 +46,7 @@ class TextInputWidget extends StatefulWidget {
   final ValueNotifier? isEmptyNotifier;
   final List<TextInputFormatter>? textInputFormatter;
   final TextInputType? textInputType;
-  final bool? enableFillColor;
+  final bool enableFillColor;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,

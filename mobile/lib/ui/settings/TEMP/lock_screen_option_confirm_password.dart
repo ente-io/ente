@@ -21,6 +21,7 @@ class LockScreenOptionConfirmPassword extends StatefulWidget {
 
 class _LockScreenOptionConfirmPasswordState
     extends State<LockScreenOptionConfirmPassword> {
+  /// _confirmPasswordController is disposed by the [TextInputWidget]
   final _confirmPasswordController = TextEditingController(text: null);
   final Configuration _configuration = Configuration.instance;
   final _focusNode = FocusNode();

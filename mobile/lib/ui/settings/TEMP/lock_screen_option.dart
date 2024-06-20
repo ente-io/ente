@@ -83,13 +83,8 @@ class _LockScreenOptionState extends State<LockScreenOption> {
   }
 
   Future<void> _onToggleSwitch() async {
-    if (appLock == false && !(isPasswordEnabled || isPinEnabled)) {
-      AppLock.of(context)!.setEnabled(!appLock);
-      await Configuration.instance.setShouldShowLockScreen(!appLock);
-    } else {
-      AppLock.of(context)!.setEnabled(!appLock);
-      await Configuration.instance.setShouldShowLockScreen(!appLock);
-    }
+    AppLock.of(context)!.setEnabled(!appLock);
+    await Configuration.instance.setShouldShowLockScreen(!appLock);
     await _configuration.removePinAndPassword();
     setState(() {
       isPasswordEnabled = _configuration.isPasswordSet();
