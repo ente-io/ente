@@ -1,3 +1,4 @@
+import { ut } from "@/next/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
     Dialog,
@@ -38,7 +39,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
-            <DialogTitle>{"What's new"}</DialogTitle>
+            <DialogTitle>{ut("What's new")}</DialogTitle>
             <DialogContent>
                 <DialogContentText>
                     <ChangelogContent />
@@ -52,7 +53,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
                     disableRipple
                     endIcon={<ArrowForward />}
                 >
-                    <ButtonContents>{"Continue"}</ButtonContents>
+                    <ButtonContents>{ut("Continue")}</ButtonContents>
                 </FocusVisibleButton>
             </DialogActions>
         </Dialog>
@@ -68,16 +69,19 @@ const ChangelogContent: React.FC = () => {
             <li>
                 <Typography>
                     <Typography color="primary">
-                        Support for Passkeys
+                        {ut("Support for Passkeys")}
                     </Typography>
-                    Passkeys can now be used as a second factor authentication
-                    mechanism.
+                    {ut(
+                        "Passkeys can now be used as a second factor authentication mechanism.",
+                    )}
                 </Typography>
             </li>
             <li>
-                <Typography color="primary">Window size</Typography>
+                <Typography color="primary">{ut("Window size")}</Typography>
                 <Typography>
-                    {"The app's window will remember its size and position."}
+                    {ut(
+                        "The app's window will remember its size and position.",
+                    )}
                 </Typography>
             </li>
         </StyledUL>
