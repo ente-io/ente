@@ -288,12 +288,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         //
         // To cover such cases, we redo the check whenever an incorrect password
         // is entered.
+        const srpAttributes: SRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES);
+        const user: User = getData(LS_KEYS.USER);
         if (srpAttributes && user?.email) {
             void didPasswordChangeElsewhere(user.email, srpAttributes).then(
                 (changed) => changed && showSessionExpiredDialog(),
             );
         }
-    }, [srpAttributes, user, showSessionExpiredDialog]);
+    }, [showSessionExpiredDialog]);
 
     if (!keyAttributes && !srpAttributes) {
         return (
