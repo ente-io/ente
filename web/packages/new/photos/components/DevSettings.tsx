@@ -2,13 +2,13 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     TextField,
     useMediaQuery,
     type ModalProps,
 } from "@mui/material";
 import { useFormik } from "formik";
+import { t } from "i18next";
 import React from "react";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
@@ -55,25 +55,22 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             <form onSubmit={form.handleSubmit}>
                 <DialogTitle>{"Developer settings"}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        <TextField
-                            fullWidth
-                            id="apiOrigin"
-                            name="apiOrigin"
-                            label="Server endpoint"
-                            placeholder="http://localhost:8080"
-                            value={form.values.apiOrigin}
-                            onChange={form.handleChange}
-                            onBlur={form.handleBlur}
-                            error={
-                                form.touched.apiOrigin &&
-                                !!form.errors.apiOrigin
-                            }
-                            helperText={
-                                form.touched.apiOrigin && form.errors.apiOrigin
-                            }
-                        />
-                    </DialogContentText>
+                    <TextField
+                        fullWidth
+                        id="apiOrigin"
+                        name="apiOrigin"
+                        label="Server endpoint"
+                        placeholder="http://localhost:8080"
+                        value={form.values.apiOrigin}
+                        onChange={form.handleChange}
+                        onBlur={form.handleBlur}
+                        error={
+                            form.touched.apiOrigin && !!form.errors.apiOrigin
+                        }
+                        helperText={
+                            form.touched.apiOrigin && form.errors.apiOrigin
+                        }
+                    />
                 </DialogContent>
                 <DialogActions>
                     <FocusVisibleButton
@@ -91,7 +88,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         fullWidth
                         disableRipple
                     >
-                        {"Cancel"}
+                        {t("CANCEL")}
                     </FocusVisibleButton>
                 </DialogActions>
             </form>
