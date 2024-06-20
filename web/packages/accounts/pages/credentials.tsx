@@ -110,6 +110,19 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES,
             );
+            const srpAttributes: SRPAttributes = getData(
+                LS_KEYS.SRP_ATTRIBUTES,
+            );
+
+            if (srpAttributes) {
+                const email = user.email;
+                if (email) {
+                    void didPasswordChangeElsewhere(email, srpAttributes).then(
+                        (changed) => changed && showSessionExpiredDialog(),
+                    );
+                }
+            }
+
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -139,17 +152,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 return;
             }
 
-            const srpAttributes: SRPAttributes = getData(
-                LS_KEYS.SRP_ATTRIBUTES,
-            );
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
-                const email = user.email;
-                if (email) {
-                    void didPasswordChangeElsewhere(email, srpAttributes).then(
-                        (changed) => changed && showSessionExpiredDialog(),
-                    );
-                }
             } else {
                 router.push(PAGES.ROOT);
             }
