@@ -1,6 +1,5 @@
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
-    Button,
     Dialog,
     DialogActions,
     DialogContent,
@@ -12,6 +11,7 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { didShowWhatsNew } from "../services/changelog";
+import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
 
 interface WhatsNewProps {
@@ -45,7 +45,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
-                <StyledButton
+                <FocusVisibleButton
                     onClick={onClose}
                     color="accent"
                     fullWidth
@@ -53,7 +53,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
                     endIcon={<ArrowForward />}
                 >
                     <ButtonContents>{"Continue"}</ButtonContents>
-                </StyledButton>
+                </FocusVisibleButton>
             </DialogActions>
         </Dialog>
     );
@@ -89,14 +89,6 @@ const StyledUL = styled("ul")`
 
     li {
         margin-block: 2rem;
-    }
-`;
-
-const StyledButton = styled(Button)`
-    /* Show an outline when the button gains keyboard focus, e.g. when the user
-       tabs to it. */
-    &.Mui-focusVisible {
-        outline: 1px solid #aaa;
     }
 `;
 

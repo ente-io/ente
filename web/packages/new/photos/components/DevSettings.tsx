@@ -1,17 +1,16 @@
 import {
-    Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
     TextField,
-    styled,
     useMediaQuery,
     type ModalProps,
 } from "@mui/material";
 import { useFormik } from "formik";
 import React from "react";
+import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
 
 interface DevSettingsProps {
@@ -77,7 +76,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <StyledButton
+                    <FocusVisibleButton
                         type="submit"
                         color="accent"
                         fullWidth
@@ -85,25 +84,17 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         disableRipple
                     >
                         {"Save"}
-                    </StyledButton>
-                    <StyledButton
+                    </FocusVisibleButton>
+                    <FocusVisibleButton
                         onClick={onClose}
                         color="secondary"
                         fullWidth
                         disableRipple
                     >
                         {"Cancel"}
-                    </StyledButton>
+                    </FocusVisibleButton>
                 </DialogActions>
             </form>
         </Dialog>
     );
 };
-
-const StyledButton = styled(Button)`
-    /* Show an outline when the button gains keyboard focus, e.g. when the user
-       tabs to it. */
-    &.Mui-focusVisible {
-        outline: 1px solid #aaa;
-    }
-`;
