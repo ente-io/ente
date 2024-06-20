@@ -1,4 +1,3 @@
-import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
     Button,
     Dialog,
@@ -6,8 +5,8 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    styled,
     TextField,
+    styled,
     useMediaQuery,
     type ModalProps,
 } from "@mui/material";
@@ -84,18 +83,16 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         fullWidth
                         disabled={form.isSubmitting}
                         disableRipple
-                        endIcon={<ArrowForward />}
                     >
-                        <ButtonContents>{"Save"}</ButtonContents>
+                        {"Save"}
                     </StyledButton>
                     <StyledButton
                         onClick={onClose}
-                        color="accent"
+                        color="secondary"
                         fullWidth
                         disableRipple
-                        endIcon={<ArrowForward />}
                     >
-                        <ButtonContents>{"Continue"}</ButtonContents>
+                        {"Cancel"}
                     </StyledButton>
                 </DialogActions>
             </form>
@@ -109,11 +106,4 @@ const StyledButton = styled(Button)`
     &.Mui-focusVisible {
         outline: 1px solid #aaa;
     }
-`;
-
-const ButtonContents = styled("div")`
-    /* Make the button text fill the entire space so the endIcon shows at the
-       trailing edge of the button. */
-    width: 100%;
-    text-align: left;
 `;
