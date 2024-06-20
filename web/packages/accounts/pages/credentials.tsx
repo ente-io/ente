@@ -146,8 +146,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 setSrpAttributes(srpAttributes);
                 const email = user.email;
                 if (email) {
-                    void ifPasswordChangedElsewhere(email, srpAttributes).then(
-                        showSessionExpiredDialog,
+                    void didPasswordChangeElsewhere(email, srpAttributes).then(
+                        (changed) => changed && showSessionExpiredDialog(),
                     );
                 }
             } else {
@@ -378,7 +378,7 @@ export default Page;
  *
  * @param localSRPAttributes The local SRP attributes.
  */
-const ifPasswordChangedElsewhere = async (
+const didPasswordChangeElsewhere = async (
     email: string,
     localSRPAttributes: SRPAttributes,
 ) => {
