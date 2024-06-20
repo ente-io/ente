@@ -7,9 +7,11 @@ import {
     DialogContentText,
     DialogTitle,
     styled,
+    TextField,
     useMediaQuery,
     type ModalProps,
 } from "@mui/material";
+import { useFormik } from "formik";
 import React from "react";
 import { SlideTransition } from "./SlideTransition";
 
@@ -32,6 +34,16 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         if (reason != "backdropClick") onClose();
     };
 
+    const formik = useFormik({
+        initialValues: { apiOrigin: "" },
+        onSubmit: (values, { setSubmitting }) => {
+            setTimeout(() => {
+                alert(JSON.stringify(values));
+                setSubmitting(false);
+            }, 400);
+        },
+    });
+
     return (
         <Dialog
             {...{ open, fullScreen }}
@@ -39,21 +51,47 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
-            <DialogTitle>{"Developer settings"}</DialogTitle>
-            <DialogContent>
-                <DialogContentText>WIP</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <StyledButton
-                    onClick={onClose}
-                    color="accent"
-                    fullWidth
-                    disableRipple
-                    endIcon={<ArrowForward />}
-                >
-                    <ButtonContents>{"Continue"}</ButtonContents>
-                </StyledButton>
-            </DialogActions>
+            <form onSubmit={formik.handleSubmit}>
+                <DialogTitle>{"Developer settings"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        <TextField
+                            fullWidth
+                            id="apiOrigin"
+                            name="apiOrigin"
+                            label="Server endpoint"
+                            value={formik.values.apiOrigin}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            error={
+                                formik.touched.apiOrigin &&
+                                !!formik.errors.apiOrigin
+                            }
+                        />
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <StyledButton
+                        type="submit"
+                        color="accent"
+                        fullWidth
+                        disabled={formik.isSubmitting}
+                        disableRipple
+                        endIcon={<ArrowForward />}
+                    >
+                        <ButtonContents>{"Save"}</ButtonContents>
+                    </StyledButton>
+                    <StyledButton
+                        onClick={onClose}
+                        color="accent"
+                        fullWidth
+                        disableRipple
+                        endIcon={<ArrowForward />}
+                    >
+                        <ButtonContents>{"Continue"}</ButtonContents>
+                    </StyledButton>
+                </DialogActions>
+            </form>
         </Dialog>
     );
 };
