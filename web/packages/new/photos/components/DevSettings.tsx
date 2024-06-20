@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import {
     Dialog,
     DialogActions,
@@ -34,14 +35,15 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
 
     const form = useFormik({
         initialValues: { apiOrigin: "" },
-        onSubmit: (values, { setSubmitting, setErrors }) => {
-            setTimeout(() => {
-                alert(JSON.stringify(values));
-                if (values.apiOrigin.startsWith("test")) {
-                    setErrors({ apiOrigin: "Testing indeed" });
-                }
+        onSubmit: async (values, { setSubmitting, setErrors }) => {
+            const res = await updateAPIOrigin(values.apiOrigin);
+            if (typeof res == "string") {
+                setErrors({ apiOrigin: res });
+            } else {
                 setSubmitting(false);
-            }, 400);
+                // Add a bit of delay to acknowledge the update better.
+                setTimeout(onClose, 200);
+            }
         },
     });
 
@@ -94,4 +96,40 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             </form>
         </Dialog>
     );
+};
+
+/**
+ * Save {@link origin} to local storage after verifying it with a ping.
+ *
+ * The given {@link origin} will be verifying by making an API call to the
+ * `/ping` endpoint. If that succeeds, then it will be saved to local storage,
+ * and all subsequent API calls will use it as the {@link apiOrigin}.
+ *
+ * See: [Note: Configuring custom server].
+ *
+ * @param origin The new API origin to use. Pass an empty string to clear the
+ * previously saved API origin (if any).
+ *
+ * @returns true on success, and the user visible error message string
+ * otherwise.
+ */
+const updateAPIOrigin = async (origin: string): Promise<true | string> => {
+    if (!origin) {
+        localStorage.removeItem("apiOrigin");
+        return true;
+    }
+
+    const url = `${origin}/ping`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok)
+            throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        localStorage.setItem("apiOrigin", origin);
+        return true;
+    } catch (e) {
+        log.error("Failed to ping the provided origin", e);
+        // The person using this is likely a developer, just give them the
+        // original error itself, they might find it helpful.
+        return e instanceof Error ? e.message : t("ERROR");
+    }
 };
