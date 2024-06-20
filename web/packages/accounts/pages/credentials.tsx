@@ -8,6 +8,7 @@ import {
     LoginFlowFormFooter,
     PasswordHeader,
     VerifyingPasskey,
+    sessionExpiredDialogAttributes,
 } from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
@@ -60,7 +61,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { appName, logout, setDialogBoxAttributesV2 } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -70,6 +71,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     >();
 
     const router = useRouter();
+
+    const showSessionExpiredDialog = () =>
+        setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
 
     useEffect(() => {
         const main = async () => {
@@ -140,6 +144,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             );
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
+                const email = user.email;
+                if (email) {
+                    void ifPasswordChangedElsewhere(email, srpAttributes).then(
+                        showSessionExpiredDialog,
+                    );
+                }
             } else {
                 router.push(PAGES.ROOT);
             }
@@ -336,3 +346,55 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 };
 
 export default Page;
+
+/**
+ * If the user changes their password on a different device, then we need to log
+ * them out here.
+ *
+ * There is a straightforward way of doing this by always making a blocking API
+ * call before showing this page, however that would add latency to the 99% user
+ * experience (of normal unlocks) for the 1% cases (they've changed their
+ * password elsewhere).
+ *
+ * If we don't do anything though, the behaviour is confusing:
+ *
+ * 1. The data on this device is encrypted with their old password, so entering
+ *    their old password will successfully log them in. This appears as a bug to
+ *    the user.
+ *
+ * 2. However, more critically, if they try to enter their new password, it does
+ *    not get accepted (since the data on this device is encrypted with their
+ *    old password). This causes user alarm.
+ *
+ * As a way to handle primarily case 2 (but also case 1), without adding latency
+ * to the normal unlocks, we do an non-blocking API call to get the user's SRP
+ * attributes when they enter this page. SRP attributes change when the password
+ * is changed, and thus when we compare the server's response with what is
+ * present locally, we'll find that the SRP attributes have changed. In such
+ * cases, we invalidate their session on this device and ask them to login
+ * afresh.
+ *
+ * @param email The user's email.
+ *
+ * @param localSRPAttributes The local SRP attributes.
+ */
+const ifPasswordChangedElsewhere = async (
+    email: string,
+    localSRPAttributes: SRPAttributes,
+) => {
+    try {
+        const serverAttributes = await getSRPAttributes(email);
+        // (Arbitrarily) compare the salt to figure out if something changed
+        // (salt will always change on password changes).
+        if (serverAttributes?.kekSalt !== localSRPAttributes.kekSalt)
+            return true; /* password indeed did change */
+        return false;
+    } catch (e) {
+        // Ignore errors here. In rare cases, the stars may align and cause the
+        // API calls to fail in that 1 case where the user indeed changed their
+        // password, but we also don't want to start logging people out for
+        // harmless transient issues like network errors.
+        log.error("Failed to compare SRP attributes", e);
+        return false;
+    }
+};
