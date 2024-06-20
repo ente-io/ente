@@ -32,7 +32,8 @@ export interface VerifyMasterPasswordFormProps {
     /**
      * Called when the user enters an incorrect password.
      *
-     * Optional.
+     * Optional. If present, this function will be called _instead_ of
+     * performing the default behaviour (showing an "incorrect password" error).
      */
     onIncorrectPassword?: () => void;
 }
@@ -104,8 +105,8 @@ export default function VerifyMasterPasswordForm({
                         setFieldError(t("WEAK_DEVICE"));
                         break;
                     case CustomError.INCORRECT_PASSWORD:
-                        setFieldError(t("INCORRECT_PASSPHRASE"));
-                        onIncorrectPassword && onIncorrectPassword();
+                        if (onIncorrectPassword) onIncorrectPassword();
+                        else setFieldError(t("INCORRECT_PASSPHRASE"));
                         break;
                     default:
                         setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
