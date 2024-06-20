@@ -29,6 +29,12 @@ export interface VerifyMasterPasswordFormProps {
      */
     getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
+    /**
+     * Called when the user enters an incorrect password.
+     *
+     * Optional.
+     */
+    onIncorrectPassword?: () => void;
 }
 
 export default function VerifyMasterPasswordForm({
@@ -39,6 +45,7 @@ export default function VerifyMasterPasswordForm({
     buttonText,
     submitButtonProps,
     getKeyAttributes,
+    onIncorrectPassword,
 }: VerifyMasterPasswordFormProps) {
     const verifyPassphrase: SingleInputFormProps["callback"] = async (
         passphrase,
@@ -98,6 +105,7 @@ export default function VerifyMasterPasswordForm({
                         break;
                     case CustomError.INCORRECT_PASSWORD:
                         setFieldError(t("INCORRECT_PASSPHRASE"));
+                        onIncorrectPassword && onIncorrectPassword();
                         break;
                     default:
                         setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);

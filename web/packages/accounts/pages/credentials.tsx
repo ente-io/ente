@@ -44,7 +44,7 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
 import {
@@ -72,8 +72,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const router = useRouter();
 
-    const showSessionExpiredDialog = () =>
-        setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+    const showSessionExpiredDialog = useCallback(
+        () => setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout)),
+        [setDialogBoxAttributesV2, logout],
+    );
 
     useEffect(() => {
         const main = async () => {
@@ -114,13 +116,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 LS_KEYS.SRP_ATTRIBUTES,
             );
 
-            if (srpAttributes) {
-                const email = user.email;
-                if (email) {
-                    void didPasswordChangeElsewhere(email, srpAttributes).then(
-                        (changed) => changed && showSessionExpiredDialog(),
-                    );
-                }
+            if (srpAttributes && user?.email) {
+                void didPasswordChangeElsewhere(user.email, srpAttributes).then(
+                    (changed) => changed && showSessionExpiredDialog(),
+                );
             }
 
             if (kekEncryptedAttributes && keyAttributes) {
@@ -280,6 +279,22 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         }
     };
 
+    const handleIncorrectPassword = useCallback(() => {
+        // We've already checked this when the page was opened. But the user
+        // might've had a tab open from earlier and switch back to it after
+        // changing their password, and then try to enter their new password
+        // there. In those cases, the page-load version of this check wouldn't
+        // get to run in the new changed condition.
+        //
+        // To cover such cases, we redo the check whenever an incorrect password
+        // is entered.
+        if (srpAttributes && user?.email) {
+            void didPasswordChangeElsewhere(user.email, srpAttributes).then(
+                (changed) => changed && showSessionExpiredDialog(),
+            );
+        }
+    }, [srpAttributes, user, showSessionExpiredDialog]);
+
     if (!keyAttributes && !srpAttributes) {
         return (
             <VerticallyCentered>
@@ -332,6 +347,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     keyAttributes={keyAttributes}
                     getKeyAttributes={getKeyAttributes}
                     srpAttributes={srpAttributes}
+                    onIncorrectPassword={handleIncorrectPassword}
                 />
 
                 <LoginFlowFormFooter>
