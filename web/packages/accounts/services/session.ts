@@ -1,60 +1,7 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { apiOrigin } from "@ente/shared/network/api";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
 
-const getSessionValidity = async () => {
-    const url = `${apiOrigin()}/users/session-validity/v2`;
-    const res = await fetch(url, {
-        headers: authenticatedRequestHeaders()
-    });
-    if (!res.ok) {
-        if (res.status == 401) return false; /* session is no longer valid */
-        else throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    }
-
-
-    export const isTokenValid = async (token: string) => {
-        try {
-            const resp = await HTTPService.get(
-                `${ENDPOINT}/users/session-validity/v2`,
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-            try {
-                if (resp.data[HAS_SET_KEYS] === undefined) {
-                    throw Error("resp.data.hasSetKey undefined");
-                }
-                if (!resp.data["hasSetKeys"]) {
-                    try {
-                        await putAttributes(
-                            token,
-                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
-                        );
-                    } catch (e) {
-                        log.error("put attribute failed", e);
-                    }
-                }
-            } catch (e) {
-                log.error("hasSetKeys not set in session validity response", e);
-            }
-            return true;
-        } catch (e) {
-            log.error("session-validity api call failed", e);
-            if (
-                e instanceof ApiError &&
-                e.httpStatusCode === HttpStatusCode.Unauthorized
-            ) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    };
-
-}
 /**
  * [Note: Handle password changes]
  *
@@ -95,24 +42,39 @@ const getSessionValidity = async () => {
  * failures, it is upto the caller to decide how to deal with failures in
  * determining session validity).
  */
-const checkSessionValidity = async (): boolean | KeyAttributes => {
-    const user = getData(LS_KEYS.USER);
-    if (!user?.email) return "invalid";
+export const checkSessionValidity = async (): Promise<
+    boolean | KeyAttributes
+> => {
+    // const user = getData(LS_KEYS.USER);
+    // if (!user?.email) return "invalid";
 
-    try {
-        const serverAttributes = await getSRPAttributes(email);
-        // (Arbitrarily) compare the salt to figure out if something changed
-        // (salt will always change on password changes).
-        if (serverAttributes?.kekSalt !== localSRPAttributes.kekSalt)
-            return true; /* password indeed did change */
-        return false;
-    } catch (e) {
-        // Ignore errors here. In rare cases, the stars may align and cause the
-        // API calls to fail in that 1 case where the user indeed changed their
-        // password, but we also don't want to start logging people out for
-        // harmless transient issues like network errors.
-        log.error("Failed to compare SRP attributes", e);
-        return false;
-    }
+    // try {
+    //     const serverAttributes = await getSRPAttributes(email);
+    //     // (Arbitrarily) compare the salt to figure out if something changed
+    //     // (salt will always change on password changes).
+    //     if (serverAttributes?.kekSalt !== localSRPAttributes.kekSalt)
+    //         return true; /* password indeed did change */
+    //     return false;
+    // } catch (e) {
+    //     // Ignore errors here. In rare cases, the stars may align and cause the
+    //     // API calls to fail in that 1 case where the user indeed changed their
+    //     // password, but we also don't want to start logging people out for
+    //     // harmless transient issues like network errors.
+    //     log.error("Failed to compare SRP attributes", e);
+    //     return false;
+    // }
+    await getSessionValidity();
+    return true;
 };
 
+const getSessionValidity = async () => {
+    const url = `${apiOrigin()}/users/session-validity/v2`;
+    const res = await fetch(url, {
+        headers: authenticatedRequestHeaders(),
+    });
+    if (!res.ok) {
+        if (res.status == 401) return false; /* session is no longer valid */
+        else throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    }
+    return true;
+};
