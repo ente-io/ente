@@ -46,9 +46,7 @@ The root `package.json` also has a convenience dev dependency:
 -   [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
     parallel tasks when we invoke various yarn scripts.
 
-## Utils
-
-### Crypto
+## Crypto
 
 We use [libsodium](https://libsodium.gitbook.io/doc/) for encryption, key
 generation etc. Specifically, we use its WebAssembly and JS wrappers made using
@@ -69,6 +67,27 @@ builds (See this [issue](https://github.com/jedisct1/libsodium.js/issues/326)).
 
 Updating it is not a big problem, it is just a pending chore - we want to test a
 bit more exhaustively when changing the crypto layer.
+
+## Meta frameworks
+
+### Next.js
+
+[Next.js](https://nextjs.org) ("next") provides the meta framework for both the
+Photos and the Auth app, and also for some of the sidecar apps like accounts and
+cast.
+
+We use a limited subset of Next. The main thing we get out of it is a reasonable
+set of defaults for bundling our app into a static export which we can then
+deploy to our webserver. In addition, the Next.js page router is convenient.
+Apart from this, while we use a few tidbits from Next.js here and there, overall
+our apps are regular React SPAs, and are not particularly tied to Next.
+
+### Vite
+
+For some of our newer code, we have started to use [Vite](https://vitejs.dev).
+It is more lower level than Next, but the bells and whistles it doesn't have are
+the bells and whistles (and the accompanying complexity) that we don't need in
+some cases.
 
 ## UI
 
@@ -133,28 +152,13 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-## Meta frameworks
+### Others
 
-### Next.js
+-   [formik](https://github.com/jaredpalmer/formik) provides an easier to use
+    abstraction for dealing with form state, validation and submission states
+    when using React.
 
-[Next.js](https://nextjs.org) ("next") provides the meta framework for both the
-Photos and the Auth app, and also for some of the sidecar apps like accounts and
-cast.
-
-We use a limited subset of Next. The main thing we get out of it is a reasonable
-set of defaults for bundling our app into a static export which we can then
-deploy to our webserver. In addition, the Next.js page router is convenient.
-Apart from this, while we use a few tidbits from Next.js here and there, overall
-our apps are regular React SPAs, and are not particularly tied to Next.
-
-### Vite
-
-For some of our newer code, we have started to use [Vite](https://vitejs.dev).
-It is more lower level than Next, but the bells and whistles it doesn't have are
-the bells and whistles (and the accompanying complexity) that we don't need in
-some cases.
-
-## General
+## Infrastructure
 
 -   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
     layer on top of Web Workers to make them more easier to use.
@@ -182,6 +186,8 @@ some cases.
 
 ## Photos app specific
 
+### General
+
 -   [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a
     React hook to create a drag-and-drop input zone.
 
@@ -189,7 +195,7 @@ some cases.
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
 
-## Face search
+### Face search
 
 -   [transformation-matrix](https://github.com/chrvadala/transformation-matrix)
     is used for performing 2D affine transformations using transformation
