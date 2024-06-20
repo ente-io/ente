@@ -34,11 +34,14 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         if (reason != "backdropClick") onClose();
     };
 
-    const formik = useFormik({
+    const form = useFormik({
         initialValues: { apiOrigin: "" },
-        onSubmit: (values, { setSubmitting }) => {
+        onSubmit: (values, { setSubmitting, setErrors }) => {
             setTimeout(() => {
                 alert(JSON.stringify(values));
+                if (values.apiOrigin.startsWith("test")) {
+                    setErrors({ apiOrigin: "Testing indeed" });
+                }
                 setSubmitting(false);
             }, 400);
         },
@@ -51,7 +54,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
-            <form onSubmit={formik.handleSubmit}>
+            <form onSubmit={form.handleSubmit}>
                 <DialogTitle>{"Developer settings"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -60,12 +63,16 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                             id="apiOrigin"
                             name="apiOrigin"
                             label="Server endpoint"
-                            value={formik.values.apiOrigin}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
+                            placeholder="http://localhost:8080"
+                            value={form.values.apiOrigin}
+                            onChange={form.handleChange}
+                            onBlur={form.handleBlur}
                             error={
-                                formik.touched.apiOrigin &&
-                                !!formik.errors.apiOrigin
+                                form.touched.apiOrigin &&
+                                !!form.errors.apiOrigin
+                            }
+                            helperText={
+                                form.touched.apiOrigin && form.errors.apiOrigin
                             }
                         />
                     </DialogContentText>
@@ -75,7 +82,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         type="submit"
                         color="accent"
                         fullWidth
-                        disabled={formik.isSubmitting}
+                        disabled={form.isSubmitting}
                         disableRipple
                         endIcon={<ArrowForward />}
                     >
