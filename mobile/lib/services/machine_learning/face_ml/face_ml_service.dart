@@ -34,7 +34,6 @@ import 'package:photos/services/machine_learning/face_ml/face_clustering/face_cl
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart';
@@ -1205,17 +1204,8 @@ class FaceMlService {
       }
 
       return embeddings;
-    } on MobileFaceNetInterpreterInitializationException {
-      throw CouldNotInitializeFaceEmbeddor();
     } on MobileFaceNetInterpreterRunException {
       throw CouldNotRunFaceEmbeddor();
-    } on MobileFaceNetEmptyInput {
-      throw InputProblemFaceEmbeddor("Input is empty");
-    } on MobileFaceNetWrongInputSize {
-      throw InputProblemFaceEmbeddor("Input size is wrong");
-    } on MobileFaceNetWrongInputRange {
-      throw InputProblemFaceEmbeddor("Input range is wrong");
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       dev.log('[SEVERE] Face embedding (batch) failed: $e');
       throw GeneralFaceMlException('Face embedding (batch) failed: $e');

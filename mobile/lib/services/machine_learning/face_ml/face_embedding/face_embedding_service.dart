@@ -7,6 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/services/remote_assets_service.dart";
 
+class MobileFaceNetInterpreterRunException implements Exception {}
+
 /// This class is responsible for running the face embedding model (MobileFaceNet) on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingService.instance].
 class FaceEmbeddingService {
   static const kModelBucketEndpoint = "https://models.ente.io/";
@@ -127,7 +129,7 @@ class FaceEmbeddingService {
       return embeddings;
     } catch (e) {
       _logger.info('MobileFaceNet Error while running inference: $e');
-      rethrow;
+      throw MobileFaceNetInterpreterRunException();
     }
   }
 }
