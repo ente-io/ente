@@ -76,12 +76,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const router = useRouter();
 
-    const showSessionExpiredDialog = useCallback(
-        () => setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout)),
-        [setDialogBoxAttributesV2, logout],
-    );
-
     const validateSession = useCallback(async () => {
+        const showSessionExpiredDialog = () =>
+            setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+
         try {
             const session = await checkSessionValidity();
             switch (session.status) {
@@ -112,7 +110,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [showSessionExpiredDialog, router]);
+    }, [setDialogBoxAttributesV2, logout]);
 
     useEffect(() => {
         const main = async () => {
