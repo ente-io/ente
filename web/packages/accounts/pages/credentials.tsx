@@ -78,6 +78,32 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         [setDialogBoxAttributesV2, logout],
     );
 
+    const validateSession = useCallback(async () => {
+        try {
+            const session = await checkSessionValidity();
+            switch (session.status) {
+                case "invalid":
+                    showSessionExpiredDialog();
+                    break;
+                case "valid":
+                    if (session.updatedKeyAttributes) {
+                        setData(
+                            LS_KEYS.KEY_ATTRIBUTES,
+                            session.updatedKeyAttributes,
+                        );
+                        // This should be a rare occurence, instead of building
+                        // the scaffolding to update all the in-memory state,
+                        // just reload everything.
+                        router.reload();
+                    }
+            }
+        } catch (e) {
+            // Ignore errors since we shouldn't be logging the user out for
+            // potentially transient issues.
+            log.warn("Ignoring error when determining session validity", e);
+        }
+    }, [showSessionExpiredDialog, router]);
+
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
@@ -118,33 +144,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             );
 
             if (token) {
-                void checkSessionValidity()
-                    .then((session) => {
-                        switch (session.status) {
-                            case "invalid":
-                                showSessionExpiredDialog();
-                                break;
-                            case "valid":
-                                if (session.updatedKeyAttributes) {
-                                    setData(
-                                        LS_KEYS.KEY_ATTRIBUTES,
-                                        session.updatedKeyAttributes,
-                                    );
-                                    // This should be a rare occurence, instead of
-                                    // building the scaffolding to update all the
-                                    // in-memory state, just reload everything.
-                                    router.reload();
-                                }
-                        }
-                    })
-                    .catch((e) => {
-                        // Ignore errors since we shouldn't be logging the user out for
-                        // potentially transient issues.
-                        log.warn(
-                            "Ignoring error when determining session validity",
-                            e,
-                        );
-                    });
+                // Let it validate without blocking the rest of the flow.
+                void validateSession();
             }
 
             if (kekEncryptedAttributes && keyAttributes) {
@@ -185,6 +186,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         main();
         appContext.showNavBar(true);
     }, []);
+    // TODO: ^ validateSession is a dependency, but add that only after we've
+    // wrapped items from the callback (like logout) in useCallback too.
 
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {
