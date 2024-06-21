@@ -9,7 +9,7 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 
 interface Iprops {
     open: boolean;
@@ -43,6 +43,7 @@ export default function AuthenticateUserModal({
         try {
             const session = await checkSessionValidity();
             if (session.status != "valid") {
+                onClose();
                 setDialogBoxAttributesV2(
                     dismissableSessionExpiredDialogAttributes(logout),
                 );
@@ -73,7 +74,6 @@ export default function AuthenticateUserModal({
                 } else {
                     setKeyAttributes(keyAttributes);
                 }
-                await validateSession();
             } catch (e) {
                 log.error("AuthenticateUserModal initialization failed", e);
                 onClose();
@@ -82,6 +82,12 @@ export default function AuthenticateUserModal({
         };
         main();
     }, []);
+
+    useEffect(() => {
+        // Do a non-blocking validation of the session, but show the dialog to
+        // the user.
+        if (open) void validateSession();
+    }, [open]);
 
     const useMasterPassword: VerifyMasterPasswordFormProps["callback"] =
         async () => {
