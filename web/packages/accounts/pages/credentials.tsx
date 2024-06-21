@@ -199,6 +199,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {
             try {
+                // Currently the page will get reloaded if any of the attributes
+                // have changed, so we don't need to worry about the kek having
+                // been generated using stale credentials. This await on the
+                // promise is here to only ensure we're done with the check
+                // before we let the user in.
                 if (sessionValidityCheck) await sessionValidityCheck;
 
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
