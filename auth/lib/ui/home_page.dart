@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
-  final FocusNode searchInputFocusNode = FocusNode();
+  final bool _autoFocusSearch = PreferenceService.instance.shouldAutoFocusOnSearchBar();
   bool _showSearchBox = false;
   String _searchText = "";
   List<Code>? _allCodes;
@@ -87,18 +87,7 @@ class _HomePageState extends State<HomePage> {
     _iconsChangedEvent = Bus.instance.on<IconsChangedEvent>().listen((event) {
       setState(() {});
     });
-    _showSearchBox = PreferenceService.instance.shouldAutoFocusOnSearchBar();
-    if (_showSearchBox) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          // https://github.com/flutter/flutter/issues/20706#issuecomment-646328652
-          FocusScope.of(context).unfocus();
-          Timer(const Duration(milliseconds: 1), () {
-            FocusScope.of(context).requestFocus(searchInputFocusNode);
-          });
-        },
-      );
-    }
+    _showSearchBox = _autoFocusSearch;
   }
 
   void _loadCodes() {
@@ -240,8 +229,7 @@ class _HomePageState extends State<HomePage> {
               : TextField(
                   autocorrect: false,
                   enableSuggestions: false,
-                  focusNode: searchInputFocusNode,
-                  autofocus: _searchText.isEmpty,
+                  autofocus: _autoFocusSearch,
                   controller: _textController,
                   onChanged: (val) {
                     _searchText = val;
