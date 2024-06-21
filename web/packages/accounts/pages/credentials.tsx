@@ -89,16 +89,23 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     showSessionExpiredDialog();
                     break;
                 case "valid":
-                    if (session.updatedKeyAttributes) {
-                        setData(
-                            LS_KEYS.KEY_ATTRIBUTES,
-                            session.updatedKeyAttributes,
-                        );
-                        // This should be a rare occurence, instead of building
-                        // the scaffolding to update all the in-memory state,
-                        // just reload everything.
-                        window.location.reload();
-                    }
+                    break;
+                case "validButPasswordChanged":
+                    setData(
+                        LS_KEYS.KEY_ATTRIBUTES,
+                        session.updatedKeyAttributes,
+                    );
+                    setData(
+                        LS_KEYS.SRP_ATTRIBUTES,
+                        session.updatedSRPAttributes,
+                    );
+                    // Set a flag that causes new interactive key attributes to
+                    // be generated.
+                    setIsFirstLogin(true);
+                    // This should be a rare occurence, instead of building the
+                    // scaffolding to update all the in-memory state, just
+                    // reload everything.
+                    window.location.reload();
             }
         } catch (e) {
             // Ignore errors since we shouldn't be logging the user out for

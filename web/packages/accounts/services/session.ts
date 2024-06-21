@@ -1,11 +1,20 @@
 import { authenticatedRequestHeaders } from "@/next/http";
+import { ensureLocalUser } from "@/next/local-user";
+import { ensure } from "@/utils/ensure";
 import { apiOrigin } from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
+import { getSRPAttributes } from "../api/srp";
+import type { SRPAttributes } from "../types/srp";
 
 type SessionValidity =
     | { status: "invalid" }
-    | { status: "valid"; updatedKeyAttributes?: KeyAttributes };
+    | { status: "valid" }
+    | {
+          status: "validButPasswordChanged";
+          updatedKeyAttributes: KeyAttributes;
+          updatedSRPAttributes: SRPAttributes;
+      };
 
 /**
  * Check if the local token and/or key attributes we have are still valid.
@@ -13,10 +22,13 @@ type SessionValidity =
  * This function does not take any parameters because it reads the current state
  * (key attributes) from local storage.
  *
- * @returns status "invalid" if the current token has been invalidated, "valid"
- * otherwise. In case the {@link KeyAttributes} returned by remote are different
- * from the ones we have locally, then the {@link updatedKeyAttributes} property
- * will also be set alongwith the valid {@link status} in the result.
+ * @returns
+ *
+ * - status "invalid" if the current token has been invalidated,
+ * - status "valid" normally
+ * - status "validButPasswordChanged" we detected that user changed their
+ *   password on a different device (without choosing the option to log out of
+ *   all existing sessions).
  *
  * ---
  *
@@ -59,6 +71,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
             return { status: "invalid" }; /* session is no longer valid */
         else throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     }
+
     // See if the response contains keyAttributes (they might not for older
     // deployments).
     const json = await res.json();
@@ -71,21 +84,37 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         //
         // Enhancement: Convert this to a zod validation.
         const remoteKeyAttributes = json.keyAttributes as KeyAttributes;
-        // See if it is different from the one we have locally (if we have
-        // something locally).
-        const localKeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        if (localKeyAttributes) {
-            // The kekSalt will be different if the key attributes change.
-            if (remoteKeyAttributes.kekSalt != localKeyAttributes.kekSalt) {
-                // The token is still valid, but the key attributes have
+
+        // We should have these values locally if we reach here.
+        const email = ensureLocalUser().email;
+        const localSRPAttributes = ensure(getData(LS_KEYS.SRP_ATTRIBUTES));
+
+        // Fetch the remote SRP attributes.
+        //
+        // The key attributes we have saved locally are the locally generated
+        // ones for interactive usage, and thus they'll always differ from the
+        // ones we get from remote. To detect if the user changed their
+        // password, we also need to fetch their SRP attributes (which will be
+        // identical between remote and us if the password is the same).
+        const remoteSRPAttributes = await getSRPAttributes(email);
+
+        // If we get something (and usually we should),
+        if (remoteSRPAttributes) {
+            // See if it is different from the one we have locally. Use the kekSalt
+            // as a proxy for comparing the entire object (The kekSalt will be
+            // different if a new password has been generated).
+            if (remoteSRPAttributes.kekSalt != localSRPAttributes.kekSalt) {
+                // The token is still valid, but the key and SRP attributes have
                 // changed.
                 return {
-                    status: "valid",
+                    status: "validButPasswordChanged",
                     updatedKeyAttributes: remoteKeyAttributes,
+                    updatedSRPAttributes: remoteSRPAttributes,
                 };
             }
         }
     }
-    // The token is still valid, but AFAWK, the key attributes are still the same.
+
+    // The token is still valid (to the best of our ascertainable knowledge).
     return { status: "valid" };
 };
