@@ -248,7 +248,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     final grayscalems = blurDetectionStopwatch.elapsedMilliseconds;
     log('creating grayscale matrix took $grayscalems ms');
     final (isBlur, blurValue) =
-        await BlurDetectionService.instance.predictIsBlurGrayLaplacian(
+        await BlurDetectionService.predictIsBlurGrayLaplacian(
       faceGrayMatrix,
       faceDirection: face.getFaceDirection(),
     );
