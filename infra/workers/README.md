@@ -15,13 +15,14 @@ Install dependencies with `yarn`.
 
 Then, to deploy an individual worker
 
--   Login into wrangler (if needed) using `yarn workspace health-check wrangler login`
+-   Login into wrangler (if needed) using
+    `yarn workspace health-check wrangler login`
 
 -   Deploy! `yarn workspace health-check wrangler deploy`
 
 Wrangler is the CLI provided by Cloudflare to manage workers. Apart from
-deploying, it also allows us to stream logs from running workers by using `yarn
-workspace <worker-name> wrangler tail`.
+deploying, it also allows us to stream logs from running workers by using
+`yarn workspace <worker-name> wrangler tail`.
 
 ## Creating a new worker
 
