@@ -69,7 +69,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
       return;
     } catch (e, s) {
       _logger.severe("failed to check status", e, s);
-      showGenericErrorDialog(context: context).ignore();
+      showGenericErrorDialog(context: context, error: e).ignore();
       return;
     }
     await UserService.instance.onPassKeyVerified(context, response);
@@ -111,7 +111,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
       }
     } catch (e, s) {
       _logger.severe('passKey: failed to handle deeplink', e, s);
-      showGenericErrorDialog(context: context).ignore();
+      showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
 
@@ -169,7 +169,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
                   await checkStatus();
                 } catch (e) {
                   debugPrint('failed to check status %e');
-                  showGenericErrorDialog(context: context).ignore();
+                  showGenericErrorDialog(context: context, error: e).ignore();
                 }
               },
               shouldSurfaceExecutionStates: true,

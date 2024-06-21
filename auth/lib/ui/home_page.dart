@@ -56,7 +56,8 @@ class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
-  final bool _autoFocusSearch = PreferenceService.instance.shouldAutoFocusOnSearchBar();
+  final bool _autoFocusSearch =
+      PreferenceService.instance.shouldAutoFocusOnSearchBar();
   bool _showSearchBox = false;
   String _searchText = "";
   List<Code>? _allCodes;
@@ -448,7 +449,10 @@ class _HomePageState extends State<HomePage> {
         CodeStore.instance.addCode(newCode);
         _focusNewCode(newCode);
       } catch (e, s) {
-        showGenericErrorDialog(context: context);
+        showGenericErrorDialog(
+          context: context,
+          error: e,
+        );
         _logger.severe("error while handling deeplink", e, s);
       }
     }
