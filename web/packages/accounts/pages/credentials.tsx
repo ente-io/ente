@@ -97,7 +97,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         // This should be a rare occurence, instead of building
                         // the scaffolding to update all the in-memory state,
                         // just reload everything.
-                        router.reload();
+                        window.location.reload();
                     }
             }
         } catch (e) {

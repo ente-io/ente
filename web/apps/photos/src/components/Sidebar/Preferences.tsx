@@ -91,7 +91,7 @@ const LanguageSelector = () => {
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
         setLocaleInUse(newLocale);
-        router.reload();
+        window.location.reload();
     };
 
     const options = supportedLocales.map((locale) => ({

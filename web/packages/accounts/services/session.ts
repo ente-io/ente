@@ -30,8 +30,13 @@ type SessionValidity =
  * to the 99% user experience (of normal unlocks) for the 1% case (they've
  * changed their password elsewhere).
  *
- * The approach we instead use is to make an non-blocking /session-validity API
- * call when this page is loaded. This API call tells us:
+ * The approach we instead use is to make an non-blocking `/session-validity`
+ * API call when this page is loaded. Usually this'll complete well before the
+ * password enters their password and presses "Sign in", but we also
+ * transparently await for this API call to finish before initiating the actual
+ * verification. Thus there is no extra latency in the happy paths.
+ *
+ * The `/session-validity` API call tells us:
  *
  * 1.  Whether or not the session has been invalidated (by the user choosing to
  *     log out from all devices elsewhere).
