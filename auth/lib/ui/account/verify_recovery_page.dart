@@ -47,7 +47,10 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
               "Please check your internet connection and try again.",
             );
           } else {
-            await showGenericErrorDialog(context: context);
+            await showGenericErrorDialog(
+              context: context,
+              error: e,
+            );
           }
           return;
         }
@@ -107,7 +110,10 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         );
       } catch (e) {
         // ignore: unawaited_futures
-        showGenericErrorDialog(context: context);
+        showGenericErrorDialog(
+          context: context,
+          error: e,
+        );
         return;
       }
     }

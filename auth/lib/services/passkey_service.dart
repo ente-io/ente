@@ -49,7 +49,7 @@ class PasskeyService {
       );
     } catch (e) {
       Logger('PasskeyService').severe("failed to open passkey page", e);
-      showGenericErrorDialog(context: context).ignore();
+      showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
 }
