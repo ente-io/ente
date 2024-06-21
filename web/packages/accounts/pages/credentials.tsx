@@ -52,6 +52,7 @@ import {
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
 import { appHomeRoute } from "../services/redirect";
+import { checkSessionValidity } from "../services/session";
 import {
     configureSRP,
     generateSRPSetupAttributes,
@@ -116,10 +117,34 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 LS_KEYS.SRP_ATTRIBUTES,
             );
 
-            if (srpAttributes && user?.email) {
-                void didPasswordChangeElsewhere(user.email, srpAttributes).then(
-                    (changed) => changed && showSessionExpiredDialog(),
-                );
+            if (token) {
+                void checkSessionValidity()
+                    .then((session) => {
+                        switch (session.status) {
+                            case "invalid":
+                                showSessionExpiredDialog();
+                                break;
+                            case "valid":
+                                if (session.updatedKeyAttributes) {
+                                    setData(
+                                        LS_KEYS.KEY_ATTRIBUTES,
+                                        session.updatedKeyAttributes,
+                                    );
+                                    // This should be a rare occurence, instead of
+                                    // building the scaffolding to update all the
+                                    // in-memory state, just reload everything.
+                                    router.reload();
+                                }
+                        }
+                    })
+                    .catch((e) => {
+                        // Ignore errors since we shouldn't be logging the user out for
+                        // potentially transient issues.
+                        log.warn(
+                            "Ignoring error when determining session validity",
+                            e,
+                        );
+                    });
             }
 
             if (kekEncryptedAttributes && keyAttributes) {

@@ -1,14 +1,26 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { apiOrigin } from "@ente/shared/network/api";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
 
 type SessionValidity =
     | { status: "invalid" }
-    | { status: "valid"; updatedKeyAttributes: KeyAttributes | undefined };
+    | { status: "valid"; updatedKeyAttributes?: KeyAttributes };
 
 /**
- * [Note: Handle password changes]
+ * Check if the local token and/or key attributes we have are still valid.
+ *
+ * This function does not take any parameters because it reads the current state
+ * (key attributes) from local storage.
+ *
+ * @returns status "invalid" if the current token has been invalidated, "valid"
+ * otherwise. In case the {@link KeyAttributes} returned by remote are different
+ * from the ones we have locally, then the {@link updatedKeyAttributes} property
+ * will also be set alongwith the valid {@link status} in the result.
+ *
+ * ---
+ *
+ * [Note: Handling password changes]
  *
  * If the user changes their password on a different device, then we need to
  * update our local state so that we use the latest password for verification.
@@ -17,12 +29,6 @@ type SessionValidity =
  * call before showing the password unlock page, however that would add latency
  * to the 99% user experience (of normal unlocks) for the 1% case (they've
  * changed their password elsewhere).
- *
- * Another alternative would be to non-blockingly check if their password has
- * changed (e.g. by comparing the remote and local SRP attributes), and if so,
- * log them out. This would be a robust solution, except users might've chosen
- * the "Don't log me out of other devices" option when changing their password
- * from the mobile app.
  *
  * The approach we instead use is to make an non-blocking /session-validity API
  * call when this page is loaded. This API call tells us:
@@ -35,15 +41,8 @@ type SessionValidity =
  * If the session has been invalidated, we log them out here too.
  *
  * If the key attributes we get are different from the ones we have locally, we
- * regenerate new ones locally, and then use those for verifying the password.
- *
- * It does not take any parameters because it reads the current state (key
- * attributes) from local storage.
- *
- * @returns status "invalid" if the current token has been invalidated, "valid"
- * otherwise. In case the {@link KeyAttributes} returned by remote are different
- * from the ones we have locally, then the {@link updatedKeyAttributes} property
- * will also be set alongwith the valid {@link status} in the result.
+ * regenerate new ones locally, and then use those for verifying the password
+ * subsequently.
  */
 export const checkSessionValidity = async (): Promise<SessionValidity> => {
     const url = `${apiOrigin()}/users/session-validity/v2`;
