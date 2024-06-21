@@ -9,7 +9,7 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 interface Iprops {
     open: boolean;
