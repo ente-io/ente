@@ -71,13 +71,11 @@ class FaceEmbeddingService {
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
     try {
-      // _logger.info('Loading face embedding model');
       final session =
           OrtSession.fromFile(File(args["modelPath"]), sessionOptions);
-      // _logger.info('Face embedding model loaded');
       return session.address;
-    } catch (e, _) {
-      // _logger.severe('Face embedding model not loaded', e, s);
+    } catch (e, s) {
+      _logger.severe('Face embedding model not loaded', e, s);
     }
     return -1;
   }
@@ -104,7 +102,7 @@ class FaceEmbeddingService {
       final int numberOfFaces = input.length ~/ (kInputSize * kInputSize * 3);
       final inputOrt = OrtValueTensor.createTensorWithDataList(
         input,
-        [numberOfFaces, kInputSize, kInputSize, 3],
+        [numberOfFaces, kInputSize, kInputSize, kNumChannels],
       );
       final inputs = {'img_inputs': inputOrt};
       final session = OrtSession.fromAddress(sessionAddress);
