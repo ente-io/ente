@@ -9,11 +9,11 @@ import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/face/model/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/naive_non_max_suppression.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/yolo_filter_extract_detections.dart';
+import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_util.dart";
+
+class YOLOFaceInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
 class FaceDetectionService {

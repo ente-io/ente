@@ -33,7 +33,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
@@ -1141,8 +1140,6 @@ class FaceMlService {
       }
 
       return faces;
-    } on YOLOFaceInterpreterInitializationException {
-      throw CouldNotInitializeFaceDetector();
     } on YOLOFaceInterpreterRunException {
       throw CouldNotRunFaceDetector();
     } catch (e) {
