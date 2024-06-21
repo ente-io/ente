@@ -13,6 +13,7 @@ import 'package:ente_auth/ui/components/components_constants.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
 typedef DialogBuilder = DialogWidget Function(BuildContext context);
@@ -80,11 +81,25 @@ Future<ButtonResult?> showGenericErrorDialog({
     icon: Icons.error_outline_outlined,
     body: context.l10n.itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
     isDismissible: isDismissible,
-    buttons: const [
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.primary,
+        labelText: context.l10n.ok,
+        buttonAction: ButtonAction.first,
+        isInAlert: true,
+      ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "OK",
-        isInAlert: true,
+        labelText: context.l10n.contactSupport,
+        buttonAction: ButtonAction.second,
+        onTap: () async {
+          await sendLogs(
+            context,
+            context.l10n.contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        },
       ),
     ],
   );
