@@ -381,10 +381,3 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 };
 
 export default Page;
-
-const didPasswordChangeElsewhere = async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    __: SRPAttributes,
-): Promise<boolean> => false;
