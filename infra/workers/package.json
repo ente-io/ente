@@ -1,0 +1,13 @@
+{
+    "name": "workers",
+    "private": true,
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20240614.0",
+        "typescript": "^5",
+        "wrangler": "^3"
+    },
+    "workspaces": [
+        "*"
+    ],
+    "packageManager": "yarn@1.22.22"
+}
