@@ -27,19 +27,24 @@ class _LockScreenOptionState extends State<LockScreenOption> {
   @override
   void initState() {
     super.initState();
-    isPasswordEnabled = _configuration.isPasswordSet();
-    isPinEnabled = _configuration.isPinSet();
+    _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
         _configuration.shouldShowLockScreen();
   }
 
+  Future<void> _initializeSettings() async {
+    final bool passwordEnabled = await _configuration.isPasswordSet();
+    final bool pinEnabled = await _configuration.isPinSet();
+    setState(() {
+      isPasswordEnabled = passwordEnabled;
+      isPinEnabled = pinEnabled;
+    });
+  }
+
   Future<void> _deviceLock() async {
     await _configuration.removePinAndPassword();
-    setState(() {
-      isPasswordEnabled = _configuration.isPasswordSet();
-      isPinEnabled = _configuration.isPinSet();
-    });
+    await _initializeSettings();
   }
 
   Future<void> _pinLock() async {
@@ -51,8 +56,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
       ),
     );
     setState(() {
-      isPasswordEnabled = _configuration.isPasswordSet();
-      isPinEnabled = _configuration.isPinSet();
+      _initializeSettings();
       if (result == false) {
         appLock = appLock;
       } else {
@@ -72,12 +76,13 @@ class _LockScreenOptionState extends State<LockScreenOption> {
       ),
     );
     setState(() {
-      isPasswordEnabled = _configuration.isPasswordSet();
-      isPinEnabled = _configuration.isPinSet();
+      _initializeSettings();
       if (result == false) {
         appLock = appLock;
       } else {
-        appLock = isPinEnabled || isPasswordEnabled;
+        appLock = isPinEnabled ||
+            isPasswordEnabled ||
+            _configuration.shouldShowLockScreen();
       }
     });
   }
@@ -87,8 +92,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     await Configuration.instance.setShouldShowLockScreen(!appLock);
     await _configuration.removePinAndPassword();
     setState(() {
-      isPasswordEnabled = _configuration.isPasswordSet();
-      isPinEnabled = _configuration.isPinSet();
+      _initializeSettings();
       appLock = !appLock;
     });
   }

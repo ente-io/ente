@@ -5,6 +5,7 @@ import "dart:io";
 import 'package:bip39/bip39.dart' as bip39;
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import "package:flutter_sodium/flutter_sodium.dart";
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
@@ -74,6 +75,7 @@ class Configuration {
   static const endPointKey = "endpoint";
   static const password = "user_pass";
   static const pin = "user_pin";
+  static const saltKey = "user_salt";
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -152,35 +154,78 @@ class Configuration {
     }
   }
 
+  static Uint8List generateSalt() {
+    return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
+  }
+
   Future<void> setPin(String userPin) async {
-    await _preferences.setString(pin, userPin);
-    await _preferences.remove(password);
+    await _secureStorage.delete(key: saltKey);
+
+    final salt = generateSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(userPin),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    final String saltPin = base64Encode(salt);
+    final String hashedPin = base64Encode(hash);
+
+    await _secureStorage.write(key: saltKey, value: saltPin);
+    await _secureStorage.write(key: pin, value: hashedPin);
+    await _secureStorage.delete(key: password);
+
+    return;
+  }
+
+  Future<Uint8List?> getSalt() async {
+    final String? salt = await _secureStorage.read(key: saltKey);
+    if (salt == null) return null;
+    return base64Decode(salt);
   }
 
   Future<String?> getPin() async {
-    return _preferences.getString(pin);
+    return _secureStorage.read(key: pin);
   }
 
   Future<void> setPassword(String pass) async {
-    await _preferences.setString(password, pass);
-    await _preferences.remove(pin);
+    await _secureStorage.delete(key: saltKey);
+
+    final salt = generateSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(pass),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    final String saltPassword = base64Encode(salt);
+    final String hashPassword = base64Encode(hash);
+
+    await _secureStorage.write(key: saltKey, value: saltPassword);
+    await _secureStorage.write(key: password, value: hashPassword);
+    await _secureStorage.delete(key: pin);
+
+    return;
   }
 
   Future<String?> getPassword() async {
-    return _preferences.getString(password);
+    return _secureStorage.read(key: password);
   }
 
   Future<void> removePinAndPassword() async {
-    await _preferences.remove(pin);
-    await _preferences.remove(password);
+    await _secureStorage.delete(key: saltKey);
+    await _secureStorage.delete(key: pin);
+    await _secureStorage.delete(key: password);
   }
 
-  bool isPinSet() {
-    return _preferences.containsKey(pin);
+  Future<bool> isPinSet() async {
+    return await _secureStorage.containsKey(key: pin);
   }
 
-  bool isPasswordSet() {
-    return _preferences.containsKey(password);
+  Future<bool> isPasswordSet() async {
+    return await _secureStorage.containsKey(key: password);
   }
 
   // _cleanUpStaleFiles deletes all files in the temp directory that are older

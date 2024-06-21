@@ -1,11 +1,16 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_sodium/flutter_sodium.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_password.dart";
+import "package:photos/utils/crypto_util.dart";
 
 class LockScreenOptionPassword extends StatefulWidget {
   const LockScreenOptionPassword({
@@ -26,6 +31,8 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
   final _submitNotifier = ValueNotifier(false);
+  Configuration configuration = Configuration.instance;
+  late String hashedPassword;
   @override
   void initState() {
     super.initState();
@@ -43,7 +50,16 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
   }
 
   Future<bool> confirmPasswordAuth(String code) async {
-    if (widget.authPass == code) {
+    final Uint8List? salt = await configuration.getSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(code),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    hashedPassword = base64Encode(hash);
+    if (widget.authPass == hashedPassword) {
       Navigator.of(context).pop(true);
       return true;
     } else {

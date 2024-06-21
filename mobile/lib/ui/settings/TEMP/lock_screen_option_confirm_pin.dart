@@ -144,6 +144,7 @@ class _LockScreenOptionConfirmPinState
           const Padding(padding: EdgeInsets.all(12)),
           Pinput(
             length: 4,
+            pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
             controller: _confirmPinController,
             defaultPinTheme: _pinPutDecoration,
             submittedPinTheme: _pinPutDecoration.copyWith(
@@ -180,10 +181,8 @@ class _LockScreenOptionConfirmPinState
             validator: (value) {
               if (value == widget.pin) {
                 return null;
-              } else {
-                value = null;
-                return 'PIN does not match';
               }
+              return 'PIN does not match';
             },
             onCompleted: (value) async {
               await Future.delayed(const Duration(milliseconds: 250));

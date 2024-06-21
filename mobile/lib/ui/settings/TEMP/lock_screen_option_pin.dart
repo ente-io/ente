@@ -1,10 +1,15 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_sodium/flutter_sodium.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/TEMP/lock_screen_option_confirm_pin.dart";
+import "package:photos/utils/crypto_util.dart";
 import 'package:pinput/pinput.dart';
 
 class LockScreenOptionPin extends StatefulWidget {
@@ -22,7 +27,8 @@ class LockScreenOptionPin extends StatefulWidget {
 
 class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
-
+  Configuration configuration = Configuration.instance;
+  late String hashedPin;
   @override
   void dispose() {
     super.dispose();
@@ -43,10 +49,20 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   }
 
   Future<bool> confirmPinAuth(String code) async {
-    if (widget.authPin == code) {
+    final Uint8List? salt = await configuration.getSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(code),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    hashedPin = base64Encode(hash);
+    if (widget.authPin == hashedPin) {
       Navigator.of(context).pop(true);
       return true;
     }
+
     _pinController.clear();
     await HapticFeedback.vibrate();
     return false;
@@ -196,14 +212,14 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               textStyle:
                   textTheme.h3Bold.copyWith(color: colorTheme.warning400),
             ),
-            validator: widget.isAuthenticating
-                ? (value) {
-                    if (widget.authPin == value) {
-                      return null;
-                    }
-                    return 'Invalid PIN';
-                  }
-                : null,
+            // validator: widget.isAuthenticating
+            //     ? (value) {
+            //         if (widget.authPin == hashedPin) {
+            //           return null;
+            //         }
+            //         return 'Invalid PIN';
+            //       }
+            //     : null,
             errorText: '',
             obscureText: true,
             obscuringCharacter: '*',
