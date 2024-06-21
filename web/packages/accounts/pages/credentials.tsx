@@ -70,6 +70,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+    const [sessionValidityCheck, setSessionValidityCheck] = useState<
+        Promise<void> | undefined
+    >();
 
     const router = useRouter();
 
@@ -144,8 +147,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             );
 
             if (token) {
-                // Let it validate without blocking the rest of the flow.
-                void validateSession();
+                setSessionValidityCheck(validateSession());
             }
 
             if (kekEncryptedAttributes && keyAttributes) {
@@ -270,6 +272,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         passphrase,
     ) => {
         try {
+            if (sessionValidityCheck) await sessionValidityCheck;
+
             if (isFirstLogin() && passphrase) {
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
@@ -306,24 +310,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             log.error("useMasterPassword failed", e);
         }
     };
-
-    const handleIncorrectPassword = useCallback(() => {
-        // We've already checked this when the page was opened. But the user
-        // might've had a tab open from earlier and switch back to it after
-        // changing their password, and then try to enter their new password
-        // there. In those cases, the page-load version of this check wouldn't
-        // get to run in the new changed condition.
-        //
-        // To cover such cases, we redo the check whenever an incorrect password
-        // is entered.
-        const srpAttributes: SRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES);
-        const user: User = getData(LS_KEYS.USER);
-        if (srpAttributes && user?.email) {
-            void didPasswordChangeElsewhere(user.email, srpAttributes).then(
-                (changed) => changed && showSessionExpiredDialog(),
-            );
-        }
-    }, [showSessionExpiredDialog]);
 
     if (!keyAttributes && !srpAttributes) {
         return (
@@ -377,7 +363,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     keyAttributes={keyAttributes}
                     getKeyAttributes={getKeyAttributes}
                     srpAttributes={srpAttributes}
-                    onIncorrectPassword={handleIncorrectPassword}
                 />
 
                 <LoginFlowFormFooter>
