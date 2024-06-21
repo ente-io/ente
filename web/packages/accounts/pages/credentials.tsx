@@ -201,6 +201,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {
             try {
+                if (sessionValidityCheck) await sessionValidityCheck;
+
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const {
                     keyAttributes,
@@ -279,8 +281,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         passphrase,
     ) => {
         try {
-            if (sessionValidityCheck) await sessionValidityCheck;
-
             if (isFirstLogin() && passphrase) {
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
