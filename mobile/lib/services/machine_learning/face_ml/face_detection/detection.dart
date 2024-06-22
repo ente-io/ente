@@ -1,4 +1,4 @@
-import 'dart:math' show max, min, pow, sqrt;
+import 'dart:math' show max, min;
 
 import "package:photos/face/model/dimension.dart";
 
@@ -79,19 +79,6 @@ class FaceDetectionRelative extends Detection {
             )
             .toList(),
         super(score: score);
-
-  /// This is used to initialize the FaceDetectionRelative object with default values.
-  /// This constructor is useful because it can be used to initialize a FaceDetectionRelative object as a constant.
-  FaceDetectionRelative.defaultInitialization()
-      : box = const <double>[0, 0, 0, 0],
-        allKeypoints = const <List<double>>[
-          [0, 0],
-          [0, 0],
-          [0, 0],
-          [0, 0],
-          [0, 0],
-        ],
-        super.empty();
 
   void correctForMaintainedAspectRatio(
     Dimensions originalSize,
@@ -272,26 +259,10 @@ class FaceDetectionAbsolute extends Detection {
     required this.allKeypoints,
   }) : super(score: score);
 
-  factory FaceDetectionAbsolute._zero() {
-    return FaceDetectionAbsolute(
-      score: 0,
-      box: <double>[0, 0, 0, 0],
-      allKeypoints: <List<double>>[
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-      ],
-    );
-  }
-
   @override
   String toString() {
     return 'FaceDetectionAbsolute( with absolute coordinates: \n score: $score \n Box: xMinBox: $xMinBox, yMinBox: $yMinBox, xMaxBox: $xMaxBox, yMaxBox: $yMaxBox, \n Keypoints: leftEye: $leftEye, rightEye: $rightEye, nose: $nose, leftMouth: $leftMouth, rightMouth: $rightMouth \n )';
   }
-
-  static FaceDetectionAbsolute empty = FaceDetectionAbsolute._zero();
 
   @override
 
@@ -339,20 +310,13 @@ List<FaceDetectionAbsolute> relativeToAbsoluteDetections({
   required int imageWidth,
   required int imageHeight,
 }) {
-  final numberOfDetections = relativeDetections.length;
-  final absoluteDetections = List<FaceDetectionAbsolute>.filled(
-    numberOfDetections,
-    FaceDetectionAbsolute._zero(),
-  );
+  final absoluteDetections = <FaceDetectionAbsolute>[];
   for (var i = 0; i < relativeDetections.length; i++) {
-    final relativeDetection = relativeDetections[i];
-    final absoluteDetection = relativeDetection.toAbsolute(
+    final absoluteDetection = relativeDetections[i].toAbsolute(
       imageWidth: imageWidth,
       imageHeight: imageHeight,
     );
-
-    absoluteDetections[i] = absoluteDetection;
+    absoluteDetections.add(absoluteDetection);
   }
-
   return absoluteDetections;
 }
