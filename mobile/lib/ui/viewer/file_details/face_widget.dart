@@ -279,7 +279,7 @@ class _FaceWidgetState extends State<FaceWidget> {
     try {
       if (isJustRemoved) {
         await ClusterFeedbackService.instance
-            .addFilesToCluster([widget.face.faceID], widget.clusterID!);
+            .addFacesToCluster([widget.face.faceID], widget.clusterID!);
       } else {
         await ClusterFeedbackService.instance
             .removeFilesFromCluster([widget.file], widget.clusterID!);

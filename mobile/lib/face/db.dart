@@ -1080,16 +1080,4 @@ class FaceMLDataDB {
     }
     await forceUpdateClusterIds(faceIDToClusterID);
   }
-
-  Future<void> addFacesToCluster(
-    List<String> faceIDs,
-    int clusterID,
-  ) async {
-    final faceIDToClusterID = <String, int>{};
-    for (final faceID in faceIDs) {
-      faceIDToClusterID[faceID] = clusterID;
-    }
-
-    await forceUpdateClusterIds(faceIDToClusterID);
-  }
 }
