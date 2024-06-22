@@ -22,6 +22,7 @@ jobs:
         steps:
             - name: Determine branch to build
               id: select-branch
+              working-directory: ${{ github.workspace }}
               run: |
                   if git ls-remote --exit-code --heads https://github.com/ente-io/ente refs/heads/staging/web; then
                       echo "branch=staging/web" >> $GITHUB_OUTPUT
