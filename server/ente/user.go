@@ -9,9 +9,6 @@ const (
 	EmailChangedTemplate   = "email_changed.html"
 	EmailChangedSubject    = "Email address updated"
 
-	// OTTEmailSubject is the subject of the OTT mail
-	OTTEmailSubject = "ente Verification Code"
-
 	ChangeEmailOTTPurpose = "change"
 )
 
