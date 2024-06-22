@@ -55,7 +55,8 @@ Dfvp7OOGAN6dEOM4+qR9sdjoSYKEBpsr6GtPAQw4dy753ec5
       return HttpClient(context: context);
     } on TlsException catch (e) {
       debugPrint(
-          "Error adding certificate to trusted certificates: ${e.osError?.message}");
+        "Error adding certificate to trusted certificates: ${e.osError?.message}",
+      );
       // certificate is already trusted. Nothing to do here
       if (e.osError?.message.contains("CERT_ALREADY_IN_HASH_TABLE") != true) {
         rethrow;
