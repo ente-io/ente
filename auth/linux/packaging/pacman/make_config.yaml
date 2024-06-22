@@ -42,10 +42,10 @@ postinstall_scripts:
   - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
   - update-desktop-database -q
   - if [ ! -e /usr/lib/libsodium.so.23 ]; then
-  -    ln -s /usr/lib/libsodium.so /usr/lib/libsodium.so.23
+  - "   ln -s /usr/lib/libsodium.so /usr/lib/libsodium.so.23"
   - fi
 
-postuninstall_scripts:
+postupgrade_scripts:
   - post_install
   
 postremove_scripts:
