@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 /*
 Reference from
@@ -9,6 +9,7 @@ https://github.com/realm/realm-dart/blob/main/packages/realm_dart/lib/src/handle
 https://github.com/realm/realm-dart/pull/1378
  */
 HttpClient windowsHttpClient() {
+  final logger = Logger("WindowsHttpClient");
   const isrgRootX1CertPEM = // The root certificate used by lets encrypt
       '''
 subject=CN=ISRG Root X1,O=Internet Security Research Group,C=US
@@ -48,13 +49,14 @@ Dfvp7OOGAN6dEOM4+qR9sdjoSYKEBpsr6GtPAQw4dy753ec5
   if (Platform.isWindows) {
     final context = SecurityContext(withTrustedRoots: true);
     try {
+      logger.info('Adding certificate to trusted certificates');
       context.setTrustedCertificatesBytes(
         const AsciiEncoder().convert(isrgRootX1CertPEM),
       );
-      debugPrint("Certificate added to trusted certificates");
+      logger.info("Certificate added to trusted certificates");
       return HttpClient(context: context);
     } on TlsException catch (e) {
-      debugPrint(
+      logger.warning(
         "Error adding certificate to trusted certificates: ${e.osError?.message}",
       );
       // certificate is already trusted. Nothing to do here
