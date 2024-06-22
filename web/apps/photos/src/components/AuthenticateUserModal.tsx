@@ -1,7 +1,7 @@
 import log from "@/next/log";
 import { checkSessionValidity } from "@ente/accounts/services/session";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import { dismissableSessionExpiredDialogAttributes } from "@ente/shared/components/LoginComponents";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -34,18 +34,18 @@ export default function AuthenticateUserModal({
             content: t("UNKNOWN_ERROR"),
         });
 
-    // This is a altered version of the check we do on the password
-    // verification screen, except here it don't try to overwrite local
-    // state and instead just request the user to login again if we detect
-    // that their password has changed on a different device and they
-    // haven't unlocked even once since then on this device.
+    // This is a altered version of the check we do on the password verification
+    // screen, except here it don't try to overwrite local state and instead
+    // just request the user to login again if we detect that their password has
+    // changed on a different device and they haven't unlocked even once since
+    // then on this device.
     const validateSession = useCallback(async () => {
         try {
             const session = await checkSessionValidity();
             if (session.status != "valid") {
                 onClose();
                 setDialogBoxAttributesV2(
-                    dismissableSessionExpiredDialogAttributes(logout),
+                    passwordChangedElsewhereDialogAttributes(logout),
                 );
             }
         } catch (e) {
@@ -114,3 +114,23 @@ export default function AuthenticateUserModal({
         </DialogBoxV2>
     );
 }
+
+/**
+ * Attributes for a dialog box that informs the user that their password was
+ * changed on a different device, and they the need to login again to be able to
+ * use the new one. Cancellable.
+ *
+ * @param onLogin Called if the user chooses the login option.
+ */
+const passwordChangedElsewhereDialogAttributes = (
+    onLogin: () => void,
+): DialogBoxAttributesV2 => ({
+    title: t("password_changed_elsewhere"),
+    content: t("password_changed_elsewhere_message"),
+    proceed: {
+        text: t("LOGIN"),
+        action: onLogin,
+        variant: "accent",
+    },
+    close: { text: t("CANCEL") },
+});

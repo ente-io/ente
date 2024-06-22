@@ -222,21 +222,3 @@ export const sessionExpiredDialogAttributes = (
         variant: "accent",
     },
 });
-
-/**
- * A variant of {@link sessionExpiredDialogAttributes} that allows the user to
- * close it. This would allow them to, say, view their recovery key if they wish
- * instead of being forced to immediately logout.
- */
-export const dismissableSessionExpiredDialogAttributes = (
-    onLogin: () => void,
-): DialogBoxAttributesV2 => ({
-    title: t("SESSION_EXPIRED"),
-    content: t("SESSION_EXPIRED_MESSAGE"),
-    proceed: {
-        text: t("LOGIN"),
-        action: onLogin,
-        variant: "accent",
-    },
-    close: { text: t("CANCEL") },
-});
