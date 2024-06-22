@@ -12,9 +12,9 @@ import (
 )
 
 func GetDB(path string) (*bolt.DB, error) {
-	db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(path, 0600, &bolt.Options{Timeout: 5 * time.Second})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Sprintf("Failed to open db %s ", path), err)
 	}
 	return db, err
 }
