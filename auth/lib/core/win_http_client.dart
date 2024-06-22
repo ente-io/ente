@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 /*
 Reference from
 https://github.com/realm/realm-dart/blob/main/packages/realm_dart/lib/src/handles/native/default_client.dart
@@ -49,8 +51,11 @@ Dfvp7OOGAN6dEOM4+qR9sdjoSYKEBpsr6GtPAQw4dy753ec5
       context.setTrustedCertificatesBytes(
         const AsciiEncoder().convert(isrgRootX1CertPEM),
       );
+      debugPrint("Certificate added to trusted certificates");
       return HttpClient(context: context);
     } on TlsException catch (e) {
+      debugPrint(
+          "Error adding certificate to trusted certificates: ${e.osError?.message}");
       // certificate is already trusted. Nothing to do here
       if (e.osError?.message.contains("CERT_ALREADY_IN_HASH_TABLE") != true) {
         rethrow;
