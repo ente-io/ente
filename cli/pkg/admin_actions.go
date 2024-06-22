@@ -82,6 +82,27 @@ func (c *ClICtrl) Disable2FA(ctx context.Context, params model.AdminActionForUse
 	return nil
 }
 
+func (c *ClICtrl) DisablePasskeys(ctx context.Context, params model.AdminActionForUser) error {
+	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
+	if err != nil {
+		return err
+	}
+	userDetails, err := c.Client.GetUserIdFromEmail(accountCtx, params.UserEmail)
+	if err != nil {
+		return err
+	}
+	err = c.Client.DisablePassKeyMFA(accountCtx, userDetails.User.ID)
+	if err != nil {
+		if apiErr, ok := err.(*api.ApiError); ok && apiErr.StatusCode == 400 && strings.Contains(apiErr.Message, "Token is too old") {
+			fmt.Printf("Error: Old admin token, please re-authenticate using `ente account add` \n")
+			return nil
+		}
+		return err
+	}
+	fmt.Println("Successfully disabled passkey for user")
+	return nil
+}
+
 func (c *ClICtrl) UpdateFreeStorage(ctx context.Context, params model.AdminActionForUser, noLimit bool) error {
 	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
 	if err != nil {
