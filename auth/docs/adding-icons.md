@@ -8,7 +8,7 @@ the relevant SVG placed within `assets/custom-icons/icons` and add the
 corresponding entry within `assets/custom-icons/_data/custom-icons.json`.
 
 Please be careful to upload small and optimized icon files. If your icon file 
-is over 50KB, it is certainly not optimized.
+is over 50KB, it is likely not optimized.
 
 Note that the correspondence between the icon and the issuer is based on the name 
 of the issuer provided by the user, excluding spaces. Only the text before the 
