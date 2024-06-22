@@ -343,14 +343,34 @@ const authenticatorAttestationResponse = (credential: Credential) => {
  * Return `true` if the given {@link redirectURL} (obtained from the redirect
  * query parameter passed around during the passkey verification flow) is one of
  * the whitelisted URLs that we allow redirecting to on success.
+ *
+ * This check is likely not necessary but we've only kept it just to be on the
+ * safer side. However, this gets in the way of people who are self hosting
+ * Ente. So only do this check if we're running on our production servers (or
+ * localhost).
  */
 export const isWhitelistedRedirect = (redirectURL: URL) =>
+    shouldRestrictToWhitelistedRedirect()
+        ? _isWhitelistedRedirect(redirectURL)
+        : true;
+
+const _isWhitelistedRedirect = (redirectURL: URL) =>
     (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh") ||
     redirectURL.protocol == "ente:" ||
     redirectURL.protocol == "enteauth:" ||
     redirectURL.protocol == "ente-cli:";
+
+export const shouldRestrictToWhitelistedRedirect = () => {
+    // host includes port, hostname is sans port
+    const hostname = new URL(window.location.origin).hostname;
+    return (
+        hostname.endsWith("localhost") ||
+        hostname.endsWith(".ente.io") ||
+        hostname.endsWith(".ente.sh")
+    );
+};
 
 export interface BeginPasskeyAuthenticationResponse {
     /**
