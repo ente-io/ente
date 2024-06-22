@@ -162,10 +162,11 @@ jobs:
             # Run below command if it is a beta or nightly
             if [[ ${{ github.ref }} =~ beta|nightly ]]; then
               flutter_distributor package --platform=linux --targets=pacman --skip-clean
+              mv dist/**/*-*-linux.pacman artifacts/ente-${{ github.ref_name }}-x86_64.pacman
             fi
             flutter_distributor package --platform=linux --targets=rpm --skip-clean
-            flutter_distributor package --platform=linux --targets=appimage --skip-clean
             mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
+            flutter_distributor package --platform=linux --targets=appimage --skip-clean
             mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
 
         - name: Generate checksums
