@@ -946,8 +946,10 @@ class FaceMlService {
       debugPrint(
         "This image with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}.",
       );
-      final resultBuilder = FaceMlResultBuilder.fromEnteFile(enteFile);
-      return resultBuilder.buildErrorOccurred();
+      final resultBuilder =
+          FaceMlResult.fromEnteFileID(enteFile.uploadedFileID!)
+            ..errorOccurred();
+      return resultBuilder;
     }
     stopwatch.stop();
     _logger.info(
@@ -965,7 +967,7 @@ class FaceMlService {
       final int faceDetectionAddress = args["faceDetectionAddress"] as int;
       final int faceEmbeddingAddress = args["faceEmbeddingAddress"] as int;
 
-      final resultBuilder = FaceMlResultBuilder.fromEnteFileID(enteFileID);
+      final resultBuilder = FaceMlResult.fromEnteFileID(enteFileID);
 
       dev.log(
         "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
@@ -999,7 +1001,8 @@ class FaceMlService {
         dev.log(
             "No faceDetectionResult, Completed analyzing image with uploadedFileID $enteFileID, in "
             "${stopwatch.elapsedMilliseconds} ms");
-        return resultBuilder.buildNoFaceDetected();
+        resultBuilder.noFaceDetected();
+        return resultBuilder;
       }
 
       stopwatch.reset();
@@ -1032,7 +1035,7 @@ class FaceMlService {
           "uploadedFileID $enteFileID, in "
           "${stopwatchTotal.elapsedMilliseconds} ms");
 
-      return resultBuilder.build();
+      return resultBuilder;
     } catch (e, s) {
       dev.log("Could not analyze image: \n e: $e \n s: $s");
       rethrow;
@@ -1120,7 +1123,7 @@ class FaceMlService {
     Image image,
     ByteData imageByteData,
     int interpreterAddress, {
-    FaceMlResultBuilder? resultBuilder,
+    FaceMlResult? resultBuilder,
   }) async {
     try {
       // Get the bounding boxes of the faces
@@ -1155,7 +1158,7 @@ class FaceMlService {
     Image image,
     ByteData imageByteData,
     List<FaceDetectionRelative> faces, {
-    FaceMlResultBuilder? resultBuilder,
+    FaceMlResult? resultBuilder,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -1187,7 +1190,7 @@ class FaceMlService {
   static Future<List<List<double>>> embedFacesSync(
     Float32List facesList,
     int interpreterAddress, {
-    FaceMlResultBuilder? resultBuilder,
+    FaceMlResult? resultBuilder,
   }) async {
     try {
       // Get the embedding of the faces
