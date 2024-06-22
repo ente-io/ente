@@ -157,8 +157,10 @@ jobs:
         - name: Build desktop app
           run: |
             flutter config --enable-linux-desktop
-            dart pub global activate flutter_distributor
+            # dart pub global activate flutter_distributor
+            dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref pacman --git-path packages/flutter_distributor
             flutter_distributor package --platform=linux --targets=rpm --skip-clean
+            flutter_distributor package --platform=linux --targets=pacman --skip-clean
             flutter_distributor package --platform=linux --targets=appimage --skip-clean
             mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
             mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
