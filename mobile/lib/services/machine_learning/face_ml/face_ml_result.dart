@@ -9,7 +9,6 @@ import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import 'package:photos/services/machine_learning/face_ml/face_ml_methods.dart';
 
 final _logger = Logger('ClusterResult_FaceMlResult');
 
@@ -39,13 +38,6 @@ class FaceMlResult {
   List<int> get fileIdForEveryFace {
     return List<int>.filled(faces.length, fileId);
   }
-
-  FaceDetectionMethod get faceDetectionMethod =>
-      FaceDetectionMethod.fromMlVersion(mlVersion);
-  FaceAlignmentMethod get faceAlignmentMethod =>
-      FaceAlignmentMethod.fromMlVersion(mlVersion);
-  FaceEmbeddingMethod get faceEmbeddingMethod =>
-      FaceEmbeddingMethod.fromMlVersion(mlVersion);
 
   const FaceMlResult({
     required this.fileId,
