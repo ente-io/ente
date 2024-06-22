@@ -1116,8 +1116,6 @@ class FaceMlService {
   /// `imageData`: The image data to analyze.
   ///
   /// Returns a list of face detection results.
-  ///
-  /// Throws [CouldNotInitializeFaceDetector], [CouldNotRunFaceDetector] or [GeneralFaceMlException] if something goes wrong.
   static Future<List<FaceDetectionRelative>> detectFacesSync(
     Image image,
     ByteData imageByteData,
@@ -1153,8 +1151,6 @@ class FaceMlService {
   /// `faces`: The face detection results in a list of [FaceDetectionAbsolute] for the faces to align.
   ///
   /// Returns a list of the aligned faces as image data.
-  ///
-  /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
   static Future<Float32List> alignFacesSync(
     Image image,
     ByteData imageByteData,

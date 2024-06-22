@@ -65,11 +65,6 @@ class PersonService {
     return map;
   }
 
-  Future<Set<String>> personIDs() async {
-    final entities = await entityService.getEntities(EntityType.person);
-    return entities.map((e) => e.id).toSet();
-  }
-
   Future<void> reconcileClusters() async {
     final EnteWatch? w = kDebugMode ? EnteWatch("reconcileClusters") : null;
     w?.start();
