@@ -224,9 +224,8 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     final (alignmentResult, correctlyEstimated) =
         SimilarityTransform.estimate(face.allKeypoints);
     if (!correctlyEstimated) {
-      alignedImageIndex += 3 * width * height;
-      alignmentResults.add(AlignmentResult.empty());
-      continue;
+      log('Face alignment failed because not able to estimate SimilarityTransform, for face: $face');
+      throw Exception('Face alignment failed because not able to estimate SimilarityTransform');
     }
     alignmentResults.add(alignmentResult);
 
