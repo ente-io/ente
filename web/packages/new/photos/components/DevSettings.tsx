@@ -1,3 +1,4 @@
+import log from "@/next/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -166,12 +167,16 @@ const updateAPIOrigin = async (origin: string) => {
     const url = `${origin}/ping`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    const json = PingResponse.parse(await res.json());
-    if (json.message != "pong") throw new Error("Invalid response");
+    try {
+        PingResponse.parse(await res.json());
+    } catch (e) {
+        log.error("Invalid response", e);
+        throw new Error("Invalid response");
+    }
 
     localStorage.setItem("apiOrigin", origin);
 };
 
 const PingResponse = z.object({
-    message: z.string().nullish(),
+    message: z.enum(["pong"]),
 });
