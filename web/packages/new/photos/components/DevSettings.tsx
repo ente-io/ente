@@ -1,3 +1,4 @@
+import { apiOrigin } from "@ente/shared/network/api";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -40,6 +41,14 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const form = useFormik({
         initialValues: {
             apiOrigin: localStorage.getItem("apiOrigin") ?? "",
+        },
+        validate: ({ apiOrigin }) => {
+            try {
+                new URL(apiOrigin);
+            } catch {
+                return { apiOrigin: "Invalid endpoint" };
+            }
+            return {};
         },
         onSubmit: async (values, { setSubmitting, setErrors }) => {
             try {
