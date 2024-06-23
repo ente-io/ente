@@ -31,10 +31,10 @@ interface DevSettingsProps {
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
-    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [saved, setSaved] = useState(false);
 
     const handleClose = () => {
-        setShowConfirmation(false);
+        setSaved(false);
         onClose();
     };
 
@@ -45,15 +45,19 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
 
     const form = useFormik({
         initialValues: { apiOrigin: "" },
+        validate: () => {
+            setSaved(false);
+            return {};
+        },
         onSubmit: async (values, { setSubmitting, setErrors }) => {
             const res = await updateAPIOrigin(values.apiOrigin);
             if (typeof res == "string") {
                 setErrors({ apiOrigin: res });
             } else {
                 setSubmitting(false);
-                setShowConfirmation(true);
+                setSaved(true);
                 // Add a bit of delay to acknowledge the update better.
-                setTimeout(handleClose, 300);
+                // setTimeout(handleClose, 300);
             }
         },
     });
@@ -87,7 +91,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    {showConfirmation ? (
+                                    {saved ? (
                                         <CheckIcon color="accent" />
                                     ) : (
                                         <IconButton
@@ -108,7 +112,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         type="submit"
                         color="accent"
                         fullWidth
-                        disabled={form.isSubmitting}
+                        disabled={form.isSubmitting || saved}
                         disableRipple
                     >
                         {"Save"}
@@ -119,7 +123,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         fullWidth
                         disableRipple
                     >
-                        {t("CANCEL")}
+                        {saved ? t("DONE") : t("CANCEL")}
                     </FocusVisibleButton>
                 </DialogActions>
             </form>
