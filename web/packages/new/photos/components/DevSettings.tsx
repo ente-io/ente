@@ -1,5 +1,3 @@
-import log from "@/next/log";
-import CheckIcon from "@mui/icons-material/Check";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -31,49 +29,33 @@ interface DevSettingsProps {
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
-    // const [saved, setSaved] = useState(false);
-
-    const savedAPIOrigin = localStorage.getItem("apiOrigin") ?? "";
-
-    const handleClose = () => {
-        // setSaved(false);
-        onClose();
-    };
 
     const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.
-        if (reason != "backdropClick") handleClose();
+        if (reason != "backdropClick") onClose();
     };
 
     const form = useFormik({
-        initialValues: { apiOrigin: "" },
-        // validate: () => {
-        //     setSaved(false);
-        //     return {};
-        // },
+        initialValues: {
+            apiOrigin: localStorage.getItem("apiOrigin") ?? "",
+        },
         onSubmit: async (values, { setSubmitting, setErrors }) => {
-            // if (saved) {
-            //     setSubmitting(false);
-            //     setTimeout(handleClose, 100);
-            //     return;
-            // }
-
-            const res = await updateAPIOrigin(values.apiOrigin);
-            if (typeof res == "string") {
-                setErrors({ apiOrigin: res });
-            } else {
-                setSubmitting(false);
-                // setSaved(true);
-                // Add a bit of delay to acknowledge the update better.
-                // setTimeout(handleClose, 600);
-
-                // handleClose();
+            try {
+                await updateAPIOrigin(values.apiOrigin);
+            } catch (e) {
+                // The person using this functionality is likely a developer and
+                // might be helped more by the original error instead of a
+                // friendlier but less specific message.
+                setErrors({
+                    apiOrigin: e instanceof Error ? e.message : String(e),
+                });
+                return;
             }
+
+            setSubmitting(false);
+            onClose();
         },
     });
-
-    const saved =
-        form.touched.apiOrigin && savedAPIOrigin == form.values.apiOrigin;
 
     return (
         <Dialog
@@ -82,13 +64,6 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
-            {/* <Snackbar
-                open={true}
-                autoHideDuration={5000}
-                onClose={handleClose}
-                message="This Snackbar will be dismissed in 5 seconds."
-            />
-            ; */}
             <form onSubmit={form.handleSubmit}>
                 <DialogTitle>{"Developer settings"}</DialogTitle>
                 <DialogContent>
@@ -111,17 +86,13 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    {saved ? (
-                                        <CheckIcon color="accent" />
-                                    ) : (
-                                        <IconButton
-                                            aria-label="More information"
-                                            color="secondary"
-                                            edge="end"
-                                        >
-                                            <InfoOutlinedIcon />
-                                        </IconButton>
-                                    )}
+                                    <IconButton
+                                        aria-label="More information"
+                                        color="secondary"
+                                        edge="end"
+                                    >
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
                                 </InputAdornment>
                             ),
                         }}
@@ -138,12 +109,12 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         {"Save"}
                     </FocusVisibleButton>
                     <FocusVisibleButton
-                        onClick={handleClose}
+                        onClick={onClose}
                         color="secondary"
                         fullWidth
                         disableRipple
                     >
-                        {saved ? t("DONE") : t("CANCEL")}
+                        {t("CANCEL")}
                     </FocusVisibleButton>
                 </DialogActions>
             </form>
@@ -162,27 +133,16 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
  *
  * @param origin The new API origin to use. Pass an empty string to clear the
  * previously saved API origin (if any).
- *
- * @returns true on success, and the user visible error message string
- * otherwise.
  */
-const updateAPIOrigin = async (origin: string): Promise<true | string> => {
+const updateAPIOrigin = async (origin: string) => {
     if (!origin) {
         localStorage.removeItem("apiOrigin");
-        return true;
+        return;
     }
 
     const url = `${origin}/ping`;
-    try {
-        const res = await fetch(url);
-        if (!res.ok)
-            throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-        localStorage.setItem("apiOrigin", origin);
-        return true;
-    } catch (e) {
-        log.error("Failed to ping the provided origin", e);
-        // The person using this is likely a developer, just give them the
-        // original error itself, they might find it helpful.
-        return e instanceof Error ? e.message : t("ERROR");
-    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    localStorage.setItem("apiOrigin", origin);
+    return true;
 };
