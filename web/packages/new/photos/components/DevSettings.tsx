@@ -6,6 +6,7 @@ import {
     DialogTitle,
     IconButton,
     InputAdornment,
+    Link,
     TextField,
     useMediaQuery,
     type ModalProps,
@@ -87,13 +88,19 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="More information"
-                                        color="secondary"
-                                        edge="end"
+                                    <Link
+                                        href="https://help.ente.io/self-hosting/guides/custom-server/"
+                                        target="_blank"
+                                        rel="noopener"
                                     >
-                                        <InfoOutlinedIcon />
-                                    </IconButton>
+                                        <IconButton
+                                            aria-label="More information"
+                                            color="secondary"
+                                            edge="end"
+                                        >
+                                            <InfoOutlinedIcon />
+                                        </IconButton>
+                                    </Link>
                                 </InputAdornment>
                             ),
                         }}
