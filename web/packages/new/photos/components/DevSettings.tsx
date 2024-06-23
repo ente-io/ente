@@ -44,7 +44,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         },
         validate: ({ apiOrigin }) => {
             try {
-                new URL(apiOrigin);
+                apiOrigin && new URL(apiOrigin);
             } catch {
                 return { apiOrigin: "Invalid endpoint" };
             }
