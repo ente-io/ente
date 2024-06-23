@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React from "react";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
 
@@ -31,10 +31,12 @@ interface DevSettingsProps {
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
-    const [saved, setSaved] = useState(false);
+    // const [saved, setSaved] = useState(false);
+
+    const savedAPIOrigin = localStorage.getItem("apiOrigin") ?? "";
 
     const handleClose = () => {
-        setSaved(false);
+        // setSaved(false);
         onClose();
     };
 
@@ -45,22 +47,33 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
 
     const form = useFormik({
         initialValues: { apiOrigin: "" },
-        validate: () => {
-            setSaved(false);
-            return {};
-        },
+        // validate: () => {
+        //     setSaved(false);
+        //     return {};
+        // },
         onSubmit: async (values, { setSubmitting, setErrors }) => {
+            // if (saved) {
+            //     setSubmitting(false);
+            //     setTimeout(handleClose, 100);
+            //     return;
+            // }
+
             const res = await updateAPIOrigin(values.apiOrigin);
             if (typeof res == "string") {
                 setErrors({ apiOrigin: res });
             } else {
                 setSubmitting(false);
-                setSaved(true);
+                // setSaved(true);
                 // Add a bit of delay to acknowledge the update better.
-                // setTimeout(handleClose, 300);
+                // setTimeout(handleClose, 600);
+
+                // handleClose();
             }
         },
     });
+
+    const saved =
+        form.touched.apiOrigin && savedAPIOrigin == form.values.apiOrigin;
 
     return (
         <Dialog
@@ -69,6 +82,13 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
+            {/* <Snackbar
+                open={true}
+                autoHideDuration={5000}
+                onClose={handleClose}
+                message="This Snackbar will be dismissed in 5 seconds."
+            />
+            ; */}
             <form onSubmit={form.handleSubmit}>
                 <DialogTitle>{"Developer settings"}</DialogTitle>
                 <DialogContent>
@@ -112,7 +132,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         type="submit"
                         color="accent"
                         fullWidth
-                        disabled={form.isSubmitting || saved}
+                        disabled={form.isSubmitting}
                         disableRipple
                     >
                         {"Save"}
