@@ -59,6 +59,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                 <DialogContent>
                     <TextField
                         fullWidth
+                        autoFocus
                         id="apiOrigin"
                         name="apiOrigin"
                         label="Server endpoint"
