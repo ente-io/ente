@@ -162,6 +162,9 @@ const TappableContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
     const handleClick: React.MouseEventHandler = (event) => {
         console.log("click", tapCount, event, event.target);
 
+        // Don't allow this when runinng on (e.g.) web.ente.io.
+        if (!shouldAllowChangingAPIOrigin()) return;
+
         // Ignore clicks on buttons when counting up towards 7.
         if (event.target instanceof HTMLButtonElement) return;
 
@@ -201,6 +204,15 @@ const TappableContainer_ = styled("div")`
         flex-direction: column;
     }
 `;
+
+/**
+ * Disable the ability to set the custom server when we're running on our own
+ * production deployment.
+ */
+const shouldAllowChangingAPIOrigin = () => {
+    const hostname = new URL(window.location.origin).hostname;
+    return !(hostname.endsWith(".ente.io") || hostname.endsWith(".ente.sh"));
+};
 
 const SlideContainer = styled("div")`
     flex: 1;
