@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import CheckIcon from "@mui/icons-material/Check";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -13,7 +14,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React from "react";
+import React, { useState } from "react";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
 
@@ -30,10 +31,16 @@ interface DevSettingsProps {
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
+    const [showConfirmation, setShowConfirmation] = useState(false);
+
+    const handleClose = () => {
+        setShowConfirmation(false);
+        onClose();
+    };
 
     const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.
-        if (reason != "backdropClick") onClose();
+        if (reason != "backdropClick") handleClose();
     };
 
     const form = useFormik({
@@ -44,8 +51,9 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                 setErrors({ apiOrigin: res });
             } else {
                 setSubmitting(false);
+                setShowConfirmation(true);
                 // Add a bit of delay to acknowledge the update better.
-                setTimeout(onClose, 200);
+                setTimeout(handleClose, 300);
             }
         },
     });
@@ -79,13 +87,17 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="More information"
-                                        color="secondary"
-                                        edge="end"
-                                    >
-                                        <InfoOutlinedIcon />
-                                    </IconButton>
+                                    {showConfirmation ? (
+                                        <CheckIcon color="accent" />
+                                    ) : (
+                                        <IconButton
+                                            aria-label="More information"
+                                            color="secondary"
+                                            edge="end"
+                                        >
+                                            <InfoOutlinedIcon />
+                                        </IconButton>
+                                    )}
                                 </InputAdornment>
                             ),
                         }}
@@ -102,7 +114,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         {"Save"}
                     </FocusVisibleButton>
                     <FocusVisibleButton
-                        onClick={onClose}
+                        onClick={handleClose}
                         color="secondary"
                         fullWidth
                         disableRipple
