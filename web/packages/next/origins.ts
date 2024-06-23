@@ -4,11 +4,10 @@ import { nullToUndefined } from "@/utils/transform";
  * Return the origin (scheme, host, port triple) that should be used for making
  * API requests to museum.
  *
- * This defaults to {@link defaultAPIOrigin}, but can be overridden when self
- * hosting or developing by setting the `NEXT_PUBLIC_ENTE_ENDPOINT` environment
- * variable.
+ * This defaults "https://api.ente.io", Ente's production API servers. but can
+ * be overridden when self hosting or developing (see {@link customAPIOrigin}).
  */
-export const apiOrigin = () => customAPIOrigin() ?? defaultAPIOrigin;
+export const apiOrigin = () => customAPIOrigin() ?? "https://api.ente.io";
 
 /**
  * Return the overridden API origin, if one is defined by either (in priority
@@ -25,12 +24,6 @@ export const customAPIOrigin = () =>
     nullToUndefined(localStorage.getItem("apiOrigin")) ??
     process.env.NEXT_PUBLIC_ENTE_ENDPOINT ??
     undefined;
-
-/**
- * Default value of {@link apiOrigin}: "https://api.ente.io", Ente's production
- * API servers.
- */
-export const defaultAPIOrigin = "https://api.ente.io";
 
 /**
  * Return the origin that should be used for uploading files.
