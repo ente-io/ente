@@ -2,8 +2,8 @@ import { isDevBuild } from "@/next/env";
 import { authenticatedRequestHeaders } from "@/next/http";
 import { localUser } from "@/next/local-user";
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import { nullToUndefined } from "@/utils/transform";
-import { apiOrigin } from "@ente/shared/network/api";
 import { z } from "zod";
 
 let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;

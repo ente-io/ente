@@ -1,12 +1,12 @@
 import { DevSettings } from "@/new/photos/components/DevSettings";
 import log from "@/next/log";
+import { albumsAppOrigin } from "@/next/origins";
 import { Login } from "@ente/accounts/components/Login";
 import { SignUp } from "@ente/accounts/components/SignUp";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import { getAlbumsURL } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -36,7 +36,7 @@ export default function LandingPage() {
     useEffect(() => {
         showNavBar(false);
         const currentURL = new URL(window.location.href);
-        const albumsURL = new URL(getAlbumsURL());
+        const albumsURL = new URL(albumsAppOrigin());
         currentURL.pathname = router.pathname;
         if (
             currentURL.host === albumsURL.host &&

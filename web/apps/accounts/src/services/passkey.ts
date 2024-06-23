@@ -1,4 +1,5 @@
 import { isDevBuild } from "@/next/env";
+import { apiOrigin } from "@/next/origins";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
@@ -8,7 +9,6 @@ import {
     toB64URLSafeNoPadding,
     toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
-import { apiOrigin } from "@ente/shared/network/api";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */

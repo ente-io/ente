@@ -1,6 +1,6 @@
 import log from "@/next/log";
-import HTTPService from "@ente/shared/network/HTTPService";
 import { apiOrigin } from "@/next/origins";
+import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { Collection } from "types/collection";

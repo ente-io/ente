@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import type { BaseAppContextT } from "@/next/types/app";
 import {
     checkPasskeyVerificationStatus,
@@ -7,7 +8,6 @@ import {
     saveCredentialsAndNavigateTo,
 } from "@ente/accounts/services/passkey";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { apiOrigin } from "@ente/shared/network/api";
 import { CircularProgress, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";

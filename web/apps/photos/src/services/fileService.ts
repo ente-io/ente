@@ -1,8 +1,8 @@
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Events, eventBus } from "@ente/shared/events";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { apiOrigin } from "@/next/origins";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { REQUEST_BATCH_SIZE } from "constants/api";
@@ -252,9 +252,14 @@ export const updateFileMagicMetadata = async (
             },
         });
     }
-    await HTTPService.put(`${apiOrigin()}/files/magic-metadata`, reqBody, null, {
-        "X-Auth-Token": token,
-    });
+    await HTTPService.put(
+        `${apiOrigin()}/files/magic-metadata`,
+        reqBody,
+        null,
+        {
+            "X-Auth-Token": token,
+        },
+    );
     return fileWithUpdatedMagicMetadataList.map(
         ({ file, updatedMagicMetadata }): EnteFile => ({
             ...file,

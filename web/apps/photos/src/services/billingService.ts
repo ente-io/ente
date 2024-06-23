@@ -7,7 +7,6 @@ import {
     setData,
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getDesktopRedirectURL } from "constants/billing";
 import isElectron from "is-electron";
 import { Plan, Subscription } from "types/billing";
 import { getPaymentToken } from "./userService";
@@ -213,7 +212,7 @@ class billingService {
 
     public getRedirectURL() {
         if (isElectron()) {
-            return getDesktopRedirectURL();
+            return `${paymentsAppOrigin()}/desktop-redirect`;
         } else {
             return `${window.location.origin}/gallery`;
         }
