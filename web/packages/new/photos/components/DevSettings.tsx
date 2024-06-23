@@ -13,6 +13,7 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
+import { z } from "zod";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
 
@@ -143,6 +144,12 @@ const updateAPIOrigin = async (origin: string) => {
     const url = `${origin}/ping`;
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const json = PingResponse.parse(await res.json());
+    if (json.message != "pong") throw new Error("Invalid response");
+
     localStorage.setItem("apiOrigin", origin);
-    return true;
 };
+
+const PingResponse = z.object({
+    message: z.string().nullish(),
+});
