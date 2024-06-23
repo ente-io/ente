@@ -1,13 +1,11 @@
 import log from "@/next/log";
+import { apiOrigin, uploaderOrigin } from "@/next/origins";
 import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint, uploaderOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
-
-const ENDPOINT = getEndpoint();
 
 const MAX_URL_REQUESTS = 50;
 
@@ -22,7 +20,7 @@ class UploadHttpClient {
             }
             const response = await retryHTTPCall(
                 () =>
-                    HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
+                    HTTPService.post(`${apiOrigin()}/files`, uploadFile, null, {
                         "X-Auth-Token": token,
                     }),
                 handleUploadError,
@@ -43,7 +41,7 @@ class UploadHttpClient {
                         return;
                     }
                     this.uploadURLFetchInProgress = HTTPService.get(
-                        `${ENDPOINT}/files/upload-urls`,
+                        `${apiOrigin()}/files/upload-urls`,
                         {
                             count: Math.min(MAX_URL_REQUESTS, count * 2),
                         },
@@ -73,7 +71,7 @@ class UploadHttpClient {
                 return;
             }
             const response = await HTTPService.get(
-                `${ENDPOINT}/files/multipart-upload-urls`,
+                `${apiOrigin()}/files/multipart-upload-urls`,
                 {
                     count,
                 },

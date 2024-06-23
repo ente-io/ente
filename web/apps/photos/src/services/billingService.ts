@@ -1,6 +1,6 @@
 import log from "@/next/log";
+import { apiOrigin, paymentsAppOrigin } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint, getPaymentsURL } from "@ente/shared/network/api";
 import {
     LS_KEYS,
     removeData,
@@ -11,8 +11,6 @@ import { getDesktopRedirectURL } from "constants/billing";
 import isElectron from "is-electron";
 import { Plan, Subscription } from "types/billing";
 import { getPaymentToken } from "./userService";
-
-const ENDPOINT = getEndpoint();
 
 enum PaymentActionType {
     Buy = "buy",
@@ -36,11 +34,11 @@ class billingService {
             let response;
             if (!token) {
                 response = await HTTPService.get(
-                    `${ENDPOINT}/billing/plans/v2`,
+                    `${apiOrigin()}/billing/plans/v2`,
                 );
             } else {
                 response = await HTTPService.get(
-                    `${ENDPOINT}/billing/user-plans`,
+                    `${apiOrigin()}/billing/user-plans`,
                     null,
                     {
                         "X-Auth-Token": getToken(),
@@ -56,7 +54,7 @@ class billingService {
     public async syncSubscription() {
         try {
             const response = await HTTPService.get(
-                `${ENDPOINT}/billing/subscription`,
+                `${apiOrigin()}/billing/subscription`,
                 null,
                 {
                     "X-Auth-Token": getToken(),
@@ -100,7 +98,7 @@ class billingService {
     public async cancelSubscription() {
         try {
             const response = await HTTPService.post(
-                `${ENDPOINT}/billing/stripe/cancel-subscription`,
+                `${apiOrigin()}/billing/stripe/cancel-subscription`,
                 null,
                 null,
                 {
@@ -118,7 +116,7 @@ class billingService {
     public async activateSubscription() {
         try {
             const response = await HTTPService.post(
-                `${ENDPOINT}/billing/stripe/activate-subscription`,
+                `${apiOrigin()}/billing/stripe/activate-subscription`,
                 null,
                 null,
                 {
@@ -142,7 +140,7 @@ class billingService {
                 return;
             }
             const response = await HTTPService.post(
-                `${ENDPOINT}/billing/verify-subscription`,
+                `${apiOrigin()}/billing/verify-subscription`,
                 {
                     paymentProvider: "stripe",
                     productID: null,
@@ -167,9 +165,14 @@ class billingService {
             return;
         }
         try {
-            await HTTPService.delete(`${ENDPOINT}/family/leave`, null, null, {
-                "X-Auth-Token": getToken(),
-            });
+            await HTTPService.delete(
+                `${apiOrigin()}/family/leave`,
+                null,
+                null,
+                {
+                    "X-Auth-Token": getToken(),
+                },
+            );
             removeData(LS_KEYS.FAMILY_DATA);
         } catch (e) {
             log.error("/family/leave failed", e);
@@ -184,7 +187,7 @@ class billingService {
     ) {
         try {
             const redirectURL = this.getRedirectURL();
-            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
+            window.location.href = `${paymentsAppOrigin()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
         } catch (e) {
             log.error("unable to get payments url", e);
             throw e;
@@ -195,7 +198,7 @@ class billingService {
         try {
             const redirectURL = this.getRedirectURL();
             const response = await HTTPService.get(
-                `${ENDPOINT}/billing/stripe/customer-portal`,
+                `${apiOrigin()}/billing/stripe/customer-portal`,
                 { redirectURL },
                 {
                     "X-Auth-Token": getToken(),

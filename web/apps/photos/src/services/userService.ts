@@ -1,12 +1,8 @@
 import log from "@/next/log";
+import { apiOrigin, customAPIOrigin, familyAppOrigin } from "@/next/origins";
 import { putAttributes } from "@ente/accounts/api/user";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    customAPIOrigin,
-    getEndpoint,
-    getFamilyPortalURL,
-} from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -21,15 +17,13 @@ import {
 } from "types/user";
 import { getLocalFamilyData, isPartOfFamily } from "utils/user/family";
 
-const ENDPOINT = getEndpoint();
-
 const HAS_SET_KEYS = "hasSetKeys";
 
 export const getPublicKey = async (email: string) => {
     const token = getToken();
 
     const resp = await HTTPService.get(
-        `${ENDPOINT}/users/public-key`,
+        `${apiOrigin()}/users/public-key`,
         { email },
         {
             "X-Auth-Token": token,
@@ -42,7 +36,7 @@ export const getPaymentToken = async () => {
     const token = getToken();
 
     const resp = await HTTPService.get(
-        `${ENDPOINT}/users/payment-token`,
+        `${apiOrigin()}/users/payment-token`,
         null,
         {
             "X-Auth-Token": token,
@@ -56,7 +50,7 @@ export const getFamiliesToken = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${ENDPOINT}/users/families-token`,
+            `${apiOrigin()}/users/families-token`,
             null,
             {
                 "X-Auth-Token": token,
@@ -74,7 +68,7 @@ export const getRoadmapRedirectURL = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${ENDPOINT}/users/roadmap/v2`,
+            `${apiOrigin()}/users/roadmap/v2`,
             null,
             {
                 "X-Auth-Token": token,
@@ -90,7 +84,7 @@ export const getRoadmapRedirectURL = async () => {
 export const isTokenValid = async (token: string) => {
     try {
         const resp = await HTTPService.get(
-            `${ENDPOINT}/users/session-validity/v2`,
+            `${apiOrigin()}/users/session-validity/v2`,
             null,
             {
                 "X-Auth-Token": token,
@@ -129,7 +123,7 @@ export const isTokenValid = async (token: string) => {
 
 export const getTwoFactorStatus = async () => {
     const resp = await HTTPService.get(
-        `${ENDPOINT}/users/two-factor/status`,
+        `${apiOrigin()}/users/two-factor/status`,
         null,
         {
             "X-Auth-Token": getToken(),
@@ -143,7 +137,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${ENDPOINT}/users/details/v2`,
+            `${apiOrigin()}/users/details/v2`,
             null,
             {
                 "X-Auth-Token": token,
@@ -160,7 +154,7 @@ export const getFamilyPortalRedirectURL = async () => {
     try {
         const jwtToken = await getFamiliesToken();
         const isFamilyCreated = isPartOfFamily(getLocalFamilyData());
-        return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
+        return `${familyAppOrigin()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
             window.location.origin
         }/gallery`;
     } catch (e) {
@@ -174,7 +168,7 @@ export const getAccountDeleteChallenge = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${ENDPOINT}/users/delete-challenge`,
+            `${apiOrigin()}/users/delete-challenge`,
             null,
             {
                 "X-Auth-Token": token,
@@ -199,7 +193,7 @@ export const deleteAccount = async (
         }
 
         await HTTPService.delete(
-            `${ENDPOINT}/users/delete`,
+            `${apiOrigin()}/users/delete`,
             { challenge, reason, feedback },
             null,
             {
@@ -217,7 +211,7 @@ export const getFaceSearchEnabledStatus = async () => {
         const token = getToken();
         const resp: AxiosResponse<GetRemoteStoreValueResponse> =
             await HTTPService.get(
-                `${ENDPOINT}/remote-store`,
+                `${apiOrigin()}/remote-store`,
                 {
                     key: "faceSearchEnabled",
                     defaultValue: false,
@@ -237,7 +231,7 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
     try {
         const token = getToken();
         await HTTPService.post(
-            `${ENDPOINT}/remote-store/update`,
+            `${apiOrigin()}/remote-store/update`,
             {
                 key: "faceSearchEnabled",
                 value: newStatus.toString(),
@@ -268,7 +262,7 @@ export const getMapEnabledStatus = async () => {
         const token = getToken();
         const resp: AxiosResponse<GetRemoteStoreValueResponse> =
             await HTTPService.get(
-                `${ENDPOINT}/remote-store`,
+                `${apiOrigin()}/remote-store`,
                 {
                     key: "mapEnabled",
                     defaultValue: false,
@@ -288,7 +282,7 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
     try {
         const token = getToken();
         await HTTPService.post(
-            `${ENDPOINT}/remote-store/update`,
+            `${apiOrigin()}/remote-store/update`,
             {
                 key: "mapEnabled",
                 value: newStatus.toString(),

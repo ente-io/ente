@@ -2,7 +2,7 @@ import log from "@/next/log";
 import { ApiError } from "../error";
 import { getToken } from "../storage/localStorage/helpers";
 import HTTPService from "./HTTPService";
-import { getEndpoint } from "./api";
+import { apiOrigin } from "@/next/origins";
 
 class CastGateway {
     constructor() {}

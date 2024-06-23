@@ -1,11 +1,10 @@
-import { getEndpoint } from "@ente/shared/network/api";
-import localForage from "@ente/shared/storage/localForage";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
-
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
+import localForage from "@ente/shared/storage/localForage";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
@@ -77,7 +76,6 @@ import {
 import { getLocalFiles } from "./fileService";
 import { getPublicKey } from "./userService";
 
-const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = "collections";
 const COLLECTION_UPDATION_TIME = "collection-updation-time";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -183,7 +181,7 @@ const getCollections = async (
 ): Promise<Collection[]> => {
     try {
         const resp = await HTTPService.get(
-            `${ENDPOINT}/collections/v2`,
+            `${apiOrigin()}/collections/v2`,
             {
                 sinceTime,
             },
@@ -330,7 +328,7 @@ export const getCollection = async (
             return;
         }
         const resp = await HTTPService.get(
-            `${ENDPOINT}/collections/${collectionID}`,
+            `${apiOrigin()}/collections/${collectionID}`,
             null,
             { "X-Auth-Token": token },
         );
@@ -474,7 +472,7 @@ const postCollection = async (
 ): Promise<EncryptedCollection> => {
     try {
         const response = await HTTPService.post(
-            `${ENDPOINT}/collections`,
+            `${apiOrigin()}/collections`,
             collectionData,
             null,
             { "X-Auth-Token": token },
@@ -529,7 +527,7 @@ export const addToCollection = async (
                 files: fileKeysEncryptedWithNewCollection,
             };
             await HTTPService.post(
-                `${ENDPOINT}/collections/add-files`,
+                `${apiOrigin()}/collections/add-files`,
                 requestBody,
                 null,
                 {
@@ -559,7 +557,7 @@ export const restoreToCollection = async (
                 files: fileKeysEncryptedWithNewCollection,
             };
             await HTTPService.post(
-                `${ENDPOINT}/collections/restore-files`,
+                `${apiOrigin()}/collections/restore-files`,
                 requestBody,
                 null,
                 {
@@ -590,7 +588,7 @@ export const moveToCollection = async (
                 files: fileKeysEncryptedWithNewCollection,
             };
             await HTTPService.post(
-                `${ENDPOINT}/collections/move-files`,
+                `${apiOrigin()}/collections/move-files`,
                 requestBody,
                 null,
                 {
@@ -736,7 +734,7 @@ export const removeNonUserFiles = async (
             };
 
             await HTTPService.post(
-                `${ENDPOINT}/collections/v3/remove-files`,
+                `${apiOrigin()}/collections/v3/remove-files`,
                 request,
                 null,
                 { "X-Auth-Token": token },
@@ -763,7 +761,7 @@ export const deleteCollection = async (
         const token = getToken();
 
         await HTTPService.delete(
-            `${ENDPOINT}/collections/v3/${collectionID}`,
+            `${apiOrigin()}/collections/v3/${collectionID}`,
             null,
             { collectionID, keepFiles },
             { "X-Auth-Token": token },
@@ -779,7 +777,7 @@ export const leaveSharedAlbum = async (collectionID: number) => {
         const token = getToken();
 
         await HTTPService.post(
-            `${ENDPOINT}/collections/leave/${collectionID}`,
+            `${apiOrigin()}/collections/leave/${collectionID}`,
             null,
             null,
             { "X-Auth-Token": token },
@@ -817,7 +815,7 @@ export const updateCollectionMagicMetadata = async (
     };
 
     await HTTPService.put(
-        `${ENDPOINT}/collections/magic-metadata`,
+        `${apiOrigin()}/collections/magic-metadata`,
         reqBody,
         null,
         {
@@ -861,7 +859,7 @@ export const updateSharedCollectionMagicMetadata = async (
     };
 
     await HTTPService.put(
-        `${ENDPOINT}/collections/sharee-magic-metadata`,
+        `${apiOrigin()}/collections/sharee-magic-metadata`,
         reqBody,
         null,
         {
@@ -905,7 +903,7 @@ export const updatePublicCollectionMagicMetadata = async (
     };
 
     await HTTPService.put(
-        `${ENDPOINT}/collections/public-magic-metadata`,
+        `${apiOrigin()}/collections/public-magic-metadata`,
         reqBody,
         null,
         {
@@ -940,7 +938,7 @@ export const renameCollection = async (
         nameDecryptionNonce,
     };
     await HTTPService.post(
-        `${ENDPOINT}/collections/rename`,
+        `${apiOrigin()}/collections/rename`,
         collectionRenameRequest,
         null,
         {
@@ -969,7 +967,7 @@ export const shareCollection = async (
             encryptedKey,
         };
         await HTTPService.post(
-            `${ENDPOINT}/collections/share`,
+            `${apiOrigin()}/collections/share`,
             shareCollectionRequest,
             null,
             {
@@ -993,7 +991,7 @@ export const unshareCollection = async (
             email: withUserEmail,
         };
         await HTTPService.post(
-            `${ENDPOINT}/collections/unshare`,
+            `${apiOrigin()}/collections/unshare`,
             shareCollectionRequest,
             null,
             {
@@ -1015,7 +1013,7 @@ export const createShareableURL = async (collection: Collection) => {
             collectionID: collection.id,
         };
         const resp = await HTTPService.post(
-            `${ENDPOINT}/collections/share-url`,
+            `${apiOrigin()}/collections/share-url`,
             createPublicAccessTokenRequest,
             null,
             {
@@ -1036,7 +1034,7 @@ export const deleteShareableURL = async (collection: Collection) => {
             return null;
         }
         await HTTPService.delete(
-            `${ENDPOINT}/collections/share-url/${collection.id}`,
+            `${apiOrigin()}/collections/share-url/${collection.id}`,
             null,
             null,
             {
@@ -1058,7 +1056,7 @@ export const updateShareableURL = async (
             return null;
         }
         const res = await HTTPService.put(
-            `${ENDPOINT}/collections/share-url`,
+            `${apiOrigin()}/collections/share-url`,
             request,
             null,
             {
