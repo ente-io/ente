@@ -1,9 +1,12 @@
 import log from "@/next/log";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
+    IconButton,
+    InputAdornment,
     TextField,
     useMediaQuery,
     type ModalProps,
@@ -73,6 +76,19 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         helperText={
                             form.touched.apiOrigin && form.errors.apiOrigin
                         }
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="More information"
+                                        color="secondary"
+                                        edge="end"
+                                    >
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                 </DialogContent>
                 <DialogActions>
