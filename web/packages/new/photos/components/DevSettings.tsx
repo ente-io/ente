@@ -77,7 +77,13 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         >
             <form onSubmit={form.handleSubmit}>
                 <DialogTitle>{"Developer settings"}</DialogTitle>
-                <DialogContent>
+                <DialogContent
+                    sx={{
+                        "&&": {
+                            paddingBlock: "8px",
+                        },
+                    }}
+                >
                     <TextField
                         fullWidth
                         autoFocus
@@ -92,7 +98,8 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                             form.touched.apiOrigin && !!form.errors.apiOrigin
                         }
                         helperText={
-                            form.touched.apiOrigin && form.errors.apiOrigin
+                            (form.touched.apiOrigin && form.errors.apiOrigin) ??
+                            " " /* always show an empty string to prevent a layout shift */
                         }
                         InputProps={{
                             endAdornment: (
