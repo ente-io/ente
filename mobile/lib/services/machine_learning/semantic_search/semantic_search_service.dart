@@ -204,6 +204,9 @@ class SemanticSearchService {
     await _frameworkInitialization.future;
     _logger.info("Attempting backfill for image embeddings");
     final fileIDs = await _getFileIDsToBeIndexed();
+    if (fileIDs.isEmpty) {
+      return;
+    }
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
     // await _cacheThumbnails(files);

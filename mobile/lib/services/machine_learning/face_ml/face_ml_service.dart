@@ -925,7 +925,7 @@ class FaceMlService {
         await _getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
 
     if (filePath == null) {
-      _logger.severe(
+      _logger.warning(
         "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null",
       );
       throw CouldNotRetrieveAnyFileData();

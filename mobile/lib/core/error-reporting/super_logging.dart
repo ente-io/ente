@@ -15,7 +15,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/models/typedefs.dart';
+import "package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -234,12 +236,22 @@ class SuperLogging {
       if (error is DioError) {
         return;
       }
+      if (error is CouldNotRetrieveAnyFileData ||
+          error is StorageLimitExceededError ||
+          error is WiFiUnavailableError ||
+          error is InvalidFileError ||
+          error is NoActiveSubscriptionError) {
+        if (kDebugMode) {
+          $.info('Not sending error to sentry: $error');
+        }
+        return;
+      }
       await Sentry.captureException(
         error,
         stackTrace: stack,
       );
     } catch (e) {
-      $.info('Sending report to sentry.io failed: $e');
+      $.info('Sending report to sentry failed: $e');
       $.info('Original error: $error');
     }
   }
