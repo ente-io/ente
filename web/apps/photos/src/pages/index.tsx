@@ -160,8 +160,6 @@ const TappableContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
     const [showDevSettings, setShowDevSettings] = useState(false);
 
     const handleClick: React.MouseEventHandler = (event) => {
-        console.log("click", tapCount, event, event.target);
-
         // Don't allow this when runinng on (e.g.) web.ente.io.
         if (!shouldAllowChangingAPIOrigin()) return;
 
