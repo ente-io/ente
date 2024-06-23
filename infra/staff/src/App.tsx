@@ -15,7 +15,7 @@ export const App: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [userData, setUserData] = useState<UserData | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [isDataFetched, setIsDataFetched] = useState<boolean>(false); 
+    const [isDataFetched, setIsDataFetched] = useState<boolean>(false);
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
@@ -46,11 +46,11 @@ export const App: React.FC = () => {
             console.log("API Response:", userDataResponse);
             setUserData(userDataResponse);
             setError(null);
-            setIsDataFetched(true); 
+            setIsDataFetched(true);
         } catch (error) {
             console.error("Error fetching data:", error);
             setError((error as Error).message);
-            setIsDataFetched(false); 
+            setIsDataFetched(false);
         }
     };
 
@@ -113,7 +113,7 @@ export const App: React.FC = () => {
                         displayValue = value;
                     }
                 } else if (typeof value === "object" && value !== null) {
-                    displayValue = JSON.stringify(value, null, 2); 
+                    displayValue = JSON.stringify(value, null, 2);
                 } else if (value === null) {
                     displayValue = "null";
                 } else if (
@@ -124,7 +124,7 @@ export const App: React.FC = () => {
                 } else if (typeof value === "undefined") {
                     displayValue = "undefined";
                 } else {
-                    displayValue = value as string; 
+                    displayValue = value as string;
                 }
 
                 return (
@@ -157,7 +157,7 @@ export const App: React.FC = () => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLFormElement>) => {
         if (event.key === "Enter") {
-            event.preventDefault(); 
+            event.preventDefault();
             fetchData().catch((error: unknown) =>
                 console.error("Fetch data error:", error),
             );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../App.css"; 
+import "../App.css";
 interface UpdateSubscriptionProps {
     token: string;
     userId: string;
@@ -14,14 +14,13 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
     onClose,
 }) => {
     const [expiryTime, setExpiryTime] = useState<Date | null>(null);
-    const [productId, setProductId] = useState<string>("50gb_monthly"); 
+    const [productId, setProductId] = useState<string>("50gb_monthly");
     const [paymentProvider, setPaymentProvider] = useState<string>("bitpay");
     const [transactionId, setTransactionId] = useState<string>("");
     const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [storage, setStorage] = useState<number | "">("");
 
-    
     useEffect(() => {
         if (productId === "50gb_yearly" || productId === "50gb_monthly") {
             setStorage(50 * 1024 * 1024 * 1024);
@@ -29,26 +28,25 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
             productId === "200gb_yearly" ||
             productId === "200gb_monthly"
         ) {
-            setStorage(200 * 1024 * 1024 * 1024); 
+            setStorage(200 * 1024 * 1024 * 1024);
         } else if (
             productId === "500gb_yearly" ||
             productId === "500gb_monthly"
         ) {
-            setStorage(500 * 1024 * 1024 * 1024); 
+            setStorage(500 * 1024 * 1024 * 1024);
         } else if (
             productId === "2000gb_yearly" ||
             productId === "2000gb_monthly"
         ) {
             setStorage(2000 * 1024 * 1024 * 1024);
         } else {
-            setStorage(""); 
+            setStorage("");
         }
     }, [productId]);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
-       
         const expiryTimeTimestamp = expiryTime
             ? expiryTime.getTime() * 1000
             : "";
@@ -163,10 +161,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                             onChange={(e) => setTransactionId(e.target.value)}
                         />
                     </div>
-                    <button
-                        type="submit"
-                        id="submitbtn"
-                       >
+                    <button type="submit" id="submitbtn">
                         Update
                     </button>
                 </form>
