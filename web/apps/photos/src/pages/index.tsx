@@ -110,7 +110,7 @@ export default function LandingPage() {
     const redirectToLoginPage = () => router.push(PAGES.LOGIN);
 
     return (
-        <Container>
+        <TappableContainer>
             {loading ? (
                 <EnteSpinner />
             ) : (
@@ -144,11 +144,11 @@ export default function LandingPage() {
                     </DesktopBox>
                 </>
             )}
-        </Container>
+        </TappableContainer>
     );
 }
 
-const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
+const TappableContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
     // [Note: Configuring custom server]
     //
     // Allow the user to tap 7 times anywhere on the onboarding screen to bring
@@ -178,7 +178,7 @@ const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
     };
 
     return (
-        <Container_ onClick={handleClick}>
+        <TappableContainer_ onClick={handleClick}>
             <>
                 <DevSettings
                     open={showDevSettings}
@@ -186,11 +186,11 @@ const Container: React.FC<React.PropsWithChildren> = ({ children }) => {
                 />
                 {children}
             </>
-        </Container_>
+        </TappableContainer_>
     );
 };
 
-const Container_ = styled("div")`
+const TappableContainer_ = styled("div")`
     display: flex;
     flex: 1;
     align-items: center;
