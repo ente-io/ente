@@ -96,13 +96,21 @@ some cases.
 [React](https://react.dev) ("react") is our core framework. It also has a
 sibling "react-dom" package that renders JSX to the DOM.
 
-### MUI and Emotion
+### MUI and Material Icons
 
-We use [MUI](https://mui.com) ("@mui/material"), which is a React component
-library, to get a base set of components.
+We use [MUI](https://mui.com)'s
+
+-   [@mui/material](https://mui.com/material-ui/getting-started/installation/),
+    which is a React component library, to get a base set of components; and
+
+-   [@mui/material-icons](https://mui.com/material-ui/material-icons/). which
+    provides Material icons exported as React components (a `SvgIcon`).
+
+### Emotion
 
 MUI uses [Emotion](https://emotion.sh/) (a styled-component variant) as its
-preferred CSS-in-JS library.
+preferred CSS-in-JS library, and we use the same in our code too to reduce
+moving parts.
 
 Emotion itself comes in many parts, of which we need the following:
 
