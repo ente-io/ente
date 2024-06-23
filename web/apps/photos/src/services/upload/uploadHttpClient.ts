@@ -2,13 +2,12 @@ import log from "@/next/log";
 import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
+import { getEndpoint, uploaderOrigin } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 
 const ENDPOINT = getEndpoint();
-const UPLOAD_ENDPOINT = getUploadEndpoint();
 
 const MAX_URL_REQUESTS = 50;
 
@@ -122,7 +121,7 @@ class UploadHttpClient {
         try {
             await retryHTTPCall(() =>
                 HTTPService.put(
-                    `${UPLOAD_ENDPOINT}/file-upload`,
+                    `${uploaderOrigin()}/file-upload`,
                     file,
                     null,
                     {
@@ -178,7 +177,7 @@ class UploadHttpClient {
         try {
             const response = await retryHTTPCall(async () => {
                 const resp = await HTTPService.put(
-                    `${UPLOAD_ENDPOINT}/multipart-upload`,
+                    `${uploaderOrigin()}/multipart-upload`,
                     filePart,
                     null,
                     {
@@ -219,7 +218,7 @@ class UploadHttpClient {
         try {
             await retryHTTPCall(() =>
                 HTTPService.post(
-                    `${UPLOAD_ENDPOINT}/multipart-complete`,
+                    `${uploaderOrigin()}/multipart-complete`,
                     reqBody,
                     null,
                     {

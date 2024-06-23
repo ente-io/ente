@@ -1,4 +1,3 @@
-import { apiOrigin } from "@ente/shared/network/api";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,

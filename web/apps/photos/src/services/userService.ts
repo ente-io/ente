@@ -2,7 +2,11 @@ import log from "@/next/log";
 import { putAttributes } from "@ente/accounts/api/user";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint, getFamilyPortalURL } from "@ente/shared/network/api";
+import {
+    customAPIOrigin,
+    getEndpoint,
+    getFamilyPortalURL,
+} from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -314,10 +318,13 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
  * rename this to say getUseDirectUpload).
  */
 export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
-    // If NEXT_PUBLIC_ENTE_ENDPOINT is set, that means we're not running a
-    // production deployment. Disable the Cloudflare upload proxy, and instead
-    // just directly use the upload URLs that museum gives us.
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT) return true;
+    // If a custom origin is set, that means we're not running a production
+    // deployment (maybe we're running locally, or being self-hosted).
+    //
+    // In such cases, disable the Cloudflare upload proxy (which won't work for
+    // self-hosters), and instead just directly use the upload URLs that museum
+    // gives us.
+    if (customAPIOrigin()) return true;
 
     try {
         const featureFlags = (
