@@ -76,7 +76,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             maxWidth="xs"
         >
             <form onSubmit={form.handleSubmit}>
-                <DialogTitle>{"Developer settings"}</DialogTitle>
+                <DialogTitle>{t("developer_settings")}</DialogTitle>
                 <DialogContent
                     sx={{
                         "&&": {
@@ -89,7 +89,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         autoFocus
                         id="apiOrigin"
                         name="apiOrigin"
-                        label="Server endpoint"
+                        label={t("server_endpoint")}
                         placeholder="http://localhost:8080"
                         value={form.values.apiOrigin}
                         onChange={form.handleChange}
@@ -110,7 +110,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                                         rel="noopener"
                                     >
                                         <IconButton
-                                            aria-label="More information"
+                                            aria-label={t("more_information")}
                                             color="secondary"
                                             edge="end"
                                         >
@@ -130,7 +130,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         disabled={form.isSubmitting}
                         disableRipple
                     >
-                        {"Save"}
+                        {t("save")}
                     </FocusVisibleButton>
                     <FocusVisibleButton
                         onClick={onClose}
