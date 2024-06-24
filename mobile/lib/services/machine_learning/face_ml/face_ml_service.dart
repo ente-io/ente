@@ -36,12 +36,12 @@ import 'package:photos/services/machine_learning/face_ml/face_detection/detectio
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
+import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
