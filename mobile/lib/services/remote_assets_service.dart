@@ -32,6 +32,35 @@ class RemoteAssetsService {
     }
   }
 
+  ///Returns asset if the remote asset is new compared to the local copy of it
+  Future<File?> getAssetIfUpdated(String remotePath) async {
+    try {
+      final path = await _getLocalPath(remotePath);
+      final file = File(path);
+      if (!file.existsSync()) {
+        final tempFile = File(path + ".temp");
+        await _downloadFile(remotePath, tempFile.path);
+        tempFile.renameSync(path);
+        return File(path);
+      } else {
+        final existingFileSize = File(path).lengthSync();
+        final tempFile = File(path + ".temp");
+        await _downloadFile(remotePath, tempFile.path);
+        final newFileSize = tempFile.lengthSync();
+        if (existingFileSize != newFileSize) {
+          tempFile.renameSync(path);
+          return File(path);
+        } else {
+          tempFile.deleteSync();
+          return null;
+        }
+      }
+    } catch (e) {
+      _logger.warning("Error getting asset if updated", e);
+      return null;
+    }
+  }
+
   Future<bool> hasAsset(String remotePath) async {
     final path = await _getLocalPath(remotePath);
     return File(path).exists();
@@ -60,8 +89,8 @@ class RemoteAssetsService {
   Future<void> _downloadFile(String url, String savePath) async {
     _logger.info("Downloading " + url);
     final existingFile = File(savePath);
-    if (await existingFile.exists()) {
-      await existingFile.delete();
+    if (existingFile.existsSync()) {
+      existingFile.deleteSync();
     }
 
     await NetworkClient.instance.getDio().download(
