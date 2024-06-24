@@ -1,5 +1,5 @@
+import "dart:async";
 import "dart:convert";
-import 'dart:math';
 
 import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
@@ -77,22 +77,23 @@ class MagicCacheService {
   Future<void> _updateCacheIfNeeded() async {
     final jsonFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
-    if (jsonFile == null) {}
+    if (jsonFile != null) {}
   }
 
-  Future<Map<String, List<int>>> getMatchingFileIDsForPromptData(
-    Map<String, Object> promptData,
+  Future<List<int>> getMatchingFileIDsForPromptData(
+    Map<String, dynamic> promptData,
   ) async {
     final result = await SemanticSearchService.instance.getMatchingFileIDs(
       promptData["prompt"] as String,
       promptData["minimumScore"] as double,
     );
 
-    return {promptData["title"] as String: result};
+    return result;
   }
 
   Future<void> updateMagicCache() async {
-    final magicCaches = <MagicCache>[];
+    final magicPromptsData = await _loadMagicPrompts();
+    final magicCaches = await nonEmptyMagicResults(magicPromptsData);
     await prefs.setString(
       _key,
       MagicCache.encodeListToJson(magicCaches),
@@ -126,17 +127,42 @@ class MagicCacheService {
     return genericSearchResults;
   }
 
-  ///Generates from 0 to max non-repeating random numbers
-  List<int> _generateUniqueRandomNumbers(int max, int count) {
-    final numbers = <int>[];
-    for (int i = 1; i <= count;) {
-      final randomNumber = Random().nextInt(max + 1);
-      if (numbers.contains(randomNumber)) {
-        continue;
+  Future<List<dynamic>> _loadMagicPrompts() async {
+    final file =
+        await RemoteAssetsService.instance.getAsset(_kMagicPromptsDataUrl);
+
+    final json = jsonDecode(await file.readAsString());
+    return json["prompts"];
+  }
+
+  ///Returns random non-empty magic results from magicPromptsData
+  ///Length is capped at [limit], can be less than [limit] if there are not enough
+  ///non-empty results
+  Future<List<MagicCache>> nonEmptyMagicResults(
+    List<dynamic> magicPromptsData,
+  ) async {
+    const limit = 4;
+    final results = <MagicCache>[];
+    final randomIndexes = List.generate(
+      magicPromptsData.length,
+      (index) => index,
+      growable: false,
+    )..shuffle();
+    for (final index in randomIndexes) {
+      final files =
+          await getMatchingFileIDsForPromptData(magicPromptsData[index]);
+      if (files.isNotEmpty) {
+        results.add(
+          MagicCache(
+            magicPromptsData[index]["title"] as String,
+            files,
+          ),
+        );
       }
-      numbers.add(randomNumber);
-      i++;
+      if (results.length >= limit) {
+        break;
+      }
     }
-    return numbers;
+    return results;
   }
 }

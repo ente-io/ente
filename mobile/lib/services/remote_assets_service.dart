@@ -21,13 +21,13 @@ class RemoteAssetsService {
   Future<File> getAsset(String remotePath, {bool refetch = false}) async {
     final path = await _getLocalPath(remotePath);
     final file = File(path);
-    if (await file.exists() && !refetch) {
+    if (file.existsSync() && !refetch) {
       _logger.info("Returning cached file for $remotePath");
       return file;
     } else {
       final tempFile = File(path + ".temp");
       await _downloadFile(remotePath, tempFile.path);
-      await tempFile.rename(path);
+      tempFile.renameSync(path);
       return File(path);
     }
   }
