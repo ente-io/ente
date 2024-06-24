@@ -1,7 +1,9 @@
 import "dart:async";
 import "dart:convert";
+import "dart:io";
 
 import "package:logging/logging.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -60,7 +62,6 @@ extension MagicCacheServiceExtension on MagicCache {
 }
 
 class MagicCacheService {
-  static const _key = "magic_cache";
   static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
   static const _kMagicPromptsDataUrl = "https://discover.ente.io/v1.json";
 
@@ -96,7 +97,7 @@ class MagicCacheService {
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (jsonFile != null) {
       Future.delayed(_kCacheUpdateDelay, () {
-        unawaited(updateMagicCache());
+        unawaited(_updateCache());
       });
       return;
     }
@@ -105,9 +106,13 @@ class MagicCacheService {
             .subtract(const Duration(seconds: 1))
             .millisecondsSinceEpoch) {
       Future.delayed(_kCacheUpdateDelay, () {
-        unawaited(updateMagicCache());
+        unawaited(_updateCache());
       });
     }
+  }
+
+  Future<String> _getCachePath() async {
+    return (await getApplicationSupportDirectory()).path + "/cache/magic_cache";
   }
 
   Future<List<int>> _getMatchingFileIDsForPromptData(
@@ -121,35 +126,41 @@ class MagicCacheService {
     return result;
   }
 
-  Future<void> updateMagicCache() async {
+  Future<void> _updateCache() async {
     try {
       _logger.info("updating magic cache");
       final magicPromptsData = await _loadMagicPrompts();
       final magicCaches = await nonEmptyMagicResults(magicPromptsData);
-      await _prefs
-          .setString(
-        _key,
-        MagicCache.encodeListToJson(magicCaches),
-      )
-          .then((value) {
-        resetLastMagicCacheUpdateTime();
-      });
+      final file = File(await _getCachePath());
+      if (!file.existsSync()) {
+        file.createSync(recursive: true);
+      }
+      file.writeAsBytesSync(MagicCache.encodeListToJson(magicCaches).codeUnits);
+      unawaited(
+        resetLastMagicCacheUpdateTime().onError((error, stackTrace) {
+          _logger.warning(
+            "Error resetting last magic cache update time",
+            error,
+          );
+        }),
+      );
     } catch (e) {
       _logger.info("Error updating magic cache", e);
     }
   }
 
   Future<List<MagicCache>?> _getMagicCache() async {
-    final jsonString = _prefs.getString(_key);
-    if (jsonString == null) {
-      _logger.info("No $_key in shared preferences");
+    final file = File(await _getCachePath());
+    if (!file.existsSync()) {
+      _logger.info("No magic cache found");
       return null;
     }
+    final jsonString = file.readAsStringSync();
     return MagicCache.decodeJsonToList(jsonString);
   }
 
   Future<void> clearMagicCache() async {
-    await _prefs.remove(_key);
+    File(await _getCachePath()).deleteSync();
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
