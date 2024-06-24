@@ -68,6 +68,14 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         },
     });
 
+    // Show validation errors only after the form has been submitted once (the
+    // touched state of apiOrigin gets set too early, perhaps because of the
+    // autoFocus).
+    const hasError =
+        form.submitCount > 0 &&
+        form.touched.apiOrigin &&
+        !!form.errors.apiOrigin;
+
     return (
         <Dialog
             {...{ open, fullScreen }}
@@ -94,12 +102,11 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
                         value={form.values.apiOrigin}
                         onChange={form.handleChange}
                         onBlur={form.handleBlur}
-                        error={
-                            form.touched.apiOrigin && !!form.errors.apiOrigin
-                        }
+                        error={hasError}
                         helperText={
-                            (form.touched.apiOrigin && form.errors.apiOrigin) ??
-                            " " /* always show an empty string to prevent a layout shift */
+                            hasError
+                                ? form.errors.apiOrigin
+                                : " " /* always show an empty string to prevent a layout shift */
                         }
                         InputProps={{
                             endAdornment: (
