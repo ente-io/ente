@@ -1,4 +1,5 @@
 import { isDevBuild } from "@/next/env";
+import { apiOrigin } from "@/next/origins";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
@@ -8,7 +9,6 @@ import {
     toB64URLSafeNoPadding,
     toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
-import { apiOrigin } from "@ente/shared/network/api";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -354,14 +354,6 @@ export const isWhitelistedRedirect = (redirectURL: URL) =>
         ? _isWhitelistedRedirect(redirectURL)
         : true;
 
-const _isWhitelistedRedirect = (redirectURL: URL) =>
-    (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
-    redirectURL.host.endsWith(".ente.io") ||
-    redirectURL.host.endsWith(".ente.sh") ||
-    redirectURL.protocol == "ente:" ||
-    redirectURL.protocol == "enteauth:" ||
-    redirectURL.protocol == "ente-cli:";
-
 export const shouldRestrictToWhitelistedRedirect = () => {
     // host includes port, hostname is sans port
     const hostname = new URL(window.location.origin).hostname;
@@ -371,6 +363,14 @@ export const shouldRestrictToWhitelistedRedirect = () => {
         hostname.endsWith(".ente.sh")
     );
 };
+
+const _isWhitelistedRedirect = (redirectURL: URL) =>
+    (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
+    redirectURL.host.endsWith(".ente.io") ||
+    redirectURL.host.endsWith(".ente.sh") ||
+    redirectURL.protocol == "ente:" ||
+    redirectURL.protocol == "enteauth:" ||
+    redirectURL.protocol == "ente-cli:";
 
 export interface BeginPasskeyAuthenticationResponse {
     /**

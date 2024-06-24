@@ -1,13 +1,11 @@
-import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
-    ConnectionDetails,
+    LoginFlowFormFooter,
     PasswordHeader,
     VerifyingPasskey,
 } from "@ente/shared/components/LoginComponents";
@@ -42,6 +40,7 @@ import {
     setKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
+import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -321,16 +320,16 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     srpAttributes={srpAttributes}
                 />
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
-                        {t("FORGOT_PASSWORD")}
-                    </LinkButton>
-                    <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
-                </FormPaperFooter>
-
-                {isDevBuild && <ConnectionDetails />}
+                <LoginFlowFormFooter>
+                    <Stack direction="row" justifyContent="space-between">
+                        <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
+                            {t("FORGOT_PASSWORD")}
+                        </LinkButton>
+                        <LinkButton onClick={logout}>
+                            {t("CHANGE_EMAIL")}
+                        </LinkButton>
+                    </Stack>
+                </LoginFlowFormFooter>
             </FormPaper>
         </VerticallyCentered>
     );

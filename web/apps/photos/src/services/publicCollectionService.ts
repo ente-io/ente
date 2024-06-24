@@ -1,15 +1,14 @@
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import { EncryptedEnteFile, EnteFile } from "types/file";
 import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
 import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
 
-const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 const PUBLIC_REFERRAL_CODE = "public-referral-code";
@@ -253,7 +252,7 @@ const getPublicFiles = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${ENDPOINT}/public-collection/diff`,
+                `${apiOrigin()}/public-collection/diff`,
                 {
                     sinceTime: time,
                 },
@@ -308,7 +307,7 @@ export const getPublicCollection = async (
             return;
         }
         const resp = await HTTPService.get(
-            `${ENDPOINT}/public-collection/info`,
+            `${apiOrigin()}/public-collection/info`,
             null,
             { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
         );
@@ -358,7 +357,7 @@ export const verifyPublicCollectionPassword = async (
 ): Promise<string> => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/public-collection/verify-password`,
+            `${apiOrigin()}/public-collection/verify-password`,
             { passHash: passwordHash },
             null,
             { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },

@@ -261,3 +261,15 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
     localStorage.setItem("locale", locale);
     return i18n.changeLanguage(locale);
 };
+
+/**
+ * A no-op marker for strings that, for various reasons, are not translated.
+ *
+ * This function does nothing, it just returns back the passed it string
+ * verbatim. It is only kept as a way for us to keep track of strings that are
+ * not translated (and for some reason, are currently not meant to be), but
+ * still are user visible.
+ *
+ * It is the sibling of the {@link t} function provided by i18next.
+ */
+export const ut = (s: string) => s;

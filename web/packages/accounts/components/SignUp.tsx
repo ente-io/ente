@@ -31,6 +31,7 @@ import {
     IconButton,
     InputAdornment,
     Link,
+    Stack,
     TextField,
     Tooltip,
     Typography,
@@ -53,9 +54,11 @@ interface SignUpProps {
     router: NextRouter;
     login: () => void;
     appName: AppName;
+    /** Reactive value of {@link customAPIHost}. */
+    host: string | undefined;
 }
 
-export function SignUp({ router, appName, login }: SignUpProps) {
+export function SignUp({ router, appName, login, host }: SignUpProps) {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -310,7 +313,19 @@ export function SignUp({ router, appName, login }: SignUpProps) {
             </Formik>
 
             <FormPaperFooter>
-                <LinkButton onClick={login}>{t("ACCOUNT_EXISTS")}</LinkButton>
+                <Stack gap={4}>
+                    <LinkButton onClick={login}>
+                        {t("ACCOUNT_EXISTS")}
+                    </LinkButton>
+
+                    <Typography
+                        variant="mini"
+                        color="text.faint"
+                        minHeight={"32px"}
+                    >
+                        {host ?? "" /* prevent layout shift with a minHeight */}
+                    </Typography>
+                </Stack>
             </FormPaperFooter>
         </>
     );
