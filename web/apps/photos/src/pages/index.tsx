@@ -160,7 +160,7 @@ const TappableContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
     const [showDevSettings, setShowDevSettings] = useState(false);
 
     const handleClick: React.MouseEventHandler = (event) => {
-        // Don't allow this when runinng on (e.g.) web.ente.io.
+        // Don't allow this when running on (e.g.) web.ente.io.
         if (!shouldAllowChangingAPIOrigin()) return;
 
         // Ignore clicks on buttons when counting up towards 7.
