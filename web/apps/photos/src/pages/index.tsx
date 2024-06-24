@@ -12,8 +12,8 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import {
-    Button,
     Box,
+    Button,
     Typography,
     styled,
     type TypographyProps,
@@ -31,6 +31,10 @@ export default function LandingPage() {
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
+    // This is kept as state because it can change as a result of user action
+    // while we're on this page (there currently isn't an event listener we can
+    // attach to for observing changes to local storage by the same window).
+    const [host, setHost] = useState(customAPIHost());
 
     const router = useRouter();
 
@@ -48,6 +52,8 @@ export default function LandingPage() {
             handleNormalRedirect();
         }
     }, []);
+
+    const handleMaybeChangeHost = () => setHost(customAPIHost());
 
     const handleAlbumsRedirect = async (currentURL: URL) => {
         const end = currentURL.hash.lastIndexOf("&");
@@ -111,7 +117,7 @@ export default function LandingPage() {
     const redirectToLoginPage = () => router.push(PAGES.LOGIN);
 
     return (
-        <TappableContainer>
+        <TappableContainer onMaybeChangeHost={handleMaybeChangeHost}>
             {loading ? (
                 <EnteSpinner />
             ) : (
@@ -133,14 +139,14 @@ export default function LandingPage() {
                         <Button size="large" onClick={redirectToLoginPage}>
                             {t("EXISTING_USER")}
                         </Button>
-                        <MobileBoxFooter />
+                        <MobileBoxFooter {...{ host }} />
                     </MobileBox>
                     <DesktopBox>
                         <SideBox>
                             {showLogin ? (
-                                <Login {...{ signUp, appName }} />
+                                <Login {...{ signUp, appName, host }} />
                             ) : (
-                                <SignUp {...{ router, appName, login }} />
+                                <SignUp {...{ router, appName, login, host }} />
                             )}
                         </SideBox>
                     </DesktopBox>
@@ -150,7 +156,19 @@ export default function LandingPage() {
     );
 }
 
-const TappableContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
+interface TappableContainerProps {
+    /**
+     * Called when the user closes the dialog to set a custom server.
+     *
+     * This is our chance to re-read the value of the custom API origin from
+     * local storage since the user might've changed it.
+     */
+    onMaybeChangeHost: () => void;
+}
+
+const TappableContainer: React.FC<
+    React.PropsWithChildren<TappableContainerProps>
+> = ({ onMaybeChangeHost, children }) => {
     // [Note: Configuring custom server]
     //
     // Allow the user to tap 7 times anywhere on the onboarding screen to bring
@@ -180,13 +198,15 @@ const TappableContainer: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
     };
 
+    const handleClose = () => {
+        setShowDevSettings(false);
+        onMaybeChangeHost();
+    };
+
     return (
         <TappableContainer_ onClick={handleClick}>
             <>
-                <DevSettings
-                    open={showDevSettings}
-                    onClose={() => setShowDevSettings(false)}
-                />
+                <DevSettings open={showDevSettings} onClose={handleClose} />
                 {children}
             </>
         </TappableContainer_>
@@ -244,9 +264,11 @@ const MobileBox = styled("div")`
     }
 `;
 
-const MobileBoxFooter: React.FC = () => {
-    const host = customAPIHost();
+interface MobileBoxFooterProps {
+    host: string | undefined;
+}
 
+const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     return (
         <Box pt={4} textAlign="center">
             {host && (

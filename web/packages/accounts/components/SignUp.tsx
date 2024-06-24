@@ -55,14 +55,14 @@ interface SignUpProps {
     router: NextRouter;
     login: () => void;
     appName: AppName;
+    /** Reactive value of {@link customAPIHost}. */
+    host: string | undefined;
 }
 
-export function SignUp({ router, appName, login }: SignUpProps) {
+export function SignUp({ router, appName, login, host }: SignUpProps) {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
-    const host = customAPIHost();
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);

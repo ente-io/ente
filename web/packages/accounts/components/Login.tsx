@@ -18,12 +18,12 @@ import { PAGES } from "../constants/pages";
 interface LoginProps {
     signUp: () => void;
     appName: AppName;
+    /** Reactive value of {@link customAPIHost}. */
+    host: string | undefined;
 }
 
-export function Login({ appName, signUp }: LoginProps) {
+export function Login({ appName, signUp, host }: LoginProps) {
     const router = useRouter();
-
-    const host = customAPIHost();
 
     const loginUser: SingleInputFormProps["callback"] = async (
         email,
