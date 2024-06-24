@@ -1,6 +1,6 @@
 import { DevSettings } from "@/new/photos/components/DevSettings";
 import log from "@/next/log";
-import { albumsAppOrigin } from "@/next/origins";
+import { albumsAppOrigin, customAPIHost } from "@/next/origins";
 import { Login } from "@ente/accounts/components/Login";
 import { SignUp } from "@ente/accounts/components/SignUp";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
@@ -8,13 +8,14 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import {
     Button,
-    styled,
+    Box,
     Typography,
+    styled,
     type TypographyProps,
 } from "@mui/material";
 import { t } from "i18next";
@@ -132,6 +133,7 @@ export default function LandingPage() {
                         <Button size="large" onClick={redirectToLoginPage}>
                             {t("EXISTING_USER")}
                         </Button>
+                        <MobileBoxFooter />
                     </MobileBox>
                     <DesktopBox>
                         <SideBox>
@@ -229,6 +231,33 @@ const Logo_ = styled("div")`
     margin-block-end: 64px;
 `;
 
+const MobileBox = styled("div")`
+    display: none;
+
+    @media (max-width: 1024px) {
+        max-width: 375px;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+`;
+
+const MobileBoxFooter: React.FC = () => {
+    const host = customAPIHost();
+
+    return (
+        <Box pt={4} textAlign="center">
+            {host && (
+                <Typography variant="mini" color="text.faint">
+                    {host}
+                </Typography>
+            )}
+        </Box>
+    );
+};
+
 const DesktopBox = styled("div")`
     flex: 1;
     height: 100%;
@@ -240,19 +269,6 @@ const DesktopBox = styled("div")`
 
     @media (max-width: 1024px) {
         display: none;
-    }
-`;
-
-const MobileBox = styled("div")`
-    display: none;
-
-    @media (max-width: 1024px) {
-        max-width: 375px;
-        width: 100%;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
     }
 `;
 
