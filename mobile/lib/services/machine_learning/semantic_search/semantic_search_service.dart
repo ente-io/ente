@@ -3,6 +3,7 @@ import "dart:collection";
 import "dart:math" show min;
 
 import "package:computer/computer.dart";
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/configuration.dart";
@@ -333,6 +334,21 @@ class SemanticSearchService {
         file,
         embedding,
       );
+    } on FormatException catch (e, _) {
+      _logger.severe(
+        "Could not get embedding for $file because FormatException occured, storing empty result locally",
+        e,
+      );
+      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      await EmbeddingsDB.instance.put(embedding);
+    } on PlatformException catch (e, s) {
+      _logger.severe(
+        "Could not get thumbnail for $file due to PlatformException related to thumbnails, storing empty result locally",
+        e,
+        s,
+      );
+      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      await EmbeddingsDB.instance.put(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
