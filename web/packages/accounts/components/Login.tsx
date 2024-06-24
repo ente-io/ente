@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { customAPIOrigin } from "@/next/origins";
+import { customAPIHost } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -8,7 +8,7 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
-import { Input, Typography, Stack } from "@mui/material";
+import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { getSRPAttributes } from "../api/srp";
@@ -23,8 +23,7 @@ interface LoginProps {
 export function Login({ appName, signUp }: LoginProps) {
     const router = useRouter();
 
-    const origin = customAPIOrigin();
-    const host = origin ? new URL(origin).host : undefined;
+    const host = customAPIHost();
 
     const loginUser: SingleInputFormProps["callback"] = async (
         email,

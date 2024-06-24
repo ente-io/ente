@@ -26,6 +26,17 @@ export const customAPIOrigin = () =>
     undefined;
 
 /**
+ * A convenience wrapper over {@link customAPIOrigin} that returns the only the
+ * host part of the custom origin (if any).
+ *
+ * This is useful in places where we indicate the custom origin in the UI.
+ */
+export const customAPIHost = () => {
+    const origin = customAPIOrigin();
+    return origin ? new URL(origin).host : undefined;
+};
+
+/**
  * Return the origin that should be used for uploading files.
  *
  * This defaults to `https://uploader.ente.io`, serviced by a Cloudflare worker

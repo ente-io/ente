@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { customAPIOrigin } from "@/next/origins";
+import { customAPIHost } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
@@ -62,8 +62,7 @@ export function SignUp({ router, appName, login }: SignUpProps) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const origin = customAPIOrigin();
-    const host = origin ? new URL(origin).host : undefined;
+    const host = customAPIHost();
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
