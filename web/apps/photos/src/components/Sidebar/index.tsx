@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
-import { customAPIOrigin } from "@/next/origins";
+import { customAPIHost } from "@/next/origins";
 import { openAccountsManagePasskeysPage } from "@ente/accounts/services/passkey";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
@@ -686,7 +686,7 @@ const DebugSection: React.FC = () => {
         electron?.appVersion().then((v) => setAppVersion(v));
     });
 
-    const origin = customAPIOrigin();
+    const host = customAPIHost();
 
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
@@ -726,7 +726,7 @@ const DebugSection: React.FC = () => {
                 {appVersion && (
                     <Typography variant="mini">{appVersion}</Typography>
                 )}
-                {origin && <Typography variant="mini">{origin}</Typography>}
+                {host && <Typography variant="mini">{host}</Typography>}
             </Stack>
         </>
     );
