@@ -5,6 +5,7 @@ import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
@@ -60,9 +61,14 @@ extension MagicCacheServiceExtension on MagicCache {
 
 class MagicCacheService {
   static const _key = "magic_cache";
+  static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
   static const _kMagicPromptsDataUrl = "https://discover.ente.io/v1.json";
 
-  late SharedPreferences prefs;
+  /// Delay is for cache update to be done not during app init, during which a
+  /// lot of other things are happening.
+  static const _kCacheUpdateDelay = Duration(seconds: 10);
+
+  late SharedPreferences _prefs;
   final Logger _logger = Logger((MagicCacheService).toString());
   MagicCacheService._privateConstructor();
 
@@ -70,15 +76,35 @@ class MagicCacheService {
       MagicCacheService._privateConstructor();
 
   void init(SharedPreferences preferences) {
-    prefs = preferences;
-    _updateCacheIfNeeded();
+    _prefs = preferences;
+    _updateCacheIfTheTimeHasCome();
   }
 
-  Future<void> _updateCacheIfNeeded() async {
+  Future<void> resetLastMagicCacheUpdateTime() async {
+    await _prefs.setInt(
+      _lastMagicCacheUpdateTime,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  int get lastMagicCacheUpdateTime {
+    return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
+  }
+
+  Future<void> _updateCacheIfTheTimeHasCome() async {
     final jsonFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (jsonFile != null) {
-      Future.delayed(const Duration(seconds: 10), () {
+      Future.delayed(_kCacheUpdateDelay, () {
+        unawaited(updateMagicCache());
+      });
+      return;
+    }
+    if (lastMagicCacheUpdateTime <
+        DateTime.now()
+            .subtract(const Duration(days: 3))
+            .millisecondsSinceEpoch) {
+      Future.delayed(_kCacheUpdateDelay, () {
         unawaited(updateMagicCache());
       });
     }
@@ -96,16 +122,25 @@ class MagicCacheService {
   }
 
   Future<void> updateMagicCache() async {
-    final magicPromptsData = await _loadMagicPrompts();
-    final magicCaches = await nonEmptyMagicResults(magicPromptsData);
-    await prefs.setString(
-      _key,
-      MagicCache.encodeListToJson(magicCaches),
-    );
+    try {
+      _logger.info("updating magic cache");
+      final magicPromptsData = await _loadMagicPrompts();
+      final magicCaches = await nonEmptyMagicResults(magicPromptsData);
+      await _prefs
+          .setString(
+        _key,
+        MagicCache.encodeListToJson(magicCaches),
+      )
+          .then((value) {
+        resetLastMagicCacheUpdateTime();
+      });
+    } catch (e) {
+      _logger.info("Error updating magic cache", e);
+    }
   }
 
   Future<List<MagicCache>?> _getMagicCache() async {
-    final jsonString = prefs.getString(_key);
+    final jsonString = _prefs.getString(_key);
     if (jsonString == null) {
       _logger.info("No $_key in shared preferences");
       return null;
@@ -114,7 +149,7 @@ class MagicCacheService {
   }
 
   Future<void> clearMagicCache() async {
-    await prefs.remove(_key);
+    await _prefs.remove(_key);
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
@@ -145,7 +180,8 @@ class MagicCacheService {
   Future<List<MagicCache>> nonEmptyMagicResults(
     List<dynamic> magicPromptsData,
   ) async {
-    const limit = 4;
+    //Show all magic prompts to internal users for feedback on results
+    final limit = flagService.internalUser ? magicPromptsData.length : 6;
     final results = <MagicCache>[];
     final randomIndexes = List.generate(
       magicPromptsData.length,
