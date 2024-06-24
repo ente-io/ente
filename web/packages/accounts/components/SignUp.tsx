@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { customAPIOrigin } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
@@ -31,6 +32,7 @@ import {
     IconButton,
     InputAdornment,
     Link,
+    Stack,
     TextField,
     Tooltip,
     Typography,
@@ -59,6 +61,9 @@ export function SignUp({ router, appName, login }: SignUpProps) {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+    const origin = customAPIOrigin();
+    const host = origin ? new URL(origin).host : undefined;
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -310,7 +315,16 @@ export function SignUp({ router, appName, login }: SignUpProps) {
             </Formik>
 
             <FormPaperFooter>
-                <LinkButton onClick={login}>{t("ACCOUNT_EXISTS")}</LinkButton>
+                <Stack gap={4}>
+                    <LinkButton onClick={login}>
+                        {t("ACCOUNT_EXISTS")}
+                    </LinkButton>
+                    {host && (
+                        <Typography variant="mini" color="text.faint">
+                            {host}
+                        </Typography>
+                    )}
+                </Stack>
             </FormPaperFooter>
         </>
     );
