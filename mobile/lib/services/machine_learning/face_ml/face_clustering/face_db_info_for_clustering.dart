@@ -1,6 +1,6 @@
 import "dart:typed_data" show Uint8List;
 
-class FaceInfoForClustering {
+class FaceDbInfoForClustering {
   final String faceID;
   int? clusterId;
   final Uint8List embeddingBytes;
@@ -14,7 +14,7 @@ class FaceInfoForClustering {
     return _fileID!;
   }
 
-  FaceInfoForClustering({
+  FaceDbInfoForClustering({
     required this.faceID,
     this.clusterId,
     required this.embeddingBytes,

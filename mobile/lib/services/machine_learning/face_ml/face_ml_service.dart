@@ -31,22 +31,19 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
-import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import 'package:photos/services/machine_learning/face_ml/face_ml_exceptions.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
+import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
-import 'package:photos/utils/image_ml_isolate.dart';
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/network_util.dart";
@@ -76,11 +73,9 @@ class FaceMlService {
 
   bool _isIsolateSpawned = false;
 
-  // singleton pattern
+  // Singleton pattern
   FaceMlService._privateConstructor();
-
   static final instance = FaceMlService._privateConstructor();
-
   factory FaceMlService() => instance;
 
   final _initLock = Lock();
@@ -107,7 +102,7 @@ class FaceMlService {
   final int _kcooldownLimit = 300;
   static const Duration _kCooldownDuration = Duration(minutes: 3);
 
-  Future<void> init({bool initializeImageMlIsolate = false}) async {
+  Future<void> init() async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
       return;
     }
@@ -122,13 +117,6 @@ class FaceMlService {
         await FaceDetectionService.instance.init();
       } catch (e, s) {
         _logger.severe("Could not initialize yolo onnx", e, s);
-      }
-      if (initializeImageMlIsolate) {
-        try {
-          await ImageMlIsolate.instance.init();
-        } catch (e, s) {
-          _logger.severe("Could not initialize image ml isolate", e, s);
-        }
       }
       try {
         await FaceEmbeddingService.instance.init();
@@ -215,11 +203,6 @@ class FaceMlService {
         await FaceDetectionService.instance.release();
       } catch (e, s) {
         _logger.severe("Could not dispose yolo onnx", e, s);
-      }
-      try {
-        ImageMlIsolate.instance.dispose();
-      } catch (e, s) {
-        _logger.severe("Could not dispose image ml isolate", e, s);
       }
       try {
         await FaceEmbeddingService.instance.release();
@@ -619,7 +602,7 @@ class FaceMlService {
         maxFaces: totalFaces,
       );
       final Set<int> missingFileIDs = {};
-      final allFaceInfoForClustering = <FaceInfoForClustering>[];
+      final allFaceInfoForClustering = <FaceDbInfoForClustering>[];
       for (final faceInfo in result) {
         if (!fileIDToCreationTime.containsKey(faceInfo.fileID)) {
           missingFileIDs.add(faceInfo.fileID);
@@ -964,8 +947,10 @@ class FaceMlService {
       debugPrint(
         "This image with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}.",
       );
-      final resultBuilder = FaceMlResultBuilder.fromEnteFile(enteFile);
-      return resultBuilder.buildErrorOccurred();
+      final resultBuilder =
+          FaceMlResult.fromEnteFileID(enteFile.uploadedFileID!)
+            ..errorOccurred();
+      return resultBuilder;
     }
     stopwatch.stop();
     _logger.info(
@@ -983,7 +968,7 @@ class FaceMlService {
       final int faceDetectionAddress = args["faceDetectionAddress"] as int;
       final int faceEmbeddingAddress = args["faceEmbeddingAddress"] as int;
 
-      final resultBuilder = FaceMlResultBuilder.fromEnteFileID(enteFileID);
+      final resultBuilder = FaceMlResult.fromEnteFileID(enteFileID);
 
       dev.log(
         "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
@@ -1017,7 +1002,8 @@ class FaceMlService {
         dev.log(
             "No faceDetectionResult, Completed analyzing image with uploadedFileID $enteFileID, in "
             "${stopwatch.elapsedMilliseconds} ms");
-        return resultBuilder.buildNoFaceDetected();
+        resultBuilder.noFaceDetected();
+        return resultBuilder;
       }
 
       stopwatch.reset();
@@ -1050,7 +1036,7 @@ class FaceMlService {
           "uploadedFileID $enteFileID, in "
           "${stopwatchTotal.elapsedMilliseconds} ms");
 
-      return resultBuilder.build();
+      return resultBuilder;
     } catch (e, s) {
       dev.log("Could not analyze image: \n e: $e \n s: $s");
       rethrow;
@@ -1134,18 +1120,16 @@ class FaceMlService {
   /// `imageData`: The image data to analyze.
   ///
   /// Returns a list of face detection results.
-  ///
-  /// Throws [CouldNotInitializeFaceDetector], [CouldNotRunFaceDetector] or [GeneralFaceMlException] if something goes wrong.
   static Future<List<FaceDetectionRelative>> detectFacesSync(
     Image image,
     ByteData imageByteData,
     int interpreterAddress, {
-    FaceMlResultBuilder? resultBuilder,
+    FaceMlResult? resultBuilder,
   }) async {
     try {
       // Get the bounding boxes of the faces
       final (List<FaceDetectionRelative> faces, dataSize) =
-          await FaceDetectionService.predictSync(
+          await FaceDetectionService.predict(
         image,
         imageByteData,
         interpreterAddress,
@@ -1157,8 +1141,6 @@ class FaceMlService {
       }
 
       return faces;
-    } on YOLOFaceInterpreterInitializationException {
-      throw CouldNotInitializeFaceDetector();
     } on YOLOFaceInterpreterRunException {
       throw CouldNotRunFaceDetector();
     } catch (e) {
@@ -1173,13 +1155,11 @@ class FaceMlService {
   /// `faces`: The face detection results in a list of [FaceDetectionAbsolute] for the faces to align.
   ///
   /// Returns a list of the aligned faces as image data.
-  ///
-  /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
   static Future<Float32List> alignFacesSync(
     Image image,
     ByteData imageByteData,
     List<FaceDetectionRelative> faces, {
-    FaceMlResultBuilder? resultBuilder,
+    FaceMlResult? resultBuilder,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -1211,12 +1191,12 @@ class FaceMlService {
   static Future<List<List<double>>> embedFacesSync(
     Float32List facesList,
     int interpreterAddress, {
-    FaceMlResultBuilder? resultBuilder,
+    FaceMlResult? resultBuilder,
   }) async {
     try {
       // Get the embedding of the faces
       final List<List<double>> embeddings =
-          await FaceEmbeddingService.predictSync(facesList, interpreterAddress);
+          await FaceEmbeddingService.predict(facesList, interpreterAddress);
 
       // Add the embeddings to the resultBuilder
       if (resultBuilder != null) {
@@ -1224,17 +1204,8 @@ class FaceMlService {
       }
 
       return embeddings;
-    } on MobileFaceNetInterpreterInitializationException {
-      throw CouldNotInitializeFaceEmbeddor();
     } on MobileFaceNetInterpreterRunException {
       throw CouldNotRunFaceEmbeddor();
-    } on MobileFaceNetEmptyInput {
-      throw InputProblemFaceEmbeddor("Input is empty");
-    } on MobileFaceNetWrongInputSize {
-      throw InputProblemFaceEmbeddor("Input size is wrong");
-    } on MobileFaceNetWrongInputRange {
-      throw InputProblemFaceEmbeddor("Input range is wrong");
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       dev.log('[SEVERE] Face embedding (batch) failed: $e');
       throw GeneralFaceMlException('Face embedding (batch) failed: $e');

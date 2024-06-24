@@ -6,24 +6,6 @@ import "package:photos/face/model/face.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/ml_versions.dart";
 
-int boolToSQLInt(bool? value, {bool defaultValue = false}) {
-  final bool v = value ?? defaultValue;
-  if (v == false) {
-    return 0;
-  } else {
-    return 1;
-  }
-}
-
-bool sqlIntToBool(int? value, {bool defaultValue = false}) {
-  final int v = value ?? (defaultValue ? 1 : 0);
-  if (v == 0) {
-    return false;
-  } else {
-    return true;
-  }
-}
-
 Map<String, dynamic> mapRemoteToFaceDB(Face face) {
   return {
     faceIDColumn: face.faceID,

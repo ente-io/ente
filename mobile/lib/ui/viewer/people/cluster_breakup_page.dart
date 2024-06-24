@@ -56,7 +56,8 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
                     child: files.isNotEmpty
                         ? ClipRRect(
                             borderRadius: const BorderRadius.all(
-                                Radius.elliptical(16, 12),),
+                              Radius.elliptical(16, 12),
+                            ),
                             child: PersonFaceWidget(
                               files.first,
                               clusterID: clusterID,
@@ -83,32 +84,6 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
                             "${clusterIDsToFiles[keys[index]]!.length} photos",
                             style: getEnteTextTheme(context).body,
                           ),
-                          // GestureDetector(
-                          //   onTap: () async {
-                          //     try {
-                          //       final int result = await FaceMLDataDB
-                          //           .instance
-                          //           .removeClusterToPerson(
-                          //         personID: widget.person.remoteID,
-                          //         clusterID: clusterID,
-                          //       );
-                          //       _logger.info(
-                          //         "Removed cluster $clusterID from person ${widget.person.remoteID}, result: $result",
-                          //       );
-                          //       Bus.instance.fire(PeopleChangedEvent());
-                          //       setState(() {});
-                          //     } catch (e) {
-                          //       _logger.severe(
-                          //         "removing cluster from person,",
-                          //         e,
-                          //       );
-                          //     }
-                          //   },
-                          //   child: const Icon(
-                          //     CupertinoIcons.minus_circled,
-                          //     color: Colors.red,
-                          //   ),
-                          // ),
                         ],
                       ),
                     ),
