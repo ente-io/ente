@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { customAPIHost } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
@@ -318,11 +317,14 @@ export function SignUp({ router, appName, login, host }: SignUpProps) {
                     <LinkButton onClick={login}>
                         {t("ACCOUNT_EXISTS")}
                     </LinkButton>
-                    {host && (
-                        <Typography variant="mini" color="text.faint">
-                            {host}
-                        </Typography>
-                    )}
+
+                    <Typography
+                        variant="mini"
+                        color="text.faint"
+                        minHeight={"32px"}
+                    >
+                        {host ?? "" /* prevent layout shift with a minHeight */}
+                    </Typography>
                 </Stack>
             </FormPaperFooter>
         </>

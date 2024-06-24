@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import { customAPIHost } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -68,11 +67,14 @@ export function Login({ appName, signUp, host }: LoginProps) {
             <FormPaperFooter>
                 <Stack gap={4}>
                     <LinkButton onClick={signUp}>{t("NO_ACCOUNT")}</LinkButton>
-                    {host && (
-                        <Typography variant="mini" color="text.faint">
-                            {host}
-                        </Typography>
-                    )}
+
+                    <Typography
+                        variant="mini"
+                        color="text.faint"
+                        minHeight={"32px"}
+                    >
+                        {host ?? "" /* prevent layout shift with a minHeight */}
+                    </Typography>
                 </Stack>
             </FormPaperFooter>
         </>
