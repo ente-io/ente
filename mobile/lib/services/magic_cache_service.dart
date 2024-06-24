@@ -102,7 +102,7 @@ class MagicCacheService {
     }
     if (lastMagicCacheUpdateTime <
         DateTime.now()
-            .subtract(const Duration(days: 3))
+            .subtract(const Duration(seconds: 1))
             .millisecondsSinceEpoch) {
       Future.delayed(_kCacheUpdateDelay, () {
         unawaited(updateMagicCache());
@@ -181,7 +181,7 @@ class MagicCacheService {
     List<dynamic> magicPromptsData,
   ) async {
     //Show all magic prompts to internal users for feedback on results
-    final limit = flagService.internalUser ? magicPromptsData.length : 6;
+    final limit = flagService.internalUser ? magicPromptsData.length : 4;
     final results = <MagicCache>[];
     final randomIndexes = List.generate(
       magicPromptsData.length,
