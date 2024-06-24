@@ -77,7 +77,11 @@ class MagicCacheService {
   Future<void> _updateCacheIfNeeded() async {
     final jsonFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
-    if (jsonFile != null) {}
+    if (jsonFile != null) {
+      Future.delayed(const Duration(seconds: 10), () {
+        unawaited(updateMagicCache());
+      });
+    }
   }
 
   Future<List<int>> getMatchingFileIDsForPromptData(
