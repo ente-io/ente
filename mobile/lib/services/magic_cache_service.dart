@@ -84,7 +84,7 @@ class MagicCacheService {
     }
   }
 
-  Future<List<int>> getMatchingFileIDsForPromptData(
+  Future<List<int>> _getMatchingFileIDsForPromptData(
     Map<String, dynamic> promptData,
   ) async {
     final result = await SemanticSearchService.instance.getMatchingFileIDs(
@@ -104,7 +104,7 @@ class MagicCacheService {
     );
   }
 
-  Future<List<MagicCache>?> getMagicCache() async {
+  Future<List<MagicCache>?> _getMagicCache() async {
     final jsonString = prefs.getString(_key);
     if (jsonString == null) {
       _logger.info("No $_key in shared preferences");
@@ -118,7 +118,7 @@ class MagicCacheService {
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
-    final magicCaches = await getMagicCache();
+    final magicCaches = await _getMagicCache();
     if (magicCaches == null) {
       _logger.info("No magic cache found");
       return [];
@@ -154,7 +154,7 @@ class MagicCacheService {
     )..shuffle();
     for (final index in randomIndexes) {
       final files =
-          await getMatchingFileIDsForPromptData(magicPromptsData[index]);
+          await _getMatchingFileIDsForPromptData(magicPromptsData[index]);
       if (files.isNotEmpty) {
         results.add(
           MagicCache(
