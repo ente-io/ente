@@ -1,5 +1,6 @@
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
+import { customAPIOrigin } from "@/next/origins";
 import { openAccountsManagePasskeysPage } from "@ente/accounts/services/passkey";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
@@ -685,6 +686,8 @@ const DebugSection: React.FC = () => {
         electron?.appVersion().then((v) => setAppVersion(v));
     });
 
+    const origin = customAPIOrigin();
+
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
             title: t("DOWNLOAD_LOGS"),
@@ -707,21 +710,6 @@ const DebugSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
-                onClick={confirmLogDownload}
-                variant="mini"
-                label={t("DOWNLOAD_UPLOAD_LOGS")}
-            />
-            {appVersion && (
-                <Typography
-                    py={"14px"}
-                    px={"16px"}
-                    color="text.muted"
-                    variant="mini"
-                >
-                    {appVersion}
-                </Typography>
-            )}
             {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
                     variant="secondary"
@@ -729,6 +717,17 @@ const DebugSection: React.FC = () => {
                     label={"Test Upload"}
                 />
             )}
+            <EnteMenuItem
+                onClick={confirmLogDownload}
+                variant="mini"
+                label={t("DOWNLOAD_UPLOAD_LOGS")}
+            />
+            <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
+                {appVersion && (
+                    <Typography variant="mini">{appVersion}</Typography>
+                )}
+                {origin && <Typography variant="mini">{origin}</Typography>}
+            </Stack>
         </>
     );
 };
