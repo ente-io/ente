@@ -1,6 +1,6 @@
+import { customAPIOrigin } from "@/next/origins";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { customAPIOrigin } from "@ente/shared/network/api";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
 import { EnteFile } from "types/file";

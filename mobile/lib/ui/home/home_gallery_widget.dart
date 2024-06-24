@@ -13,6 +13,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class HomeGalleryWidget extends StatelessWidget {
   final Widget? header;
@@ -84,13 +85,15 @@ class HomeGalleryWidget extends StatelessWidget {
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
     );
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        gallery,
-        FileSelectionOverlayBar(GalleryType.homepage, selectedFiles),
-      ],
+    return SelectionState(
+      selectedFiles: selectedFiles,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          gallery,
+          FileSelectionOverlayBar(GalleryType.homepage, selectedFiles),
+        ],
+      ),
     );
-    // return gallery;
   }
 }

@@ -3,24 +3,26 @@
 Source code for our
 [Cloudflare Workers](https://developers.cloudflare.com/workers/).
 
-Each worker is a self contained directory with its each `package.json`.
+Workers are organized as Yarn workspaces sharing a common `package.json` and
+base `tsconfig`. They can however be deployed individually.
 
 ## Deploying
 
--   Switch to a worker directory, e.g. `cd github-discord-notifier`.
+Install dependencies with `yarn`.
 
--   Install dependencies (if needed) with `yarn`
+> If you have previously deployed, then you will have an old `yarn.lock`. In
+> this case it is safe to delete and recreate using `rm yarn.lock && yarn`.
 
-    > If you have previously deployed, then you will have an old `yarn.lock`. In
-    > this case it is safe to delete and recreate using `rm yarn.lock && yarn`.
+Then, to deploy an individual worker
 
--   Login into wrangler (if needed) using `yarn wrangler login`
+-   Login into wrangler (if needed) using
+    `yarn workspace health-check wrangler login`
 
--   Deploy! `yarn wrangler deploy`
+-   Deploy! `yarn workspace health-check wrangler deploy`
 
 Wrangler is the CLI provided by Cloudflare to manage workers. Apart from
 deploying, it also allows us to stream logs from running workers by using
-`yarn wrangler tail`.
+`yarn workspace <worker-name> wrangler tail`.
 
 ## Creating a new worker
 

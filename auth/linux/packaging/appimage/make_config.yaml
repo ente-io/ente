@@ -1,6 +1,8 @@
 display_name: Auth
 license: GPLv3
 
+metainfo: linux/packaging/ente_auth.appdata.xml
+
 icon: assets/icons/auth-icon.png
 
 keywords:

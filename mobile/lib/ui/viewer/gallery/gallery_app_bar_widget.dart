@@ -179,7 +179,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             setState(() {});
           }
         } catch (e, s) {
-          _logger.severe("Failed to rename album", e, s);
+          _logger.warning("Failed to rename album", e, s);
           rethrow;
         }
       },
@@ -610,7 +610,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         await dialog.hide();
         Navigator.of(context).pop();
       } catch (e, s) {
-        _logger.severe("failed to trash collection", e, s);
+        _logger.warning("failed to trash collection", e, s);
         await dialog.hide();
         await showGenericErrorDialog(context: context, error: e);
       }

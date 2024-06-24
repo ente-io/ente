@@ -1,19 +1,21 @@
+import { DevSettings } from "@/new/photos/components/DevSettings";
 import log from "@/next/log";
+import { albumsAppOrigin, customAPIHost } from "@/next/origins";
 import { Login } from "@ente/accounts/components/Login";
 import { SignUp } from "@ente/accounts/components/SignUp";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import { getAlbumsURL } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import {
+    Box,
     Button,
-    styled,
     Typography,
+    styled,
     type TypographyProps,
 } from "@mui/material";
 import { t } from "i18next";
@@ -26,14 +28,20 @@ import { useAppContext } from "./_app";
 
 export default function LandingPage() {
     const { appName, showNavBar, setDialogMessage } = useAppContext();
-    const router = useRouter();
+
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
+    // This is kept as state because it can change as a result of user action
+    // while we're on this page (there currently isn't an event listener we can
+    // attach to for observing changes to local storage by the same window).
+    const [host, setHost] = useState(customAPIHost());
+
+    const router = useRouter();
 
     useEffect(() => {
         showNavBar(false);
         const currentURL = new URL(window.location.href);
-        const albumsURL = new URL(getAlbumsURL());
+        const albumsURL = new URL(albumsAppOrigin());
         currentURL.pathname = router.pathname;
         if (
             currentURL.host === albumsURL.host &&
@@ -44,6 +52,8 @@ export default function LandingPage() {
             handleNormalRedirect();
         }
     }, []);
+
+    const handleMaybeChangeHost = () => setHost(customAPIHost());
 
     const handleAlbumsRedirect = async (currentURL: URL) => {
         const end = currentURL.hash.lastIndexOf("&");
@@ -107,7 +117,7 @@ export default function LandingPage() {
     const redirectToLoginPage = () => router.push(PAGES.LOGIN);
 
     return (
-        <Container>
+        <TappableContainer onMaybeChangeHost={handleMaybeChangeHost}>
             {loading ? (
                 <EnteSpinner />
             ) : (
@@ -129,23 +139,81 @@ export default function LandingPage() {
                         <Button size="large" onClick={redirectToLoginPage}>
                             {t("EXISTING_USER")}
                         </Button>
+                        <MobileBoxFooter {...{ host }} />
                     </MobileBox>
                     <DesktopBox>
                         <SideBox>
                             {showLogin ? (
-                                <Login {...{ signUp, appName }} />
+                                <Login {...{ signUp, appName, host }} />
                             ) : (
-                                <SignUp {...{ router, appName, login }} />
+                                <SignUp {...{ router, appName, login, host }} />
                             )}
                         </SideBox>
                     </DesktopBox>
                 </>
             )}
-        </Container>
+        </TappableContainer>
     );
 }
 
-const Container = styled("div")`
+interface TappableContainerProps {
+    /**
+     * Called when the user closes the dialog to set a custom server.
+     *
+     * This is our chance to re-read the value of the custom API origin from
+     * local storage since the user might've changed it.
+     */
+    onMaybeChangeHost: () => void;
+}
+
+const TappableContainer: React.FC<
+    React.PropsWithChildren<TappableContainerProps>
+> = ({ onMaybeChangeHost, children }) => {
+    // [Note: Configuring custom server]
+    //
+    // Allow the user to tap 7 times anywhere on the onboarding screen to bring
+    // up a page where they can configure the endpoint that the app should
+    // connect to.
+    //
+    // See: https://help.ente.io/self-hosting/guides/custom-server/
+    const [tapCount, setTapCount] = useState(0);
+    const [showDevSettings, setShowDevSettings] = useState(false);
+
+    const handleClick: React.MouseEventHandler = (event) => {
+        // Don't allow this when running on (e.g.) web.ente.io.
+        if (!shouldAllowChangingAPIOrigin()) return;
+
+        // Ignore clicks on buttons when counting up towards 7.
+        if (event.target instanceof HTMLButtonElement) return;
+
+        // Ignore clicks when the dialog is already open.
+        if (showDevSettings) return;
+
+        // Otherwise increase the tap count,
+        setTapCount(tapCount + 1);
+        // And show the dev settings dialog when it reaches 7.
+        if (tapCount + 1 == 7) {
+            setTapCount(0);
+            setShowDevSettings(true);
+        }
+    };
+
+    const handleClose = () => {
+        setShowDevSettings(false);
+        onMaybeChangeHost();
+    };
+
+    return (
+        <TappableContainer_ onClick={handleClick}>
+            <>
+                <DevSettings open={showDevSettings} onClose={handleClose} />
+                {children}
+            </>
+        </TappableContainer_>
+    );
+};
+
+const TappableContainer_ = styled("div")`
     display: flex;
     flex: 1;
     align-items: center;
@@ -156,6 +224,15 @@ const Container = styled("div")`
         flex-direction: column;
     }
 `;
+
+/**
+ * Disable the ability to set the custom server when we're running on our own
+ * production deployment.
+ */
+const shouldAllowChangingAPIOrigin = () => {
+    const hostname = new URL(window.location.origin).hostname;
+    return !(hostname.endsWith(".ente.io") || hostname.endsWith(".ente.sh"));
+};
 
 const SlideContainer = styled("div")`
     flex: 1;
@@ -174,6 +251,35 @@ const Logo_ = styled("div")`
     margin-block-end: 64px;
 `;
 
+const MobileBox = styled("div")`
+    display: none;
+
+    @media (max-width: 1024px) {
+        max-width: 375px;
+        width: 100%;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+`;
+
+interface MobileBoxFooterProps {
+    host: string | undefined;
+}
+
+const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
+    return (
+        <Box pt={4} textAlign="center">
+            {host && (
+                <Typography variant="mini" color="text.faint">
+                    {host}
+                </Typography>
+            )}
+        </Box>
+    );
+};
+
 const DesktopBox = styled("div")`
     flex: 1;
     height: 100%;
@@ -185,19 +291,6 @@ const DesktopBox = styled("div")`
 
     @media (max-width: 1024px) {
         display: none;
-    }
-`;
-
-const MobileBox = styled("div")`
-    display: none;
-
-    @media (max-width: 1024px) {
-        max-width: 375px;
-        width: 100%;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
     }
 `;
 

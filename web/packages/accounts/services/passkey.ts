@@ -1,5 +1,6 @@
 import { clientPackageHeaderIfPresent } from "@/next/http";
 import log from "@/next/log";
+import { accountsAppOrigin, apiOrigin } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
@@ -12,7 +13,6 @@ import {
 } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { accountsAppURL, apiOrigin } from "@ente/shared/network/api";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -48,7 +48,7 @@ export const passkeyVerificationRedirectURL = (
         redirect,
         ...recoverOption,
     });
-    return `${accountsAppURL()}/passkeys/verify?${params.toString()}`;
+    return `${accountsAppOrigin()}/passkeys/verify?${params.toString()}`;
 };
 
 interface OpenPasskeyVerificationURLOptions {
@@ -131,7 +131,7 @@ export const openAccountsManagePasskeysPage = async () => {
     const token = await getAccountsToken();
     const params = new URLSearchParams({ token });
 
-    window.open(`${accountsAppURL()}/passkeys?${params.toString()}`);
+    window.open(`${accountsAppOrigin()}/passkeys?${params.toString()}`);
 };
 
 export const isPasskeyRecoveryEnabled = async () => {

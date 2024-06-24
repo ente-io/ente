@@ -194,6 +194,7 @@ class FaceMlService {
 
   void _listenOnPeopleChangedSync() {
     Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      if (event.type == PeopleEventType.syncDone) return;
       _shouldSyncPeople = true;
     });
   }
@@ -367,7 +368,7 @@ class FaceMlService {
     _isSyncing = true;
     if (forceSync) {
       await PersonService.instance.reconcileClusters();
-      Bus.instance.fire(PeopleChangedEvent());
+      Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
       _shouldSyncPeople = false;
     }
     _isSyncing = false;
@@ -924,7 +925,7 @@ class FaceMlService {
         await _getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
 
     if (filePath == null) {
-      _logger.severe(
+      _logger.warning(
         "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null",
       );
       throw CouldNotRetrieveAnyFileData();

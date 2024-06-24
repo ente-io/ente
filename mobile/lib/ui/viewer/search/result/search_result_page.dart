@@ -12,6 +12,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class SearchResultPage extends StatefulWidget {
   final SearchResult searchResult;
@@ -99,15 +100,18 @@ class _SearchResultPageState extends State<SearchResultPage> {
           _selectedFiles,
         ),
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          gallery,
-          FileSelectionOverlayBar(
-            SearchResultPage.overlayType,
-            _selectedFiles,
-          ),
-        ],
+      body: SelectionState(
+        selectedFiles: _selectedFiles,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            gallery,
+            FileSelectionOverlayBar(
+              SearchResultPage.overlayType,
+              _selectedFiles,
+            ),
+          ],
+        ),
       ),
     );
   }

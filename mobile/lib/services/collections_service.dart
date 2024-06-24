@@ -729,7 +729,7 @@ class CollectionsService {
       collection.setName(newName);
       sync().ignore();
     } catch (e, s) {
-      _logger.severe("failed to rename collection", e, s);
+      _logger.warning("failed to rename collection", e, s);
       rethrow;
     }
   }

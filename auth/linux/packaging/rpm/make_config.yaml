@@ -9,6 +9,8 @@ url: https://github.com/ente-io/ente
 
 display_name: Auth
 
+metainfo: linux/packaging/ente_auth.appdata.xml
+
 requires:
   - libsqlite3x
   - webkit2gtk4.0

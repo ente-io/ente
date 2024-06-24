@@ -333,7 +333,7 @@ Future<void> _sync(String caller) async {
     await SyncService.instance.sync();
   } catch (e, s) {
     if (!isHandledSyncError(e)) {
-      _logger.severe("Sync error", e, s);
+      _logger.warning("Sync error", e, s);
     }
   }
 }

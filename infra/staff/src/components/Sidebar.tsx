@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { apiOrigin } from "../services/support";
+import UpdateSubscription from "./UpdateSubscription"; // Import the UpdateSubscription component
 
 interface SidebarProps {
     token: string;
@@ -12,18 +13,36 @@ interface UserData {
         ID: string;
     };
 }
+interface ActionResponse {
+    success?: boolean;
+    message?: string;
+}
 
 export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
-    const [, /*userId*/ setUserId] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+    const [showUpdateSubscription, setShowUpdateSubscription] =
+        useState<boolean>(false); // State to control UpdateSubscription popup
 
-    interface ApiResponse {
-        data: {
-            userId: string;
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
         };
-    }
+    }, []);
+
+    const handleClickOutside = (event: MouseEvent) => {
+        if (
+            dropdownRef.current &&
+            !dropdownRef.current.contains(event.target as Node)
+        ) {
+            setDropdownVisible(false);
+        }
+    };
 
     const fetchData = async (): Promise<string | null> => {
         if (!email || !token) {
@@ -32,9 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         }
 
         try {
-            const url = `${apiOrigin}/admin/user?email=${encodeURIComponent(
-                email,
-            )}&token=${encodeURIComponent(token)}`;
+            const url = `${apiOrigin}/admin/user?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -70,9 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                 Closefamily: "/admin/user/close-family",
             };
 
-            const url = `${apiOrigin}${actionUrls[action]}?id=${encodeURIComponent(
-                userId,
-            )}&token=${encodeURIComponent(token)}`;
+            const url = `${apiOrigin}${actionUrls[action]}?id=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`;
             const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -85,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                 );
             }
 
-            const result = (await response.json()) as ApiResponse;
+            const result = (await response.json()) as ActionResponse;
             console.log("API Response:", result);
 
             setMessage(`${action} completed successfully`);
@@ -109,8 +124,55 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         }
     };
 
+    const deleteUser = async () => {
+        try {
+            const url = `${apiOrigin}/admin/user/delete?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+            const response = await fetch(url, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Network response was not ok: ${response.status}`,
+                );
+            }
+
+            setMessage("Delete Account completed successfully");
+            setError(null);
+            setTimeout(() => {
+                setMessage(null);
+            }, 1000);
+            setDropdownVisible(false);
+        } catch (error) {
+            console.error(`Error deleting account:`, error);
+            setError(
+                error instanceof Error && typeof error.message === "string"
+                    ? error.message
+                    : "An unexpected error occurred",
+            );
+
+            setTimeout(() => {
+                setError(null);
+            }, 1000);
+            setMessage(null);
+        }
+    };
+
     const handleActionClick = async (action: string) => {
         try {
+            if (action === "UpdateSubscription") {
+                const fetchedUserId = await fetchData();
+                if (fetchedUserId) {
+                    setShowUpdateSubscription(true);
+                }
+                return;
+            }
+
+            if (action === "DeleteAccount") {
+                await deleteUser();
+                return;
+            }
+
             const fetchedUserId = await fetchData();
             if (!fetchedUserId) {
                 throw new Error("Incorrect email id or token");
@@ -140,6 +202,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
         { value: "Disable2FA", label: "Disable 2FA" },
         { value: "Closefamily", label: "Close Family" },
         { value: "DisablePasskeys", label: "Disable Passkeys" },
+        { value: "DeleteAccount", label: "Delete Account" },
+        { value: "UpdateSubscription", label: "Update Subscription" }, // New option added here
     ];
 
     return (
@@ -149,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                     MORE
                 </button>
                 {dropdownVisible && (
-                    <div className="dropdown-menu">
+                    <div className="dropdown-menu" ref={dropdownRef}>
                         <ul>
                             {dropdownOptions.map((option) => (
                                 <li key={option.value}>
@@ -177,6 +241,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ token, email }) => {
                 <div className={`message ${error ? "error" : "success"}`}>
                     {error ? `Error: ${error}` : `Success: ${message}`}
                 </div>
+            )}
+            {showUpdateSubscription && userId && (
+                <UpdateSubscription
+                    token={token}
+                    userId={userId}
+                    onClose={() => setShowUpdateSubscription(false)}
+                />
             )}
         </div>
     );
