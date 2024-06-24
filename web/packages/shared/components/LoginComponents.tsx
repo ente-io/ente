@@ -52,7 +52,7 @@ export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
 
     return (
         <FormPaperFooter>
-            <Stack gap={"16px"} sx={{ width: "100%", textAlign: "start" }}>
+            <Stack gap="16px" width="100%" textAlign="start">
                 {children}
 
                 {host && (
