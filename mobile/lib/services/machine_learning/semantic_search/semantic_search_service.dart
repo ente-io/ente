@@ -214,20 +214,6 @@ class SemanticSearchService {
     unawaited(_pollQueue());
   }
 
-  Future<void> _cacheThumbnails(List<EnteFile> files) async {
-    int counter = 0;
-    const batchSize = 100;
-    for (var i = 0; i < files.length;) {
-      final futures = <Future>[];
-      for (var j = 0; j < batchSize && i < files.length; j++, i++) {
-        futures.add(getThumbnail(files[i]));
-      }
-      await Future.wait(futures);
-      counter += futures.length;
-      _logger.info("$counter/${files.length} thumbnails cached");
-    }
-  }
-
   Future<List<int>> _getFileIDsToBeIndexed() async {
     final uploadedFileIDs = await getIndexableFileIDs();
     final embeddedFileIDs =
