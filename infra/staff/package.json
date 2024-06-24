@@ -11,12 +11,15 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "date-fns": "^3.6.0",
         "react": "^18",
+        "react-datepicker": "^7.1.0",
         "react-dom": "^18",
         "react-toastify": "^10.0.5",
         "zod": "^3"
     },
     "devDependencies": {
+        "@rollup/plugin-node-resolve": "^15.2.3",
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "@typescript-eslint/eslint-plugin": "^7",
@@ -29,7 +32,7 @@
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3.2",
         "prettier-plugin-packagejson": "^2.5",
-        "typescript": "^5.4.5",
+        "typescript": "^5",
         "vite": "^5.2"
     },
     "packageManager": "yarn@1.22.22"
