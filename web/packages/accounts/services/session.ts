@@ -1,7 +1,7 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { ensureLocalUser } from "@/next/local-user";
+import { apiOrigin } from "@/next/origins";
 import { ensure } from "@/utils/ensure";
-import { apiOrigin } from "@ente/shared/network/api";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { getSRPAttributes } from "../api/srp";
