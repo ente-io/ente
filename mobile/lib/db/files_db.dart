@@ -1808,6 +1808,9 @@ class FilesDB {
   }
 
   Future<List<EnteFile>> getUploadedFiles(List<int> uploadedIDs) async {
+    if (uploadedIDs.isEmpty) {
+      return <EnteFile>[];
+    }
     final db = await instance.sqliteAsyncDB;
     String inParam = "";
     for (final id in uploadedIDs) {

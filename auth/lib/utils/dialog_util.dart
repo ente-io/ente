@@ -13,6 +13,8 @@ import 'package:ente_auth/ui/components/components_constants.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/utils/email_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 typedef DialogBuilder = DialogWidget Function(BuildContext context);
@@ -69,22 +71,97 @@ Future<ButtonResult?> showErrorDialogForException({
   );
 }
 
+String parseErrorForUI(
+  BuildContext context,
+  String genericError, {
+  Object? error,
+  bool surfaceError = kDebugMode,
+}) {
+  try {
+    if (error == null) {
+      return genericError;
+    }
+    if (error is DioException) {
+      final DioException dioError = error;
+      if (dioError.type == DioExceptionType.unknown) {
+        if (dioError.error.toString().contains('Failed host lookup')) {
+          return context.l10n.networkHostLookUpErr;
+        } else if (dioError.error.toString().contains('SocketException')) {
+          return context.l10n.networkConnectionRefusedErr;
+        }
+      }
+    }
+    // return generic error if the user is not internal and the error is not in debug mode
+    if (!kDebugMode) {
+      return genericError;
+    }
+    String errorInfo = "";
+    if (error is DioException) {
+      final DioException dioError = error;
+      if (dioError.type == DioExceptionType.badResponse) {
+        if (dioError.response?.data["code"] != null) {
+          errorInfo = "Reason: " + dioError.response!.data["code"];
+        } else {
+          errorInfo = "Reason: " + dioError.response!.data.toString();
+        }
+      } else if (dioError.type == DioExceptionType.unknown) {
+        errorInfo = "Reason: " + dioError.error.toString();
+      } else {
+        errorInfo = "Reason: " + dioError.type.toString();
+      }
+    } else {
+      if (kDebugMode) {
+        errorInfo = error.toString();
+      } else {
+        errorInfo = error.toString().split('Source stack')[0];
+      }
+    }
+    if (errorInfo.isNotEmpty) {
+      return "$genericError\n\n$errorInfo";
+    }
+    return genericError;
+  } catch (e) {
+    return genericError;
+  }
+}
+
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showGenericErrorDialog({
   required BuildContext context,
   bool isDismissible = true,
+  required Object? error,
 }) async {
+  final errorBody = parseErrorForUI(
+    context,
+    context.l10n.itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    error: error,
+  );
+
   return showDialogWidget(
     context: context,
     title: context.l10n.error,
     icon: Icons.error_outline_outlined,
-    body: context.l10n.itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    body: errorBody,
     isDismissible: isDismissible,
-    buttons: const [
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.primary,
+        labelText: context.l10n.ok,
+        buttonAction: ButtonAction.first,
+        isInAlert: true,
+      ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "OK",
-        isInAlert: true,
+        labelText: context.l10n.contactSupport,
+        buttonAction: ButtonAction.second,
+        onTap: () async {
+          await sendLogs(
+            context,
+            context.l10n.contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        },
       ),
     ],
   );

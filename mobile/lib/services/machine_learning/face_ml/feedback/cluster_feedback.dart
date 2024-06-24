@@ -139,6 +139,7 @@ class ClusterFeedbackService {
     PersonEntity p,
   ) async {
     try {
+      _logger.info('removeFilesFromPerson called');
       // Get the relevant faces to be removed
       final faceIDs = await FaceMLDataDB.instance
           .getFaceIDsForPerson(p.remoteID)
@@ -149,6 +150,13 @@ class ClusterFeedbackService {
       });
       final embeddings =
           await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      if (faceIDs.isEmpty || embeddings.isEmpty) {
+        _logger.severe(
+          'No faces or embeddings found for person ${p.remoteID} that match the given files',
+        );
+        return;
+      }
 
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
@@ -161,7 +169,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.20,
       );
       if (clusterResult.isEmpty) {
-        _logger.warning('No clusters found or something went wrong');
+        _logger.severe('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
@@ -179,7 +187,12 @@ class ClusterFeedbackService {
       await FaceMLDataDB.instance
           .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
 
+      // Update remote so new sync does not undo this change
+      await PersonService.instance
+          .removeFilesFromPerson(person: p, faceIDs: faceIDs.toSet());
+
       Bus.instance.fire(PeopleChangedEvent());
+      _logger.info('removeFilesFromPerson done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromPerson", e, s);
@@ -191,6 +204,7 @@ class ClusterFeedbackService {
     List<EnteFile> files,
     int clusterID,
   ) async {
+    _logger.info('removeFilesFromCluster called');
     try {
       // Get the relevant faces to be removed
       final faceIDs = await FaceMLDataDB.instance
@@ -203,6 +217,13 @@ class ClusterFeedbackService {
       final embeddings =
           await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
 
+      if (faceIDs.isEmpty || embeddings.isEmpty) {
+        _logger.severe(
+          'No faces or embeddings found for cluster $clusterID that match the given files',
+        );
+        return;
+      }
+
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
 
@@ -214,6 +235,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.20,
       );
       if (clusterResult.isEmpty) {
+        _logger.severe('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
@@ -230,13 +252,7 @@ class ClusterFeedbackService {
           source: "$clusterID",
         ),
       );
-      // Bus.instance.fire(
-      //   LocalPhotosUpdatedEvent(
-      //     files,
-      //     type: EventType.peopleClusterChanged,
-      //     source: "$clusterID",
-      //   ),
-      // );
+      _logger.info('removeFilesFromCluster done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);
@@ -504,7 +520,7 @@ class ClusterFeedbackService {
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
     final checkSizes = [100, 20, kMinimumClusterSizeSearchResult, 10, 5, 1];
-    late Map<int, Vector> clusterAvgBigClusters;
+    Map<int, Vector> clusterAvgBigClusters = <int, Vector>{};
     final List<(int, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {
       if (smallestPersonClusterSize >=

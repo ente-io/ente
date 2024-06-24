@@ -18,7 +18,6 @@ export enum LS_KEYS {
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
     WAIT_TIME = "waitTime",
-    API_ENDPOINT = "apiEndpoint",
     // Moved to the new wrapper @/next/local-storage
     // LOCALE = 'locale',
     MAP_ENABLED = "mapEnabled",

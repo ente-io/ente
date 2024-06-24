@@ -1,21 +1,16 @@
-name: "Sync Crowdin translations (auth)"
+name: "Push sources to Crowdin (auth)"
 
 on:
     push:
         branches: [main]
         paths:
             # Run workflow when auth's intl_en.arb is changed
-            - "mobile/lib/l10n/arb/app_en.arb"
+            - "auth/lib/l10n/arb/app_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/auth-crowdin.yml"
-    schedule:
-        # See: [Note: Run workflow on specific days of the week]
-        - cron: "50 1 * * 2"
-    # Also allow manually running the workflow
-    workflow_dispatch:
 
 jobs:
-    synchronize-with-crowdin:
+    push-sources-to-crowdin:
         runs-on: ubuntu-latest
 
         steps:
@@ -29,13 +24,7 @@ jobs:
                   config: "auth/crowdin.yml"
                   upload_sources: true
                   upload_translations: false
-                  download_translations: true
-                  localization_branch_name: translations/auth
-                  create_pull_request: true
-                  skip_untranslated_strings: true
-                  pull_request_title: "[auth] New translations"
-                  pull_request_body: "New translations from [Crowdin](https://crowdin.com/project/ente-authenticator-app)"
-                  pull_request_base_branch_name: "main"
+                  download_translations: false
                   project_id: 575169
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

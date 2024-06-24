@@ -1,6 +1,6 @@
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { Collection } from "types/collection";
@@ -13,8 +13,6 @@ import { getCollection } from "./collectionService";
 const TRASH = "file-trash";
 const TRASH_TIME = "trash-time";
 const DELETED_COLLECTION = "deleted-collection";
-
-const ENDPOINT = getEndpoint();
 
 async function getLocalTrash() {
     const trash = (await localForage.getItem<Trash>(TRASH)) || [];
@@ -91,7 +89,7 @@ export const updateTrash = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${ENDPOINT}/trash/v2/diff`,
+                `${apiOrigin()}/trash/v2/diff`,
                 {
                     sinceTime: time,
                 },
@@ -160,7 +158,7 @@ export const emptyTrash = async () => {
         const lastUpdatedAt = await getLastSyncTime();
 
         await HTTPService.post(
-            `${ENDPOINT}/trash/empty`,
+            `${apiOrigin()}/trash/empty`,
             { lastUpdatedAt },
             null,
             {

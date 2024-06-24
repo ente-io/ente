@@ -1610,8 +1610,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "5f26aef45ed9f5e563c26f90c1e21b3339ed906d"
-      resolved-ref: "5f26aef45ed9f5e563c26f90c1e21b3339ed906d"
+      ref: ente_onnxruntime
+      resolved-ref: fb9393e36013790938b5bc995a4dca15fed3c944
       url: "https://github.com/ente-io/onnxruntime.git"
     source: git
     version: "1.1.0"

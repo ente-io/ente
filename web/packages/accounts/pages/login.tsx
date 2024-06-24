@@ -1,3 +1,4 @@
+import { customAPIHost } from "@/next/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -15,6 +16,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const router = useRouter();
 
+    const host = customAPIHost();
+
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
@@ -24,7 +27,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         showNavBar(true);
     }, []);
 
-    const register = () => {
+    const signUp = () => {
         router.push(PAGES.SIGNUP);
     };
 
@@ -35,7 +38,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     ) : (
         <VerticallyCentered>
             <FormPaper>
-                <Login signUp={register} appName={appName} />
+                <Login {...{ appName, signUp, host }} />
             </FormPaper>
         </VerticallyCentered>
     );

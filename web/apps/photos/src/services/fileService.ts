@@ -1,8 +1,8 @@
 import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Events, eventBus } from "@ente/shared/events";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { REQUEST_BATCH_SIZE } from "constants/api";
@@ -28,7 +28,6 @@ import {
     setCollectionLastSyncTime,
 } from "./collectionService";
 
-const ENDPOINT = getEndpoint();
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";
 
@@ -118,7 +117,7 @@ export const getFiles = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${ENDPOINT}/collections/v2/diff`,
+                `${apiOrigin()}/collections/v2/diff`,
                 {
                     collectionID: collection.id,
                     sinceTime: time,
@@ -187,7 +186,7 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
                 })),
             };
             await HTTPService.post(
-                `${ENDPOINT}/files/trash`,
+                `${apiOrigin()}/files/trash`,
                 trashRequest,
                 null,
                 {
@@ -211,7 +210,7 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
 
         for (const batch of batchedFilesToDelete) {
             await HTTPService.post(
-                `${ENDPOINT}/trash/delete`,
+                `${apiOrigin()}/trash/delete`,
                 { fileIDs: batch },
                 null,
                 {
@@ -253,9 +252,14 @@ export const updateFileMagicMetadata = async (
             },
         });
     }
-    await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
-        "X-Auth-Token": token,
-    });
+    await HTTPService.put(
+        `${apiOrigin()}/files/magic-metadata`,
+        reqBody,
+        null,
+        {
+            "X-Auth-Token": token,
+        },
+    );
     return fileWithUpdatedMagicMetadataList.map(
         ({ file, updatedMagicMetadata }): EnteFile => ({
             ...file,
@@ -296,7 +300,7 @@ export const updateFilePublicMagicMetadata = async (
         });
     }
     await HTTPService.put(
-        `${ENDPOINT}/files/public-magic-metadata`,
+        `${apiOrigin()}/files/public-magic-metadata`,
         reqBody,
         null,
         {

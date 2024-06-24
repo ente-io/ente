@@ -19,6 +19,7 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class HiddenPage extends StatefulWidget {
   final String tagPrefix;
@@ -139,15 +140,18 @@ class _HiddenPageState extends State<HiddenPage> {
           _selectedFiles,
         ),
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          gallery,
-          FileSelectionOverlayBar(
-            widget.overlayType,
-            _selectedFiles,
-          ),
-        ],
+      body: SelectionState(
+        selectedFiles: _selectedFiles,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            gallery,
+            FileSelectionOverlayBar(
+              widget.overlayType,
+              _selectedFiles,
+            ),
+          ],
+        ),
       ),
     );
   }

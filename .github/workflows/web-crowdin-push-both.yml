@@ -1,6 +1,6 @@
 name: "Push Crowdin translations (web)"
 
-# This is a variant of web-crowdin.yml that uploads the translated strings in
+# This is a variant of web-crowdin-sync.yml that uploads the translated strings in
 # addition to the source strings.
 #
 # This allows us to change the strings in our source code for an automated
@@ -9,11 +9,11 @@ name: "Push Crowdin translations (web)"
 
 on:
     # Trigger manually, or using
-    # `gh workflow run web-crowdin-push.yml --ref <my-branch>`
+    # `gh workflow run web-crowdin-push-both.yml --ref <my-branch>`
     workflow_dispatch:
 
 jobs:
-    push-to-crowdin:
+    push-both-to-crowdin:
         runs-on: ubuntu-latest
 
         steps:

@@ -111,7 +111,10 @@ class AccountSectionWidget extends StatelessWidget {
                   CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
             } catch (e) {
               // ignore: unawaited_futures
-              showGenericErrorDialog(context: context);
+              showGenericErrorDialog(
+                context: context,
+                error: e,
+              );
               return;
             }
             // ignore: unawaited_futures

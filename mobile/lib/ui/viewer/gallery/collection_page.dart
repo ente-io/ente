@@ -16,6 +16,7 @@ import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
@@ -98,16 +99,19 @@ class CollectionPage extends StatelessWidget {
           collection: c.collection,
         ),
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          gallery,
-          FileSelectionOverlayBar(
-            galleryType,
-            _selectedFiles,
-            collection: c.collection,
-          ),
-        ],
+      body: SelectionState(
+        selectedFiles: _selectedFiles,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            gallery,
+            FileSelectionOverlayBar(
+              galleryType,
+              _selectedFiles,
+              collection: c.collection,
+            ),
+          ],
+        ),
       ),
     );
   }

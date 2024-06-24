@@ -1,5 +1,7 @@
 name: "Deploy staging (web)"
 
+# Builds the "staging/web" branch if it exists, "main" otherwise.
+
 on:
     schedule:
         # Run everyday at ~3:00 PM IST
@@ -18,9 +20,20 @@ jobs:
                 working-directory: web
 
         steps:
-            - name: Checkout code
+            - name: Determine branch to build
+              id: select-branch
+              working-directory: ${{ github.workspace }}
+              run: |
+                  if git ls-remote --exit-code --heads https://github.com/ente-io/ente refs/heads/staging/web; then
+                      echo "branch=staging/web" >> $GITHUB_OUTPUT
+                  else
+                      echo "branch=main" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Checkout ${{ steps.select-branch.outputs.branch }}
               uses: actions/checkout@v4
               with:
+                  ref: ${{ steps.select-branch.outputs.branch }}
                   submodules: recursive
 
             - name: Setup node and enable yarn caching

@@ -196,6 +196,38 @@ class PersonService {
     personData.logStats();
   }
 
+  Future<void> removeFilesFromPerson({
+    required PersonEntity person,
+    required Set<String> faceIDs,
+  }) async {
+    final personData = person.data;
+    final List<int> emptiedClusters = [];
+    for (final cluster in personData.assigned!) {
+      cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
+      if (cluster.faces.isEmpty) {
+        emptiedClusters.add(cluster.id);
+      }
+    }
+
+    // Safety check to make sure we haven't created an empty cluster now, if so delete it
+    for (final emptyClusterID in emptiedClusters) {
+      personData.assigned!
+          .removeWhere((element) => element.id != emptyClusterID);
+      await faceMLDataDB.removeClusterToPerson(
+        personID: person.remoteID,
+        clusterID: emptyClusterID,
+      );
+    }
+
+    
+    await entityService.addOrUpdate(
+      EntityType.person,
+      json.encode(personData.toJson()),
+      id: person.remoteID,
+    );
+    personData.logStats();
+  }
+
   Future<void> deletePerson(String personID, {bool onlyMapping = false}) async {
     if (onlyMapping) {
       final PersonEntity? entity = await getPerson(personID);

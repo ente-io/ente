@@ -25,6 +25,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -231,40 +232,43 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       key: ValueKey("$centerPoint$selectedRadius"),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              Gallery(
-                loadingWidget: Column(
-                  children: [
-                    galleryHeaderWidget,
-                    EnteLoadingWidget(
-                      color: getEnteColorScheme(context).strokeMuted,
-                    ),
-                  ],
+          return SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Gallery(
+                  loadingWidget: Column(
+                    children: [
+                      galleryHeaderWidget,
+                      EnteLoadingWidget(
+                        color: getEnteColorScheme(context).strokeMuted,
+                      ),
+                    ],
+                  ),
+                  header: galleryHeaderWidget,
+                  asyncLoader: (
+                    creationStartTime,
+                    creationEndTime, {
+                    limit,
+                    asc,
+                  }) async {
+                    return snapshot.data as FileLoadResult;
+                  },
+                  reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                  removalEventTypes: const {
+                    EventType.deletedFromRemote,
+                    EventType.deletedFromEverywhere,
+                  },
+                  selectedFiles: _selectedFiles,
+                  tagPrefix: widget.tagPrefix,
                 ),
-                header: galleryHeaderWidget,
-                asyncLoader: (
-                  creationStartTime,
-                  creationEndTime, {
-                  limit,
-                  asc,
-                }) async {
-                  return snapshot.data as FileLoadResult;
-                },
-                reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                removalEventTypes: const {
-                  EventType.deletedFromRemote,
-                  EventType.deletedFromEverywhere,
-                },
-                selectedFiles: _selectedFiles,
-                tagPrefix: widget.tagPrefix,
-              ),
-              FileSelectionOverlayBar(
-                GalleryType.locationTag,
-                _selectedFiles,
-              ),
-            ],
+                FileSelectionOverlayBar(
+                  GalleryType.locationTag,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           );
         } else {
           return Column(

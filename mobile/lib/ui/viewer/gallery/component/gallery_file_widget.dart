@@ -55,6 +55,7 @@ class GalleryFileWidget extends StatelessWidget {
           ? thumbnailLargeSize
           : thumbnailSmallSize,
       shouldShowOwnerAvatar: !isFileSelected,
+      shouldShowVideoDuration: true,
     );
     return GestureDetector(
       onTap: () {
