@@ -1,3 +1,4 @@
+import { customAPIHost } from "@/next/origins";
 import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -20,7 +21,7 @@ import {
 } from "@ente/shared/storage/localStorage/helpers";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -164,6 +165,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setTimeout(() => setResend(0), 3000);
     };
 
+    const host = customAPIHost();
+
     if (!email) {
         return (
             <VerticallyCentered>
@@ -225,17 +228,27 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     callback={onSubmit}
                 />
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    {resend === 0 && (
-                        <LinkButton onClick={resendEmail}>
-                            {t("RESEND_MAIL")}
-                        </LinkButton>
-                    )}
-                    {resend === 1 && <span>{t("SENDING")}</span>}
-                    {resend === 2 && <span>{t("SENT")}</span>}
-                    <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
+                <FormPaperFooter>
+                    <Stack gap={4} sx={{ width: "100%", textAlign: "start" }}>
+                        <Stack direction="row" justifyContent="space-between">
+                            {resend === 0 && (
+                                <LinkButton onClick={resendEmail}>
+                                    {t("RESEND_MAIL")}
+                                </LinkButton>
+                            )}
+                            {resend === 1 && <span>{t("SENDING")}</span>}
+                            {resend === 2 && <span>{t("SENT")}</span>}
+                            <LinkButton onClick={logout}>
+                                {t("CHANGE_EMAIL")}
+                            </LinkButton>
+                        </Stack>
+
+                        {host && (
+                            <Typography variant="small" color="text.faint">
+                                {host}
+                            </Typography>
+                        )}
+                    </Stack>
                 </FormPaperFooter>
             </FormPaper>
         </VerticallyCentered>
