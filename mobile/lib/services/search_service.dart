@@ -49,9 +49,6 @@ class SearchService {
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
-  // static const _kMagicPromptsDataUrl = "https://discover.ente.io/v1.json";
-
-  // var magicPromptsData = [];
 
   SearchService._privateConstructor();
 
@@ -67,14 +64,6 @@ class SearchService {
       // _loadMagicPrompts();
     }
   }
-
-  // Future<dynamic> _loadMagicPrompts() async {
-  //   final file = await RemoteAssetsService.instance
-  //       .getAsset(_kMagicPromptsDataUrl, refetch: true);
-
-  //   final json = jsonDecode(await file.readAsString());
-  //   magicPromptsData = json["prompts"];
-  // }
 
   Set<int> ignoreCollections() {
     return CollectionsService.instance.getHiddenCollectionIds();
