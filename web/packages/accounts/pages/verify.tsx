@@ -1,13 +1,14 @@
-import { customAPIHost } from "@/next/origins";
 import { ensure } from "@/utils/ensure";
 import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import { VerifyingPasskey } from "@ente/shared/components/LoginComponents";
+import {
+    LoginFlowFormFooter,
+    VerifyingPasskey,
+} from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -165,8 +166,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setTimeout(() => setResend(0), 3000);
     };
 
-    const host = customAPIHost();
-
     if (!email) {
         return (
             <VerticallyCentered>
@@ -228,28 +227,20 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     callback={onSubmit}
                 />
 
-                <FormPaperFooter>
-                    <Stack gap={1} sx={{ width: "100%", textAlign: "start" }}>
-                        <Stack direction="row" justifyContent="space-between">
-                            {resend === 0 && (
-                                <LinkButton onClick={resendEmail}>
-                                    {t("RESEND_MAIL")}
-                                </LinkButton>
-                            )}
-                            {resend === 1 && <span>{t("SENDING")}</span>}
-                            {resend === 2 && <span>{t("SENT")}</span>}
-                            <LinkButton onClick={logout}>
-                                {t("CHANGE_EMAIL")}
+                <LoginFlowFormFooter>
+                    <Stack direction="row" justifyContent="space-between">
+                        {resend === 0 && (
+                            <LinkButton onClick={resendEmail}>
+                                {t("RESEND_MAIL")}
                             </LinkButton>
-                        </Stack>
-
-                        {host && (
-                            <Typography variant="small" color="text.faint">
-                                {host}
-                            </Typography>
                         )}
+                        {resend === 1 && <span>{t("SENDING")}</span>}
+                        {resend === 2 && <span>{t("SENT")}</span>}
+                        <LinkButton onClick={logout}>
+                            {t("CHANGE_EMAIL")}
+                        </LinkButton>
                     </Stack>
-                </FormPaperFooter>
+                </LoginFlowFormFooter>
             </FormPaper>
         </VerticallyCentered>
     );
