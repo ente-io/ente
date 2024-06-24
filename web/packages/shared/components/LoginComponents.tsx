@@ -1,6 +1,5 @@
-import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { customAPIHost } from "@/next/origins";
 import type { BaseAppContextT } from "@/next/types/app";
 import {
     checkPasskeyVerificationStatus,
@@ -8,7 +7,7 @@ import {
     saveCredentialsAndNavigateTo,
 } from "@ente/accounts/services/passkey";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { CircularProgress, Typography, styled } from "@mui/material";
+import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -46,21 +45,25 @@ const Header_ = styled("div")`
     gap: 8px;
 `;
 
-export const ConnectionDetails: React.FC = () => {
-    const host = new URL(apiOrigin()).host;
+export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => {
+    const host = customAPIHost();
 
     return (
-        <ConnectionDetails_>
-            <Typography variant="small" color="text.faint">
-                {host}
-            </Typography>
-        </ConnectionDetails_>
+        <FormPaperFooter>
+            <Stack gap={"16px"} sx={{ width: "100%", textAlign: "start" }}>
+                {children}
+
+                {host && (
+                    <Typography variant="small" color="text.faint">
+                        {host}
+                    </Typography>
+                )}
+            </Stack>
+        </FormPaperFooter>
     );
 };
-
-const ConnectionDetails_ = styled("div")`
-    margin-block-start: 1rem;
-`;
 
 interface VerifyingPasskeyProps {
     /** ID of the current passkey verification session. */
@@ -161,16 +164,16 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                     </ButtonStack>
                 </VerifyingPasskeyMiddle>
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={handleRecover}>
-                        {t("RECOVER_ACCOUNT")}
-                    </LinkButton>
-                    <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
-                </FormPaperFooter>
-
-                {isDevBuild && <ConnectionDetails />}
+                <LoginFlowFormFooter>
+                    <Stack direction="row" justifyContent="space-between">
+                        <LinkButton onClick={handleRecover}>
+                            {t("RECOVER_ACCOUNT")}
+                        </LinkButton>
+                        <LinkButton onClick={logout}>
+                            {t("CHANGE_EMAIL")}
+                        </LinkButton>
+                    </Stack>
+                </LoginFlowFormFooter>
             </FormPaper>
         </VerticallyCentered>
     );

@@ -229,7 +229,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 />
 
                 <FormPaperFooter>
-                    <Stack gap={4} sx={{ width: "100%", textAlign: "start" }}>
+                    <Stack gap={1} sx={{ width: "100%", textAlign: "start" }}>
                         <Stack direction="row" justifyContent="space-between">
                             {resend === 0 && (
                                 <LinkButton onClick={resendEmail}>
