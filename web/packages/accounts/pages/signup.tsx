@@ -1,3 +1,4 @@
+import { customAPIHost } from "@/next/origins";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -14,6 +15,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
+
+    const host = customAPIHost();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
@@ -34,7 +37,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <EnteSpinner />
             ) : (
                 <FormPaper>
-                    <SignUp login={login} router={router} appName={appName} />
+                    <SignUp {...{ appName, login, router, host }} />
                 </FormPaper>
             )}
         </VerticallyCentered>
