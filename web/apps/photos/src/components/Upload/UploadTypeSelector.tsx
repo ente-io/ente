@@ -96,15 +96,11 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             }}
             onClose={dialogCloseHandler({ onClose: handleClose })}
         >
-            {!showTakeoutOptions ? (
-                <Options
-                    intent={intent}
-                    onSelect={handleSelect}
-                    onClose={handleClose}
-                />
-            ) : (
-                <TakeoutOptions onSelect={handleSelect} onClose={handleClose} />
-            )}
+            <Options
+                intent={intent}
+                onSelect={handleSelect}
+                onClose={handleClose}
+            />
         </Dialog>
     );
 };
@@ -119,7 +115,54 @@ type OptionsProps = {
     onClose: () => void;
 };
 
-const Options: React.FC<OptionsProps> = ({ intent, onClose, onSelect }) => {
+export const Options: React.FC<OptionsProps> = ({
+    intent,
+    onSelect,
+    onClose,
+}) => {
+    // [Note: Dialog state remains preseved on reopening]
+    //
+    // Keep dialog content specific state here, in a separate component, so that
+    // this state is not tied to the lifetime of the dialog.
+    //
+    // If we don't do this, then the dialog retains whatever it was doing when
+    // it was last closed. Sometimes that is desirable, but sometimes not, and
+    // in the latter cases moving the instance specific state to a child works.
+
+    const [showTakeoutOptions, setShowTakeoutOptions] = useState(false);
+
+    const handleTakeoutClose = () => {
+        setShowTakeoutOptions(false);
+    };
+
+    const handleSelect = (option: OptionType) => {
+        switch (option) {
+            case "files":
+                onSelect("files");
+                break;
+            case "folders":
+                onSelect("folders");
+                break;
+            case "zips":
+                !showTakeoutOptions
+                    ? setShowTakeoutOptions(true)
+                    : onSelect("zips");
+                break;
+        }
+    };
+
+    return !showTakeoutOptions ? (
+        <DefaultOptions {...{ intent, onClose }} onSelect={handleSelect} />
+    ) : (
+        <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
+    );
+};
+
+const DefaultOptions: React.FC<OptionsProps> = ({
+    intent,
+    onClose,
+    onSelect,
+}) => {
     return (
         <>
             <DialogTitleWithCloseButton onClose={onClose}>
@@ -129,6 +172,7 @@ const Options: React.FC<OptionsProps> = ({ intent, onClose, onSelect }) => {
                       ? t("IMPORT")
                       : t("UPLOAD")}
             </DialogTitleWithCloseButton>
+
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
                     {intent != "import" && (
