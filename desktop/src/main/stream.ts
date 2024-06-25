@@ -2,7 +2,6 @@
  * @file stream data to-from renderer using a custom protocol handler.
  */
 import { net, protocol } from "electron/main";
-import StreamZip from "node-stream-zip";
 import { randomUUID } from "node:crypto";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -11,6 +10,7 @@ import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ffmpegConvertToMP4 } from "./services/ffmpeg";
+import { markClosableZip, openZip } from "./services/zip";
 import { ensure } from "./utils/common";
 import {
     deleteTempFile,
@@ -113,7 +113,7 @@ const handleRead = async (path: string) => {
 };
 
 const handleReadZip = async (zipPath: string, entryName: string) => {
-    const zip = new StreamZip.async({ file: zipPath });
+    const zip = openZip(zipPath);
     const entry = await zip.entry(entryName);
     if (!entry) return new Response("", { status: 404 });
 
@@ -130,7 +130,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
         webReadableStreamAny as ReadableStream<Uint8Array>;
 
     // Close the zip handle when the underlying stream closes.
-    stream.on("end", () => void zip.close());
+    stream.on("end", () => markClosableZip(zipPath));
 
     // While it is documented that entry.time is the modification time,
     // the units are not mentioned. By seeing the source code, we can

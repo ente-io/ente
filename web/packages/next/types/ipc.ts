@@ -567,6 +567,9 @@ export interface Electron {
 
     /**
      * Clear any pending uploads.
+     *
+     * This is also taken by the Node.js layer as a signal to clear any cached
+     * state it has kept around to speed up the upload.
      */
     clearPendingUploads: () => Promise<void>;
 }
