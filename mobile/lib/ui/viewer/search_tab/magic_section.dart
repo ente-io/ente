@@ -239,7 +239,7 @@ class MagicRecommendation extends StatelessWidget {
                       ),
                       ConstrainedBox(
                         constraints: const BoxConstraints(
-                          maxWidth: 76,
+                          maxWidth: 88,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.only(
