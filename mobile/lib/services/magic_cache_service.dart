@@ -169,6 +169,7 @@ class MagicCacheService {
       _logger.info("No magic cache found");
       return [];
     }
+
     final List<GenericSearchResult> genericSearchResults = [];
     for (MagicCache magicCache in magicCaches) {
       final genericSearchResult = await magicCache.toGenericSearchResult();

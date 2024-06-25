@@ -60,9 +60,6 @@ class SearchService {
       _cachedFilesFuture = null;
       _cachedHiddenFilesFuture = null;
     });
-    if (flagService.internalUser) {
-      // _loadMagicPrompts();
-    }
   }
 
   Set<int> ignoreCollections() {
