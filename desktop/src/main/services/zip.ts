@@ -5,7 +5,7 @@ import StreamZip from "node-stream-zip";
 const _cache = new LRUCache<string, StreamZip.StreamZipAsync>({
     max: 50,
     disposeAfter: (zip, zipPath) => {
-        if (isInUse(zipPath)) {
+        if (_refCount.has(zipPath)) {
             // Add it back again. The `noDisposeOnSet` flag prevents dispose
             // from being called again. From my understanding, it shouldn't
             // matter in our case, but I've kept it here to match the
@@ -20,8 +20,6 @@ const _cache = new LRUCache<string, StreamZip.StreamZipAsync>({
 
 /** Reference count. */
 const _refCount = new Map<string, number>();
-
-const isInUse = (zipPath: string) => (_refCount.get(zipPath) ?? 0) > 0;
 
 /**
  * Cached `StreamZip.async`s
