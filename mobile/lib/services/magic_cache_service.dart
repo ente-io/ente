@@ -103,7 +103,7 @@ class MagicCacheService {
     }
     if (lastMagicCacheUpdateTime <
         DateTime.now()
-            .subtract(const Duration(seconds: 1))
+            .subtract(const Duration(days: 3))
             .millisecondsSinceEpoch) {
       Future.delayed(_kCacheUpdateDelay, () {
         unawaited(_updateCache());
