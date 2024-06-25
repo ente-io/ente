@@ -502,6 +502,7 @@
       "altNames": ["twitter"],
       "slug": "x"
     },
+    { "title": "yahoo" },
     {
       "title": "Yandex",
       "altNames": ["Ya", "Яндекс"],
