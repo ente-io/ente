@@ -50,12 +50,6 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     );
 
     const directlyShowUploadFiles = useRef(isMobileOrTable());
-    const [showTakeoutOptions, setShowTakeoutOptions] = useState(false);
-
-    const handleClose = () => {
-        setShowTakeoutOptions(false);
-        onClose();
-    };
 
     useEffect(() => {
         if (
@@ -64,7 +58,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
             uploadFiles();
-            handleClose();
+            onClose();
         }
     }, [open]);
 
@@ -77,9 +71,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                 uploadFolders();
                 break;
             case "zips":
-                !showTakeoutOptions
-                    ? setShowTakeoutOptions(true)
-                    : uploadGoogleTakeoutZips();
+                uploadGoogleTakeoutZips();
                 break;
         }
     };
@@ -94,12 +86,12 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                     [theme.breakpoints.down(360)]: { p: 0 },
                 }),
             }}
-            onClose={dialogCloseHandler({ onClose: handleClose })}
+            onClose={dialogCloseHandler({ onClose: onClose })}
         >
             <Options
                 intent={intent}
                 onSelect={handleSelect}
-                onClose={handleClose}
+                onClose={onClose}
             />
         </Dialog>
     );
