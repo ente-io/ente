@@ -6,11 +6,7 @@ const _cache = new LRUCache<string, StreamZip.StreamZipAsync>({
     max: 50,
     disposeAfter: (zip, zipPath) => {
         if (_refCount.has(zipPath)) {
-            // Add it back again. The `noDisposeOnSet` flag prevents dispose
-            // from being called again. From my understanding, it shouldn't
-            // matter in our case, but I've kept it here to match the
-            // recommended example:
-            // https://github.com/isaacs/node-lru-cache/issues/151#issuecomment-1033206697
+            // Add it back again.
             _cache.set(zipPath, zip);
         } else {
             void zip.close();
