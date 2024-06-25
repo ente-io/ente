@@ -8,7 +8,7 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
-import { Box, Dialog, Stack, Typography } from "@mui/material";
+import { Box, Dialog, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { isMobileOrTable } from "utils/common/deviceDetection";
@@ -228,14 +228,19 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                         >
                             {t("Select zips")}
                         </FocusVisibleButton>
-                        <FocusVisibleButton
-                            color="secondary"
-                            fullWidth
-                            disableRipple
-                            onClick={() => onSelect("zips")}
+                        <Link
+                            href="https://help.ente.io/photos/migration/from-google-photos/"
+                            target="_blank"
+                            rel="noopener"
                         >
-                            {t("FAQ")}
-                        </FocusVisibleButton>
+                            <FocusVisibleButton
+                                color="secondary"
+                                fullWidth
+                                disableRipple
+                            >
+                                {t("FAQ")}
+                            </FocusVisibleButton>
+                        </Link>
                     </Stack>
 
                     <Typography variant="small" color="text.muted" pb={1}>
