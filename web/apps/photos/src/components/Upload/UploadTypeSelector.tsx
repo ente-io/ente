@@ -181,7 +181,6 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                         endIcon={<ChevronRight />}
                         label={t("UPLOAD_DIRS")}
                     />
-
                     {intent !== "collect" && (
                         <EnteMenuItem
                             onClick={() => onSelect("zips")}
@@ -203,6 +202,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
     onSelect,
     onClose,
 }) => {
+    // TODO(MR): Move these to localized strings when finalized.
     return (
         <>
             <DialogTitleWithCloseButtonSm onClose={onClose}>
