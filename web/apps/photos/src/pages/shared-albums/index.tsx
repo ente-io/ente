@@ -63,7 +63,6 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
-    UploadTypeSelectorIntent,
 } from "types/gallery";
 import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
 import {
@@ -582,9 +581,7 @@ export default function PublicCollectionGallery() {
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
-                    uploadTypeSelectorIntent={
-                        UploadTypeSelectorIntent.collectPhotos
-                    }
+                    uploadTypeSelectorIntent="collect"
                     {...{
                         dragAndDropFiles,
                         openFileSelector,

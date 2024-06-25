@@ -49,6 +49,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import SearchResultInfo from "components/Search/SearchResultInfo";
 import Sidebar from "components/Sidebar";
+import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { GalleryNavbar } from "components/pages/gallery/Navbar";
@@ -101,7 +102,6 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
-    UploadTypeSelectorIntent,
 } from "types/gallery";
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
@@ -278,9 +278,7 @@ export default function Gallery() {
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
-        useState<UploadTypeSelectorIntent>(
-            UploadTypeSelectorIntent.normalUpload,
-        );
+        useState<UploadTypeSelectorIntent>("upload");
 
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -992,12 +990,12 @@ export default function Gallery() {
         }
     };
 
-    const openUploader = (intent = UploadTypeSelectorIntent.normalUpload) => {
+    const openUploader = (intent?: UploadTypeSelectorIntent) => {
         if (!uploadManager.shouldAllowNewUpload()) {
             return;
         }
         setUploadTypeSelectorView(true);
-        setUploadTypeSelectorIntent(intent);
+        setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
     const closeCollectionSelector = () => {

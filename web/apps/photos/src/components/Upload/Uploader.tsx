@@ -39,7 +39,6 @@ import {
     SetCollections,
     SetFiles,
     SetLoading,
-    UploadTypeSelectorIntent,
 } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -50,7 +49,10 @@ import {
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
-import UploadTypeSelector from "./UploadTypeSelector";
+import {
+    UploadTypeSelector,
+    type UploadTypeSelectorIntent,
+} from "./UploadTypeSelector";
 
 enum PICKED_UPLOAD_TYPE {
     FILES = "files",
@@ -767,12 +769,12 @@ export default function Uploader({
                 didSelect={didSelectCollectionMapping}
             />
             <UploadTypeSelector
-                show={props.uploadTypeSelectorView}
+                open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
+                intent={props.uploadTypeSelectorIntent}
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
-                uploadTypeSelectorIntent={props.uploadTypeSelectorIntent}
             />
             <UploadProgress
                 open={uploadProgressView}

@@ -9,17 +9,21 @@ import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlin
 import { Box, Dialog, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useRef } from "react";
-import { UploadTypeSelectorIntent } from "types/gallery";
 import { isMobileOrTable } from "utils/common/deviceDetection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
+export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
+
 interface UploadTypeSelectorProps {
+    /** If `true`, then the selector is shown. */
+    open: boolean;
+    /** Callback to indicate that the selector should be closed. */
     onClose: () => void;
-    show: boolean;
+    /** The particular context / scenario in which this upload is occuring. */
+    intent: UploadTypeSelectorIntent;
     uploadFiles: () => void;
     uploadFolders: () => void;
     uploadGoogleTakeoutZips: () => void;
-    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
 }
 
 /**
@@ -31,13 +35,13 @@ interface UploadTypeSelectorProps {
  * upload. But having an explicit easy to reach button is also necessary for new
  * users, or for cases where drag-and-drop might not be appropriate.
  */
-const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
+export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
+    open,
     onClose,
-    show,
+    intent,
     uploadFiles,
     uploadFolders,
     uploadGoogleTakeoutZips,
-    uploadTypeSelectorIntent,
 }) => {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -46,18 +50,18 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
 
     useEffect(() => {
         if (
-            show &&
+            open &&
             directlyShowUploadFiles.current &&
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
             uploadFiles();
             onClose();
         }
-    }, [show]);
+    }, [open]);
 
     return (
         <Dialog
-            open={show}
+            open={open}
             PaperProps={{
                 sx: (theme) => ({
                     maxWidth: "375px",
@@ -68,18 +72,15 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             onClose={dialogCloseHandler({ onClose })}
         >
             <DialogTitleWithCloseButton onClose={onClose}>
-                {uploadTypeSelectorIntent ===
-                UploadTypeSelectorIntent.collectPhotos
+                {intent == "collect"
                     ? t("SELECT_PHOTOS")
-                    : uploadTypeSelectorIntent ===
-                        UploadTypeSelectorIntent.import
+                    : intent == "import"
                       ? t("IMPORT")
                       : t("UPLOAD")}
             </DialogTitleWithCloseButton>
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
-                    {uploadTypeSelectorIntent !==
-                        UploadTypeSelectorIntent.import && (
+                    {intent != "import" && (
                         <EnteMenuItem
                             onClick={uploadFiles}
                             startIcon={<FileUploadIcon />}
@@ -94,8 +95,7 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                         label={t("UPLOAD_DIRS")}
                     />
 
-                    {uploadTypeSelectorIntent !==
-                        UploadTypeSelectorIntent.collectPhotos && (
+                    {intent !== "collect" && (
                         <EnteMenuItem
                             onClick={uploadGoogleTakeoutZips}
                             startIcon={<GoogleIcon />}
@@ -111,5 +111,3 @@ const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         </Dialog>
     );
 };
-
-export default UploadTypeSelector;
