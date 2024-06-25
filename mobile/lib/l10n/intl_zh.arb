@@ -1250,5 +1250,6 @@
   "rotate": "旋转",
   "left": "向左",
   "right": "向右",
-  "whatsNew": "更新日志"
+  "whatsNew": "更新日志",
+  "reviewSuggestions": "查看建议"
 }
