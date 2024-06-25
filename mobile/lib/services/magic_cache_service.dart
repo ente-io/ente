@@ -164,18 +164,23 @@ class MagicCacheService {
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
-    final magicCaches = await _getMagicCache();
-    if (magicCaches == null) {
-      _logger.info("No magic cache found");
+    try {
+      final magicCaches = await _getMagicCache();
+      if (magicCaches == null) {
+        _logger.info("No magic cache found");
+        return [];
+      }
+
+      final List<GenericSearchResult> genericSearchResults = [];
+      for (MagicCache magicCache in magicCaches) {
+        final genericSearchResult = await magicCache.toGenericSearchResult();
+        genericSearchResults.add(genericSearchResult);
+      }
+      return genericSearchResults;
+    } catch (e) {
+      _logger.info("Error getting magic generic search result", e);
       return [];
     }
-
-    final List<GenericSearchResult> genericSearchResults = [];
-    for (MagicCache magicCache in magicCaches) {
-      final genericSearchResult = await magicCache.toGenericSearchResult();
-      genericSearchResults.add(genericSearchResult);
-    }
-    return genericSearchResults;
   }
 
   Future<List<dynamic>> _loadMagicPrompts() async {
