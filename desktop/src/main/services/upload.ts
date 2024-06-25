@@ -5,6 +5,7 @@ import { existsSync } from "original-fs";
 import type { PendingUploads, ZipItem } from "../../types/ipc";
 import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
+import { clearOpenZipCache } from "./zip";
 
 export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
     const zip = new StreamZip.async({ file: zipPath });
@@ -152,4 +153,7 @@ export const markUploadedZipItems = (
     uploadStatusStore.set("zipItems", updated);
 };
 
-export const clearPendingUploads = () => uploadStatusStore.clear();
+export const clearPendingUploads = () => {
+    uploadStatusStore.clear();
+    clearOpenZipCache();
+};
