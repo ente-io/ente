@@ -1,7 +1,27 @@
 import { LRUCache } from "lru-cache";
 import StreamZip from "node-stream-zip";
 
-const _cache = new LRUCache<string, StreamZip.StreamZipAsync>({ max: 50 });
+/** The cache. */
+const _cache = new LRUCache<string, StreamZip.StreamZipAsync>({
+    max: 50,
+    disposeAfter: (zip, zipPath) => {
+        if (isInUse(zipPath)) {
+            // Add it back again. The `noDisposeOnSet` flag prevents dispose
+            // from being called again. From my understanding, it shouldn't
+            // matter in our case, but I've kept it here to match the
+            // recommended example:
+            // https://github.com/isaacs/node-lru-cache/issues/151#issuecomment-1033206697
+            _cache.set(zipPath, zip);
+        } else {
+            void zip.close();
+        }
+    },
+});
+
+/** Reference count. */
+const _refCount = new Map<string, number>();
+
+const isInUse = (zipPath: string) => (_refCount.get(zipPath) ?? 0) > 0;
 
 /**
  * Cached `StreamZip.async`s
@@ -29,10 +49,32 @@ export const openZip = (zipPath: string) => {
         result = new StreamZip.async({ file: zipPath });
         _cache.set(zipPath, result);
     }
+    _refCount.set(zipPath, (_refCount.get(zipPath) ?? 0) + 1);
     return result;
+};
+
+/**
+ * Indicate to our cache that an item we opened earlier using {@link openZip}
+ * can now be safely closed.
+ *
+ * @param zipPath The key that was used for opening this zip.
+ */
+export const markClosableZip = (zipPath: string) => {
+    const rc = _refCount.get(zipPath);
+    if (!rc) throw new Error(`Double close for ${zipPath}`);
+    if (rc == 1) _refCount.delete(zipPath);
+    else _refCount.set(zipPath, rc - 1);
 };
 
 /**
  * Clear any entries previously cached by {@link openZip}.
  */
-export const clearOpenZipCache = () => _cache.clear();
+export const clearOpenZipCache = () => {
+    if (_refCount.size > 0) {
+        const keys = JSON.stringify([..._refCount.keys()]);
+        throw new Error(
+            `Attempting to clear zip file cache when some items are still in use: ${keys}`,
+        );
+    }
+    _cache.clear();
+};

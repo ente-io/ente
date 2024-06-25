@@ -1,14 +1,13 @@
-import StreamZip from "node-stream-zip";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { existsSync } from "original-fs";
 import type { PendingUploads, ZipItem } from "../../types/ipc";
 import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
-import { clearOpenZipCache } from "./zip";
+import { clearOpenZipCache, markClosableZip, openZip } from "./zip";
 
 export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
-    const zip = new StreamZip.async({ file: zipPath });
+    const zip = openZip(zipPath);
 
     const entries = await zip.entries();
     const entryNames: string[] = [];
@@ -22,7 +21,7 @@ export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
         }
     }
 
-    await zip.close();
+    markClosableZip(zipPath);
 
     return entryNames.map((entryName) => [zipPath, entryName]);
 };
@@ -35,7 +34,7 @@ export const pathOrZipItemSize = async (
         return stat.size;
     } else {
         const [zipPath, entryName] = pathOrZipItem;
-        const zip = new StreamZip.async({ file: zipPath });
+        const zip = openZip(zipPath);
         const entry = await zip.entry(entryName);
         if (!entry)
             throw new Error(
