@@ -1,4 +1,6 @@
+import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
 import DialogTitleWithCloseButton, {
+    DialogTitleWithCloseButtonSm,
     dialogCloseHandler,
 } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -6,7 +8,7 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
-import { Box, Dialog, Stack, Typography } from "@mui/material";
+import { Box, Dialog, Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { isMobileOrTable } from "utils/common/deviceDetection";
@@ -50,6 +52,11 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     const directlyShowUploadFiles = useRef(isMobileOrTable());
     const [showTakeoutOptions, setShowTakeoutOptions] = useState(false);
 
+    const handleClose = () => {
+        setShowTakeoutOptions(false);
+        onClose();
+    };
+
     useEffect(() => {
         if (
             open &&
@@ -57,7 +64,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
             uploadFiles();
-            onClose();
+            handleClose();
         }
     }, [open]);
 
@@ -69,7 +76,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             case "folders":
                 uploadFolders();
                 break;
-            case "zip":
+            case "zips":
                 !showTakeoutOptions
                     ? setShowTakeoutOptions(true)
                     : uploadGoogleTakeoutZips();
@@ -87,19 +94,16 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                     [theme.breakpoints.down(360)]: { p: 0 },
                 }),
             }}
-            onClose={dialogCloseHandler({ onClose })}
+            onClose={dialogCloseHandler({ onClose: handleClose })}
         >
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {intent == "collect"
-                    ? t("SELECT_PHOTOS")
-                    : intent == "import"
-                      ? t("IMPORT")
-                      : t("UPLOAD")}
-            </DialogTitleWithCloseButton>
-            {showTakeoutOptions ? (
-                <Options intent={intent} onSelect={handleSelect} />
+            {!showTakeoutOptions ? (
+                <Options
+                    intent={intent}
+                    onSelect={handleSelect}
+                    onClose={handleClose}
+                />
             ) : (
-                <Options intent={intent} onSelect={handleSelect} />
+                <TakeoutOptions onSelect={handleSelect} onClose={handleClose} />
             )}
         </Dialog>
     );
@@ -111,39 +115,109 @@ type OptionsProps = {
     intent: UploadTypeSelectorIntent;
     /** Called when the user selects one of the provided options. */
     onSelect: (option: OptionType) => void;
+    /** Called when the dialog should be closed. */
+    onClose: () => void;
 };
 
-const Options: React.FC<OptionsProps> = ({ intent, onSelect }) => {
+const Options: React.FC<OptionsProps> = ({ intent, onClose, onSelect }) => {
     return (
-        <Box p={1.5} pt={0.5}>
-            <Stack spacing={0.5}>
-                {intent != "import" && (
+        <>
+            <DialogTitleWithCloseButton onClose={onClose}>
+                {intent == "collect"
+                    ? t("SELECT_PHOTOS")
+                    : intent == "import"
+                      ? t("IMPORT")
+                      : t("UPLOAD")}
+            </DialogTitleWithCloseButton>
+            <Box p={1.5} pt={0.5}>
+                <Stack spacing={0.5}>
+                    {intent != "import" && (
+                        <EnteMenuItem
+                            onClick={() => onSelect("files")}
+                            startIcon={<FileUploadIcon />}
+                            endIcon={<ChevronRight />}
+                            label={t("UPLOAD_FILES")}
+                        />
+                    )}
                     <EnteMenuItem
-                        onClick={() => onSelect("files")}
-                        startIcon={<FileUploadIcon />}
+                        onClick={() => onSelect("folders")}
+                        startIcon={<FolderUploadIcon />}
                         endIcon={<ChevronRight />}
-                        label={t("UPLOAD_FILES")}
+                        label={t("UPLOAD_DIRS")}
                     />
-                )}
-                <EnteMenuItem
-                    onClick={() => onSelect("folders")}
-                    startIcon={<FolderUploadIcon />}
-                    endIcon={<ChevronRight />}
-                    label={t("UPLOAD_DIRS")}
-                />
 
-                {intent !== "collect" && (
-                    <EnteMenuItem
-                        onClick={() => onSelect("zips")}
-                        startIcon={<GoogleIcon />}
-                        endIcon={<ChevronRight />}
-                        label={t("UPLOAD_GOOGLE_TAKEOUT")}
-                    />
-                )}
-            </Stack>
-            <Typography p={1.5} pt={4} color="text.muted">
-                {t("DRAG_AND_DROP_HINT")}
-            </Typography>
-        </Box>
+                    {intent !== "collect" && (
+                        <EnteMenuItem
+                            onClick={() => onSelect("zips")}
+                            startIcon={<GoogleIcon />}
+                            endIcon={<ChevronRight />}
+                            label={t("UPLOAD_GOOGLE_TAKEOUT")}
+                        />
+                    )}
+                </Stack>
+                <Typography p={1.5} pt={4} color="text.muted">
+                    {t("DRAG_AND_DROP_HINT")}
+                </Typography>
+            </Box>
+        </>
+    );
+};
+
+const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
+    onSelect,
+    onClose,
+}) => {
+    return (
+        <>
+            <DialogTitleWithCloseButtonSm onClose={onClose}>
+                {t("UPLOAD_GOOGLE_TAKEOUT")}
+            </DialogTitleWithCloseButtonSm>
+
+            <Box p={1.5}>
+                <Stack gap={3}>
+                    <Stack gap={1}>
+                        <FocusVisibleButton
+                            color="accent"
+                            fullWidth
+                            disableRipple
+                            onClick={() => onSelect("folders")}
+                        >
+                            {t("Select folder")}
+                        </FocusVisibleButton>
+                        <FocusVisibleButton
+                            color="secondary"
+                            fullWidth
+                            disableRipple
+                            onClick={() => onSelect("zips")}
+                        >
+                            {t("Select takeout zips")}
+                        </FocusVisibleButton>
+                        <FocusVisibleButton
+                            color="secondary"
+                            fullWidth
+                            disableRipple
+                            onClick={() => onSelect("zips")}
+                        >
+                            {t("FAQ")}
+                        </FocusVisibleButton>
+                    </Stack>
+                    <Stack gap={2}>
+                        <Typography variant="small" color="text.muted">
+                            Unzip all zips into a merged folder and upload that.
+                            Or upload the zips directly. See FAQ for details.
+                        </Typography>
+                        <Paper variant="outlined">
+                            <Typography
+                                variant="small"
+                                color="text.faint"
+                                p={1}
+                            >
+                                Tip: Use the 50 GB option when exporting zips.
+                            </Typography>
+                        </Paper>
+                    </Stack>
+                </Stack>
+            </Box>
+        </>
     );
 };
