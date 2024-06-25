@@ -8,7 +8,7 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
-import { Box, Dialog, Paper, Stack, Typography } from "@mui/material";
+import { Box, Dialog, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { isMobileOrTable } from "utils/common/deviceDetection";
@@ -190,7 +190,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("zips")}
                         >
-                            {t("Select takeout zips")}
+                            {t("Select zips")}
                         </FocusVisibleButton>
                         <FocusVisibleButton
                             color="secondary"
@@ -203,18 +203,9 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                     </Stack>
                     <Stack gap={2}>
                         <Typography variant="small" color="text.muted">
-                            Unzip all zips into a merged folder and upload that.
+                            Unzip all zips into the same folder and upload that.
                             Or upload the zips directly. See FAQ for details.
                         </Typography>
-                        <Paper variant="outlined">
-                            <Typography
-                                variant="small"
-                                color="text.faint"
-                                p={1}
-                            >
-                                Tip: Use the 50 GB option when exporting zips.
-                            </Typography>
-                        </Paper>
                     </Stack>
                 </Stack>
             </Box>
