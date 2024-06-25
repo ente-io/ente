@@ -13,7 +13,6 @@ import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
@@ -292,8 +291,6 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
-      case SectionType.magic:
-        return [Bus.instance.on<MLFrameworkInitializationUpdateEvent>()];
       default:
         return [];
     }
