@@ -218,7 +218,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
             </DialogTitleWithCloseButtonSm>
 
             <Box p={1.5}>
-                <Stack gap={3}>
+                <Stack gap={2.5}>
                     <Stack gap={1}>
                         <FocusVisibleButton
                             color="accent"
@@ -245,12 +245,11 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             {t("FAQ")}
                         </FocusVisibleButton>
                     </Stack>
-                    <Stack gap={2}>
-                        <Typography variant="small" color="text.muted">
-                            Unzip all zips into the same folder and upload that.
-                            Or upload the zips directly. See FAQ for details.
-                        </Typography>
-                    </Stack>
+
+                    <Typography variant="small" color="text.muted" pb={1}>
+                        Unzip all zips into the same folder and upload that. Or
+                        upload the zips directly. See FAQ for details.
+                    </Typography>
                 </Stack>
             </Box>
         </>
