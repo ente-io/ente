@@ -93,10 +93,10 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={t("FAILED_UPLOADS")}
                                 sectionInfo={
+                                    /* TODO(MR): Move these to localized strings when finalized. */
                                     uploadStage === UPLOAD_STAGES.FINISH
                                         ? undefined
-                                        : // TODO(MR): Move these to localized strings when finalized.
-                                          "There will be an option to retry these when the upload finishes."
+                                        : "There will be an option to retry these when the upload finishes."
                                 }
                             />
                             <ResultSection
