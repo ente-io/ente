@@ -89,6 +89,10 @@
       "title": "Crowdpear"
     },
     {
+      "title": "crypto.com",
+      "altNames": ["crypto"]
+    },
+    {
       "title": "DCS",
       "altNames": ["Digital Combat Simulator"],
       "slug": "dcs"
