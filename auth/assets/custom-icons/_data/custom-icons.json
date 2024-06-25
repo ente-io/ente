@@ -39,15 +39,11 @@
     {
       "title": "Bloom Host",
       "slug": "bloom_host",
-      "altNames": [
-        "Bloom Host Billing"
-      ]
+      "altNames": ["Bloom Host Billing"]
     },
     {
       "title": "BorgBase",
-      "altNames": [
-        "borg"
-      ],
+      "altNames": ["borg"],
       "slug": "BorgBase"
     },
     {
@@ -94,9 +90,7 @@
     },
     {
       "title": "DCS",
-      "altNames": [
-        "Digital Combat Simulator"
-      ],
+      "altNames": ["Digital Combat Simulator"],
       "slug": "dcs"
     },
     {
@@ -121,6 +115,11 @@
     {
       "title": "ente",
       "hex": "1DB954"
+    },
+    {
+      "title": "ecitizen",
+      "slug": "ecitizen_kenya",
+      "altNames": "ecitizen kenya"
     },
     {
       "title": "Epic Games",
@@ -156,9 +155,7 @@
     },
     {
       "title": "Gosuslugi",
-      "altNames": [
-        "Госуслуги"
-      ],
+      "altNames": ["Госуслуги"],
       "slug": "Gosuslugi"
     },
     {
@@ -234,11 +231,7 @@
     {
       "title": "Local",
       "slug": "local_wp",
-      "altNames": [
-        "LocalWP",
-        "Local WP",
-        "Local Wordpress"
-      ]
+      "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
     },
     {
       "title": "Marketplace.tf",
@@ -246,23 +239,14 @@
     },
     {
       "title": "Mastodon",
-      "altNames": [
-        "mstdn",
-        "fediscience",
-        "mathstodon",
-        "fosstodon"
-      ],
+      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
       "hex": "6364FF"
     },
     {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
-      "altNames": [
-        "Mercado Libre",
-        "MercadoLibre",
-        "MercadoLivre"
-      ]
+      "altNames": ["Mercado Libre", "MercadoLibre", "MercadoLivre"]
     },
     {
       "title": "Microsoft"
@@ -278,9 +262,7 @@
     },
     {
       "title": "Murena",
-      "altNames": [
-        "eCloud"
-      ],
+      "altNames": ["eCloud"],
       "slug": "ecloud"
     },
     {
@@ -371,11 +353,7 @@
     {
       "title": "Registro br",
       "slug": "registro_br",
-      "altNames": [
-        "Registro br",
-        "registrobr",
-        "Registro.br"
-      ]
+      "altNames": ["Registro br", "registrobr", "Registro.br"]
     },
     {
       "title": "Render"
@@ -441,10 +419,7 @@
     },
     {
       "title": "Techlore",
-      "altNames": [
-        "Techlore Courses",
-        "Techlore Forums"
-      ]
+      "altNames": ["Techlore Courses", "Techlore Forums"]
     },
     {
       "title": "Termius",
@@ -476,10 +451,7 @@
     },
     {
       "title": "Twitch",
-      "altNames": [
-        "Twitch.tv",
-        "Twitch tv"
-      ]
+      "altNames": ["Twitch.tv", "Twitch tv"]
     },
     {
       "title": "Ubisoft",
@@ -515,30 +487,21 @@
     {
       "title": "WorkOS",
       "slug": "workos",
-      "altNames": [
-        "Work OS"
-      ]
+      "altNames": ["Work OS"]
     },
     {
       "title": "X",
-      "altNames": [
-        "twitter"
-      ],
+      "altNames": ["twitter"],
       "slug": "x"
     },
     {
       "title": "Yandex",
-      "altNames": [
-        "Ya",
-        "Яндекс"
-      ],
+      "altNames": ["Ya", "Яндекс"],
       "slug": "Yandex"
     },
     {
       "title": "YNAB",
-      "altNames": [
-        "You Need A Budget"
-      ],
+      "altNames": ["You Need A Budget"],
       "slug": "ynab",
       "hex": "3B5EDA"
     }
