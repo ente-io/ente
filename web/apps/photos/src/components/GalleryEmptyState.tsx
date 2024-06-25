@@ -9,7 +9,6 @@ import { Box, Button, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import uploadManager from "services/upload/uploadManager";
-import { UploadTypeSelectorIntent } from "types/gallery";
 
 const Wrapper = styled(Box)`
     display: flex;
@@ -61,9 +60,7 @@ export default function GalleryEmptyState({ openUploader }) {
                             "not-allowed",
                     }}
                     color="accent"
-                    onClick={() =>
-                        openUploader(UploadTypeSelectorIntent.normalUpload)
-                    }
+                    onClick={() => openUploader("upload")}
                     disabled={!uploadManager.shouldAllowNewUpload()}
                     sx={{
                         mt: 1.5,
@@ -83,9 +80,7 @@ export default function GalleryEmptyState({ openUploader }) {
                             !uploadManager.shouldAllowNewUpload() &&
                             "not-allowed",
                     }}
-                    onClick={() =>
-                        openUploader(UploadTypeSelectorIntent.import)
-                    }
+                    onClick={() => openUploader("import")}
                     disabled={!uploadManager.shouldAllowNewUpload()}
                     sx={{
                         mt: 1.5,

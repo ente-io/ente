@@ -1,9 +1,8 @@
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import { Button, ButtonProps, IconButton, styled } from "@mui/material";
+import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import { t } from "i18next";
-
 import uploadManager from "services/upload/uploadManager";
-import { UploadTypeSelectorIntent } from "types/gallery";
 
 const Wrapper = styled("div")<{ $disableShrink: boolean }>`
     display: flex;

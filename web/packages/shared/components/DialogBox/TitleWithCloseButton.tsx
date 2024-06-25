@@ -35,8 +35,29 @@ const DialogTitleWithCloseButton: React.FC<
         </DialogTitle>
     );
 };
-
 export default DialogTitleWithCloseButton;
+
+export const DialogTitleWithCloseButtonSm: React.FC<
+    React.PropsWithChildren<DialogTitleWithCloseButtonProps>
+> = ({ children, onClose }) => {
+    return (
+        <DialogTitle>
+            <SpaceBetweenFlex>
+                {children}
+                {onClose && (
+                    <IconButton
+                        aria-label="close"
+                        onClick={onClose}
+                        sx={{ float: "right" }}
+                        color="secondary"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                )}
+            </SpaceBetweenFlex>
+        </DialogTitle>
+    );
+};
 
 export const dialogCloseHandler =
     ({

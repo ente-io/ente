@@ -66,14 +66,12 @@ export function UploadProgressDialog() {
                                     "THUMBNAIL_GENERATION_FAILED_INFO",
                                 )}
                             />
-
                             {uploadStage === UPLOAD_STAGES.FINISH &&
                                 hasUnUploadedFiles && (
                                     <NotUploadSectionHeader>
                                         {t("FILE_NOT_UPLOADED_LIST")}
                                     </NotUploadSectionHeader>
                                 )}
-
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
                                 sectionTitle={t("BLOCKED_UPLOADS")}
@@ -94,6 +92,12 @@ export function UploadProgressDialog() {
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={t("FAILED_UPLOADS")}
+                                sectionInfo={
+                                    /* TODO(MR): Move these to localized strings when finalized. */
+                                    uploadStage === UPLOAD_STAGES.FINISH
+                                        ? undefined
+                                        : "There will be an option to retry these when the upload finishes."
+                                }
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}

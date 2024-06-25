@@ -38,11 +38,7 @@ export type MergedSourceURL = {
     original: string;
     converted: string;
 };
-export enum UploadTypeSelectorIntent {
-    normalUpload,
-    import,
-    collectPhotos,
-}
+
 export type GalleryContextType = {
     showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
