@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/deckerst/aves/blob/4a0009f4f0b63f2c4478e2531be8046c3b2e3320/plugins/aves_model/lib/src/video/keys.dart
+
 class FFProbeKeys {
   static const androidCaptureFramerate = 'com.android.capture.fps';
   static const androidManufacturer = 'com.android.manufacturer';

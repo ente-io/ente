@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/deckerst/aves/blob/51a593e0fcfafe02dc4701fb1791935294aac933/lib/model/video/channel_layouts.dart
+
 // channel layout constants from FFmpeg libavutil/channel_layout.h
 class ChannelLayouts {
   // ignore_for_file: constant_identifier_names

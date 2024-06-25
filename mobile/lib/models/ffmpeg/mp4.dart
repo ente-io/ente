@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/deckerst/aves/blob/4a0009f4f0b63f2c4478e2531be8046c3b2e3320/lib/ref/mp4.dart
+
 class Mp4 {
   // adapted from `metadata-extractor`
   static final brands = <String, String>{

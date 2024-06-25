@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/deckerst/aves
+
 import "package:collection/collection.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";

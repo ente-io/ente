@@ -1,3 +1,5 @@
+// Adapted from: https://github.com/deckerst/aves/blob/4a0009f4f0b63f2c4478e2531be8046c3b2e3320/lib/widgets/settings/language/language.dart
+
 class Language {
   final String iso639_2, name;
   final String? native;
