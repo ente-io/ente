@@ -1,10 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/core/win_http_client.dart';
 import 'package:ente_auth/events/endpoint_updated_event.dart';
 import 'package:ente_auth/utils/package_info_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
@@ -52,19 +50,6 @@ class Network {
         },
       ),
     );
-    if (Platform.isWindows) {
-      final customHttpClient = windowsHttpClient();
-      _enteDio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          return customHttpClient;
-        },
-      );
-      _dio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          return customHttpClient;
-        },
-      );
-    }
     _setupInterceptors(endpoint);
 
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
