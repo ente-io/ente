@@ -33,28 +33,6 @@ class _MagicSectionState extends State<MagicSection> {
     super.initState();
     _magicSearchResults = widget.magicSearchResults;
 
-    //At times, ml framework is not initialized when the search results are
-    //requested (widget.momentsSearchResults is empty) and is initialized
-    //(which fires MLFrameworkInitializationUpdateEvent with
-    //InitializationState.initialized) before initState of this widget is
-    //called. We do listen to MLFrameworkInitializationUpdateEvent and reload
-    //this widget but the event with InitializationState.initialized would have
-    //already been fired in the above case.
-    if (_magicSearchResults.isEmpty) {
-      SectionType.magic
-          .getData(
-        context,
-        limit: kSearchSectionLimit,
-      )
-          .then((value) {
-        if (mounted) {
-          setState(() {
-            _magicSearchResults = value as List<GenericSearchResult>;
-          });
-        }
-      });
-    }
-
     final streamsToListenTo = SectionType.magic.sectionUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
@@ -84,7 +62,6 @@ class _MagicSectionState extends State<MagicSection> {
   @override
   void didUpdateWidget(covariant MagicSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    //widget.magicSearch is empty when doing a hot reload
     if (widget.magicSearchResults.isNotEmpty) {
       _magicSearchResults = widget.magicSearchResults;
     }
@@ -262,7 +239,7 @@ class MagicRecommendation extends StatelessWidget {
                       ),
                       ConstrainedBox(
                         constraints: const BoxConstraints(
-                          maxWidth: 76,
+                          maxWidth: 88,
                         ),
                         child: Padding(
                           padding: const EdgeInsets.only(
