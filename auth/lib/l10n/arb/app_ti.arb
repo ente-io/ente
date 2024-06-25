@@ -20,6 +20,8 @@
   "codeIssuerHint": "ኣዋጂ",
   "codeSecretKeyHint": "ምስጢራዊ መፍትሕ",
   "codeAccountHint": "ሕሳብ (you@domain.com)",
+  "codeTagHint": "ልጣፍ",
+  "accountKeyType": "ዓይነት ቁልፊ",
   "sessionExpired": "ክፍለ ግዜኡ ኣኺሉ።",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -111,12 +113,14 @@
   "copied": "Copied",
   "pleaseTryAgain": "Please try again",
   "existingUser": "Existing User",
+  "newUser": "ሓድሽ ናብ Ente",
   "delete": "Delete",
   "enterYourPasswordHint": "Enter your password",
   "forgotPassword": "Forgot password",
   "oops": "ዉዉኡ",
   "suggestFeatures": "Suggest features",
   "faq": "FAQ",
+  "faq_q_1": "Auth ክሳብ ክንደይ ውሑስ እዩ፧",
   "faq_q_2": "Can I access my codes on desktop?",
   "faq_a_2": "You can access your codes on the web @ auth.ente.io.",
   "faq_q_3": "How can I delete codes?",

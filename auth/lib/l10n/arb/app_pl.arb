@@ -20,6 +20,7 @@
   "codeIssuerHint": "Wydawca",
   "codeSecretKeyHint": "Tajny klucz",
   "codeAccountHint": "Konto (ty@domena.com)",
+  "accountKeyType": "Rodzaj klucza",
   "sessionExpired": "Sesja wygasła",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -77,11 +78,14 @@
   "data": "Dane",
   "importCodes": "Importuj kody",
   "importTypePlainText": "Zwykły tekst",
+  "importTypeEnteEncrypted": "Zaszyfrowany eksport ente",
   "passwordForDecryptingExport": "Hasło do odszyfrowania eksportu",
   "passwordEmptyError": "Pole hasło nie może być puste",
   "importFromApp": "Importuj kody z {appName}",
   "importGoogleAuthGuide": "Wyeksportuj twoje konta z Google Authenticator do kodu QR używając opcji \"Przenieś konta\". Potem używając innego urządzenia, zeskanuj kod QR.",
   "importSelectJsonFile": "Wybierz plik JSON",
+  "importSelectAppExport": "Wybierz plik eksportu {appName}",
+  "importEnteEncGuide": "Wybierz zaszyfrowany plik JSON wyeksportowany z ente",
   "importRaivoGuide": "Użyj opcji \"Eksportuj OTP do archiwum ZIP\" w Ustawieniach Raivo.\n\nWyodrębnij plik zip i zaimportuj plik JSON.",
   "importAegisGuide": "Użyj opcji \"Eksportuj sejf\" w ustawieniach Aegis.\n\nJeśli twój sejf jest zaszyfrowany, musisz wprowadzić hasło sejfu, aby odszyfrować sejf.",
   "exportCodes": "Eksportuj kody",
@@ -107,12 +111,14 @@
   "copied": "Skopiowano",
   "pleaseTryAgain": "Proszę spróbować ponownie",
   "existingUser": "Istniejący użytkownik",
+  "newUser": "Nowy do Ente",
   "delete": "Usuń",
   "enterYourPasswordHint": "Wprowadź swoje hasło",
   "forgotPassword": "Nie pamiętam hasła",
   "oops": "Ups",
   "suggestFeatures": "Zaproponuj funkcje",
   "faq": "Najczęściej zadawane pytania (FAQ)",
+  "faq_q_1": "Jak bezpieczny jest Auth?",
   "faq_q_2": "Czy mogę uzyskać dostęp do moich kodów na komputerze?",
   "faq_a_2": "Możesz uzyskać dostęp do swoich kodów na stronie auth.ente.io.",
   "faq_q_3": "Jak mogę usunąć kody?",
@@ -143,6 +149,7 @@
       }
     }
   },
+  "invalidQRCode": "Nieprawidłowy kod QR",
   "noRecoveryKeyTitle": "Brak klucza odzyskiwania?",
   "enterEmailHint": "Wprowadź adres e-mail",
   "invalidEmailTitle": "Nieprawidłowy adres e-mail",
@@ -333,9 +340,17 @@
   "deleteCodeAuthMessage": "Uwierzytelnij, aby usunąć kod",
   "showQRAuthMessage": "Uwierzytelnij, aby pokazać kod QR",
   "confirmAccountDeleteTitle": "Potwierdź usunięcie konta",
+  "androidBiometricHint": "Potwierdź swoją tożsamość",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
   "androidBiometricNotRecognized": "Nie rozpoznano. Spróbuj ponownie.",
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Sukces",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
   },
   "androidCancelButton": "Anuluj",
   "@androidCancelButton": {
@@ -345,13 +360,38 @@
   "@androidSignInTitle": {
     "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
   },
+  "androidBiometricRequiredTitle": "Wymagana biometria",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
   "goToSettings": "Przejdź do Ustawień",
   "@goToSettings": {
     "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
   },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
   "noInternetConnection": "Brak połączenia z Internetem",
   "pleaseCheckYourInternetConnectionAndTryAgain": "Proszę sprawdzić połączenie internetowe i spróbować ponownie.",
+  "signOutFromOtherDevices": "Wyloguj z pozostałych urządzeń",
+  "signOutOtherBody": "Jeśli uważasz, że ktoś może znać Twoje hasło, możesz wymusić wylogowanie na wszystkich innych urządzeniach korzystających z Twojego konta.",
+  "signOutOtherDevices": "Wyloguj z pozostałych urządzeń",
+  "doNotSignOut": "Nie wylogowuj mnie",
   "hearUsWhereTitle": "Jak usłyszałeś o Ente? (opcjonalnie)",
+  "recoveryKeySaved": "Klucz odzyskiwania zapisany w folderze Pobrane!",
   "waitingForVerification": "Oczekiwanie na weryfikację...",
-  "developerSettings": "Ustawienia deweloperskie"
+  "loginSessionExpired": "Sesja wygasła",
+  "loginSessionExpiredDetails": "Twoja sesja wygasła. Zaloguj się ponownie.",
+  "developerSettingsWarning": "Czy na pewno chcesz zmodyfikować ustawienia programisty?",
+  "developerSettings": "Ustawienia deweloperskie",
+  "customEndpoint": "Połączono z {endpoint}",
+  "pinText": "Przypnij",
+  "unpinText": "Odepnij",
+  "pinnedCodeMessage": "Przypięto {code}",
+  "unpinnedCodeMessage": "Odpięto {code}",
+  "create": "Utwórz",
+  "deleteTagTitle": "Usunąć etykietę?",
+  "somethingWentWrongParsingCode": "Nie udało się przetworzyć kodów {x}.",
+  "updateNotAvailable": "Aktualizacja jest niedostępna"
 }
