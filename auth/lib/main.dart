@@ -66,6 +66,9 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows) {
+    await whiteListLetsEncryptRootCA();
+  }
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
@@ -87,7 +90,7 @@ void main() async {
   }
 }
 
-void whiteListLetsEncryptRootCA() async {
+Future<void> whiteListLetsEncryptRootCA() async {
   try {
     // https://stackoverflow.com/a/71090239
     // https://github.com/ente-io/ente/issues/2178
