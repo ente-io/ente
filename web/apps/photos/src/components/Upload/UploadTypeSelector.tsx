@@ -8,7 +8,7 @@ import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
 import { Box, Dialog, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { isMobileOrTable } from "utils/common/deviceDetection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
@@ -46,7 +46,9 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
+
     const directlyShowUploadFiles = useRef(isMobileOrTable());
+    const [showTakeoutOptions, setShowTakeoutOptions] = useState(false);
 
     useEffect(() => {
         if (
@@ -58,6 +60,22 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
             onClose();
         }
     }, [open]);
+
+    const handleSelect = (option: OptionType) => {
+        switch (option) {
+            case "files":
+                uploadFiles();
+                break;
+            case "folders":
+                uploadFolders();
+                break;
+            case "zip":
+                !showTakeoutOptions
+                    ? setShowTakeoutOptions(true)
+                    : uploadGoogleTakeoutZips();
+                break;
+        }
+    };
 
     return (
         <Dialog
@@ -78,36 +96,54 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
                       ? t("IMPORT")
                       : t("UPLOAD")}
             </DialogTitleWithCloseButton>
-            <Box p={1.5} pt={0.5}>
-                <Stack spacing={0.5}>
-                    {intent != "import" && (
-                        <EnteMenuItem
-                            onClick={uploadFiles}
-                            startIcon={<FileUploadIcon />}
-                            endIcon={<ChevronRight />}
-                            label={t("UPLOAD_FILES")}
-                        />
-                    )}
-                    <EnteMenuItem
-                        onClick={uploadFolders}
-                        startIcon={<FolderUploadIcon />}
-                        endIcon={<ChevronRight />}
-                        label={t("UPLOAD_DIRS")}
-                    />
-
-                    {intent !== "collect" && (
-                        <EnteMenuItem
-                            onClick={uploadGoogleTakeoutZips}
-                            startIcon={<GoogleIcon />}
-                            endIcon={<ChevronRight />}
-                            label={t("UPLOAD_GOOGLE_TAKEOUT")}
-                        />
-                    )}
-                </Stack>
-                <Typography p={1.5} pt={4} color="text.muted">
-                    {t("DRAG_AND_DROP_HINT")}
-                </Typography>
-            </Box>
+            {showTakeoutOptions ? (
+                <Options intent={intent} onSelect={handleSelect} />
+            ) : (
+                <Options intent={intent} onSelect={handleSelect} />
+            )}
         </Dialog>
+    );
+};
+
+type OptionType = "files" | "folders" | "zips";
+
+type OptionsProps = {
+    intent: UploadTypeSelectorIntent;
+    /** Called when the user selects one of the provided options. */
+    onSelect: (option: OptionType) => void;
+};
+
+const Options: React.FC<OptionsProps> = ({ intent, onSelect }) => {
+    return (
+        <Box p={1.5} pt={0.5}>
+            <Stack spacing={0.5}>
+                {intent != "import" && (
+                    <EnteMenuItem
+                        onClick={() => onSelect("files")}
+                        startIcon={<FileUploadIcon />}
+                        endIcon={<ChevronRight />}
+                        label={t("UPLOAD_FILES")}
+                    />
+                )}
+                <EnteMenuItem
+                    onClick={() => onSelect("folders")}
+                    startIcon={<FolderUploadIcon />}
+                    endIcon={<ChevronRight />}
+                    label={t("UPLOAD_DIRS")}
+                />
+
+                {intent !== "collect" && (
+                    <EnteMenuItem
+                        onClick={() => onSelect("zips")}
+                        startIcon={<GoogleIcon />}
+                        endIcon={<ChevronRight />}
+                        label={t("UPLOAD_GOOGLE_TAKEOUT")}
+                    />
+                )}
+            </Stack>
+            <Typography p={1.5} pt={4} color="text.muted">
+                {t("DRAG_AND_DROP_HINT")}
+            </Typography>
+        </Box>
     );
 };
