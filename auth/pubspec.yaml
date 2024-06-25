@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 3.0.17+317
+version: 3.0.18+318
 publish_to: none
 
 environment:
@@ -132,6 +132,7 @@ flutter:
     - assets/custom-icons/icons/
     - assets/custom-icons/_data/
     - assets/svg/
+    - assets/ca/
 
   fonts:
     - family: Inter

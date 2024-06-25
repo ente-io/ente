@@ -263,6 +263,8 @@
   "exportLogs": "导出日志",
   "enterYourRecoveryKey": "输入您的恢复密钥",
   "tempErrorContactSupportIfPersists": "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。",
+  "networkHostLookUpErr": "无法连接到 Ente，请检查您的网络设置，如果错误仍然存​​在，请联系支持。",
+  "networkConnectionRefusedErr": "无法连接到 Ente，请稍后重试。如果错误仍然存​​在，请联系支持人员。",
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。",
   "about": "关于",
   "weAreOpenSource": "我们是开源的 ！",

@@ -128,3 +128,6 @@ watcher for the watch folders functionality.
 
 [node-stream-zip](https://github.com/antelle/node-stream-zip) is used for
 reading of large ZIP files (e.g. during imports of Google Takeout ZIPs).
+
+[lru-cache](https://github.com/isaacs/node-lru-cache) is used to cache file ZIP
+handles to avoid reopening them for every operation.

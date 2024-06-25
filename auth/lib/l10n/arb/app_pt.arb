@@ -263,6 +263,8 @@
   "exportLogs": "Exportar logs",
   "enterYourRecoveryKey": "Digite a chave de recuperação",
   "tempErrorContactSupportIfPersists": "Parece que algo deu errado. Por favor, tente novamente mais tarde. Se o erro persistir, entre em contato com nossa equipe de suporte.",
+  "networkHostLookUpErr": "Não foi possível conectar-se ao Ente, verifique suas configurações de rede e entre em contato com o suporte se o erro persistir.",
+  "networkConnectionRefusedErr": "Não foi possível conectar ao Ente, tente novamente após algum tempo. Se o erro persistir, entre em contato com o suporte.",
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Parece que algo deu errado. Por favor, tente novamente mais tarde. Se o erro persistir, entre em contato com nossa equipe de suporte.",
   "about": "Sobre",
   "weAreOpenSource": "Nós somos de código aberto!",
