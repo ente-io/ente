@@ -263,6 +263,8 @@
   "exportLogs": "Esporta log",
   "enterYourRecoveryKey": "Inserisci la tua chiave di recupero",
   "tempErrorContactSupportIfPersists": "Sembra che qualcosa sia andato storto. Riprova tra un po'. Se l'errore persiste, contatta il nostro team di supporto.",
+  "networkHostLookUpErr": "Impossibile connettersi a Ente, controlla le impostazioni di rete e contatta l'assistenza se l'errore persiste.",
+  "networkConnectionRefusedErr": "Impossibile connettersi a Ente, riprova tra un po' di tempo. Se l'errore persiste, contatta l'assistenza.",
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Sembra che qualcosa sia andato storto. Riprova tra un po'. Se l'errore persiste, contatta il nostro team di supporto.",
   "about": "Informazioni",
   "weAreOpenSource": "Siamo open source!",
