@@ -164,8 +164,11 @@ class FaceMlService {
     _isSyncing = false;
   }
 
-  Future<void> runAllFaceML() async {
-    if (_cannotRunMLFunction()) return;
+  Future<void> runAllFaceML({bool force = false}) async {
+    if (force) {
+      _mlControllerStatus = true;
+    }
+    if (_cannotRunMLFunction() && !force) return;
 
     await sync(forceSync: _shouldSyncPeople);
 
