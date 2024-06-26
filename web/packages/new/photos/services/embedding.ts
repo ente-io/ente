@@ -1,9 +1,9 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { apiURL } from "@/next/origins";
 import { nullToUndefined } from "@/utils/transform";
-// import ComlinkCryptoWorker from "@ente/shared/crypto";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { z } from "zod";
-// import { getAllLocalFiles } from "./files";
+import { getAllLocalFiles } from "./files";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
@@ -74,15 +74,47 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 
 /**
  * Ask remote for what all changes have happened to the face embeddings that it
- * knows about since the last time we synced. Then update our local state to
- * reflect those changes.
+ * knows about since the last time we synced. Update our local state to reflect
+ * those changes.
  *
  * It takes no parameters since it saves the last sync time in local storage.
+ *
+ * Precondition: This function should be called only after we have synced files
+ * with remote (See: [Note: Ignoring embeddings for unknown files]).
  */
 export const syncRemoteFaceEmbeddings = async () => {
     let sinceTime = faceEmbeddingSyncTime();
-    // const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    // const files = await getAllLocalFiles();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const localFiles = await getAllLocalFiles();
+    const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+
+    const decryptEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
+        const file = localFilesByID.get(remoteEmbedding.fileID)
+        // [Note: Ignoring embeddings for unknown files]
+        //
+        // We need the file to decrypt the embedding. This is easily ensured by
+        // running the embedding sync after we have synced our local files with
+        // remote.
+        //
+        // Still, it might happen that we come across an embedding for which we
+        // don't have the corresponding file locally. We can put them in two
+        // buckets:
+        //
+        // 1.  Known case: In rare cases we might get a diff entry for an
+        //     embedding corresponding to a file which has been deleted (but
+        //     whose embedding is enqueued for deletion). Client should expect
+        //     such a scenario, but all they have to do is just ignore such
+        //     embeddings.
+        //
+        // 2.  Other unknown cases: Even if somehow we end up with an embedding
+        //     for a existent file which we don't have locally, it is fine
+        //     because the current client will just regenerate the embedding if
+        //     the file really exists and gets locally found later. There would
+        //     be a bit of duplicate work, but that's fine as long as there
+        //     isn't a systematic scenario where this happens.
+        if (!file) return undefined;
+
+    }
 
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
@@ -96,7 +128,7 @@ export const syncRemoteFaceEmbeddings = async () => {
         );
         if (remoteEmbeddings.length == 0) break;
         // const _embeddings = Promise.all(
-        //     remoteEmbeddings.map(decryptFaceEmbedding),
+        //     remoteEmbeddings.map(decryptEmbedding),
         // );
         sinceTime = remoteEmbeddings.reduce(
             (max, { updatedAt }) => Math.max(max, updatedAt),
@@ -106,7 +138,7 @@ export const syncRemoteFaceEmbeddings = async () => {
     }
 };
 
-// const decryptFaceEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
+const decryptFaceEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
 //                         const fileKey = fileIdToKeyMap.get(embedding.fileID);
 //                         if (!fileKey) {
 //                             throw Error(CustomError.FILE_NOT_FOUND);
