@@ -102,7 +102,7 @@ class FaceMlService {
   static const _embeddingFetchLimit = 200;
   static const _kForceClusteringFaceCount = 8000;
 
-  /// Only call this function once at app startup, after that you can directly call [indexAndClusterAll]
+  /// Only call this function once at app startup, after that you can directly call [runAllFaceML]
   Future<void> init() async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false ||
         _isInitialized) {
@@ -127,7 +127,7 @@ class FaceMlService {
             "MLController allowed running ML, faces indexing starting",
           );
         }
-        unawaited(indexAndClusterAll());
+        unawaited(runAllFaceML());
       } else {
         _logger.info(
           "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
@@ -164,7 +164,7 @@ class FaceMlService {
     _isSyncing = false;
   }
 
-  Future<void> indexAndClusterAll() async {
+  Future<void> runAllFaceML() async {
     if (_cannotRunMLFunction()) return;
 
     await sync(forceSync: _shouldSyncPeople);
