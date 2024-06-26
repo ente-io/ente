@@ -172,7 +172,39 @@ const saveFaceEmbeddingSyncTime = (t: number) =>
 
 // }
 
-/** The maximum number of items to fetch in a single GET /embeddings/diff */
+/**
+ * The maximum number of items to fetch in a single GET /embeddings/diff
+ *
+ * [Note: Limit of returned items in /diff requests]
+ *
+ * The various GET /diff API methods, which tell the client what all has changed
+ * since a timestamp (provided by the client) take a limit parameter.
+ *
+ * These diff API calls return all items whose updated at is greater
+ * (non-inclusive) than the timestamp we provide. So there is no mechanism for
+ * pagination of items which have the same exact updated at. Conceptually, it
+ * may happen that there are more items than the limit we've provided.
+ *
+ * The behaviour of this limit is different for file diff and embeddings diff.
+ *
+ * -   For file diff, the limit is advisory, and remote may return less, equal
+ *     or more items than the provided limit. The scenario where it returns more
+ *     is when more files than the limit have the same updated at. Theoretically
+ *     it would make the diff response unbounded, however in practice file
+ *     modifications themselves are all batched. Even if the user selects all
+ *     the files in their library and updates them all in one go in the UI,
+ *     their client app must use batched API calls to make those updates, and
+ *     each of those batches would get distinct updated at.
+ *
+ * -   For embeddings diff, there are no bulk updates and this limit is enforced
+ *     as a maximum. While theoretically it is possible for an arbitrary number
+ *     of files to have the same updated at, in practice it is not possible with
+ *     the current set of APIs where clients PUT individual embeddings (the
+ *     updated at is a server timestamp). And even if somehow a large number of
+ *     files get the same updated at and thus get truncated in the response, it
+ *     won't lead to any data loss, the client which requested that particular
+ *     truncated diff will just regenerate them.
+ */
 const diffLimit = 500;
 
 /**
@@ -188,6 +220,8 @@ const diffLimit = 500;
  *
  * @returns an array of {@link RemoteEmbedding}. The returned array is limited
  * to a maximum count of {@link diffLimit}.
+ *
+ * > See [Note: Limit of returned items in /diff requests].
  */
 const getEmbeddingsDiff = async (
     model: EmbeddingModel,
