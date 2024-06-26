@@ -9,21 +9,22 @@ import { clearOpenZipCache, markClosableZip, openZip } from "./zip";
 export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
     const zip = openZip(zipPath);
 
-    const entries = await zip.entries();
-    const entryNames: string[] = [];
+    try {
+        const entries = await zip.entries();
+        const entryNames: string[] = [];
 
-    for (const entry of Object.values(entries)) {
-        const basename = path.basename(entry.name);
-        // Ignore "hidden" files (files whose names begins with a dot).
-        if (entry.isFile && !basename.startsWith(".")) {
-            // `entry.name` is the path within the zip.
-            entryNames.push(entry.name);
+        for (const entry of Object.values(entries)) {
+            const basename = path.basename(entry.name);
+            // Ignore "hidden" files (files whose names begins with a dot).
+            if (entry.isFile && !basename.startsWith(".")) {
+                // `entry.name` is the path within the zip.
+                entryNames.push(entry.name);
+            }
         }
+        return entryNames.map((entryName) => [zipPath, entryName]);
+    } finally {
+        markClosableZip(zipPath);
     }
-
-    markClosableZip(zipPath);
-
-    return entryNames.map((entryName) => [zipPath, entryName]);
 };
 
 export const pathOrZipItemSize = async (
@@ -35,14 +36,16 @@ export const pathOrZipItemSize = async (
     } else {
         const [zipPath, entryName] = pathOrZipItem;
         const zip = openZip(zipPath);
-        const entry = await zip.entry(entryName);
-        if (!entry)
-            throw new Error(
-                `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
-            );
-        const size = entry.size;
-        await zip.close();
-        return size;
+        try {
+            const entry = await zip.entry(entryName);
+            if (!entry)
+                throw new Error(
+                    `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
+                );
+            return entry.size;
+        } finally {
+            markClosableZip(zipPath);
+        }
     }
 };
 

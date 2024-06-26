@@ -129,8 +129,11 @@ export const makeFileForDataOrPathOrZipItem = async (
             writeToTemporaryFile = async () => {
                 const [zipPath, entryName] = dataOrPathOrZipItem;
                 const zip = openZip(zipPath);
-                await zip.extract(entryName, path);
-                markClosableZip(zipPath);
+                try {
+                    await zip.extract(entryName, path);
+                } finally {
+                    markClosableZip(zipPath);
+                }
             };
         }
     }
