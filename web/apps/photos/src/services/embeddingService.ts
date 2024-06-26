@@ -1,3 +1,4 @@
+import type { EmbeddingModel } from "@/new/photos/services/embedding";
 import { inWorker } from "@/next/env";
 import log from "@/next/log";
 import { apiOrigin } from "@/next/origins";
@@ -9,7 +10,6 @@ import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type {
     Embedding,
-    EmbeddingModel,
     EncryptedEmbedding,
     GetEmbeddingDiffResponse,
     PutEmbeddingRequest,
