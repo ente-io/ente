@@ -12,6 +12,91 @@ import sodium, { type StateAddress } from "libsodium-wrappers";
 import { ENCRYPTION_CHUNK_SIZE } from "../constants";
 import type { B64EncryptionResult } from "../types";
 
+export async function fromB64(input: string) {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+}
+
+export async function toB64(input: Uint8Array) {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
+}
+
+/** Convert a {@link Uint8Array} to a URL safe Base64 encoded string. */
+export const toB64URLSafe = async (input: Uint8Array) => {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
+};
+
+/**
+ * Convert a {@link Uint8Array} to a URL safe Base64 encoded string.
+ *
+ * This differs from {@link toB64URLSafe} in that it does not append any
+ * trailing padding character(s) "=" to make the resultant string's length be an
+ * integer multiple of 4.
+ *
+ * -   In some contexts, for example when serializing WebAuthn binary for
+ *     transmission over the network, this is the required / recommended
+ *     approach.
+ *
+ * -   In other cases, for example when trying to pass an arbitrary JSON string
+ *     via a URL parameter, this is also convenient so that we do not have to
+ *     deal with any ambiguity surrounding the "=" which is also the query
+ *     parameter key value separator.
+ */
+export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
+
+/**
+ * Convert a Base64 encoded string to a {@link Uint8Array}.
+ *
+ * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
+ * its input string's length to be a an integer multiple of 4.
+ */
+export const fromB64URLSafeNoPadding = async (input: string) => {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
+
+/**
+ * Variant of {@link toB64URLSafeNoPadding} that works with {@link strings}. See also
+ * its sibling method {@link fromB64URLSafeNoPaddingString}.
+ */
+export const toB64URLSafeNoPaddingString = async (input: string) => {
+    await sodium.ready;
+    return toB64URLSafeNoPadding(sodium.from_string(input));
+};
+
+/**
+ * Variant of {@link fromB64URLSafeNoPadding} that works with {@link strings}. See also
+ * its sibling method {@link toB64URLSafeNoPaddingString}.
+ */
+export const fromB64URLSafeNoPaddingString = async (input: string) => {
+    await sodium.ready;
+    return sodium.to_string(await fromB64URLSafeNoPadding(input));
+};
+
+export async function fromUTF8(input: string) {
+    await sodium.ready;
+    return sodium.from_string(input);
+}
+
+export async function toUTF8(input: string) {
+    await sodium.ready;
+    return sodium.to_string(await fromB64(input));
+}
+export async function toHex(input: string) {
+    await sodium.ready;
+    return sodium.to_hex(await fromB64(input));
+}
+
+export async function fromHex(input: string) {
+    await sodium.ready;
+    return await toB64(sodium.from_hex(input));
+}
+
 export async function decryptChaChaOneShot(
     data: Uint8Array,
     header: Uint8Array,
@@ -395,89 +480,4 @@ export async function generateSubKey(
             await fromB64(key),
         ),
     );
-}
-
-export async function fromB64(input: string) {
-    await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
-}
-
-export async function toB64(input: Uint8Array) {
-    await sodium.ready;
-    return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
-}
-
-/** Convert a {@link Uint8Array} to a URL safe Base64 encoded string. */
-export const toB64URLSafe = async (input: Uint8Array) => {
-    await sodium.ready;
-    return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
-};
-
-/**
- * Convert a {@link Uint8Array} to a URL safe Base64 encoded string.
- *
- * This differs from {@link toB64URLSafe} in that it does not append any
- * trailing padding character(s) "=" to make the resultant string's length be an
- * integer multiple of 4.
- *
- * -   In some contexts, for example when serializing WebAuthn binary for
- *     transmission over the network, this is the required / recommended
- *     approach.
- *
- * -   In other cases, for example when trying to pass an arbitrary JSON string
- *     via a URL parameter, this is also convenient so that we do not have to
- *     deal with any ambiguity surrounding the "=" which is also the query
- *     parameter key value separator.
- */
-export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
-    await sodium.ready;
-    return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
-};
-
-/**
- * Convert a Base64 encoded string to a {@link Uint8Array}.
- *
- * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
- * its input string's length to be a an integer multiple of 4.
- */
-export const fromB64URLSafeNoPadding = async (input: string) => {
-    await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
-};
-
-/**
- * Variant of {@link toB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link fromB64URLSafeNoPaddingString}.
- */
-export const toB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return toB64URLSafeNoPadding(sodium.from_string(input));
-};
-
-/**
- * Variant of {@link fromB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link toB64URLSafeNoPaddingString}.
- */
-export const fromB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return sodium.to_string(await fromB64URLSafeNoPadding(input));
-};
-
-export async function fromUTF8(input: string) {
-    await sodium.ready;
-    return sodium.from_string(input);
-}
-
-export async function toUTF8(input: string) {
-    await sodium.ready;
-    return sodium.to_string(await fromB64(input));
-}
-export async function toHex(input: string) {
-    await sodium.ready;
-    return sodium.to_hex(await fromB64(input));
-}
-
-export async function fromHex(input: string) {
-    await sodium.ready;
-    return await toB64(sodium.from_hex(input));
 }
