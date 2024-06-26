@@ -129,7 +129,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     const webReadableStream =
         webReadableStreamAny as ReadableStream<Uint8Array>;
 
-    // Close the zip handle when the underlying stream closes.
+    // Let go of the zip handle when the underlying stream closes.
     stream.on("end", () => markClosableZip(zipPath));
 
     // While it is documented that entry.time is the modification time,
