@@ -15,12 +15,17 @@ export async function fromB64(input: string) {
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
 }
 
-export async function toB64(input: Uint8Array) {
+/**
+ * Convert a {@link Uint8Array} to a Base64 encoded string.
+ *
+ * See also {@link toB64URLSafe} and {@link toB64URLSafeNoPadding}.
+ */
+export const toB64 = async (input: Uint8Array) => {
     await sodium.ready;
     return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
-}
+};
 
-/** Convert a {@link Uint8Array} to a URL safe Base64 encoded string. */
+/** Convert a {@link Uint8Array} to a **URL safe** Base64 encoded string. */
 export const toB64URLSafe = async (input: Uint8Array) => {
     await sodium.ready;
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
