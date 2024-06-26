@@ -651,7 +651,6 @@ class FaceMlService {
   }
 
   Future<void> _initModels() async {
-    if (LocalSettings.instance.isFaceIndexingEnabled) return;
     return _initModelLock.synchronized(() async {
       if (_isModelsInitialized) return;
       _logger.info('initModels called');
@@ -682,7 +681,7 @@ class FaceMlService {
   Future<void> _releaseModels() async {
     return _initModelLock.synchronized(() async {
       _logger.info("dispose called");
-      if (!_isInitialized) {
+      if (!_isModelsInitialized) {
         return;
       }
       try {
@@ -696,7 +695,7 @@ class FaceMlService {
         _logger.severe("Could not dispose mobilefacenet", e, s);
       }
       OrtEnv.instance.release();
-      _isInitialized = false;
+      _isModelsInitialized = false;
     });
   }
 
