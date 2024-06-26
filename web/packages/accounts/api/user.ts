@@ -7,7 +7,7 @@ import type {
     TwoFactorVerificationResponse,
     UserVerificationResponse,
 } from "@ente/accounts/types/user";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";

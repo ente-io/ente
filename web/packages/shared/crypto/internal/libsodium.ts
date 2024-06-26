@@ -9,7 +9,6 @@
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
-import type { B64EncryptionResult } from "../types";
 
 export async function fromB64(input: string) {
     await sodium.ready;
@@ -275,6 +274,13 @@ export async function encryptFileChunk(
 
     return pushResult;
 }
+
+export interface B64EncryptionResult {
+    encryptedData: string;
+    key: string;
+    nonce: string;
+}
+
 export async function encryptToB64(data: string, key: string) {
     await sodium.ready;
     const encrypted = await encrypt(await fromB64(data), await fromB64(key));
