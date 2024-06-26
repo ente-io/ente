@@ -21,7 +21,19 @@ export const toB64 = async (input: Uint8Array) => {
 };
 
 /**
- * Convert a {@link Uint8Array} to a **URL safe** Base64 encoded string.
+ * Convert a Base64 encoded string to a {@link Uint8Array}.
+ *
+ * This is the converse of {@link toBase64}.
+ */
+export const fromB64 = async (input: string) => {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+};
+
+/**
+ * Convert a {@link Uint8Array} to a URL-safe Base64 encoded string.
+ *
+ * See also {@link toB64URLSafe} and {@link toB64URLSafeNoPadding}.
  */
 export const toB64URLSafe = async (input: Uint8Array) => {
     await sodium.ready;
@@ -29,7 +41,7 @@ export const toB64URLSafe = async (input: Uint8Array) => {
 };
 
 /**
- * Convert a {@link Uint8Array} to a URL safe Base64 encoded string.
+ * Convert a {@link Uint8Array} to a unpadded URL-safe Base64 encoded string.
  *
  * This differs from {@link toB64URLSafe} in that it does not append any
  * trailing padding character(s) "=" to make the resultant string's length be an
@@ -49,13 +61,8 @@ export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
 };
 
-export async function fromB64(input: string) {
-    await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
-}
-
 /**
- * Convert a Base64 encoded string to a {@link Uint8Array}.
+ * Convert a unpadded URL-safe Base64 encoded string to a {@link Uint8Array}.
  *
  * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
  * its input string's length to be a an integer multiple of 4.
@@ -66,8 +73,8 @@ export const fromB64URLSafeNoPadding = async (input: string) => {
 };
 
 /**
- * Variant of {@link toB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link fromB64URLSafeNoPaddingString}.
+ * Variant of {@link toB64URLSafeNoPadding} that works with {@link string}
+ * inputs. See also its sibling method {@link fromB64URLSafeNoPaddingString}.
  */
 export const toB64URLSafeNoPaddingString = async (input: string) => {
     await sodium.ready;
@@ -92,6 +99,7 @@ export async function toUTF8(input: string) {
     await sodium.ready;
     return sodium.to_string(await fromB64(input));
 }
+
 export async function toHex(input: string) {
     await sodium.ready;
     return sodium.to_hex(await fromB64(input));
