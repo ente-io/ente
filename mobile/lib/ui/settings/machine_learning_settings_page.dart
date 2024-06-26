@@ -224,7 +224,7 @@ class _MachineLearningSettingsPageState
                   await LocalSettings.instance.toggleFaceIndexing();
               if (isEnabled) {
                 await FaceMlService.instance.init();
-                unawaited(FaceMlService.instance.runAllFaceML());
+                unawaited(FaceMlService.instance.runAllFaceML(force: true));
               } else {
                 FaceMlService.instance.pauseIndexingAndClustering();
               }

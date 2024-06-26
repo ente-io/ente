@@ -718,6 +718,7 @@ class FaceMlService {
         _isIsolateSpawned = true;
 
         _resetInactivityTimer();
+        _logger.info('initIsolate done');
       } catch (e) {
         _logger.severe('Could not spawn isolate', e);
         _isIsolateSpawned = false;
