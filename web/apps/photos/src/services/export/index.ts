@@ -1,6 +1,8 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import { getAllLocalFiles } from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { wait } from "@/utils/promise";
@@ -22,7 +24,6 @@ import {
     ExportUIUpdaters,
     FileExportNames,
 } from "types/export";
-import { EnteFile } from "types/file";
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
@@ -37,7 +38,6 @@ import { safeDirectoryName, safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
-import { getAllLocalFiles } from "../fileService";
 import { migrateExport } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */

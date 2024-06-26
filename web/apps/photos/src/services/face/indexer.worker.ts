@@ -1,5 +1,5 @@
+import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import type { EnteFile } from "types/file";
 import { fileLogID } from "utils/file";
 import {
     closeFaceDBConnectionsIfNeeded,

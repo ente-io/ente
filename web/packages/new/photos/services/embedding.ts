@@ -1,7 +1,9 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { apiOrigin } from "@/next/origins";
 import { nullToUndefined } from "@/utils/transform";
+// import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { z } from "zod";
+// import { getAllLocalFiles } from "./files";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
@@ -79,24 +81,46 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  */
 export const syncRemoteFaceEmbeddings = async () => {
     let sinceTime = faceEmbeddingSyncTime();
+    // const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    // const files = await getAllLocalFiles();
+
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
     // https://github.com/eslint/eslint/pull/18286
     /* eslint-disable no-constant-condition */
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
-        const embeddings = await getEmbeddingsDiff(
+        const remoteEmbeddings = await getEmbeddingsDiff(
             "file-ml-clip-face",
             sinceTime,
         );
-        if (embeddings.length == 0) break;
-        sinceTime = embeddings.reduce(
+        if (remoteEmbeddings.length == 0) break;
+        // const _embeddings = Promise.all(
+        //     remoteEmbeddings.map(decryptFaceEmbedding),
+        // );
+        sinceTime = remoteEmbeddings.reduce(
             (max, { updatedAt }) => Math.max(max, updatedAt),
             sinceTime,
         );
         saveFaceEmbeddingSyncTime(sinceTime);
     }
 };
+
+// const decryptFaceEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
+//                         const fileKey = fileIdToKeyMap.get(embedding.fileID);
+//                         if (!fileKey) {
+//                             throw Error(CustomError.FILE_NOT_FOUND);
+//                         }
+//                         const decryptedData = await worker.decryptMetadata(
+//                             embedding.encryptedEmbedding,
+//                             embedding.decryptionHeader,
+//                             fileIdToKeyMap.get(embedding.fileID),
+//                         );
+//                         return {
+//                             ...decryptedData,
+//                             updatedAt: embedding.updatedAt,
+//                         } as unknown as FileML;
+// };
 
 /**
  * The updatedAt of the most recent face {@link RemoteEmbedding} we've retrieved

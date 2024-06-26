@@ -1,9 +1,9 @@
+import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
 import { CollectionSelectorAttributes } from "components/Collections/CollectionSelector";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { TimeStampListItem } from "components/PhotoList";
 import { Collection } from "types/collection";
-import { EnteFile } from "types/file";
 
 export type SelectedState = {
     [k: number]: boolean;

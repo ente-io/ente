@@ -1,10 +1,10 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import EnteDateTimePicker from "components/EnteDateTimePicker";
 import { useState } from "react";
-import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,

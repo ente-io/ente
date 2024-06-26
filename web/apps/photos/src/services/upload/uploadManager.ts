@@ -1,5 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
+import { getLocalFiles } from "@/new/photos/services/files";
+import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { ensureElectron } from "@/next/electron";
 import { lowercaseExtension, nameAndExtension } from "@/next/file";
 import log from "@/next/log";
@@ -26,10 +28,8 @@ import {
 import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
 import { Collection } from "types/collection";
-import { EncryptedEnteFile, EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
-import { getLocalFiles } from "../fileService";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,

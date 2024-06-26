@@ -1,9 +1,9 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
 import { syncAndGetFilesToIndex } from "services/face/indexer";
 import { FaceIndexerWorker } from "services/face/indexer.worker";
-import { EnteFile } from "types/file";
 
 const batchSize = 200;
 

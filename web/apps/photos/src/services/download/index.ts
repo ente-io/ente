@@ -1,5 +1,10 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import {
+    EnteFile,
+    type LivePhotoSourceURL,
+    type SourceURLs,
+} from "@/new/photos/types/file";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -9,37 +14,9 @@ import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import type { Remote } from "comlink";
 import isElectron from "is-electron";
 import * as ffmpeg from "services/ffmpeg";
-import { EnteFile } from "types/file";
 import { getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
-
-export type LivePhotoSourceURL = {
-    image: () => Promise<string>;
-    video: () => Promise<string>;
-};
-
-export type LoadedLivePhotoSourceURL = {
-    image: string;
-    video: string;
-};
-
-export type SourceURLs = {
-    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    isOriginal: boolean;
-    isRenderable: boolean;
-    type: "normal" | "livePhoto";
-    /**
-     * Best effort attempt at obtaining the MIME type.
-     *
-     * Known cases where it is missing:
-     *
-     * - Live photos (these have a different code path for obtaining the URL).
-     * - A video that is passes the isPlayable test in the browser.
-     *
-     */
-    mimeType?: string;
-};
 
 export type OnDownloadProgress = (event: {
     loaded: number;

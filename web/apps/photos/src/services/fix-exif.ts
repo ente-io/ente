@@ -1,9 +1,9 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { FixOption } from "components/FixCreationTime";
 import { detectFileTypeInfo } from "services/detect-type";
-import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,

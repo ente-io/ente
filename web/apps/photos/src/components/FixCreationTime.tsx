@@ -1,3 +1,4 @@
+import { EnteFile } from "@/new/photos/types/file";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
     Button,
@@ -14,7 +15,6 @@ import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
 import { updateCreationTimeWithExif } from "services/fix-exif";
-import { EnteFile } from "types/file";
 import EnteDateTimePicker from "./EnteDateTimePicker";
 
 export interface FixCreationTimeAttributes {

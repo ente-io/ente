@@ -1,3 +1,4 @@
+import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { apiOrigin } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -5,7 +6,6 @@ import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
-import { EncryptedEnteFile, EnteFile } from "types/file";
 import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
 import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
 

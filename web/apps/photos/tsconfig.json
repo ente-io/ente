@@ -22,7 +22,9 @@
         "**/*.tsx",
         "**/*.js",
         "../../packages/shared/themes/mui-theme.d.ts",
-        "../../packages/next/global-electron.d.ts"
+        "../../packages/next/global-electron.d.ts",
+        "../../packages/new/photos/types/file.ts",
+        "../../packages/new/photos/types/magicMetadata.ts"
     ],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }

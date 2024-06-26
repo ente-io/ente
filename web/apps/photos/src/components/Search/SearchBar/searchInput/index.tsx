@@ -1,4 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { t } from "i18next";
@@ -17,7 +18,6 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 import { LocationTagData } from "types/entity";
-import { EnteFile } from "types/file";
 import {
     ClipSearchScores,
     DateValue,

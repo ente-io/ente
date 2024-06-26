@@ -2,6 +2,15 @@ import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import {
+    EnteFile,
+    MetadataFileAttributes,
+    S3FileAttributes,
+    type EncryptedEnteFile,
+    type FilePublicMagicMetadata,
+    type FilePublicMagicMetadataProps,
+} from "@/new/photos/types/file";
+import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
 import log from "@/next/log";
@@ -24,15 +33,6 @@ import {
     PublicUploadProps,
     type LivePhotoAssets,
 } from "services/upload/uploadManager";
-import {
-    EnteFile,
-    MetadataFileAttributes,
-    S3FileAttributes,
-    type EncryptedEnteFile,
-    type FilePublicMagicMetadata,
-    type FilePublicMagicMetadataProps,
-} from "types/file";
-import { EncryptedMagicMetadata } from "types/magicMetadata";
 import type { ParsedExtractedMetadata } from "types/metadata";
 import {
     getNonEmptyMagicMetadataProps,

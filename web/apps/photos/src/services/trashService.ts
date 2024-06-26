@@ -1,10 +1,10 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { apiOrigin } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { Collection } from "types/collection";
-import { EnteFile } from "types/file";
 import { SetFiles } from "types/gallery";
 import { EncryptedTrashItem, Trash } from "types/trash";
 import { decryptFile, mergeMetadata, sortTrashFiles } from "utils/file";

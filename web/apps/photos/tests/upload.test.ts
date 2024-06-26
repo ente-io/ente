@@ -1,6 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
-import { getLocalFiles } from "services/fileService";
 import { tryToParseDateTime } from "services/upload/date";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,

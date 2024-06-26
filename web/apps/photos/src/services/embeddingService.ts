@@ -1,4 +1,6 @@
 import type { EmbeddingModel } from "@/new/photos/services/embedding";
+import { getAllLocalFiles } from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
 import { inWorker } from "@/next/env";
 import log from "@/next/log";
 import { apiOrigin } from "@/next/origins";
@@ -14,10 +16,8 @@ import type {
     GetEmbeddingDiffResponse,
     PutEmbeddingRequest,
 } from "types/embedding";
-import { EnteFile } from "types/file";
 import { getLocalCollections } from "./collectionService";
 import type { FaceIndex } from "./face/types";
-import { getAllLocalFiles } from "./fileService";
 import { getLocalTrashedFiles } from "./trashService";
 
 type FileML = FaceIndex & {

@@ -1,3 +1,6 @@
+import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
+import { SUB_TYPE, VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -30,7 +33,6 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import { getAllLocalFiles, getLocalFiles } from "services/fileService";
 import {
     COLLECTION_ROLE,
     Collection,
@@ -38,9 +40,7 @@ import {
     CollectionPublicMagicMetadataProps,
     CollectionSummaries,
 } from "types/collection";
-import { EnteFile } from "types/file";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
-import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
 import { safeDirectoryName } from "utils/native-fs";

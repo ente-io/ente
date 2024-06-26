@@ -1,10 +1,18 @@
+import { getLocalFiles } from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
+import {
+    EncryptedMagicMetadata,
+    SUB_TYPE,
+    UpdateMagicMetadataRequest,
+    VISIBILITY_STATE,
+} from "@/new/photos/types/magicMetadata";
 import log from "@/next/log";
 import { apiOrigin } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
@@ -40,13 +48,6 @@ import {
     RemoveFromCollectionRequest,
     UpdatePublicURL,
 } from "types/collection";
-import { EnteFile } from "types/file";
-import {
-    EncryptedMagicMetadata,
-    SUB_TYPE,
-    UpdateMagicMetadataRequest,
-    VISIBILITY_STATE,
-} from "types/magicMetadata";
 import { FamilyData } from "types/user";
 import {
     changeCollectionSubType,
@@ -73,7 +74,6 @@ import {
     isPinnedCollection,
     updateMagicMetadata,
 } from "utils/magicMetadata";
-import { getLocalFiles } from "./fileService";
 import { getPublicKey } from "./userService";
 
 const COLLECTION_TABLE = "collections";
