@@ -73,9 +73,8 @@ const RemoteEmbedding = z.object({
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 
 /**
- * Ask remote for what all changes have happened to the face embeddings that it
- * knows about since the last time we synced. Update our local state to reflect
- * those changes.
+ * Fetch new or updated face embeddings with the server and save them locally.
+ * Also prune local embeddings for any files no longer exist locally.
  *
  * It takes no parameters since it saves the last sync time in local storage.
  *
