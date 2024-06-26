@@ -1,7 +1,7 @@
+import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { putEmbedding } from "services/embeddingService";
-import type { EnteFile } from "types/file";
 import type { FaceIndex } from "./types";
 
 export const putFaceIndex = async (

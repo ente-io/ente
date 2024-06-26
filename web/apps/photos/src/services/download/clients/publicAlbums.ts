@@ -1,9 +1,9 @@
+import { EnteFile } from "@/new/photos/types/file";
 import { customAPIOrigin } from "@/next/origins";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import { DownloadClient } from "services/download";
-import { EnteFile } from "types/file";
 
 export class PublicAlbumsDownloadClient implements DownloadClient {
     private token: string;

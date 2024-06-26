@@ -1,11 +1,11 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
 import type { Person } from "services/face/people";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
-import { EnteFile } from "types/file";
 import {
     ClipSearchScores,
     DateValue,

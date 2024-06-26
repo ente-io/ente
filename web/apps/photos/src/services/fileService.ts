@@ -1,21 +1,20 @@
-import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { Events, eventBus } from "@ente/shared/events";
-import HTTPService from "@ente/shared/network/HTTPService";
-import localForage from "@ente/shared/storage/localForage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { REQUEST_BATCH_SIZE } from "constants/api";
-import { Collection } from "types/collection";
+import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";
 import {
     EncryptedEnteFile,
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
     TrashRequest,
-} from "types/file";
+} from "@/new/photos/types/file";
+import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
+import log from "@/next/log";
+import { apiOrigin } from "@/next/origins";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { REQUEST_BATCH_SIZE } from "constants/api";
+import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
-import { BulkUpdateMagicMetadataRequest } from "types/magicMetadata";
 import { batch } from "utils/common";
 import {
     decryptFile,
@@ -27,52 +26,6 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collectionService";
-
-const FILES_TABLE = "files";
-const HIDDEN_FILES_TABLE = "hidden-files";
-
-/**
- * Return all files that we know about locally, both "normal" and "hidden".
- */
-export const getAllLocalFiles = async () =>
-    [].concat(await getLocalFiles("normal"), await getLocalFiles("hidden"));
-
-/**
- * Return all files that we know about locally. By default it returns only
- * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
- * "hidden" to get it to instead return hidden files that we know about locally.
- */
-export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
-    const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    const files: Array<EnteFile> =
-        (await localForage.getItem<EnteFile[]>(tableName)) || [];
-    return files;
-};
-
-const setLocalFiles = async (type: "normal" | "hidden", files: EnteFile[]) => {
-    try {
-        const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-        await localForage.setItem(tableName, files);
-        try {
-            eventBus.emit(Events.LOCAL_FILES_UPDATED);
-        } catch (e) {
-            log.error("Error in localFileUpdated handlers", e);
-        }
-    } catch (e1) {
-        try {
-            const storageEstimate = await navigator.storage.estimate();
-            log.error(
-                `failed to save files to indexedDB (storageEstimate was ${storageEstimate}`,
-                e1,
-            );
-            log.info(`storage estimate ${JSON.stringify(storageEstimate)}`);
-        } catch (e2) {
-            log.error("failed to save files to indexedDB", e1);
-            log.error("failed to get storage stats", e2);
-        }
-        throw e1;
-    }
-};
 
 export const syncFiles = async (
     type: "normal" | "hidden",

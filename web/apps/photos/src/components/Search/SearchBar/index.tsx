@@ -1,7 +1,7 @@
 import { Collection } from "types/collection";
 import { SearchBarMobile } from "./searchBarMobile";
 
-import { EnteFile } from "types/file";
+import { EnteFile } from "@/new/photos/types/file";
 import { UpdateSearch } from "types/search";
 import SearchInput from "./searchInput";
 import { SearchBarWrapper } from "./styledComponents";

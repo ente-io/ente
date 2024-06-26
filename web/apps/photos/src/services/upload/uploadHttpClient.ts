@@ -1,10 +1,10 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { apiOrigin, uploaderOrigin } from "@/next/origins";
 import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 
 const MAX_URL_REQUESTS = 50;

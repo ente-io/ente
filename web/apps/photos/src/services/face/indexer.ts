@@ -2,11 +2,11 @@ import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
+import { getAllLocalFiles } from "@/new/photos/services/files";
+import type { EnteFile } from "@/new/photos/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import type { Remote } from "comlink";
-import { getAllLocalFiles } from "services/fileService";
-import type { EnteFile } from "types/file";
 import {
     faceIndex,
     indexableFileIDs,

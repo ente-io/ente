@@ -1,8 +1,8 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { apiOrigin } from "@/next/origins";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { EnteFile } from "types/file";
 import { retryHTTPCall } from "./uploadHttpClient";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 

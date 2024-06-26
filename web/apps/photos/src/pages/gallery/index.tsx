@@ -1,6 +1,8 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
+import { getLocalFiles } from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -90,13 +92,12 @@ import {
 import downloadManager from "services/download";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
-import { getLocalFiles, syncFiles } from "services/fileService";
+import { syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { getLocalTrashedFiles, syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid, syncMapEnabled } from "services/userService";
 import { Collection, CollectionSummaries } from "types/collection";
-import { EnteFile } from "types/file";
 import {
     GalleryContextType,
     SelectedState,
