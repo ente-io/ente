@@ -16,7 +16,7 @@ import { basename } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
-import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
+import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import type { B64EncryptionResult } from "@ente/shared/crypto/types";
 import { CustomError, handleUploadError } from "@ente/shared/error";

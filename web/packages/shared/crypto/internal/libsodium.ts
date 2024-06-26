@@ -9,7 +9,6 @@
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
-import { ENCRYPTION_CHUNK_SIZE } from "../constants";
 import type { B64EncryptionResult } from "../types";
 
 export async function fromB64(input: string) {
@@ -114,6 +113,8 @@ export async function decryptChaChaOneShot(
     );
     return pullResult.message;
 }
+
+export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
 
 export const decryptChaCha = async (
     data: Uint8Array,
