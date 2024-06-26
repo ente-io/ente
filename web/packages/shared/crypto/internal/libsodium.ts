@@ -10,11 +10,6 @@ import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 
-export async function fromB64(input: string) {
-    await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
-}
-
 /**
  * Convert a {@link Uint8Array} to a Base64 encoded string.
  *
@@ -25,7 +20,9 @@ export const toB64 = async (input: Uint8Array) => {
     return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
 };
 
-/** Convert a {@link Uint8Array} to a **URL safe** Base64 encoded string. */
+/**
+ * Convert a {@link Uint8Array} to a **URL safe** Base64 encoded string.
+ */
 export const toB64URLSafe = async (input: Uint8Array) => {
     await sodium.ready;
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
@@ -51,6 +48,11 @@ export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
     await sodium.ready;
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
 };
+
+export async function fromB64(input: string) {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+}
 
 /**
  * Convert a Base64 encoded string to a {@link Uint8Array}.
