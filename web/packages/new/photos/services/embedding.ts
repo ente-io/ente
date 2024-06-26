@@ -1,3 +1,6 @@
+import { authenticatedRequestHeaders } from "@/next/http";
+import { apiOrigin } from "@/next/origins";
+
 /**
  * The embeddings that we (the current client) knows how to handle.
  *
@@ -33,14 +36,23 @@ export const syncRemoteFaceEmbeddings = async () => {
 
 // }
 
+/** The maximum number of items to fetch in a single GET /embeddings/diff */
+const diffLimit = 500;
+
 /**
  * GET /embeddings/diff for the given model and changes {@link sinceTime}.
  *
  * @param model The {@link EmbeddingModel} whose diff we wish for.
  *
- * @param sinceTime The last time we synced (epoch ms).
+ * @param sinceTime The last time we synced (epoch ms). Pass 0 to fetch
+ * everything from the beginning.
  */
-// const getEmbeddingsDiff = async (model: EmbeddingModel, sinceTime: number) => {
-//     // const params = new URLSearchParams()
+const getEmbeddingsDiff = async (model: EmbeddingModel, sinceTime: number) => {
+    const params = new URLSearchParams({model, sinceTime: `${sinceTime}`, limit: `${diffLimit}`})
+    const url = `${apiOrigin()}/embeddings/diff`;
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: authenticatedRequestHeaders(),
+    })
+    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+}
 
-// }
