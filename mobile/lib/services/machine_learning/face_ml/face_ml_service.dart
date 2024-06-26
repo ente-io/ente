@@ -99,8 +99,6 @@ class FaceMlService {
   final int _fileDownloadLimit = 10;
   final int _embeddingFetchLimit = 200;
   final int _kForceClusteringFaceCount = 8000;
-  final int _kcooldownLimit = 300;
-  static const Duration _kCooldownDuration = Duration(minutes: 3);
 
   Future<void> init() async {
     if (LocalSettings.instance.isFaceIndexingEnabled == false) {
@@ -405,7 +403,6 @@ class FaceMlService {
 
       int fileAnalyzedCount = 0;
       int fileSkippedCount = 0;
-      int cooldownCount = 0;
       final stopwatch = Stopwatch()..start();
       final List<EnteFile> filesWithLocalID = <EnteFile>[];
       final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
@@ -548,22 +545,12 @@ class FaceMlService {
             (previousValue, element) => previousValue + (element ? 1 : 0),
           );
           fileAnalyzedCount += sumFutures;
-
-          if (fileAnalyzedCount > _kcooldownLimit) {
-            _logger.info(
-              'Reached ${cooldownCount * _kcooldownLimit + fileAnalyzedCount} indexed files, cooling down to prevent OS from killing the app',
-            );
-            cooldownCount++;
-            fileAnalyzedCount -= _kcooldownLimit;
-            await Future.delayed(_kCooldownDuration);
-            _logger.info('cooldown done, continuing indexing');
-          }
         }
       }
 
       stopwatch.stop();
       _logger.info(
-        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed ${cooldownCount * _kcooldownLimit + fileAnalyzedCount} images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images, $cooldownCount cooldowns)",
+        "`indexAllImages()` finished. Fetched $fetchedCount and analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image, skipped $fileSkippedCount images)",
       );
       _logStatus();
     } catch (e, s) {
