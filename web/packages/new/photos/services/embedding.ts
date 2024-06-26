@@ -1,8 +1,9 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { apiURL } from "@/next/origins";
+import log from "@/next/log";
 import { nullToUndefined } from "@/utils/transform";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { z } from "zod";
+import { decryptFileMetadata } from "../../common/crypto/ente";
 import { getAllLocalFiles } from "./files";
 
 /**
@@ -83,12 +84,11 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  */
 export const syncRemoteFaceEmbeddings = async () => {
     let sinceTime = faceEmbeddingSyncTime();
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const localFiles = await getAllLocalFiles();
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
     const decryptEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
-        const file = localFilesByID.get(remoteEmbedding.fileID)
+        const file = localFilesByID.get(remoteEmbedding.fileID);
         // [Note: Ignoring embeddings for unknown files]
         //
         // We need the file to decrypt the embedding. This is easily ensured by
@@ -112,8 +112,18 @@ export const syncRemoteFaceEmbeddings = async () => {
         //     be a bit of duplicate work, but that's fine as long as there
         //     isn't a systematic scenario where this happens.
         if (!file) return undefined;
-
-    }
+        try {
+            const decryptedString = await decryptFileMetadata(
+                remoteEmbedding.encryptedEmbedding,
+                remoteEmbedding.decryptionHeader,
+                file.key,
+            );
+            return decryptedString;
+        } catch (e) {
+            log.warn("Ignoring unparseable embedding", e);
+            return undefined;
+        }
+    };
 
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
@@ -126,9 +136,7 @@ export const syncRemoteFaceEmbeddings = async () => {
             sinceTime,
         );
         if (remoteEmbeddings.length == 0) break;
-        // const _embeddings = Promise.all(
-        //     remoteEmbeddings.map(decryptEmbedding),
-        // );
+        void (await Promise.all(remoteEmbeddings.map(decryptEmbedding)));
         sinceTime = remoteEmbeddings.reduce(
             (max, { updatedAt }) => Math.max(max, updatedAt),
             sinceTime,
@@ -137,7 +145,7 @@ export const syncRemoteFaceEmbeddings = async () => {
     }
 };
 
-const decryptFaceEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
+// const decryptFaceEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
 //                         const fileKey = fileIdToKeyMap.get(embedding.fileID);
 //                         if (!fileKey) {
 //                             throw Error(CustomError.FILE_NOT_FOUND);

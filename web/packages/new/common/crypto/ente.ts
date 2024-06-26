@@ -9,7 +9,7 @@
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 
 /**
- * Decrypt the metadata associated with a file using the file's key.
+ * Decrypt arbitrary metadata associated with a file using the its's key.
  *
  * @param encryptedMetadataB64 The Base64 encoded string containing the
  * encrypted data.
@@ -17,8 +17,8 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
  * @param headerB64 The Base64 encoded string containing the decryption header
  * produced during encryption.
  *
- * @param keyB64 The Base64 encoded string containing the encryption key (which
- * is the file's key).
+ * @param keyB64 The Base64 encoded string containing the encryption key
+ * (this'll generally be the file's key).
  *
  * @returns The decrypted utf-8 string.
  */
