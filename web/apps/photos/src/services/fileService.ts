@@ -7,6 +7,7 @@ import {
     TrashRequest,
 } from "@/new/photos/types/file";
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -16,12 +17,7 @@ import { REQUEST_BATCH_SIZE } from "constants/api";
 import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
 import { batch } from "utils/common";
-import {
-    decryptFile,
-    getLatestVersionFiles,
-    mergeMetadata,
-    sortFiles,
-} from "utils/file";
+import { decryptFile, getLatestVersionFiles, sortFiles } from "utils/file";
 import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,

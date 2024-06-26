@@ -1,4 +1,9 @@
-import { EnteFile } from "@/new/photos/types/file";
+import {
+    getLocalTrash,
+    getTrashedFiles,
+    TRASH,
+} from "@/new/photos/services/files";
+import { EncryptedTrashItem, Trash } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -6,22 +11,11 @@ import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
-import { EncryptedTrashItem, Trash } from "types/trash";
-import { decryptFile, mergeMetadata, sortTrashFiles } from "utils/file";
+import { decryptFile } from "utils/file";
 import { getCollection } from "./collectionService";
 
-const TRASH = "file-trash";
 const TRASH_TIME = "trash-time";
 const DELETED_COLLECTION = "deleted-collection";
-
-async function getLocalTrash() {
-    const trash = (await localForage.getItem<Trash>(TRASH)) || [];
-    return trash;
-}
-
-export async function getLocalTrashedFiles() {
-    return getTrashedFiles(await getLocalTrash());
-}
 
 export async function getLocalDeletedCollections() {
     const trashedCollections: Array<Collection> =
@@ -135,19 +129,6 @@ export const updateTrash = async (
     }
     return currentTrash;
 };
-
-export function getTrashedFiles(trash: Trash): EnteFile[] {
-    return sortTrashFiles(
-        mergeMetadata(
-            trash.map((trashedFile) => ({
-                ...trashedFile.file,
-                updationTime: trashedFile.updatedAt,
-                deleteBy: trashedFile.deleteBy,
-                isTrashed: true,
-            })),
-        ),
-    );
-}
 
 export const emptyTrash = async () => {
     try {

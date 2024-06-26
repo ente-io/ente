@@ -1,3 +1,4 @@
+import { getLocalTrashedFiles } from "@/new/photos/services/files";
 import { authenticatedRequestHeaders } from "@/next/http";
 import { apiURL } from "@/next/origins";
 import log from "@/next/log";
@@ -84,7 +85,11 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  */
 export const syncRemoteFaceEmbeddings = async () => {
     let sinceTime = faceEmbeddingSyncTime();
-    const localFiles = await getAllLocalFiles();
+    // Include files from trash, otherwise they'll get unnecessarily reindexed
+    // if the user restores them from trash before permanent deletion.
+    const localFiles = (await getAllLocalFiles()).concat(
+        await getLocalTrashedFiles(),
+    );
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
     const decryptEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
@@ -199,6 +204,7 @@ const saveFaceEmbeddingSyncTime = (t: number) =>
  * out of sync in the shape of the types they represent, the TypeScript compiler
  * will flag it for us.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FaceIndex = z
     .object({
         fileID: z.number(),

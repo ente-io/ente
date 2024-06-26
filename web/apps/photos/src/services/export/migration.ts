@@ -2,6 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
@@ -22,11 +23,7 @@ import {
     FileExportNames,
 } from "types/export";
 import { getNonEmptyPersonalCollections } from "utils/collection";
-import {
-    getIDBasedSortedFiles,
-    getPersonalFiles,
-    mergeMetadata,
-} from "utils/file";
+import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
     safeDirectoryName,
     safeFileName,

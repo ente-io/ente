@@ -12,6 +12,7 @@ import {
     FileWithUpdatedMagicMetadata,
 } from "@/new/photos/types/file";
 import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
 import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
@@ -194,20 +195,6 @@ export function sortFiles(files: EnteFile[], sortAsc = false) {
             );
         }
         return factor * (b.metadata.creationTime - a.metadata.creationTime);
-    });
-}
-
-export function sortTrashFiles(files: EnteFile[]) {
-    return files.sort((a, b) => {
-        if (a.deleteBy === b.deleteBy) {
-            if (a.metadata.creationTime === b.metadata.creationTime) {
-                return (
-                    b.metadata.modificationTime - a.metadata.modificationTime
-                );
-            }
-            return b.metadata.creationTime - a.metadata.creationTime;
-        }
-        return a.deleteBy - b.deleteBy;
     });
 }
 
@@ -430,31 +417,6 @@ export function isSharedFile(user: User, file: EnteFile) {
         return false;
     }
     return file.ownerID !== user.id;
-}
-
-/**
- * [Note: File name for local EnteFile objects]
- *
- * The title property in a file's metadata is the original file's name. The
- * metadata of a file cannot be edited. So if later on the file's name is
- * changed, then the edit is stored in the `editedName` property of the public
- * metadata of the file.
- *
- * This function merges these edits onto the file object that we use locally.
- * Effectively, post this step, the file's metadata.title can be used in lieu of
- * its filename.
- */
-export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => {
-        if (file.pubMagicMetadata?.data.editedTime) {
-            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-        }
-        if (file.pubMagicMetadata?.data.editedName) {
-            file.metadata.title = file.pubMagicMetadata.data.editedName;
-        }
-
-        return file;
-    });
 }
 
 export function updateExistingFilePubMetadata(

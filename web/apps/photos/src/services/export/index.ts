@@ -3,6 +3,7 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { wait } from "@/utils/promise";
@@ -29,11 +30,7 @@ import {
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
-import {
-    getPersonalFiles,
-    getUpdatedEXIFFileForDownload,
-    mergeMetadata,
-} from "utils/file";
+import { getPersonalFiles, getUpdatedEXIFFileForDownload } from "utils/file";
 import { safeDirectoryName, safeFileName } from "utils/native-fs";
 import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
