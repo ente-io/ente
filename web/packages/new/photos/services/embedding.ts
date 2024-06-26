@@ -78,9 +78,24 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  * It takes no parameters since it saves the last sync time in local storage.
  */
 export const syncRemoteFaceEmbeddings = async () => {
-    const sinceTime = faceEmbeddingSyncTime();
-    saveFaceEmbeddingSyncTime(sinceTime);
-    return 0;
+    let sinceTime = faceEmbeddingSyncTime();
+    // TODO: eslint has fixed this spurious warning, but we're not on the latest
+    // version yet, so add a disable.
+    // https://github.com/eslint/eslint/pull/18286
+    /* eslint-disable no-constant-condition */
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+        const embeddings = await getEmbeddingsDiff(
+            "file-ml-clip-face",
+            sinceTime,
+        );
+        if (embeddings.length == 0) break;
+        sinceTime = embeddings.reduce(
+            (max, { updatedAt }) => Math.max(max, updatedAt),
+            sinceTime,
+        );
+        saveFaceEmbeddingSyncTime(sinceTime);
+    }
 };
 
 /**
