@@ -37,9 +37,6 @@ export type EmbeddingModel =
     | "onnx-clip" /* CLIP (text) embeddings */
     | "file-ml-clip-face" /* Face embeddings */;
 
-/** The maximum number of items to fetch in a single GET /embeddings/diff */
-const diffLimit = 500;
-
 const RemoteEmbedding = z.object({
     /** The ID of the file whose embedding this is. */
     fileID: z.number(),
@@ -71,6 +68,8 @@ const RemoteEmbedding = z.object({
     version: z.number().nullish().transform(nullToUndefined),
 });
 
+type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
+
 /**
  * Ask remote for what all changes have happened to the face embeddings that it
  * knows about since the last time we synced. Then update our local state to
@@ -79,27 +78,59 @@ const RemoteEmbedding = z.object({
  * It takes no parameters since it saves the last sync time in local storage.
  */
 export const syncRemoteFaceEmbeddings = async () => {
+    const sinceTime = faceEmbeddingSyncTime();
+    saveFaceEmbeddingSyncTime(sinceTime);
     return 0;
 };
+
+/**
+ * The updatedAt of the most recent face {@link RemoteEmbedding} we've retrieved
+ * and saved from remote, or 0.
+ *
+ * This value is persisted to local storage. To update it, use
+ * {@link saveFaceEmbeddingSyncMarker}.
+ */
+const faceEmbeddingSyncTime = () =>
+    parseInt(localStorage.getItem("faceEmbeddingSyncTime") ?? "0");
+
+/** Sibling of {@link faceEmbeddingSyncMarker}. */
+const saveFaceEmbeddingSyncTime = (t: number) =>
+    localStorage.setItem("faceEmbeddingSyncTime", `${t}`);
 
 // const getFaceEmbeddings = async () => {
 
 // }
 
+/** The maximum number of items to fetch in a single GET /embeddings/diff */
+const diffLimit = 500;
+
 /**
- * GET /embeddings/diff for the given model and changes {@link sinceTime}.
+ * GET embeddings for the given model that have been updated {@link sinceTime}.
+ *
+ * This fetches the next {@link diffLimit} embeddings whose {@link updatedAt} is
+ * greater than the given {@link sinceTime} (non-inclusive).
  *
  * @param model The {@link EmbeddingModel} whose diff we wish for.
  *
- * @param sinceTime The last time we synced (epoch ms). Pass 0 to fetch
- * everything from the beginning.
+ * @param sinceTime The updatedAt of the last embedding we've synced (epoch ms).
+ * Pass 0 to fetch everything from the beginning.
+ *
+ * @returns an array of {@link RemoteEmbedding}. The returned array is limited
+ * to a maximum count of {@link diffLimit}.
  */
-const getEmbeddingsDiff = async (model: EmbeddingModel, sinceTime: number) => {
-    const params = new URLSearchParams({model, sinceTime: `${sinceTime}`, limit: `${diffLimit}`})
+const getEmbeddingsDiff = async (
+    model: EmbeddingModel,
+    sinceTime: number,
+): Promise<RemoteEmbedding[]> => {
+    const params = new URLSearchParams({
+        model,
+        sinceTime: `${sinceTime}`,
+        limit: `${diffLimit}`,
+    });
     const url = `${apiOrigin()}/embeddings/diff`;
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: authenticatedRequestHeaders(),
-    })
+    });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-}
-
+    return z.array(RemoteEmbedding).parse(await res.json());
+};
