@@ -7,9 +7,10 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/settings/TEMP/lock_screen_option_password.dart";
-import "package:photos/ui/settings/TEMP/lock_screen_option_pin.dart";
+import "package:photos/ui/settings/lockscreen/lock_screen_option_password.dart";
+import "package:photos/ui/settings/lockscreen/lock_screen_option_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
+import "package:photos/utils/lockscreen_setting.dart";
 
 class LockScreenOption extends StatefulWidget {
   const LockScreenOption({super.key});
@@ -20,6 +21,7 @@ class LockScreenOption extends StatefulWidget {
 
 class _LockScreenOptionState extends State<LockScreenOption> {
   final Configuration _configuration = Configuration.instance;
+  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
@@ -30,12 +32,12 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
-        _configuration.shouldShowLockScreen();
+        _configuration.shouldShowSystemLockScreen();
   }
 
   Future<void> _initializeSettings() async {
-    final bool passwordEnabled = await _configuration.isPasswordSet();
-    final bool pinEnabled = await _configuration.isPinSet();
+    final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
+    final bool pinEnabled = await _lockscreenSetting.isPinSet();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
@@ -43,7 +45,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
   }
 
   Future<void> _deviceLock() async {
-    await _configuration.removePinAndPassword();
+    await _lockscreenSetting.removePinAndPassword();
     await _initializeSettings();
   }
 
@@ -57,12 +59,10 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     );
     setState(() {
       _initializeSettings();
-      if (result == false) {
-        appLock = appLock;
-      } else {
+      if (result) {
         appLock = isPinEnabled ||
             isPasswordEnabled ||
-            _configuration.shouldShowLockScreen();
+            _configuration.shouldShowSystemLockScreen();
       }
     });
   }
@@ -77,20 +77,18 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     );
     setState(() {
       _initializeSettings();
-      if (result == false) {
-        appLock = appLock;
-      } else {
+      if (result) {
         appLock = isPinEnabled ||
             isPasswordEnabled ||
-            _configuration.shouldShowLockScreen();
+            _configuration.shouldShowSystemLockScreen();
       }
     });
   }
 
   Future<void> _onToggleSwitch() async {
     AppLock.of(context)!.setEnabled(!appLock);
-    await Configuration.instance.setShouldShowLockScreen(!appLock);
-    await _configuration.removePinAndPassword();
+    await _configuration.setSystemLockScreen(!appLock);
+    await _lockscreenSetting.removePinAndPassword();
     setState(() {
       _initializeSettings();
       appLock = !appLock;

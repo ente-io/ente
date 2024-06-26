@@ -5,7 +5,6 @@ import "dart:io";
 import 'package:bip39/bip39.dart' as bip39;
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import "package:flutter_sodium/flutter_sodium.dart";
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
@@ -35,6 +34,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/lockscreen_setting.dart";
 import 'package:photos/utils/validator_util.dart';
 import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,7 +60,7 @@ class Configuration {
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
   // should be kept on while the app is in foreground.
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
-  static const keyShouldShowLockScreen = "should_show_lock_screen";
+  static const keyShowSystemLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
@@ -86,7 +86,7 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
-
+  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
   // on appSupport directory which OS won't clean up automatically
@@ -152,80 +152,6 @@ class Configuration {
         rethrow;
       }
     }
-  }
-
-  static Uint8List generateSalt() {
-    return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
-  }
-
-  Future<void> setPin(String userPin) async {
-    await _secureStorage.delete(key: saltKey);
-
-    final salt = generateSalt();
-    final hash = cryptoPwHash({
-      "password": utf8.encode(userPin),
-      "salt": salt,
-      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
-      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
-    });
-
-    final String saltPin = base64Encode(salt);
-    final String hashedPin = base64Encode(hash);
-
-    await _secureStorage.write(key: saltKey, value: saltPin);
-    await _secureStorage.write(key: pin, value: hashedPin);
-    await _secureStorage.delete(key: password);
-
-    return;
-  }
-
-  Future<Uint8List?> getSalt() async {
-    final String? salt = await _secureStorage.read(key: saltKey);
-    if (salt == null) return null;
-    return base64Decode(salt);
-  }
-
-  Future<String?> getPin() async {
-    return _secureStorage.read(key: pin);
-  }
-
-  Future<void> setPassword(String pass) async {
-    await _secureStorage.delete(key: saltKey);
-
-    final salt = generateSalt();
-    final hash = cryptoPwHash({
-      "password": utf8.encode(pass),
-      "salt": salt,
-      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
-      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
-    });
-
-    final String saltPassword = base64Encode(salt);
-    final String hashPassword = base64Encode(hash);
-
-    await _secureStorage.write(key: saltKey, value: saltPassword);
-    await _secureStorage.write(key: password, value: hashPassword);
-    await _secureStorage.delete(key: pin);
-
-    return;
-  }
-
-  Future<String?> getPassword() async {
-    return _secureStorage.read(key: password);
-  }
-
-  Future<void> removePinAndPassword() async {
-    await _secureStorage.delete(key: saltKey);
-    await _secureStorage.delete(key: pin);
-    await _secureStorage.delete(key: password);
-  }
-
-  Future<bool> isPinSet() async {
-    return await _secureStorage.containsKey(key: pin);
-  }
-
-  Future<bool> isPasswordSet() async {
-    return await _secureStorage.containsKey(key: password);
   }
 
   // _cleanUpStaleFiles deletes all files in the temp directory that are older
@@ -697,16 +623,22 @@ class Configuration {
     }
   }
 
-  bool shouldShowLockScreen() {
-    if (_preferences.containsKey(keyShouldShowLockScreen)) {
-      return _preferences.getBool(keyShouldShowLockScreen)!;
+  Future<bool> shouldShowLockScreen() async {
+    final bool isPin = await _lockscreenSetting.isPinSet();
+    final bool isPass = await _lockscreenSetting.isPasswordSet();
+    return isPin || isPass || shouldShowSystemLockScreen();
+  }
+
+  bool shouldShowSystemLockScreen() {
+    if (_preferences.containsKey(keyShowSystemLockScreen)) {
+      return _preferences.getBool(keyShowSystemLockScreen)!;
     } else {
       return false;
     }
   }
 
-  Future<void> setShouldShowLockScreen(bool value) {
-    return _preferences.setBool(keyShouldShowLockScreen, value);
+  Future<void> setSystemLockScreen(bool value) {
+    return _preferences.setBool(keyShowSystemLockScreen, value);
   }
 
   void setVolatilePassword(String volatilePassword) {

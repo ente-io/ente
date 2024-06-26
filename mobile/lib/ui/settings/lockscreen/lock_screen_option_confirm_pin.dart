@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/utils/lockscreen_setting.dart";
 import "package:pinput/pinput.dart";
 
 class LockScreenOptionConfirmPin extends StatefulWidget {
@@ -18,7 +18,8 @@ class LockScreenOptionConfirmPin extends StatefulWidget {
 class _LockScreenOptionConfirmPinState
     extends State<LockScreenOptionConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
-  final Configuration _configuration = Configuration.instance;
+
+  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
   final _pinPutDecoration = PinTheme(
     height: 48,
     width: 48,
@@ -49,7 +50,7 @@ class _LockScreenOptionConfirmPinState
 
   Future<void> _confirmPinMatch() async {
     if (widget.pin == _confirmPinController.text) {
-      await _configuration.setPin(_confirmPinController.text);
+      await _lockscreenSetting.setPin(_confirmPinController.text);
 
       Navigator.of(context).pop(true);
       Navigator.of(context).pop(true);

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
+import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
@@ -53,6 +54,7 @@ import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
+import "package:photos/utils/lockscreen_setting.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -94,7 +96,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         builder: (args) =>
             EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled: Configuration.instance.shouldShowLockScreen(),
+        enabled: await Configuration.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
@@ -195,7 +197,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _isProcessRunning = true;
     _logger.info("Initializing...  inBG =$isBackground via: $via");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-
+    const secureStorage = FlutterSecureStorage();
     await _logFGHeartBeatInfo();
     _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
@@ -208,6 +210,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
+
+    _logger.info("Lockscreen init");
+    LockscreenSetting.instance.init(secureStorage);
 
     _logger.info("Configuration init");
     await Configuration.instance.init();
