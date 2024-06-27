@@ -215,17 +215,16 @@ export const canEnableFaceIndexing = async () =>
  * on any client. This {@link isFaceIndexingEnabled} property, on the other
  * hand, denotes whether or not indexing is enabled on the current client.
  */
-export const isFaceIndexingEnabled = async () => {
-    return localStorage.getItem("faceIndexingEnabled") == "1";
-};
+export const isFaceIndexingEnabled = () =>
+    localStorage.getItem("faceIndexingEnabled") == "1";
 
 /**
  * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
  */
-export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
-    if (enabled) localStorage.setItem("faceIndexingEnabled", "1");
-    else localStorage.removeItem("faceIndexingEnabled");
-};
+export const setIsFaceIndexingEnabled = (enabled: boolean) =>
+    enabled
+        ? localStorage.setItem("faceIndexingEnabled", "1")
+        : localStorage.removeItem("faceIndexingEnabled");
 
 /**
  * Sync face DB with the local (and potentially indexable) files that we know
