@@ -12,6 +12,19 @@ export const apiOrigin = async () =>
     (await customAPIOrigin()) ?? "https://api.ente.io";
 
 /**
+ * A convenience function to construct an endpoint in a one-liner.
+ *
+ * This avoids us having to create a temporary variable or otherwise complicate
+ * the call sites since async functions cannot be used inside template literals.
+ *
+ * @returns The equivalent of `${await apiOrigin()}/pathEtc`
+ */
+export const apiURL = async (pathEtc: string) => {
+    const origin = await apiOrigin();
+    return `${origin}/${pathEtc}`;
+};
+
+/**
  * Return the overridden API origin, if one is defined by either (in priority
  * order):
  *

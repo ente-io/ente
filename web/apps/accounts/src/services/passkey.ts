@@ -1,5 +1,5 @@
 import { isDevBuild } from "@/next/env";
-import { apiOrigin } from "@/next/origins";
+import { apiOrigin, apiURL } from "@/next/origins";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
@@ -58,7 +58,7 @@ const GetPasskeysResponse = z.object({
  * has no passkeys.
  */
 export const getPasskeys = async (token: string) => {
-    const url = `${apiOrigin()}/passkeys`;
+    const url = await apiURL("passkeys");
     const res = await fetch(url, {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
