@@ -72,7 +72,7 @@ const Contents: React.FC<ContentsProps> = (props) => {
                 setInitialAPIOrigin(
                     // TODO: Migration of apiOrigin from local storage to indexed DB
                     // Remove me after a bit (27 June 2024).
-                    o ?? localStorage.getItem("apiOrigin") ?? undefined,
+                    o ?? localStorage.getItem("apiOrigin") ?? "",
                 ),
             ),
         [],
@@ -80,20 +80,20 @@ const Contents: React.FC<ContentsProps> = (props) => {
 
     // Even though this is async, this should be instantanous, we're just
     // reading the value from the local IndexedDB.
-    if (!initialAPIOrigin) return <></>;
+    if (initialAPIOrigin === undefined) return <></>;
 
     return <Form {...{ initialAPIOrigin }} {...props} />;
 };
 
 type FormProps = ContentsProps & {
     /** The initial value of API origin to prefill in the text input field. */
-    initialAPIOrigin: string | undefined;
+    initialAPIOrigin: string;
 };
 
 const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
     const form = useFormik({
         initialValues: {
-            apiOrigin: initialAPIOrigin ?? "",
+            apiOrigin: initialAPIOrigin,
         },
         validate: ({ apiOrigin }) => {
             try {
