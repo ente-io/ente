@@ -5,6 +5,7 @@ import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
+import { clear as clearKV } from "idb-keyval";
 import { logout as remoteLogout } from "../api/user";
 
 /**
@@ -55,5 +56,10 @@ export const accountLogout = async () => {
         clearHTTPState();
     } catch (e) {
         ignoreError("http", e);
+    }
+    try {
+        await clearKV();
+    } catch (e) {
+        ignoreError("kv", e);
     }
 };
