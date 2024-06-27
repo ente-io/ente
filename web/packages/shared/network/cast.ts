@@ -24,7 +24,7 @@ class CastGateway {
         try {
             const token = getToken();
             await HTTPService.delete(
-                await apiURL("/cast/revoke-all-tokens"),
+                await apiURL("/cast/revoke-all-tokens/"),
                 undefined,
                 undefined,
                 {
@@ -59,9 +59,12 @@ class CastGateway {
     }
 
     public async registerDevice(publicKey: string): Promise<string> {
-        const resp = await HTTPService.post(await apiURL("/cast/device-info"), {
-            publicKey: publicKey,
-        });
+        const resp = await HTTPService.post(
+            await apiURL("/cast/device-info/"),
+            {
+                publicKey: publicKey,
+            },
+        );
         return resp.data.deviceCode;
     }
 
@@ -73,7 +76,7 @@ class CastGateway {
     ) {
         const token = getToken();
         await HTTPService.post(
-            await apiURL("/cast/cast-data"),
+            await apiURL("/cast/cast-data/"),
             {
                 deviceCode: `${code}`,
                 encPayload: castPayload,
