@@ -1803,10 +1803,10 @@ packages:
     dependency: "direct main"
     description:
       name: photo_manager
-      sha256: df594f989f0c31cdb3ed48f3d49cb9ffadf11cc3700d2c3460b1912c93432621
+      sha256: "68d6099d07ce5033170f8368af8128a4555cf1d590a97242f83669552de989b1"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "3.2.0"
   photo_manager_image_provider:
     dependency: transitive
     description:
