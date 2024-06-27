@@ -1,4 +1,3 @@
-import { nullToUndefined } from "@/utils/transform";
 import { get, set } from "idb-keyval";
 
 /**
@@ -42,7 +41,7 @@ export const customAPIOrigin = async () => {
         // Remove me after a bit (27 June 2024).
         const legacyOrigin = localStorage.getItem("apiOrigin");
         if (legacyOrigin !== null) {
-            origin = nullToUndefined(legacyOrigin);
+            origin = legacyOrigin;
             if (origin) await set("apiOrigin", origin);
             localStorage.removeItem("apiOrigin");
         }
