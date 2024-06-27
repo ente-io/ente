@@ -13,12 +13,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const { appName } = appContext;
 
     const [loading, setLoading] = useState(true);
+    const [host, setHost] = useState<string | undefined>();
 
     const router = useRouter();
 
-    const host = customAPIHost();
-
     useEffect(() => {
+        void customAPIHost().then(setHost);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push(PAGES.VERIFY);

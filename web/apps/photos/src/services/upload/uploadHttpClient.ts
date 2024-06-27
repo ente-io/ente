@@ -117,9 +117,10 @@ class UploadHttpClient {
         progressTracker,
     ): Promise<string> {
         try {
+            const origin = await uploaderOrigin();
             await retryHTTPCall(() =>
                 HTTPService.put(
-                    `${uploaderOrigin()}/file-upload`,
+                    `${origin}/file-upload`,
                     file,
                     null,
                     {
@@ -173,9 +174,10 @@ class UploadHttpClient {
         progressTracker,
     ) {
         try {
+            const origin = await uploaderOrigin();
             const response = await retryHTTPCall(async () => {
                 const resp = await HTTPService.put(
-                    `${uploaderOrigin()}/multipart-upload`,
+                    `${origin}/multipart-upload`,
                     filePart,
                     null,
                     {
@@ -214,9 +216,10 @@ class UploadHttpClient {
 
     async completeMultipartUploadV2(completeURL: string, reqBody: any) {
         try {
+            const origin = await uploaderOrigin();
             await retryHTTPCall(() =>
                 HTTPService.post(
-                    `${uploaderOrigin()}/multipart-complete`,
+                    `${origin}/multipart-complete`,
                     reqBody,
                     null,
                     {

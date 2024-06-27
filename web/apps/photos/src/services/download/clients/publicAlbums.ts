@@ -20,6 +20,7 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         const accessToken = this.token;
         const accessTokenJWT = this.passwordToken;
         if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
+        const customOrigin = await customAPIOrigin();
 
         // See: [Note: Passing credentials for self-hosted file fetches]
         const getThumbnail = () => {
@@ -27,7 +28,6 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
                 responseType: "arraybuffer",
             };
 
-            const customOrigin = customAPIOrigin();
             if (customOrigin) {
                 const params = new URLSearchParams({
                     accessToken,
@@ -67,6 +67,8 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         const accessTokenJWT = this.passwordToken;
         if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
 
+        const customOrigin = await customAPIOrigin();
+
         // See: [Note: Passing credentials for self-hosted file fetches]
         const getFile = () => {
             const opts = {
@@ -75,7 +77,6 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
                 onDownloadProgress,
             };
 
-            const customOrigin = customAPIOrigin();
             if (customOrigin) {
                 const params = new URLSearchParams({
                     accessToken,
@@ -112,9 +113,10 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         const accessTokenJWT = this.passwordToken;
         if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
 
+        const customOrigin = await customAPIOrigin();
+
         // See: [Note: Passing credentials for self-hosted file fetches]
         const getFile = () => {
-            const customOrigin = customAPIOrigin();
             if (customOrigin) {
                 const params = new URLSearchParams({
                     accessToken,

@@ -317,8 +317,9 @@ const downloadFile = async (
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
+    const customOrigin = await customAPIOrigin();
+
     const getFile = () => {
-        const customOrigin = customAPIOrigin();
         if (customOrigin) {
             // See: [Note: Passing credentials for self-hosted file fetches]
             const params = new URLSearchParams({ castToken });
