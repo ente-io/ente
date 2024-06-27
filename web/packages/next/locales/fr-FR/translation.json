@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Session expiré",
     "PASSWORD_GENERATION_FAILED": "Votre navigateur ne permet pas de générer une clé forte correspondant aux standards de chiffrement de Ente, veuillez réessayer en utilisant l'appli mobile ou un autre navigateur",
     "CHANGE_PASSWORD": "Modifier le mot de passe",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Retour",
     "RECOVERY_KEY": "Clé de récupération",
     "SAVE_LATER": "Plus tard",
