@@ -8,6 +8,7 @@ import {
     LoginFlowFormFooter,
     PasswordHeader,
     VerifyingPasskey,
+    sessionExpiredDialogAttributes,
 } from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
@@ -43,7 +44,7 @@ import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
 import {
@@ -51,6 +52,7 @@ import {
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
 import { appHomeRoute } from "../services/redirect";
+import { checkSessionValidity } from "../services/session";
 import {
     configureSRP,
     generateSRPSetupAttributes,
@@ -60,7 +62,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { appName, logout, setDialogBoxAttributesV2 } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -68,8 +70,47 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+    const [sessionValidityCheck, setSessionValidityCheck] = useState<
+        Promise<void> | undefined
+    >();
 
     const router = useRouter();
+
+    const validateSession = useCallback(async () => {
+        const showSessionExpiredDialog = () =>
+            setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+
+        try {
+            const session = await checkSessionValidity();
+            switch (session.status) {
+                case "invalid":
+                    showSessionExpiredDialog();
+                    break;
+                case "valid":
+                    break;
+                case "validButPasswordChanged":
+                    setData(
+                        LS_KEYS.KEY_ATTRIBUTES,
+                        session.updatedKeyAttributes,
+                    );
+                    setData(
+                        LS_KEYS.SRP_ATTRIBUTES,
+                        session.updatedSRPAttributes,
+                    );
+                    // Set a flag that causes new interactive key attributes to
+                    // be generated.
+                    setIsFirstLogin(true);
+                    // This should be a rare occurence, instead of building the
+                    // scaffolding to update all the in-memory state, just
+                    // reload everything.
+                    window.location.reload();
+            }
+        } catch (e) {
+            // Ignore errors since we shouldn't be logging the user out for
+            // potentially transient issues.
+            log.warn("Ignoring error when determining session validity", e);
+        }
+    }, [setDialogBoxAttributesV2, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -106,6 +147,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES,
             );
+            const srpAttributes: SRPAttributes = getData(
+                LS_KEYS.SRP_ATTRIBUTES,
+            );
+
+            if (token) {
+                setSessionValidityCheck(validateSession());
+            }
+
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -135,9 +184,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 return;
             }
 
-            const srpAttributes: SRPAttributes = getData(
-                LS_KEYS.SRP_ATTRIBUTES,
-            );
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
             } else {
@@ -147,10 +193,19 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         main();
         appContext.showNavBar(true);
     }, []);
+    // TODO: ^ validateSession is a dependency, but add that only after we've
+    // wrapped items from the callback (like logout) in useCallback too.
 
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {
             try {
+                // Currently the page will get reloaded if any of the attributes
+                // have changed, so we don't need to worry about the kek having
+                // been generated using stale credentials. This await on the
+                // promise is here to only ensure we're done with the check
+                // before we let the user in.
+                if (sessionValidityCheck) await sessionValidityCheck;
+
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const {
                     keyAttributes,

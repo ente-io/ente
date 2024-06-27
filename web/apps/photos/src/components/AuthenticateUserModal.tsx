@@ -1,5 +1,7 @@
 import log from "@/next/log";
+import { checkSessionValidity } from "@ente/accounts/services/session";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -7,7 +9,7 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 interface Iprops {
     open: boolean;
@@ -20,7 +22,8 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, setDialogBoxAttributesV2, logout } =
+        useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
@@ -30,6 +33,27 @@ export default function AuthenticateUserModal({
             close: { variant: "critical" },
             content: t("UNKNOWN_ERROR"),
         });
+
+    // This is a altered version of the check we do on the password verification
+    // screen, except here it don't try to overwrite local state and instead
+    // just request the user to login again if we detect that their password has
+    // changed on a different device and they haven't unlocked even once since
+    // then on this device.
+    const validateSession = useCallback(async () => {
+        try {
+            const session = await checkSessionValidity();
+            if (session.status != "valid") {
+                onClose();
+                setDialogBoxAttributesV2(
+                    passwordChangedElsewhereDialogAttributes(logout),
+                );
+            }
+        } catch (e) {
+            // Ignore errors since we shouldn't be logging the user out for
+            // potentially transient issues.
+            log.warn("Ignoring error when determining session validity", e);
+        }
+    }, [setDialogBoxAttributesV2, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -59,6 +83,12 @@ export default function AuthenticateUserModal({
         main();
     }, []);
 
+    useEffect(() => {
+        // Do a non-blocking validation of the session, but show the dialog to
+        // the user.
+        if (open) void validateSession();
+    }, [open]);
+
     const useMasterPassword: VerifyMasterPasswordFormProps["callback"] =
         async () => {
             onClose();
@@ -84,3 +114,23 @@ export default function AuthenticateUserModal({
         </DialogBoxV2>
     );
 }
+
+/**
+ * Attributes for a dialog box that informs the user that their password was
+ * changed on a different device, and they the need to login again to be able to
+ * use the new one. Cancellable.
+ *
+ * @param onLogin Called if the user chooses the login option.
+ */
+const passwordChangedElsewhereDialogAttributes = (
+    onLogin: () => void,
+): DialogBoxAttributesV2 => ({
+    title: t("password_changed_elsewhere"),
+    content: t("password_changed_elsewhere_message"),
+    proceed: {
+        text: t("LOGIN"),
+        action: onLogin,
+        variant: "accent",
+    },
+    close: { text: t("CANCEL") },
+});
