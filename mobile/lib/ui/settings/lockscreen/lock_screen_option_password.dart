@@ -18,6 +18,8 @@ class LockScreenOptionPassword extends StatefulWidget {
     this.isAuthenticating = false,
     this.authPass,
   });
+
+  /// If [isAuthenticating] is true then we are authenticating the user
   final bool isAuthenticating;
   final String? authPass;
   @override

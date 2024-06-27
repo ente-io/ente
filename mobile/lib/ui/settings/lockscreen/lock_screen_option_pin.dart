@@ -19,6 +19,7 @@ class LockScreenOptionPin extends StatefulWidget {
     this.authPin,
   });
 
+  /// If [isAuthenticating] is true then we are authenticating the user
   final bool isAuthenticating;
   final String? authPin;
   @override
@@ -29,7 +30,9 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
   final _pinController = TextEditingController(text: null);
 
   final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
-  late String hashedPin;
+  late String enteredHashedPin;
+  bool isPinValid = false;
+
   @override
   void dispose() {
     super.dispose();
@@ -58,14 +61,20 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
       "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
     });
 
-    hashedPin = base64Encode(hash);
-    if (widget.authPin == hashedPin) {
+    enteredHashedPin = base64Encode(hash);
+    if (widget.authPin == enteredHashedPin) {
       Navigator.of(context).pop(true);
       return true;
     }
-
-    _pinController.clear();
+    setState(() {
+      isPinValid = true;
+    });
     await HapticFeedback.vibrate();
+    await Future.delayed(const Duration(milliseconds: 75));
+    _pinController.clear();
+    setState(() {
+      isPinValid = false;
+    });
     return false;
   }
 
@@ -207,23 +216,16 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
-                  color: colorTheme.fillBase,
+                  color: colorTheme.warning400,
                 ),
               ),
               textStyle:
                   textTheme.h3Bold.copyWith(color: colorTheme.warning400),
             ),
-            // validator: widget.isAuthenticating
-            //     ? (value) {
-            //         if (widget.authPin == hashedPin) {
-            //           return null;
-            //         }
-            //         return 'Invalid PIN';
-            //       }
-            //     : null,
-            errorText: '',
+            forceErrorState: isPinValid,
             obscureText: true,
             obscuringCharacter: '*',
+            errorText: '',
             onCompleted: (value) async {
               await Future.delayed(const Duration(milliseconds: 250));
               await _confirmPin(_pinController.text);
