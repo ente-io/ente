@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Sitzung abgelaufen",
     "PASSWORD_GENERATION_FAILED": "Dein Browser konnte keinen starken Schlüssel generieren, der den Verschlüsselungsstandards des Entes entspricht, bitte versuche die mobile App oder einen anderen Browser zu verwenden",
     "CHANGE_PASSWORD": "Passwort ändern",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Zurück",
     "RECOVERY_KEY": "Wiederherstellungsschlüssel",
     "SAVE_LATER": "Auf später verschieben",

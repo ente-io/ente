@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Sessie verlopen",
     "PASSWORD_GENERATION_FAILED": "Uw browser kon geen sterke sleutel genereren die voldoet aan onze versleutelingsstandaarden. Probeer de mobiele app of een andere browser te gebruiken",
     "CHANGE_PASSWORD": "Wachtwoord wijzigen",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Ga terug",
     "RECOVERY_KEY": "Herstelsleutel",
     "SAVE_LATER": "Doe dit later",

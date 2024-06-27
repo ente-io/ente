@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "세션 만료",
     "PASSWORD_GENERATION_FAILED": "당신의 브라우저는 Ente의 암호화 표준을 충족하는 강력한 키를 생성할 수 없습니다. 모바일 앱이나 다른 브라우저를 사용하세요.",
     "CHANGE_PASSWORD": "암호 변경하기",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "뒤로 가기",
     "RECOVERY_KEY": "키 복구하기",
     "SAVE_LATER": "나중에 저장하기",

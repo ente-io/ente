@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "",
     "PASSWORD_GENERATION_FAILED": "",
     "CHANGE_PASSWORD": "",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Fara til baka",
     "RECOVERY_KEY": "",
     "SAVE_LATER": "Gera þetta seinna",
