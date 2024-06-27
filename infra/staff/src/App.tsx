@@ -103,6 +103,8 @@ export const App: React.FC = () => {
                     displayValue = new Date(value / 1000).toLocaleString();
                 } else if (key === "storage" && typeof value === "number") {
                     displayValue = `${(value / 1024 ** 3).toFixed(2)} GB`;
+                } else if (key === "usage" && typeof value === "number") {
+                    displayValue = `${(value / 1024 ** 3).toFixed(2)} GB`;
                 } else if (typeof value === "string") {
                     try {
                         const parsedValue = JSON.parse(
