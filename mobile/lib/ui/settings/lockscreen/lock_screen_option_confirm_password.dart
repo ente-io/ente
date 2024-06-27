@@ -148,6 +148,7 @@ class _LockScreenOptionConfirmPasswordState
                   textCapitalization: TextCapitalization.none,
                   textEditingController: _confirmPasswordController,
                   isPasswordInput: true,
+                  shouldSurfaceExecutionStates: false,
                   onChange: (p0) {
                     _isFormValid.value =
                         _confirmPasswordController.text.isNotEmpty;

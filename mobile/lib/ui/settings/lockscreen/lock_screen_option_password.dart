@@ -180,6 +180,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
                   textCapitalization: TextCapitalization.none,
                   textEditingController: _passwordController,
                   isPasswordInput: true,
+                  shouldSurfaceExecutionStates: false,
                   onChange: (p0) {
                     _isFormValid.value = _passwordController.text.isNotEmpty;
                   },
