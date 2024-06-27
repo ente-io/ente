@@ -28,7 +28,8 @@ IndexedDB is a transactional NoSQL store provided by browsers. It has quite
 large storage limits, and data is stored per origin (and remains persistent
 across tab restarts).
 
-Unlike local storage, IndexedDB is also accessible from web workers.
+Unlike local storage, IndexedDB is also accessible from web workers and so we
+also use IndexedDB for storing ad-hoc key value pairs.
 
 Older code used the LocalForage library for storing things in Indexed DB. This
 library falls back to localStorage in case Indexed DB storage is not available.
@@ -40,13 +41,6 @@ For more details, see:
 
 -   https://web.dev/articles/indexeddb
 -   https://github.com/jakearchibald/idb
-
-## IndexedDB KV
-
-We earlier used local storage for ad-hoc key value storage, but local storage is
-not accessible from web workers which we use quite a bit. So now we use _idb_'s
-sibling libary, idb-keyval, for storing key value pairs that need to be accessed
-from both the main thread and web workers.
 
 ## OPFS
 

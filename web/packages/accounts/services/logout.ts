@@ -1,11 +1,11 @@
 import { clearBlobCaches } from "@/next/blob-cache";
 import { clearHTTPState } from "@/next/http";
+import { clearKVDB } from "@/next/kv";
 import log from "@/next/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
-import { clear as clearKV } from "idb-keyval";
 import { logout as remoteLogout } from "../api/user";
 
 /**
@@ -25,41 +25,41 @@ export const accountLogout = async () => {
     try {
         await remoteLogout();
     } catch (e) {
-        ignoreError("remote", e);
+        ignoreError("Remote", e);
     }
     try {
         InMemoryStore.clear();
     } catch (e) {
-        ignoreError("in-memory store", e);
+        ignoreError("In-memory store", e);
     }
     try {
         clearKeys();
     } catch (e) {
-        ignoreError("session store", e);
+        ignoreError("Session storage", e);
     }
     try {
         clearData();
     } catch (e) {
-        ignoreError("local storage", e);
+        ignoreError("Local storage", e);
     }
     try {
         await localForage.clear();
     } catch (e) {
-        ignoreError("local forage", e);
+        ignoreError("Local forage", e);
     }
     try {
         await clearBlobCaches();
     } catch (e) {
-        ignoreError("cache", e);
+        ignoreError("Blob cache", e);
     }
     try {
         clearHTTPState();
     } catch (e) {
-        ignoreError("http", e);
+        ignoreError("HTTP", e);
     }
     try {
-        await clearKV();
+        await clearKVDB();
     } catch (e) {
-        ignoreError("kv", e);
+        ignoreError("KV DB", e);
     }
 };

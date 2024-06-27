@@ -1,3 +1,4 @@
+import { getKV, removeKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -14,7 +15,6 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import { del, get, set } from "idb-keyval";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { FocusVisibleButton } from "./FocusVisibleButton";
@@ -68,7 +68,7 @@ const Contents: React.FC<ContentsProps> = (props) => {
 
     useEffect(
         () =>
-            void get<string>("apiOrigin").then((o) =>
+            void getKV("apiOrigin").then((o) =>
                 setInitialAPIOrigin(
                     // TODO: Migration of apiOrigin from local storage to indexed DB
                     // Remove me after a bit (27 June 2024).
@@ -213,7 +213,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
  */
 const updateAPIOrigin = async (origin: string) => {
     if (!origin) {
-        await del("apiOrigin");
+        await removeKV("apiOrigin");
         // TODO: Migration of apiOrigin from local storage to indexed DB
         // Remove me after a bit (27 June 2024).
         localStorage.removeItem("apiOrigin");
@@ -230,7 +230,7 @@ const updateAPIOrigin = async (origin: string) => {
         throw new Error("Invalid response");
     }
 
-    await set("apiOrigin", origin);
+    await setKV("apiOrigin", origin);
 };
 
 const PingResponse = z.object({

@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval";
+import { getKV, setKV } from "@/next/kv";
 
 /**
  * Return the origin (scheme, host, port triple) that should be used for making
@@ -35,14 +35,14 @@ export const apiURL = async (path: string) => (await apiOrigin()) + path;
  * Otherwise return undefined.
  */
 export const customAPIOrigin = async () => {
-    let origin = await get<string>("apiOrigin");
+    let origin = await getKV("apiOrigin");
     if (!origin) {
         // TODO: Migration of apiOrigin from local storage to indexed DB
         // Remove me after a bit (27 June 2024).
         const legacyOrigin = localStorage.getItem("apiOrigin");
         if (legacyOrigin !== null) {
             origin = legacyOrigin;
-            if (origin) await set("apiOrigin", origin);
+            if (origin) await setKV("apiOrigin", origin);
             localStorage.removeItem("apiOrigin");
         }
     }
