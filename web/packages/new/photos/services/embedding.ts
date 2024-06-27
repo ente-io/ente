@@ -1,11 +1,11 @@
 import { getLocalTrashedFiles } from "@/new/photos/services/files";
 import { authenticatedRequestHeaders } from "@/next/http";
-import { apiURL } from "@/next/origins";
 import log from "@/next/log";
-import { nullToUndefined } from "@/utils/transform";
+import { apiURL } from "@/next/origins";
 import { z } from "zod";
 import { decryptFileMetadata } from "../../common/crypto/ente";
 import { saveFaceIndex } from "./face/db";
+import { faceIndexingVersion, type FaceIndex } from "./face/types";
 import { getAllLocalFiles } from "./files";
 
 /**
@@ -22,17 +22,19 @@ import { getAllLocalFiles } from "./files";
  *
  * [Note: Handling versioning of embeddings]
  *
- * The embeddings themselves have a version included in them, so it is possible
+ * The embeddings themselves have a version embedded in them, so it is possible
  * for us to make backward compatible updates to the indexing process on newer
- * clients.
+ * clients (There is a top level version field too but that is not used.
  *
  * If we bump the version of same model (say when indexing on a newer client),
  * the assumption will be that older client will be able to consume the
- * response. Say if we improve blur detection, older client should just consume
- * the newer version and not try to index the file locally.
+ * response. e.g.  Say if we improve blur detection, older client should just
+ * consume embeddings with a newer version and not try to index the file again
+ * locally.
  *
- * If you get version that is older, client should discard and try to index
- * locally (if needed) and also put the newer version it has on remote.
+ * If we get an embedding with version that is older than the version the client
+ * supports, then the client should ignore it. This way, the file will get
+ * reindexed locally an embedding with a newer version will get put to remote.
  *
  * In the case where the changes are not backward compatible and can only be
  * consumed by clients with the relevant scaffolding, then we change this
@@ -65,12 +67,6 @@ const RemoteEmbedding = z.object({
     decryptionHeader: z.string(),
     /** Last time (epoch ms) this embedding was updated. */
     updatedAt: z.number(),
-    /**
-     * The version for the embedding. Optional.
-     *
-     * See: [Note: Handling versioning of embeddings]
-     */
-    version: z.number().nullish().transform(nullToUndefined),
 });
 
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
@@ -86,7 +82,7 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 export const pullRemoteFaceEmbeddings = async () => {
     const model: EmbeddingModel = "file-ml-clip-face";
     const saveEmbedding = (jsonString: string) =>
-        saveFaceIndex(FaceIndex.parse(JSON.parse(jsonString)));
+        saveFaceIndexIfNewer(FaceIndex.parse(JSON.parse(jsonString)));
 
     // Include files from trash, otherwise they'll get unnecessarily reindexed
     // if the user restores them from trash before permanent deletion.
@@ -159,6 +155,23 @@ const embeddingSyncTime = (model: EmbeddingModel) =>
 /** Sibling of {@link embeddingSyncTime}. */
 const saveEmbeddingSyncTime = (t: number, model: EmbeddingModel) =>
     localStorage.setItem("embeddingSyncTime:" + model, `${t}`);
+
+/**
+ * Save the given {@link faceIndex} locally if it is newer than the one we have.
+ *
+ * This is a variant of {@link saveFaceIndex} that performs version checking as
+ * described in [Note: Handling versioning of embeddings].
+ */
+export const saveFaceIndexIfNewer = async (index: FaceIndex) => {
+    const version = index.faceEmbedding.version;
+    if (version <= faceIndexingVersion) {
+        log.info(
+            `Ignoring remote face index with version ${version} not newer than what our indexer supports (${faceIndexingVersion})`,
+        );
+        return;
+    }
+    return saveFaceIndex(index);
+};
 
 /**
  * Zod schemas for the {@link FaceIndex} types.

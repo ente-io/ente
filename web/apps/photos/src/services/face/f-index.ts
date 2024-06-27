@@ -1,5 +1,12 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import type {
+    Box,
+    Dimensions,
+    Face,
+    Point,
+} from "@/new/photos/services/face/types";
+import { faceIndexingVersion } from "@/new/photos/services/face/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
@@ -21,7 +28,6 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import type { Box, Dimensions, Face, Point } from "./types";
 
 /**
  * Index faces in the given file.
@@ -64,7 +70,7 @@ export const indexFaces = async (
             width,
             height,
             faceEmbedding: {
-                version: 1,
+                version: faceIndexingVersion,
                 client: userAgent,
                 faces: await indexFacesInBitmap(fileID, imageBitmap),
             },

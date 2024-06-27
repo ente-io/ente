@@ -1,6 +1,6 @@
+import type { Box } from "@/new/photos/services/face/types";
 import { blobCache } from "@/next/blob-cache";
 import type { FaceAlignment } from "./f-index";
-import type { Box } from "./types";
 
 export const saveFaceCrop = async (
     imageBitmap: ImageBitmap,
