@@ -31,19 +31,19 @@ class OnnxImageEncoder {
     //Check the existence of imagePath locally
     final rgb = img.decodeImage(await File(args["imagePath"]).readAsBytes())!;
 
-    final int nx = rgb.width;
-    final int ny = rgb.height;
-    final int inputSize = 3 * nx * ny;
+    final int imageWidth = rgb.width;
+    final int imageHeight = rgb.height;
+    final int inputSize = 3 * imageWidth * imageHeight;
     final inputImage = List.filled(inputSize, 0.toDouble());
 
-    const int nx2 = 224;
-    const int ny2 = 224;
-    const int totalSize = 3 * nx2 * ny2;
+    const int requiredWidth = 224;
+    const int requiredHeight = 224;
+    const int totalSize = 3 * requiredWidth * requiredHeight;
 
     // Load image into List<double> inputImage
-    for (int y = 0; y < ny; y++) {
-      for (int x = 0; x < nx; x++) {
-        final int i = 3 * (y * nx + x);
+    for (int y = 0; y < imageHeight; y++) {
+      for (int x = 0; x < imageWidth; x++) {
+        final int i = 3 * (y * imageWidth + x);
         final pixel = rgb.getPixel(x, y);
         inputImage[i] = pixel.r.toDouble();
         inputImage[i + 1] = pixel.g.toDouble();
@@ -52,49 +52,49 @@ class OnnxImageEncoder {
     }
 
     final result = List.filled(totalSize, 0.toDouble());
-    final scale = max(nx, ny) / 224;
+    final invertedScale = max(imageWidth, imageHeight) / 224;
 
-    final int nx3 = (nx / scale + 0.5).toInt();
-    final int ny3 = (ny / scale + 0.5).toInt();
+    final int scaledWidth = (imageWidth / invertedScale + 0.5).toInt();
+    final int scaledHeight = (imageHeight / invertedScale + 0.5).toInt();
 
     final mean = [0.48145466, 0.4578275, 0.40821073];
     final std = [0.26862954, 0.26130258, 0.27577711];
 
-    for (int y = 0; y < ny3; y++) {
-      for (int x = 0; x < nx3; x++) {
+    for (int y = 0; y < scaledHeight; y++) {
+      for (int x = 0; x < scaledWidth; x++) {
         for (int c = 0; c < 3; c++) {
           //linear interpolation
-          final double sx = (x + 0.5) * scale - 0.5;
-          final double sy = (y + 0.5) * scale - 0.5;
+          final double scaledX = (x + 0.5) * invertedScale - 0.5;
+          final double scaledY = (y + 0.5) * invertedScale - 0.5;
 
-          final int x0 = max(0, sx.floor());
-          final int y0 = max(0, sy.floor());
+          final int x0 = max(0, scaledX.floor());
+          final int y0 = max(0, scaledY.floor());
 
-          final int x1 = min(x0 + 1, nx - 1);
-          final int y1 = min(y0 + 1, ny - 1);
+          final int x1 = min(x0 + 1, imageWidth - 1);
+          final int y1 = min(y0 + 1, imageHeight - 1);
 
-          final double dx = sx - x0;
-          final double dy = sy - y0;
+          final double dx = scaledX - x0;
+          final double dy = scaledY - y0;
 
-          final int j00 = 3 * (y0 * nx + x0) + c;
-          final int j01 = 3 * (y0 * nx + x1) + c;
-          final int j10 = 3 * (y1 * nx + x0) + c;
-          final int j11 = 3 * (y1 * nx + x1) + c;
+          final int j00 = 3 * (y0 * imageWidth + x0) + c;
+          final int j01 = 3 * (y0 * imageWidth + x1) + c;
+          final int j10 = 3 * (y1 * imageWidth + x0) + c;
+          final int j11 = 3 * (y1 * imageWidth + x1) + c;
 
-          final double v00 = inputImage[j00];
-          final double v01 = inputImage[j01];
-          final double v10 = inputImage[j10];
-          final double v11 = inputImage[j11];
+          final double pixel1 = inputImage[j00];
+          final double pixel2 = inputImage[j01];
+          final double pixel3 = inputImage[j10];
+          final double pixel4 = inputImage[j11];
 
-          final double v0 = v00 * (1 - dx) + v01 * dx;
-          final double v1 = v10 * (1 - dx) + v11 * dx;
+          final double v0 = pixel1 * (1 - dx) + pixel2 * dx;
+          final double v1 = pixel3 * (1 - dx) + pixel4 * dx;
 
           final double v = v0 * (1 - dy) + v1 * dy;
 
           final int v2 = min(max(v.round(), 0), 255);
 
           // createTensorWithDataList is dump compared to reshape and hence has to be given with one channel after another
-          final int i = (y * nx3 + x) + (c % 3) * 224 * 224;
+          final int i = (y * scaledWidth + x) + (c % 3) * 224 * 224; // TODO: is the use of scaledWidth here intentional, or is it a mistake to not use requiredWidth?
 
           result[i] = ((v2 / 255) - mean[c]) / std[c];
         }
