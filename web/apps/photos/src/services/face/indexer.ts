@@ -1,4 +1,10 @@
 import {
+    faceIndex,
+    indexableFileIDs,
+    indexedAndIndexableCounts,
+    syncWithLocalFiles,
+} from "@/new/photos/services/face/db";
+import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
@@ -7,12 +13,6 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import type { Remote } from "comlink";
-import {
-    faceIndex,
-    indexableFileIDs,
-    indexedAndIndexableCounts,
-    syncWithLocalFiles,
-} from "./db";
 import type { FaceIndexerWorker } from "./indexer.worker";
 
 /**

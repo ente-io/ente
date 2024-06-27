@@ -1,11 +1,11 @@
-import type { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
-import { fileLogID } from "utils/file";
 import {
     closeFaceDBConnectionsIfNeeded,
     markIndexingFailed,
     saveFaceIndex,
-} from "./db";
+} from "@/new/photos/services/face/db";
+import type { EnteFile } from "@/new/photos/types/file";
+import log from "@/next/log";
+import { fileLogID } from "utils/file";
 import { indexFaces } from "./f-index";
 import { putFaceIndex } from "./remote";
 import type { FaceIndex } from "./types";

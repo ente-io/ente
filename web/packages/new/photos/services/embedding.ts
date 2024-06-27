@@ -84,13 +84,15 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  * with remote (See: [Note: Ignoring embeddings for unknown files]).
  */
 export const syncRemoteFaceEmbeddings = async () => {
-    let sinceTime = faceEmbeddingSyncTime();
     // Include files from trash, otherwise they'll get unnecessarily reindexed
     // if the user restores them from trash before permanent deletion.
     const localFiles = (await getAllLocalFiles()).concat(
         await getLocalTrashedFiles(),
     );
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+
+    // Delete embeddings for files which are no longer present locally.
+    // pruneFaceEmbeddings(localFilesByID);
 
     const decryptEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
         const file = localFilesByID.get(remoteEmbedding.fileID);
@@ -129,6 +131,8 @@ export const syncRemoteFaceEmbeddings = async () => {
             return undefined;
         }
     };
+
+    let sinceTime = faceEmbeddingSyncTime();
 
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
