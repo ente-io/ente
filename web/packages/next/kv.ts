@@ -14,13 +14,8 @@ import log from "./log";
 interface KVDBSchema extends DBSchema {
     kv: {
         key: string;
-        value: KV;
+        value: string;
     };
-}
-
-interface KV {
-    key: string;
-    value: string;
 }
 
 /**
@@ -53,7 +48,7 @@ let _kvDB: ReturnType<typeof openKVDB> | undefined;
 const openKVDB = async () => {
     const db = await openDB<KVDBSchema>("kv", 1, {
         upgrade(db) {
-            db.createObjectStore("kv", { keyPath: "key" });
+            db.createObjectStore("kv");
         },
         blocking() {
             log.info(
@@ -109,8 +104,7 @@ export const clearKVDB = async () => {
  */
 export const getKV = async (key: string) => {
     const db = await kvDB();
-    const kv = await db.get("kv", key);
-    return kv?.value;
+    return await db.get("kv", key);
 };
 
 /**
@@ -119,7 +113,7 @@ export const getKV = async (key: string) => {
  */
 export const setKV = async (key: string, value: string) => {
     const db = await kvDB();
-    await db.put("kv", { key, value }, key);
+    await db.put("kv", value, key);
 };
 
 /**
