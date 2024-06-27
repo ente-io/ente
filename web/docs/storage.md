@@ -28,7 +28,7 @@ IndexedDB is a transactional NoSQL store provided by browsers. It has quite
 large storage limits, and data is stored per origin (and remains persistent
 across tab restarts).
 
-Unlike local storage, IndexedDB is also accessible from Web Workers.
+Unlike local storage, IndexedDB is also accessible from web workers.
 
 Older code used the LocalForage library for storing things in Indexed DB. This
 library falls back to localStorage in case Indexed DB storage is not available.

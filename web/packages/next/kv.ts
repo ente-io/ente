@@ -5,7 +5,7 @@ import log from "./log";
  * Key value store schema.
  *
  * The use IndexedDB to store arbitrary key-value pairs. The functional
- * motivation is to allow these to also be accessed from Web Workers (local
+ * motivation is to allow these to also be accessed from web workers (local
  * storage is limited to the main thread).
  *
  * The "kv" database consists of one object store, "kv". Each entry is a string.
