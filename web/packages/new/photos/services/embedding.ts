@@ -84,6 +84,10 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  * See: [Note: Ignoring embeddings for unknown files].
  */
 export const pullRemoteFaceEmbeddings = async () => {
+    const model: EmbeddingModel = "file-ml-clip-face";
+    const saveEmbedding = (jsonString: string) =>
+        saveFaceIndex(FaceIndex.parse(JSON.parse(jsonString)));
+
     // Include files from trash, otherwise they'll get unnecessarily reindexed
     // if the user restores them from trash before permanent deletion.
     const localFiles = (await getAllLocalFiles()).concat(
@@ -112,18 +116,14 @@ export const pullRemoteFaceEmbeddings = async () => {
     //     scenario where this happens.
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    let sinceTime = faceEmbeddingSyncTime();
-
+    let sinceTime = embeddingSyncTime(model);
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
     // https://github.com/eslint/eslint/pull/18286
     /* eslint-disable no-constant-condition */
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
-        const remoteEmbeddings = await getEmbeddingsDiff(
-            "file-ml-clip-face",
-            sinceTime,
-        );
+        const remoteEmbeddings = await getEmbeddingsDiff(model, sinceTime);
         if (remoteEmbeddings.length == 0) break;
         for (const remoteEmbedding of remoteEmbeddings) {
             sinceTime = Math.max(sinceTime, remoteEmbedding.updatedAt);
@@ -135,29 +135,30 @@ export const pullRemoteFaceEmbeddings = async () => {
                     remoteEmbedding.decryptionHeader,
                     file.key,
                 );
-                const faceIndex = FaceIndex.parse(JSON.parse(jsonString));
-                await saveFaceIndex(faceIndex);
+                await saveEmbedding(jsonString);
             } catch (e) {
-                log.warn("Ignoring unparseable embedding", e);
+                log.warn(`Ignoring unparseable ${model} embedding`, e);
             }
         }
-        saveFaceEmbeddingSyncTime(sinceTime);
+        saveEmbeddingSyncTime(sinceTime, model);
     }
 };
 
 /**
- * The updatedAt of the most recent face {@link RemoteEmbedding} we've retrieved
- * and saved from remote, or 0.
+ * The updatedAt of the most recent {@link RemoteEmbedding} for {@link model}
+ * we've retrieved from remote.
+ *
+ * Returns 0 if there is no such embedding.
  *
  * This value is persisted to local storage. To update it, use
- * {@link saveFaceEmbeddingSyncMarker}.
+ * {@link saveEmbeddingSyncTime}.
  */
-const faceEmbeddingSyncTime = () =>
-    parseInt(localStorage.getItem("faceEmbeddingSyncTime") ?? "0");
+const embeddingSyncTime = (model: EmbeddingModel) =>
+    parseInt(localStorage.getItem("embeddingSyncTime:" + model) ?? "0");
 
-/** Sibling of {@link faceEmbeddingSyncMarker}. */
-const saveFaceEmbeddingSyncTime = (t: number) =>
-    localStorage.setItem("faceEmbeddingSyncTime", `${t}`);
+/** Sibling of {@link embeddingSyncTime}. */
+const saveEmbeddingSyncTime = (t: number, model: EmbeddingModel) =>
+    localStorage.setItem("embeddingSyncTime:" + model, `${t}`);
 
 /**
  * Zod schemas for the {@link FaceIndex} types.
@@ -183,7 +184,6 @@ const saveFaceEmbeddingSyncTime = (t: number) =>
  * out of sync in the shape of the types they represent, the TypeScript compiler
  * will flag it for us.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FaceIndex = z
     .object({
         fileID: z.number(),

@@ -1,4 +1,5 @@
 import type { EmbeddingModel } from "@/new/photos/services/embedding";
+import type { FaceIndex } from "@/new/photos/services/face/types";
 import {
     getAllLocalFiles,
     getLocalTrashedFiles,
@@ -20,7 +21,6 @@ import type {
     PutEmbeddingRequest,
 } from "types/embedding";
 import { getLocalCollections } from "./collectionService";
-import type { FaceIndex } from "./face/types";
 
 type FileML = FaceIndex & {
     updatedAt: number;
