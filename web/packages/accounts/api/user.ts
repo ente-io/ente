@@ -1,4 +1,4 @@
-import { apiOrigin } from "@/next/origins";
+import { apiOrigin, apiURL } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import type {
     RecoveryKey,
@@ -14,25 +14,32 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 
-export const sendOtt = (appName: AppName, email: string) => {
-    return HTTPService.post(`${apiOrigin()}/users/ott`, {
+export const sendOtt = async (appName: AppName, email: string) => {
+    return HTTPService.post(await apiURL("users/ott"), {
         email,
         client: appName == "auth" ? "totp" : "web",
     });
 };
 
-export const verifyOtt = (email: string, ott: string, referral: string) => {
+export const verifyOtt = async (
+    email: string,
+    ott: string,
+    referral: string,
+) => {
     const cleanedReferral = `web:${referral?.trim() || ""}`;
-    return HTTPService.post(`${apiOrigin()}/users/verify-email`, {
+    return HTTPService.post(await apiURL("users/verify-email"), {
         email,
         ott,
         source: cleanedReferral,
     });
 };
 
-export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
+export const putAttributes = async (
+    token: string,
+    keyAttributes: KeyAttributes,
+) =>
     HTTPService.put(
-        `${apiOrigin()}/users/attributes`,
+        await apiURL("users/attributes"),
         { keyAttributes },
         undefined,
         {
@@ -43,7 +50,7 @@ export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
 export const logout = async () => {
     try {
         const token = getToken();
-        await HTTPService.post(`${apiOrigin()}/users/logout`, null, undefined, {
+        await HTTPService.post(await apiURL("users/logout"), null, undefined, {
             "X-Auth-Token": token,
         });
     } catch (e) {
