@@ -75,13 +75,12 @@ const RemoteEmbedding = z.object({
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 
 /**
- * Fetch new or updated face embeddings with the server and save them locally.
- * Also prune local embeddings for any files no longer exist locally.
+ * Fetch new or updated face embeddings from remote and save them locally.
  *
  * It takes no parameters since it saves the last sync time in local storage.
  *
- * Precondition: This function should be called only after we have synced files
- * with remote (See: [Note: Ignoring embeddings for unknown files]).
+ * This function should be called only after we have synced files with remote.
+ * See: [Note: Ignoring embeddings for unknown files].
  */
 export const syncRemoteFaceEmbeddings = async () => {
     // Include files from trash, otherwise they'll get unnecessarily reindexed
@@ -90,9 +89,6 @@ export const syncRemoteFaceEmbeddings = async () => {
         await getLocalTrashedFiles(),
     );
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
-
-    // Delete embeddings for files which are no longer present locally.
-    // pruneFaceEmbeddings(localFilesByID);
 
     const decryptEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
         const file = localFilesByID.get(remoteEmbedding.fileID);

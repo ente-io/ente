@@ -2,13 +2,16 @@ import {
     faceIndex,
     indexableFileIDs,
     indexedAndIndexableCounts,
-    syncWithLocalFiles,
+    syncAssumingLocalFileIDs,
 } from "@/new/photos/services/face/db";
 import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
-import { getAllLocalFiles } from "@/new/photos/services/files";
+import {
+    getAllLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
@@ -229,13 +232,13 @@ export const setIsFaceIndexingEnabled = async (enabled: boolean) => {
  * about. Then return the next {@link count} files that still need to be
  * indexed.
  *
- * For more specifics of what a "sync" entails, see {@link syncWithLocalFiles}.
+ * For specifics of what a "sync" entails, see {@link syncAssumingLocalFileIDs}.
  *
  * @param userID Sync only files owned by a {@link userID} with the face DB.
  *
  * @param count Limit the resulting list of indexable files to {@link count}.
  */
-export const syncAndGetFilesToIndex = async (
+export const syncWithLocalFilesAndGetFilesToIndex = async (
     userID: number,
     count: number,
 ): Promise<EnteFile[]> => {
@@ -246,7 +249,14 @@ export const syncAndGetFilesToIndex = async (
         localFiles.filter(isIndexable).map((f) => [f.id, f]),
     );
 
-    await syncWithLocalFiles([...localFilesByID.keys()]);
+    const localFilesInTrashIDs = (await getLocalTrashedFiles()).map(
+        (f) => f.id,
+    );
+
+    await syncAssumingLocalFileIDs(
+        [...localFilesByID.keys()],
+        localFilesInTrashIDs,
+    );
 
     const fileIDsToIndex = await indexableFileIDs(count);
     return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
