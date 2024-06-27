@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { apiOrigin, customAPIOrigin, familyAppOrigin } from "@/next/origins";
+import { apiURL, customAPIOrigin, familyAppOrigin } from "@/next/origins";
 import { putAttributes } from "@ente/accounts/api/user";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -23,7 +23,7 @@ export const getPublicKey = async (email: string) => {
     const token = getToken();
 
     const resp = await HTTPService.get(
-        `${apiOrigin()}/users/public-key`,
+        await apiURL("/users/public-key"),
         { email },
         {
             "X-Auth-Token": token,
@@ -36,7 +36,7 @@ export const getPaymentToken = async () => {
     const token = getToken();
 
     const resp = await HTTPService.get(
-        `${apiOrigin()}/users/payment-token`,
+        await apiURL("/users/payment-token"),
         null,
         {
             "X-Auth-Token": token,
@@ -50,7 +50,7 @@ export const getFamiliesToken = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/families-token`,
+            await apiURL("/users/families-token"),
             null,
             {
                 "X-Auth-Token": token,
@@ -68,7 +68,7 @@ export const getRoadmapRedirectURL = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/roadmap/v2`,
+            await apiURL("/users/roadmap/v2"),
             null,
             {
                 "X-Auth-Token": token,
@@ -84,7 +84,7 @@ export const getRoadmapRedirectURL = async () => {
 export const isTokenValid = async (token: string) => {
     try {
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/session-validity/v2`,
+            await apiURL("/users/session-validity/v2"),
             null,
             {
                 "X-Auth-Token": token,
@@ -123,7 +123,7 @@ export const isTokenValid = async (token: string) => {
 
 export const getTwoFactorStatus = async () => {
     const resp = await HTTPService.get(
-        `${apiOrigin()}/users/two-factor/status`,
+        await apiURL("/users/two-factor/status"),
         null,
         {
             "X-Auth-Token": getToken(),
@@ -137,7 +137,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/details/v2`,
+            await apiURL("/users/details/v2"),
             null,
             {
                 "X-Auth-Token": token,
@@ -168,7 +168,7 @@ export const getAccountDeleteChallenge = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/delete-challenge`,
+            await apiURL("/users/delete-challenge"),
             null,
             {
                 "X-Auth-Token": token,
@@ -193,7 +193,7 @@ export const deleteAccount = async (
         }
 
         await HTTPService.delete(
-            `${apiOrigin()}/users/delete`,
+            await apiURL("/users/delete"),
             { challenge, reason, feedback },
             null,
             {
@@ -211,7 +211,7 @@ export const getFaceSearchEnabledStatus = async () => {
         const token = getToken();
         const resp: AxiosResponse<GetRemoteStoreValueResponse> =
             await HTTPService.get(
-                `${apiOrigin()}/remote-store`,
+                await apiURL("/remote-store"),
                 {
                     key: "faceSearchEnabled",
                     defaultValue: false,
@@ -231,7 +231,7 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
     try {
         const token = getToken();
         await HTTPService.post(
-            `${apiOrigin()}/remote-store/update`,
+            await apiURL("/remote-store/update"),
             {
                 key: "faceSearchEnabled",
                 value: newStatus.toString(),
@@ -262,7 +262,7 @@ export const getMapEnabledStatus = async () => {
         const token = getToken();
         const resp: AxiosResponse<GetRemoteStoreValueResponse> =
             await HTTPService.get(
-                `${apiOrigin()}/remote-store`,
+                await apiURL("/remote-store"),
                 {
                     key: "mapEnabled",
                     defaultValue: false,
@@ -282,7 +282,7 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
     try {
         const token = getToken();
         await HTTPService.post(
-            `${apiOrigin()}/remote-store/update`,
+            await apiURL("/remote-store/update"),
             {
                 key: "mapEnabled",
                 value: newStatus.toString(),
@@ -318,7 +318,7 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
     // In such cases, disable the Cloudflare upload proxy (which won't work for
     // self-hosters), and instead just directly use the upload URLs that museum
     // gives us.
-    if (customAPIOrigin()) return true;
+    if (await customAPIOrigin()) return true;
 
     try {
         const featureFlags = (

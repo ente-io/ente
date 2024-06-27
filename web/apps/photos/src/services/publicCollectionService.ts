@@ -1,6 +1,6 @@
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -252,7 +252,7 @@ const getPublicFiles = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${apiOrigin()}/public-collection/diff`,
+                await apiURL("/public-collection/diff"),
                 {
                     sinceTime: time,
                 },
@@ -307,7 +307,7 @@ export const getPublicCollection = async (
             return;
         }
         const resp = await HTTPService.get(
-            `${apiOrigin()}/public-collection/info`,
+            await apiURL("/public-collection/info"),
             null,
             { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
         );
@@ -357,7 +357,7 @@ export const verifyPublicCollectionPassword = async (
 ): Promise<string> => {
     try {
         const resp = await HTTPService.post(
-            `${apiOrigin()}/public-collection/verify-password`,
+            await apiURL("/public-collection/verify-password"),
             { passHash: passwordHash },
             null,
             { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
