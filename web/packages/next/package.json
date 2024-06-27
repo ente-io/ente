@@ -11,6 +11,7 @@
         "get-user-locale": "^2.3",
         "i18next": "^23.10",
         "i18next-resources-to-backend": "^1.2.0",
+        "idb-keyval": "^6",
         "is-electron": "^2.2",
         "next": "^14.1",
         "react": "^18",
