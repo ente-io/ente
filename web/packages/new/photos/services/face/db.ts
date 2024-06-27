@@ -170,7 +170,7 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const indexStore = tx.objectStore("face-index");
     const statusStore = tx.objectStore("file-status");
-    return Promise.all([
+    await Promise.all([
         indexStore.put(faceIndex),
         statusStore.put({
             fileID: faceIndex.fileID,
@@ -178,7 +178,7 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
             failureCount: 0,
         }),
         tx.done,
-    ]).then(() => {} /* convert result to void */);
+    ]);
 };
 
 /**
@@ -242,7 +242,7 @@ export const syncWithLocalFiles = async (localFileIDs: number[]) => {
     const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
     const removedFileIDs = fdbFileIDs.filter((id) => !local.has(id));
 
-    return Promise.all(
+    await Promise.all(
         [
             newFileIDs.map((id) =>
                 tx.objectStore("file-status").put({
@@ -257,7 +257,7 @@ export const syncWithLocalFiles = async (localFileIDs: number[]) => {
             removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
             tx.done,
         ].flat(),
-    ).then(() => {} /* convert result to void */);
+    );
 };
 
 /**
