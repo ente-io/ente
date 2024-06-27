@@ -87,7 +87,7 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  * This function should be called only after we have synced files with remote.
  * See: [Note: Ignoring embeddings for unknown files].
  */
-export const pullEmbeddings = async (
+const pullEmbeddings = async (
     model: EmbeddingModel,
     save: (decryptedEmbedding: string) => Promise<void>,
 ) => {
