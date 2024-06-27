@@ -72,18 +72,25 @@ const RemoteEmbedding = z.object({
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 
 /**
- * Fetch new or updated face embeddings from remote and save them locally.
+ * Fetch new or updated embeddings from remote and save them locally.
  *
- * It takes no parameters since it saves the last sync time in local storage.
+ * @param model The {@link EmbeddingModel} for which to pull embeddings. For
+ * each model, this function maintains the last sync time in local storage so
+ * subsequent fetches only pull what's new.
+ *
+ * @param save A function that is called to save the embedding. The save process
+ * can be model specific, so this provides us a hook to reuse the surrounding
+ * pull mechanisms while varying the save itself. This function will be passed
+ * the decrypted embedding string. If it throws, then we'll log about but
+ * otherwise ignore the embedding under consideration.
  *
  * This function should be called only after we have synced files with remote.
  * See: [Note: Ignoring embeddings for unknown files].
  */
-export const pullRemoteFaceEmbeddings = async () => {
-    const model: EmbeddingModel = "file-ml-clip-face";
-    const saveEmbedding = (jsonString: string) =>
-        saveFaceIndexIfNewer(FaceIndex.parse(JSON.parse(jsonString)));
-
+export const pullEmbeddings = async (
+    model: EmbeddingModel,
+    save: (decryptedEmbedding: string) => Promise<void>,
+) => {
     // Include files from trash, otherwise they'll get unnecessarily reindexed
     // if the user restores them from trash before permanent deletion.
     const localFiles = (await getAllLocalFiles()).concat(
@@ -119,6 +126,7 @@ export const pullRemoteFaceEmbeddings = async () => {
     /* eslint-disable no-constant-condition */
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
+        let c = 0;
         const remoteEmbeddings = await getEmbeddingsDiff(model, sinceTime);
         if (remoteEmbeddings.length == 0) break;
         for (const remoteEmbedding of remoteEmbeddings) {
@@ -126,17 +134,20 @@ export const pullRemoteFaceEmbeddings = async () => {
             try {
                 const file = localFilesByID.get(remoteEmbedding.fileID);
                 if (!file) continue;
-                const jsonString = await decryptFileMetadata(
-                    remoteEmbedding.encryptedEmbedding,
-                    remoteEmbedding.decryptionHeader,
-                    file.key,
+                await save(
+                    await decryptFileMetadata(
+                        remoteEmbedding.encryptedEmbedding,
+                        remoteEmbedding.decryptionHeader,
+                        file.key,
+                    ),
                 );
-                await saveEmbedding(jsonString);
+                c++;
             } catch (e) {
                 log.warn(`Ignoring unparseable ${model} embedding`, e);
             }
         }
         saveEmbeddingSyncTime(sinceTime, model);
+        log.info(`Fetched ${c} ${model} embeddings`);
     }
 };
 
@@ -155,6 +166,19 @@ const embeddingSyncTime = (model: EmbeddingModel) =>
 /** Sibling of {@link embeddingSyncTime}. */
 const saveEmbeddingSyncTime = (t: number, model: EmbeddingModel) =>
     localStorage.setItem("embeddingSyncTime:" + model, `${t}`);
+
+/**
+ * Fetch new or updated face embeddings from remote and save them locally.
+ *
+ * It takes no parameters since it saves the last sync time in local storage.
+ *
+ * This function should be called only after we have synced files with remote.
+ * See: [Note: Ignoring embeddings for unknown files].
+ */
+export const pullFaceEmbeddings = () =>
+    pullEmbeddings("file-ml-clip-face", (jsonString: string) =>
+        saveFaceIndexIfNewer(FaceIndex.parse(JSON.parse(jsonString))),
+    );
 
 /**
  * Save the given {@link faceIndex} locally if it is newer than the one we have.
