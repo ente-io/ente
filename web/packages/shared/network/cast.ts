@@ -11,7 +11,7 @@ class CastGateway {
         let resp;
         try {
             resp = await HTTPService.get(
-                await apiURL(`cast/cast-data/${code}`),
+                await apiURL(`/cast/cast-data/${code}`),
             );
         } catch (e) {
             log.error("failed to getCastData", e);
@@ -24,7 +24,7 @@ class CastGateway {
         try {
             const token = getToken();
             await HTTPService.delete(
-                await apiURL("cast/revoke-all-tokens"),
+                await apiURL("/cast/revoke-all-tokens"),
                 undefined,
                 undefined,
                 {
@@ -42,7 +42,7 @@ class CastGateway {
         try {
             const token = getToken();
             resp = await HTTPService.get(
-                await apiURL(`cast/device-info/${code}`),
+                await apiURL(`/cast/device-info/${code}`),
                 undefined,
                 {
                     "X-Auth-Token": token,
@@ -59,7 +59,7 @@ class CastGateway {
     }
 
     public async registerDevice(publicKey: string): Promise<string> {
-        const resp = await HTTPService.post(await apiURL("cast/device-info"), {
+        const resp = await HTTPService.post(await apiURL("/cast/device-info"), {
             publicKey: publicKey,
         });
         return resp.data.deviceCode;
@@ -73,7 +73,7 @@ class CastGateway {
     ) {
         const token = getToken();
         await HTTPService.post(
-            await apiURL("cast/cast-data"),
+            await apiURL("/cast/cast-data"),
             {
                 deviceCode: `${code}`,
                 encPayload: castPayload,

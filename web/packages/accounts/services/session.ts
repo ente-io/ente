@@ -62,7 +62,7 @@ type SessionValidity =
  * subsequently.
  */
 export const checkSessionValidity = async (): Promise<SessionValidity> => {
-    const url = await apiURL("users/session-validity/v2");
+    const url = await apiURL("/users/session-validity/v2");
     const res = await fetch(url, {
         headers: authenticatedRequestHeaders(),
     });

@@ -65,7 +65,7 @@ const fetchAndSaveFeatureFlags = () =>
         .then(saveFlagJSONString);
 
 const fetchFeatureFlags = async () => {
-    const url = await apiURL("remote-store/feature-flags");
+    const url = await apiURL("/remote-store/feature-flags");
     const res = await fetch(url, {
         headers: authenticatedRequestHeaders(),
     });

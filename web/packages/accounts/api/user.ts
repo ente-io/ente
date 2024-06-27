@@ -15,7 +15,7 @@ import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 
 export const sendOtt = async (appName: AppName, email: string) => {
-    return HTTPService.post(await apiURL("users/ott"), {
+    return HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: appName == "auth" ? "totp" : "web",
     });
@@ -27,7 +27,7 @@ export const verifyOtt = async (
     referral: string,
 ) => {
     const cleanedReferral = `web:${referral?.trim() || ""}`;
-    return HTTPService.post(await apiURL("users/verify-email"), {
+    return HTTPService.post(await apiURL("/users/verify-email"), {
         email,
         ott,
         source: cleanedReferral,
@@ -39,7 +39,7 @@ export const putAttributes = async (
     keyAttributes: KeyAttributes,
 ) =>
     HTTPService.put(
-        await apiURL("users/attributes"),
+        await apiURL("/users/attributes"),
         { keyAttributes },
         undefined,
         {
@@ -50,7 +50,7 @@ export const putAttributes = async (
 export const logout = async () => {
     try {
         const token = getToken();
-        await HTTPService.post(await apiURL("users/logout"), null, undefined, {
+        await HTTPService.post(await apiURL("/users/logout"), null, undefined, {
             "X-Auth-Token": token,
         });
     } catch (e) {

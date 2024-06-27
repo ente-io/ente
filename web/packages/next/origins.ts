@@ -17,12 +17,12 @@ export const apiOrigin = async () =>
  * This avoids us having to create a temporary variable or otherwise complicate
  * the call sites since async functions cannot be used inside template literals.
  *
- * @returns The equivalent of `${await apiOrigin()}/pathEtc`
+ * @param path The URL path usually, but can be anything that needs to be
+ * suffixed to the origin. It must begin with a "/".
+ *
+ * @returns path prefixed by {@link apiOrigin}.
  */
-export const apiURL = async (pathEtc: string) => {
-    const origin = await apiOrigin();
-    return `${origin}/${pathEtc}`;
-};
+export const apiURL = async (path: string) => (await apiOrigin()) + path;
 
 /**
  * Return the overridden API origin, if one is defined by either (in priority

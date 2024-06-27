@@ -58,7 +58,7 @@ const GetPasskeysResponse = z.object({
  * has no passkeys.
  */
 export const getPasskeys = async (token: string) => {
-    const url = await apiURL("passkeys");
+    const url = await apiURL("/passkeys");
     const res = await fetch(url, {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
@@ -82,7 +82,7 @@ export const renamePasskey = async (
     name: string,
 ) => {
     const params = new URLSearchParams({ friendlyName: name });
-    const url = await apiURL(`passkeys/${id}`);
+    const url = await apiURL(`/passkeys/${id}`);
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -98,7 +98,7 @@ export const renamePasskey = async (
  * @param id The `id` of the existing passkey to delete.
  */
 export const deletePasskey = async (token: string, id: string) => {
-    const url = await apiURL(`passkeys/${id}`);
+    const url = await apiURL(`/passkeys/${id}`);
     const res = await fetch(url, {
         method: "DELETE",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -149,7 +149,7 @@ interface BeginPasskeyRegistrationResponse {
 }
 
 const beginPasskeyRegistration = async (token: string) => {
-    const url = await apiURL("passkeys/registration/begin");
+    const url = await apiURL("/passkeys/registration/begin");
     const res = await fetch(url, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -293,7 +293,7 @@ const finishPasskeyRegistration = async ({
     const transports = attestationResponse.getTransports();
 
     const params = new URLSearchParams({ friendlyName, sessionID });
-    const url = await apiURL("passkeys/registration/finish");
+    const url = await apiURL("/passkeys/registration/finish");
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -414,7 +414,7 @@ export const passkeySessionAlreadyClaimedErrorMessage =
 export const beginPasskeyAuthentication = async (
     passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
-    const url = await apiURL("users/two-factor/passkeys/begin");
+    const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
         body: JSON.stringify({ sessionID: passkeySessionID }),
@@ -504,7 +504,7 @@ export const finishPasskeyAuthentication = async ({
         ceremonySessionID,
         clientPackage,
     });
-    const url = await apiURL("users/two-factor/passkeys/finish");
+    const url = await apiURL("/users/two-factor/passkeys/finish");
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: {

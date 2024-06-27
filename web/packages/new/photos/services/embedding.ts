@@ -166,7 +166,7 @@ const getEmbeddingsDiff = async (
         sinceTime: `${sinceTime}`,
         limit: `${diffLimit}`,
     });
-    const url = await apiURL("embeddings/diff");
+    const url = await apiURL("/embeddings/diff");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: authenticatedRequestHeaders(),
     });
