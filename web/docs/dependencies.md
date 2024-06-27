@@ -172,7 +172,9 @@ For more details, see [translations.md](translations.md).
     layer on top of Web Workers to make them more easier to use.
 
 -   [idb](https://github.com/jakearchibald/idb) provides a promise API over the
-    browser-native IndexedDB APIs.
+    browser-native IndexedDB APIs, and is used as our primary tabular database.
+    [idb-keyval](https://github.com/jakearchibald/idb-keyval) is its sibling
+    library that we use for ad-hoc key value storage.
 
     > For more details about IDB and its role, see [storage.md](storage.md).
 
