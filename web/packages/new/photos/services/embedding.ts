@@ -82,7 +82,7 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  * This function should be called only after we have synced files with remote.
  * See: [Note: Ignoring embeddings for unknown files].
  */
-export const syncRemoteFaceEmbeddings = async () => {
+export const pullRemoteFaceEmbeddings = async () => {
     // Include files from trash, otherwise they'll get unnecessarily reindexed
     // if the user restores them from trash before permanent deletion.
     const localFiles = (await getAllLocalFiles()).concat(
