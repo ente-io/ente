@@ -8,7 +8,7 @@ import {
 } from "@/new/photos/types/file";
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -70,7 +70,7 @@ export const getFiles = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${apiOrigin()}/collections/v2/diff`,
+                await apiURL("/collections/v2/diff"),
                 {
                     collectionID: collection.id,
                     sinceTime: time,
@@ -139,7 +139,7 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
                 })),
             };
             await HTTPService.post(
-                `${apiOrigin()}/files/trash`,
+                await apiURL("/files/trash"),
                 trashRequest,
                 null,
                 {
@@ -163,7 +163,7 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
 
         for (const batch of batchedFilesToDelete) {
             await HTTPService.post(
-                `${apiOrigin()}/trash/delete`,
+                await apiURL("/trash/delete"),
                 { fileIDs: batch },
                 null,
                 {
@@ -206,7 +206,7 @@ export const updateFileMagicMetadata = async (
         });
     }
     await HTTPService.put(
-        `${apiOrigin()}/files/magic-metadata`,
+        await apiURL("/files/magic-metadata"),
         reqBody,
         null,
         {
@@ -253,7 +253,7 @@ export const updateFilePublicMagicMetadata = async (
         });
     }
     await HTTPService.put(
-        `${apiOrigin()}/files/public-magic-metadata`,
+        await apiURL("/files/public-magic-metadata"),
         reqBody,
         null,
         {
