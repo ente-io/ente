@@ -1,6 +1,6 @@
 import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -89,7 +89,7 @@ export const updateTrash = async (
                 break;
             }
             resp = await HTTPService.get(
-                `${apiOrigin()}/trash/v2/diff`,
+                await apiURL("/trash/v2/diff"),
                 {
                     sinceTime: time,
                 },
@@ -158,7 +158,7 @@ export const emptyTrash = async () => {
         const lastUpdatedAt = await getLastSyncTime();
 
         await HTTPService.post(
-            `${apiOrigin()}/trash/empty`,
+            await apiURL("/trash/empty"),
             { lastUpdatedAt },
             null,
             {

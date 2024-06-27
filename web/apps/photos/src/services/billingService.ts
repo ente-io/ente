@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { apiOrigin, paymentsAppOrigin } from "@/next/origins";
+import { apiURL, paymentsAppOrigin } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     LS_KEYS,
@@ -33,11 +33,11 @@ class billingService {
             let response;
             if (!token) {
                 response = await HTTPService.get(
-                    `${apiOrigin()}/billing/plans/v2`,
+                    await apiURL("/billing/plans/v2"),
                 );
             } else {
                 response = await HTTPService.get(
-                    `${apiOrigin()}/billing/user-plans`,
+                    await apiURL("/billing/user-plans"),
                     null,
                     {
                         "X-Auth-Token": getToken(),
@@ -53,7 +53,7 @@ class billingService {
     public async syncSubscription() {
         try {
             const response = await HTTPService.get(
-                `${apiOrigin()}/billing/subscription`,
+                await apiURL("/billing/subscription"),
                 null,
                 {
                     "X-Auth-Token": getToken(),
@@ -97,7 +97,7 @@ class billingService {
     public async cancelSubscription() {
         try {
             const response = await HTTPService.post(
-                `${apiOrigin()}/billing/stripe/cancel-subscription`,
+                await apiURL("/billing/stripe/cancel-subscription"),
                 null,
                 null,
                 {
@@ -115,7 +115,7 @@ class billingService {
     public async activateSubscription() {
         try {
             const response = await HTTPService.post(
-                `${apiOrigin()}/billing/stripe/activate-subscription`,
+                await apiURL("/billing/stripe/activate-subscription"),
                 null,
                 null,
                 {
@@ -139,7 +139,7 @@ class billingService {
                 return;
             }
             const response = await HTTPService.post(
-                `${apiOrigin()}/billing/verify-subscription`,
+                await apiURL("/billing/verify-subscription"),
                 {
                     paymentProvider: "stripe",
                     productID: null,
@@ -165,7 +165,7 @@ class billingService {
         }
         try {
             await HTTPService.delete(
-                `${apiOrigin()}/family/leave`,
+                await apiURL("/family/leave"),
                 null,
                 null,
                 {
@@ -197,7 +197,7 @@ class billingService {
         try {
             const redirectURL = this.getRedirectURL();
             const response = await HTTPService.get(
-                `${apiOrigin()}/billing/stripe/customer-portal`,
+                await apiURL("/billing/stripe/customer-portal"),
                 { redirectURL },
                 {
                     "X-Auth-Token": getToken(),

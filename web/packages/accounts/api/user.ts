@@ -1,4 +1,4 @@
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import type {
     RecoveryKey,
@@ -14,25 +14,32 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 
-export const sendOtt = (appName: AppName, email: string) => {
-    return HTTPService.post(`${apiOrigin()}/users/ott`, {
+export const sendOtt = async (appName: AppName, email: string) => {
+    return HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: appName == "auth" ? "totp" : "web",
     });
 };
 
-export const verifyOtt = (email: string, ott: string, referral: string) => {
+export const verifyOtt = async (
+    email: string,
+    ott: string,
+    referral: string,
+) => {
     const cleanedReferral = `web:${referral?.trim() || ""}`;
-    return HTTPService.post(`${apiOrigin()}/users/verify-email`, {
+    return HTTPService.post(await apiURL("/users/verify-email"), {
         email,
         ott,
         source: cleanedReferral,
     });
 };
 
-export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
+export const putAttributes = async (
+    token: string,
+    keyAttributes: KeyAttributes,
+) =>
     HTTPService.put(
-        `${apiOrigin()}/users/attributes`,
+        await apiURL("/users/attributes"),
         { keyAttributes },
         undefined,
         {
@@ -43,7 +50,7 @@ export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
 export const logout = async () => {
     try {
         const token = getToken();
-        await HTTPService.post(`${apiOrigin()}/users/logout`, null, undefined, {
+        await HTTPService.post(await apiURL("/users/logout"), null, undefined, {
             "X-Auth-Token": token,
         });
     } catch (e) {
@@ -64,7 +71,7 @@ export const logout = async () => {
 
 export const verifyTwoFactor = async (code: string, sessionID: string) => {
     const resp = await HTTPService.post(
-        `${apiOrigin()}/users/two-factor/verify`,
+        await apiURL("/users/two-factor/verify"),
         {
             code,
             sessionID,
@@ -81,7 +88,7 @@ export const recoverTwoFactor = async (
     twoFactorType: TwoFactorType,
 ) => {
     const resp = await HTTPService.get(
-        `${apiOrigin()}/users/two-factor/recover`,
+        await apiURL("/users/two-factor/recover"),
         {
             sessionID,
             twoFactorType,
@@ -96,7 +103,7 @@ export const removeTwoFactor = async (
     twoFactorType: TwoFactorType,
 ) => {
     const resp = await HTTPService.post(
-        `${apiOrigin()}/users/two-factor/remove`,
+        await apiURL("/users/two-factor/remove"),
         {
             sessionID,
             secret,
@@ -108,7 +115,7 @@ export const removeTwoFactor = async (
 
 export const changeEmail = async (email: string, ott: string) => {
     await HTTPService.post(
-        `${apiOrigin()}/users/change-email`,
+        await apiURL("/users/change-email"),
         {
             email,
             ott,
@@ -121,7 +128,7 @@ export const changeEmail = async (email: string, ott: string) => {
 };
 
 export const sendOTTForEmailChange = async (email: string) => {
-    await HTTPService.post(`${apiOrigin()}/users/ott`, {
+    await HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: "web",
         purpose: "change",
@@ -130,7 +137,7 @@ export const sendOTTForEmailChange = async (email: string) => {
 
 export const setupTwoFactor = async () => {
     const resp = await HTTPService.post(
-        `${apiOrigin()}/users/two-factor/setup`,
+        await apiURL("/users/two-factor/setup"),
         null,
         undefined,
         {
@@ -145,7 +152,7 @@ export const enableTwoFactor = async (
     recoveryEncryptedTwoFactorSecret: B64EncryptionResult,
 ) => {
     await HTTPService.post(
-        `${apiOrigin()}/users/two-factor/enable`,
+        await apiURL("/users/two-factor/enable"),
         {
             code,
             encryptedTwoFactorSecret:
@@ -160,9 +167,9 @@ export const enableTwoFactor = async (
     );
 };
 
-export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
+export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
     HTTPService.put(
-        `${apiOrigin()}/users/recovery-key`,
+        await apiURL("/users/recovery-key"),
         recoveryKey,
         undefined,
         {
@@ -172,7 +179,7 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
 
 export const disableTwoFactor = async () => {
     await HTTPService.post(
-        `${apiOrigin()}/users/two-factor/disable`,
+        await apiURL("/users/two-factor/disable"),
         null,
         undefined,
         {

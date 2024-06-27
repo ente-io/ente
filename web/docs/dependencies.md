@@ -169,7 +169,7 @@ For more details, see [translations.md](translations.md).
 ## Infrastructure
 
 -   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
-    layer on top of Web Workers to make them more easier to use.
+    layer on top of web workers to make them more easier to use.
 
 -   [idb](https://github.com/jakearchibald/idb) provides a promise API over the
     browser-native IndexedDB APIs.

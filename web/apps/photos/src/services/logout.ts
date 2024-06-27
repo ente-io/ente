@@ -18,6 +18,9 @@ export const photosLogout = async () => {
     const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
+    // Terminate any workers before clearing persistent state.
+    // See: [Note: Caching IDB instances in separate execution contexts].
+
     await accountLogout();
 
     try {

@@ -1,6 +1,6 @@
 import { authenticatedRequestHeaders } from "@/next/http";
 import { ensureLocalUser } from "@/next/local-user";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import { ensure } from "@/utils/ensure";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
@@ -62,7 +62,7 @@ type SessionValidity =
  * subsequently.
  */
 export const checkSessionValidity = async (): Promise<SessionValidity> => {
-    const url = `${apiOrigin()}/users/session-validity/v2`;
+    const url = await apiURL("/users/session-validity/v2");
     const res = await fetch(url, {
         headers: authenticatedRequestHeaders(),
     });
