@@ -5,6 +5,7 @@ import log from "@/next/log";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { decryptFileMetadata } from "../../common/crypto/ente";
+import { saveFaceIndex } from "./face/db";
 import { getAllLocalFiles } from "./files";
 
 /**
@@ -88,45 +89,28 @@ export const pullRemoteFaceEmbeddings = async () => {
     const localFiles = (await getAllLocalFiles()).concat(
         await getLocalTrashedFiles(),
     );
+    // [Note: Ignoring embeddings for unknown files]
+    //
+    // We need the file to decrypt the embedding. This is easily ensured by
+    // running the embedding sync after we have synced our local files with
+    // remote.
+    //
+    // Still, it might happen that we come across an embedding for which we
+    // don't have the corresponding file locally. We can put them in two
+    // buckets:
+    //
+    // 1.  Known case: In rare cases we might get a diff entry for an embedding
+    //     corresponding to a file which has been deleted (but whose embedding
+    //     is enqueued for deletion). Client should expect such a scenario, but
+    //     all they have to do is just ignore such embeddings.
+    //
+    // 2.  Other unknown cases: Even if somehow we end up with an embedding for
+    //     a existent file which we don't have locally, it is fine because the
+    //     current client will just regenerate the embedding if the file really
+    //     exists and gets locally found later. There would be a bit of
+    //     duplicate work, but that's fine as long as there isn't a systematic
+    //     scenario where this happens.
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
-
-    const decryptEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
-        const file = localFilesByID.get(remoteEmbedding.fileID);
-        // [Note: Ignoring embeddings for unknown files]
-        //
-        // We need the file to decrypt the embedding. This is easily ensured by
-        // running the embedding sync after we have synced our local files with
-        // remote.
-        //
-        // Still, it might happen that we come across an embedding for which we
-        // don't have the corresponding file locally. We can put them in two
-        // buckets:
-        //
-        // 1.  Known case: In rare cases we might get a diff entry for an
-        //     embedding corresponding to a file which has been deleted (but
-        //     whose embedding is enqueued for deletion). Client should expect
-        //     such a scenario, but all they have to do is just ignore such
-        //     embeddings.
-        //
-        // 2.  Other unknown cases: Even if somehow we end up with an embedding
-        //     for a existent file which we don't have locally, it is fine
-        //     because the current client will just regenerate the embedding if
-        //     the file really exists and gets locally found later. There would
-        //     be a bit of duplicate work, but that's fine as long as there
-        //     isn't a systematic scenario where this happens.
-        if (!file) return undefined;
-        try {
-            const decryptedString = await decryptFileMetadata(
-                remoteEmbedding.encryptedEmbedding,
-                remoteEmbedding.decryptionHeader,
-                file.key,
-            );
-            return decryptedString;
-        } catch (e) {
-            log.warn("Ignoring unparseable embedding", e);
-            return undefined;
-        }
-    };
 
     let sinceTime = faceEmbeddingSyncTime();
 
@@ -141,30 +125,25 @@ export const pullRemoteFaceEmbeddings = async () => {
             sinceTime,
         );
         if (remoteEmbeddings.length == 0) break;
-        void (await Promise.all(remoteEmbeddings.map(decryptEmbedding)));
-        sinceTime = remoteEmbeddings.reduce(
-            (max, { updatedAt }) => Math.max(max, updatedAt),
-            sinceTime,
-        );
+        for (const remoteEmbedding of remoteEmbeddings) {
+            sinceTime = Math.max(sinceTime, remoteEmbedding.updatedAt);
+            try {
+                const file = localFilesByID.get(remoteEmbedding.fileID);
+                if (!file) continue;
+                const jsonString = await decryptFileMetadata(
+                    remoteEmbedding.encryptedEmbedding,
+                    remoteEmbedding.decryptionHeader,
+                    file.key,
+                );
+                const faceIndex = FaceIndex.parse(JSON.parse(jsonString));
+                await saveFaceIndex(faceIndex);
+            } catch (e) {
+                log.warn("Ignoring unparseable embedding", e);
+            }
+        }
         saveFaceEmbeddingSyncTime(sinceTime);
     }
 };
-
-// const decryptFaceEmbedding = async (remoteEmbedding: RemoteEmbedding) => {
-//                         const fileKey = fileIdToKeyMap.get(embedding.fileID);
-//                         if (!fileKey) {
-//                             throw Error(CustomError.FILE_NOT_FOUND);
-//                         }
-//                         const decryptedData = await worker.decryptMetadata(
-//                             embedding.encryptedEmbedding,
-//                             embedding.decryptionHeader,
-//                             fileIdToKeyMap.get(embedding.fileID),
-//                         );
-//                         return {
-//                             ...decryptedData,
-//                             updatedAt: embedding.updatedAt,
-//                         } as unknown as FileML;
-// };
 
 /**
  * The updatedAt of the most recent face {@link RemoteEmbedding} we've retrieved
