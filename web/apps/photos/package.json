@@ -22,7 +22,6 @@
         "fast-srp-hap": "^2.0.4",
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
         "hdbscan": "0.0.1-alpha.5",
-        "idb": "^8",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
         "localforage": "^1.9.0",

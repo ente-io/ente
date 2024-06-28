@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../App.css";
+import { apiOrigin } from "../services/support";
 interface UpdateSubscriptionProps {
     token: string;
     userId: string;
@@ -51,7 +52,7 @@ export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
             ? expiryTime.getTime() * 1000
             : "";
 
-        const url = `http://localhost:8080/admin/user/subscription`;
+        const url = `${apiOrigin}/admin/user/subscription`;
         const body = {
             userId,
             storage,

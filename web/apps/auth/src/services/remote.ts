@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -81,7 +81,7 @@ interface AuthKey {
 export const getAuthKey = async (): Promise<AuthKey> => {
     try {
         const resp = await HTTPService.get(
-            `${apiOrigin()}/authenticator/key`,
+            await apiURL("/authenticator/key"),
             {},
             {
                 "X-Auth-Token": getToken(),
@@ -108,7 +108,7 @@ export const getDiff = async (
 ): Promise<AuthEntity[]> => {
     try {
         const resp = await HTTPService.get(
-            `${apiOrigin()}/authenticator/entity/diff`,
+            await apiURL("/authenticator/entity/diff"),
             {
                 sinceTime,
                 limit,

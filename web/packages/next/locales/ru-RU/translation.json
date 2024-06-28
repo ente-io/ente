@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Время сессии истекло",
     "PASSWORD_GENERATION_FAILED": "Вашему браузеру не удалось сгенерировать надежный ключ, соответствующий стандартам шифрования ente, пожалуйста, попробуйте использовать мобильное приложение или другой браузер",
     "CHANGE_PASSWORD": "Изменить пароль",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Вернуться назад",
     "RECOVERY_KEY": "Ключ восстановления",
     "SAVE_LATER": "Сделать позже",

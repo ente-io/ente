@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Session expired",
     "PASSWORD_GENERATION_FAILED": "Your browser was unable to generate a strong key that meets Ente's encryption standards, please try using the mobile app or another browser",
     "CHANGE_PASSWORD": "Change password",
+    "password_changed_elsewhere": "Password changed elsewhere",
+    "password_changed_elsewhere_message": "Please login again on this device to use your new password to authenticate.",
     "GO_BACK": "Go back",
     "RECOVERY_KEY": "Recovery key",
     "SAVE_LATER": "Do this later",

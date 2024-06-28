@@ -1,5 +1,5 @@
 import { authenticatedRequestHeaders } from "@/next/http";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import { nullToUndefined } from "@/utils/transform";
 // import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { z } from "zod";
@@ -166,7 +166,7 @@ const getEmbeddingsDiff = async (
         sinceTime: `${sinceTime}`,
         limit: `${diffLimit}`,
     });
-    const url = `${apiOrigin()}/embeddings/diff`;
+    const url = await apiURL("/embeddings/diff");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: authenticatedRequestHeaders(),
     });

@@ -3,7 +3,7 @@ import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { inWorker } from "@/next/env";
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
@@ -285,7 +285,7 @@ export const getEmbeddingsDiff = async (
             return;
         }
         const response = await HTTPService.get(
-            `${apiOrigin()}/embeddings/diff`,
+            await apiURL("/embeddings/diff"),
             {
                 sinceTime,
                 limit: DIFF_LIMIT,
@@ -314,7 +314,7 @@ export const putEmbedding = async (
             throw Error(CustomError.TOKEN_MISSING);
         }
         const resp = await HTTPService.put(
-            `${apiOrigin()}/embeddings`,
+            await apiURL("/embeddings"),
             putEmbeddingReq,
             null,
             {

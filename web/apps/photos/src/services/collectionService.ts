@@ -7,7 +7,7 @@ import {
     VISIBILITY_STATE,
 } from "@/new/photos/types/magicMetadata";
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -181,7 +181,7 @@ const getCollections = async (
 ): Promise<Collection[]> => {
     try {
         const resp = await HTTPService.get(
-            `${apiOrigin()}/collections/v2`,
+            await apiURL("/collections/v2"),
             {
                 sinceTime,
             },
@@ -328,7 +328,7 @@ export const getCollection = async (
             return;
         }
         const resp = await HTTPService.get(
-            `${apiOrigin()}/collections/${collectionID}`,
+            await apiURL(`/collections/${collectionID}`),
             null,
             { "X-Auth-Token": token },
         );
@@ -472,7 +472,7 @@ const postCollection = async (
 ): Promise<EncryptedCollection> => {
     try {
         const response = await HTTPService.post(
-            `${apiOrigin()}/collections`,
+            await apiURL("/collections"),
             collectionData,
             null,
             { "X-Auth-Token": token },
@@ -527,7 +527,7 @@ export const addToCollection = async (
                 files: fileKeysEncryptedWithNewCollection,
             };
             await HTTPService.post(
-                `${apiOrigin()}/collections/add-files`,
+                await apiURL("/collections/add-files"),
                 requestBody,
                 null,
                 {
@@ -557,7 +557,7 @@ export const restoreToCollection = async (
                 files: fileKeysEncryptedWithNewCollection,
             };
             await HTTPService.post(
-                `${apiOrigin()}/collections/restore-files`,
+                await apiURL("/collections/restore-files"),
                 requestBody,
                 null,
                 {
@@ -588,7 +588,7 @@ export const moveToCollection = async (
                 files: fileKeysEncryptedWithNewCollection,
             };
             await HTTPService.post(
-                `${apiOrigin()}/collections/move-files`,
+                await apiURL("/collections/move-files"),
                 requestBody,
                 null,
                 {
@@ -734,7 +734,7 @@ export const removeNonUserFiles = async (
             };
 
             await HTTPService.post(
-                `${apiOrigin()}/collections/v3/remove-files`,
+                await apiURL("/collections/v3/remove-files"),
                 request,
                 null,
                 { "X-Auth-Token": token },
@@ -761,7 +761,7 @@ export const deleteCollection = async (
         const token = getToken();
 
         await HTTPService.delete(
-            `${apiOrigin()}/collections/v3/${collectionID}`,
+            await apiURL(`/collections/v3/${collectionID}`),
             null,
             { collectionID, keepFiles },
             { "X-Auth-Token": token },
@@ -777,7 +777,7 @@ export const leaveSharedAlbum = async (collectionID: number) => {
         const token = getToken();
 
         await HTTPService.post(
-            `${apiOrigin()}/collections/leave/${collectionID}`,
+            await apiURL(`/collections/leave/${collectionID}`),
             null,
             null,
             { "X-Auth-Token": token },
@@ -815,7 +815,7 @@ export const updateCollectionMagicMetadata = async (
     };
 
     await HTTPService.put(
-        `${apiOrigin()}/collections/magic-metadata`,
+        await apiURL("/collections/magic-metadata"),
         reqBody,
         null,
         {
@@ -859,7 +859,7 @@ export const updateSharedCollectionMagicMetadata = async (
     };
 
     await HTTPService.put(
-        `${apiOrigin()}/collections/sharee-magic-metadata`,
+        await apiURL("/collections/sharee-magic-metadata"),
         reqBody,
         null,
         {
@@ -903,7 +903,7 @@ export const updatePublicCollectionMagicMetadata = async (
     };
 
     await HTTPService.put(
-        `${apiOrigin()}/collections/public-magic-metadata`,
+        await apiURL("/collections/public-magic-metadata"),
         reqBody,
         null,
         {
@@ -938,7 +938,7 @@ export const renameCollection = async (
         nameDecryptionNonce,
     };
     await HTTPService.post(
-        `${apiOrigin()}/collections/rename`,
+        await apiURL("/collections/rename"),
         collectionRenameRequest,
         null,
         {
@@ -967,7 +967,7 @@ export const shareCollection = async (
             encryptedKey,
         };
         await HTTPService.post(
-            `${apiOrigin()}/collections/share`,
+            await apiURL("/collections/share"),
             shareCollectionRequest,
             null,
             {
@@ -991,7 +991,7 @@ export const unshareCollection = async (
             email: withUserEmail,
         };
         await HTTPService.post(
-            `${apiOrigin()}/collections/unshare`,
+            await apiURL("/collections/unshare"),
             shareCollectionRequest,
             null,
             {
@@ -1013,7 +1013,7 @@ export const createShareableURL = async (collection: Collection) => {
             collectionID: collection.id,
         };
         const resp = await HTTPService.post(
-            `${apiOrigin()}/collections/share-url`,
+            await apiURL("/collections/share-url"),
             createPublicAccessTokenRequest,
             null,
             {
@@ -1034,7 +1034,7 @@ export const deleteShareableURL = async (collection: Collection) => {
             return null;
         }
         await HTTPService.delete(
-            `${apiOrigin()}/collections/share-url/${collection.id}`,
+            await apiURL(`/collections/share-url/${collection.id}`),
             null,
             null,
             {
@@ -1056,7 +1056,7 @@ export const updateShareableURL = async (
             return null;
         }
         const res = await HTTPService.put(
-            `${apiOrigin()}/collections/share-url`,
+            await apiURL("/collections/share-url"),
             request,
             null,
             {

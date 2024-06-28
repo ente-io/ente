@@ -1,3 +1,4 @@
+import { getKV, removeKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -14,7 +15,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideTransition } from "./SlideTransition";
@@ -38,9 +39,61 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         if (reason != "backdropClick") onClose();
     };
 
+    return (
+        <Dialog
+            {...{ open, fullScreen }}
+            onClose={handleDialogClose}
+            TransitionComponent={SlideTransition}
+            maxWidth="xs"
+        >
+            <Contents {...{ onClose }} />
+        </Dialog>
+    );
+};
+
+type ContentsProps = Pick<DevSettingsProps, "onClose">;
+
+const Contents: React.FC<ContentsProps> = (props) => {
+    // We need two nested components.
+    //
+    // -   The initialAPIOrigin cannot be in our parent (the top level
+    //     DevSettings) otherwise it gets preserved across dialog reopens
+    //     instead of being read from storage on opening the dialog.
+    //
+    // -   The initialAPIOrigin cannot be in our child (Form) because Formik
+    //     doesn't have supported for async initial values.
+    const [initialAPIOrigin, setInitialAPIOrigin] = useState<
+        string | undefined
+    >();
+
+    useEffect(
+        () =>
+            void getKV("apiOrigin").then((o) =>
+                setInitialAPIOrigin(
+                    // TODO: Migration of apiOrigin from local storage to indexed DB
+                    // Remove me after a bit (27 June 2024).
+                    o ?? localStorage.getItem("apiOrigin") ?? "",
+                ),
+            ),
+        [],
+    );
+
+    // Even though this is async, this should be instantanous, we're just
+    // reading the value from the local IndexedDB.
+    if (initialAPIOrigin === undefined) return <></>;
+
+    return <Form {...{ initialAPIOrigin }} {...props} />;
+};
+
+type FormProps = ContentsProps & {
+    /** The initial value of API origin to prefill in the text input field. */
+    initialAPIOrigin: string;
+};
+
+const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
     const form = useFormik({
         initialValues: {
-            apiOrigin: localStorage.getItem("apiOrigin") ?? "",
+            apiOrigin: initialAPIOrigin,
         },
         validate: ({ apiOrigin }) => {
             try {
@@ -77,79 +130,72 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         !!form.errors.apiOrigin;
 
     return (
-        <Dialog
-            {...{ open, fullScreen }}
-            onClose={handleDialogClose}
-            TransitionComponent={SlideTransition}
-            maxWidth="xs"
-        >
-            <form onSubmit={form.handleSubmit}>
-                <DialogTitle>{t("developer_settings")}</DialogTitle>
-                <DialogContent
-                    sx={{
-                        "&&": {
-                            paddingBlock: "8px",
-                        },
-                    }}
-                >
-                    <TextField
-                        fullWidth
-                        autoFocus
-                        id="apiOrigin"
-                        name="apiOrigin"
-                        label={t("server_endpoint")}
-                        placeholder="http://localhost:8080"
-                        value={form.values.apiOrigin}
-                        onChange={form.handleChange}
-                        onBlur={form.handleBlur}
-                        error={hasError}
-                        helperText={
-                            hasError
-                                ? form.errors.apiOrigin
-                                : " " /* always show an empty string to prevent a layout shift */
-                        }
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Link
-                                        href="https://help.ente.io/self-hosting/guides/custom-server/"
-                                        target="_blank"
-                                        rel="noopener"
+        <form onSubmit={form.handleSubmit}>
+            <DialogTitle>{t("developer_settings")}</DialogTitle>
+            <DialogContent
+                sx={{
+                    "&&": {
+                        paddingBlock: "8px",
+                    },
+                }}
+            >
+                <TextField
+                    fullWidth
+                    autoFocus
+                    id="apiOrigin"
+                    name="apiOrigin"
+                    label={t("server_endpoint")}
+                    placeholder="http://localhost:8080"
+                    value={form.values.apiOrigin}
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    error={hasError}
+                    helperText={
+                        hasError
+                            ? form.errors.apiOrigin
+                            : " " /* always show an empty string to prevent a layout shift */
+                    }
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <Link
+                                    href="https://help.ente.io/self-hosting/guides/custom-server/"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    <IconButton
+                                        aria-label={t("more_information")}
+                                        color="secondary"
+                                        edge="end"
                                     >
-                                        <IconButton
-                                            aria-label={t("more_information")}
-                                            color="secondary"
-                                            edge="end"
-                                        >
-                                            <InfoOutlinedIcon />
-                                        </IconButton>
-                                    </Link>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <FocusVisibleButton
-                        type="submit"
-                        color="accent"
-                        fullWidth
-                        disabled={form.isSubmitting}
-                        disableRipple
-                    >
-                        {t("save")}
-                    </FocusVisibleButton>
-                    <FocusVisibleButton
-                        onClick={onClose}
-                        color="secondary"
-                        fullWidth
-                        disableRipple
-                    >
-                        {t("CANCEL")}
-                    </FocusVisibleButton>
-                </DialogActions>
-            </form>
-        </Dialog>
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
+                                </Link>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </DialogContent>
+            <DialogActions>
+                <FocusVisibleButton
+                    type="submit"
+                    color="accent"
+                    fullWidth
+                    disabled={form.isSubmitting}
+                    disableRipple
+                >
+                    {t("save")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    onClick={onClose}
+                    color="secondary"
+                    fullWidth
+                    disableRipple
+                >
+                    {t("CANCEL")}
+                </FocusVisibleButton>
+            </DialogActions>
+        </form>
     );
 };
 
@@ -167,6 +213,9 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
  */
 const updateAPIOrigin = async (origin: string) => {
     if (!origin) {
+        await removeKV("apiOrigin");
+        // TODO: Migration of apiOrigin from local storage to indexed DB
+        // Remove me after a bit (27 June 2024).
         localStorage.removeItem("apiOrigin");
         return;
     }
@@ -181,7 +230,7 @@ const updateAPIOrigin = async (origin: string) => {
         throw new Error("Invalid response");
     }
 
-    localStorage.setItem("apiOrigin", origin);
+    await setKV("apiOrigin", origin);
 };
 
 const PingResponse = z.object({

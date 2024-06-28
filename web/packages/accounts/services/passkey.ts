@@ -1,6 +1,6 @@
 import { clientPackageHeaderIfPresent } from "@/next/http";
 import log from "@/next/log";
-import { accountsAppOrigin, apiOrigin } from "@/next/origins";
+import { accountsAppOrigin, apiURL } from "@/next/origins";
 import type { AppName } from "@/next/types/app";
 import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
@@ -139,7 +139,7 @@ export const isPasskeyRecoveryEnabled = async () => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/two-factor/recovery-status`,
+            await apiURL("/users/two-factor/recovery-status"),
             {},
             {
                 "X-Auth-Token": token,
@@ -166,7 +166,7 @@ const configurePasskeyRecovery = async (
         const token = getToken();
 
         const resp = await HTTPService.post(
-            `${apiOrigin()}/users/two-factor/passkeys/configure-recovery`,
+            await apiURL("/users/two-factor/passkeys/configure-recovery"),
             {
                 secret,
                 userSecretCipher,
@@ -196,7 +196,7 @@ const getAccountsToken = async () => {
     const token = getToken();
 
     const resp = await HTTPService.get(
-        `${apiOrigin()}/users/accounts-token`,
+        await apiURL("/users/accounts-token"),
         undefined,
         {
             "X-Auth-Token": token,
@@ -234,7 +234,7 @@ export const passkeySessionExpiredErrorMessage = "Passkey session has expired";
 export const checkPasskeyVerificationStatus = async (
     sessionID: string,
 ): Promise<TwoFactorAuthorizationResponse | undefined> => {
-    const url = `${apiOrigin()}/users/two-factor/passkeys/get-token`;
+    const url = await apiURL("/users/two-factor/passkeys/get-token");
     const params = new URLSearchParams({ sessionID });
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: clientPackageHeaderIfPresent(),

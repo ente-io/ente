@@ -19,10 +19,11 @@ export class PhotosDownloadClient implements DownloadClient {
         const token = this.token;
         if (!token) throw Error(CustomError.TOKEN_MISSING);
 
+        const customOrigin = await customAPIOrigin();
+
         // See: [Note: Passing credentials for self-hosted file fetches]
         const getThumbnail = () => {
             const opts = { responseType: "arraybuffer", timeout: this.timeout };
-            const customOrigin = customAPIOrigin();
             if (customOrigin) {
                 const params = new URLSearchParams({ token });
                 return HTTPService.get(
@@ -53,6 +54,8 @@ export class PhotosDownloadClient implements DownloadClient {
         const token = this.token;
         if (!token) throw Error(CustomError.TOKEN_MISSING);
 
+        const customOrigin = await customAPIOrigin();
+
         // See: [Note: Passing credentials for self-hosted file fetches]
         const getFile = () => {
             const opts = {
@@ -61,7 +64,6 @@ export class PhotosDownloadClient implements DownloadClient {
                 onDownloadProgress,
             };
 
-            const customOrigin = customAPIOrigin();
             if (customOrigin) {
                 const params = new URLSearchParams({ token });
                 return HTTPService.get(
@@ -88,6 +90,8 @@ export class PhotosDownloadClient implements DownloadClient {
     async downloadFileStream(file: EnteFile): Promise<Response> {
         const token = this.token;
         if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+        const customOrigin = await customAPIOrigin();
 
         // [Note: Passing credentials for self-hosted file fetches]
         //
@@ -126,7 +130,6 @@ export class PhotosDownloadClient implements DownloadClient {
         //    signed URL and stream back the response.
 
         const getFile = () => {
-            const customOrigin = customAPIOrigin();
             if (customOrigin) {
                 const params = new URLSearchParams({ token });
                 return fetch(

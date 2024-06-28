@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "",
     "PASSWORD_GENERATION_FAILED": "Browser kamu tidak dapat menghasilkan kunci yang kuat, yang memenuhi standar enkripsi Ente. Silakan coba menggunakan app seluler atau browser lain",
     "CHANGE_PASSWORD": "Ubah sandi",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Kembali",
     "RECOVERY_KEY": "Kunci pemulihan",
     "SAVE_LATER": "Lakukan lain kali",

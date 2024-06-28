@@ -17,7 +17,7 @@ import type {
 } from "@/new/photos/types/file";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
-import { apiOrigin, customAPIOrigin } from "@/next/origins";
+import { apiURL, customAPIOrigin } from "@/next/origins";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -164,7 +164,7 @@ const getEncryptedCollectionFiles = async (
     let resp: AxiosResponse;
     do {
         resp = await HTTPService.get(
-            `${apiOrigin()}/cast/diff`,
+            await apiURL("/cast/diff"),
             { sinceTime },
             {
                 "Cache-Control": "no-cache",
@@ -317,8 +317,9 @@ const downloadFile = async (
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
+    const customOrigin = await customAPIOrigin();
+
     const getFile = () => {
-        const customOrigin = customAPIOrigin();
         if (customOrigin) {
             // See: [Note: Passing credentials for self-hosted file fetches]
             const params = new URLSearchParams({ castToken });

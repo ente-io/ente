@@ -10,7 +10,7 @@ import EnteButton from "@ente/shared/components/EnteButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { VerticallyCentered } from "./Container";
 import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
 import { genericErrorAttributes } from "./ErrorComponents";
@@ -48,7 +48,9 @@ const Header_ = styled("div")`
 export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
     children,
 }) => {
-    const host = customAPIHost();
+    const [host, setHost] = useState<string | undefined>();
+
+    useEffect(() => void customAPIHost().then(setHost), []);
 
     return (
         <FormPaperFooter>

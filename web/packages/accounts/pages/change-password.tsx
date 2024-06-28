@@ -1,5 +1,9 @@
 import { ensure } from "@/utils/ensure";
-import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
+import {
+    getSRPAttributes,
+    startSRPSetup,
+    updateSRPAndKeys,
+} from "@ente/accounts/api/srp";
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@ente/accounts/components/SetPasswordForm";
@@ -111,6 +115,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             updatedKeyAttr: updatedKey,
         });
 
+        // Update the SRP attributes that are stored locally.
+        if (user?.email) {
+            const srpAttributes = await getSRPAttributes(user.email);
+            if (srpAttributes) {
+                setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+            }
+        }
+
         const updatedKeyAttributes = Object.assign(keyAttributes, updatedKey);
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
@@ -119,6 +131,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
 
         await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+
         redirectToAppHome();
     };
 

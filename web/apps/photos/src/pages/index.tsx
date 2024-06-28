@@ -22,7 +22,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { useAppContext } from "./_app";
 
@@ -31,14 +31,17 @@ export default function LandingPage() {
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    // This is kept as state because it can change as a result of user action
-    // while we're on this page (there currently isn't an event listener we can
-    // attach to for observing changes to local storage by the same window).
-    const [host, setHost] = useState(customAPIHost());
+    const [host, setHost] = useState<string | undefined>();
 
     const router = useRouter();
 
+    const refreshHost = useCallback(
+        () => void customAPIHost().then(setHost),
+        [],
+    );
+
     useEffect(() => {
+        refreshHost();
         showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(albumsAppOrigin());
@@ -51,9 +54,7 @@ export default function LandingPage() {
         } else {
             handleNormalRedirect();
         }
-    }, []);
-
-    const handleMaybeChangeHost = () => setHost(customAPIHost());
+    }, [refreshHost]);
 
     const handleAlbumsRedirect = async (currentURL: URL) => {
         const end = currentURL.hash.lastIndexOf("&");
@@ -117,7 +118,7 @@ export default function LandingPage() {
     const redirectToLoginPage = () => router.push(PAGES.LOGIN);
 
     return (
-        <TappableContainer onMaybeChangeHost={handleMaybeChangeHost}>
+        <TappableContainer onMaybeChangeHost={refreshHost}>
             {loading ? (
                 <EnteSpinner />
             ) : (

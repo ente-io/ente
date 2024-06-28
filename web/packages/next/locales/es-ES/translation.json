@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Sesión caducado",
     "PASSWORD_GENERATION_FAILED": "Su navegador no ha podido generar una clave fuerte que cumpla con los estándares de cifrado de la entidad, por favor intente usar la aplicación móvil u otro navegador",
     "CHANGE_PASSWORD": "Cambiar contraseña",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Retroceder",
     "RECOVERY_KEY": "Clave de recuperación",
     "SAVE_LATER": "Hacer más tarde",

@@ -107,6 +107,8 @@
     "SESSION_EXPIRED": "Sessione scaduta",
     "PASSWORD_GENERATION_FAILED": "Il tuo browser non è stato in grado di generare una chiave forte che soddisfa gli standard di crittografia Ente, prova ad usare l'app per dispositivi mobili o un altro browser",
     "CHANGE_PASSWORD": "Cambia password",
+    "password_changed_elsewhere": "",
+    "password_changed_elsewhere_message": "",
     "GO_BACK": "Torna indietro",
     "RECOVERY_KEY": "Chiave di recupero",
     "SAVE_LATER": "Fallo più tardi",

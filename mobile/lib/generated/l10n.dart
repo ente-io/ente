@@ -8953,6 +8953,27 @@ class S {
       args: [],
     );
   }
+
+  /// `Use as cover`
+  String get useAsCover {
+    return Intl.message(
+      'Use as cover',
+      name: 'useAsCover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not {name}?`
+  String notPersonLabel(String name) {
+    return Intl.message(
+      'Not $name?',
+      name: 'notPersonLabel',
+      desc:
+          'Label to indicate that the person in the photo is not the person whose name is mentioned',
+      args: [name],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

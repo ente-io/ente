@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
@@ -58,7 +58,7 @@ const getEntityKey = async (type: EntityType) => {
             return;
         }
         const resp = await HTTPService.get(
-            `${apiOrigin()}/user-entity/key`,
+            await apiURL("/user-entity/key"),
             {
                 type,
             },
@@ -173,7 +173,7 @@ const getEntityDiff = async (
             return;
         }
         const resp = await HTTPService.get(
-            `${apiOrigin()}/user-entity/entity/diff`,
+            await apiURL("/user-entity/entity/diff"),
             {
                 sinceTime: time,
                 type,

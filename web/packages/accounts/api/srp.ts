@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { apiOrigin } from "@/next/origins";
+import { apiURL } from "@/next/origins";
 import type {
     CompleteSRPSetupRequest,
     CompleteSRPSetupResponse,
@@ -21,7 +21,7 @@ export const getSRPAttributes = async (
 ): Promise<SRPAttributes | null> => {
     try {
         const resp = await HTTPService.get(
-            `${apiOrigin()}/users/srp/attributes`,
+            await apiURL("/users/srp/attributes"),
             {
                 email,
             },
@@ -39,7 +39,7 @@ export const startSRPSetup = async (
 ): Promise<SetupSRPResponse> => {
     try {
         const resp = await HTTPService.post(
-            `${apiOrigin()}/users/srp/setup`,
+            await apiURL("/users/srp/setup"),
             setupSRPRequest,
             undefined,
             {
@@ -60,7 +60,7 @@ export const completeSRPSetup = async (
 ) => {
     try {
         const resp = await HTTPService.post(
-            `${apiOrigin()}/users/srp/complete`,
+            await apiURL("/users/srp/complete"),
             completeSRPSetupRequest,
             undefined,
             {
@@ -77,7 +77,7 @@ export const completeSRPSetup = async (
 export const createSRPSession = async (srpUserID: string, srpA: string) => {
     try {
         const resp = await HTTPService.post(
-            `${apiOrigin()}/users/srp/create-session`,
+            await apiURL("/users/srp/create-session"),
             {
                 srpUserID,
                 srpA,
@@ -97,7 +97,7 @@ export const verifySRPSession = async (
 ) => {
     try {
         const resp = await HTTPService.post(
-            `${apiOrigin()}/users/srp/verify-session`,
+            await apiURL("/users/srp/verify-session"),
             {
                 sessionID,
                 srpUserID,
@@ -125,7 +125,7 @@ export const updateSRPAndKeys = async (
 ): Promise<UpdateSRPAndKeysResponse> => {
     try {
         const resp = await HTTPService.post(
-            `${apiOrigin()}/users/srp/update`,
+            await apiURL("/users/srp/update"),
             updateSRPAndKeyRequest,
             undefined,
             {

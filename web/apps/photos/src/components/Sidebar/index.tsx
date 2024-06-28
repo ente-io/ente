@@ -679,14 +679,14 @@ const ExitSection: React.FC = () => {
 const DebugSection: React.FC = () => {
     const appContext = useContext(AppContext);
     const [appVersion, setAppVersion] = useState<string | undefined>();
+    const [host, setHost] = useState<string | undefined>();
 
     const electron = globalThis.electron;
 
     useEffect(() => {
-        electron?.appVersion().then((v) => setAppVersion(v));
+        void electron?.appVersion().then(setAppVersion);
+        void customAPIHost().then(setHost);
     });
-
-    const host = customAPIHost();
 
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
