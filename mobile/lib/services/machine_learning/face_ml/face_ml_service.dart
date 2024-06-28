@@ -9,7 +9,6 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
-import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -42,14 +41,11 @@ import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import "package:photos/services/search_service.dart";
-import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
+import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
-import "package:photos/utils/thumbnail_util.dart";
 import "package:synchronized/synchronized.dart";
-
-enum FileDataForML { thumbnailData, fileData }
 
 enum FaceMlOperation { analyzeImage }
 
@@ -836,15 +832,8 @@ class FaceMlService {
   Future<FaceMlResult?> _analyzeImageInSingleIsolate(EnteFile enteFile) async {
     _checkEnteFileForID(enteFile);
 
-    final String? filePath =
-        await _getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
-
-    if (filePath == null) {
-      _logger.warning(
-        "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null",
-      );
-      throw CouldNotRetrieveAnyFileData();
-    }
+    final String filePath =
+        await getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
 
     final Stopwatch stopwatch = Stopwatch()..start();
     late FaceMlResult result;
@@ -973,71 +962,6 @@ class FaceMlService {
       dev.log("Could not analyze image: \n e: $e \n s: $s");
       rethrow;
     }
-  }
-
-  Future<String?> _getImagePathForML(
-    EnteFile enteFile, {
-    FileDataForML typeOfData = FileDataForML.fileData,
-  }) async {
-    String? imagePath;
-
-    switch (typeOfData) {
-      case FileDataForML.fileData:
-        final stopwatch = Stopwatch()..start();
-        File? file;
-        if (enteFile.fileType == FileType.video) {
-          try {
-            file = await getThumbnailForUploadedFile(enteFile);
-          } on PlatformException catch (e, s) {
-            _logger.severe(
-              "Could not get thumbnail for $enteFile due to PlatformException",
-              e,
-              s,
-            );
-            throw ThumbnailRetrievalException(e.toString(), s);
-          }
-        } else {
-          try {
-            file = await getFile(enteFile, isOrigin: true);
-          } catch (e, s) {
-            _logger.severe(
-              "Could not get file for $enteFile",
-              e,
-              s,
-            );
-          }
-        }
-        if (file == null) {
-          _logger.warning(
-            "Could not get file for $enteFile of type ${enteFile.fileType.toString()}",
-          );
-          imagePath = null;
-          break;
-        }
-        imagePath = file.path;
-        stopwatch.stop();
-        _logger.info(
-          "Getting file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-        break;
-
-      case FileDataForML.thumbnailData:
-        final stopwatch = Stopwatch()..start();
-        final File? thumbnail = await getThumbnailForUploadedFile(enteFile);
-        if (thumbnail == null) {
-          _logger.warning("Could not get thumbnail for $enteFile");
-          imagePath = null;
-          break;
-        }
-        imagePath = thumbnail.path;
-        stopwatch.stop();
-        _logger.info(
-          "Getting thumbnail data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
-        );
-        break;
-    }
-
-    return imagePath;
   }
 
   /// Detects faces in the given image data.
