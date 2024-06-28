@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:developer" show log;
-import "dart:math" show min;
+import "dart:math" show max, min;
 import "dart:typed_data" show Float32List, Uint8List, ByteData;
 import "dart:ui";
 
@@ -203,28 +203,25 @@ Future<Float32List> preprocessImageClip(
   const mean = [0.48145466, 0.4578275, 0.40821073];
   const std = [0.26862954, 0.26130258, 0.27577711];
 
-  final scale = min(requiredWidth / image.width, requiredHeight / image.height);
-  final scaledWidth = (image.width * scale).round().clamp(0, requiredWidth);
-  final scaledHeight = (image.height * scale).round().clamp(0, requiredHeight);
+  final scale = max(requiredWidth / image.width, requiredHeight / image.height);
+  final scaledWidth = (image.width * scale).round();
+  final scaledHeight = (image.height * scale).round();
+  final widthOffset = max(0, scaledWidth - requiredWidth) / 2;
+  final heightOffset = max(0, scaledHeight - requiredHeight) / 2;
 
   final processedBytes = Float32List(requiredSize);
   final buffer = Float32List.view(processedBytes.buffer);
   int pixelIndex = 0;
   const int greenOff = requiredHeight * requiredWidth;
   const int blueOff = 2 * requiredHeight * requiredWidth;
-  for (var h = 0; h < requiredHeight; h++) {
-    for (var w = 0; w < requiredWidth; w++) {
-      late Color pixel;
-      if (w >= scaledWidth || h >= scaledHeight) {
-        pixel = const Color.fromRGBO(114, 114, 114, 1.0);
-      } else {
-        pixel = _getPixelBicubic(
-          w / scale,
-          h / scale,
-          image,
-          imgByteData,
-        );
-      }
+  for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
+    for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
+      final Color pixel = _getPixelBicubic(
+        w / scale,
+        h / scale,
+        image,
+        imgByteData,
+      );
       buffer[pixelIndex] = ((pixel.red / 255) - mean[0]) / std[0];
       buffer[pixelIndex + greenOff] = ((pixel.green / 255) - mean[1]) / std[1];
       buffer[pixelIndex + blueOff] = ((pixel.blue / 255) - mean[2]) / std[2];
