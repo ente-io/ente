@@ -93,8 +93,7 @@ class OnnxImageEncoder {
 
           final int v2 = min(max(v.round(), 0), 255);
 
-          // createTensorWithDataList is dump compared to reshape and hence has to be given with one channel after another
-          final int i = (y * scaledWidth + x) + (c % 3) * 224 * 224; // TODO: is the use of scaledWidth here intentional, or is it a mistake to not use requiredWidth?
+          final int i = (y * requiredWidth + x) + c * 224 * 224;
 
           result[i] = ((v2 / 255) - mean[c]) / std[c];
         }
