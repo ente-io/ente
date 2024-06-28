@@ -71,14 +71,10 @@ class ONNX extends MLFramework {
   Future<List<double>> getImageEmbedding(String imagePath) async {
     try {
       final startTime = DateTime.now();
-      final result = await _computer.compute(
-        _clipImage.inferByImage,
-        param: {
-          "imagePath": imagePath,
-          "address": _imageEncoderAddress,
-        },
-        taskName: "createImageEmbedding",
-      ) as List<double>;
+      final result = await _clipImage.inferByImage({ // TODO: add computer back later
+        "imagePath": imagePath,
+        "address": _imageEncoderAddress,
+      });
       final endTime = DateTime.now();
       _logger.info(
         "createImageEmbedding took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
