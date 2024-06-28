@@ -27,8 +27,6 @@ class OnnxImageEncoder {
   }
 
   Future<List<double>> inferByImage(Map args) async {
-    final runOptions = OrtRunOptions();
-    //Check the existence of imagePath locally
     final rgb = img.decodeImage(await File(args["imagePath"]).readAsBytes())!;
 
     final int imageWidth = rgb.width;
@@ -105,6 +103,7 @@ class OnnxImageEncoder {
         OrtValueTensor.createTensorWithDataList(floatList, [1, 3, 224, 224]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(args["address"]);
+    final runOptions = OrtRunOptions();
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
 
