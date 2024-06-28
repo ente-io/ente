@@ -8,7 +8,8 @@ import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx
 class ONNX extends MLFramework {
   static const kModelBucketEndpoint = "https://models.ente.io/";
   static const kImageModel = "clip-image-vit-32-float32.onnx";
-  static const kTextModel = "clip-text-vit-32-uint8.onnx";
+  // static const kTextModel = "clip-text-vit-32-uint8.onnx"; // TODO: check later whether to revert back or not
+  static const kTextModel = "clip-text-vit-32-float32-int32.onnx";
 
   final _computer = Computer.shared();
   final _logger = Logger("ONNX");
@@ -71,7 +72,8 @@ class ONNX extends MLFramework {
   Future<List<double>> getImageEmbedding(String imagePath) async {
     try {
       final startTime = DateTime.now();
-      final result = await _clipImage.inferByImage({ // TODO: add computer back later
+      final result = await _clipImage.inferByImage({
+        // TODO: add computer back later
         "imagePath": imagePath,
         "address": _imageEncoderAddress,
       });
