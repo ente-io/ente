@@ -163,7 +163,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.remove_circle_outline,
-          labelText: 'Not ${widget.person!.data.name}?',
+          labelText: S.of(context).notPersonLabel(widget.person!.data.name),
           onTap: anyUploadedFiles ? _onNotpersonClicked : null,
         ),
       );
@@ -171,7 +171,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.image_outlined,
-            labelText: 'Use as cover',
+            labelText: S.of(context).useAsCover,
             onTap: anyUploadedFiles ? _setPersonCover : null,
           ),
         );

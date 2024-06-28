@@ -1251,6 +1251,17 @@
   "left": "Left",
   "right": "Right",
   "whatsNew": "What's new",
-  "reviewSuggestions": "Review suggestions"
+  "reviewSuggestions": "Review suggestions",
+  "useAsCover": "Use as cover",
+  "notPersonLabel": "Not {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  }
 }
 

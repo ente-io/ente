@@ -1264,6 +1264,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("Erneut versuchen"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Bitte überprüfe und lösche die Elemente, die du für Duplikate hältst."),
+        "reviewSuggestions":
+            MessageLookupByLibrary.simpleMessage("Vorschläge überprüfen"),
         "right": MessageLookupByLibrary.simpleMessage("Rechts"),
         "rotate": MessageLookupByLibrary.simpleMessage("Drehen"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Nach links drehen"),
