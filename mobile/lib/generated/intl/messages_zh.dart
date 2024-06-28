@@ -1015,6 +1015,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("重试"),
         "reviewDeduplicateItems":
             MessageLookupByLibrary.simpleMessage("请检查并删除您认为重复的项目。"),
+        "reviewSuggestions": MessageLookupByLibrary.simpleMessage("查看建议"),
         "right": MessageLookupByLibrary.simpleMessage("向右"),
         "rotate": MessageLookupByLibrary.simpleMessage("旋转"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("向左旋转"),

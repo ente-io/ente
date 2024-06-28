@@ -125,9 +125,9 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.uncategorized:
       case GalleryType.locationTag:
       case GalleryType.peopleTag:
+      case GalleryType.cluster:
         return true;
       case GalleryType.hiddenSection:
-      case GalleryType.cluster:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.localFolder:
       case GalleryType.trash:
