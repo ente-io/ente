@@ -193,6 +193,48 @@ Future<(Float32List, Dimensions, Dimensions)>
   );
 }
 
+Future<Float32List> preprocessImageClip(
+  Image image,
+  ByteData imgByteData,
+) async {
+  const int requiredWidth = 224;
+  const int requiredHeight = 224;
+  const int requiredSize = 3 * requiredWidth * requiredHeight;
+  const mean = [0.48145466, 0.4578275, 0.40821073];
+  const std = [0.26862954, 0.26130258, 0.27577711];
+
+  final scale = min(requiredWidth / image.width, requiredHeight / image.height);
+  final scaledWidth = (image.width * scale).round().clamp(0, requiredWidth);
+  final scaledHeight = (image.height * scale).round().clamp(0, requiredHeight);
+
+  final processedBytes = Float32List(requiredSize);
+  final buffer = Float32List.view(processedBytes.buffer);
+  int pixelIndex = 0;
+  const int greenOff = requiredHeight * requiredWidth;
+  const int blueOff = 2 * requiredHeight * requiredWidth;
+  for (var h = 0; h < requiredHeight; h++) {
+    for (var w = 0; w < requiredWidth; w++) {
+      late Color pixel;
+      if (w >= scaledWidth || h >= scaledHeight) {
+        pixel = const Color.fromRGBO(114, 114, 114, 1.0);
+      } else {
+        pixel = _getPixelBicubic(
+          w / scale,
+          h / scale,
+          image,
+          imgByteData,
+        );
+      }
+      buffer[pixelIndex] = ((pixel.red / 255) - mean[0]) / std[0];
+      buffer[pixelIndex + greenOff] = ((pixel.green / 255) - mean[1]) / std[1];
+      buffer[pixelIndex + blueOff] = ((pixel.blue / 255) - mean[2]) / std[2];
+      pixelIndex++;
+    }
+  }
+
+  return processedBytes;
+}
+
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     preprocessToMobileFaceNetFloat32List(
   Image image,
@@ -225,7 +267,9 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
         SimilarityTransform.estimate(face.allKeypoints);
     if (!correctlyEstimated) {
       log('Face alignment failed because not able to estimate SimilarityTransform, for face: $face');
-      throw Exception('Face alignment failed because not able to estimate SimilarityTransform');
+      throw Exception(
+        'Face alignment failed because not able to estimate SimilarityTransform',
+      );
     }
     alignmentResults.add(alignmentResult);
 
