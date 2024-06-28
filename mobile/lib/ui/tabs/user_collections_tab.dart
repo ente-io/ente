@@ -83,8 +83,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     });
     _favoritesServiceInitCompleteEvent =
         Bus.instance.on<FavoritesServiceInitCompleteEvent>().listen((event) {
-      _loadReason = event.reason;
-      setState(() {});
+      _debouncer.run(() async {
+        _loadReason = event.reason;
+        setState(() {});
+      });
     });
     sortKey = LocalSettings.instance.albumSortKey();
   }
