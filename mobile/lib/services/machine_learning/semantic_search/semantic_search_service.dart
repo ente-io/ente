@@ -25,7 +25,7 @@ import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
-import "package:photos/utils/thumbnail_util.dart";
+// import "package:photos/utils/thumbnail_util.dart";
 
 class SemanticSearchService {
   SemanticSearchService._privateConstructor();
@@ -355,12 +355,16 @@ class SemanticSearchService {
       await _mlController.future;
     }
     try {
-      final thumbnail = await getThumbnailForUploadedFile(file);
-      if (thumbnail == null) {
-        _logger.warning("Could not get thumbnail for $file");
-        return;
-      }
-      final filePath = thumbnail.path;
+      // TODO: revert this later
+      // final thumbnail = await getThumbnailForUploadedFile(file);
+      // if (thumbnail == null) {
+      //   _logger.warning("Could not get thumbnail for $file");
+      //   return;
+      // }
+      // final filePath = thumbnail.path;
+      final filePath =
+          await getImagePathForML(file, typeOfData: FileDataForML.fileData);
+
       _logger.info("Running clip over $file");
       final result = await _mlFramework.getImageEmbedding(filePath);
       if (result.length != kEmbeddingLength) {
