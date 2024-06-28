@@ -80,9 +80,22 @@ export const NULL_EXPORT_RECORD: ExportRecord = {
     collectionExportNames: {},
 };
 
+export interface ExportOpts {
+    /**
+     * If true, perform an additional on-disk check to determine which files
+     * need to be exported.
+     *
+     * This has performance implications for huge libraries, so we only do this:
+     * - For the first export after an app start
+     * - If the user explicitly presses the "Resync" button.
+     */
+    resync?: boolean;
+}
+
 class ExportService {
     private exportSettings: ExportSettings;
     private exportInProgress: RequestCanceller = null;
+    private resync = true;
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>();
     private fileReader: FileReader = null;
@@ -164,6 +177,16 @@ class ExportService {
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
+    private resyncOnce() {
+        const resync = this.resync;
+        this.resync = false;
+        return resync;
+    }
+
+    resumeExport() {
+        this.scheduleExport({ resync: this.resyncOnce() });
+    }
+
     enableContinuousExport() {
         try {
             if (this.continuousExportEventHandler) {
@@ -172,7 +195,7 @@ class ExportService {
             }
             log.info("enabling continuous export");
             this.continuousExportEventHandler = () => {
-                this.scheduleExport();
+                this.scheduleExport({ resync: this.resyncOnce() });
             };
             this.continuousExportEventHandler();
             eventBus.addListener(
@@ -225,6 +248,7 @@ class ExportService {
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord,
+                undefined,
             );
             return unExportedFiles;
         } catch (e) {
@@ -276,7 +300,7 @@ class ExportService {
         }
     }
 
-    scheduleExport = async () => {
+    scheduleExport = async (exportOpts: ExportOpts) => {
         try {
             if (this.exportInProgress) {
                 log.info("export in progress, scheduling re-run");
@@ -297,7 +321,7 @@ class ExportService {
                 const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);
                 log.info("export started");
-                await this.runExport(exportFolder, isCanceled);
+                await this.runExport(exportFolder, isCanceled, exportOpts);
                 log.info("export completed");
             } finally {
                 if (isCanceled.status) {
@@ -312,7 +336,7 @@ class ExportService {
                     if (this.reRunNeeded) {
                         this.reRunNeeded = false;
                         log.info("re-running export");
-                        setTimeout(() => this.scheduleExport(), 0);
+                        setTimeout(() => this.scheduleExport(exportOpts), 0);
                     }
                 }
             }
@@ -329,6 +353,7 @@ class ExportService {
     private async runExport(
         exportFolder: string,
         isCanceled: CancellationStatus,
+        { resync }: ExportOpts,
     ) {
         try {
             const user: User = getData(LS_KEYS.USER);
@@ -370,10 +395,23 @@ class ExportService {
                 personalFiles,
                 exportRecord,
             );
+
+            const diskFileRecordIDs = resync
+                ? await readOnDiskFileExportRecordIDs(
+                      personalFiles,
+                      collectionIDExportNameMap,
+                      exportFolder,
+                      exportRecord,
+                      isCanceled,
+                  )
+                : undefined;
+
             const filesToExport = getUnExportedFiles(
                 personalFiles,
                 exportRecord,
+                diskFileRecordIDs,
             );
+
             const deletedExportedCollections = getDeletedExportedCollections(
                 nonEmptyPersonalCollections,
                 exportRecord,
@@ -1122,7 +1160,7 @@ export const resumeExportsIfNeeded = async () => {
     }
     if (isExportInProgress(exportRecord.stage)) {
         log.debug(() => "Resuming in-progress export");
-        exportService.scheduleExport();
+        exportService.resumeExport();
     }
 };
 
@@ -1229,21 +1267,90 @@ const getDeletedExportedCollections = (
     return deletedExportedCollections;
 };
 
+/**
+ * Return export record IDs of {@link files} for which there is also exists a
+ * file on disk.
+ */
+const readOnDiskFileExportRecordIDs = async (
+    files: EnteFile[],
+    collectionIDFolderNameMap: Map<number, string>,
+    exportDir: string,
+    exportRecord: ExportRecord,
+    isCanceled: CancellationStatus,
+): Promise<Set<string>> => {
+    const fs = ensureElectron().fs;
+
+    const result = new Set<string>();
+    if (!(await fs.exists(exportDir))) return result;
+
+    const fileExportNames = exportRecord.fileExportNames ?? {};
+
+    for (const file of files) {
+        if (isCanceled.status) throw Error(CustomError.EXPORT_STOPPED);
+
+        const collectionExportName = collectionIDFolderNameMap.get(
+            file.collectionID,
+        );
+        if (!collectionExportName) continue;
+
+        const collectionExportPath = `${exportDir}/${collectionExportName}`;
+        const recordID = getExportRecordFileUID(file);
+        const exportName = fileExportNames[recordID];
+        if (!exportName) continue;
+
+        let fileName: string;
+        let fileName2: string | undefined; // Live photos have 2 parts
+        if (isLivePhotoExportName(exportName)) {
+            const { image, video } = parseLivePhotoExportName(exportName);
+            fileName = image;
+            fileName2 = video;
+        } else {
+            fileName = exportName;
+        }
+
+        const filePath = `${collectionExportPath}/${fileName}`;
+        if (await fs.exists(filePath)) {
+            // Also check that the sibling part exists (if any).
+            if (fileName2) {
+                const filePath2 = `${collectionExportPath}/${fileName2}`;
+                if (await fs.exists(filePath2)) result.add(recordID);
+            } else {
+                result.add(recordID);
+            }
+        }
+    }
+
+    return result;
+};
+
+/**
+ * Return the list of files from amongst {@link allFiles} that still need to be
+ * exported.
+ *
+ * @param allFiles The list of files to export.
+ *
+ * @param exportRecord The export record containing bookeeping for the export.
+ *
+ * @paramd diskFileRecordIDs (Optional) The export record IDs of files from
+ * amongst {@link allFiles} that already exist on disk. If provided (e.g. when
+ * doing a resync), we perform an extra check for on-disk existence instead of
+ * relying solely on the export record.
+ */
 const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord,
+    diskFileRecordIDs: Set<string> | undefined,
 ) => {
     if (!exportRecord?.fileExportNames) {
         return allFiles;
     }
     const exportedFiles = new Set(Object.keys(exportRecord?.fileExportNames));
-    const unExportedFiles = allFiles.filter((file) => {
-        if (!exportedFiles.has(getExportRecordFileUID(file))) {
-            return true;
-        }
+    return allFiles.filter((file) => {
+        const recordID = getExportRecordFileUID(file);
+        if (!exportedFiles.has(recordID)) return true;
+        if (diskFileRecordIDs && !diskFileRecordIDs.has(recordID)) return true;
         return false;
     });
-    return unExportedFiles;
 };
 
 const getDeletedExportedFiles = (

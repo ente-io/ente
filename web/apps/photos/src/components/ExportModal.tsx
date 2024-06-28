@@ -23,6 +23,7 @@ import { useContext, useEffect, useState } from "react";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
+    type ExportOpts,
 } from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
 import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
@@ -144,10 +145,10 @@ export default function ExportModal(props: Props) {
         setContinuousExport(newContinuousExport);
     };
 
-    const startExport = async () => {
+    const startExport = async (opts?: ExportOpts) => {
         if (!(await verifyExportFolderExists())) return;
 
-        await exportService.scheduleExport();
+        await exportService.scheduleExport(opts ?? {});
     };
 
     const stopExport = () => {
@@ -240,7 +241,7 @@ const ExportDynamicContent = ({
     collectionNameMap,
 }: {
     exportStage: ExportStage;
-    startExport: () => void;
+    startExport: (opts?: ExportOpts) => void;
     stopExport: () => void;
     onHide: () => void;
     lastExportTime: number;
@@ -273,7 +274,7 @@ const ExportDynamicContent = ({
                     lastExportTime={lastExportTime}
                     pendingExports={pendingExports}
                     collectionNameMap={collectionNameMap}
-                    startExport={startExport}
+                    onResync={() => startExport({ resync: true })}
                 />
             );
 
