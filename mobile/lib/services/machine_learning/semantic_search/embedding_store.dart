@@ -34,6 +34,7 @@ class EmbeddingStore {
   }
 
   Future<bool> pullEmbeddings(Model model) async {
+    return true; // TODO: remove this
     if (_remoteSyncStatus != null) {
       return _remoteSyncStatus!.future;
     }
@@ -57,6 +58,7 @@ class EmbeddingStore {
   }
 
   Future<void> pushEmbeddings() async {
+    return; // TODO: remove this
     final pendingItems = await EmbeddingsDB.instance.getUnsyncedEmbeddings();
     final fileMap = await FilesDB.instance
         .getFilesFromIDs(pendingItems.map((e) => e.fileID).toList());
@@ -81,7 +83,7 @@ class EmbeddingStore {
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
     await EmbeddingsDB.instance.put(embedding);
-    unawaited(_pushEmbedding(file, embedding));
+    // unawaited(_pushEmbedding(file, embedding)); // TODO: uncomment this
   }
 
   Future<void> clearEmbeddings(Model model) async {
@@ -174,7 +176,7 @@ class EmbeddingStore {
       inputs.add(input);
     }
     final embeddings = await _computer.compute(
-      decodeEmbeddings,
+      _decodeEmbeddings,
       param: {
         "inputs": inputs,
       },
@@ -189,7 +191,7 @@ class EmbeddingStore {
   }
 }
 
-Future<List<Embedding>> decodeEmbeddings(Map<String, dynamic> args) async {
+Future<List<Embedding>> _decodeEmbeddings(Map<String, dynamic> args) async {
   final embeddings = <Embedding>[];
 
   final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
