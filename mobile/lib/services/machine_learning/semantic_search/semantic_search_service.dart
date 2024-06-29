@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:collection";
+import "dart:developer" as dev show log;
 import "dart:math" show min;
 
 import "package:computer/computer.dart";
@@ -236,8 +237,16 @@ class SemanticSearchService {
   }) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults =
-        await _getSimilarities(textEmbedding, minimumSimilarity: scoreThreshold);
+    final queryResults = await _getSimilarities(
+      textEmbedding,
+      minimumSimilarity: scoreThreshold,
+    );
+
+    // print query for top ten scores
+    for (int i = 0; i < min(10, queryResults.length); i++) {
+      final result = queryResults[i];
+      dev.log("Query: $query, Score: ${result.score}, index $i");
+    }
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
@@ -267,11 +276,16 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<List<int>> getMatchingFileIDs(String query, double minimumSimilarity) async {
+  Future<List<int>> getMatchingFileIDs(
+    String query,
+    double minimumSimilarity,
+  ) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults =
-        await _getSimilarities(textEmbedding, minimumSimilarity: minimumSimilarity);
+    final queryResults = await _getSimilarities(
+      textEmbedding,
+      minimumSimilarity: minimumSimilarity,
+    );
 
     final queryResultIds = <int>[];
     for (QueryResult result in queryResults) {
@@ -475,6 +489,12 @@ List<QueryResult> computeBulkSimilarities(Map args) {
       imageEmbedding.embedding,
       textEmbedding,
     );
+    if (imageEmbedding.fileID == 61353139 ||
+        imageEmbedding.fileID == 61921627) {
+      dev.log(
+        "Embedding for image ${imageEmbedding.fileID}: ${imageEmbedding.embedding}",
+      );
+    } // TODO: remove this later
     if (score >= minimumSimilarity) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
@@ -484,7 +504,10 @@ List<QueryResult> computeBulkSimilarities(Map args) {
   return queryResults;
 }
 
-double computeCosineSimilarity(List<double> imageEmbedding, List<double> textEmbedding) {
+double computeCosineSimilarity(
+  List<double> imageEmbedding,
+  List<double> textEmbedding,
+) {
   assert(
     imageEmbedding.length == textEmbedding.length,
     "The two embeddings should have the same length",
