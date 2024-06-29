@@ -32,9 +32,7 @@ export const getDefaultOptions = async () => {
     return [
         // TODO-ML(MR): Skip this for now if indexing is disabled (eventually
         // the indexing status should not be tied to results).
-        ...((await isFaceIndexingEnabled())
-            ? [await getIndexStatusSuggestion()]
-            : []),
+        ...(isFaceIndexingEnabled() ? [await getIndexStatusSuggestion()] : []),
         ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };

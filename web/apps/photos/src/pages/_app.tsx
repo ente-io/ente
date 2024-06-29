@@ -202,7 +202,7 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         const loadMlSearchState = async () => {
             try {
-                const enabled = await isFaceIndexingEnabled();
+                const enabled = isFaceIndexingEnabled();
                 setMlSearchEnabled(enabled);
                 mlWorkManager.setMlSearchEnabled(enabled);
             } catch (e) {
@@ -302,7 +302,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const updateMlSearchEnabled = async (enabled: boolean) => {
         try {
-            await setIsFaceIndexingEnabled(enabled);
+            setIsFaceIndexingEnabled(enabled);
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {

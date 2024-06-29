@@ -18,7 +18,7 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { Link } from "@mui/material";

@@ -1,10 +1,11 @@
+import { terminateFaceWorker } from "@/new/photos/services/face";
+import { clearFaceData } from "@/new/photos/services/face/db";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
 import log from "@/next/log";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { clipService } from "services/clip-service";
 import DownloadManager from "./download";
 import exportService from "./export";
-import { clearFaceData } from "./face/db";
 import mlWorkManager from "./face/mlWorkManager";
 
 /**
@@ -39,6 +40,12 @@ export const photosLogout = async () => {
         await clipService.logout();
     } catch (e) {
         ignoreError("CLIP", e);
+    }
+
+    try {
+        terminateFaceWorker();
+    } catch (e) {
+        ignoreError("face", e);
     }
 
     const electron = globalThis.electron;

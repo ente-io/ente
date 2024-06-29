@@ -25,7 +25,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
 
     public terminate() {
         this.worker.terminate();
-        log.debug(() => `Terminated ${this.name}`);
+        log.debug(() => `Terminated web worker ${this.name}`);
     }
 }
 

@@ -1,5 +1,9 @@
 import type { EmbeddingModel } from "@/new/photos/services/embedding";
-import { getAllLocalFiles } from "@/new/photos/services/files";
+import type { FaceIndex } from "@/new/photos/services/face/types";
+import {
+    getAllLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { inWorker } from "@/next/env";
 import log from "@/next/log";
@@ -17,8 +21,6 @@ import type {
     PutEmbeddingRequest,
 } from "types/embedding";
 import { getLocalCollections } from "./collectionService";
-import type { FaceIndex } from "./face/types";
-import { getLocalTrashedFiles } from "./trashService";
 
 type FileML = FaceIndex & {
     updatedAt: number;

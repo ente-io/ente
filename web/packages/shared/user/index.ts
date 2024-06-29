@@ -1,5 +1,5 @@
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 

@@ -1,4 +1,5 @@
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -7,7 +8,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
-import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
+import { decryptFile, sortFiles } from "utils/file";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
