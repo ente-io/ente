@@ -2,7 +2,6 @@ import log from "@/next/log";
 
 export enum LS_KEYS {
     USER = "user",
-    SESSION = "session",
     KEY_ATTRIBUTES = "keyAttributes",
     ORIGINAL_KEY_ATTRIBUTES = "originalKeyAttributes",
     SUBSCRIPTION = "subscription",
@@ -11,12 +10,10 @@ export enum LS_KEYS {
     JUST_SIGNED_UP = "justSignedUp",
     SHOW_BACK_BUTTON = "showBackButton",
     EXPORT = "export",
-    THUMBNAIL_FIX_STATE = "thumbnailFixState",
     // LOGS = "logs",
     USER_DETAILS = "userDetails",
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
-    WAIT_TIME = "waitTime",
     // Moved to the new wrapper @/next/local-storage
     // LOCALE = 'locale',
     MAP_ENABLED = "mapEnabled",
