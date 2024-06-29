@@ -234,6 +234,18 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
+
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     // - Conversion
@@ -479,18 +491,6 @@ export interface Electron {
          * The path is guaranteed to use POSIX separators ('/').
          */
         onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
-
-        /**
-         * Return the paths of all the files under the given folder.
-         *
-         * This function walks the directory tree starting at {@link folderPath}
-         * and returns a list of the absolute paths of all the files that exist
-         * therein. It will recursively traverse into nested directories, and
-         * return the absolute paths of the files there too.
-         *
-         * The returned paths are guaranteed to use POSIX separators ('/').
-         */
-        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     // - Upload
