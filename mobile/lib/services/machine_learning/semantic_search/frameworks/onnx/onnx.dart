@@ -55,7 +55,13 @@ class ONNX extends MLFramework {
   @override
   Future<void> loadTextModel(String path) async {
     final startTime = DateTime.now();
-    await _computer.compute(_clipText.initTokenizer);
+    final String vocabPath = await _clipText.getVocab();
+    await _computer.compute(
+      _clipText.initTokenizer,
+      param: {
+        "vocabPath": vocabPath,
+      },
+    );
     _textEncoderAddress = await _computer.compute(
       _clipText.loadModel,
       param: {

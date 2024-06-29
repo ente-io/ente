@@ -13,10 +13,16 @@ class OnnxTextEncoder {
   final _logger = Logger("OnnxTextEncoder");
   final OnnxTextTokenizer _tokenizer = OnnxTextTokenizer();
 
-  // Do not run in an isolate since rootBundle can only be accessed in the main isolate
-  Future<void> initTokenizer() async {
+  Future<String> getVocab() async {
     final File vocabFile =
         await RemoteAssetsService.instance.getAsset(kVocabRemotePath);
+    return vocabFile.path;
+  }
+
+  // Do not run in an isolate since rootBundle can only be accessed in the main isolate
+  Future<void> initTokenizer(Map args) async {
+    final String path = args["vocabPath"];
+    final File vocabFile = File(path);
     final String vocab = await vocabFile.readAsString();
     await _tokenizer.init(vocab);
   }
