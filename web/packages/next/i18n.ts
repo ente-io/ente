@@ -263,6 +263,21 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
 };
 
 /**
+ * A no-op marker for strings that, for various reasons, pending addition to the
+ * translation dataset.
+ *
+ * This function does nothing, it just returns back the passed it string
+ * verbatim. It is only kept as a way for us to keep track of strings which
+ * we've not yet added to the list of strings that should be translated (e.g.
+ * perhaps we're awaiting feedback on the copy).
+ *
+ * It is the sibling of the {@link t} function provided by i18next.
+ *
+ * See also: {@link ut}.
+ */
+export const pt = (s: string) => s;
+
+/**
  * A no-op marker for strings that, for various reasons, are not translated.
  *
  * This function does nothing, it just returns back the passed it string
@@ -270,6 +285,8 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
  * not translated (and for some reason, are currently not meant to be), but
  * still are user visible.
  *
- * It is the sibling of the {@link t} function provided by i18next.
+ * It is the sibling of the {@link t} function provided by i18next. See also
+ *
+ * See also: {@link pt}.
  */
 export const ut = (s: string) => s;

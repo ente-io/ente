@@ -1,4 +1,5 @@
 import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
+import { pt } from "@/next/i18n";
 import DialogTitleWithCloseButton, {
     DialogTitleWithCloseButtonSm,
     dialogCloseHandler,
@@ -202,7 +203,6 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
     onSelect,
     onClose,
 }) => {
-    // TODO(MR): Move these to localized strings when finalized.
     return (
         <>
             <DialogTitleWithCloseButtonSm onClose={onClose}>
@@ -218,7 +218,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("folders")}
                         >
-                            {t("Select folder")}
+                            {pt("Select folder")}
                         </FocusVisibleButton>
                         <FocusVisibleButton
                             color="secondary"
@@ -226,7 +226,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("zips")}
                         >
-                            {t("Select zips")}
+                            {pt("Select zips")}
                         </FocusVisibleButton>
                         <Link
                             href="https://help.ente.io/photos/migration/from-google-photos/"
@@ -238,14 +238,15 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                                 fullWidth
                                 disableRipple
                             >
-                                {t("FAQ")}
+                                {pt("FAQ")}
                             </FocusVisibleButton>
                         </Link>
                     </Stack>
 
                     <Typography variant="small" color="text.muted" pb={1}>
-                        Unzip all zips into the same folder and upload that. Or
-                        upload the zips directly. See FAQ for details.
+                        {pt(
+                            "Unzip all zips into the same folder and upload that. Or upload the zips directly. See FAQ for details.",
+                        )}
                     </Typography>
                 </Stack>
             </Box>
