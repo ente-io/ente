@@ -6,11 +6,13 @@ import 'dart:typed_data' show Uint8List;
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
+import "package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_image_encoder.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
 enum ImageOperation {
   generateFaceThumbnails,
+  clip,
 }
 
 class ImageIsolate {
@@ -88,6 +90,15 @@ class ImageIsolate {
               faceBoxes,
             );
             sendPort.send(List.from(results));
+          case ImageOperation.clip:
+            final imagePath = args['imagePath'] as String;
+            final address = args['address'] as int;
+            final result = await OnnxImageEncoder.inferByImage({
+              'imagePath': imagePath,
+              'address': address,
+            });
+            sendPort.send(List.from(result));
+            break;
         }
       } catch (e, stackTrace) {
         sendPort
@@ -174,5 +185,17 @@ class ImageIsolate {
         },
       ),
     ).then((value) => value.cast<Uint8List>());
+  }
+
+  Future<List<double>> inferClipImageEmbedding(String imagePath, int encoderAddress) async {
+    return await _runInIsolate(
+      (
+        ImageOperation.clip,
+        {
+          'imagePath': imagePath,
+          'address': encoderAddress,
+        },
+      ),
+    ).then((value) => value.cast<double>());
   }
 }

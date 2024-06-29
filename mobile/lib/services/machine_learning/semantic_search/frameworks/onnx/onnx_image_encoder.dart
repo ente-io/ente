@@ -26,7 +26,7 @@ class OnnxImageEncoder {
     return -1;
   }
 
-  Future<List<double>> inferByImage(Map args) async {
+  static Future<List<double>> inferByImage(Map args) async {
     final imageData = await File(args["imagePath"]).readAsBytes();
     final image = await decodeImageFromData(imageData);
     final ByteData imgByteData = await getByteDataFromImage(image);

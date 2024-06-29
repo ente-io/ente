@@ -4,6 +4,7 @@ import "package:onnxruntime/onnxruntime.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_image_encoder.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_text_encoder.dart';
+import "package:photos/utils/image_isolate.dart";
 
 class ONNX extends MLFramework {
   static const kModelBucketEndpoint = "https://models.ente.io/";
@@ -72,11 +73,11 @@ class ONNX extends MLFramework {
   Future<List<double>> getImageEmbedding(String imagePath) async {
     try {
       final startTime = DateTime.now();
-      final result = await _clipImage.inferByImage({
-        // TODO: add computer back later
-        "imagePath": imagePath,
-        "address": _imageEncoderAddress,
-      });
+      // TODO: properly integrate with other ml later (FaceMlService)
+      final result = await ImageIsolate.instance.inferClipImageEmbedding(
+        imagePath,
+        _imageEncoderAddress,
+      );
       final endTime = DateTime.now();
       _logger.info(
         "createImageEmbedding took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
