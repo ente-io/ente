@@ -2,7 +2,7 @@ import {
     faceIndex,
     indexableFileIDs,
     indexedAndIndexableCounts,
-    syncAssumingLocalFileIDs,
+    updateAssumingLocalFiles,
 } from "@/new/photos/services/face/db";
 import {
     isBetaUser,
@@ -231,7 +231,7 @@ export const setIsFaceIndexingEnabled = (enabled: boolean) =>
  * about. Then return the next {@link count} files that still need to be
  * indexed.
  *
- * For specifics of what a "sync" entails, see {@link syncAssumingLocalFileIDs}.
+ * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
  *
  * @param userID Sync only files owned by a {@link userID} with the face DB.
  *
@@ -248,13 +248,11 @@ export const syncWithLocalFilesAndGetFilesToIndex = async (
         localFiles.filter(isIndexable).map((f) => [f.id, f]),
     );
 
-    const localFilesInTrashIDs = (await getLocalTrashedFiles()).map(
-        (f) => f.id,
-    );
+    const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
 
-    await syncAssumingLocalFileIDs(
+    await updateAssumingLocalFiles(
         [...localFilesByID.keys()],
-        localFilesInTrashIDs,
+        localTrashFileIDs,
     );
 
     const fileIDsToIndex = await indexableFileIDs(count);

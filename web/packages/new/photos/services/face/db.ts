@@ -214,17 +214,17 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
- * Sync entries in the face DB to align with the state of local files outside
+ * Update entries in the face DB to align with the state of local files outside
  * face DB.
  *
  * @param localFileIDs IDs of all the files that the client is aware of filtered
  * to only keep the files that the user owns and the formats that can be indexed
  * by our current face indexing pipeline.
  *
- * @param localFilesInTrashIDs IDs of all the files in trash.
+ * @param localTrashFilesIDs IDs of all the files in trash.
  *
  * This function then updates the state of file entries in face DB to the be in
- * "sync" with these provided local file IDS.
+ * sync with these provided local file IDS.
  *
  * - Files that are present locally but are not yet in face DB get a fresh entry
  *   in face DB (and are marked as indexable).
@@ -237,9 +237,9 @@ export const addFileEntry = async (fileID: number) => {
  *   is prevent churn (re-indexing) if the user moves some files to trash but
  *   then later restores them before they get permanently deleted.
  */
-export const syncAssumingLocalFileIDs = async (
+export const updateAssumingLocalFiles = async (
     localFileIDs: number[],
-    localFilesInTrashIDs: number[],
+    localTrashFilesIDs: number[],
 ) => {
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
@@ -249,21 +249,21 @@ export const syncAssumingLocalFileIDs = async (
         .getAllKeys(IDBKeyRange.only("indexed"));
 
     const local = new Set(localFileIDs);
-    const localTrash = new Set(localFilesInTrashIDs);
+    const localTrash = new Set(localTrashFilesIDs);
     const fdb = new Set(fdbFileIDs);
     const fdbIndexed = new Set(fdbIndexedFileIDs);
 
     const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
-    const fileIDsToRemove = fdbFileIDs.filter((id) => {
-        if (local.has(id)) return false; // Still exists
+    const removedFileIDs = fdbFileIDs.filter((id) => {
+        if (local.has(id)) return false; // Still exists.
         if (localTrash.has(id)) {
-            // Exists in trash
+            // Exists in trash.
             if (fdbIndexed.has(id)) {
                 // But is already indexed, so let it be.
                 return false;
             }
         }
-        return true; // Remove
+        return true; // Remove.
     });
 
     await Promise.all(
@@ -275,12 +275,10 @@ export const syncAssumingLocalFileIDs = async (
                     failureCount: 0,
                 }),
             ),
-            fileIDsToRemove.map((id) =>
+            removedFileIDs.map((id) =>
                 tx.objectStore("file-status").delete(id),
             ),
-            fileIDsToRemove.map((id) =>
-                tx.objectStore("face-index").delete(id),
-            ),
+            removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
             tx.done,
         ].flat(),
     );
