@@ -1,7 +1,5 @@
 import chokidar, { type FSWatcher } from "chokidar";
 import { BrowserWindow } from "electron/main";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { FolderWatch, type CollectionMapping } from "../../types/ipc";
 import log from "../log";
 import { watchStore } from "../stores/watch";
@@ -141,20 +139,6 @@ export const watchUpdateIgnoredFiles = (
             return watch;
         }),
     );
-};
-
-export const watchFindFiles = async (dirPath: string) => {
-    const items = await fs.readdir(dirPath, { withFileTypes: true });
-    let paths: string[] = [];
-    for (const item of items) {
-        const itemPath = path.posix.join(dirPath, item.name);
-        if (item.isFile()) {
-            paths.push(itemPath);
-        } else if (item.isDirectory()) {
-            paths = [...paths, ...(await watchFindFiles(itemPath))];
-        }
-    }
-    return paths;
 };
 
 /**

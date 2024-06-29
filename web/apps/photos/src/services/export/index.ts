@@ -1283,6 +1283,17 @@ const readOnDiskFileExportRecordIDs = async (
     const result = new Set<string>();
     if (!(await fs.exists(exportDir))) return result;
 
+    // Both the paths involved are guaranteed to use POSIX separators and thus
+    // can directly be compared.
+    //
+    // -   `exportDir` traces its origin to `electron.selectDirectory()`, which
+    //     returns POSIX paths. Down below we use it as the base directory when
+    //     construction paths for the items to export.
+    //
+    // -   `findFiles` is also guaranteed to return POSIX paths.
+    //
+    const ls = new Set(await ensureElectron().fs.findFiles(exportDir));
+
     const fileExportNames = exportRecord.fileExportNames ?? {};
 
     for (const file of files) {
@@ -1309,11 +1320,11 @@ const readOnDiskFileExportRecordIDs = async (
         }
 
         const filePath = `${collectionExportPath}/${fileName}`;
-        if (await fs.exists(filePath)) {
+        if (ls.has(filePath)) {
             // Also check that the sibling part exists (if any).
             if (fileName2) {
                 const filePath2 = `${collectionExportPath}/${fileName2}`;
-                if (await fs.exists(filePath2)) result.add(recordID);
+                if (ls.has(filePath2)) result.add(recordID);
             } else {
                 result.add(recordID);
             }

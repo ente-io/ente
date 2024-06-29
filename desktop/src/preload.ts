@@ -216,8 +216,8 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
     );
 };
 
-const watchFindFiles = (folderPath: string) =>
-    ipcRenderer.invoke("watchFindFiles", folderPath);
+const fsFindFiles = (folderPath: string) =>
+    ipcRenderer.invoke("fsFindFiles", folderPath);
 
 const watchRemoveListeners = () => {
     ipcRenderer.removeAllListeners("watchAddFile");
@@ -340,6 +340,7 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
+        findFiles: fsFindFiles,
     },
 
     // - Conversion
@@ -366,7 +367,6 @@ contextBridge.exposeInMainWorld("electron", {
         onAddFile: watchOnAddFile,
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
-        findFiles: watchFindFiles,
     },
 
     // - Upload

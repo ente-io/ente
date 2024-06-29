@@ -561,7 +561,7 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     for (const watch of watches) {
         const folderPath = watch.folderPath;
 
-        const filePaths = await electron.watch.findFiles(folderPath);
+        const filePaths = await electron.fs.findFiles(folderPath);
 
         // Files that are on disk but not yet synced.
         for (const filePath of pathsToUpload(filePaths, watch))
