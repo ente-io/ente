@@ -126,9 +126,9 @@ const pullEmbeddings = async (
     /* eslint-disable no-constant-condition */
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
-        let c = 0;
         const remoteEmbeddings = await getEmbeddingsDiff(model, sinceTime);
         if (remoteEmbeddings.length == 0) break;
+        let count = 0;
         for (const remoteEmbedding of remoteEmbeddings) {
             sinceTime = Math.max(sinceTime, remoteEmbedding.updatedAt);
             try {
@@ -141,13 +141,13 @@ const pullEmbeddings = async (
                         file.key,
                     ),
                 );
-                c++;
+                count++;
             } catch (e) {
                 log.warn(`Ignoring unparseable ${model} embedding`, e);
             }
         }
         saveEmbeddingSyncTime(sinceTime, model);
-        log.info(`Fetched ${c} ${model} embeddings`);
+        log.info(`Fetched ${count} ${model} embeddings`);
     }
 };
 
