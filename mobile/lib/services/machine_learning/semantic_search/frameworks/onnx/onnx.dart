@@ -71,6 +71,7 @@ class ONNX extends MLFramework {
 
   @override
   Future<List<double>> getImageEmbedding(String imagePath) async {
+    _logger.info('getImageEmbedding called');
     try {
       final startTime = DateTime.now();
       // TODO: properly integrate with other ml later (FaceMlService)
@@ -80,7 +81,7 @@ class ONNX extends MLFramework {
       );
       final endTime = DateTime.now();
       _logger.info(
-        "createImageEmbedding took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+        "getImageEmbedding done in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
       );
       return result;
     } catch (e, s) {
