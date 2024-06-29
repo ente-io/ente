@@ -58,7 +58,6 @@ class EmbeddingStore {
   }
 
   Future<void> pushEmbeddings() async {
-    return; // TODO: remove this
     final pendingItems = await EmbeddingsDB.instance.getUnsyncedEmbeddings();
     final fileMap = await FilesDB.instance
         .getFilesFromIDs(pendingItems.map((e) => e.fileID).toList());
@@ -83,7 +82,7 @@ class EmbeddingStore {
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
     await EmbeddingsDB.instance.put(embedding);
-    // unawaited(_pushEmbedding(file, embedding)); // TODO: uncomment this
+    unawaited(_pushEmbedding(file, embedding));
   }
 
   Future<void> clearEmbeddings(Model model) async {
@@ -96,7 +95,7 @@ class EmbeddingStore {
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(embedding.embedding);
     final encryptedEmbedding = await CryptoUtil.encryptChaCha(
-      utf8.encode(embeddingJSON) as Uint8List,
+      utf8.encode(embeddingJSON),
       encryptionKey,
     );
     final encryptedData =
