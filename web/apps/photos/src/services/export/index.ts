@@ -1329,7 +1329,7 @@ const readOnDiskFileExportRecordIDs = async (
  *
  * @param allFiles The list of files to export.
  *
- * @param exportRecord The export record containing bookeeping for the export.
+ * @param exportRecord The export record containing bookkeeping for the export.
  *
  * @paramd diskFileRecordIDs (Optional) The export record IDs of files from
  * amongst {@link allFiles} that already exist on disk. If provided (e.g. when
