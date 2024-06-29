@@ -285,7 +285,7 @@ export const pt = (s: string) => s;
  * not translated (and for some reason, are currently not meant to be), but
  * still are user visible.
  *
- * It is the sibling of the {@link t} function provided by i18next. See also
+ * It is the sibling of the {@link t} function provided by i18next.
  *
  * See also: {@link pt}.
  */
