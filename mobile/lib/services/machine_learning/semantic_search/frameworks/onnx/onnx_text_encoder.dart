@@ -1,7 +1,7 @@
 import "dart:io";
 import "dart:math";
-import "dart:typed_data";
 
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart';
@@ -11,18 +11,13 @@ class OnnxTextEncoder {
   static const kVocabRemotePath =
       "https://models.ente.io/bpe_simple_vocab_16e6.txt";
   final _logger = Logger("OnnxTextEncoder");
+
   final OnnxTextTokenizer _tokenizer = OnnxTextTokenizer();
 
-  Future<String> getVocab() async {
+
+  Future<void> initTokenizer() async {
     final File vocabFile =
         await RemoteAssetsService.instance.getAsset(kVocabRemotePath);
-    return vocabFile.path;
-  }
-
-  // Do not run in an isolate since rootBundle can only be accessed in the main isolate
-  Future<void> initTokenizer(Map args) async {
-    final String path = args["vocabPath"];
-    final File vocabFile = File(path);
     final String vocab = await vocabFile.readAsString();
     await _tokenizer.init(vocab);
   }
