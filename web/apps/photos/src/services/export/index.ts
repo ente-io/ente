@@ -1309,24 +1309,21 @@ const readOnDiskFileExportRecordIDs = async (
         const exportName = fileExportNames[recordID];
         if (!exportName) continue;
 
-        let fileName: string;
-        let fileName2: string | undefined; // Live photos have 2 parts
-        if (isLivePhotoExportName(exportName)) {
-            const { image, video } = parseLivePhotoExportName(exportName);
-            fileName = image;
-            fileName2 = video;
+        if (ls.has(`${collectionExportPath}/${exportName}`)) {
+            result.add(recordID);
         } else {
-            fileName = exportName;
-        }
-
-        const filePath = `${collectionExportPath}/${fileName}`;
-        if (ls.has(filePath)) {
-            // Also check that the sibling part exists (if any).
-            if (fileName2) {
-                const filePath2 = `${collectionExportPath}/${fileName2}`;
-                if (ls.has(filePath2)) result.add(recordID);
-            } else {
-                result.add(recordID);
+            // It might be a live photo - these store a JSON string instead of
+            // the file's name as the exportName.
+            try {
+                const { image, video } = parseLivePhotoExportName(exportName);
+                if (
+                    ls.has(`${collectionExportPath}/${image}`) &&
+                    ls.has(`${collectionExportPath}/${video}`)
+                ) {
+                    result.add(recordID);
+                }
+            } catch {
+                /* Not an error, the file just might not exist on disk yet */
             }
         }
     }
