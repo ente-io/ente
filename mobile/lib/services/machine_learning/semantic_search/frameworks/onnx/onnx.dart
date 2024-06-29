@@ -55,8 +55,7 @@ class ONNX extends MLFramework {
   @override
   Future<void> loadTextModel(String path) async {
     final startTime = DateTime.now();
-    // Doing this from main isolate since `rootBundle` cannot be accessed outside it
-    await _clipText.initTokenizer();
+    await _computer.compute(_clipText.initTokenizer);
     _textEncoderAddress = await _computer.compute(
       _clipText.loadModel,
       param: {
