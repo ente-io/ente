@@ -1,4 +1,6 @@
+import "dart:async";
 import "dart:io";
+import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -6,6 +8,7 @@ import "package:photos/l10n/l10n.dart";
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
+import "package:photos/utils/lockscreen_setting.dart";
 
 class LockScreen extends StatefulWidget {
   const LockScreen({Key? key}) : super(key: key);
@@ -20,11 +23,17 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   bool _hasPlacedAppInBackground = false;
   bool _hasAuthenticationFailed = false;
   int? lastAuthenticatingTime;
+  bool isTimerRunning = false;
+  int lockedTime = 0;
+  int invalidAttemptCount = 0;
+  int remainingTime = 0;
+  final _lockscreenSetting = LockscreenSetting.instance;
 
   @override
   void initState() {
     _logger.info("initiatingState");
     super.initState();
+    invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (isNonMobileIOSDevice()) {
@@ -53,11 +62,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                 SizedBox(
                   width: 180,
                   child: GradientButton(
-                    text: context.l10n.unlock,
+                    text: isTimerRunning
+                        ? formatTime(remainingTime)
+                        : context.l10n.unlock,
                     iconData: Icons.lock_open_outlined,
                     onTap: () async {
-                      // ignore: unawaited_futures
-                      _showLockScreen(source: "tapUnlock");
+                      if (!isTimerRunning) {
+                        await _showLockScreen(source: "tapUnlock");
+                      }
                     },
                   ),
                 ),
@@ -78,32 +90,38 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     _logger.info(state.toString());
     if (state == AppLifecycleState.resumed && !_isShowingLockScreen) {
-      // This is triggered either when the lock screen is dismissed or when
-      // the app is brought to foreground
       _hasPlacedAppInBackground = false;
       final bool didAuthInLast5Seconds = lastAuthenticatingTime != null &&
           DateTime.now().millisecondsSinceEpoch - lastAuthenticatingTime! <
               5000;
+
       if (!_hasAuthenticationFailed && !didAuthInLast5Seconds) {
-        // Show the lock screen again only if the app is resuming from the
-        // background, and not when the lock screen was explicitly dismissed
-        Future.delayed(
-          Duration.zero,
-          () => _showLockScreen(source: "lifeCycle"),
-        );
+        if (_lockscreenSetting.getlastInvalidAttemptTime() >
+                DateTime.now().millisecondsSinceEpoch &&
+            !_isShowingLockScreen) {
+          final int time = (_lockscreenSetting.getlastInvalidAttemptTime() -
+                  DateTime.now().millisecondsSinceEpoch) ~/
+              1000;
+
+          Future.delayed(
+            Duration.zero,
+            () {
+              startLockTimer(time);
+              _showLockScreen(source: "lifeCycle");
+            },
+          );
+        }
       } else {
-        _hasAuthenticationFailed = false; // Reset failure state
+        _hasAuthenticationFailed = false;
       }
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      // This is triggered either when the lock screen pops up or when
-      // the app is pushed to background
       if (!_isShowingLockScreen) {
         _hasPlacedAppInBackground = true;
-        _hasAuthenticationFailed = false; // reset failure state
+        _hasAuthenticationFailed = false;
       }
     }
   }
@@ -115,24 +133,83 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  Future<void> startLockTimer(int time) async {
+    if (isTimerRunning) {
+      return;
+    }
+
+    setState(() {
+      isTimerRunning = true;
+      remainingTime = time;
+    });
+
+    while (remainingTime > 0) {
+      await Future.delayed(const Duration(seconds: 1));
+      setState(() {
+        remainingTime--;
+      });
+    }
+
+    setState(() {
+      isTimerRunning = false;
+    });
+  }
+
+  String formatTime(int seconds) {
+    final int hours = seconds ~/ 3600;
+    final int minutes = (seconds % 3600) ~/ 60;
+    final int remainingSeconds = seconds % 60;
+
+    if (hours > 0) {
+      return "$hours hr $minutes min";
+    } else if (minutes > 0) {
+      return "$minutes min $remainingSeconds sec";
+    } else {
+      return "$remainingSeconds sec";
+    }
+  }
+
   Future<void> _showLockScreen({String source = ''}) async {
     final int id = DateTime.now().millisecondsSinceEpoch;
     _logger.info("Showing lock screen $source $id");
     try {
+      if (id < _lockscreenSetting.getlastInvalidAttemptTime() &&
+          !_isShowingLockScreen) {
+        final int time =
+            (_lockscreenSetting.getlastInvalidAttemptTime() - id) ~/ 1000;
+
+        await startLockTimer(time);
+      }
       _isShowingLockScreen = true;
-      final result = await requestAuthentication(
-        context,
-        context.l10n.authToViewYourMemories,
-      );
+      final result = isTimerRunning
+          ? false
+          : await requestAuthentication(
+              context,
+              context.l10n.authToViewYourMemories,
+              isLockscreenAuth: true,
+            );
       _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
         AppLock.of(context)!.didUnlock();
+        await _lockscreenSetting.setInvalidAttemptCount(0);
+        setState(() {
+          lockedTime = 15;
+          isTimerRunning = false;
+        });
       } else {
         if (!_hasPlacedAppInBackground) {
-          // Treat this as a failure only if user did not explicitly
-          // put the app in background
+          if (_lockscreenSetting.getInvalidAttemptCount() > 4 &&
+              invalidAttemptCount !=
+                  _lockscreenSetting.getInvalidAttemptCount()) {
+            invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
+            lockedTime = pow(2, invalidAttemptCount - 5).toInt() * 30;
+            await _lockscreenSetting.setLastInvalidAttemptTime(
+              DateTime.now().millisecondsSinceEpoch + lockedTime * 1000,
+            );
+            await startLockTimer(lockedTime);
+          }
           _hasAuthenticationFailed = true;
           _logger.info("Authentication failed");
         }

@@ -7,8 +7,8 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/settings/lockscreen/lock_screen_option_password.dart";
-import "package:photos/ui/settings/lockscreen/lock_screen_option_pin.dart";
+import "package:photos/ui/settings/lockscreen/lockscreen_password.dart";
+import "package:photos/ui/settings/lockscreen/lockscreen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 
@@ -53,7 +53,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     final bool result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return const LockScreenOptionPin();
+          return const LockScreenPin();
         },
       ),
     );
@@ -71,7 +71,7 @@ class _LockScreenOptionState extends State<LockScreenOption> {
     final bool result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return const LockScreenOptionPassword();
+          return const LockScreenPassword();
         },
       ),
     );

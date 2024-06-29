@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/utils/crypto_util.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class LockscreenSetting {
   LockscreenSetting._privateConstructor();
@@ -13,11 +14,30 @@ class LockscreenSetting {
   static const password = "user_pass";
   static const pin = "user_pin";
   static const saltKey = "user_salt";
-
+  static const keyInvalidAttempts = "invalid_attempts";
+  static const lastInvalidAttemptTime = "last_invalid_attempt_time";
   late FlutterSecureStorage _secureStorage;
+  late SharedPreferences _preferences;
 
-  void init(FlutterSecureStorage secureStorage) {
+  void init(FlutterSecureStorage secureStorage, SharedPreferences prefs) async {
     _secureStorage = secureStorage;
+    _preferences = prefs;
+  }
+
+  Future<void> setLastInvalidAttemptTime(int time) async {
+    await _preferences.setInt(lastInvalidAttemptTime, time);
+  }
+
+  int getlastInvalidAttemptTime() {
+    return _preferences.getInt(lastInvalidAttemptTime) ?? 0;
+  }
+
+  int getInvalidAttemptCount() {
+    return _preferences.getInt(keyInvalidAttempts) ?? 0;
+  }
+
+  Future<void> setInvalidAttemptCount(int count) async {
+    await _preferences.setInt(keyInvalidAttempts, count);
   }
 
   static Uint8List generateSalt() {

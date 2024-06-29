@@ -7,7 +7,11 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 
-Future<bool> requestAuthentication(BuildContext context, String reason) async {
+Future<bool> requestAuthentication(
+  BuildContext context,
+  String reason, {
+  bool isLockscreenAuth = false,
+}) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
 
@@ -16,7 +20,12 @@ Future<bool> requestAuthentication(BuildContext context, String reason) async {
   final String? savedPassword = await lockscreenSetting.getPassword();
   if (savedPassword != null || savedPin != null) {
     return await LocalAuthenticationService.instance
-        .requestEnteAuthForLockScreen(context, savedPin, savedPassword);
+        .requestEnteAuthForLockScreen(
+      context,
+      savedPin,
+      savedPassword,
+      isLockscreenAuth: isLockscreenAuth,
+    );
   } else {
     return await LocalAuthentication().authenticate(
       localizedReason: reason,

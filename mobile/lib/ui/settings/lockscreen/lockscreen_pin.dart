@@ -7,31 +7,41 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/settings/lockscreen/lock_screen_option_confirm_pin.dart";
+import "package:photos/ui/settings/lockscreen/lockscreen_confirm_pin.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 import 'package:pinput/pinput.dart';
 
-class LockScreenOptionPin extends StatefulWidget {
-  const LockScreenOptionPin({
+class LockScreenPin extends StatefulWidget {
+  const LockScreenPin({
     super.key,
     this.isAuthenticating = false,
+    this.isLockscreenAuth = false,
     this.authPin,
   });
 
-  /// If [isAuthenticating] is true then we are authenticating the user
+  /// If [isLockscreenAuth] is true then we are authenticating the user at the Lock screen
+  /// If [isAuthenticating] is true then we are authenticating the user at the Setting screen
   final bool isAuthenticating;
+  final bool isLockscreenAuth;
   final String? authPin;
   @override
-  State<LockScreenOptionPin> createState() => _LockScreenOptionPinState();
+  State<LockScreenPin> createState() => _LockScreenPinState();
 }
 
-class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
+class _LockScreenPinState extends State<LockScreenPin> {
   final _pinController = TextEditingController(text: null);
 
   final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
   late String enteredHashedPin;
   bool isPinValid = false;
+  int invalidAttemptsCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    invalidAttemptsCount = _lockscreenSetting.getInvalidAttemptCount();
+  }
 
   @override
   void dispose() {
@@ -63,19 +73,30 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
 
     enteredHashedPin = base64Encode(hash);
     if (widget.authPin == enteredHashedPin) {
+      invalidAttemptsCount = 0;
+      await _lockscreenSetting.setInvalidAttemptCount(0);
       Navigator.of(context).pop(true);
       return true;
+    } else {
+      setState(() {
+        isPinValid = true;
+      });
+      await HapticFeedback.vibrate();
+      await Future.delayed(const Duration(milliseconds: 75));
+      _pinController.clear();
+      setState(() {
+        isPinValid = false;
+      });
+
+      if (widget.isLockscreenAuth) {
+        invalidAttemptsCount++;
+        if (invalidAttemptsCount > 4) {
+          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
+          Navigator.of(context).pop(false);
+        }
+      }
+      return false;
     }
-    setState(() {
-      isPinValid = true;
-    });
-    await HapticFeedback.vibrate();
-    await Future.delayed(const Duration(milliseconds: 75));
-    _pinController.clear();
-    setState(() {
-      isPinValid = false;
-    });
-    return false;
   }
 
   Future<void> _confirmPin(String code) async {
@@ -85,8 +106,7 @@ class _LockScreenOptionPinState extends State<LockScreenOptionPin> {
     } else {
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (BuildContext context) =>
-              LockScreenOptionConfirmPin(pin: code),
+          builder: (BuildContext context) => LockScreenConfirmPin(pin: code),
         ),
       );
       _pinController.clear();

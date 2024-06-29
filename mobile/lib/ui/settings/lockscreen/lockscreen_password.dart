@@ -8,37 +8,41 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
-import "package:photos/ui/settings/lockscreen/lock_screen_option_confirm_password.dart";
+import "package:photos/ui/settings/lockscreen/lockscreen_confirm_password.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 
-class LockScreenOptionPassword extends StatefulWidget {
-  const LockScreenOptionPassword({
+class LockScreenPassword extends StatefulWidget {
+  const LockScreenPassword({
     super.key,
     this.isAuthenticating = false,
+    this.isLockscreenAuth = false,
     this.authPass,
   });
 
-  /// If [isAuthenticating] is true then we are authenticating the user
+  /// If [isLockscreenAuth] is true then we are authenticating the user at Lock screen
+  /// If [isAuthenticating] is true then we are authenticating the user at Setting screen
   final bool isAuthenticating;
+  final bool isLockscreenAuth;
   final String? authPass;
   @override
-  State<LockScreenOptionPassword> createState() =>
-      _LockScreenOptionPasswordState();
+  State<LockScreenPassword> createState() => _LockScreenPasswordState();
 }
 
-class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
+class _LockScreenPasswordState extends State<LockScreenPassword> {
   /// _passwordController is disposed by the [TextInputWidget]
   final _passwordController = TextEditingController(text: null);
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
   final _submitNotifier = ValueNotifier(false);
+  int invalidAttemptsCount = 0;
 
   final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
-  late String hashedPassword;
+  late String enteredHashedPassword;
   @override
   void initState() {
     super.initState();
+    invalidAttemptsCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _focusNode.requestFocus();
     });
@@ -61,11 +65,20 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
       "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
     });
 
-    hashedPassword = base64Encode(hash);
-    if (widget.authPass == hashedPassword) {
+    enteredHashedPassword = base64Encode(hash);
+    if (widget.authPass == enteredHashedPassword) {
+      await _lockscreenSetting.setInvalidAttemptCount(0);
       Navigator.of(context).pop(true);
       return true;
     } else {
+      if (widget.isLockscreenAuth) {
+        invalidAttemptsCount++;
+        if (invalidAttemptsCount > 4) {
+          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
+          Navigator.of(context).pop(false);
+        }
+      }
+
       await HapticFeedback.vibrate();
       throw Exception("Incorrect password");
     }
@@ -78,7 +91,7 @@ class _LockScreenOptionPasswordState extends State<LockScreenOptionPassword> {
     } else {
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (BuildContext context) => LockScreenOptionConfirmPassword(
+          builder: (BuildContext context) => LockScreenConfirmPassword(
             password: _passwordController.text,
           ),
         ),

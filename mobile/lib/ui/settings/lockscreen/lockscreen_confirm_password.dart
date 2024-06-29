@@ -7,20 +7,19 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 
-class LockScreenOptionConfirmPassword extends StatefulWidget {
-  const LockScreenOptionConfirmPassword({
+class LockScreenConfirmPassword extends StatefulWidget {
+  const LockScreenConfirmPassword({
     super.key,
     required this.password,
   });
   final String password;
 
   @override
-  State<LockScreenOptionConfirmPassword> createState() =>
-      _LockScreenOptionConfirmPasswordState();
+  State<LockScreenConfirmPassword> createState() =>
+      _LockScreenConfirmPasswordState();
 }
 
-class _LockScreenOptionConfirmPasswordState
-    extends State<LockScreenOptionConfirmPassword> {
+class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
   /// _confirmPasswordController is disposed by the [TextInputWidget]
   final _confirmPasswordController = TextEditingController(text: null);
 

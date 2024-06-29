@@ -7,16 +7,14 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 import "package:pinput/pinput.dart";
 
-class LockScreenOptionConfirmPin extends StatefulWidget {
-  const LockScreenOptionConfirmPin({super.key, required this.pin});
+class LockScreenConfirmPin extends StatefulWidget {
+  const LockScreenConfirmPin({super.key, required this.pin});
   final String pin;
   @override
-  State<LockScreenOptionConfirmPin> createState() =>
-      _LockScreenOptionConfirmPinState();
+  State<LockScreenConfirmPin> createState() => _LockScreenConfirmPinState();
 }
 
-class _LockScreenOptionConfirmPinState
-    extends State<LockScreenOptionConfirmPin> {
+class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
 
   final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
