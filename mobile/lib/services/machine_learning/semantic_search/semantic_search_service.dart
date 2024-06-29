@@ -36,7 +36,7 @@ class SemanticSearchService {
   static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
 
   static const kEmbeddingLength = 512;
-  static const kScoreThreshold = 0.23;
+  static const kMinimumSimilarityThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
   static const kDebounceDuration = Duration(milliseconds: 4000);
 
@@ -237,7 +237,7 @@ class SemanticSearchService {
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults =
-        await _getScores(textEmbedding, scoreThreshold: scoreThreshold);
+        await _getSimilarities(textEmbedding, minimumSimilarity: scoreThreshold);
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
@@ -267,11 +267,11 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<List<int>> getMatchingFileIDs(String query, double minScore) async {
+  Future<List<int>> getMatchingFileIDs(String query, double minimumSimilarity) async {
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults =
-        await _getScores(textEmbedding, scoreThreshold: minScore);
+        await _getSimilarities(textEmbedding, minimumSimilarity: minimumSimilarity);
 
     final queryResultIds = <int>[];
     for (QueryResult result in queryResults) {
@@ -417,17 +417,17 @@ class SemanticSearchService {
     }
   }
 
-  Future<List<QueryResult>> _getScores(
+  Future<List<QueryResult>> _getSimilarities(
     List<double> textEmbedding, {
-    double? scoreThreshold,
+    double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
     final List<QueryResult> queryResults = await _computer.compute(
-      computeBulkScore,
+      computeBulkSimilarities,
       param: {
         "imageEmbeddings": _cachedEmbeddings,
         "textEmbedding": textEmbedding,
-        "scoreThreshold": scoreThreshold,
+        "minimumSimilarity": minimumSimilarity,
       },
       taskName: "computeBulkScore",
     );
@@ -464,18 +464,18 @@ class SemanticSearchService {
   }
 }
 
-List<QueryResult> computeBulkScore(Map args) {
+List<QueryResult> computeBulkSimilarities(Map args) {
   final queryResults = <QueryResult>[];
   final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
-  final scoreThreshold =
-      args["scoreThreshold"] ?? SemanticSearchService.kScoreThreshold;
+  final minimumSimilarity = args["minimumSimilarity"] ??
+      SemanticSearchService.kMinimumSimilarityThreshold;
   for (final imageEmbedding in imageEmbeddings) {
-    final score = computeScore(
+    final score = computeCosineSimilarity(
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (score >= scoreThreshold) {
+    if (score >= minimumSimilarity) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
   }
@@ -484,17 +484,17 @@ List<QueryResult> computeBulkScore(Map args) {
   return queryResults;
 }
 
-double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
+double computeCosineSimilarity(List<double> imageEmbedding, List<double> textEmbedding) {
   assert(
     imageEmbedding.length == textEmbedding.length,
     "The two embeddings should have the same length",
   );
-  double score = 0;
+  double cosineSimilarity = 0;
   final length = imageEmbedding.length;
   for (int index = 0; index < length; index++) {
-    score += imageEmbedding[index] * textEmbedding[index];
+    cosineSimilarity += imageEmbedding[index] * textEmbedding[index];
   }
-  return score;
+  return cosineSimilarity;
 }
 
 class QueryResult {
