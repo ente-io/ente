@@ -24,7 +24,7 @@ import { getAllLocalFiles } from "./files";
  *
  * The embeddings themselves have a version embedded in them, so it is possible
  * for us to make backward compatible updates to the indexing process on newer
- * clients (There is a top level version field too but that is not used.
+ * clients (There is also a top level version field too but that is not used).
  *
  * If we bump the version of same model (say when indexing on a newer client),
  * the assumption will be that older client will be able to consume the
