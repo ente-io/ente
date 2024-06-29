@@ -54,6 +54,23 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       '$runtimeType building with ${widget.selectedFiles.files.length}',
     );
 
+    return widget.galleryType == GalleryType.homepage
+        ? _body()
+        : PopScope(
+            canPop: false,
+            onPopInvoked: (didPop) {
+              if (!didPop) {
+                if (widget.selectedFiles.files.isEmpty) {
+                  Navigator.of(context).pop();
+                }
+                widget.selectedFiles.clearAll();
+              }
+            },
+            child: _body(),
+          );
+  }
+
+  Widget _body() {
     return ValueListenableBuilder(
       valueListenable: _hasSelectedFilesNotifier,
       builder: (context, value, child) {
