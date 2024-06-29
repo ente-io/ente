@@ -177,6 +177,10 @@ const saveEmbeddingSyncTime = (t: number, model: EmbeddingModel) =>
  */
 export const pullFaceEmbeddings = () =>
     pullEmbeddings("file-ml-clip-face", (jsonString: string) =>
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error, @typescript-eslint/ban-ts-comment
+        // @ts-ignore TODO: There is no error here, but this file is imported by
+        // one of our packages that doesn't have strict mode enabled yet,
+        // causing a spurious error to be emitted in that context.
         saveFaceIndexIfNewer(FaceIndex.parse(JSON.parse(jsonString))),
     );
 
