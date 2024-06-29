@@ -36,7 +36,7 @@ class SemanticSearchService {
   static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
 
   static const kEmbeddingLength = 512;
-  static const kMinimumSimilarityThreshold = 0.23;
+  static const kMinimumSimilarityThreshold = 0.20;
   static const kShouldPushEmbeddings = true;
   static const kDebounceDuration = Duration(milliseconds: 4000);
 
