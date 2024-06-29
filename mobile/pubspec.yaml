@@ -238,7 +238,6 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/clip/
     - assets/video-editor/
   fonts:
     - family: Inter
