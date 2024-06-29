@@ -1,4 +1,5 @@
 import { getKV, setKV } from "@/next/kv";
+import { inWorker } from "./env";
 
 /**
  * Return the origin (scheme, host, port triple) that should be used for making
@@ -36,7 +37,7 @@ export const apiURL = async (path: string) => (await apiOrigin()) + path;
  */
 export const customAPIOrigin = async () => {
     let origin = await getKV("apiOrigin");
-    if (!origin) {
+    if (!origin && !inWorker()) {
         // TODO: Migration of apiOrigin from local storage to indexed DB
         // Remove me after a bit (27 June 2024).
         const legacyOrigin = localStorage.getItem("apiOrigin");
