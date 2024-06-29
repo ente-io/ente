@@ -12,7 +12,6 @@ export enum LS_KEYS {
     SHOW_BACK_BUTTON = "showBackButton",
     EXPORT = "export",
     THUMBNAIL_FIX_STATE = "thumbnailFixState",
-    LIVE_PHOTO_INFO_SHOWN_COUNT = "livePhotoInfoShownCount",
     // LOGS = "logs",
     USER_DETAILS = "userDetails",
     COLLECTION_SORT_BY = "collectionSortBy",
