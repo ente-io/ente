@@ -82,8 +82,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
-        const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(appName, userId);
+        const userID = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(appName, userID);
         logUnhandledErrorsAndRejections(true);
         setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
