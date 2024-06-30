@@ -11,7 +11,7 @@ import type { AppName } from "./types/app";
  * @param userId The uid for the currently logged in user, if any.
  */
 export const logStartupBanner = (appName: AppName, userId?: number) => {
-    const sha = process.env.GIT_SHA;
+    const sha = process.env.gitSHA;
     const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
     log.info(`Starting ente-${appName}-web ${buildId}uid ${userId ?? 0}`);
 };

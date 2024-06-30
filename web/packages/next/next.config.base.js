@@ -17,7 +17,7 @@ const path = require("path");
 /**
  * Return the current commit ID if we're running inside a git repository.
  */
-const gitSHA = () => {
+const gitSHA = (() => {
     // Allow the command to fail. gitSHA will be an empty string in such cases.
     // This allows us to run the build even when we're outside of a git context.
     //
@@ -38,7 +38,7 @@ const gitSHA = () => {
     // Convert empty strings (e.g. when the `|| true` part of the above execSync
     // comes into play) to undefined.
     return result ? result : undefined;
-};
+})();
 
 /**
  * The name of the Ente app we're building.
@@ -79,9 +79,9 @@ const nextConfig = {
     transpilePackages: ["@/next", "@/utils", "@/new"],
 
     // Add environment variables to the JavaScript bundle. They will be
-    // available as `process.env.VAR_NAME` to our code.
+    // available as `process.env.varName` to our code.
     env: {
-        GIT_SHA: gitSHA(),
+        gitSHA,
         appName,
         isDesktop,
     },
