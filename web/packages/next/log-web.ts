@@ -1,6 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import { appNames, type AppName } from "./types/app";
+import { appName, appNames, type AppName } from "./types/app";
 
 /**
  * Log a standard startup banner.
@@ -10,12 +10,12 @@ import { appNames, type AppName } from "./types/app";
  * @param appName The {@link AppName} of the app that is starting.
  * @param userID The uid for the currently logged in user, if any.
  */
-export const logStartupBanner = (appName: AppName, userID?: number) => {
+export const logStartupBanner = (_: AppName, userID?: number) => {
     // Log a warning if appName isn't what it claims to be. See the
     // documentation of `appName` for why this is needed.
     if (!appNames.includes(appName)) {
         log.warn(
-            `App name ${appName} is not one of the known app names: ${JSON.stringify(appNames)}`,
+            `App name "${appName}" is not one of the known app names: ${JSON.stringify(appNames)}`,
         );
     }
 
