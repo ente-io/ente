@@ -9,7 +9,10 @@ export const appNames = ["accounts", "auth", "photos"] as const;
 export type AppName = (typeof appNames)[number];
 
 /**
- * The name of the Ente app which we're currently running as.
+ * The unique key for the app.
+ *
+ * This is the name of the Ente app which we're currently running as. It is used
+ * as a key for various properties that are different across apps.
  *
  * Parts of our code are shared across apps. Some parts of them also run in
  * non-main thread execution contexts like web workers. So there isn't always an
@@ -25,15 +28,15 @@ export type AppName = (typeof appNames)[number];
 export const appName: AppName = process.env.appName as AppName;
 
 /**
- * Static title for the app.
+ * Static (English) title for the app.
  *
  * This is shown until we have the localized version.
  */
-export const appTitle: Record<AppName, string> = {
+export const staticAppTitle = {
     accounts: "Ente Accounts",
     auth: "Ente Auth",
     photos: "Ente Photos",
-};
+}[appName];
 
 /**
  * Client "package names" for each of our apps.
@@ -67,8 +70,6 @@ export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
  * listed in {@link AppName}.
  */
 export interface BaseAppContextT {
-    /** The unique key for the app. */
-    appName: AppName;
     /** Perform the (possibly app specific) logout sequence. */
     logout: () => void;
     /** Show or hide the app's navigation bar. */

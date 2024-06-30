@@ -1,4 +1,3 @@
-import type { AppName } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
@@ -20,9 +19,7 @@ import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const router = useRouter();
 
     useEffect(() => {
@@ -36,7 +33,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
-                <ChangeEmailForm {...{ appName }} />
+                <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>
     );
@@ -49,11 +46,7 @@ interface formValues {
     ott?: string;
 }
 
-interface ChangeEmailFormProps {
-    appName: AppName;
-}
-
-const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({ appName }) => {
+const ChangeEmailForm: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
@@ -101,7 +94,7 @@ const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({ appName }) => {
         }
     };
 
-    const goToApp = () => router.push(appHomeRoute(appName));
+    const goToApp = () => router.push(appHomeRoute);
 
     return (
         <Formik<formValues>

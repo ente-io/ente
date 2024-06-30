@@ -39,9 +39,7 @@ import { useEffect, useState } from "react";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
 
@@ -137,7 +135,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(appHomeRoute(appName));
+        router.push(appHomeRoute);
     };
 
     // TODO: Handle the case where user is not loaded yet.

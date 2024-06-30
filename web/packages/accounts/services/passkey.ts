@@ -1,8 +1,7 @@
 import { clientPackageHeaderIfPresent } from "@/next/http";
 import log from "@/next/log";
 import { accountsAppOrigin, apiURL } from "@/next/origins";
-import type { AppName } from "@/next/types/app";
-import { clientPackageName } from "@/next/types/app";
+import { appName, clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -24,15 +23,10 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
- * @param appName The {@link AppName} of the app which is calling this function.
- *
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
-export const passkeyVerificationRedirectURL = (
-    appName: AppName,
-    passkeySessionID: string,
-) => {
+export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
     const clientPackage = clientPackageName(appName);
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate

@@ -1,7 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { appTitle, type AppName } from "@/next/types/app";
+import { staticAppTitle } from "@/next/types/app";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";
@@ -24,8 +24,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
-    const appName: AppName = "accounts";
-
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
 
     const [showNavbar, setShowNavbar] = useState(false);
@@ -61,7 +59,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, [router]);
 
     const appContext = {
-        appName,
         logout,
         showNavBar: setShowNavbar,
         isMobile,
@@ -70,7 +67,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const title = isI18nReady
         ? t("title", { context: "accounts" })
-        : appTitle[appName];
+        : staticAppTitle;
 
     return (
         <>

@@ -6,9 +6,9 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
 import {
+    appName,
     appTitle,
     clientPackageName,
-    type AppName,
     type BaseAppContextT,
 } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
@@ -59,8 +59,6 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
-    const appName: AppName = "auth";
-
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -83,7 +81,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
         const userID = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(appName, userID);
+        logStartupBanner(userID);
         logUnhandledErrorsAndRejections(true);
         setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
@@ -159,9 +157,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         somethingWentWrong,
     };
 
-    const title = isI18nReady
-        ? t("title", { context: "auth" })
-        : appTitle[appName];
+    const title = isI18nReady ? t("title", { context: "auth" }) : staticAppTitle;
 
     return (
         <>

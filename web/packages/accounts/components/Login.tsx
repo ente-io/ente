@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import type { AppName } from "@/next/types/app";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -16,12 +15,11 @@ import { PAGES } from "../constants/pages";
 
 interface LoginProps {
     signUp: () => void;
-    appName: AppName;
     /** Reactive value of {@link customAPIHost}. */
     host: string | undefined;
 }
 
-export function Login({ appName, signUp, host }: LoginProps) {
+export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
     const router = useRouter();
 
     const loginUser: SingleInputFormProps["callback"] = async (
@@ -33,7 +31,7 @@ export function Login({ appName, signUp, host }: LoginProps) {
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ` srpAttributes: ${JSON.stringify(srpAttributes)}`);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
-                await sendOtt(appName, email);
+                await sendOtt(email);
                 router.push(PAGES.VERIFY);
             } else {
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
@@ -79,4 +77,4 @@ export function Login({ appName, signUp, host }: LoginProps) {
             </FormPaperFooter>
         </>
     );
-}
+};

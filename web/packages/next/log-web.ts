@@ -1,16 +1,15 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import { appName, appNames, type AppName } from "./types/app";
+import { appName, appNames } from "./types/app";
 
 /**
  * Log a standard startup banner.
  *
  * This helps us identify app starts and other environment details in the logs.
  *
- * @param appName The {@link AppName} of the app that is starting.
  * @param userID The uid for the currently logged in user, if any.
  */
-export const logStartupBanner = (_: AppName, userID?: number) => {
+export const logStartupBanner = (userID?: number) => {
     // Log a warning if appName isn't what it claims to be. See the
     // documentation of `appName` for why this is needed.
     if (!appNames.includes(appName)) {

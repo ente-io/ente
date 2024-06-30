@@ -23,9 +23,7 @@ export enum SetupMode {
     MANUAL_CODE,
 }
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
         TwoFactorSecret | undefined
     >();
@@ -60,7 +58,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(appHomeRoute(appName));
+        router.push(appHomeRoute);
     };
 
     return (

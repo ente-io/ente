@@ -1,5 +1,5 @@
 import { apiURL } from "@/next/origins";
-import type { AppName } from "@/next/types/app";
+import { appName } from "@/next/types/app";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
@@ -14,7 +14,7 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 
-export const sendOtt = async (appName: AppName, email: string) => {
+export const sendOtt = async (email: string) => {
     return HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: appName == "auth" ? "totp" : "web",

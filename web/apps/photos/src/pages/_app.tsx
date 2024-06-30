@@ -7,9 +7,9 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
 import {
-    appTitle,
+    appName,
     clientPackageName,
-    type AppName,
+    staticAppTitle,
     type BaseAppContextT,
 } from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
@@ -109,8 +109,6 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
-    const appName: AppName = "photos";
-
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -149,7 +147,7 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
         const userID = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(appName, userID);
+        logStartupBanner(userID);
         logUnhandledErrorsAndRejections(true);
         setAppNameForAuthenticatedRequests(appName);
         HTTPService.setHeaders({
@@ -374,7 +372,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const title = isI18nReady
         ? t("title", { context: "photos" })
-        : appTitle[appName];
+        : staticAppTitle;
 
     return (
         <>
