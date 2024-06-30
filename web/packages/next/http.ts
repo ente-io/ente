@@ -1,5 +1,5 @@
+import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";
-import { clientPackageName } from "./types/app";
 
 /**
  * Return headers that should be passed alongwith (almost) all authenticated

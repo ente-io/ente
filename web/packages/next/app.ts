@@ -47,12 +47,6 @@ export const staticAppTitle = {
     photos: "Ente Photos",
 }[appName];
 
-export const _clientPackageName: Record<AppName, string> = {
-    accounts: "io.ente.accounts.web",
-    auth: "io.ente.auth.web",
-    photos: "io.ente.photos.web",
-};
-
 /** Client package name for the Photos desktop app */
 export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
 
@@ -71,7 +65,11 @@ export const clientPackageName = (() => {
             throw new Error(`Unsupported desktop appName ${appName}`);
         return clientPackageNamePhotosDesktop;
     }
-    return _clientPackageName[appName];
+    return {
+        accounts: "io.ente.accounts.web",
+        auth: "io.ente.auth.web",
+        photos: "io.ente.photos.web",
+    }[appName];
 })();
 
 /**

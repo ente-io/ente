@@ -1,6 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import { appName, appNames } from "./types/app";
+import { appName, appNames } from "./app";
 
 /**
  * Log a standard startup banner.

@@ -94,8 +94,6 @@ export const openPasskeyVerificationURL = ({
 /**
  * Open a new window showing a page on the Ente accounts app where the user can
  * see and their manage their passkeys.
- *
- * @param appName The {@link AppName} of the app which is calling this function.
  */
 export const openAccountsManagePasskeysPage = async () => {
     // Check if the user has passkey recovery enabled
