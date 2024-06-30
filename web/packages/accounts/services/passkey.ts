@@ -1,7 +1,7 @@
 import { clientPackageHeader } from "@/next/http";
 import log from "@/next/log";
 import { accountsAppOrigin, apiURL } from "@/next/origins";
-import { appName, clientPackageName } from "@/next/types/app";
+import { clientPackageName, isDesktop } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -27,13 +27,13 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
  * verification session.
  */
 export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
-    const clientPackage = clientPackageName(appName);
+    const clientPackage = clientPackageName;
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
     // in desktop app]
     const redirect = `${window.location.origin}/passkeys/finish`;
     // See: [Note: Conditional passkey recover option on accounts]
-    const recoverOption: Record<string, string> = globalThis.electron
+    const recoverOption: Record<string, string> = isDesktop
         ? {}
         : { recover: `${window.location.origin}/passkeys/recover` };
     const params = new URLSearchParams({

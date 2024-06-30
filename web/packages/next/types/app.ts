@@ -28,6 +28,15 @@ export type AppName = (typeof appNames)[number];
 export const appName: AppName = process.env.appName as AppName;
 
 /**
+ * True if we're running in our desktop app.
+ *
+ * This is similar to checking for `globalThis.electron`, however the advantage
+ * of this check is that it will also work inside web workers (whose globalThis
+ * won't have an electron object defined).
+ */
+export const isDesktop = process.env.isDesktop == "1";
+
+/**
  * Static (English) title for the app.
  *
  * This is shown until we have the localized version.
@@ -57,7 +66,7 @@ export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
  * app (currently only photos), this will be the platform specific package name.
  */
 export const clientPackageName = (() => {
-    if (process.env.isDesktop) {
+    if (isDesktop) {
         if (appName != "photos")
             throw new Error(`Unsupported desktop appName ${appName}`);
         return clientPackageNamePhotosDesktop;
