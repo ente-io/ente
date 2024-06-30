@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import { customAPIHost } from "@/next/origins";
-import type { BaseAppContextT } from "@/next/types/app";
+import type { BaseAppContextT } from "@/next/types/context";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,

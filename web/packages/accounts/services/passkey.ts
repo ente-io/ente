@@ -1,7 +1,7 @@
+import { clientPackageName, isDesktop } from "@/next/app";
 import { clientPackageHeader } from "@/next/http";
 import log from "@/next/log";
 import { accountsAppOrigin, apiURL } from "@/next/origins";
-import { clientPackageName, isDesktop } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";

@@ -1,7 +1,7 @@
+import { staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { disableDiskLogs } from "@/next/log";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { appTitle } from "@/next/app";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, ThemeProvider } from "@mui/material";
@@ -19,7 +19,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     return (
         <>
-            <CustomHead title={appTitle.photos} />
+            <CustomHead title={staticAppTitle} />
 
             <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
                 <CssBaseline enableColorScheme />

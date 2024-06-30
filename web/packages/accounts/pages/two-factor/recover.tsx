@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import type { BaseAppContextT } from "@/next/types/app";
+import type { BaseAppContextT } from "@/next/types/context";
 import { ensure } from "@/utils/ensure";
 import {
     recoverTwoFactor,

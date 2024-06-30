@@ -1,5 +1,5 @@
+import { appName } from "@/next/app";
 import { apiURL } from "@/next/origins";
-import { appName } from "@/next/types/app";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,

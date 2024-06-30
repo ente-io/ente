@@ -1,8 +1,8 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { EnteFile } from "@/new/photos/types/file";
+import { clientPackageNamePhotosDesktop } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
-import { clientPackageNamePhotosDesktop } from "@/next/types/app";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { eventBus, Events } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";

@@ -9,6 +9,6 @@ import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
 export const appHomeRoute: string = {
     accounts: "/passkeys",
     auth: AUTH_PAGES.AUTH,
-    cast: "/",
+    cast: "/" /* The cast app doesn't use this, this is an arbitrary value. */,
     photos: PHOTOS_PAGES.GALLERY,
 }[appName];
