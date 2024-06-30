@@ -1,14 +1,12 @@
 import { CustomHead } from "@/next/components/Head";
-import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
 import {
-    appName,
-    appTitle,
     clientPackageName,
+    staticAppTitle,
     type BaseAppContextT,
 } from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
@@ -82,11 +80,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void setupI18n().finally(() => setIsI18nReady(true));
         const userID = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(userID);
+        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
-        setAppNameForAuthenticatedRequests(appName);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName(appName),
-        });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
@@ -145,7 +140,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     };
 
     const appContext = {
-        appName,
         logout,
         showNavBar,
         isMobile,
@@ -157,7 +151,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         somethingWentWrong,
     };
 
-    const title = isI18nReady ? t("title", { context: "auth" }) : staticAppTitle;
+    const title = isI18nReady
+        ? t("title", { context: "auth" })
+        : staticAppTitle;
 
     return (
         <>

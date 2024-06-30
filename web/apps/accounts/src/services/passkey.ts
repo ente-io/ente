@@ -22,12 +22,10 @@ export const isWebAuthnSupported = () => !!navigator.credentials;
  */
 const accountsAuthenticatedRequestHeaders = (
     token: string,
-): Record<string, string> => {
-    return {
-        "X-Auth-Token": token,
-        "X-Client-Package": clientPackageName("accounts"),
-    };
-};
+): Record<string, string> => ({
+    "X-Auth-Token": token,
+    "X-Client-Package": clientPackageName,
+});
 
 const Passkey = z.object({
     /** A unique ID for the passkey */

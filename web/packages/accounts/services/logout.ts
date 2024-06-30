@@ -1,5 +1,4 @@
 import { clearBlobCaches } from "@/next/blob-cache";
-import { clearHTTPState } from "@/next/http";
 import { clearKVDB } from "@/next/kv";
 import log from "@/next/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
@@ -51,11 +50,6 @@ export const accountLogout = async () => {
         await clearBlobCaches();
     } catch (e) {
         ignoreError("Blob cache", e);
-    }
-    try {
-        clearHTTPState();
-    } catch (e) {
-        ignoreError("HTTP", e);
     }
     try {
         await clearKVDB();

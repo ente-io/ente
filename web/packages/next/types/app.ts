@@ -38,24 +38,6 @@ export const staticAppTitle = {
     photos: "Ente Photos",
 }[appName];
 
-/**
- * Client "package names" for each of our apps.
- *
- * These are used as the identifier in the user agent strings that we send to
- * our own servers.
- *
- * In cases where this code works for both a web and a desktop app for the same
- * app (currently only photos), return the platform specific package name.
- */
-export const clientPackageName = (appName: AppName): string => {
-    if (globalThis.electron) {
-        if (appName != "photos")
-            throw new Error(`Unsupported desktop appName ${appName}`);
-        return clientPackageNamePhotosDesktop;
-    }
-    return _clientPackageName[appName];
-};
-
 export const _clientPackageName: Record<AppName, string> = {
     accounts: "io.ente.accounts.web",
     auth: "io.ente.auth.web",
@@ -64,6 +46,24 @@ export const _clientPackageName: Record<AppName, string> = {
 
 /** Client package name for the Photos desktop app */
 export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
+
+/**
+ * Client "package names" for our app.
+ *
+ * The package name is used as the (a) "X-Client-Package" header in API
+ * requests, and (b) as the identifier in inline user agent strings in payloads.
+ *
+ * In cases where this code works for both a web and a desktop app for the same
+ * app (currently only photos), this will be the platform specific package name.
+ */
+export const clientPackageName = (() => {
+    if (process.env.isDesktop) {
+        if (appName != "photos")
+            throw new Error(`Unsupported desktop appName ${appName}`);
+        return clientPackageNamePhotosDesktop;
+    }
+    return _clientPackageName[appName];
+})();
 
 /**
  * Properties guaranteed to be present in the AppContext types for apps that are

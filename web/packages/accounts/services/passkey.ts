@@ -1,4 +1,4 @@
-import { clientPackageHeaderIfPresent } from "@/next/http";
+import { clientPackageHeader } from "@/next/http";
 import log from "@/next/log";
 import { accountsAppOrigin, apiURL } from "@/next/origins";
 import { appName, clientPackageName } from "@/next/types/app";
@@ -231,7 +231,7 @@ export const checkPasskeyVerificationStatus = async (
     const url = await apiURL("/users/two-factor/passkeys/get-token");
     const params = new URLSearchParams({ sessionID });
     const res = await fetch(`${url}?${params.toString()}`, {
-        headers: clientPackageHeaderIfPresent(),
+        headers: clientPackageHeader(),
     });
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)

@@ -1,5 +1,4 @@
 import { CustomHead } from "@/next/components/Head";
-import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
 import {
@@ -7,7 +6,6 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
 import {
-    appName,
     clientPackageName,
     staticAppTitle,
     type BaseAppContextT,
@@ -148,11 +146,8 @@ export default function App({ Component, pageProps }: AppProps) {
         void setupI18n().finally(() => setIsI18nReady(true));
         const userID = (getData(LS_KEYS.USER) as User)?.id;
         logStartupBanner(userID);
+        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
-        setAppNameForAuthenticatedRequests(appName);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName(appName),
-        });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
@@ -345,7 +340,6 @@ export default function App({ Component, pageProps }: AppProps) {
     };
 
     const appContext = {
-        appName,
         showNavBar,
         mlSearchEnabled,
         updateMlSearchEnabled,
