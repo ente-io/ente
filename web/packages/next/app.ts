@@ -48,9 +48,6 @@ export const staticAppTitle = {
     photos: "Ente Photos",
 }[appName];
 
-/** Client package name for the Photos desktop app */
-export const clientPackageNamePhotosDesktop = "io.ente.photos.desktop";
-
 /**
  * Client "package names" for our app.
  *
@@ -64,7 +61,7 @@ export const clientPackageName = (() => {
     if (isDesktop) {
         if (appName != "photos")
             throw new Error(`Unsupported desktop appName ${appName}`);
-        return clientPackageNamePhotosDesktop;
+        return "io.ente.photos.desktop";
     }
     return {
         accounts: "io.ente.accounts.web",

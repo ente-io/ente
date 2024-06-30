@@ -1,10 +1,10 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { EnteFile } from "@/new/photos/types/file";
-import { clientPackageNamePhotosDesktop } from "@/next/app";
+import { clientPackageName } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { eventBus, Events } from "@ente/shared/events";
+import { Events, eventBus } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
@@ -348,9 +348,5 @@ export function logQueueStats(queue: PQueue, name: string) {
     );
 }
 
-const getUserAgent = async () => {
-    const electron = ensureElectron();
-    const name = clientPackageNamePhotosDesktop;
-    const version = await electron.appVersion();
-    return `${name}/${version}`;
-};
+const getUserAgent = async () =>
+    `${clientPackageName}/${await ensureElectron().appVersion()}`;
