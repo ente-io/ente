@@ -1,6 +1,6 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import type { AppName } from "./types/app";
+import { appNames, type AppName } from "./types/app";
 
 /**
  * Log a standard startup banner.
@@ -11,6 +11,14 @@ import type { AppName } from "./types/app";
  * @param userId The uid for the currently logged in user, if any.
  */
 export const logStartupBanner = (appName: AppName, userId?: number) => {
+    // Log a warning if appName isn't what it claims to be. See the
+    // documentation of `appName` for why this is needed.
+    if (!appNames.includes(appName)) {
+        log.warn(
+            `App name ${appName} is not one of the known app names: ${JSON.stringify(appNames)}`,
+        );
+    }
+
     const sha = process.env.gitSHA;
     const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
     log.info(`Starting ente-${appName}-web ${buildId}uid ${userId ?? 0}`);

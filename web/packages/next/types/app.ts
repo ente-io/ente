@@ -1,10 +1,28 @@
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 
+export const appNames = ["accounts", "auth", "photos"] as const;
+
 /**
  * Arbitrary names that we used as keys for indexing various constants
  * corresponding to our apps that rely on this package.
  */
-export type AppName = "accounts" | "auth" | "photos";
+export type AppName = (typeof appNames)[number];
+
+/**
+ * The name of the Ente app which we're currently running as.
+ *
+ * Parts of our code are shared across apps. Some parts of them also run in
+ * non-main thread execution contexts like web workers. So there isn't always an
+ * easy way to figure out what the current app is.
+ *
+ * To solve this, we inject the app name during the build process. This is
+ * available to all our code (shared packages, web workers).
+ *
+ * This constant employs an `as` cast to avoid incurring a dynamic check, and as
+ * such may be incorrect (e.g. when a new app gets added). So apps should
+ * dynamically validate and log it once somewhere during init.
+ */
+export const appName: AppName = process.env.appName as AppName;
 
 /**
  * Static title for the app.
