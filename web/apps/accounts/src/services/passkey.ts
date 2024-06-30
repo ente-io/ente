@@ -1,5 +1,6 @@
 import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
+import { clientPackageHeader } from "@/next/http";
 import { apiURL } from "@/next/origins";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
@@ -415,6 +416,7 @@ export const beginPasskeyAuthentication = async (
     const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
+        headers: clientPackageHeader(),
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
     if (!res.ok) {
@@ -506,6 +508,8 @@ export const finishPasskeyAuthentication = async ({
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: {
+            // Note: Unlike the other requests, this is the clientPackage of the
+            // _requesting_ app, not the accounts app.
             "X-Client-Package": clientPackage,
         },
         body: JSON.stringify({
