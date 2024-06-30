@@ -1,6 +1,6 @@
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 
-export const appNames = ["accounts", "auth", "photos"] as const;
+export const appNames = ["accounts", "auth", "cast", "photos"] as const;
 
 /**
  * Arbitrary names that we used as keys for indexing various constants
@@ -44,6 +44,7 @@ export const isDesktop = process.env.isDesktop == "1";
 export const staticAppTitle = {
     accounts: "Ente Accounts",
     auth: "Ente Auth",
+    cast: "Ente Photos",
     photos: "Ente Photos",
 }[appName];
 
@@ -68,6 +69,7 @@ export const clientPackageName = (() => {
     return {
         accounts: "io.ente.accounts.web",
         auth: "io.ente.auth.web",
+        cast: "io.ente.cast.web",
         photos: "io.ente.photos.web",
     }[appName];
 })();

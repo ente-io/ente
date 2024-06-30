@@ -1,7 +1,7 @@
 import { CustomHead } from "@/next/components/Head";
 import { disableDiskLogs } from "@/next/log";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { appTitle } from "@/next/types/app";
+import { appTitle } from "@/next/app";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, ThemeProvider } from "@mui/material";

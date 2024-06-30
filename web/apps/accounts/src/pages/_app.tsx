@@ -1,7 +1,7 @@
+import { staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { staticAppTitle } from "@/next/types/app";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";

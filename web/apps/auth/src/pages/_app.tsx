@@ -1,14 +1,11 @@
+import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import {
-    clientPackageName,
-    staticAppTitle,
-    type BaseAppContextT,
-} from "@/next/types/app";
+import type { BaseAppContextT } from "@/next/types/context";
 import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";

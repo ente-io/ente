@@ -1,4 +1,4 @@
-import { appName } from "@/next/types/app";
+import { appName } from "@/next/app";
 import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
 
 /**
@@ -6,8 +6,9 @@ import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
  *
  * This is where we redirect to after successful authentication.
  */
-export const appHomeRoute = {
+export const appHomeRoute: string = {
     accounts: "/passkeys",
     auth: AUTH_PAGES.AUTH,
+    cast: "/",
     photos: PHOTOS_PAGES.GALLERY,
 }[appName];

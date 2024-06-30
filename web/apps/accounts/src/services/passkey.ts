@@ -1,6 +1,6 @@
+import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
 import { apiURL } from "@/next/origins";
-import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
