@@ -5,7 +5,7 @@ import { clipService } from "services/clip-service";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import { syncMapEnabled } from "services/userService";
-import { isFaceIndexingEnabled } from "./face/indexer";
+// import { isFaceIndexingEnabled } from "./face/indexer";
 
 /**
  * Perform a soft "refresh" by making various API calls to fetch state from
@@ -22,7 +22,7 @@ export const sync = async () => {
     fetchAndSaveFeatureFlagsIfNeeded();
     if (isDesktop) {
         await syncCLIPEmbeddings();
-        if (isFaceIndexingEnabled()) await (await faceWorker()).sync();
+        // if (isFaceIndexingEnabled()) await (await faceWorker()).sync();
         void clipService.scheduleImageEmbeddingExtraction();
     }
 };
