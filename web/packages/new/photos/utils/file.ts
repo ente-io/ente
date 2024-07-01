@@ -7,19 +7,6 @@ import isElectron from "is-electron";
 import type { EnteFile } from "../types/file";
 import { detectFileTypeInfo } from "./detect-type";
 
-const SUPPORTED_RAW_FORMATS = [
-    "heic",
-    "rw2",
-    "tiff",
-    "arw",
-    "cr3",
-    "cr2",
-    "nef",
-    "psd",
-    "dng",
-    "tif",
-];
-
 class ModuleState {
     /**
      * This will be set to true if we get an error from the Node.js side of our
@@ -95,7 +82,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
-        if (isElectron() && available && isSupportedRawFormat(extension)) {
+        if (isElectron() && available && isNativeConvertibleToJPEG(extension)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
@@ -124,6 +111,30 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
     }
 };
 
+/**
+ * File extensions which our native JPEG conversion code should be able to
+ * convert to a renderable image.
+ */
+const convertibleToJPEGExtensions = [
+    "heic",
+    "rw2",
+    "tiff",
+    "arw",
+    "cr3",
+    "cr2",
+    "nef",
+    "psd",
+    "dng",
+    "tif",
+];
+
+/**
+ * Return true if {@link extension} is amongst the file extensions which we
+ * expect our native JPEG conversion to be able to process.
+ */
+export const isNativeConvertibleToJPEG = (extension: string) =>
+    convertibleToJPEGExtensions.includes(extension.toLowerCase());
+
 const nativeConvertToJPEG = async (imageBlob: Blob) => {
     const startTime = Date.now();
     const imageData = new Uint8Array(await imageBlob.arrayBuffer());
@@ -137,7 +148,3 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData], { type: "image/jpeg" });
 };
-
-export function isSupportedRawFormat(exactType: string) {
-    return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
-}

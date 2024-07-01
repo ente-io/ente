@@ -11,13 +11,13 @@ import {
     copyFileToClipboard,
     downloadSingleFile,
     getFileFromURL,
-    isSupportedRawFormat,
 } from "utils/file";
 
 import { FILE_TYPE } from "@/media/file-type";
 import { isNonWebImageFileExtension } from "@/media/formats";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
+import { isNativeConvertibleToJPEG } from "@/new/photos/utils/file";
 import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -352,7 +352,9 @@ function PhotoViewer(props: Iprops) {
         const extension = lowercaseExtension(file.metadata.title);
         const isSupported =
             !isNonWebImageFileExtension(extension) ||
-            isSupportedRawFormat(extension);
+            // TODO: This condition doesn't sound correct when running in the
+            // web app?
+            isNativeConvertibleToJPEG(extension);
         setShowEditButton(
             file.metadata.fileType === FILE_TYPE.IMAGE && isSupported,
         );
