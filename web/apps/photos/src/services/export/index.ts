@@ -1,9 +1,15 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import {
+    exportMetadataDirectoryName,
+    exportTrashDirectoryName,
+} from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
+import { writeStream } from "@/new/photos/utils/native-stream";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { wait } from "@/utils/promise";
@@ -31,8 +37,6 @@ import {
     getNonEmptyPersonalCollections,
 } from "utils/collection";
 import { getPersonalFiles, getUpdatedEXIFFileForDownload } from "utils/file";
-import { safeDirectoryName, safeFileName } from "utils/native-fs";
-import { writeStream } from "utils/native-stream";
 import { getAllLocalCollections } from "../collectionService";
 import downloadManager from "../download";
 import { migrateExport } from "./migration";
@@ -45,18 +49,6 @@ const exportRecordFileName = "export_status.json";
  * directory when the user starts an export to the file system.
  */
 const exportDirectoryName = "Ente Photos";
-
-/**
- * Name of the directory in which we put our metadata when exporting to the file
- * system.
- */
-export const exportMetadataDirectoryName = "metadata";
-
-/**
- * Name of the directory in which we keep trash items when deleting files that
- * have been exported to the local disk previously.
- */
-export const exportTrashDirectoryName = "Trash";
 
 export enum ExportStage {
     INIT = 0,

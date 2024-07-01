@@ -12,6 +12,8 @@ import {
 import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import { safeFileName } from "@/new/photos/utils/native-fs";
+import { writeStream } from "@/new/photos/utils/native-stream";
 import { lowercaseExtension } from "@/next/file";
 import log from "@/next/log";
 import { type Electron } from "@/next/types/ipc";
@@ -36,8 +38,6 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
-import { safeFileName } from "utils/native-fs";
-import { writeStream } from "utils/native-stream";
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,

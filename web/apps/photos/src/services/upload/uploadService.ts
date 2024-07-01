@@ -12,6 +12,7 @@ import {
 } from "@/new/photos/types/file";
 import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
+import { readStream } from "@/new/photos/utils/native-stream";
 import { ensureElectron } from "@/next/electron";
 import { basename } from "@/next/file";
 import log from "@/next/log";
@@ -39,7 +40,6 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "utils/magicMetadata";
-import { readStream } from "utils/native-stream";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";

@@ -3,6 +3,11 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import {
+    safeDirectoryName,
+    safeFileName,
+    sanitizeFilename,
+} from "@/new/photos/utils/native-fs";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
@@ -24,11 +29,6 @@ import {
 } from "types/export";
 import { getNonEmptyPersonalCollections } from "utils/collection";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
-import {
-    safeDirectoryName,
-    safeFileName,
-    sanitizeFilename,
-} from "utils/native-fs";
 import {
     exportMetadataDirectoryName,
     getCollectionIDFromFileUID,

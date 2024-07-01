@@ -1,6 +1,7 @@
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { SUB_TYPE, VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
+import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
@@ -43,7 +44,6 @@ import {
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
-import { safeDirectoryName } from "utils/native-fs";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,

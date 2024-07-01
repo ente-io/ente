@@ -1,11 +1,11 @@
 /** @file Dealing with the JSON metadata in Google Takeouts */
 
+import { readStream } from "@/new/photos/utils/native-stream";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { NULL_LOCATION } from "constants/upload";
 import type { Location } from "types/metadata";
-import { readStream } from "utils/native-stream";
 import type { UploadItem } from "./types";
 
 export interface ParsedMetadataJSON {

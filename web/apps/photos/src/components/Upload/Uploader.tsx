@@ -1,3 +1,4 @@
+import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { basename } from "@/next/file";
 import log from "@/next/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
@@ -15,7 +16,6 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
-import { exportMetadataDirectoryName } from "services/export";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,

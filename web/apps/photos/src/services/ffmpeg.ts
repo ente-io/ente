@@ -1,3 +1,8 @@
+import {
+    readConvertToMP4Done,
+    readConvertToMP4Stream,
+    writeConvertToMP4Stream,
+} from "@/new/photos/utils/native-stream";
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
@@ -9,11 +14,6 @@ import {
 } from "constants/ffmpeg";
 import { NULL_LOCATION } from "constants/upload";
 import type { ParsedExtractedMetadata } from "types/metadata";
-import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
-} from "utils/native-stream";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 import {
     toDataOrPathOrZipEntry,
