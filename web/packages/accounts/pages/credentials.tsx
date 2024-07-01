@@ -28,6 +28,7 @@ import {
     clearData,
     getData,
     setData,
+    setLSUser,
 } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -224,7 +225,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         passkeySessionID,
                         isTwoFactorEnabled: true,
@@ -244,7 +245,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
@@ -253,7 +254,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         token,
                         encryptedToken,

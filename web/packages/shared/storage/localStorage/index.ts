@@ -53,10 +53,10 @@ export const clearData = () => localStorage.clear();
 // accessed from web workers to KV DB.
 //
 // Creating a new function here to act as a funnel point.
-export const setLSUser = (user: object) => {
+export const setLSUser = async (user: object) => {
     const token = user["token"];
     token && typeof token == "string"
-        ? setKV("token", token)
-        : removeKV("token");
+        ? await setKV("token", token)
+        : await removeKV("token");
     setData(LS_KEYS.USER, user);
 };
