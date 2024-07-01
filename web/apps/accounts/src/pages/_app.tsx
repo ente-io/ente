@@ -26,21 +26,13 @@ import "styles/global.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
-
     const [showNavbar, setShowNavbar] = useState(false);
-
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
         DialogBoxAttributesV2 | undefined
     >();
-
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
 
-    useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
     const isMobile = useMediaQuery("(max-width: 428px)");
-
     const router = useRouter();
 
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
@@ -51,6 +43,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
+
+    useEffect(() => {
+        setDialogBoxV2View(true);
+    }, [dialogBoxAttributeV2]);
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
