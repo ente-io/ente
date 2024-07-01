@@ -7,7 +7,6 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import isElectron from "is-electron";
 import PQueue from "p-queue";
 import { Embedding } from "types/embedding";
 import { getPersonalFiles } from "utils/file";
@@ -81,10 +80,6 @@ class CLIPService {
             concurrency: 1,
         });
     }
-
-    isPlatformSupported = () => {
-        return isElectron();
-    };
 
     async logout() {
         if (this.embeddingExtractionInProgress) {

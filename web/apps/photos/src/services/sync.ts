@@ -1,5 +1,6 @@
 import { faceWorker } from "@/new/photos/services/face";
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
+import { isDesktop } from "@/next/app";
 import { clipService } from "services/clip-service";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
@@ -19,12 +20,9 @@ export const sync = async () => {
     await syncEntities();
     await syncMapEnabled();
     fetchAndSaveFeatureFlagsIfNeeded();
-    const electron = globalThis.electron;
-    if (electron) {
+    if (isDesktop) {
         await syncCLIPEmbeddings();
         if (isFaceIndexingEnabled()) await (await faceWorker()).sync();
-    }
-    if (clipService.isPlatformSupported()) {
         void clipService.scheduleImageEmbeddingExtraction();
     }
 };
