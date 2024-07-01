@@ -32,9 +32,7 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
                 flex={1}
             >
                 {password
-                    ? t("PASSPHRASE_STRENGTH", {
-                          context: passwordStrength.toUpperCase(),
-                      })
+                    ? t("passphrase_strength", { context: passwordStrength })
                     : ""}
             </Typography>
         </FlexWrapper>
