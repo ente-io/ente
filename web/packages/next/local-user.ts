@@ -1,6 +1,8 @@
 // TODO: This file belongs to the accounts package
 import { z } from "zod";
 
+// TODO: During login the only field present is email. Which makes this
+// optionality indicated by these types incorrect.
 const LocalUser = z.object({
     /** The user's ID. */
     id: z.number(),

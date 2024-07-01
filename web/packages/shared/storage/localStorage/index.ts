@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { removeKV, setKV } from "packages/next/kv";
 
 export enum LS_KEYS {
     USER = "user",
@@ -46,3 +47,16 @@ export const getData = (key: LS_KEYS) => {
 };
 
 export const clearData = () => localStorage.clear();
+
+// TODO: Migrate this to `local-user.ts`, with (a) more precise optionality
+// indication of the constituent fields, (b) moving any fields that need to be
+// accessed from web workers to KV DB.
+//
+// Creating a new function here to act as a funnel point.
+export const setLSUser = (user: object) => {
+    const token = user["token"];
+    token && typeof token == "string"
+        ? setKV("token", token)
+        : removeKV("token");
+    setData(LS_KEYS.USER, user);
+};
