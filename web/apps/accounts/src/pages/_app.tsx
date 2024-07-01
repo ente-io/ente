@@ -10,8 +10,6 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -35,8 +33,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const isMobile = useMediaQuery("(max-width: 428px)");
     const router = useRouter();
 
-    const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
-
     useEffect(() => {
         disableDiskLogs();
         void setupI18n().finally(() => setIsI18nReady(true));
@@ -49,8 +45,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, [dialogBoxAttributeV2]);
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
-
-    const theme = getTheme(themeColor, "photos");
 
     const logout = useCallback(() => {
         void accountLogout().then(() => router.push(PAGES.ROOT));
@@ -71,7 +65,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <>
             <CustomHead {...{ title }} />
 
-            <ThemeProvider theme={theme}>
+            <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
                 <CssBaseline enableColorScheme />
                 <DialogBoxV2
                     sx={{ zIndex: 1600 }}
