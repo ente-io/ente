@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import type { BaseAppContextT } from "@/next/types/context";
 import { ensure } from "@/utils/ensure";
 import {
     recoverTwoFactor,
@@ -7,6 +6,7 @@ import {
     type TwoFactorType,
 } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
+import type { AccountsContextT } from "@ente/accounts/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -38,7 +38,7 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
-    appContext: BaseAppContextT;
+    appContext: AccountsContextT;
     twoFactorType: TwoFactorType;
 }
 

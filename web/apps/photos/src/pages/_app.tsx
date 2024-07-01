@@ -6,9 +6,9 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { BaseAppContextT } from "@/next/types/context";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
+import type { AccountsContextT } from "@ente/accounts/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {
@@ -73,10 +73,9 @@ const redirectMap = new Map([
 ]);
 
 /**
- * Properties available via the {@link AppContext} to the Photos app's React
- * tree.
+ * Properties available via {@link AppContext} to the Photos app's React tree.
  */
-type AppContextT = BaseAppContextT & {
+type AppContextT = AccountsContextT & {
     mlSearchEnabled: boolean;
     mapEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;

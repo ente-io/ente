@@ -1,5 +1,5 @@
-import type { BaseAppContextT } from "@/next/types/context";
 import { ensure } from "@/utils/ensure";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { createContext, useContext } from "react";
 
 /**
@@ -9,7 +9,12 @@ import { createContext, useContext } from "react";
  *
  * -   It also doesn't need the logout function.
  */
-type AppContextT = Omit<BaseAppContextT, "logout">;
+interface AppContextT {
+    /** Show or hide the app's navigation bar. */
+    showNavBar: (show: boolean) => void;
+    isMobile: boolean;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
+}
 
 /**
  * The React {@link Context} available to all pages.

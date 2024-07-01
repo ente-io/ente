@@ -5,9 +5,9 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import type { BaseAppContextT } from "@/next/types/context";
 import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
+import type { AccountsContextT } from "@ente/accounts/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -37,9 +37,9 @@ import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
 /**
- * Properties available via the {@link AppContext} to the Auth app's React tree.
+ * Properties available via {@link AppContext} to the Auth app's React tree.
  */
-type AppContextT = BaseAppContextT & {
+type AppContextT = AccountsContextT & {
     startLoading: () => void;
     finishLoading: () => void;
     themeColor: THEME_COLOR;
