@@ -1,5 +1,7 @@
-import { PasswordStrength } from "@ente/accounts/constants";
-import { estimatePasswordStrength } from "@ente/accounts/utils";
+import {
+    PasswordStrength,
+    estimatePasswordStrength,
+} from "@ente/accounts/utils";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";

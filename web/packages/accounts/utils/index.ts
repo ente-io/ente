@@ -1,5 +1,10 @@
-import { PasswordStrength } from "@ente/accounts/constants";
 import zxcvbn from "zxcvbn";
+
+export enum PasswordStrength {
+    WEAK = "WEAK",
+    MODERATE = "MODERATE",
+    STRONG = "STRONG",
+}
 
 export const convertBufferToBase64 = (buffer: Buffer) => {
     return buffer.toString("base64");
