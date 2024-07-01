@@ -10,6 +10,7 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
+import { clearData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
@@ -35,6 +36,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         disableDiskLogs();
+        // accounts.ente.io has no local state, but some older builds might've
+        // leftover some scraps. Clear it out. (tag: Migration)
+        // Added 1 July 2024, can be removed after a while.
+        clearData();
         void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
