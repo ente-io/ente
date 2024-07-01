@@ -216,8 +216,9 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
-    FileUploader.instance.clearCachedUploadURLs();
     if (!autoLogout) {
+      // Following services won't be initialized if it's the case of autoLogout
+      FileUploader.instance.clearCachedUploadURLs();
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
       MemoriesService.instance.clearCache();
