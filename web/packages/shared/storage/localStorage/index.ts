@@ -1,5 +1,5 @@
-import log from "@/next/log";
 import { removeKV, setKV } from "@/next/kv";
+import log from "@/next/log";
 
 export enum LS_KEYS {
     USER = "user",
@@ -54,7 +54,10 @@ export const clearData = () => localStorage.clear();
 //
 // Creating a new function here to act as a funnel point.
 export const setLSUser = async (user: object) => {
-    await setKVToken(user);
+    const token = user["token"];
+    token && typeof token == "string"
+        ? await setKV("token", token)
+        : await removeKV("token");
     setData(LS_KEYS.USER, user);
 };
 
@@ -68,9 +71,11 @@ export const setLSUser = async (user: object) => {
  *
  * This was added 1 July 2024, can be removed after a while (tag: Migration).
  */
-export const setKVToken = async (user: unknown) => {
-    const token = user ? user["token"] : undefined;
-    token && typeof token == "string"
-        ? await setKV("token", token)
+export const migrateKVToken = async (user: unknown) => {
+    user &&
+    typeof user == "object" &&
+    "token" in user &&
+    typeof user.token == "string"
+        ? await setKV("token", user.token)
         : await removeKV("token");
 };

@@ -20,7 +20,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import {
     LS_KEYS,
     getData,
-    setKVToken,
+    migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
@@ -80,7 +80,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        setKVToken(user);
+        migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
