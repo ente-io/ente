@@ -54,9 +54,11 @@ export const clearData = () => localStorage.clear();
 //
 // Creating a new function here to act as a funnel point.
 export const setLSUser = async (user: object) => {
-    const token = user["token"];
-    token && typeof token == "string"
-        ? await setKV("token", token)
+    user &&
+    typeof user == "object" &&
+    "token" in user &&
+    typeof user.token == "string"
+        ? await setKV("token", user.token)
         : await removeKV("token");
     setData(LS_KEYS.USER, user);
 };

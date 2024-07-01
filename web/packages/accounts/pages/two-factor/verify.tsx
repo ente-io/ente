@@ -11,7 +11,12 @@ import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { LS_KEYS, getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
