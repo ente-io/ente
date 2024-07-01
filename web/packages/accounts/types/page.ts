@@ -1,4 +1,4 @@
-import type { BaseAppContextT } from "@/next/types/app";
+import type { BaseAppContextT } from "@/next/types/context";
 
 /**
  * The default type for pages exposed by this package.

@@ -10,7 +10,7 @@ import { SignUp } from "../components/SignUp";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
+    const { showNavBar } = appContext;
 
     const [loading, setLoading] = useState(true);
     const [host, setHost] = useState<string | undefined>();
@@ -24,7 +24,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
 
     const login = () => {
@@ -37,7 +37,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <EnteSpinner />
             ) : (
                 <FormPaper>
-                    <SignUp {...{ appName, login, router, host }} />
+                    <SignUp {...{ login, router, host }} />
                 </FormPaper>
             )}
         </VerticallyCentered>

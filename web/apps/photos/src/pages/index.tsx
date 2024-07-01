@@ -27,7 +27,7 @@ import { Trans } from "react-i18next";
 import { useAppContext } from "./_app";
 
 export default function LandingPage() {
-    const { appName, showNavBar, setDialogMessage } = useAppContext();
+    const { showNavBar, setDialogMessage } = useAppContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
@@ -145,9 +145,9 @@ export default function LandingPage() {
                     <DesktopBox>
                         <SideBox>
                             {showLogin ? (
-                                <Login {...{ signUp, appName, host }} />
+                                <Login {...{ signUp, host }} />
                             ) : (
-                                <SignUp {...{ router, appName, login, host }} />
+                                <SignUp {...{ router, login, host }} />
                             )}
                         </SideBox>
                     </DesktopBox>

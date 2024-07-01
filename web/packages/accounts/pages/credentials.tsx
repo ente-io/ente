@@ -62,7 +62,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout, setDialogBoxAttributesV2 } = appContext;
+    const { logout, setDialogBoxAttributesV2 } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -138,7 +138,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const token = getToken();
             if (key && token) {
-                router.push(appHomeRoute(appName));
+                router.push(appHomeRoute);
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -231,10 +231,8 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    const url = passkeyVerificationRedirectURL(
-                        appName,
-                        passkeySessionID,
-                    );
+                    const url =
+                        passkeyVerificationRedirectURL(passkeySessionID);
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
@@ -315,7 +313,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? appHomeRoute(appName));
+            router.push(redirectURL ?? appHomeRoute);
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }

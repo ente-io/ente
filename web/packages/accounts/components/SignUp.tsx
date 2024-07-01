@@ -1,5 +1,4 @@
 import log from "@/next/log";
-import type { AppName } from "@/next/types/app";
 import { sendOtt } from "@ente/accounts/api/user";
 import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
 import { PAGES } from "@ente/accounts/constants/pages";
@@ -53,12 +52,11 @@ interface FormValues {
 interface SignUpProps {
     router: NextRouter;
     login: () => void;
-    appName: AppName;
     /** Reactive value of {@link customAPIHost}. */
     host: string | undefined;
 }
 
-export function SignUp({ router, appName, login, host }: SignUpProps) {
+export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -86,7 +84,7 @@ export function SignUp({ router, appName, login, host }: SignUpProps) {
             try {
                 setData(LS_KEYS.USER, { email });
                 setLocalReferralSource(referral);
-                await sendOtt(appName, email);
+                await sendOtt(email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
                 setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
@@ -329,4 +327,4 @@ export function SignUp({ router, appName, login, host }: SignUpProps) {
             </FormPaperFooter>
         </>
     );
-}
+};

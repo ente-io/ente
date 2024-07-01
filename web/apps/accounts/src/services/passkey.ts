@@ -1,6 +1,7 @@
+import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
+import { clientPackageHeader } from "@/next/http";
 import { apiURL } from "@/next/origins";
-import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -22,12 +23,10 @@ export const isWebAuthnSupported = () => !!navigator.credentials;
  */
 const accountsAuthenticatedRequestHeaders = (
     token: string,
-): Record<string, string> => {
-    return {
-        "X-Auth-Token": token,
-        "X-Client-Package": clientPackageName("accounts"),
-    };
-};
+): Record<string, string> => ({
+    "X-Auth-Token": token,
+    "X-Client-Package": clientPackageName,
+});
 
 const Passkey = z.object({
     /** A unique ID for the passkey */
@@ -417,6 +416,7 @@ export const beginPasskeyAuthentication = async (
     const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
+        headers: clientPackageHeader(),
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
     if (!res.ok) {
@@ -508,6 +508,8 @@ export const finishPasskeyAuthentication = async ({
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: {
+            // Note: Unlike the other requests, this is the clientPackage of the
+            // _requesting_ app, not the accounts app.
             "X-Client-Package": clientPackage,
         },
         body: JSON.stringify({

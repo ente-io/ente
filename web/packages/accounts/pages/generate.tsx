@@ -32,7 +32,7 @@ import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { logout } = appContext;
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
@@ -56,7 +56,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push(appHomeRoute(appName));
+                    router.push(appHomeRoute);
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -106,7 +106,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push(appHomeRoute(appName));
+                        router.push(appHomeRoute);
                     }}
                     /* TODO: Why is this error being ignored */
                     somethingWentWrong={() => {}}

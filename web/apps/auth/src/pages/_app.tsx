@@ -1,16 +1,11 @@
+import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
-import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import {
-    appTitle,
-    clientPackageName,
-    type AppName,
-    type BaseAppContextT,
-} from "@/next/types/app";
+import type { BaseAppContextT } from "@/next/types/context";
 import { ensure } from "@/utils/ensure";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";
@@ -59,8 +54,6 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
-    const appName: AppName = "auth";
-
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -82,13 +75,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
-        const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(appName, userId);
+        const userID = (getData(LS_KEYS.USER) as User)?.id;
+        logStartupBanner(userID);
+        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
-        setAppNameForAuthenticatedRequests(appName);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName(appName),
-        });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
@@ -147,7 +137,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     };
 
     const appContext = {
-        appName,
         logout,
         showNavBar,
         isMobile,
@@ -161,7 +150,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const title = isI18nReady
         ? t("title", { context: "auth" })
-        : appTitle[appName];
+        : staticAppTitle;
 
     return (
         <>

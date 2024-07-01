@@ -12,11 +12,12 @@
 
 const cp = require("child_process");
 const os = require("os");
+const path = require("path");
 
 /**
  * Return the current commit ID if we're running inside a git repository.
  */
-const gitSHA = () => {
+const gitSHA = (() => {
     // Allow the command to fail. gitSHA will be an empty string in such cases.
     // This allows us to run the build even when we're outside of a git context.
     //
@@ -37,7 +38,31 @@ const gitSHA = () => {
     // Convert empty strings (e.g. when the `|| true` part of the above execSync
     // comes into play) to undefined.
     return result ? result : undefined;
-};
+})();
+
+/**
+ * The name of the Ente app we're building.
+ *
+ * This is taken from the name of the directory which we're building. e.g. `yarn
+ * dev:auth` will cause yarn to be invoked in `web/apps/auth`, and so this will
+ * be set to `auth`.
+ *
+ * In our runtime code, all references to `process.env.appName` will be
+ * statically replaced by this value at build time.
+ */
+const appName = path.basename(process.cwd());
+
+/**
+ * "1" if we're building our desktop app.
+ *
+ * The _ENTE_IS_DESKTOP environment variable will be set by the yarn script that
+ * builds the web app for embedding in the desktop app. Whenever it is set, we
+ * set this value to "1".
+ *
+ * In our runtime code, all references to `process.env.isDesktop` will be
+ * statically replaced by this value at build time.
+ */
+const isDesktop = process.env._ENTE_IS_DESKTOP ? "1" : "";
 
 /**
  * Configuration for the Next.js build
@@ -54,12 +79,14 @@ const nextConfig = {
     transpilePackages: ["@/next", "@/utils", "@/new"],
 
     // Add environment variables to the JavaScript bundle. They will be
-    // available as `process.env.VAR_NAME` to our code.
+    // available as `process.env.varName` to our code.
     env: {
-        GIT_SHA: gitSHA(),
+        gitSHA,
+        appName,
+        isDesktop,
     },
 
-    // Customize the webpack configuration used by Next.js
+    // Customize the webpack configuration used by Next.js.
     webpack: (config, { isServer }) => {
         // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
         if (!isServer) {

@@ -39,7 +39,7 @@ import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { logout } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -95,11 +95,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 });
                 // TODO: This is not the first login though if they already have
                 // 2FA. Does this flag mean first login on this device?
+                //
+                // Update: This flag causes the interactive encryption key to be
+                // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
-                const url = passkeyVerificationRedirectURL(
-                    appName,
-                    passkeySessionID,
-                );
+                const url = passkeyVerificationRedirectURL(passkeySessionID);
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
@@ -161,7 +161,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appName, email);
+        await sendOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };

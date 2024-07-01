@@ -1,19 +1,26 @@
 import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
-import type { AppName } from "./types/app";
+import { appName, appNames } from "./app";
 
 /**
  * Log a standard startup banner.
  *
  * This helps us identify app starts and other environment details in the logs.
  *
- * @param appName The {@link AppName} of the app that is starting.
- * @param userId The uid for the currently logged in user, if any.
+ * @param userID The uid for the currently logged in user, if any.
  */
-export const logStartupBanner = (appName: AppName, userId?: number) => {
-    const sha = process.env.GIT_SHA;
-    const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
-    log.info(`Starting ente-${appName}-web ${buildId}uid ${userId ?? 0}`);
+export const logStartupBanner = (userID?: number) => {
+    // Log a warning if appName isn't what it claims to be. See the
+    // documentation of `appName` for why this is needed.
+    if (!appNames.includes(appName)) {
+        log.warn(
+            `App name "${appName}" is not one of the known app names: ${JSON.stringify(appNames)}`,
+        );
+    }
+
+    const sha = process.env.gitSHA;
+    const buildID = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
+    log.info(`Starting ente-${appName}-web ${buildID}uid ${userID ?? 0}`);
 };
 
 /**
