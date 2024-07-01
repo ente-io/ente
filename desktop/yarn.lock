@@ -928,6 +928,11 @@ cli-truncate@^2.1.0:
     slice-ansi "^3.0.0"
     string-width "^4.2.0"
 
+clip-bpe-js@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/clip-bpe-js/-/clip-bpe-js-0.0.6.tgz#a11c228e793fa29841f8cd4f8576fc1ff3403511"
+  integrity sha512-+0n0eeacgFmg9hKhHhXanKkRDhqRwzYK7dj46VYMzePxmN8zbbDgeTQZchfvARNpbBMRi7FfWRSW3lysOUDX/Q==
+
 cliui@^8.0.1:
   version "8.0.1"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-8.0.1.tgz#0c04b075db02cbfe60dc8e6cf2f5486b1a3608aa"

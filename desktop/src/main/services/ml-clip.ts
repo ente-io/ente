@@ -5,10 +5,10 @@
  *
  * @see `web/apps/photos/src/services/clip-service.ts` for more details.
  */
+import Tokenizer from "clip-bpe-js";
 import jpeg from "jpeg-js";
 import fs from "node:fs/promises";
 import * as ort from "onnxruntime-node";
-import Tokenizer from "../../thirdparty/clip-bpe-ts/mod";
 import log from "../log";
 import { writeStream } from "../stream";
 import { ensure, wait } from "../utils/common";
