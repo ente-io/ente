@@ -117,9 +117,8 @@ class EnteOnnxFlutterPlugin : FlutterPlugin, MethodCallHandler {
                 sessionMap[modelType] = modelState
             }
             if (!modelState.isInitialized) {
-                val modelBytes = readModelFile(modelPath)
                 for (i in 0 until sessionsCount) {
-                    val session = createSession(faceOrtEnv, modelBytes)
+                    val session = createSession(faceOrtEnv, modelPath)
                     if (session != null) {
                         modelState.sessionAddresses[i] = session
                     }
@@ -192,8 +191,8 @@ class EnteOnnxFlutterPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun createSession(env: OrtEnvironment, modelBytes: ByteArray): OrtSession? {
-        return env.createSession(modelBytes, OrtSession.SessionOptions())
+    private fun createSession(env: OrtEnvironment, modalPath: String): OrtSession? {
+        return env.createSession(modalPath, OrtSession.SessionOptions())
     }
 
     private fun releaseAllSessions() {
