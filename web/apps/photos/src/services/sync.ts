@@ -1,4 +1,3 @@
-import { faceWorker } from "@/new/photos/services/face";
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
 import { isDesktop } from "@/next/app";
 import { clipService } from "services/clip-service";
