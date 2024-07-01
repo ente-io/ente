@@ -67,7 +67,7 @@ const fetchAndSaveFeatureFlags = () =>
 const fetchFeatureFlags = async () => {
     const url = await apiURL("/remote-store/feature-flags");
     const res = await fetch(url, {
-        headers: authenticatedRequestHeaders(),
+        headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return res;

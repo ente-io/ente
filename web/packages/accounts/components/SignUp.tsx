@@ -4,7 +4,7 @@ import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength
 import { PAGES } from "@ente/accounts/constants/pages";
 import { isWeakPassword } from "@ente/accounts/utils";
 import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import { LS_KEYS } from "@ente/shared//storage/localStorage";
+import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -82,7 +82,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
             }
             setLoading(true);
             try {
-                setData(LS_KEYS.USER, { email });
+                await setLSUser({ email });
                 setLocalReferralSource(referral);
                 await sendOtt(email);
             } catch (e) {

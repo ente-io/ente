@@ -25,7 +25,6 @@ import {
     styled,
     useMediaQuery,
 } from "@mui/material";
-import { useAppContext } from "components/context";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -35,6 +34,7 @@ import {
     renamePasskey,
     type Passkey,
 } from "services/passkey";
+import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
     const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();

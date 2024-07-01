@@ -1,28 +1,30 @@
-import { PasswordStrength } from "@ente/accounts/constants";
 import { estimatePasswordStrength } from "@ente/accounts/utils";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
-export const PasswordStrengthHint = ({
-    password,
-}: {
+interface PasswordStrengthHintProps {
     password: string;
-}): JSX.Element => {
+}
+
+export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
+    password,
+}) => {
     const passwordStrength = useMemo(
         () => estimatePasswordStrength(password),
         [password],
     );
+
     return (
         <FlexWrapper mt={"8px"} mb={"4px"}>
             <Typography
                 variant="small"
                 sx={(theme) => ({
                     color:
-                        passwordStrength === PasswordStrength.WEAK
+                        passwordStrength == "weak"
                             ? theme.colors.danger.A700
-                            : passwordStrength === PasswordStrength.MODERATE
+                            : passwordStrength == "moderate"
                               ? theme.colors.warning.A500
                               : theme.colors.accent.A500,
                 })}
@@ -30,7 +32,9 @@ export const PasswordStrengthHint = ({
                 flex={1}
             >
                 {password
-                    ? t("PASSPHRASE_STRENGTH", { context: passwordStrength })
+                    ? t("PASSPHRASE_STRENGTH", {
+                          context: passwordStrength.toUpperCase(),
+                      })
                     : ""}
             </Typography>
         </FlexWrapper>

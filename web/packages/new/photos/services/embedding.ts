@@ -332,7 +332,7 @@ const getEmbeddingsDiff = async (
     });
     const url = await apiURL("/embeddings/diff");
     const res = await fetch(`${url}?${params.toString()}`, {
-        headers: authenticatedRequestHeaders(),
+        headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return z.array(RemoteEmbedding).parse(await res.json());

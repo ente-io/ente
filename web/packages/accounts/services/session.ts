@@ -64,7 +64,7 @@ type SessionValidity =
 export const checkSessionValidity = async (): Promise<SessionValidity> => {
     const url = await apiURL("/users/session-validity/v2");
     const res = await fetch(url, {
-        headers: authenticatedRequestHeaders(),
+        headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) {
         if (res.status == 401)

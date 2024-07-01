@@ -5,7 +5,7 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -27,7 +27,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
         setFieldError,
     ) => {
         try {
-            setData(LS_KEYS.USER, { email });
+            await setLSUser({ email });
             const srpAttributes = await getSRPAttributes(email);
             log.debug(() => ` srpAttributes: ${JSON.stringify(srpAttributes)}`);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {

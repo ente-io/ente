@@ -3,7 +3,7 @@ import { useContext } from "react";
 
 import { disableTwoFactor } from "@ente/accounts/api/user";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Button, Grid } from "@mui/material";
 import router from "next/router";
 import { AppContext } from "pages/_app";
@@ -33,7 +33,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
     const twoFactorDisable = async () => {
         try {
             await disableTwoFactor();
-            setData(LS_KEYS.USER, {
+            await setLSUser({
                 ...getData(LS_KEYS.USER),
                 isTwoFactorEnabled: false,
             });

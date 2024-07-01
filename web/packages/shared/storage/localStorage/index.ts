@@ -1,3 +1,4 @@
+import { removeKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 
 export enum LS_KEYS {
@@ -46,3 +47,37 @@ export const getData = (key: LS_KEYS) => {
 };
 
 export const clearData = () => localStorage.clear();
+
+// TODO: Migrate this to `local-user.ts`, with (a) more precise optionality
+// indication of the constituent fields, (b) moving any fields that need to be
+// accessed from web workers to KV DB.
+//
+// Creating a new function here to act as a funnel point.
+export const setLSUser = async (user: object) => {
+    user &&
+    typeof user == "object" &&
+    "token" in user &&
+    typeof user.token == "string"
+        ? await setKV("token", user.token)
+        : await removeKV("token");
+    setData(LS_KEYS.USER, user);
+};
+
+/**
+ * Update the "token" KV with the token (if any) for the given {@link user}.
+ *
+ * This is an internal implementation details of {@link setLSUser} and doesn't
+ * need to exposed conceptually. For now though, we need to call this externally
+ * at an early point in the app startup to also copy over the token into KV DB
+ * for existing users.
+ *
+ * This was added 1 July 2024, can be removed after a while (tag: Migration).
+ */
+export const migrateKVToken = async (user: unknown) => {
+    user &&
+    typeof user == "object" &&
+    "token" in user &&
+    typeof user.token == "string"
+        ? await setKV("token", user.token)
+        : await removeKV("token");
+};

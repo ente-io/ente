@@ -8,8 +8,8 @@ import { ensureAuthToken } from "./local-user";
  * -   The auth token
  * -   The client package name.
  */
-export const authenticatedRequestHeaders = (): Record<string, string> => ({
-    "X-Auth-Token": ensureAuthToken(),
+export const authenticatedRequestHeaders = async () => ({
+    "X-Auth-Token": await ensureAuthToken(),
     "X-Client-Package": clientPackageName,
 });
 
@@ -17,6 +17,6 @@ export const authenticatedRequestHeaders = (): Record<string, string> => ({
  * Return a headers object with "X-Client-Package" header set to the client
  * package name of the current app.
  */
-export const clientPackageHeader = (): Record<string, string> => ({
+export const clientPackageHeader = () => ({
     "X-Client-Package": clientPackageName,
 });
