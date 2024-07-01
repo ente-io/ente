@@ -1,10 +1,6 @@
 import zxcvbn from "zxcvbn";
 
-export enum PasswordStrength {
-    WEAK = "WEAK",
-    MODERATE = "MODERATE",
-    STRONG = "STRONG",
-}
+export type PasswordStrength = "weak" | "moderate" | "strong";
 
 export const convertBufferToBase64 = (buffer: Buffer) => {
     return buffer.toString("base64");
@@ -16,19 +12,19 @@ export const convertBase64ToBuffer = (base64: string) => {
 
 export function estimatePasswordStrength(password: string): PasswordStrength {
     if (!password) {
-        return PasswordStrength.WEAK;
+        return "weak";
     }
 
     const zxcvbnResult = zxcvbn(password);
     if (zxcvbnResult.score < 2) {
-        return PasswordStrength.WEAK;
+        return "weak";
     } else if (zxcvbnResult.score < 3) {
-        return PasswordStrength.MODERATE;
+        return "moderate";
     } else {
-        return PasswordStrength.STRONG;
+        return "strong";
     }
 }
 
 export const isWeakPassword = (password: string) => {
-    return estimatePasswordStrength(password) === PasswordStrength.WEAK;
+    return estimatePasswordStrength(password) == "weak";
 };
