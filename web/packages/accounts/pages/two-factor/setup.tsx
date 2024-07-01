@@ -9,7 +9,7 @@ import type { TwoFactorSecret } from "@ente/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Box, CardContent, Typography } from "@mui/material";
 import Card from "@mui/material/Card";
 import { t } from "i18next";
@@ -54,7 +54,7 @@ const Page: React.FC<PageProps> = () => {
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         await markSuccessful();
-        setData(LS_KEYS.USER, {
+        await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });

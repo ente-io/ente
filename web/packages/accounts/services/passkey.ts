@@ -13,7 +13,12 @@ import {
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
@@ -250,14 +255,14 @@ export const checkPasskeyVerificationStatus = async (
  *
  * @returns the slug that we should navigate to now.
  */
-export const saveCredentialsAndNavigateTo = (
+export const saveCredentialsAndNavigateTo = async (
     response: TwoFactorAuthorizationResponse,
 ) => {
     // This method somewhat duplicates `saveCredentialsAndNavigateTo` in the
     // /passkeys/finish page.
     const { id, encryptedToken, keyAttributes } = response;
 
-    setData(LS_KEYS.USER, {
+    await setLSUser({
         ...getData(LS_KEYS.USER),
         encryptedToken,
         id,

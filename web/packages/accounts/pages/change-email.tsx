@@ -8,7 +8,7 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SubmitButton from "@ente/shared/components/SubmitButton";
-import { LS_KEYS, getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";

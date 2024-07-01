@@ -108,7 +108,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
             if (!response) setVerificationStatus("pending");
-            else router.push(saveCredentialsAndNavigateTo(response));
+            else router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             setDialogBoxAttributesV2(
