@@ -8,6 +8,7 @@ import type {
 } from "@/new/photos/services/face/types";
 import { faceIndexingVersion } from "@/new/photos/services/face/types";
 import type { EnteFile } from "@/new/photos/types/file";
+import { getRenderableImage } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
@@ -20,7 +21,6 @@ import {
     scale,
     translate,
 } from "transformation-matrix";
-import { getRenderableImage } from "utils/file";
 import { saveFaceCrop } from "./crop";
 import {
     clamp,
