@@ -3,6 +3,11 @@ import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
 import {
+    NULL_LOCATION,
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_RESULT,
+} from "@/new/photos/constants/upload";
+import {
     EnteFile,
     MetadataFileAttributes,
     S3FileAttributes,
@@ -11,6 +16,7 @@ import {
     type FilePublicMagicMetadataProps,
 } from "@/new/photos/types/file";
 import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
+import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { ensureElectron } from "@/next/electron";
@@ -23,11 +29,6 @@ import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import type { Remote } from "comlink";
-import {
-    NULL_LOCATION,
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
-} from "constants/upload";
 import { addToCollection } from "services/collectionService";
 import { parseImageMetadata } from "services/exif";
 import * as ffmpeg from "services/ffmpeg";
@@ -35,7 +36,6 @@ import {
     PublicUploadProps,
     type LivePhotoAssets,
 } from "services/upload/uploadManager";
-import type { ParsedExtractedMetadata } from "types/metadata";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,

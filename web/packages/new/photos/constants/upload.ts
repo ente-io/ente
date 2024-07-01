@@ -1,4 +1,4 @@
-import { Location } from "types/metadata";
+import type { Location } from "../types/metadata";
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 

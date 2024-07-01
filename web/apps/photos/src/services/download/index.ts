@@ -24,7 +24,7 @@ export type OnDownloadProgress = (event: {
     total: number;
 }) => void;
 
-export interface DownloadClient {
+interface DownloadClient {
     updateTokens: (token: string, passwordToken?: string) => void;
     downloadThumbnail: (
         file: EnteFile,

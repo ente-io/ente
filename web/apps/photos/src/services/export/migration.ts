@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
@@ -30,7 +31,6 @@ import {
 import { getNonEmptyPersonalCollections } from "utils/collection";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
-    exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,

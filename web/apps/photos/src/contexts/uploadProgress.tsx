@@ -1,4 +1,4 @@
-import { UPLOAD_STAGES } from "constants/upload";
+import { UPLOAD_STAGES } from "@/new/photos/constants/upload";
 import { createContext } from "react";
 import type {
     InProgressUpload,

@@ -1,3 +1,5 @@
+import { NULL_LOCATION } from "@/new/photos/constants/upload";
+import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import {
     readConvertToMP4Done,
     readConvertToMP4Stream,
@@ -12,8 +14,6 @@ import {
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "constants/ffmpeg";
-import { NULL_LOCATION } from "constants/upload";
-import type { ParsedExtractedMetadata } from "types/metadata";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 import {
     toDataOrPathOrZipEntry,

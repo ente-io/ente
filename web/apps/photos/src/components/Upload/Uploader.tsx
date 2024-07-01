@@ -1,3 +1,4 @@
+import { UPLOAD_STAGES } from "@/new/photos/constants/upload";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { basename } from "@/next/file";
 import log from "@/next/log";
@@ -8,7 +9,6 @@ import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
-import { UPLOAD_STAGES } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";

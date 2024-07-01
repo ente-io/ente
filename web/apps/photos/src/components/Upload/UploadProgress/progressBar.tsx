@@ -1,5 +1,5 @@
+import { UPLOAD_STAGES } from "@/new/photos/constants/upload";
 import { Box, Divider, LinearProgress } from "@mui/material";
-import { UPLOAD_STAGES } from "constants/upload";
 import UploadProgressContext from "contexts/uploadProgress";
 import { useContext } from "react";
 

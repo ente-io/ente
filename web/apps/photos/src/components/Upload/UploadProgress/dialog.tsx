@@ -1,8 +1,8 @@
 import { Dialog, DialogContent, Link } from "@mui/material";
 import { t } from "i18next";
 
+import { UPLOAD_RESULT, UPLOAD_STAGES } from "@/new/photos/constants/upload";
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import UploadProgressContext from "contexts/uploadProgress";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
