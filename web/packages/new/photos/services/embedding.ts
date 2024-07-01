@@ -1,5 +1,6 @@
 import { getLocalTrashedFiles } from "@/new/photos/services/files";
 import { authenticatedRequestHeaders } from "@/next/http";
+import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
@@ -119,7 +120,7 @@ const pullEmbeddings = async (
     //     scenario where this happens.
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    let sinceTime = embeddingSyncTime(model);
+    let sinceTime = await embeddingSyncTime(model);
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
     // https://github.com/eslint/eslint/pull/18286
@@ -146,7 +147,7 @@ const pullEmbeddings = async (
                 log.warn(`Ignoring unparseable ${model} embedding`, e);
             }
         }
-        saveEmbeddingSyncTime(sinceTime, model);
+        await saveEmbeddingSyncTime(sinceTime, model);
         log.info(`Fetched ${count} ${model} embeddings`);
     }
 };
@@ -160,12 +161,12 @@ const pullEmbeddings = async (
  * This value is persisted to local storage. To update it, use
  * {@link saveEmbeddingSyncTime}.
  */
-const embeddingSyncTime = (model: EmbeddingModel) =>
-    parseInt(localStorage.getItem("embeddingSyncTime:" + model) ?? "0");
+const embeddingSyncTime = async (model: EmbeddingModel) =>
+    parseInt((await getKV("embeddingSyncTime:" + model)) ?? "0");
 
 /** Sibling of {@link embeddingSyncTime}. */
-const saveEmbeddingSyncTime = (t: number, model: EmbeddingModel) =>
-    localStorage.setItem("embeddingSyncTime:" + model, `${t}`);
+const saveEmbeddingSyncTime = async (t: number, model: EmbeddingModel) =>
+    setKV("embeddingSyncTime:" + model, `${t}`);
 
 /**
  * The maximum number of items to fetch in a single GET /embeddings/diff
