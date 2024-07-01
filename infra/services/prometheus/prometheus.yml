@@ -1,8 +1,5 @@
 # https://prometheus.io/docs/prometheus/latest/configuration/
 
-global:
-    scrape_interval: 30s # Default is 1m
-
 scrape_configs:
     - job_name: museum
       static_configs:
