@@ -1,6 +1,7 @@
 import { staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
+import { disableDiskLogs } from "@/next/log";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
 import { PAGES } from "@ente/accounts/constants/pages";
 import { accountLogout } from "@ente/accounts/services/logout";
@@ -45,6 +46,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
+        disableDiskLogs();
         void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
