@@ -15,7 +15,12 @@ import SingleInputForm, {
 import { ApiError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
-import { LS_KEYS, getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
@@ -39,7 +44,7 @@ import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout } = appContext;
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -67,7 +72,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         main();
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -199,7 +204,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                appContext={appContext}
+                {...{ logout, setDialogBoxAttributesV2 }}
             />
         );
     }

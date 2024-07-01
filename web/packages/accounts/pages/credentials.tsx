@@ -63,7 +63,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, setDialogBoxAttributesV2 } = appContext;
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -192,7 +192,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         main();
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
     // TODO: ^ validateSession is a dependency, but add that only after we've
     // wrapped items from the callback (like logout) in useCallback too.
@@ -353,7 +353,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                appContext={appContext}
+                {...{ logout, setDialogBoxAttributesV2 }}
             />
         );
     }
