@@ -15,7 +15,7 @@ import SingleInputForm, {
 import { ApiError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
@@ -87,7 +87,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             } = resp.data as UserVerificationResponse;
             if (passkeySessionID) {
                 const user = getData(LS_KEYS.USER);
-                setData(LS_KEYS.USER, {
+                await setLSUser({
                     ...user,
                     passkeySessionID,
                     isTwoFactorEnabled: true,
@@ -103,7 +103,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
-                setData(LS_KEYS.USER, {
+                await setLSUser({
                     email,
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
@@ -111,7 +111,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 setIsFirstLogin(true);
                 router.push(PAGES.TWO_FACTOR_VERIFY);
             } else {
-                setData(LS_KEYS.USER, {
+                await setLSUser({
                     email,
                     token,
                     encryptedToken,
