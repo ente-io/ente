@@ -54,9 +54,23 @@ export const clearData = () => localStorage.clear();
 //
 // Creating a new function here to act as a funnel point.
 export const setLSUser = async (user: object) => {
-    const token = user["token"];
+    await setKVToken(user);
+    setData(LS_KEYS.USER, user);
+};
+
+/**
+ * Update the "token" KV with the token (if any) for the given {@link user}.
+ *
+ * This is an internal implementation details of {@link setLSUser} and doesn't
+ * need to exposed conceptually. For now though, we need to call this externally
+ * at an early point in the app startup to also copy over the token into KV DB
+ * for existing users.
+ *
+ * This was added 1 July 2024, can be removed after a while (tag: Migration).
+ */
+export const setKVToken = async (user: unknown) => {
+    const token = user ? user["token"] : undefined;
     token && typeof token == "string"
         ? await setKV("token", token)
         : await removeKV("token");
-    setData(LS_KEYS.USER, user);
 };

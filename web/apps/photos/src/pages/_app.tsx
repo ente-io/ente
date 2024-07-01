@@ -23,7 +23,11 @@ import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setKVToken,
+} from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
     getToken,
@@ -140,8 +144,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
-        const userID = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(userID);
+        const user = getData(LS_KEYS.USER) as User | undefined | null;
+        setKVToken(user);
+        logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);

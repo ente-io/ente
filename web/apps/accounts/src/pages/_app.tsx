@@ -33,7 +33,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         disableDiskLogs();
         // The accounts app has no local state, but some older builds might've
-        // leftover some scraps. Clear it out. Thi code added 1 July 2024, can
+        // leftover some scraps. Clear it out. This code added 1 July 2024, can
         // be removed after a while (tag: Migration).
         clearData();
         void setupI18n().finally(() => setIsI18nReady(true));
