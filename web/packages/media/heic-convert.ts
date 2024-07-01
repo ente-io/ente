@@ -23,11 +23,7 @@ export const heicToJPEG = async (heicBlob: Blob) =>
 let _comlinkWorker: ComlinkWorker<typeof HEICConvertWorker> | undefined;
 
 /** Lazily created, cached, instance of our web worker. */
-const worker = async () => {
-    let comlinkWorker = _comlinkWorker;
-    if (!comlinkWorker) _comlinkWorker = comlinkWorker = createComlinkWorker();
-    return await comlinkWorker.remote;
-};
+const worker = async () => (_comlinkWorker ??= createComlinkWorker()).remote;
 
 const createComlinkWorker = () =>
     new ComlinkWorker<typeof HEICConvertWorker>(
