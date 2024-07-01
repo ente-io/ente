@@ -4,10 +4,6 @@ import { createContext, useContext } from "react";
 
 /**
  * The type of the context for pages in the accounts app.
- *
- * -   The accounts app has no extra properties on top of the base context.
- *
- * -   It also doesn't need the logout function.
  */
 interface AppContextT {
     /** Show or hide the app's navigation bar. */
@@ -17,7 +13,7 @@ interface AppContextT {
 }
 
 /**
- * The React {@link Context} available to all pages.
+ * The React {@link Context} available to all nodes in the React tree.
  */
 export const AppContext = createContext<AppContextT | undefined>(undefined);
 

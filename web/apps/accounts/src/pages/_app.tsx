@@ -3,8 +3,6 @@ import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
 import { disableDiskLogs } from "@/next/log";
 import { logUnhandledErrorsAndRejections } from "@/next/log-web";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -15,11 +13,10 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline, useMediaQuery } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { AppContext } from "components/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { AppContext } from "../types/context";
 
 import "styles/global.css";
 
@@ -32,7 +29,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
 
     const isMobile = useMediaQuery("(max-width: 428px)");
-    const router = useRouter();
 
     useEffect(() => {
         disableDiskLogs();
@@ -51,12 +47,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
-    const logout = useCallback(() => {
-        void accountLogout().then(() => router.push(PAGES.ROOT));
-    }, [router]);
-
     const appContext = {
-        logout,
         showNavBar: setShowNavbar,
         isMobile,
         setDialogBoxAttributesV2,
