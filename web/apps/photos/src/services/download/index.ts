@@ -5,6 +5,7 @@ import {
     type LivePhotoSourceURL,
     type SourceURLs,
 } from "@/new/photos/types/file";
+import { getRenderableImage } from "@/new/photos/utils/file";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -14,7 +15,6 @@ import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import type { Remote } from "comlink";
 import isElectron from "is-electron";
 import * as ffmpeg from "services/ffmpeg";
-import { getRenderableImage } from "utils/file";
 import { PhotosDownloadClient } from "./clients/photos";
 import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 

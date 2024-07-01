@@ -2,6 +2,7 @@ import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import { detectFileTypeInfoFromChunk } from "@/new/photos/services/detect-type";
 import {
     EnteFile,
     MetadataFileAttributes,
@@ -40,7 +41,6 @@ import {
 } from "utils/magicMetadata";
 import { readStream } from "utils/native-stream";
 import * as convert from "xml-js";
-import { detectFileTypeInfoFromChunk } from "../detect-type";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";

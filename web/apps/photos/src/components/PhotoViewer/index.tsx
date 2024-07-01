@@ -17,6 +17,7 @@ import {
 import { FILE_TYPE } from "@/media/file-type";
 import { isNonWebImageFileExtension } from "@/media/formats";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
+import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -44,7 +45,6 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { detectFileTypeInfo } from "services/detect-type";
 import downloadManager from "services/download";
 import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";

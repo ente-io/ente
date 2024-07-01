@@ -78,7 +78,7 @@ export const detectFileTypeInfoFromChunk = async (
         const known = KnownFileTypeInfos.find((f) => f.extension == extension);
         if (known) return known;
 
-        if (KnownNonMediaFileExtensions.includes(extension))
+        if (extension && KnownNonMediaFileExtensions.includes(extension))
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
 
         throw e;
