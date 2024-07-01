@@ -1,9 +1,9 @@
 import { isNonWebImageFileExtension } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
+import { isDesktop } from "@/next/app";
 import log from "@/next/log";
 import { CustomErrorMessage } from "@/next/types/ipc";
 import { workerBridge } from "@/next/worker/worker-bridge";
-import isElectron from "is-electron";
 import type { EnteFile } from "../types/file";
 import { detectFileTypeInfo } from "./detect-type";
 
@@ -82,7 +82,7 @@ export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
         }
 
         const available = !moduleState.isNativeJPEGConversionNotAvailable;
-        if (isElectron() && available && isNativeConvertibleToJPEG(extension)) {
+        if (isDesktop && available && isNativeConvertibleToJPEG(extension)) {
             // If we're running in our desktop app, see if our Node.js layer can
             // convert this into a JPEG using native tools for us.
             try {
