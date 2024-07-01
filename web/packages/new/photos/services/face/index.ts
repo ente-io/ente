@@ -9,11 +9,8 @@ import { FaceWorker } from "./worker";
 let _comlinkWorker: ComlinkWorker<typeof FaceWorker> | undefined;
 
 /** Lazily created, cached, instance of {@link FaceWorker}. */
-export const faceWorker = async () => {
-    let comlinkWorker = _comlinkWorker;
-    if (!comlinkWorker) _comlinkWorker = comlinkWorker = createComlinkWorker();
-    return await comlinkWorker.remote;
-};
+export const faceWorker = async () =>
+    (_comlinkWorker ??= createComlinkWorker()).remote;
 
 const createComlinkWorker = () =>
     new ComlinkWorker<typeof FaceWorker>(

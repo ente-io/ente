@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { EnteFile } from "@/new/photos/types/file";
+import { isDesktop } from "@/next/app";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -295,9 +296,7 @@ async function getLocationSuggestions(searchPhrase: string) {
 async function getClipSuggestion(
     searchPhrase: string,
 ): Promise<Suggestion | undefined> {
-    if (!clipService.isPlatformSupported()) {
-        return null;
-    }
+    if (!isDesktop) return undefined;
 
     const clipResults = await searchClip(searchPhrase);
     if (!clipResults) return undefined;

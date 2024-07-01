@@ -1,3 +1,4 @@
+import { expose } from "comlink";
 import { pullFaceEmbeddings } from "../embedding";
 
 /**
@@ -20,3 +21,5 @@ export class FaceWorker {
         this.isSyncing = false;
     }
 }
+
+expose(FaceWorker);
