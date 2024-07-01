@@ -1,5 +1,5 @@
 import log from "@/next/log";
-import { removeKV, setKV } from "packages/next/kv";
+import { removeKV, setKV } from "@/next/kv";
 
 export enum LS_KEYS {
     USER = "user",
