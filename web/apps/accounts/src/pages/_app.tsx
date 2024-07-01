@@ -36,9 +36,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         disableDiskLogs();
-        // accounts.ente.io has no local state, but some older builds might've
-        // leftover some scraps. Clear it out. (tag: Migration)
-        // Added 1 July 2024, can be removed after a while.
+        // The accounts app has no local state, but some older builds might've
+        // leftover some scraps. Clear it out. Thi code added 1 July 2024, can
+        // be removed after a while (tag: Migration).
         clearData();
         void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);

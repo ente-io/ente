@@ -1,10 +1,10 @@
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 
 /**
- * Properties guaranteed to be present in the AppContext types for apps that are
- * listed in {@link AppName}.
+ * Properties expected to be present in the AppContext types for pages that
+ * defer to the pages provided by the accounts package.
  */
-export interface BaseAppContextT {
+export interface AccountsContextT {
     /** Perform the (possibly app specific) logout sequence. */
     logout: () => void;
     /** Show or hide the app's navigation bar. */
