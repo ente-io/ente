@@ -63,8 +63,8 @@ export interface EnteFile
 }
 
 export interface LivePhotoSourceURL {
-    image: () => Promise<string>;
-    video: () => Promise<string>;
+    image: () => Promise<string | undefined>;
+    video: () => Promise<string | undefined>;
 }
 
 export interface LoadedLivePhotoSourceURL {

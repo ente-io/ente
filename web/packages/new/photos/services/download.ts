@@ -443,14 +443,14 @@ async function getRenderableFileURL(
     originalFileURL: string,
     forceConvert: boolean,
 ): Promise<SourceURLs> {
-    const existingOrNewObjectURL = (convertedBlob: Blob) =>
+    const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
         convertedBlob
             ? convertedBlob === fileBlob
                 ? originalFileURL
                 : URL.createObjectURL(convertedBlob)
             : undefined;
 
-    let url: SourceURLs["url"];
+    let url: SourceURLs["url"] | undefined;
     let isOriginal: boolean;
     let isRenderable: boolean;
     let type: SourceURLs["type"] = "normal";
@@ -497,14 +497,15 @@ async function getRenderableFileURL(
         }
     }
 
-    return { url, isOriginal, isRenderable, type, mimeType };
+    // TODO: Can we remove this ensure and reflect it in the types?
+    return { url: ensure(url), isOriginal, isRenderable, type, mimeType };
 }
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
     fileBlob: Blob,
     forceConvert: boolean,
-): Promise<LivePhotoSourceURL> {
+): Promise<LivePhotoSourceURL | undefined> {
     const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
 
     const getRenderableLivePhotoImageURL = async () => {
@@ -514,11 +515,12 @@ async function getRenderableLivePhotoURL(
                 livePhoto.imageFileName,
                 imageBlob,
             );
+            if (!convertedImageBlob) return undefined;
 
             return URL.createObjectURL(convertedImageBlob);
         } catch (e) {
             //ignore and return null
-            return null;
+            return undefined;
         }
     };
 
@@ -531,10 +533,11 @@ async function getRenderableLivePhotoURL(
                 forceConvert,
                 true,
             );
+            if (!convertedVideoBlob) return undefined;
             return URL.createObjectURL(convertedVideoBlob);
         } catch (e) {
             //ignore and return null
-            return null;
+            return undefined;
         }
     };
 
@@ -609,7 +612,9 @@ class PhotosDownloadClient implements DownloadClient {
 
         const resp = await retryAsyncFunction(getThumbnail);
         if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
-        return new Uint8Array(resp.data);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
     }
 
     async downloadFile(
@@ -649,7 +654,9 @@ class PhotosDownloadClient implements DownloadClient {
 
         const resp = await retryAsyncFunction(getFile);
         if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
-        return new Uint8Array(resp.data);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
     }
 
     async downloadFileStream(file: EnteFile): Promise<Response> {
@@ -714,12 +721,12 @@ class PhotosDownloadClient implements DownloadClient {
 }
 
 class PublicAlbumsDownloadClient implements DownloadClient {
-    private token: string;
-    private passwordToken: string;
+    private token: string | undefined;
+    private passwordToken: string | undefined;
 
     constructor(private timeout: number) {}
 
-    updateTokens(token: string, passwordToken: string) {
+    updateTokens(token: string, passwordToken?: string) {
         this.token = token;
         this.passwordToken = passwordToken;
     }
@@ -764,7 +771,9 @@ class PublicAlbumsDownloadClient implements DownloadClient {
 
         const resp = await getThumbnail();
         if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
-        return new Uint8Array(resp.data);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
     };
 
     downloadFile = async (
@@ -813,7 +822,9 @@ class PublicAlbumsDownloadClient implements DownloadClient {
 
         const resp = await retryAsyncFunction(getFile);
         if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
-        return new Uint8Array(resp.data);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
     };
 
     async downloadFileStream(file: EnteFile): Promise<Response> {
