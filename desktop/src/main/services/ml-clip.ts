@@ -1,3 +1,7 @@
+// TODO: These arise from the array indexing in the pre-processing code. Isolate
+// once that code settles down to its final place.
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 /**
  * @file Compute CLIP embeddings for images and text.
  *
@@ -49,9 +53,7 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
     return normalizeEmbedding(imageEmbedding);
 };
 
-const getRGBData = async (
-    jpegFilePath: string,
-): Promise<Float32Array> => {
+const getRGBData = async (jpegFilePath: string): Promise<Float32Array> => {
     const jpegData = await fs.readFile(jpegFilePath);
     const rawImageData = jpeg.decode(jpegData, {
         useTArray: true,
