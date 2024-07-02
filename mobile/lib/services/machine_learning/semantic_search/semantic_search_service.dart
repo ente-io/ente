@@ -490,12 +490,6 @@ List<QueryResult> computeBulkSimilarities(Map args) {
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (imageEmbedding.fileID == 61353139 ||
-        imageEmbedding.fileID == 61921627) {
-      dev.log(
-        "Embedding for image ${imageEmbedding.fileID}: ${imageEmbedding.embedding}",
-      );
-    } // TODO: remove this later
     if (score >= minimumSimilarity) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
