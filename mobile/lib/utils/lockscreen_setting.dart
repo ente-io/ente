@@ -19,8 +19,8 @@ class LockscreenSetting {
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
 
-  void init(FlutterSecureStorage secureStorage, SharedPreferences prefs) async {
-    _secureStorage = secureStorage;
+  void init(SharedPreferences prefs) async {
+    _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
   }
 
