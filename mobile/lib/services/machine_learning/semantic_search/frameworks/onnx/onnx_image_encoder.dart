@@ -1,32 +1,29 @@
 import "dart:io";
-import "dart:math";
 import "dart:typed_data";
 
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
+import "package:photos/utils/ml_util.dart";
 
-class OnnxImageEncoder {
-  final _logger = Logger("OnnxImageEncoder");
+class ClipImageEncoder extends MlModel {
+  static const kRemoteBucketModelPath = "clip-image-vit-32-float32.onnx";
+  // static const kRemoteBucketModelPath = "clip-text-vit-32-uint8.onnx";
 
-  Future<int> loadModel(Map args) async {
-    final sessionOptions = OrtSessionOptions()
-      ..setInterOpNumThreads(1)
-      ..setIntraOpNumThreads(1)
-      ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    try {
-      final session =
-          OrtSession.fromFile(File(args["imageModelPath"]), sessionOptions);
-      _logger.info('image model loaded');
+  @override
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
 
-      return session.address;
-    } catch (e, s) {
-      _logger.severe(e, s);
-    }
-    return -1;
-  }
+  @override
+  Logger get logger => _logger;
+  static final _logger = Logger('ClipImageEncoder');
 
-  static Future<List<double>> inferByImage(Map args) async {
+  // Singleton pattern
+  ClipImageEncoder._privateConstructor();
+  static final instance = ClipImageEncoder._privateConstructor();
+  factory ClipImageEncoder() => instance;
+
+  static Future<List<double>> predict(Map args) async {
     final imageData = await File(args["imagePath"]).readAsBytes();
     final image = await decodeImageFromData(imageData);
     final ByteData imgByteData = await getByteDataFromImage(image);
@@ -41,14 +38,8 @@ class OnnxImageEncoder {
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
 
-    double imageNormalization = 0;
-    for (int i = 0; i < 512; i++) {
-      imageNormalization += embedding[i] * embedding[i];
-    }
-    final double sqrtImageNormalization = sqrt(imageNormalization);
-    for (int i = 0; i < 512; i++) {
-      embedding[i] = embedding[i] / sqrtImageNormalization;
-    }
+    normalizeEmbedding(embedding);
+
     return embedding;
   }
 }

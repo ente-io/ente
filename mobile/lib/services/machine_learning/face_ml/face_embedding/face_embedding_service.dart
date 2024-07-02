@@ -1,9 +1,9 @@
-import 'dart:math' as math show sqrt;
 import 'dart:typed_data' show Float32List;
 
 import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/utils/ml_util.dart";
 
 class MobileFaceNetInterpreterRunException implements Exception {}
 
@@ -48,14 +48,7 @@ class FaceEmbeddingService extends MlModel {
       final embeddings = outputs[0]?.value as List<List<double>>;
 
       for (final embedding in embeddings) {
-        double normalization = 0;
-        for (int i = 0; i < kEmbeddingSize; i++) {
-          normalization += embedding[i] * embedding[i];
-        }
-        final double sqrtNormalization = math.sqrt(normalization);
-        for (int i = 0; i < kEmbeddingSize; i++) {
-          embedding[i] = embedding[i] / sqrtNormalization;
-        }
+        normalizeEmbedding(embedding);
       }
       stopwatch.stop();
       _logger.info(

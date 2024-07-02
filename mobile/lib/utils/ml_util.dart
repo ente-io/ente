@@ -1,4 +1,5 @@
 import "dart:io" show File;
+import "dart:math" as math show sqrt;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
@@ -88,4 +89,15 @@ Future<String> getImagePathForML(
   }
 
   return imagePath;
+}
+
+void normalizeEmbedding(List<double> embedding) {
+  double normalization = 0;
+  for (int i = 0; i < embedding.length; i++) {
+    normalization += embedding[i] * embedding[i];
+  }
+  final double sqrtNormalization = math.sqrt(normalization);
+  for (int i = 0; i < embedding.length; i++) {
+    embedding[i] = embedding[i] / sqrtNormalization;
+  }
 }
