@@ -2,10 +2,12 @@ import "dart:async";
 import "dart:convert";
 
 import "package:computer/computer.dart";
+import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
 import "package:photos/services/machine_learning/semantic_search/embedding_store.dart";
@@ -139,4 +141,46 @@ Future<Map<int, FileMl>> _decryptFileMLComputer(
       result[input.embedding.fileID] = decodedEmbedding;
     }
     return result;
+  }
+
+bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
+    if (fileMl.faceEmbedding.version < faceMlVersion) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
+      return true;
+    }
+    // are all landmarks equal?
+    bool allLandmarksEqual = true;
+    if (fileMl.faceEmbedding.faces.isEmpty) {
+      debugPrint("No face for ${fileMl.fileID}");
+      allLandmarksEqual = false;
+    }
+    for (final face in fileMl.faceEmbedding.faces) {
+      if (face.detection.landmarks.isEmpty) {
+        allLandmarksEqual = false;
+        break;
+      }
+      if (face.detection.landmarks
+          .any((landmark) => landmark.x != landmark.y)) {
+        allLandmarksEqual = false;
+        break;
+      }
+    }
+    if (allLandmarksEqual) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because landmarks are equal");
+      debugPrint(
+        fileMl.faceEmbedding.faces
+            .map((e) => e.detection.landmarks.toString())
+            .toList()
+            .toString(),
+      );
+      return true;
+    }
+    if (fileMl.width == null || fileMl.height == null) {
+      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+          "because width is null");
+      return true;
+    }
+    return false;
   }

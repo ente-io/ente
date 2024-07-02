@@ -8,7 +8,7 @@ import "dart:ui" show Image;
 
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
-import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
+import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -17,7 +17,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/list.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
@@ -173,23 +172,21 @@ class FaceMlService {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
 
-      final w = (kDebugMode ? EnteWatch('prepare indexing files') : null)
-        ?..start();
+      // Get indexed fileIDs, all regular files, and all hidden files
       final Map<int, int> alreadyIndexedFiles =
           await FaceMLDataDB.instance.getIndexedFileIds();
-      w?.log('getIndexedFileIds');
       final List<EnteFile> enteFiles =
           await SearchService.instance.getAllFiles();
-      w?.log('getAllFiles');
+      final List<EnteFile> hiddenFiles =
+          await SearchService.instance.getHiddenFiles();
 
+      // Sort out what should be indexed and in what order
       int fileAnalyzedCount = 0;
       int fileSkippedCount = 0;
       final stopwatch = Stopwatch()..start();
       final List<EnteFile> filesWithLocalID = <EnteFile>[];
       final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
       final List<EnteFile> hiddenFilesToIndex = <EnteFile>[];
-      w?.log('getIndexableFileIDs');
-
       for (final EnteFile enteFile in enteFiles) {
         if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
           fileSkippedCount++;
@@ -201,10 +198,6 @@ class FaceMlService {
           filesWithLocalID.add(enteFile);
         }
       }
-      w?.log('sifting through all normal files');
-      final List<EnteFile> hiddenFiles =
-          await SearchService.instance.getHiddenFiles();
-      w?.log('getHiddenFiles: ${hiddenFiles.length} hidden files');
       for (final EnteFile enteFile in hiddenFiles) {
         if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
           fileSkippedCount++;
@@ -212,26 +205,20 @@ class FaceMlService {
         }
         hiddenFilesToIndex.add(enteFile);
       }
-
-      // list of files where files with localID are first
       final sortedBylocalID = <EnteFile>[];
       sortedBylocalID.addAll(filesWithLocalID);
       sortedBylocalID.addAll(filesWithoutLocalID);
       sortedBylocalID.addAll(hiddenFilesToIndex);
-      w?.log('preparing all files to index');
       final List<List<EnteFile>> chunks =
-          sortedBylocalID.chunks(_embeddingFetchLimit);
+          sortedBylocalID.chunks(_embeddingFetchLimit); // Chunks of 200
+
       int fetchedCount = 0;
       outerLoop:
       for (final chunk in chunks) {
+        // Fetching and storing remote embeddings
         if (LocalSettings.instance.remoteFetchEnabled) {
           try {
-            final Set<int> fileIds =
-                {}; // if there are duplicates here server returns 400
-            // Try to find embeddings on the remote server
-            for (final f in chunk) {
-              fileIds.add(f.uploadedFileID!);
-            }
+            final fileIds = chunk.map((file) => file.uploadedFileID!).toSet();
             _logger.info('starting remote fetch for ${fileIds.length} files');
             final res =
                 await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
@@ -240,7 +227,7 @@ class FaceMlService {
             final List<Face> faces = [];
             final remoteFileIdToVersion = <int, int>{};
             for (FileMl fileMl in res.mlData.values) {
-              if (_shouldDiscardRemoteEmbedding(fileMl)) continue;
+              if (shouldDiscardRemoteEmbedding(fileMl)) continue;
               if (fileMl.faceEmbedding.faces.isEmpty) {
                 faces.add(
                   Face.empty(
@@ -297,6 +284,7 @@ class FaceMlService {
             'Not fetching embeddings because user manually disabled it in debug options',
           );
         }
+
         final smallerChunks = chunk.chunks(_fileDownloadLimit);
         for (final smallestChunk in smallerChunks) {
           final futures = <Future<bool>>[];
@@ -807,8 +795,6 @@ class FaceMlService {
 
   /// Analyzes the given image data by running the full pipeline for faces, using [_analyzeImageSync] in the isolate.
   Future<FaceMlResult?> _analyzeImageInSingleIsolate(EnteFile enteFile) async {
-    _checkEnteFileForID(enteFile);
-
     final String filePath =
         await getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
 
@@ -1038,66 +1024,7 @@ class FaceMlService {
     }
   }
 
-  bool _shouldDiscardRemoteEmbedding(FileMl fileMl) {
-    if (fileMl.faceEmbedding.version < faceMlVersion) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
-      return true;
-    }
-    // are all landmarks equal?
-    bool allLandmarksEqual = true;
-    if (fileMl.faceEmbedding.faces.isEmpty) {
-      debugPrint("No face for ${fileMl.fileID}");
-      allLandmarksEqual = false;
-    }
-    for (final face in fileMl.faceEmbedding.faces) {
-      if (face.detection.landmarks.isEmpty) {
-        allLandmarksEqual = false;
-        break;
-      }
-      if (face.detection.landmarks
-          .any((landmark) => landmark.x != landmark.y)) {
-        allLandmarksEqual = false;
-        break;
-      }
-    }
-    if (allLandmarksEqual) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because landmarks are equal");
-      debugPrint(
-        fileMl.faceEmbedding.faces
-            .map((e) => e.detection.landmarks.toString())
-            .toList()
-            .toString(),
-      );
-      return true;
-    }
-    if (fileMl.width == null || fileMl.height == null) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because width is null");
-      return true;
-    }
-    return false;
-  }
-
-  /// Checks if the ente file to be analyzed actually can be analyzed: it must be uploaded and in the correct format.
-  void _checkEnteFileForID(EnteFile enteFile) {
-    if (_skipAnalysisEnteFile(enteFile, <int, int>{})) {
-      final String logString =
-          '''Skipped analysis of image with enteFile, it might be the wrong format or has no uploadedFileID, or MLController doesn't allow it to run.
-        enteFile: ${enteFile.toString()}
-        ''';
-      _logger.warning(logString);
-      _logStatus();
-      throw GeneralFaceMlException(logString);
-    }
-  }
-
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
-    if (_isIndexingOrClusteringRunning == false ||
-        _mlControllerStatus == false) {
-      return true;
-    }
     // Skip if the file is not uploaded or not owned by the user
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
       return true;
