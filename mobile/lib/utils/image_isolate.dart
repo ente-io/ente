@@ -187,6 +187,7 @@ class ImageIsolate {
     ).then((value) => value.cast<Uint8List>());
   }
 
+  // TODO: remove this later to have clip indexing combined with faces
   Future<List<double>> inferClipImageEmbedding(String imagePath, int encoderAddress) async {
     return await _runInIsolate(
       (
