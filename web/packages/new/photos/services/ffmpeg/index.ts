@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/array-type */
-
 import {
     NULL_LOCATION,
     toDataOrPathOrZipEntry,
@@ -168,8 +165,8 @@ function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
         property.split("="),
     );
     const validKeyValuePairs = metadataKeyValueArray.filter(
-        (keyValueArray) => keyValueArray.length === 2,
-    ) as Array<[string, string]>;
+        (keyValueArray) => keyValueArray.length == 2,
+    ) as [string, string][];
 
     const metadataMap = Object.fromEntries(validKeyValuePairs);
 
@@ -262,7 +259,7 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
     const token = await writeConvertToMP4Stream(electron, blob);
     const mp4Blob = await readConvertToMP4Stream(electron, token);
-    readConvertToMP4Done(electron, token);
+    await readConvertToMP4Done(electron, token);
     return mp4Blob;
 };
 
