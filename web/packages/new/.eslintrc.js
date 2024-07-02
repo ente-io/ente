@@ -4,5 +4,5 @@ module.exports = {
     // I haven't investigated much, when we run eslint on our CI, it seems to behave
     // differently than locally and give a lot of warnings that possibly arise from
     // it not being able to locate ffmpeg-wasm.
-    ignorePatterns: ["ffmpeg/worker.ts"],
+    ignorePatterns: ["**/ffmpeg/worker.ts"],
 };
