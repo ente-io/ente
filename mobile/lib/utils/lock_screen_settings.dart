@@ -11,11 +11,11 @@ class LockScreenSettings {
 
   static final LockScreenSettings instance =
       LockScreenSettings._privateConstructor();
-  static const password = "user_pass";
-  static const pin = "user_pin";
-  static const saltKey = "user_salt";
-  static const keyInvalidAttempts = "invalid_attempts";
-  static const lastInvalidAttemptTime = "last_invalid_attempt_time";
+  static const password = "ls_password";
+  static const pin = "ls_pin";
+  static const saltKey = "ls_salt";
+  static const keyInvalidAttempts = "ls_invalid_attempts";
+  static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
 
@@ -40,14 +40,14 @@ class LockScreenSettings {
     await _preferences.setInt(keyInvalidAttempts, count);
   }
 
-  static Uint8List generateSalt() {
+  static Uint8List _generateSalt() {
     return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
   }
 
   Future<void> setPin(String userPin) async {
     await _secureStorage.delete(key: saltKey);
 
-    final salt = generateSalt();
+    final salt = _generateSalt();
     final hash = cryptoPwHash({
       "password": utf8.encode(userPin),
       "salt": salt,
@@ -78,7 +78,7 @@ class LockScreenSettings {
   Future<void> setPassword(String pass) async {
     await _secureStorage.delete(key: saltKey);
 
-    final salt = generateSalt();
+    final salt = _generateSalt();
     final hash = cryptoPwHash({
       "password": utf8.encode(pass),
       "salt": salt,
