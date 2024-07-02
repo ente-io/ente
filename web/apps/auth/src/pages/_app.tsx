@@ -1,3 +1,5 @@
+import { accountLogout } from "@/accounts/services/logout";
+import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
@@ -6,8 +8,6 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
 import { ensure } from "@/utils/ensure";
-import { accountLogout } from "@ente/accounts/services/logout";
-import type { AccountsContextT } from "@ente/accounts/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";

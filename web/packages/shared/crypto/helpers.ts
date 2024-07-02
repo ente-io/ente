@@ -1,5 +1,5 @@
+import { setRecoveryKey } from "@/accounts/api/user";
 import log from "@/next/log";
-import { setRecoveryKey } from "@ente/accounts/api/user";
 import {
     LS_KEYS,
     getData,

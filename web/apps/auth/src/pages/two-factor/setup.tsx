@@ -1,4 +1,4 @@
-import Page_ from "@ente/accounts/pages/two-factor/setup";
+import Page_ from "@/accounts/pages/two-factor/setup";
 import { useAppContext } from "../_app";
 
 const Page = () => <Page_ appContext={useAppContext()} />;

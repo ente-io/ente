@@ -1,10 +1,10 @@
+import { accountLogout } from "@/accounts/services/logout";
 import DownloadManager from "@/new/photos/services/download";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
 import { terminateMLWorker } from "@/new/photos/services/ml";
 import { clearFaceDB } from "@/new/photos/services/ml/db";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import log from "@/next/log";
-import { accountLogout } from "@ente/accounts/services/logout";
 import { clipService } from "services/clip-service";
 import exportService from "./export";
 

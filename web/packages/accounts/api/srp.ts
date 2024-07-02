@@ -1,5 +1,8 @@
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
+import { ApiError, CustomError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { HttpStatusCode } from "axios";
 import type {
     CompleteSRPSetupRequest,
     CompleteSRPSetupResponse,
@@ -11,10 +14,7 @@ import type {
     SetupSRPResponse,
     UpdateSRPAndKeysRequest,
     UpdateSRPAndKeysResponse,
-} from "@ente/accounts/types/srp";
-import { ApiError, CustomError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { HttpStatusCode } from "axios";
+} from "../types/srp";
 
 export const getSRPAttributes = async (
     email: string,

@@ -1,12 +1,12 @@
-import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
-import { putAttributes } from "@ente/accounts/api/user";
+import { putAttributes } from "@/accounts/api/user";
 import SetPasswordForm, {
     type SetPasswordFormProps,
-} from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { configureSRP } from "@ente/accounts/services/srp";
-import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
+} from "@/accounts/components/SetPasswordForm";
+import { PAGES } from "@/accounts/constants/pages";
+import { configureSRP } from "@/accounts/services/srp";
+import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";

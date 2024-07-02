@@ -1,10 +1,10 @@
-import log from "@/next/log";
-import { customAPIHost } from "@/next/origins";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
-} from "@ente/accounts/services/passkey";
+} from "@/accounts/services/passkey";
+import log from "@/next/log";
+import { customAPIHost } from "@/next/origins";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";

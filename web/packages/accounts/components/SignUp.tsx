@@ -1,9 +1,9 @@
+import { sendOtt } from "@/accounts/api/user";
+import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
+import { PAGES } from "@/accounts/constants/pages";
+import { isWeakPassword } from "@/accounts/utils";
+import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
 import log from "@/next/log";
-import { sendOtt } from "@ente/accounts/api/user";
-import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { isWeakPassword } from "@ente/accounts/utils";
-import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";

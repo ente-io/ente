@@ -1,4 +1,4 @@
-import { PAGES } from "@ente/accounts/constants/pages";
+import { PAGES } from "@/accounts/constants/pages";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 

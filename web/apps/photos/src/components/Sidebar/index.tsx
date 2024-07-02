@@ -1,7 +1,7 @@
+import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
 import { customAPIHost } from "@/next/origins";
-import { openAccountsManagePasskeysPage } from "@ente/accounts/services/passkey";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";

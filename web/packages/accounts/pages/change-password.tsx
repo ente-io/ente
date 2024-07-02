@@ -1,22 +1,19 @@
-import { ensure } from "@/utils/ensure";
 import {
     getSRPAttributes,
     startSRPSetup,
     updateSRPAndKeys,
-} from "@ente/accounts/api/srp";
+} from "@/accounts/api/srp";
 import SetPasswordForm, {
     type SetPasswordFormProps,
-} from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
+} from "@/accounts/components/SetPasswordForm";
+import { PAGES } from "@/accounts/constants/pages";
 import {
     generateSRPClient,
     generateSRPSetupAttributes,
-} from "@ente/accounts/services/srp";
-import type { UpdatedKey } from "@ente/accounts/types/user";
-import {
-    convertBase64ToBuffer,
-    convertBufferToBase64,
-} from "@ente/accounts/utils";
+} from "@/accounts/services/srp";
+import type { UpdatedKey } from "@/accounts/types/user";
+import { convertBase64ToBuffer, convertBufferToBase64 } from "@/accounts/utils";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
