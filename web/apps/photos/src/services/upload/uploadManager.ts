@@ -1,6 +1,12 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
+import type { UploadItem } from "@/new/photos/services/upload/types";
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_RESULT,
+    UPLOAD_STAGES,
+} from "@/new/photos/services/upload/types";
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { ensureElectron } from "@/next/electron";
 import { lowercaseExtension, nameAndExtension } from "@/next/file";
@@ -15,11 +21,6 @@ import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";
 import { Canceler } from "axios";
 import type { Remote } from "comlink";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
-    UPLOAD_STAGES,
-} from "constants/upload";
 import isElectron from "is-electron";
 import {
     getLocalPublicFiles,
@@ -35,7 +36,6 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import type { UploadItem } from "./types";
 import UploadService, { uploadItemFileName, uploader } from "./uploadService";
 
 export type FileID = number;

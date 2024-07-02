@@ -5,12 +5,12 @@
  * written for use by the code that runs in our desktop app.
  */
 
-import { nameAndExtension } from "@/next/file";
-import sanitize from "sanitize-filename";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
-} from "services/export";
+} from "@/new/photos/services/export";
+import { nameAndExtension } from "@/next/file";
+import sanitize from "sanitize-filename";
 
 /**
  * Sanitize string for use as file or directory name.

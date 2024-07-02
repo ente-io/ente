@@ -1,3 +1,16 @@
+import {
+    NULL_LOCATION,
+    toDataOrPathOrZipEntry,
+    type DesktopUploadItem,
+    type UploadItem,
+} from "@/new/photos/services/upload/types";
+import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
+import {
+    readConvertToMP4Done,
+    readConvertToMP4Stream,
+    writeConvertToMP4Stream,
+} from "@/new/photos/utils/native-stream";
+import { ensureElectron } from "@/next/electron";
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
@@ -6,20 +19,8 @@ import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
-} from "constants/ffmpeg";
-import { NULL_LOCATION } from "constants/upload";
-import type { ParsedExtractedMetadata } from "types/metadata";
-import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
-} from "utils/native-stream";
-import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
-import {
-    toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
-    type UploadItem,
-} from "./upload/types";
+} from "./constants";
+import type { DedicatedFFmpegWorker } from "./worker";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
@@ -112,7 +113,7 @@ export const extractVideoMetadata = async (
     const outputData =
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt")
-            : await electron.ffmpegExec(
+            : await ensureElectron().ffmpegExec(
                   command,
                   toDataOrPathOrZipEntry(uploadItem),
                   "txt",
@@ -164,8 +165,8 @@ function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
         property.split("="),
     );
     const validKeyValuePairs = metadataKeyValueArray.filter(
-        (keyValueArray) => keyValueArray.length === 2,
-    ) as Array<[string, string]>;
+        (keyValueArray) => keyValueArray.length == 2,
+    ) as [string, string][];
 
     const metadataMap = Object.fromEntries(validKeyValuePairs);
 
@@ -190,19 +191,19 @@ function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
     return parsedMetadata;
 }
 
-function parseAppleISOLocation(isoLocation: string) {
+const parseAppleISOLocation = (isoLocation: string | undefined) => {
     let location = { ...NULL_LOCATION };
     if (isoLocation) {
-        const [latitude, longitude] = isoLocation
+        const m = isoLocation
             .match(/(\+|-)\d+\.*\d+/g)
-            .map((x) => parseFloat(x));
+            ?.map((x) => parseFloat(x));
 
-        location = { latitude, longitude };
+        location = { latitude: m?.at(0) ?? null, longitude: m?.at(1) ?? null };
     }
     return location;
-}
+};
 
-function parseCreationTime(creationTime: string) {
+const parseCreationTime = (creationTime: string | undefined) => {
     let dateTime = null;
     if (creationTime) {
         dateTime = validateAndGetCreationUnixTimeInMicroSeconds(
@@ -210,7 +211,7 @@ function parseCreationTime(creationTime: string) {
         );
     }
     return dateTime;
-}
+};
 
 /**
  * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
@@ -258,18 +259,18 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
     const token = await writeConvertToMP4Stream(electron, blob);
     const mp4Blob = await readConvertToMP4Stream(electron, token);
-    readConvertToMP4Done(electron, token);
+    await readConvertToMP4Done(electron, token);
     return mp4Blob;
 };
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
-    private instance: Promise<Remote<DedicatedFFmpegWorker>>;
+    private instance: Promise<Remote<DedicatedFFmpegWorker>> | undefined;
 
     private createComlinkWorker = () =>
         new ComlinkWorker<typeof DedicatedFFmpegWorker>(
             "ffmpeg-worker",
-            new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
+            new Worker(new URL("worker.ts", import.meta.url)),
         );
 
     async lazy() {

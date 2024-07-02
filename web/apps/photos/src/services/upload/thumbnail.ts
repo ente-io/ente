@@ -1,12 +1,15 @@
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
+import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import {
+    toDataOrPathOrZipEntry,
+    type DesktopUploadItem,
+} from "@/new/photos/services/upload/types";
 import log from "@/next/log";
 import { type Electron } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { withTimeout } from "@/utils/promise";
-import * as ffmpeg from "services/ffmpeg";
-import { toDataOrPathOrZipEntry, type DesktopUploadItem } from "./types";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;

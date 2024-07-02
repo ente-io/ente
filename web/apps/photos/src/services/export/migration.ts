@@ -1,8 +1,15 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import downloadManager from "@/new/photos/services/download";
+import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import {
+    safeDirectoryName,
+    safeFileName,
+    sanitizeFilename,
+} from "@/new/photos/utils/native-fs";
 import { ensureElectron } from "@/next/electron";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
@@ -10,7 +17,6 @@ import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { getLocalCollections } from "services/collectionService";
-import downloadManager from "services/download";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,
@@ -25,12 +31,6 @@ import {
 import { getNonEmptyPersonalCollections } from "utils/collection";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
-    safeDirectoryName,
-    safeFileName,
-    sanitizeFilename,
-} from "utils/native-fs";
-import {
-    exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
