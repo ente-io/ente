@@ -1,3 +1,9 @@
+// TODO: These arise from the array indexing in the pre-processing code. Isolate
+// once that code settles down to its final place (currently duplicated across
+// web and desktop).
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
+import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
 
 /**
@@ -47,9 +53,9 @@ export function pixelRGBBilinear(
 
     // Return interpolated pixel colors.
     return {
-        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
-        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
-        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
+        r: bilinear(pixel1.r!, pixel2.r!, pixel3.r!, pixel4.r!),
+        g: bilinear(pixel1.g!, pixel2.g!, pixel3.g!, pixel4.g!),
+        b: bilinear(pixel1.b!, pixel2.b!, pixel3.b!, pixel4.b!),
     };
 }
 
@@ -128,9 +134,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, py);
 
-    const ip0 = cubic(dx, ipp.r, icp.r, inp.r, iap.r);
-    const ip1 = cubic(dx, ipp.g, icp.g, inp.g, iap.g);
-    const ip2 = cubic(dx, ipp.b, icp.b, inp.b, iap.b);
+    const ip0 = cubic(dx, ipp.r!, icp.r!, inp.r!, iap.r!);
+    const ip1 = cubic(dx, ipp.g!, icp.g!, inp.g!, iap.g!);
+    const ip2 = cubic(dx, ipp.b!, icp.b!, inp.b!, iap.b!);
     // const ip3 = cubic(dx, ipp.a, icp.a, inp.a, iap.a);
 
     const ipc =
@@ -144,9 +150,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, y);
 
-    const ic0 = cubic(dx, ipc.r, icc.r, inc.r, iac.r);
-    const ic1 = cubic(dx, ipc.g, icc.g, inc.g, iac.g);
-    const ic2 = cubic(dx, ipc.b, icc.b, inc.b, iac.b);
+    const ic0 = cubic(dx, ipc.r!, icc.r!, inc.r!, iac.r!);
+    const ic1 = cubic(dx, ipc.g!, icc.g!, inc.g!, iac.g!);
+    const ic2 = cubic(dx, ipc.b!, icc.b!, inc.b!, iac.b!);
     // const ic3 = cubic(dx, ipc.a, icc.a, inc.a, iac.a);
 
     const ipn =
@@ -166,9 +172,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, ny);
 
-    const in0 = cubic(dx, ipn.r, icn.r, inn.r, ian.r);
-    const in1 = cubic(dx, ipn.g, icn.g, inn.g, ian.g);
-    const in2 = cubic(dx, ipn.b, icn.b, inn.b, ian.b);
+    const in0 = cubic(dx, ipn.r!, icn.r!, inn.r!, ian.r!);
+    const in1 = cubic(dx, ipn.g!, icn.g!, inn.g!, ian.g!);
+    const in2 = cubic(dx, ipn.b!, icn.b!, inn.b!, ian.b!);
     // const in3 = cubic(dx, ipn.a, icn.a, inn.a, ian.a);
 
     const ipa =
@@ -188,9 +194,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, ay);
 
-    const ia0 = cubic(dx, ipa.r, ica.r, ina.r, iaa.r);
-    const ia1 = cubic(dx, ipa.g, ica.g, ina.g, iaa.g);
-    const ia2 = cubic(dx, ipa.b, ica.b, ina.b, iaa.b);
+    const ia0 = cubic(dx, ipa.r!, ica.r!, ina.r!, iaa.r!);
+    const ia1 = cubic(dx, ipa.g!, ica.g!, ina.g!, iaa.g!);
+    const ia2 = cubic(dx, ipa.b!, ica.b!, ina.b!, iaa.b!);
     // const ia3 = cubic(dx, ipa.a, ica.a, ina.a, iaa.a);
 
     const c0 = Math.trunc(clamp(cubic(dy, ip0, ic0, in0, ia0), 0, 255));
@@ -215,7 +221,7 @@ export const warpAffineFloat32List = (
 
     // Get the pixel data.
     const offscreenCanvas = new OffscreenCanvas(width, height);
-    const ctx = offscreenCanvas.getContext("2d");
+    const ctx = ensure(offscreenCanvas.getContext("2d"));
     ctx.drawImage(imageBitmap, 0, 0, width, height);
     const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
@@ -225,13 +231,13 @@ export const warpAffineFloat32List = (
     ); // 3x3
 
     const A: Matrix = new Matrix([
-        [transformationMatrix[0][0], transformationMatrix[0][1]],
-        [transformationMatrix[1][0], transformationMatrix[1][1]],
+        [transformationMatrix[0]![0]!, transformationMatrix[0]![1]!],
+        [transformationMatrix[1]![0]!, transformationMatrix[1]![1]!],
     ]);
     const Ainverse = inverse(A);
 
-    const b00 = transformationMatrix[0][2];
-    const b10 = transformationMatrix[1][2];
+    const b00 = transformationMatrix[0]![2]!;
+    const b10 = transformationMatrix[1]![2]!;
     const a00Prime = Ainverse.get(0, 0);
     const a01Prime = Ainverse.get(0, 1);
     const a10Prime = Ainverse.get(1, 0);
@@ -283,9 +289,9 @@ export const grayscaleIntMatrixFromNormalized2List = (
             const pixelIndex = startIndex + 3 * (y * width + x);
             return clamp(
                 Math.round(
-                    0.299 * bipolarFloatToRGB(imageList[pixelIndex]) +
-                        0.587 * bipolarFloatToRGB(imageList[pixelIndex + 1]) +
-                        0.114 * bipolarFloatToRGB(imageList[pixelIndex + 2]),
+                    0.299 * bipolarFloatToRGB(imageList[pixelIndex]!) +
+                        0.587 * bipolarFloatToRGB(imageList[pixelIndex + 1]!) +
+                        0.114 * bipolarFloatToRGB(imageList[pixelIndex + 2]!),
                 ),
                 0,
                 255,
