@@ -3,7 +3,7 @@ import { deleteDB, openDB, type DBSchema } from "idb";
 import type { FaceIndex } from "./types";
 
 /**
- * [Note: Face DB schema]
+ * Face DB schema.
  *
  * There "face" database is made of two object stores:
  *
@@ -62,20 +62,9 @@ interface FileStatus {
 }
 
 /**
- * A promise to the face DB.
+ * A lazily-created, cached promise for face DB.
  *
- * We open the database once (lazily), and thereafter save and reuse the promise
- * each time something wants to connect to it.
- *
- * This promise can subsequently get cleared if we need to relinquish our
- * connection (e.g. if another client wants to open the face DB with a newer
- * version of the schema).
- *
- * Note that this is module specific state, so the main thread and each worker
- * thread that calls the functions in this module will have their own promises.
- * To ensure that all connections get torn down correctly, we need to call
- * {@link closeFaceDBConnectionsIfNeeded} from both the main thread and all the
- * worker threads that use this module.
+ * See: [Note: Caching IDB instances in separate execution contexts].
  */
 let _faceDB: ReturnType<typeof openFaceDB> | undefined;
 
@@ -125,28 +114,20 @@ const deleteLegacyDB = () => {
 const faceDB = () => (_faceDB ??= openFaceDB());
 
 /**
- * Close the face DB connection (if any) opened by this module.
+ * Clear any data stored in the face DB.
  *
- * To ensure proper teardown of the DB connections, this function must be called
- * at least once by any execution context that has called any of the other
- * functions in this module.
+ * This is meant to be called during logout in the main thread.
  */
-export const closeFaceDBConnectionsIfNeeded = async () => {
+export const clearFaceDB = async () => {
+    deleteLegacyDB();
+
     try {
         if (_faceDB) (await _faceDB).close();
-    } finally {
-        _faceDB = undefined;
+    } catch (e) {
+        log.warn("Ignoring error when trying to close face DB", e);
     }
-};
+    _faceDB = undefined;
 
-/**
- * Clear any data stored by the face module.
- *
- * Meant to be called during logout.
- */
-export const clearFaceData = async () => {
-    deleteLegacyDB();
-    await closeFaceDBConnectionsIfNeeded();
     return deleteDB("face", {
         blocked() {
             log.warn(
