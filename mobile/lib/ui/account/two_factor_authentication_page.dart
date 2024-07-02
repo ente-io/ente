@@ -4,7 +4,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
-import 'package:pinput/pin_put/pin_put.dart';
+import "package:pinput/pinput.dart";
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
   final String sessionID;
@@ -20,9 +20,14 @@ class TwoFactorAuthenticationPage extends StatefulWidget {
 class _TwoFactorAuthenticationPageState
     extends State<TwoFactorAuthenticationPage> {
   final _pinController = TextEditingController();
-  final _pinPutDecoration = BoxDecoration(
-    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
-    borderRadius: BorderRadius.circular(15.0),
+
+  final _pinPutDecoration = PinTheme(
+    height: 45,
+    width: 45,
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
+      borderRadius: BorderRadius.circular(15.0),
+    ),
   );
   String _code = "";
   late LifecycleEventHandler _lifecycleEventHandler;
@@ -78,9 +83,9 @@ class _TwoFactorAuthenticationPageState
         const Padding(padding: EdgeInsets.all(32)),
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: PinPut(
-            fieldsCount: 6,
-            onSubmit: (String code) {
+          child: Pinput(
+            length: 6,
+            onCompleted: (String code) {
               _verifyTwoFactorCode(code);
             },
             onChanged: (String pin) {
@@ -88,23 +93,33 @@ class _TwoFactorAuthenticationPageState
                 _code = pin;
               });
             },
+            autofocus: true,
             controller: _pinController,
-            submittedFieldDecoration: _pinPutDecoration.copyWith(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            selectedFieldDecoration: _pinPutDecoration,
-            followingFieldDecoration: _pinPutDecoration.copyWith(
-              borderRadius: BorderRadius.circular(5.0),
-              border: Border.all(
-                color: const Color.fromRGBO(45, 194, 98, 0.5),
+            defaultPinTheme: _pinPutDecoration,
+            submittedPinTheme: _pinPutDecoration.copyWith(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5.0),
+                border: Border.all(
+                  color: const Color.fromRGBO(45, 194, 98, 0.5),
+                ),
               ),
             ),
-            inputDecoration: const InputDecoration(
-              focusedBorder: InputBorder.none,
-              border: InputBorder.none,
-              counterText: '',
+            followingPinTheme: _pinPutDecoration.copyWith(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(
+                  color: const Color.fromRGBO(45, 194, 98, 0.5),
+                ),
+              ),
             ),
-            autofocus: true,
+            focusedPinTheme: _pinPutDecoration.copyWith(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15.0),
+                border: Border.all(
+                  color: const Color.fromRGBO(45, 194, 98, 0.5),
+                ),
+              ),
+            ),
           ),
         ),
         const Padding(padding: EdgeInsets.all(24)),

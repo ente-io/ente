@@ -21,6 +21,8 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
+import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -138,21 +140,26 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).lockscreen,
+        captionedTextWidget: const CaptionedTextWidget(
+          title: 'App lock',
         ),
-        trailingWidget: ToggleSwitchWidget(
-          value: () => _config.shouldShowLockScreen(),
-          onChanged: () async {
-            await LocalAuthenticationService.instance
-                .requestLocalAuthForLockScreen(
-              context,
-              !_config.shouldShowLockScreen(),
-              S.of(context).authToChangeLockscreenSetting,
-              S.of(context).lockScreenEnablePreSteps,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final bool result = await requestAuthentication(
+            context,
+            S.of(context).authToChangeLockscreenSetting,
+          );
+          if (result) {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const LockScreenOptions();
+                },
+              ),
             );
-          },
-        ),
+          }
+        },
       ),
       sectionOptionSpacing,
       MenuItemWidget(
