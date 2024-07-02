@@ -14,6 +14,7 @@ import {
     readConvertToMP4Stream,
     writeConvertToMP4Stream,
 } from "@/new/photos/utils/native-stream";
+import { ensureElectron } from "@/next/electron";
 import type { Electron } from "@/next/types/ipc";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
@@ -116,7 +117,7 @@ export const extractVideoMetadata = async (
     const outputData =
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt")
-            : await electron.ffmpegExec(
+            : await ensureElectron().ffmpegExec(
                   command,
                   toDataOrPathOrZipEntry(uploadItem),
                   "txt",
@@ -268,7 +269,7 @@ const convertToMP4Native = async (electron: Electron, blob: Blob) => {
 
 /** Lazily create a singleton instance of our worker */
 class WorkerFactory {
-    private instance: Promise<Remote<DedicatedFFmpegWorker>>;
+    private instance: Promise<Remote<DedicatedFFmpegWorker>> | undefined;
 
     private createComlinkWorker = () =>
         new ComlinkWorker<typeof DedicatedFFmpegWorker>(
