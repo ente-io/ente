@@ -1,8 +1,8 @@
-import type { FaceIndex } from "@/new/photos/services/face/types";
+import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { putEmbedding } from "services/embeddingService";
+// import { putEmbedding } from "services/embeddingService";
 
 export const putFaceIndex = async (
     enteFile: EnteFile,
@@ -16,10 +16,13 @@ export const putFaceIndex = async (
     const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
     const { file: encryptedEmbeddingData } =
         await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
-    await putEmbedding({
-        fileID: enteFile.id,
-        encryptedEmbedding: encryptedEmbeddingData.encryptedData,
-        decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-        model: "file-ml-clip-face",
-    });
+    // TODO(MR): Indexing
+    console.log(encryptedEmbeddingData);
+    throw new Error("Unimplemented");
+    // await putEmbedding({
+    //     fileID: enteFile.id,
+    //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
+    //     decryptionHeader: encryptedEmbeddingData.decryptionHeader,
+    //     model: "file-ml-clip-face",
+    // });
 };

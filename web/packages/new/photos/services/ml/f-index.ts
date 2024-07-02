@@ -6,8 +6,8 @@ import type {
     Dimensions,
     Face,
     Point,
-} from "@/new/photos/services/face/types";
-import { faceIndexingVersion } from "@/new/photos/services/face/types";
+} from "@/new/photos/services/ml/types";
+import { faceIndexingVersion } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import { getRenderableImage } from "@/new/photos/utils/file";
 import log from "@/next/log";

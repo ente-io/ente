@@ -1,7 +1,7 @@
 export interface Person {
     id: number;
     name?: string;
-    files: Array<number>;
+    files: number[];
     displayFaceId?: string;
 }
 

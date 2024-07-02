@@ -1,4 +1,4 @@
-import type { Box } from "@/new/photos/services/face/types";
+import type { Box } from "@/new/photos/services/ml/types";
 import { blobCache } from "@/next/blob-cache";
 import type { FaceAlignment } from "./f-index";
 

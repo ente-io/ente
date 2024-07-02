@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import { clientPackageName } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
@@ -8,7 +8,7 @@ import { Events, eventBus } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import type { DedicatedMLWorker } from "services/ml/face.worker";
+import type { DedicatedMLWorker } from "./face.worker";
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
@@ -22,8 +22,8 @@ export class MLSyncJob {
     private runCallback: () => Promise<boolean>;
     private state: JobState;
     private stopped: boolean;
-    private intervalSec: number;
-    private nextTimeoutId: ReturnType<typeof setTimeout>;
+    private intervalSec = 5;
+    private nextTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
     constructor(runCallback: () => Promise<boolean>) {
         this.runCallback = runCallback;
@@ -92,14 +92,14 @@ export class MLSyncJob {
 }
 
 class MLWorkManager {
-    private mlSyncJob: MLSyncJob;
-    private syncJobWorker: ComlinkWorker<typeof DedicatedMLWorker>;
+    private mlSyncJob: MLSyncJob | undefined;
+    private syncJobWorker: ComlinkWorker<typeof DedicatedMLWorker> | undefined;
 
     private debouncedLiveSyncIdle: () => void;
     private debouncedFilesUpdated: () => void;
 
     private liveSyncQueue: PQueue;
-    private liveSyncWorker: ComlinkWorker<typeof DedicatedMLWorker>;
+    private liveSyncWorker: ComlinkWorker<typeof DedicatedMLWorker> | undefined;
     private mlSearchEnabled: boolean;
 
     public isSyncing = false;
@@ -114,11 +114,12 @@ class MLWorkManager {
         this.mlSearchEnabled = false;
 
         this.debouncedLiveSyncIdle = debounce(
-            () => this.onLiveSyncIdle(),
+            () => void this.onLiveSyncIdle(),
             30 * 1000,
         );
         this.debouncedFilesUpdated = debounce(
-            () => this.mlSearchEnabled && this.localFilesUpdatedHandler(),
+            () =>
+                void (this.mlSearchEnabled && this.localFilesUpdatedHandler()),
             30 * 1000,
         );
     }
@@ -169,7 +170,7 @@ class MLWorkManager {
     }
 
     async logout() {
-        this.setMlSearchEnabled(false);
+        await this.setMlSearchEnabled(false);
         this.stopSyncJob();
         this.mlSyncJob = undefined;
         await this.terminateLiveSyncWorker();
@@ -198,17 +199,17 @@ class MLWorkManager {
 
     private async localFilesUpdatedHandler() {
         log.info("Local files updated");
-        this.startSyncJob();
+        await this.startSyncJob();
     }
 
     // Live Sync
-    private async getLiveSyncWorker() {
-        if (!this.liveSyncWorker) {
-            this.liveSyncWorker = createFaceComlinkWorker("ml-sync-live");
-        }
+    // private async getLiveSyncWorker() {
+    //     if (!this.liveSyncWorker) {
+    //         this.liveSyncWorker = createFaceComlinkWorker("ml-sync-live");
+    //     }
 
-        return await this.liveSyncWorker.remote;
-    }
+    //     return await this.liveSyncWorker.remote;
+    // }
 
     private async terminateLiveSyncWorker() {
         if (!this.liveSyncWorker) {
@@ -223,6 +224,7 @@ class MLWorkManager {
                 error,
             );
         }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         this.liveSyncWorker?.terminate();
         this.liveSyncWorker = undefined;
     }
@@ -230,11 +232,11 @@ class MLWorkManager {
     private async onLiveSyncIdle() {
         log.info("Live sync idle");
         await this.terminateLiveSyncWorker();
-        this.mlSearchEnabled && this.startSyncJob();
+        await (this.mlSearchEnabled && this.startSyncJob());
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public async syncLocalFile(enteFile: EnteFile, localFile: globalThis.File) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await
+    public async syncLocalFile(_: EnteFile, __: globalThis.File) {
         return;
         /*
         TODO-ML(MR): Disable live sync for now
@@ -289,10 +291,11 @@ class MLWorkManager {
             }
 
             const token = getToken();
-            const userID = getUserID();
+            const userID = getUserID() as number;
             const userAgent = await getUserAgent();
             const jobWorkerProxy = await this.getSyncJobWorker();
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return await jobWorkerProxy.sync(token, userID, userAgent);
             // this.terminateSyncJobWorker();
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
@@ -301,8 +304,10 @@ class MLWorkManager {
         } finally {
             this.isSyncing = false;
         }
+        return false;
     }
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     public async startSyncJob() {
         try {
             log.info("MLWorkManager.startSyncJob");

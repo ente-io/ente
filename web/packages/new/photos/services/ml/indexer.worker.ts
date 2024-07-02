@@ -3,7 +3,7 @@ import {
     markIndexingFailed,
     saveFaceIndex,
 } from "@/new/photos/services/face/db";
-import type { FaceIndex } from "@/new/photos/services/face/types";
+import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { fileLogID } from "utils/file";
