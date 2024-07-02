@@ -2,7 +2,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import {
     faceIndexingStatus,
     isFaceIndexingEnabled,
-} from "@/new/photos/services/ml/indexer";
+} from "@/new/photos/services/ml";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";

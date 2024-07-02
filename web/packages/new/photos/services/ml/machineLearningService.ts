@@ -2,7 +2,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import { syncWithLocalFilesAndGetFilesToIndex } from "./indexer";
+import { syncWithLocalFilesAndGetFilesToIndex } from ".";
 import { index } from "./worker";
 
 const batchSize = 200;

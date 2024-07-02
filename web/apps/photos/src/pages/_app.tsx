@@ -2,7 +2,7 @@ import DownloadManager from "@/new/photos/services/download";
 import {
     isFaceIndexingEnabled,
     setIsFaceIndexingEnabled,
-} from "@/new/photos/services/ml/indexer";
+} from "@/new/photos/services/ml";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
