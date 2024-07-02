@@ -1,5 +1,6 @@
 import type { Box } from "@/new/photos/services/ml/types";
 import { blobCache } from "@/next/blob-cache";
+import { ensure } from "@/utils/ensure";
 import type { FaceAlignment } from "./f-index";
 
 export const saveFaceCrop = async (
@@ -19,7 +20,7 @@ export const saveFaceCrop = async (
 
 const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
     const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-    canvas.getContext("2d").drawImage(imageBitmap, 0, 0);
+    ensure(canvas.getContext("2d")).drawImage(imageBitmap, 0, 0);
     return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
@@ -46,7 +47,7 @@ const extractFaceCrop = (
     }
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
-    const offscreenCtx = offscreen.getContext("2d");
+    const offscreenCtx = ensure(offscreen.getContext("2d"));
     offscreenCtx.imageSmoothingQuality = "high";
 
     offscreenCtx.translate(outputSize.width / 2, outputSize.height / 2);
@@ -77,12 +78,12 @@ const extractFaceCrop = (
 };
 
 /** Round all the components of the box. */
-const roundBox = (box: Box): Box => {
-    const [x, y, width, height] = [box.x, box.y, box.width, box.height].map(
-        (val) => Math.round(val),
-    );
-    return { x, y, width, height };
-};
+const roundBox = (box: Box): Box => ({
+    x: Math.round(box.x),
+    y: Math.round(box.y),
+    width: Math.round(box.width),
+    height: Math.round(box.height),
+});
 
 /** Increase the size of the given {@link box} by {@link factor}. */
 const enlargeBox = (box: Box, factor: number): Box => {
