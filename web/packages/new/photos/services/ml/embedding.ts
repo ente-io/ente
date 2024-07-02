@@ -309,9 +309,9 @@ export const pullFaceEmbeddings = () =>
  */
 const saveFaceIndexIfNewer = async (index: FaceIndex) => {
     const version = index.faceEmbedding.version;
-    if (version <= faceIndexingVersion) {
+    if (version < faceIndexingVersion) {
         log.info(
-            `Ignoring remote face index with version ${version} not newer than what our indexer supports (${faceIndexingVersion})`,
+            `Ignoring remote face index with version ${version} older than what our indexer can produce (${faceIndexingVersion})`,
         );
         return;
     }
