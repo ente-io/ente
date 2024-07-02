@@ -16,7 +16,6 @@ import type { EnteFile } from "@/new/photos/types/file";
 // import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 // import type { Remote } from "comlink";
-// import type { FaceIndexerWorker } from "./indexer.worker";
 
 /**
  * Face indexing orchestrator.
@@ -129,12 +128,6 @@ class FaceIndexer {
 
 /** The singleton instance of {@link FaceIndexer}. */
 export default new FaceIndexer();
-
-// const createFaceIndexerComlinkWorker = () =>
-//     new ComlinkWorker<typeof FaceIndexerWorker>(
-//         "face-indexer",
-//         new Worker(new URL("indexer.worker.ts", import.meta.url)),
-//     );
 
 export interface FaceIndexingStatus {
     /**
