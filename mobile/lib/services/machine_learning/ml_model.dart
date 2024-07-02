@@ -9,7 +9,6 @@ abstract class MlModel {
   Logger get logger;
 
   String get kModelBucketEndpoint => "https://models.ente.io/";
-  static const kRemoteBucketModelPath = "";
 
   String get modelRemotePath;
 
