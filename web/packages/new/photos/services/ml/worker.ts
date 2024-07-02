@@ -2,7 +2,7 @@ import { markIndexingFailed, saveFaceIndex } from "@/new/photos/services/ml/db";
 import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { expose } from "comlink";
+// import { expose } from "comlink";
 import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { indexFaces } from "./index-face";
@@ -28,7 +28,8 @@ export class MLWorker {
     }
 }
 
-expose(MLWorker);
+// TODO-ML: Temorarily disable
+// expose(MLWorker);
 
 /**
  * Index faces in a file, save the persist the results locally, and put them
