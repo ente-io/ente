@@ -24,7 +24,8 @@ import {
 //
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
 // @ts-ignore
-import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
+import { ensure } from "@/utils/ensure";
+import { createFFmpeg, type FFmpeg } from "ffmpeg-wasm";
 
 export class DedicatedFFmpegWorker {
     private ffmpeg: FFmpeg;
@@ -106,7 +107,7 @@ const randomPrefix = () => {
 
     let result = "";
     for (let i = 0; i < 10; i++)
-        result += alphabet[Math.floor(Math.random() * alphabet.length)];
+        result += ensure(alphabet[Math.floor(Math.random() * alphabet.length)]);
     return result;
 };
 
@@ -127,4 +128,5 @@ const substitutePlaceholders = (
                 return segment;
             }
         })
-        .filter((c) => !!c);
+        // TODO: The type guard should automatically get deduced with TS 5.5
+        .filter((s): s is string => !!s);
