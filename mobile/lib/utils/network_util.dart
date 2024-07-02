@@ -17,5 +17,7 @@ Future<bool> canUseHighBandwidth() async {
       );
     }
   }
-  return canUploadUnderCurrentNetworkConditions;
+  final canDownloadOverMobileData =
+      Configuration.instance.shouldBackupOverMobileData();
+  return canUploadUnderCurrentNetworkConditions || canDownloadOverMobileData;
 }
