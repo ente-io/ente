@@ -1,14 +1,16 @@
-import { getLocalTrashedFiles } from "@/new/photos/services/files";
+import { decryptFileMetadata } from "@/new/common/crypto/ente";
+import {
+    getAllLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
 import { authenticatedRequestHeaders } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
-import { decryptFileMetadata } from "../../common/crypto/ente";
-import { getAllLocalFiles } from "./files";
-import { saveFaceIndex } from "./ml/db";
-import { faceIndexingVersion } from "./ml/f-index";
-import { type FaceIndex } from "./ml/types";
+import { saveFaceIndex } from "./db";
+import { faceIndexingVersion } from "./f-index";
+import { type FaceIndex } from "./types";
 
 /**
  * The embeddings that we (the current client) knows how to handle.

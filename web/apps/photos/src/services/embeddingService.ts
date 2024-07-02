@@ -1,8 +1,8 @@
-import type { EmbeddingModel } from "@/new/photos/services/embedding";
 import {
     getAllLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
+import type { EmbeddingModel } from "@/new/photos/services/ml/embedding";
 import type { FaceIndex } from "@/new/photos/services/ml/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { inWorker } from "@/next/env";

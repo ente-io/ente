@@ -1,5 +1,5 @@
 import { expose } from "comlink";
-import { pullFaceEmbeddings } from "../embedding";
+import { pullFaceEmbeddings } from "./embedding";
 
 /**
  * Run operations related to face indexing and search in a Web Worker.
