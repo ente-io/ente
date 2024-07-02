@@ -186,7 +186,7 @@ class _LockScreenState extends State<LockScreen>
     if (Platform.isAndroid) {
       return false;
     }
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
+    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
     return shortestSide > 600 ? true : false;
   }
 
@@ -296,7 +296,7 @@ class _LockScreenState extends State<LockScreen>
           : await requestAuthentication(
               context,
               context.l10n.authToViewYourMemories,
-              isOnOpeningApp: true,
+              isOpeningApp: true,
             );
       _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;

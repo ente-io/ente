@@ -10,21 +10,20 @@ import "package:photos/utils/lock_screen_settings.dart";
 Future<bool> requestAuthentication(
   BuildContext context,
   String reason, {
-  bool isOnOpeningApp = false,
+  bool isOpeningApp = false,
 }) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
 
-  final LockScreenSettings lockscreenSetting = LockScreenSettings.instance;
-  final String? savedPin = await lockscreenSetting.getPin();
-  final String? savedPassword = await lockscreenSetting.getPassword();
+  final String? savedPin = await LockScreenSettings.instance.getPin();
+  final String? savedPassword = await LockScreenSettings.instance.getPassword();
   if (savedPassword != null || savedPin != null) {
     return await LocalAuthenticationService.instance
         .requestEnteAuthForLockScreen(
       context,
       savedPin,
       savedPassword,
-      isOnOpeningApp: isOnOpeningApp,
+      isOnOpeningApp: isOpeningApp,
     );
   } else {
     return await LocalAuthentication().authenticate(
