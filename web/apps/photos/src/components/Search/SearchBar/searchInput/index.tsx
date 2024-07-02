@@ -1,4 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
+import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
@@ -11,7 +12,6 @@ import { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { InputActionMeta } from "react-select/src/types";
 import { City } from "services/locationSearchService";
-import type { Person } from "services/ml/people";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,

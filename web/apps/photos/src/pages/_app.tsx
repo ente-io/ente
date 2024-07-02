@@ -1,4 +1,9 @@
 import DownloadManager from "@/new/photos/services/download";
+import {
+    isFaceIndexingEnabled,
+    setIsFaceIndexingEnabled,
+} from "@/new/photos/services/ml/indexer";
+import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
@@ -51,11 +56,6 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import {
-    isFaceIndexingEnabled,
-    setIsFaceIndexingEnabled,
-} from "services/ml/indexer";
-import mlWorkManager from "services/ml/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,

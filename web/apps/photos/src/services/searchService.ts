@@ -4,12 +4,12 @@ import {
     isFaceIndexingEnabled,
 } from "@/new/photos/services/ml/indexer";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
+import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
-import type { Person } from "services/ml/people";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import {

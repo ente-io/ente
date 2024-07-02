@@ -1,7 +1,7 @@
 import DownloadManager from "@/new/photos/services/download";
+import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
 import { terminateFaceWorker } from "@/new/photos/services/ml";
 import { clearFaceData } from "@/new/photos/services/ml/db";
-import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import log from "@/next/log";
 import { accountLogout } from "@ente/accounts/services/logout";

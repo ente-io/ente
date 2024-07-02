@@ -295,7 +295,7 @@ class MLWorkManager {
             const userAgent = await getUserAgent();
             const jobWorkerProxy = await this.getSyncJobWorker();
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+             
             return await jobWorkerProxy.sync(token, userID, userAgent);
             // this.terminateSyncJobWorker();
             // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job

@@ -1,8 +1,8 @@
 import { FILE_TYPE } from "@/media/file-type";
+import type { FaceIndexingStatus } from "@/new/photos/services/ml/indexer";
+import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { City } from "services/locationSearchService";
-import type { FaceIndexingStatus } from "services/ml/indexer";
-import type { Person } from "services/ml/people";
 import { LocationTagData } from "types/entity";
 
 export enum SuggestionType {
