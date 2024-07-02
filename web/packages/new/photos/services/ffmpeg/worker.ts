@@ -129,4 +129,6 @@ const substitutePlaceholders = (
             }
         })
         // TODO: The type guard should automatically get deduced with TS 5.5
+        // We still need to wait for VSCode to ship with TS 5.5 otherwise the
+        // red squigglies in the editor will remain.
         .filter((s): s is string => !!s);
