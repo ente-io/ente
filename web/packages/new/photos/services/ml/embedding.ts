@@ -242,6 +242,98 @@ const getEmbeddingsDiff = async (
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return z.array(RemoteEmbedding).parse(await res.json());
 };
+/*
+export const putEmbedding = async (
+    putEmbeddingReq: PutEmbeddingRequest,
+): Promise<EncryptedEmbedding> => {
+    try {
+        const token = inWorker()
+            ? await workerBridge.getAuthToken()
+            : getToken();
+        if (!token) {
+            log.info("putEmbedding failed: token not found");
+            throw Error(CustomError.TOKEN_MISSING);
+        }
+        const resp = await HTTPService.put(
+            await apiURL("/embeddings"),
+            putEmbeddingReq,
+            null,
+            {
+                "X-Auth-Token": token,
+            },
+        );
+        return resp.data;
+    } catch (e) {
+        log.error("put embedding failed", e);
+        throw e;
+    }
+};
+*/
+
+/**
+ * Upload an embedding to remote.
+ *
+ * This function will save or update the given embedding as the latest embedding
+ * associated with the given {@link enteFile} for {@link model}.
+ *
+ * @param enteFile {@link EnteFile} to which this embedding relates to.
+ *
+ * @param model The {@link EmbeddingModel} which we are uploading.
+ *
+ * @param embedding String representation of the embedding. The exact contents
+ * of the embedding are model specific (usually this is the JSON string).
+ */
+export const putEmbedding = async (
+    enteFile: EnteFile,
+    model: EmbeddingModel,
+    embedding: string,
+) => {
+    log.debug(() => ({ t: `Uploading embedding`, model, embedding }));
+
+    const { encryptedMetadataB64, decryptionHeaderB64 } =
+        await encryptFileMetadata(embedding, enteFile.key);
+
+        await apiURL("/"),
+        putEmbeddingReq,
+        null,
+        {
+            "X-Auth-Token": token,
+        },
+
+        const url = apiURL("/embeddings")
+    const res = await fetch(url, {
+        method: "PUT",
+        headers: authenticatedRequestHeaders(),
+        body: JSON.stringify({
+
+        })
+    }
+    if (!res.ok) throw new Error()
+
+    )
+
+    // Sanity check
+
+    const rt = await decryptFileMetadata(
+        encryptedMetadataB64,
+        decryptionHeaderB64,
+        enteFile.key,
+    );
+    console.log("put", JSON.stringify(faceIndex) == rt);
+
+    // const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
+    // const { file: encryptedEmbeddingData } =
+    //     await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
+    // // TODO(MR): Indexing
+    // console.log(encryptedEmbeddingData);
+    // throw new Error("Unimplemented");
+    // await putEmbedding({
+    //     fileID: enteFile.id,
+    //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
+    //     decryptionHeader: encryptedEmbeddingData.decryptionHeader,
+    //     model: "file-ml-clip-face",
+    // });
+};
 
 export const putFaceIndex = async (
     enteFile: EnteFile,
@@ -331,8 +423,8 @@ const saveFaceIndexIfNewer = async (index: FaceIndex) => {
  * not possible to go the other way (TS type => Zod schema).
  *
  * However, in some cases having when the TypeScript type under consideration is
- * used pervasely in our code, having a standalone TypeScript type with attached
- * docstrings, is worth the code duplication.
+ * used pervasively in code, having a standalone TypeScript type with attached
+ * docstrings is worth the code duplication.
  *
  * Note that this'll just be syntactic duplication - if the two definitions get
  * out of sync in the shape of the types they represent, the TypeScript compiler
