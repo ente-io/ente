@@ -240,7 +240,9 @@ const getEmbeddingsDiff = async (
         headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    return z.array(RemoteEmbedding).parse(await res.json());
+
+    return z.object({ diff: z.array(RemoteEmbedding) }).parse(await res.json())
+        .diff;
 };
 
 /**
