@@ -7,6 +7,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/settings/lockscreen/lock_screen_option.dart";
 import "package:photos/ui/settings/lockscreen/lockscreen_confirm_pin.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/lockscreen_setting.dart";
@@ -75,7 +76,13 @@ class _LockScreenPinState extends State<LockScreenPin> {
     if (widget.authPin == enteredHashedPin) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      Navigator.of(context).pop(true);
+      widget.isLockscreenAuth
+          ? Navigator.of(context).pop(true)
+          : Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LockScreenOption(),
+              ),
+            );
       return true;
     } else {
       setState(() {
@@ -116,6 +123,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
   final _pinPutDecoration = PinTheme(
     height: 48,
     width: 48,
+    padding: const EdgeInsets.only(top: 6.0),
     decoration: BoxDecoration(
       border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
       borderRadius: BorderRadius.circular(15.0),
@@ -205,7 +213,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
             ),
           ),
           Text(
-            widget.isAuthenticating ? 'Enter PIN' : 'Set new PIN',
+            widget.isAuthenticating ? "Enter PIN" : "Set new PIN",
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

@@ -8,6 +8,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
+import "package:photos/ui/settings/lockscreen/lock_screen_option.dart";
 import "package:photos/ui/settings/lockscreen/lockscreen_confirm_password.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/lockscreen_setting.dart";
@@ -68,7 +69,14 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     enteredHashedPassword = base64Encode(hash);
     if (widget.authPass == enteredHashedPassword) {
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      Navigator.of(context).pop(true);
+
+      widget.isLockscreenAuth
+          ? Navigator.of(context).pop(true)
+          : Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LockScreenOption(),
+              ),
+            );
       return true;
     } else {
       if (widget.isLockscreenAuth) {
@@ -134,7 +142,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
         builder: (context, isFormValid, child) {
           return DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            buttonText: S.of(context).ok,
+            buttonText: "Next",
             isFormValid: isFormValid,
             onPressedFunction: () async {
               _submitNotifier.value = !_submitNotifier.value;

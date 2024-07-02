@@ -5,7 +5,9 @@ import "dart:math";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/l10n/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/gradient_button.dart';
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import "package:photos/utils/lockscreen_setting.dart";
@@ -17,7 +19,8 @@ class LockScreen extends StatefulWidget {
   State<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
+class _LockScreenState extends State<LockScreen>
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   final _logger = Logger("LockScreen");
   bool _isShowingLockScreen = false;
   bool _hasPlacedAppInBackground = false;
@@ -27,7 +30,16 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   int lockedTime = 0;
   int invalidAttemptCount = 0;
   int remainingTime = 0;
+  bool showErrorMessage = true;
   final _lockscreenSetting = LockscreenSetting.instance;
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(milliseconds: 500),
+    vsync: this,
+  );
+  late final animation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
 
   @override
   void initState() {
@@ -46,36 +58,125 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final colorTheme = getEnteColorScheme(context);
     return Scaffold(
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Opacity(
-                  opacity: 0.2,
-                  child: Image.asset('assets/loading_photos_background.png'),
-                ),
-                SizedBox(
-                  width: 180,
-                  child: GradientButton(
-                    text: isTimerRunning
-                        ? formatTime(remainingTime)
-                        : context.l10n.unlock,
-                    iconData: Icons.lock_open_outlined,
-                    onTap: () async {
-                      if (!isTimerRunning) {
-                        await _showLockScreen(source: "tapUnlock");
-                      }
-                    },
-                  ),
-                ),
-              ],
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: ExactAssetImage(
+              'assets/loading_photos_background_fullscreen.png',
             ),
-          ],
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Center(
+          child: isTimerRunning
+              ? Column(
+                  children: [
+                    const Spacer(),
+                    SizedBox(
+                      height: 120,
+                      width: 120,
+                      child: Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              width: 82,
+                              height: 82,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.white70.withOpacity(0.2),
+                                    Colors.white10.withOpacity(0.2),
+                                    Colors.white70.withOpacity(0.4),
+                                    Colors.white60.withOpacity(0.8),
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(1.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: colorTheme.backgroundBase,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              height: 75,
+                              width: 75,
+                              child: TweenAnimationBuilder<double>(
+                                tween: Tween<double>(
+                                  begin: 0,
+                                  end: calculateRemainingTime(),
+                                ),
+                                curve: Curves.ease,
+                                duration: const Duration(milliseconds: 50),
+                                builder: (context, value, _) =>
+                                    CircularProgressIndicator(
+                                  backgroundColor: colorTheme.backdropBase,
+                                  value: value,
+                                  color: colorTheme.primary400,
+                                  strokeWidth: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: IconButtonWidget(
+                              size: 30,
+                              icon: Icons.lock,
+                              iconButtonType: IconButtonType.primary,
+                              iconColor: colorTheme.tabIcon,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    AnimatedSwitcher(
+                      duration: const Duration(seconds: 1),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                      child: showErrorMessage
+                          ? const Text(
+                              "Too many incorrect attempts",
+                              key: ValueKey<int>(1),
+                            )
+                          : Text(
+                              formatTime(remainingTime),
+                              key: const ValueKey<int>(2),
+                            ),
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SizedBox(
+                      width: 180,
+                      child: GradientButton(
+                        text: context.l10n.unlock,
+                        iconData: Icons.lock_open_outlined,
+                        onTap: () async {
+                          await _showLockScreen(source: "tapUnlock");
+                        },
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
@@ -129,6 +230,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     _logger.info('disposing');
+    _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -155,17 +257,25 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     });
   }
 
+  double calculateRemainingTime() {
+    final int totalLockedTime =
+        lockedTime = pow(2, invalidAttemptCount - 5).toInt() * 30;
+    if (remainingTime == 0) return 1;
+
+    return 1 - remainingTime / totalLockedTime;
+  }
+
   String formatTime(int seconds) {
     final int hours = seconds ~/ 3600;
     final int minutes = (seconds % 3600) ~/ 60;
     final int remainingSeconds = seconds % 60;
 
     if (hours > 0) {
-      return "$hours hr $minutes min";
+      return "${hours}h ${minutes}m";
     } else if (minutes > 0) {
-      return "$minutes min $remainingSeconds sec";
+      return "${minutes}m ${remainingSeconds}s";
     } else {
-      return "$remainingSeconds sec";
+      return "${remainingSeconds}s";
     }
   }
 
@@ -208,6 +318,11 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
             await _lockscreenSetting.setLastInvalidAttemptTime(
               DateTime.now().millisecondsSinceEpoch + lockedTime * 1000,
             );
+            Timer(const Duration(seconds: 2), () {
+              setState(() {
+                showErrorMessage = false;
+              });
+            });
             await startLockTimer(lockedTime);
           }
           _hasAuthenticationFailed = true;

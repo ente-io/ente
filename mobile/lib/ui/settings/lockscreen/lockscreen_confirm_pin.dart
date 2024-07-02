@@ -21,6 +21,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
   final _pinPutDecoration = PinTheme(
     height: 48,
     width: 48,
+    padding: const EdgeInsets.only(top: 6.0),
     decoration: BoxDecoration(
       border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
       borderRadius: BorderRadius.circular(15.0),
@@ -184,7 +185,6 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
               return 'PIN does not match';
             },
             onCompleted: (value) async {
-              await Future.delayed(const Duration(milliseconds: 250));
               await _confirmPinMatch();
             },
           ),
