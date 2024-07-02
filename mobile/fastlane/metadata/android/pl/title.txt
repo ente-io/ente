@@ -1,1 +1,1 @@
-ente - szyfrowane przechowywanie zdjęć
+Ente - szyfrowane przechowywanie zdjęć

@@ -1251,5 +1251,16 @@
   "left": "向左",
   "right": "向右",
   "whatsNew": "更新日志",
-  "reviewSuggestions": "查看建议"
+  "reviewSuggestions": "查看建议",
+  "useAsCover": "用作封面",
+  "notPersonLabel": "不是 {name}？",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  }
 }

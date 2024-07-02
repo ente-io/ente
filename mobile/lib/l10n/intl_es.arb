@@ -1251,5 +1251,16 @@
   "left": "Izquierda",
   "right": "Derecha",
   "whatsNew": "Qué hay de nuevo",
-  "reviewSuggestions": "Revisar sugerencias"
+  "reviewSuggestions": "Revisar sugerencias",
+  "useAsCover": "Usar como cubierta",
+  "notPersonLabel": "¿No es {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  }
 }

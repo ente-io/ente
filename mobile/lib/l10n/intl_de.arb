@@ -1251,5 +1251,16 @@
   "left": "Links",
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
-  "reviewSuggestions": "Vorschläge überprüfen"
+  "reviewSuggestions": "Vorschläge überprüfen",
+  "useAsCover": "Als Titelbild festlegen",
+  "notPersonLabel": "Nicht {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  }
 }
