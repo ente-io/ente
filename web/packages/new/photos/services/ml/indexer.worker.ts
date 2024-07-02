@@ -7,8 +7,8 @@ import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { fileLogID } from "../../utils/file";
+import { putFaceIndex } from "./embedding";
 import { indexFaces } from "./f-index";
-import { putFaceIndex } from "./remote";
 
 /**
  * Index faces in a file, save the persist the results locally, and put them on

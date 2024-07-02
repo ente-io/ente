@@ -3,14 +3,17 @@ import {
     getAllLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
+import type { EnteFile } from "@/new/photos/types/file";
 import { authenticatedRequestHeaders } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { z } from "zod";
 import { saveFaceIndex } from "./db";
 import { faceIndexingVersion } from "./f-index";
 import { type FaceIndex } from "./types";
+// import { putEmbedding } from "services/embeddingService";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
@@ -237,6 +240,29 @@ const getEmbeddingsDiff = async (
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return z.array(RemoteEmbedding).parse(await res.json());
+};
+
+export const putFaceIndex = async (
+    enteFile: EnteFile,
+    faceIndex: FaceIndex,
+) => {
+    log.debug(() => ({
+        t: "Uploading faceEmbedding",
+        d: JSON.stringify(faceIndex),
+    }));
+
+    const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const { file: encryptedEmbeddingData } =
+        await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
+    // TODO(MR): Indexing
+    console.log(encryptedEmbeddingData);
+    throw new Error("Unimplemented");
+    // await putEmbedding({
+    //     fileID: enteFile.id,
+    //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
+    //     decryptionHeader: encryptedEmbeddingData.decryptionHeader,
+    //     model: "file-ml-clip-face",
+    // });
 };
 
 // MARK: - Face
