@@ -1,10 +1,15 @@
 import { FILE_TYPE } from "@/media/file-type";
+import {
+    faceIndexingStatus,
+    isFaceIndexingEnabled,
+} from "@/new/photos/services/ml/indexer";
+import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
+import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
-import type { Person } from "services/face/people";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import {
@@ -21,8 +26,6 @@ import { getFormattedDate } from "utils/search";
 import { clipService, computeClipMatchScore } from "./clip-service";
 import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
-import { faceIndexingStatus, isFaceIndexingEnabled } from "./face/indexer";
-import mlWorkManager from "./face/mlWorkManager";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);

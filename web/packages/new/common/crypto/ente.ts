@@ -2,23 +2,51 @@
  * @file Higher level functions that use the ontology of Ente's types
  *
  * These are thin wrappers over the (thin-) wrappers in internal/libsodium.ts.
- * The main difference is that they don't name things in terms of the crypto
- * algorithms, but rather by the specific Ente specific tasks we are trying to
- * do.
+ * The main difference is that these functions don't talk in terms of the crypto
+ * algorithms, but rather in terms the higher-level Ente specific goal we are
+ * trying to accomplish.
  */
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 
 /**
- * Decrypt arbitrary metadata associated with a file using the its's key.
+ * Encrypt arbitrary metadata associated with a file using its key.
  *
- * @param encryptedMetadataB64 The Base64 encoded string containing the
- * encrypted data.
+ * @param metadata The metadata (string) to encrypt.
  *
- * @param headerB64 The Base64 encoded string containing the decryption header
+ * @param keyB64 Base64 encoded string containing the encryption key (this'll
+ * generally be the file's key).
+ *
+ * @returns Base64 encoded strings containing the encrypted data and the
+ * decryption header.
+ */
+export const encryptFileMetadata = async (
+    metadata: string,
+    keyB64: string,
+): Promise<{ encryptedMetadataB64: string; decryptionHeaderB64: string }> => {
+    const encoder = new TextEncoder();
+    const encodedMetadata = encoder.encode(metadata);
+
+    const { file } = await libsodium.encryptChaChaOneShot(
+        encodedMetadata,
+        keyB64,
+    );
+    return {
+        encryptedMetadataB64: await libsodium.toB64(file.encryptedData),
+        decryptionHeaderB64: file.decryptionHeader,
+    };
+};
+
+/**
+ * Decrypt arbitrary metadata associated with a file using the its key.
+ *
+ * @param encryptedMetadataB64 Base64 encoded string containing the encrypted
+ * data.
+ *
+ * @param headerB64 Base64 encoded string containing the decryption header
  * produced during encryption.
  *
- * @param keyB64 The Base64 encoded string containing the encryption key
- * (this'll generally be the file's key).
+ * @param keyB64 Base64 encoded string containing the encryption key (this'll
+ * generally be the file's key).
  *
  * @returns The decrypted utf-8 string.
  */

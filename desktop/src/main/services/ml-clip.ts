@@ -1,5 +1,6 @@
 // TODO: These arise from the array indexing in the pre-processing code. Isolate
-// once that code settles down to its final place.
+// once that code settles down to its final place (currently duplicated across
+// web and desktop).
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 /**

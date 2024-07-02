@@ -1,4 +1,4 @@
-import type { EmbeddingModel } from "@/new/photos/services/embedding";
+import type { EmbeddingModel } from "@/new/photos/services/ml/embedding";
 
 export interface EncryptedEmbedding {
     fileID: number;

@@ -49,14 +49,6 @@ export enum FILE_OPS_TYPE {
     DELETE_PERMANENTLY,
 }
 
-/**
- * @returns a string to use as an identifier when logging information about the
- * given {@link enteFile}. The returned string contains the file name (for ease
- * of debugging) and the file ID (for exactness).
- */
-export const fileLogID = (enteFile: EnteFile) =>
-    `file ${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
-
 export async function getUpdatedEXIFFileForDownload(
     fileReader: FileReader,
     file: EnteFile,

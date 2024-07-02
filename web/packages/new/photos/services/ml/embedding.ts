@@ -1,13 +1,20 @@
-import { getLocalTrashedFiles } from "@/new/photos/services/files";
-import { authenticatedRequestHeaders } from "@/next/http";
+import {
+    decryptFileMetadata,
+    encryptFileMetadata,
+} from "@/new/common/crypto/ente";
+import {
+    getAllLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
+import type { EnteFile } from "@/new/photos/types/file";
+import { HTTPError, authenticatedRequestHeaders } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
-import { decryptFileMetadata } from "../../common/crypto/ente";
-import { saveFaceIndex } from "./face/db";
-import { faceIndexingVersion, type FaceIndex } from "./face/types";
-import { getAllLocalFiles } from "./files";
+import { saveFaceIndex } from "./db";
+import { faceIndexingVersion } from "./f-index";
+import { type FaceIndex } from "./types";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
@@ -233,7 +240,46 @@ const getEmbeddingsDiff = async (
         headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-    return z.array(RemoteEmbedding).parse(await res.json());
+
+    return z.object({ diff: z.array(RemoteEmbedding) }).parse(await res.json())
+        .diff;
+};
+
+/**
+ * Upload an embedding to remote.
+ *
+ * This function will save or update the given embedding as the latest embedding
+ * associated with the given {@link enteFile} for {@link model}.
+ *
+ * @param enteFile {@link EnteFile} to which this embedding relates to.
+ *
+ * @param model The {@link EmbeddingModel} which we are uploading.
+ *
+ * @param embedding String representation of the embedding. The exact contents
+ * of the embedding are model specific (usually this is the JSON string).
+ */
+export const putEmbedding = async (
+    enteFile: EnteFile,
+    model: EmbeddingModel,
+    embedding: string,
+) => {
+    log.debug(() => ({ t: `Uploading embedding`, model, embedding }));
+
+    const { encryptedMetadataB64, decryptionHeaderB64 } =
+        await encryptFileMetadata(embedding, enteFile.key);
+
+    const url = await apiURL("/embeddings");
+    const res = await fetch(url, {
+        method: "PUT",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({
+            fileID: enteFile.id,
+            encryptedEmbedding: encryptedMetadataB64,
+            decryptionHeader: decryptionHeaderB64,
+            model,
+        }),
+    });
+    if (!res.ok) throw new HTTPError(url, res);
 };
 
 // MARK: - Face
@@ -263,9 +309,9 @@ export const pullFaceEmbeddings = () =>
  */
 const saveFaceIndexIfNewer = async (index: FaceIndex) => {
     const version = index.faceEmbedding.version;
-    if (version <= faceIndexingVersion) {
+    if (version < faceIndexingVersion) {
         log.info(
-            `Ignoring remote face index with version ${version} not newer than what our indexer supports (${faceIndexingVersion})`,
+            `Ignoring remote face index with version ${version} older than what our indexer can produce (${faceIndexingVersion})`,
         );
         return;
     }
@@ -289,8 +335,8 @@ const saveFaceIndexIfNewer = async (index: FaceIndex) => {
  * not possible to go the other way (TS type => Zod schema).
  *
  * However, in some cases having when the TypeScript type under consideration is
- * used pervasely in our code, having a standalone TypeScript type with attached
- * docstrings, is worth the code duplication.
+ * used pervasively in code, having a standalone TypeScript type with attached
+ * docstrings is worth the code duplication.
  *
  * Note that this'll just be syntactic duplication - if the two definitions get
  * out of sync in the shape of the types they represent, the TypeScript compiler
@@ -340,3 +386,10 @@ const FaceIndex = z
     })
     // Retain fields we might not (currently) understand.
     .passthrough();
+
+/**
+ * Save the face index for the given {@link enteFile} on remote so that other
+ * clients can directly pull it instead of needing to reindex.
+ */
+export const putFaceIndex = async (enteFile: EnteFile, faceIndex: FaceIndex) =>
+    putEmbedding(enteFile, "file-ml-clip-face", JSON.stringify(faceIndex));

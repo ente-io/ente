@@ -15,9 +15,9 @@ export interface ClusterFacesResult {
  * pipeline. Each embedding is for a face detected in an image (a single image
  * may have multiple faces detected within it).
  */
-export const clusterFaces = async (
-    faceEmbeddings: Array<Array<number>>,
-): Promise<ClusterFacesResult> => {
+export const clusterFaces = (
+    faceEmbeddings: number[][],
+): ClusterFacesResult => {
     const hdbscan = new Hdbscan({
         input: faceEmbeddings,
         minClusterSize: 3,

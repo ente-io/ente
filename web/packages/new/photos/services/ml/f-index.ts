@@ -1,3 +1,10 @@
+// The ML code in this file involves imperative array indexing and processing,
+// and allowing non-null assertions ("!") are the easiest way to get tsc to
+// accept it in the presence of noUncheckedIndexedAccess without obfuscating the
+// original algorithms.
+//
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
@@ -6,20 +13,20 @@ import type {
     Dimensions,
     Face,
     Point,
-} from "@/new/photos/services/face/types";
-import { faceIndexingVersion } from "@/new/photos/services/face/types";
+} from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import { getRenderableImage } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
+import { ensure } from "@/utils/ensure";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
-    Matrix as TransformationMatrix,
     applyToPoint,
     compose,
     scale,
     translate,
+    type Matrix as TransformationMatrix,
 } from "transformation-matrix";
 import { saveFaceCrop } from "./crop";
 import {
@@ -28,6 +35,11 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+
+/**
+ * The version of the face indexing pipeline implemented by the current client.
+ */
+export const faceIndexingVersion = 1;
 
 /**
  * Index faces in the given file.
@@ -86,15 +98,20 @@ export const indexFaces = async (
  *
  * For videos their thumbnail is used.
  */
-const renderableImageBlob = async (enteFile: EnteFile, file: File) => {
+const renderableImageBlob = async (
+    enteFile: EnteFile,
+    file: File | undefined,
+) => {
     const fileType = enteFile.metadata.fileType;
     if (fileType == FILE_TYPE.VIDEO) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
-        return new Blob([thumbnailData]);
+        return new Blob([ensure(thumbnailData)]);
     } else {
-        return file
-            ? getRenderableImage(enteFile.metadata.title, file)
-            : fetchRenderableBlob(enteFile);
+        return ensure(
+            file
+                ? await getRenderableImage(enteFile.metadata.title, file)
+                : await fetchRenderableBlob(enteFile),
+        );
     }
 };
 
@@ -163,8 +180,8 @@ const indexFacesInBitmap = async (
         faceID,
         detection: normalizeToImageDimensions(detection, imageDimensions),
         score,
-        blur: blurs[i],
-        embedding: Array.from(embeddings[i]),
+        blur: blurs[i]!,
+        embedding: Array.from(embeddings[i]!),
     }));
 };
 
@@ -176,7 +193,12 @@ const indexFacesInBitmap = async (
 const detectFaces = async (
     imageBitmap: ImageBitmap,
 ): Promise<YOLOFaceDetection[]> => {
-    const rect = ({ width, height }) => ({ x: 0, y: 0, width, height });
+    const rect = ({ width, height }: Dimensions) => ({
+        x: 0,
+        y: 0,
+        width,
+        height,
+    });
 
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
@@ -203,7 +225,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
 
     // Create an OffscreenCanvas and set its size.
     const offscreenCanvas = new OffscreenCanvas(width, height);
-    const ctx = offscreenCanvas.getContext("2d");
+    const ctx = ensure(offscreenCanvas.getContext("2d"));
     ctx.drawImage(imageBitmap, 0, 0, width, height);
     const imageData = ctx.getImageData(0, 0, width, height);
     const pixelData = imageData.data;
@@ -271,26 +293,26 @@ const filterExtractDetectionsFromYOLOOutput = (
     const faces: YOLOFaceDetection[] = [];
     // Iterate over each row.
     for (let i = 0; i < rows.length; i += 16) {
-        const score = rows[i + 4];
+        const score = rows[i + 4]!;
         if (score < 0.7) continue;
 
-        const xCenter = rows[i];
-        const yCenter = rows[i + 1];
-        const width = rows[i + 2];
-        const height = rows[i + 3];
+        const xCenter = rows[i]!;
+        const yCenter = rows[i + 1]!;
+        const width = rows[i + 2]!;
+        const height = rows[i + 3]!;
         const x = xCenter - width / 2.0; // topLeft
         const y = yCenter - height / 2.0; // topLeft
 
-        const leftEyeX = rows[i + 5];
-        const leftEyeY = rows[i + 6];
-        const rightEyeX = rows[i + 7];
-        const rightEyeY = rows[i + 8];
-        const noseX = rows[i + 9];
-        const noseY = rows[i + 10];
-        const leftMouthX = rows[i + 11];
-        const leftMouthY = rows[i + 12];
-        const rightMouthX = rows[i + 13];
-        const rightMouthY = rows[i + 14];
+        const leftEyeX = rows[i + 5]!;
+        const leftEyeY = rows[i + 6]!;
+        const rightEyeX = rows[i + 7]!;
+        const rightEyeY = rows[i + 8]!;
+        const noseX = rows[i + 9]!;
+        const noseY = rows[i + 10]!;
+        const leftMouthX = rows[i + 11]!;
+        const leftMouthY = rows[i + 12]!;
+        const rightMouthX = rows[i + 13]!;
+        const rightMouthY = rows[i + 14]!;
 
         const box = { x, y, width, height };
         const landmarks = [
@@ -379,7 +401,7 @@ const naiveNonMaxSuppression = (
     // Loop through the detections and calculate the IOU.
     for (let i = 0; i < detections.length - 1; i++) {
         for (let j = i + 1; j < detections.length; j++) {
-            const iou = intersectionOverUnion(detections[i], detections[j]);
+            const iou = intersectionOverUnion(detections[i]!, detections[j]!);
             if (iou >= iouThreshold) {
                 detections.splice(j, 1);
                 j--;
@@ -522,7 +544,7 @@ const convertToMobileFaceNetInput = (
         faceAlignments.length * faceSize * faceSize * 3,
     );
     for (let i = 0; i < faceAlignments.length; i++) {
-        const { affineMatrix } = faceAlignments[i];
+        const { affineMatrix } = faceAlignments[i]!;
         const faceDataOffset = i * faceSize * faceSize * 3;
         warpAffineFloat32List(
             imageBitmap,
@@ -564,11 +586,11 @@ const detectBlur = (
 type FaceDirection = "left" | "right" | "straight";
 
 const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
-    const leftEye = landmarks[0];
-    const rightEye = landmarks[1];
-    const nose = landmarks[2];
-    const leftMouth = landmarks[3];
-    const rightMouth = landmarks[4];
+    const leftEye = landmarks[0]!;
+    const rightEye = landmarks[1]!;
+    const nose = landmarks[2]!;
+    const leftMouth = landmarks[3]!;
+    const rightMouth = landmarks[4]!;
 
     const eyeDistanceX = Math.abs(rightEye.x - leftEye.x);
     const eyeDistanceY = Math.abs(rightEye.y - leftEye.y);
@@ -609,11 +631,12 @@ const applyLaplacian = (
 ): number[][] => {
     const paddedImage = padImage(image, direction);
     const numRows = paddedImage.length - 2;
-    const numCols = paddedImage[0].length - 2;
+    const numCols = paddedImage[0]!.length - 2;
 
     // Create an output image initialized to 0.
-    const outputImage: number[][] = Array.from({ length: numRows }, () =>
-        new Array(numCols).fill(0),
+    const outputImage = Array.from(
+        { length: numRows },
+        () => new Array(numCols).fill(0) as number[],
     );
 
     // Define the Laplacian kernel.
@@ -629,11 +652,11 @@ const applyLaplacian = (
             let sum = 0;
             for (let ki = 0; ki < 3; ki++) {
                 for (let kj = 0; kj < 3; kj++) {
-                    sum += paddedImage[i + ki][j + kj] * kernel[ki][kj];
+                    sum += paddedImage[i + ki]![j + kj]! * kernel[ki]![kj]!;
                 }
             }
             // Adjust the output value if necessary (e.g., clipping).
-            outputImage[i][j] = sum;
+            outputImage[i]![j] = sum;
         }
     }
 
@@ -644,37 +667,38 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
     const removeSideColumns = 56; /* must be even */
 
     const numRows = image.length;
-    const numCols = image[0].length;
+    const numCols = image[0]!.length;
     const paddedNumCols = numCols + 2 - removeSideColumns;
     const paddedNumRows = numRows + 2;
 
     // Create a new matrix with extra padding.
-    const paddedImage: number[][] = Array.from({ length: paddedNumRows }, () =>
-        new Array(paddedNumCols).fill(0),
+    const paddedImage = Array.from(
+        { length: paddedNumRows },
+        () => new Array(paddedNumCols).fill(0) as number[],
     );
 
-    if (direction === "straight") {
+    if (direction == "straight") {
         // Copy original image into the center of the padded image.
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < paddedNumCols - 2; j++) {
-                paddedImage[i + 1][j + 1] =
-                    image[i][j + Math.round(removeSideColumns / 2)];
+                paddedImage[i + 1]![j + 1] =
+                    image[i]![j + Math.round(removeSideColumns / 2)]!;
             }
         }
-    } else if (direction === "left") {
+    } else if (direction == "left") {
         // If the face is facing left, we only take the right side of the face
         // image.
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < paddedNumCols - 2; j++) {
-                paddedImage[i + 1][j + 1] = image[i][j + removeSideColumns];
+                paddedImage[i + 1]![j + 1] = image[i]![j + removeSideColumns]!;
             }
         }
-    } else if (direction === "right") {
+    } else {
         // If the face is facing right, we only take the left side of the face
         // image.
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < paddedNumCols - 2; j++) {
-                paddedImage[i + 1][j + 1] = image[i][j];
+                paddedImage[i + 1]![j + 1] = image[i]![j]!;
             }
         }
     }
@@ -683,16 +707,17 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
     // - Top and bottom rows
     for (let j = 1; j <= paddedNumCols - 2; j++) {
         // Top row
-        paddedImage[0][j] = paddedImage[2][j];
+        paddedImage[0]![j] = paddedImage[2]![j]!;
         // Bottom row
-        paddedImage[numRows + 1][j] = paddedImage[numRows - 1][j];
+        paddedImage[numRows + 1]![j] = paddedImage[numRows - 1]![j]!;
     }
     // - Left and right columns
     for (let i = 0; i < numRows + 2; i++) {
         // Left column
-        paddedImage[i][0] = paddedImage[i][2];
+        paddedImage[i]![0] = paddedImage[i]![2]!;
         // Right column
-        paddedImage[i][paddedNumCols - 1] = paddedImage[i][paddedNumCols - 3];
+        paddedImage[i]![paddedNumCols - 1] =
+            paddedImage[i]![paddedNumCols - 3]!;
     }
 
     return paddedImage;
@@ -700,11 +725,11 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
 
 const matrixVariance = (matrix: number[][]): number => {
     const numRows = matrix.length;
-    const numCols = matrix[0].length;
+    const numCols = matrix[0]!.length;
     const totalElements = numRows * numCols;
 
     // Calculate the mean.
-    let mean: number = 0;
+    let mean = 0;
     matrix.forEach((row) => {
         row.forEach((value) => {
             mean += value;
@@ -713,7 +738,7 @@ const matrixVariance = (matrix: number[][]): number => {
     mean /= totalElements;
 
     // Calculate the variance.
-    let variance: number = 0;
+    let variance = 0;
     matrix.forEach((row) => {
         row.forEach((value) => {
             const diff: number = value - mean;

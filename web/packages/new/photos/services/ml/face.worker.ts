@@ -1,7 +1,7 @@
 import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import { expose } from "comlink";
-import mlService from "services/machineLearning/machineLearningService";
+import mlService from "./machineLearningService";
 
 export class DedicatedMLWorker {
     public async closeLocalSyncContext() {
@@ -15,7 +15,13 @@ export class DedicatedMLWorker {
         enteFile: EnteFile,
         localFile: globalThis.File,
     ) {
-        mlService.syncLocalFile(token, userID, userAgent, enteFile, localFile);
+        return mlService.syncLocalFile(
+            token,
+            userID,
+            userAgent,
+            enteFile,
+            localFile,
+        );
     }
 
     public async sync(token: string, userID: number, userAgent: string) {
