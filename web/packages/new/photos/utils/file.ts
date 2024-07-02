@@ -24,6 +24,16 @@ class ModuleState {
 const moduleState = new ModuleState();
 
 /**
+ * @returns a string to use as an identifier when logging information about the
+ * given {@link enteFile}. The returned string contains the file name (for ease
+ * of debugging) and the file ID (for exactness).
+ */
+export const fileLogID = (enteFile: EnteFile) =>
+    // TODO: Remove this when file/metadata types have optionality annotations.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    `file ${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
+
+/**
  * [Note: File name for local EnteFile objects]
  *
  * The title property in a file's metadata is the original file's name. The

@@ -2,11 +2,11 @@ import {
     closeFaceDBConnectionsIfNeeded,
     markIndexingFailed,
     saveFaceIndex,
-} from "@/new/photos/services/face/db";
+} from "@/new/photos/services/ml/db";
 import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { fileLogID } from "utils/file";
+import { fileLogID } from "../../utils/file";
 import { indexFaces } from "./f-index";
 import { putFaceIndex } from "./remote";
 
@@ -46,7 +46,7 @@ export class FaceIndexerWorker {
             // failed, not if there were subsequent failures (like when trying
             // to put the result to remote or save it to the local face DB).
             log.error(`Failed to index faces in ${f}`, e);
-            markIndexingFailed(enteFile.id);
+            await markIndexingFailed(enteFile.id);
             throw e;
         }
 
@@ -72,6 +72,6 @@ export class FaceIndexerWorker {
      * connections to the face DB from the web worker's context.
      */
     closeFaceDB() {
-        closeFaceDBConnectionsIfNeeded();
+        void closeFaceDBConnectionsIfNeeded();
     }
 }

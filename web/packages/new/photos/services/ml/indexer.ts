@@ -3,7 +3,7 @@ import {
     indexableFileIDs,
     indexedAndIndexableCounts,
     updateAssumingLocalFiles,
-} from "@/new/photos/services/face/db";
+} from "@/new/photos/services/ml/db";
 import {
     isBetaUser,
     isInternalUser,

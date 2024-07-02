@@ -110,23 +110,23 @@ class MachineLearningService {
         return this.syncContext;
     }
 
-    private async getLocalSyncContext(
-        token: string,
-        userID: number,
-        userAgent: string,
-    ) {
-        // TODO-ML(MR): This is updating the file ML version. verify.
-        if (!this.localSyncContext) {
-            log.info("Creating localSyncContext");
-            // TODO-ML(MR):
-            this.localSyncContext = new Promise((resolve) => {
-                resolve(new MLSyncContext(token, userID, userAgent));
-            });
-        } else {
-            log.info("reusing existing localSyncContext");
-        }
-        return this.localSyncContext;
-    }
+    // private async getLocalSyncContext(
+    //     token: string,
+    //     userID: number,
+    //     userAgent: string,
+    // ) {
+    //     // TODO-ML(MR): This is updating the file ML version. verify.
+    //     if (!this.localSyncContext) {
+    //         log.info("Creating localSyncContext");
+    //         // TODO-ML(MR):
+    //         this.localSyncContext = new Promise((resolve) => {
+    //             resolve(new MLSyncContext(token, userID, userAgent));
+    //         });
+    //     } else {
+    //         log.info("reusing existing localSyncContext");
+    //     }
+    //     return this.localSyncContext;
+    // }
 
     public async closeLocalSyncContext() {
         if (this.localSyncContext) {
@@ -139,15 +139,20 @@ class MachineLearningService {
 
     public async syncLocalFile(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        token: string,
+        _: string,
+        // token: string,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        userID: number,
+        __: number,
+        // userID: number,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        userAgent: string,
+        ___: string,
+        // userAgent: string,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        enteFile: EnteFile,
+        ____: EnteFile,
+        // enteFile: EnteFile,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        localFile?: globalThis.File,
+        _____?: globalThis.File,
+        // localFile?: globalThis.File,
     ) {
         /* TODO-ML(MR): Currently not used
         const syncContext = await this.getLocalSyncContext(
