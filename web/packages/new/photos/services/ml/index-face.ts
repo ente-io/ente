@@ -1,7 +1,9 @@
-// The ML code in this file involves imperative array indexing and processing,
-// and allowing non-null assertions ("!") are the easiest way to get tsc to
-// accept it in the presence of noUncheckedIndexedAccess without obfuscating the
-// original algorithms.
+// [Note: Allowing non-null assertions selectively]
+//
+// The code in this file involves a lot of imperative array processing and
+// indexing, and allowing non-null assertions ("!") is the easiest way to get
+// TypeScript to accept it in the presence of noUncheckedIndexedAccess without
+// obfuscating the original algorithms.
 //
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 

@@ -2,8 +2,8 @@ import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import { syncWithLocalFilesAndGetFilesToIndex } from "./indexer";
-import { FaceIndexerWorker } from "./indexer.worker";
+import { syncWithLocalFilesAndGetFilesToIndex } from ".";
+import { index } from "./worker";
 
 const batchSize = 200;
 
@@ -214,9 +214,7 @@ class MachineLearningService {
         file: File | undefined,
         userAgent: string,
     ) {
-        const worker = new FaceIndexerWorker();
-
-        await worker.index(enteFile, file, userAgent);
+        await index(enteFile, file, userAgent);
     }
 }
 

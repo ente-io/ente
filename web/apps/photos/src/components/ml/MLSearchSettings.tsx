@@ -1,4 +1,4 @@
-import { canEnableFaceIndexing } from "@/new/photos/services/ml/indexer";
+import { canEnableFaceIndexing } from "@/new/photos/services/ml";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {

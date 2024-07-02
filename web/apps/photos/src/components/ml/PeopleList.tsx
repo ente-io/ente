@@ -1,4 +1,4 @@
-import { unidentifiedFaceIDs } from "@/new/photos/services/ml/indexer";
+import { unidentifiedFaceIDs } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { blobCache } from "@/next/blob-cache";

@@ -13,7 +13,7 @@ import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
 import { saveFaceIndex } from "./db";
-import { faceIndexingVersion } from "./f-index";
+import { faceIndexingVersion } from "./index-face";
 import { type FaceIndex } from "./types";
 
 /**
