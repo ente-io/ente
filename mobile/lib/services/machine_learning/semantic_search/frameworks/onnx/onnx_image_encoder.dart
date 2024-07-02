@@ -9,7 +9,6 @@ import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
   static const kRemoteBucketModelPath = "clip-image-vit-32-float32.onnx";
-  // static const kRemoteBucketModelPath = "clip-text-vit-32-uint8.onnx";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
