@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable @typescript-eslint/array-type */
+/* @ts-nocheck */
+
 import {
     NULL_LOCATION,
     toDataOrPathOrZipEntry,
@@ -18,8 +22,8 @@ import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
-} from "constants/ffmpeg";
-import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
+} from "./constants";
+import type { DedicatedFFmpegWorker } from "./worker";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
@@ -269,7 +273,7 @@ class WorkerFactory {
     private createComlinkWorker = () =>
         new ComlinkWorker<typeof DedicatedFFmpegWorker>(
             "ffmpeg-worker",
-            new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
+            new Worker(new URL("worker.ts", import.meta.url)),
         );
 
     async lazy() {

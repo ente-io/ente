@@ -2,6 +2,7 @@ import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     NULL_LOCATION,
@@ -32,7 +33,6 @@ import { CustomError, handleUploadError } from "@ente/shared/error";
 import type { Remote } from "comlink";
 import { addToCollection } from "services/collectionService";
 import { parseImageMetadata } from "services/exif";
-import * as ffmpeg from "services/ffmpeg";
 import {
     PublicUploadProps,
     type LivePhotoAssets,

@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import {
     EnteFile,
     type LivePhotoSourceURL,
@@ -17,7 +18,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import type { Remote } from "comlink";
 import isElectron from "is-electron";
-import * as ffmpeg from "services/ffmpeg";
 
 export type OnDownloadProgress = (event: {
     loaded: number;

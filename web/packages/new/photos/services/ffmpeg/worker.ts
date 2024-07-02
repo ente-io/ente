@@ -5,7 +5,7 @@ import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
-} from "constants/ffmpeg";
+} from "./constants";
 
 // When we run tsc on CI, the line below errors out
 //
@@ -22,7 +22,7 @@ import {
 // Note that we can't use @ts-expect-error since it doesn't error out when
 // actually building!
 //
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
 // @ts-ignore
 import { FFmpeg, createFFmpeg } from "ffmpeg-wasm";
 
