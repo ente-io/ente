@@ -5,14 +5,12 @@ class FileMl {
   final int? height;
   final int? width;
   final FaceEmbeddings faceEmbedding;
-  final ClipEmbedding? clipEmbedding;
 
   FileMl(
     this.fileID,
     this.faceEmbedding, {
     this.height,
     this.width,
-    this.clipEmbedding,
   });
 
   // toJson
@@ -21,7 +19,6 @@ class FileMl {
         'height': height,
         'width': width,
         'faceEmbedding': faceEmbedding.toJson(),
-        'clipEmbedding': clipEmbedding?.toJson(),
       };
   // fromJson
   factory FileMl.fromJson(Map<String, dynamic> json) {
@@ -30,11 +27,6 @@ class FileMl {
       FaceEmbeddings.fromJson(json['faceEmbedding'] as Map<String, dynamic>),
       height: json['height'] as int?,
       width: json['width'] as int?,
-      clipEmbedding: json['clipEmbedding'] == null
-          ? null
-          : ClipEmbedding.fromJson(
-              json['clipEmbedding'] as Map<String, dynamic>,
-            ),
     );
   }
 }
@@ -64,8 +56,7 @@ class FaceEmbeddings {
         json['faces'].map((x) => Face.fromJson(x as Map<String, dynamic>)),
       ),
       json['version'] as int,
-      client: json['client'] ??
-      'unknown',
+      client: json['client'] ?? 'unknown',
     );
   }
 }
