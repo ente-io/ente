@@ -1,5 +1,5 @@
+import type { UserVerificationResponse } from "@/accounts/types/user";
 import { ensure } from "@/utils/ensure";
-import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";

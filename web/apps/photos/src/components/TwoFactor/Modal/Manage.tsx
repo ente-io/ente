@@ -1,7 +1,7 @@
 import { t } from "i18next";
 import { useContext } from "react";
 
-import { disableTwoFactor } from "@ente/accounts/api/user";
+import { disableTwoFactor } from "@/accounts/api/user";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Button, Grid } from "@mui/material";

@@ -1,3 +1,4 @@
+import type { AccountsContextT } from "@/accounts/types/context";
 import DownloadManager from "@/new/photos/services/download";
 import {
     isFaceIndexingEnabled,
@@ -14,7 +15,6 @@ import {
 } from "@/next/log-web";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
-import type { AccountsContextT } from "@ente/accounts/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import {

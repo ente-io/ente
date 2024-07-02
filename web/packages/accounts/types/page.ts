@@ -1,4 +1,4 @@
-import type { AccountsContextT } from "@ente/accounts/types/context";
+import type { AccountsContextT } from "./context";
 
 /**
  * The default type for pages exposed by this package.

@@ -1,4 +1,4 @@
-import type { TwoFactorSecret } from "@ente/accounts/types/user";
+import type { TwoFactorSecret } from "@/accounts/types/user";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { t } from "i18next";
 

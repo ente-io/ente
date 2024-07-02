@@ -1,5 +1,5 @@
+import { checkSessionValidity } from "@/accounts/services/session";
 import log from "@/next/log";
-import { checkSessionValidity } from "@ente/accounts/services/session";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import VerifyMasterPasswordForm, {

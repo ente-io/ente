@@ -1,11 +1,11 @@
-import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
-import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
+import { enableTwoFactor, setupTwoFactor } from "@/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
-} from "@ente/accounts/components/two-factor/VerifyForm";
-import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
-import type { TwoFactorSecret } from "@ente/accounts/types/user";
+} from "@/accounts/components/two-factor/VerifyForm";
+import { TwoFactorSetup } from "@/accounts/components/two-factor/setup";
+import type { TwoFactorSecret } from "@/accounts/types/user";
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
