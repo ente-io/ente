@@ -1,3 +1,4 @@
+import DownloadManager from "@/new/photos/services/download";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
@@ -48,7 +49,6 @@ import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
-import DownloadManager from "services/download";
 import { resumeExportsIfNeeded } from "services/export";
 import {
     isFaceIndexingEnabled,

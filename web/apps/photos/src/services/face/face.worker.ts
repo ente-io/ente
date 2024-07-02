@@ -1,6 +1,6 @@
+import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { expose } from "comlink";
-import downloadManager from "services/download";
 import mlService from "services/machineLearning/machineLearningService";
 
 export class DedicatedMLWorker {

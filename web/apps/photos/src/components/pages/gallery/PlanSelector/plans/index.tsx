@@ -1,3 +1,4 @@
+import { formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
@@ -12,7 +13,6 @@ import {
     isPopularPlan,
     isUserSubscribedPlan,
 } from "utils/billing";
-import { formattedStorageByteSize } from "utils/units";
 import { PlanRow } from "./planRow";
 
 interface Iprops {

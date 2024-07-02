@@ -11,8 +11,8 @@ import {
 } from "./section";
 import { InProgressItemContainer } from "./styledComponents";
 
+import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { CaptionedText } from "components/CaptionedText";
-import { UPLOAD_STAGES } from "constants/upload";
 
 export const InProgressSection = () => {
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadStage } =

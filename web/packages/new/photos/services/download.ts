@@ -1,29 +1,34 @@
+// TODO: Remove this override
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import {
+import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import type {
     EnteFile,
-    type LivePhotoSourceURL,
-    type SourceURLs,
+    LivePhotoSourceURL,
+    SourceURLs,
 } from "@/new/photos/types/file";
+import { getRenderableImage } from "@/new/photos/utils/file";
+import { isDesktop } from "@/next/app";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
+import { customAPIOrigin } from "@/next/origins";
+import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { retryAsyncFunction } from "@ente/shared/utils";
 import type { Remote } from "comlink";
-import isElectron from "is-electron";
-import * as ffmpeg from "services/ffmpeg";
-import { getRenderableImage } from "utils/file";
-import { PhotosDownloadClient } from "./clients/photos";
-import { PublicAlbumsDownloadClient } from "./clients/publicAlbums";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
     total: number;
 }) => void;
 
-export interface DownloadClient {
+interface DownloadClient {
     updateTokens: (token: string, passwordToken?: string) => void;
     downloadThumbnail: (
         file: EnteFile,
@@ -37,8 +42,8 @@ export interface DownloadClient {
 }
 
 class DownloadManagerImpl {
-    private ready: boolean = false;
-    private downloadClient: DownloadClient;
+    private ready = false;
+    private downloadClient: DownloadClient | undefined;
     /** Local cache for thumbnails. Might not be available. */
     private thumbnailCache?: BlobCache;
     /**
@@ -47,11 +52,14 @@ class DownloadManagerImpl {
      * Only available when we're running in the desktop app.
      */
     private fileCache?: BlobCache;
-    private cryptoWorker: Remote<DedicatedCryptoWorker>;
+    private cryptoWorker: Remote<DedicatedCryptoWorker> | undefined;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
-    private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
+    private thumbnailObjectURLPromises = new Map<
+        number,
+        Promise<string | undefined>
+    >();
 
     private fileDownloadProgress = new Map<number, number>();
 
@@ -86,12 +94,17 @@ class DownloadManagerImpl {
             throw new Error(
                 "Attempting to use an uninitialized download manager",
             );
+
+        return {
+            downloadClient: ensure(this.downloadClient),
+            cryptoWorker: ensure(this.cryptoWorker),
+        };
     }
 
-    async logout() {
+    logout() {
         this.ready = false;
-        this.cryptoWorker = null;
-        this.downloadClient = null;
+        this.cryptoWorker = undefined;
+        this.downloadClient = undefined;
         this.fileObjectURLPromises.clear();
         this.fileConversionPromises.clear();
         this.thumbnailObjectURLPromises.clear();
@@ -100,11 +113,8 @@ class DownloadManagerImpl {
     }
 
     updateToken(token: string, passwordToken?: string) {
-        this.downloadClient.updateTokens(token, passwordToken);
-    }
-
-    updateCryptoWorker(cryptoWorker: Remote<DedicatedCryptoWorker>) {
-        this.cryptoWorker = cryptoWorker;
+        const { downloadClient } = this.ensureInitialized();
+        downloadClient.updateTokens(token, passwordToken);
     }
 
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
@@ -112,10 +122,12 @@ class DownloadManagerImpl {
     }
 
     private downloadThumb = async (file: EnteFile) => {
-        const encrypted = await this.downloadClient.downloadThumbnail(file);
-        const decrypted = await this.cryptoWorker.decryptThumbnail(
+        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+
+        const encrypted = await downloadClient.downloadThumbnail(file);
+        const decrypted = await cryptoWorker.decryptThumbnail(
             encrypted,
-            await this.cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+            await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
             file.key,
         );
         return decrypted;
@@ -127,14 +139,17 @@ class DownloadManagerImpl {
         const key = file.id.toString();
         const cached = await this.thumbnailCache?.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
-        if (localOnly) return null;
+        if (localOnly) return undefined;
 
         const thumb = await this.downloadThumb(file);
-        this.thumbnailCache?.put(key, new Blob([thumb]));
+        await this.thumbnailCache?.put(key, new Blob([thumb]));
         return thumb;
     }
 
-    async getThumbnailForPreview(file: EnteFile, localOnly = false) {
+    async getThumbnailForPreview(
+        file: EnteFile,
+        localOnly = false,
+    ): Promise<string | undefined> {
         this.ensureInitialized();
         try {
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
@@ -160,15 +175,19 @@ class DownloadManagerImpl {
     getFileForPreview = async (
         file: EnteFile,
         forceConvert = false,
-    ): Promise<SourceURLs> => {
+    ): Promise<SourceURLs | undefined> => {
         this.ensureInitialized();
         try {
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
                 ).blob();
-                const { url: originalFileURL } =
-                    await this.fileObjectURLPromises.get(file.id);
+                // TODO: Is this ensure valid?
+                // The existing code was already dereferencing, so it shouldn't
+                // affect behaviour.
+                const { url: originalFileURL } = ensure(
+                    await this.fileObjectURLPromises.get(file.id),
+                );
 
                 const converted = await getRenderableFileURL(
                     file,
@@ -196,7 +215,7 @@ class DownloadManagerImpl {
     async getFile(
         file: EnteFile,
         cacheInMemory = false,
-    ): Promise<ReadableStream<Uint8Array>> {
+    ): Promise<ReadableStream<Uint8Array> | null> {
         this.ensureInitialized();
         try {
             const getFilePromise = async (): Promise<SourceURLs> => {
@@ -215,7 +234,12 @@ class DownloadManagerImpl {
                 }
                 this.fileObjectURLPromises.set(file.id, getFilePromise());
             }
-            const fileURLs = await this.fileObjectURLPromises.get(file.id);
+            // TODO: Is this ensure valid?
+            // The existing code was already dereferencing, so it shouldn't
+            // affect behaviour.
+            const fileURLs = ensure(
+                await this.fileObjectURLPromises.get(file.id),
+            );
             if (fileURLs.isOriginal) {
                 const fileStream = (await fetch(fileURLs.url as string)).body;
                 return fileStream;
@@ -231,12 +255,15 @@ class DownloadManagerImpl {
 
     private async downloadFile(
         file: EnteFile,
-    ): Promise<ReadableStream<Uint8Array>> {
+    ): Promise<ReadableStream<Uint8Array> | null> {
+        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+
         log.info(`download attempted for file id ${file.id}`);
 
         const onDownloadProgress = this.trackDownloadProgress(
             file.id,
-            file.info?.fileSize,
+            // TODO: Is info supposed to be optional though?
+            file.info?.fileSize ?? 0,
         );
 
         const cacheKey = file.id.toString();
@@ -248,23 +275,29 @@ class DownloadManagerImpl {
             const cachedBlob = await this.fileCache?.get(cacheKey);
             let encryptedArrayBuffer = await cachedBlob?.arrayBuffer();
             if (!encryptedArrayBuffer) {
-                const array = await this.downloadClient.downloadFile(
+                const array = await downloadClient.downloadFile(
                     file,
                     onDownloadProgress,
                 );
                 encryptedArrayBuffer = array.buffer;
-                this.fileCache?.put(cacheKey, new Blob([encryptedArrayBuffer]));
+                await this.fileCache?.put(
+                    cacheKey,
+                    new Blob([encryptedArrayBuffer]),
+                );
             }
             this.clearDownloadProgress(file.id);
             try {
-                const decrypted = await this.cryptoWorker.decryptFile(
+                const decrypted = await cryptoWorker.decryptFile(
                     new Uint8Array(encryptedArrayBuffer),
-                    await this.cryptoWorker.fromB64(file.file.decryptionHeader),
+                    await cryptoWorker.fromB64(file.file.decryptionHeader),
                     file.key,
                 );
                 return new Response(decrypted).body;
             } catch (e) {
-                if (e.message === CustomError.PROCESSING_FAILED) {
+                if (
+                    e instanceof Error &&
+                    e.message == CustomError.PROCESSING_FAILED
+                ) {
                     log.error(
                         `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
                         e,
@@ -278,7 +311,7 @@ class DownloadManagerImpl {
         let res: Response;
         if (cachedBlob) res = new Response(cachedBlob);
         else {
-            res = await this.downloadClient.downloadFileStream(file);
+            res = await downloadClient.downloadFileStream(file);
             // We don't have a files cache currently, so this was already a
             // no-op. But even if we had a cache, this seems sus, because
             // res.blob() will read the stream and I'd think then trying to do
@@ -286,20 +319,20 @@ class DownloadManagerImpl {
 
             // this.fileCache?.put(cacheKey, await res.blob());
         }
-        const reader = res.body.getReader();
+        const body = res.body;
+        if (!body) return null;
+        const reader = body.getReader();
 
-        const contentLength = +res.headers.get("Content-Length") ?? 0;
+        const contentLength =
+            parseInt(res.headers.get("Content-Length") ?? "") || 0;
         let downloadedBytes = 0;
 
-        const decryptionHeader = await this.cryptoWorker.fromB64(
+        const decryptionHeader = await cryptoWorker.fromB64(
             file.file.decryptionHeader,
         );
-        const fileKey = await this.cryptoWorker.fromB64(file.key);
+        const fileKey = await cryptoWorker.fromB64(file.key);
         const { pullState, decryptionChunkSize } =
-            await this.cryptoWorker.initChunkDecryption(
-                decryptionHeader,
-                fileKey,
-            );
+            await cryptoWorker.initChunkDecryption(decryptionHeader, fileKey);
 
         let leftoverBytes = new Uint8Array();
 
@@ -333,7 +366,7 @@ class DownloadManagerImpl {
                     // and we might need multiple iterations to drain it all.
                     while (data.length >= decryptionChunkSize) {
                         const { decryptedData } =
-                            await this.cryptoWorker.decryptFileChunk(
+                            await cryptoWorker.decryptFileChunk(
                                 data.slice(0, decryptionChunkSize),
                                 pullState,
                             );
@@ -347,7 +380,7 @@ class DownloadManagerImpl {
                         // full chunk, no more bytes are going to come.
                         if (data.length) {
                             const { decryptedData } =
-                                await this.cryptoWorker.decryptFileChunk(
+                                await cryptoWorker.decryptFileChunk(
                                     data,
                                     pullState,
                                 );
@@ -395,7 +428,7 @@ const DownloadManager = new DownloadManagerImpl();
 
 export default DownloadManager;
 
-const createDownloadClient = (token: string): DownloadClient => {
+const createDownloadClient = (token: string | undefined): DownloadClient => {
     const timeout = 300000; // 5 minute
     if (token) {
         return new PhotosDownloadClient(token, timeout);
@@ -410,14 +443,14 @@ async function getRenderableFileURL(
     originalFileURL: string,
     forceConvert: boolean,
 ): Promise<SourceURLs> {
-    const existingOrNewObjectURL = (convertedBlob: Blob) =>
+    const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
         convertedBlob
             ? convertedBlob === fileBlob
                 ? originalFileURL
                 : URL.createObjectURL(convertedBlob)
             : undefined;
 
-    let url: SourceURLs["url"];
+    let url: SourceURLs["url"] | undefined;
     let isOriginal: boolean;
     let isRenderable: boolean;
     let type: SourceURLs["type"] = "normal";
@@ -464,14 +497,15 @@ async function getRenderableFileURL(
         }
     }
 
-    return { url, isOriginal, isRenderable, type, mimeType };
+    // TODO: Can we remove this ensure and reflect it in the types?
+    return { url: ensure(url), isOriginal, isRenderable, type, mimeType };
 }
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
     fileBlob: Blob,
     forceConvert: boolean,
-): Promise<LivePhotoSourceURL> {
+): Promise<LivePhotoSourceURL | undefined> {
     const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
 
     const getRenderableLivePhotoImageURL = async () => {
@@ -481,11 +515,12 @@ async function getRenderableLivePhotoURL(
                 livePhoto.imageFileName,
                 imageBlob,
             );
+            if (!convertedImageBlob) return undefined;
 
             return URL.createObjectURL(convertedImageBlob);
         } catch (e) {
             //ignore and return null
-            return null;
+            return undefined;
         }
     };
 
@@ -498,10 +533,11 @@ async function getRenderableLivePhotoURL(
                 forceConvert,
                 true,
             );
+            if (!convertedVideoBlob) return undefined;
             return URL.createObjectURL(convertedVideoBlob);
         } catch (e) {
             //ignore and return null
-            return null;
+            return undefined;
         }
     };
 
@@ -524,7 +560,7 @@ async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            if (!forceConvert && !runOnWeb && !isElectron()) {
+            if (!forceConvert && !runOnWeb && !isDesktop) {
                 return null;
             }
             log.info(`Converting video ${videoNameTitle} to mp4`);
@@ -534,5 +570,295 @@ async function getPlayableVideo(
     } catch (e) {
         log.error("Video conversion failed", e);
         return null;
+    }
+}
+
+class PhotosDownloadClient implements DownloadClient {
+    constructor(
+        private token: string,
+        private timeout: number,
+    ) {}
+
+    updateTokens(token: string) {
+        this.token = token;
+    }
+
+    async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {
+        const token = this.token;
+        if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+        const customOrigin = await customAPIOrigin();
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const getThumbnail = () => {
+            const opts = { responseType: "arraybuffer", timeout: this.timeout };
+            if (customOrigin) {
+                const params = new URLSearchParams({ token });
+                return HTTPService.get(
+                    `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
+                    undefined,
+                    undefined,
+                    opts,
+                );
+            } else {
+                return HTTPService.get(
+                    `https://thumbnails.ente.io/?fileID=${file.id}`,
+                    undefined,
+                    { "X-Auth-Token": token },
+                    opts,
+                );
+            }
+        };
+
+        const resp = await retryAsyncFunction(getThumbnail);
+        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
+    }
+
+    async downloadFile(
+        file: EnteFile,
+        onDownloadProgress: (event: { loaded: number; total: number }) => void,
+    ): Promise<Uint8Array> {
+        const token = this.token;
+        if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+        const customOrigin = await customAPIOrigin();
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const getFile = () => {
+            const opts = {
+                responseType: "arraybuffer",
+                timeout: this.timeout,
+                onDownloadProgress,
+            };
+
+            if (customOrigin) {
+                const params = new URLSearchParams({ token });
+                return HTTPService.get(
+                    `${customOrigin}/files/download/${file.id}?${params.toString()}`,
+                    undefined,
+                    undefined,
+                    opts,
+                );
+            } else {
+                return HTTPService.get(
+                    `https://files.ente.io/?fileID=${file.id}`,
+                    undefined,
+                    { "X-Auth-Token": token },
+                    opts,
+                );
+            }
+        };
+
+        const resp = await retryAsyncFunction(getFile);
+        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
+    }
+
+    async downloadFileStream(file: EnteFile): Promise<Response> {
+        const token = this.token;
+        if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+        const customOrigin = await customAPIOrigin();
+
+        // [Note: Passing credentials for self-hosted file fetches]
+        //
+        // Fetching files (or thumbnails) in the default self-hosted Ente
+        // configuration involves a redirection:
+        //
+        // 1. The browser makes a HTTP GET to a museum with credentials. Museum
+        //    inspects the credentials, in this case the auth token, and if
+        //    they're valid, returns a HTTP 307 redirect to the pre-signed S3
+        //    URL that to the file in the configured S3 bucket.
+        //
+        // 2. The browser follows the redirect to get the actual file. The URL
+        //    is pre-signed, i.e. already has all credentials needed to prove to
+        //    the S3 object storage that it should serve this response.
+        //
+        // For the first step normally we'd pass the auth the token via the
+        // "X-Auth-Token" HTTP header. In this case though, that would be
+        // problematic because the browser preserves the request headers when it
+        // follows the HTTP 307 redirect, and the "X-Auth-Token" header also
+        // gets sent to the redirected S3 request made in second step.
+        //
+        // To avoid this, we pass the token as a query parameter. Generally this
+        // is not a good idea, but in this case (a) the URL is not a user
+        // visible one and (b) even if it gets logged, it'll be in the
+        // self-hosters own service.
+        //
+        // Note that Ente's own servers don't have these concerns because we use
+        // a slightly different flow involving a proxy instead of directly
+        // connecting to the S3 storage.
+        //
+        // 1. The web browser makes a HTTP GET request to a proxy passing it the
+        //    credentials in the "X-Auth-Token".
+        //
+        // 2. The proxy then does both the original steps: (a). Use the
+        //    credentials to get the pre signed URL, and (b) fetch that pre
+        //    signed URL and stream back the response.
+
+        const getFile = () => {
+            if (customOrigin) {
+                const params = new URLSearchParams({ token });
+                return fetch(
+                    `${customOrigin}/files/download/${file.id}?${params.toString()}`,
+                );
+            } else {
+                return fetch(`https://files.ente.io/?fileID=${file.id}`, {
+                    headers: {
+                        "X-Auth-Token": token,
+                    },
+                });
+            }
+        };
+
+        return retryAsyncFunction(getFile);
+    }
+}
+
+class PublicAlbumsDownloadClient implements DownloadClient {
+    private token: string | undefined;
+    private passwordToken: string | undefined;
+
+    constructor(private timeout: number) {}
+
+    updateTokens(token: string, passwordToken?: string) {
+        this.token = token;
+        this.passwordToken = passwordToken;
+    }
+
+    downloadThumbnail = async (file: EnteFile) => {
+        const accessToken = this.token;
+        const accessTokenJWT = this.passwordToken;
+        if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
+        const customOrigin = await customAPIOrigin();
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const getThumbnail = () => {
+            const opts = {
+                responseType: "arraybuffer",
+            };
+
+            if (customOrigin) {
+                const params = new URLSearchParams({
+                    accessToken,
+                    ...(accessTokenJWT && { accessTokenJWT }),
+                });
+                return HTTPService.get(
+                    `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
+                    undefined,
+                    undefined,
+                    opts,
+                );
+            } else {
+                return HTTPService.get(
+                    `https://public-albums.ente.io/preview/?fileID=${file.id}`,
+                    undefined,
+                    {
+                        "X-Auth-Access-Token": accessToken,
+                        ...(accessTokenJWT && {
+                            "X-Auth-Access-Token-JWT": accessTokenJWT,
+                        }),
+                    },
+                    opts,
+                );
+            }
+        };
+
+        const resp = await getThumbnail();
+        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
+    };
+
+    downloadFile = async (
+        file: EnteFile,
+        onDownloadProgress: (event: { loaded: number; total: number }) => void,
+    ) => {
+        const accessToken = this.token;
+        const accessTokenJWT = this.passwordToken;
+        if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
+
+        const customOrigin = await customAPIOrigin();
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const getFile = () => {
+            const opts = {
+                responseType: "arraybuffer",
+                timeout: this.timeout,
+                onDownloadProgress,
+            };
+
+            if (customOrigin) {
+                const params = new URLSearchParams({
+                    accessToken,
+                    ...(accessTokenJWT && { accessTokenJWT }),
+                });
+                return HTTPService.get(
+                    `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
+                    undefined,
+                    undefined,
+                    opts,
+                );
+            } else {
+                return HTTPService.get(
+                    `https://public-albums.ente.io/download/?fileID=${file.id}`,
+                    undefined,
+                    {
+                        "X-Auth-Access-Token": accessToken,
+                        ...(accessTokenJWT && {
+                            "X-Auth-Access-Token-JWT": accessTokenJWT,
+                        }),
+                    },
+                    opts,
+                );
+            }
+        };
+
+        const resp = await retryAsyncFunction(getFile);
+        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        // TODO: Remove this cast (it won't be needed when we migrate this from
+        // axios to fetch).
+        return new Uint8Array(resp.data as ArrayBuffer);
+    };
+
+    async downloadFileStream(file: EnteFile): Promise<Response> {
+        const accessToken = this.token;
+        const accessTokenJWT = this.passwordToken;
+        if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
+
+        const customOrigin = await customAPIOrigin();
+
+        // See: [Note: Passing credentials for self-hosted file fetches]
+        const getFile = () => {
+            if (customOrigin) {
+                const params = new URLSearchParams({
+                    accessToken,
+                    ...(accessTokenJWT && { accessTokenJWT }),
+                });
+                return fetch(
+                    `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
+                );
+            } else {
+                return fetch(
+                    `https://public-albums.ente.io/download/?fileID=${file.id}`,
+                    {
+                        headers: {
+                            "X-Auth-Access-Token": accessToken,
+                            ...(accessTokenJWT && {
+                                "X-Auth-Access-Token-JWT": accessTokenJWT,
+                            }),
+                        },
+                    },
+                );
+            }
+        };
+
+        return retryAsyncFunction(getFile);
     }
 }

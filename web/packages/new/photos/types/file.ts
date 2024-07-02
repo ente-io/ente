@@ -26,7 +26,7 @@ export interface EncryptedEnteFile {
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
     metadata: MetadataFileAttributes;
-    info: FileInfo;
+    info: FileInfo | undefined;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     encryptedKey: string;
@@ -63,8 +63,8 @@ export interface EnteFile
 }
 
 export interface LivePhotoSourceURL {
-    image: () => Promise<string>;
-    video: () => Promise<string>;
+    image: () => Promise<string | undefined>;
+    video: () => Promise<string | undefined>;
 }
 
 export interface LoadedLivePhotoSourceURL {

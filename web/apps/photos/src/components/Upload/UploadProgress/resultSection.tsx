@@ -1,7 +1,7 @@
+import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { CaptionedText } from "components/CaptionedText";
 import ItemList from "components/ItemList";
-import { UPLOAD_RESULT } from "constants/upload";
 import UploadProgressContext from "contexts/uploadProgress";
 import { useContext } from "react";
 import {

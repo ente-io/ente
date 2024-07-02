@@ -1,3 +1,4 @@
+import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 
 export function downloadAsFile(filename: string, content: string) {
@@ -47,7 +48,7 @@ export async function retryAsyncFunction<T>(
             if (attemptNumber === waitTimeBeforeNextTry.length) {
                 throw e;
             }
-            await wait(waitTimeBeforeNextTry[attemptNumber]);
+            await wait(ensure(waitTimeBeforeNextTry[attemptNumber]));
         }
     }
 }

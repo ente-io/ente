@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import DownloadManager from "@/new/photos/services/download";
 import type {
     Box,
     Dimensions,
@@ -8,10 +9,10 @@ import type {
 } from "@/new/photos/services/face/types";
 import { faceIndexingVersion } from "@/new/photos/services/face/types";
 import type { EnteFile } from "@/new/photos/types/file";
+import { getRenderableImage } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import { Matrix } from "ml-matrix";
-import DownloadManager from "services/download";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
     Matrix as TransformationMatrix,
@@ -20,7 +21,6 @@ import {
     scale,
     translate,
 } from "transformation-matrix";
-import { getRenderableImage } from "utils/file";
 import { saveFaceCrop } from "./crop";
 import {
     clamp,

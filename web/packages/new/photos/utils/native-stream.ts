@@ -52,7 +52,7 @@ export const readStream = async (
     const res = await fetch(req);
     if (!res.ok)
         throw new Error(
-            `Failed to read stream from ${url}: HTTP ${res.status}`,
+            `Failed to read stream from ${url.href}: HTTP ${res.status}`,
         );
 
     const size = readNumericHeader(res, "Content-Length");
@@ -63,7 +63,7 @@ export const readStream = async (
 
 const readNumericHeader = (res: Response, key: string) => {
     const valueText = res.headers.get(key);
-    const value = +valueText;
+    const value = valueText === null ? NaN : +valueText;
     if (isNaN(value))
         throw new Error(
             `Expected a numeric ${key} when reading a stream response, instead got ${valueText}`,
@@ -111,7 +111,9 @@ export const writeStream = async (
 
     const res = await fetch(req);
     if (!res.ok)
-        throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+        throw new Error(
+            `Failed to write stream to ${url.href}: HTTP ${res.status}`,
+        );
 };
 
 /**
@@ -161,7 +163,7 @@ export const readConvertToMP4Stream = async (
     const res = await fetch(req);
     if (!res.ok)
         throw new Error(
-            `Failed to read stream from ${url}: HTTP ${res.status}`,
+            `Failed to read stream from ${url.href}: HTTP ${res.status}`,
         );
 
     return res.blob();
@@ -185,5 +187,7 @@ export const readConvertToMP4Done = async (
     const req = new Request(url, { method: "GET" });
     const res = await fetch(req);
     if (!res.ok)
-        throw new Error(`Failed to close stream at ${url}: HTTP ${res.status}`);
+        throw new Error(
+            `Failed to close stream at ${url.href}: HTTP ${res.status}`,
+        );
 };
