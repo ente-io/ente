@@ -56,15 +56,11 @@ class DownloadManagerImpl {
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
-    private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
+    private thumbnailObjectURLPromises = new Map<number, Promise<string | undefined>>();
 
     private fileDownloadProgress = new Map<number, number>();
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
-
-    private ensureClient() {
-        return ensure(this.downloadClient);
-    }
 
     async init(token?: string) {
         if (this.ready) {
@@ -140,14 +136,14 @@ class DownloadManagerImpl {
         const key = file.id.toString();
         const cached = await this.thumbnailCache?.get(key);
         if (cached) return new Uint8Array(await cached.arrayBuffer());
-        if (localOnly) return null;
+        if (localOnly) return undefined;
 
         const thumb = await this.downloadThumb(file);
         await this.thumbnailCache?.put(key, new Blob([thumb]));
         return thumb;
     }
 
-    async getThumbnailForPreview(file: EnteFile, localOnly = false) {
+    async getThumbnailForPreview(file: EnteFile, localOnly = false): Promise<string | undefined> {
         this.ensureInitialized();
         try {
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
