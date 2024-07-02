@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/array-type */
-/* @ts-nocheck */
 
 import {
     NULL_LOCATION,
@@ -207,7 +206,7 @@ const parseAppleISOLocation = (isoLocation: string | undefined) => {
     return location;
 };
 
-function parseCreationTime(creationTime: string) {
+const parseCreationTime = (creationTime: string | undefined) => {
     let dateTime = null;
     if (creationTime) {
         dateTime = validateAndGetCreationUnixTimeInMicroSeconds(
@@ -215,7 +214,7 @@ function parseCreationTime(creationTime: string) {
         );
     }
     return dateTime;
-}
+};
 
 /**
  * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.

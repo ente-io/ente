@@ -5,7 +5,7 @@ export interface Location {
 
 export interface ParsedExtractedMetadata {
     location: Location;
-    creationTime: number;
-    width: number;
-    height: number;
+    creationTime: number | null;
+    width: number | null;
+    height: number | null;
 }
