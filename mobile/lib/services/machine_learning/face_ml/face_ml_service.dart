@@ -14,7 +14,6 @@ import "package:onnxruntime/onnxruntime.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/list.dart";
@@ -36,6 +35,7 @@ import 'package:photos/services/machine_learning/face_ml/face_detection/face_det
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
+import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
@@ -91,8 +91,6 @@ class FaceMlService {
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
   bool _shouldPauseIndexingAndClustering = false;
-  bool _shouldSyncPeople = false;
-  bool _isSyncing = false;
 
   static const int _fileDownloadLimit = 10;
   static const _embeddingFetchLimit = 200;
@@ -105,6 +103,9 @@ class FaceMlService {
       return;
     }
     _logger.info("init called");
+
+    // Activate FaceRecognitionService
+    await FaceRecognitionService.instance.init();
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
@@ -132,32 +133,8 @@ class FaceMlService {
       }
     });
 
-    // Listen on DiffSync
-    Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      unawaited(sync());
-    });
-
-    // Listne on PeopleChanged
-    Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      if (event.type == PeopleEventType.syncDone) return;
-      _shouldSyncPeople = true;
-    });
-
     _isInitialized = true;
     _logger.info('init done');
-  }
-
-  Future<void> sync({bool forceSync = true}) async {
-    if (_isSyncing) {
-      return;
-    }
-    _isSyncing = true;
-    if (forceSync) {
-      await PersonService.instance.reconcileClusters();
-      Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
-      _shouldSyncPeople = false;
-    }
-    _isSyncing = false;
   }
 
   Future<void> runAllFaceML({bool force = false}) async {
@@ -166,7 +143,7 @@ class FaceMlService {
     }
     if (_cannotRunMLFunction() && !force) return;
 
-    await sync(forceSync: _shouldSyncPeople);
+    await FaceRecognitionService.instance.sync();
 
     final int unclusteredFacesCount =
         await FaceMLDataDB.instance.getUnclusteredFaceCount();
@@ -1177,7 +1154,6 @@ class FaceMlService {
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering
     debugIndexingDisabled: $debugIndexingDisabled
-    shouldSyncPeople: $_shouldSyncPeople
     ''';
     _logger.info(status);
   }
