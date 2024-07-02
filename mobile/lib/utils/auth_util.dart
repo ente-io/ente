@@ -5,26 +5,25 @@ import 'package:local_auth_ios/local_auth_ios.dart';
 import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/local_authentication_service.dart";
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
 Future<bool> requestAuthentication(
   BuildContext context,
   String reason, {
-  bool isLockscreenAuth = false,
+  bool isOpeningApp = false,
 }) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
 
-  final LockscreenSetting lockscreenSetting = LockscreenSetting.instance;
-  final String? savedPin = await lockscreenSetting.getPin();
-  final String? savedPassword = await lockscreenSetting.getPassword();
+  final String? savedPin = await LockScreenSettings.instance.getPin();
+  final String? savedPassword = await LockScreenSettings.instance.getPassword();
   if (savedPassword != null || savedPin != null) {
     return await LocalAuthenticationService.instance
         .requestEnteAuthForLockScreen(
       context,
       savedPin,
       savedPassword,
-      isLockscreenAuth: isLockscreenAuth,
+      isOnOpeningApp: isOpeningApp,
     );
   } else {
     return await LocalAuthentication().authenticate(

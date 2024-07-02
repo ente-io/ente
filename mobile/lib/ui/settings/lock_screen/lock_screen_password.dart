@@ -1,35 +1,47 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_confirm_password.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
+import "package:photos/utils/crypto_util.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
-class LockScreenConfirmPassword extends StatefulWidget {
-  const LockScreenConfirmPassword({
+class LockScreenPassword extends StatefulWidget {
+  const LockScreenPassword({
     super.key,
-    required this.password,
+    this.isAuthenticating = false,
+    this.isOnOpeningApp = false,
+    this.authPass,
   });
-  final String password;
 
+  //Is false when setting a new password
+  final bool isAuthenticating;
+  final bool isOnOpeningApp;
+  final String? authPass;
   @override
-  State<LockScreenConfirmPassword> createState() =>
-      _LockScreenConfirmPasswordState();
+  State<LockScreenPassword> createState() => _LockScreenPasswordState();
 }
 
-class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
-  /// _confirmPasswordController is disposed by the [TextInputWidget]
-  final _confirmPasswordController = TextEditingController(text: null);
-
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
+class _LockScreenPasswordState extends State<LockScreenPassword> {
+  /// _passwordController is disposed by the [TextInputWidget]
+  final _passwordController = TextEditingController(text: null);
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
   final _submitNotifier = ValueNotifier(false);
+  int invalidAttemptsCount = 0;
+
+  final _lockscreenSetting = LockScreenSettings.instance;
   @override
   void initState() {
     super.initState();
+    invalidAttemptsCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _focusNode.requestFocus();
     });
@@ -37,22 +49,10 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
 
   @override
   void dispose() {
+    super.dispose();
     _submitNotifier.dispose();
     _focusNode.dispose();
     _isFormValid.dispose();
-    super.dispose();
-  }
-
-  Future<void> _confirmPasswordMatch() async {
-    if (widget.password == _confirmPasswordController.text) {
-      await _lockscreenSetting.setPassword(_confirmPasswordController.text);
-
-      Navigator.of(context).pop(true);
-      Navigator.of(context).pop(true);
-      return;
-    }
-    await HapticFeedback.vibrate();
-    throw Exception("Incorrect password");
   }
 
   @override
@@ -76,7 +76,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
         leading: IconButton(
           onPressed: () {
             FocusScope.of(context).unfocus();
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(false);
           },
           icon: Icon(
             Icons.arrow_back,
@@ -89,7 +89,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
         builder: (context, isFormValid, child) {
           return DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            buttonText: S.of(context).confirm,
+            buttonText: "Next",
             isFormValid: isFormValid,
             onPressedFunction: () async {
               _submitNotifier.value = !_submitNotifier.value;
@@ -134,26 +134,26 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
                 ),
               ),
               Text(
-                'Re-enter Password',
+                widget.isAuthenticating ? 'Enter Password' : 'Set new Password',
+                textAlign: TextAlign.center,
                 style: textTheme.bodyBold,
               ),
               const Padding(padding: EdgeInsets.all(12)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextInputWidget(
-                  hintText: S.of(context).confirmPassword,
+                  hintText: S.of(context).password,
                   focusNode: _focusNode,
                   enableFillColor: false,
                   textCapitalization: TextCapitalization.none,
-                  textEditingController: _confirmPasswordController,
+                  textEditingController: _passwordController,
                   isPasswordInput: true,
                   shouldSurfaceExecutionStates: false,
                   onChange: (p0) {
-                    _isFormValid.value =
-                        _confirmPasswordController.text.isNotEmpty;
+                    _isFormValid.value = _passwordController.text.isNotEmpty;
                   },
                   onSubmit: (p0) {
-                    return _confirmPasswordMatch();
+                    return _confirmPassword();
                   },
                   submitNotifier: _submitNotifier,
                 ),
@@ -164,5 +164,55 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
         ),
       ),
     );
+  }
+
+  Future<bool> _confirmPasswordAuth(String inputtedPassword) async {
+    final Uint8List? salt = await _lockscreenSetting.getSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(inputtedPassword),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    if (widget.authPass == base64Encode(hash)) {
+      await _lockscreenSetting.setInvalidAttemptCount(0);
+
+      widget.isOnOpeningApp
+          ? Navigator.of(context).pop(true)
+          : Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LockScreenOptions(),
+              ),
+            );
+      return true;
+    } else {
+      if (widget.isOnOpeningApp) {
+        invalidAttemptsCount++;
+        if (invalidAttemptsCount > 4) {
+          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
+          Navigator.of(context).pop(false);
+        }
+      }
+
+      await HapticFeedback.vibrate();
+      throw Exception("Incorrect password");
+    }
+  }
+
+  Future<void> _confirmPassword() async {
+    if (widget.isAuthenticating) {
+      await _confirmPasswordAuth(_passwordController.text);
+      return;
+    } else {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) => LockScreenConfirmPassword(
+            password: _passwordController.text,
+          ),
+        ),
+      );
+      _passwordController.clear();
+    }
   }
 }

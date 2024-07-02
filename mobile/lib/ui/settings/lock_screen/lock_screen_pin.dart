@@ -7,24 +7,24 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/settings/lockscreen/lock_screen_option.dart";
-import "package:photos/ui/settings/lockscreen/lockscreen_confirm_pin.dart";
+import "package:photos/ui/settings/lock_screen/custom_pin_keypad.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_confirm_pin.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:photos/utils/crypto_util.dart";
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:pinput/pinput.dart';
 
 class LockScreenPin extends StatefulWidget {
   const LockScreenPin({
     super.key,
     this.isAuthenticating = false,
-    this.isLockscreenAuth = false,
+    this.isOnOpeningApp = false,
     this.authPin,
   });
 
-  /// If [isLockscreenAuth] is true then we are authenticating the user at the Lock screen
-  /// If [isAuthenticating] is true then we are authenticating the user at the Setting screen
+  //Is false when setting a new password
   final bool isAuthenticating;
-  final bool isLockscreenAuth;
+  final bool isOnOpeningApp;
   final String? authPin;
   @override
   State<LockScreenPin> createState() => _LockScreenPinState();
@@ -33,8 +33,7 @@ class LockScreenPin extends StatefulWidget {
 class _LockScreenPinState extends State<LockScreenPin> {
   final _pinController = TextEditingController(text: null);
 
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
-  late String enteredHashedPin;
+  final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   bool isPinValid = false;
   int invalidAttemptsCount = 0;
 
@@ -50,19 +49,6 @@ class _LockScreenPinState extends State<LockScreenPin> {
     _pinController.dispose();
   }
 
-  void _onKeyTap(String number) {
-    _pinController.text += number;
-    return;
-  }
-
-  void _onBackspace() {
-    if (_pinController.text.isNotEmpty) {
-      _pinController.text =
-          _pinController.text.substring(0, _pinController.text.length - 1);
-    }
-    return;
-  }
-
   Future<bool> confirmPinAuth(String code) async {
     final Uint8List? salt = await _lockscreenSetting.getSalt();
     final hash = cryptoPwHash({
@@ -72,15 +58,14 @@ class _LockScreenPinState extends State<LockScreenPin> {
       "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
     });
 
-    enteredHashedPin = base64Encode(hash);
-    if (widget.authPin == enteredHashedPin) {
+    if (widget.authPin == base64Encode(hash)) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      widget.isLockscreenAuth
+      widget.isOnOpeningApp
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const LockScreenOption(),
+                builder: (context) => const LockScreenOptions(),
               ),
             );
       return true;
@@ -95,7 +80,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
         isPinValid = false;
       });
 
-      if (widget.isLockscreenAuth) {
+      if (widget.isOnOpeningApp) {
         invalidAttemptsCount++;
         if (invalidAttemptsCount > 4) {
           await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
@@ -262,196 +247,8 @@ class _LockScreenPinState extends State<LockScreenPin> {
           isPortrait
               ? const Spacer()
               : const Padding(padding: EdgeInsets.all(12)),
-          customKeyPad(colorTheme, textTheme),
+          CustomPinKeypad(controller: _pinController),
         ],
-      ),
-    );
-  }
-
-  Widget customKeyPad(EnteColorScheme colorTheme, EnteTextTheme textTheme) {
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.all(2),
-        color: colorTheme.strokeFainter,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  text: '',
-                  number: '1',
-                  onTap: () {
-                    _onKeyTap('1');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  text: "ABC",
-                  number: '2',
-                  onTap: () {
-                    _onKeyTap('2');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  text: "DEF",
-                  number: '3',
-                  onTap: () {
-                    _onKeyTap('3');
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '4',
-                  text: "GHI",
-                  onTap: () {
-                    _onKeyTap('4');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '5',
-                  text: 'JKL',
-                  onTap: () {
-                    _onKeyTap('5');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '6',
-                  text: 'MNO',
-                  onTap: () {
-                    _onKeyTap('6');
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '7',
-                  text: 'PQRS',
-                  onTap: () {
-                    _onKeyTap('7');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '8',
-                  text: 'TUV',
-                  onTap: () {
-                    _onKeyTap('8');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '9',
-                  text: 'WXYZ',
-                  onTap: () {
-                    _onKeyTap('9');
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '',
-                  text: '',
-                  muteButton: true,
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '0',
-                  text: '',
-                  onTap: () {
-                    _onKeyTap('0');
-                  },
-                ),
-                buttonWidget(
-                  colorTheme: colorTheme,
-                  textTheme: textTheme,
-                  number: '',
-                  text: '',
-                  icons: const Icon(Icons.backspace_outlined),
-                  onTap: () {
-                    _onBackspace();
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buttonWidget({
-    colorTheme,
-    textTheme,
-    text,
-    number,
-    muteButton = false,
-    icons,
-    onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            borderRadius: BorderRadius.circular(6),
-            color: muteButton
-                ? colorTheme.fillFaintPressed
-                : icons == null
-                    ? colorTheme.backgroundElevated2
-                    : null,
-          ),
-          child: Center(
-            child: muteButton
-                ? Container()
-                : icons != null
-                    ? Container(
-                        child: icons,
-                      )
-                    : Container(
-                        padding: const EdgeInsets.all(4),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              number,
-                              style: textTheme.h3,
-                            ),
-                            Text(
-                              text,
-                              style: textTheme.miniBold,
-                            ),
-                          ],
-                        ),
-                      ),
-          ),
-        ),
       ),
     );
   }

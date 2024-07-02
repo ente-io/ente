@@ -10,7 +10,7 @@ import 'package:photos/ui/common/gradient_button.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreen extends StatefulWidget {
   const LockScreen({Key? key}) : super(key: key);
@@ -31,7 +31,7 @@ class _LockScreenState extends State<LockScreen>
   int invalidAttemptCount = 0;
   int remainingTime = 0;
   bool showErrorMessage = true;
-  final _lockscreenSetting = LockscreenSetting.instance;
+  final _lockscreenSetting = LockScreenSettings.instance;
   late final AnimationController _controller = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
@@ -186,7 +186,7 @@ class _LockScreenState extends State<LockScreen>
     if (Platform.isAndroid) {
       return false;
     }
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
+    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
     return shortestSide > 600 ? true : false;
   }
 
@@ -296,7 +296,7 @@ class _LockScreenState extends State<LockScreen>
           : await requestAuthentication(
               context,
               context.l10n.authToViewYourMemories,
-              isLockscreenAuth: true,
+              isOpeningApp: true,
             );
       _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;

@@ -3,8 +3,8 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/ui/settings/lockscreen/lockscreen_password.dart";
-import "package:photos/ui/settings/lockscreen/lockscreen_pin.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -39,7 +39,7 @@ class LocalAuthenticationService {
     BuildContext context,
     String? savedPin,
     String? savedPassword, {
-    bool isLockscreenAuth = false,
+    bool isOnOpeningApp = false,
   }) async {
     if (savedPassword != null) {
       final result = await Navigator.of(context).push(
@@ -47,7 +47,7 @@ class LocalAuthenticationService {
           builder: (BuildContext context) {
             return LockScreenPassword(
               isAuthenticating: true,
-              isLockscreenAuth: isLockscreenAuth,
+              isOnOpeningApp: isOnOpeningApp,
               authPass: savedPassword,
             );
           },
@@ -63,7 +63,7 @@ class LocalAuthenticationService {
           builder: (BuildContext context) {
             return LockScreenPin(
               isAuthenticating: true,
-              isLockscreenAuth: isLockscreenAuth,
+              isOnOpeningApp: isOnOpeningApp,
               authPin: savedPin,
             );
           },

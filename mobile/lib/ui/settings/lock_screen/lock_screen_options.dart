@@ -7,21 +7,21 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/settings/lockscreen/lockscreen_password.dart";
-import "package:photos/ui/settings/lockscreen/lockscreen_pin.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
-class LockScreenOption extends StatefulWidget {
-  const LockScreenOption({super.key});
+class LockScreenOptions extends StatefulWidget {
+  const LockScreenOptions({super.key});
 
   @override
-  State<LockScreenOption> createState() => _LockScreenOptionState();
+  State<LockScreenOptions> createState() => _LockScreenOptionsState();
 }
 
-class _LockScreenOptionState extends State<LockScreenOption> {
+class _LockScreenOptionsState extends State<LockScreenOptions> {
   final Configuration _configuration = Configuration.instance;
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
+  final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;

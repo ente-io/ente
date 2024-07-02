@@ -34,7 +34,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -73,9 +73,6 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
-  static const password = "user_pass";
-  static const pin = "user_pin";
-  static const saltKey = "user_salt";
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -86,7 +83,6 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
   // on appSupport directory which OS won't clean up automatically
@@ -624,8 +620,8 @@ class Configuration {
   }
 
   Future<bool> shouldShowLockScreen() async {
-    final bool isPin = await _lockscreenSetting.isPinSet();
-    final bool isPass = await _lockscreenSetting.isPasswordSet();
+    final bool isPin = await LockScreenSettings.instance.isPinSet();
+    final bool isPass = await LockScreenSettings.instance.isPasswordSet();
     return isPin || isPass || shouldShowSystemLockScreen();
   }
 
