@@ -1,6 +1,6 @@
 import DownloadManager from "@/new/photos/services/download";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
-import { terminateFaceWorker } from "@/new/photos/services/ml";
+import { terminateMLWorker } from "@/new/photos/services/ml";
 import { clearFaceData } from "@/new/photos/services/ml/db";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import log from "@/next/log";
@@ -19,10 +19,22 @@ export const photosLogout = async () => {
     const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
+    // - Workers
+
     // Terminate any workers before clearing persistent state.
     // See: [Note: Caching IDB instances in separate execution contexts].
 
+    try {
+        terminateMLWorker();
+    } catch (e) {
+        ignoreError("face", e);
+    }
+
+    // - Remote logout and clear state
+
     await accountLogout();
+
+    // - Photos specific logout
 
     try {
         clearFeatureFlagSessionState();
@@ -42,11 +54,7 @@ export const photosLogout = async () => {
         ignoreError("CLIP", e);
     }
 
-    try {
-        terminateFaceWorker();
-    } catch (e) {
-        ignoreError("face", e);
-    }
+    // - Desktop
 
     const electron = globalThis.electron;
     if (electron) {
@@ -69,7 +77,7 @@ export const photosLogout = async () => {
         }
 
         try {
-            await electron?.logout();
+            await electron.logout();
         } catch (e) {
             ignoreError("electron", e);
         }
