@@ -7,6 +7,7 @@ import {
     type SourceURLs,
 } from "@/new/photos/types/file";
 import { getRenderableImage } from "@/new/photos/utils/file";
+import { isDesktop } from "@/next/app";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { customAPIOrigin } from "@/next/origins";
@@ -17,7 +18,6 @@ import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { retryAsyncFunction } from "@ente/shared/utils";
 import type { Remote } from "comlink";
-import isElectron from "is-electron";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
@@ -525,7 +525,7 @@ async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            if (!forceConvert && !runOnWeb && !isElectron()) {
+            if (!forceConvert && !runOnWeb && !isDesktop) {
                 return null;
             }
             log.info(`Converting video ${videoNameTitle} to mp4`);
