@@ -2,11 +2,12 @@ import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
-} from "@/new/photos/constants/upload";
+} from "@/new/photos/services/upload/types";
 import {
     EnteFile,
     MetadataFileAttributes,
@@ -50,7 +51,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import type { UploadItem } from "./types";
 import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableUploadItem } from "./uploadManager";
 

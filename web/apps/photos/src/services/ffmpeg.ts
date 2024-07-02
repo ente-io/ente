@@ -1,4 +1,9 @@
-import { NULL_LOCATION } from "@/new/photos/constants/upload";
+import {
+    NULL_LOCATION,
+    toDataOrPathOrZipEntry,
+    type DesktopUploadItem,
+    type UploadItem,
+} from "@/new/photos/services/upload/types";
 import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import {
     readConvertToMP4Done,
@@ -15,11 +20,6 @@ import {
     outputPathPlaceholder,
 } from "constants/ffmpeg";
 import type { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
-import {
-    toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
-    type UploadItem,
-} from "./upload/types";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web

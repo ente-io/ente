@@ -1,5 +1,9 @@
-import { UPLOAD_STAGES } from "@/new/photos/constants/upload";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
+import type {
+    FileAndPath,
+    UploadItem,
+} from "@/new/photos/services/upload/types";
+import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { basename } from "@/next/file";
 import log from "@/next/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
@@ -21,7 +25,6 @@ import {
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
-import type { FileAndPath, UploadItem } from "services/upload/types";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,

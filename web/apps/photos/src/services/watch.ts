@@ -3,8 +3,8 @@
  * watch folders functionality.
  */
 
-import { UPLOAD_RESULT } from "@/new/photos/constants/upload";
 import { getLocalFiles } from "@/new/photos/services/files";
+import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { EncryptedEnteFile } from "@/new/photos/types/file";
 import { ensureElectron } from "@/next/electron";
 import { basename, dirname } from "@/next/file";

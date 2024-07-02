@@ -11,7 +11,7 @@ import {
 } from "./section";
 import { InProgressItemContainer } from "./styledComponents";
 
-import { UPLOAD_STAGES } from "@/new/photos/constants/upload";
+import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { CaptionedText } from "components/CaptionedText";
 
 export const InProgressSection = () => {

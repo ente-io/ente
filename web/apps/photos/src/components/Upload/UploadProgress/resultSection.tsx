@@ -1,4 +1,4 @@
-import { UPLOAD_RESULT } from "@/new/photos/constants/upload";
+import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { CaptionedText } from "components/CaptionedText";
 import ItemList from "components/ItemList";

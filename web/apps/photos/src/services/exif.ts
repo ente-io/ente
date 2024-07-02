@@ -1,5 +1,5 @@
 import { type FileTypeInfo } from "@/media/file-type";
-import { NULL_LOCATION } from "@/new/photos/constants/upload";
+import { NULL_LOCATION } from "@/new/photos/services/upload/types";
 import type {
     Location,
     ParsedExtractedMetadata,

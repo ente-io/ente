@@ -1,4 +1,7 @@
-import { UPLOAD_RESULT, UPLOAD_STAGES } from "@/new/photos/constants/upload";
+import {
+    UPLOAD_RESULT,
+    UPLOAD_STAGES,
+} from "@/new/photos/services/upload/types";
 import { Button, DialogActions } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
