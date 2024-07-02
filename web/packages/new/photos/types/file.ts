@@ -26,7 +26,7 @@ export interface EncryptedEnteFile {
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
     metadata: MetadataFileAttributes;
-    info: FileInfo;
+    info: FileInfo | undefined;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     encryptedKey: string;

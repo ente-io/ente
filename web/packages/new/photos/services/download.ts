@@ -56,7 +56,10 @@ class DownloadManagerImpl {
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
-    private thumbnailObjectURLPromises = new Map<number, Promise<string | undefined>>();
+    private thumbnailObjectURLPromises = new Map<
+        number,
+        Promise<string | undefined>
+    >();
 
     private fileDownloadProgress = new Map<number, number>();
 
@@ -143,7 +146,10 @@ class DownloadManagerImpl {
         return thumb;
     }
 
-    async getThumbnailForPreview(file: EnteFile, localOnly = false): Promise<string | undefined> {
+    async getThumbnailForPreview(
+        file: EnteFile,
+        localOnly = false,
+    ): Promise<string | undefined> {
         this.ensureInitialized();
         try {
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
@@ -169,15 +175,19 @@ class DownloadManagerImpl {
     getFileForPreview = async (
         file: EnteFile,
         forceConvert = false,
-    ): Promise<SourceURLs> => {
+    ): Promise<SourceURLs | undefined> => {
         this.ensureInitialized();
         try {
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
                 ).blob();
-                const { url: originalFileURL } =
-                    await this.fileObjectURLPromises.get(file.id);
+                // TODO: Is this ensure valid?
+                // The existing code was already dereferencing, so it shouldn't
+                // affect behaviour.
+                const { url: originalFileURL } = ensure(
+                    await this.fileObjectURLPromises.get(file.id),
+                );
 
                 const converted = await getRenderableFileURL(
                     file,
@@ -205,7 +215,7 @@ class DownloadManagerImpl {
     async getFile(
         file: EnteFile,
         cacheInMemory = false,
-    ): Promise<ReadableStream<Uint8Array>> {
+    ): Promise<ReadableStream<Uint8Array> | null> {
         this.ensureInitialized();
         try {
             const getFilePromise = async (): Promise<SourceURLs> => {
@@ -224,7 +234,12 @@ class DownloadManagerImpl {
                 }
                 this.fileObjectURLPromises.set(file.id, getFilePromise());
             }
-            const fileURLs = await this.fileObjectURLPromises.get(file.id);
+            // TODO: Is this ensure valid?
+            // The existing code was already dereferencing, so it shouldn't
+            // affect behaviour.
+            const fileURLs = ensure(
+                await this.fileObjectURLPromises.get(file.id),
+            );
             if (fileURLs.isOriginal) {
                 const fileStream = (await fetch(fileURLs.url as string)).body;
                 return fileStream;
@@ -240,12 +255,15 @@ class DownloadManagerImpl {
 
     private async downloadFile(
         file: EnteFile,
-    ): Promise<ReadableStream<Uint8Array>> {
+    ): Promise<ReadableStream<Uint8Array> | null> {
+        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+
         log.info(`download attempted for file id ${file.id}`);
 
         const onDownloadProgress = this.trackDownloadProgress(
             file.id,
-            file.info?.fileSize,
+            // TODO: Is info supposed to be optional though?
+            file.info?.fileSize ?? 0,
         );
 
         const cacheKey = file.id.toString();
@@ -257,23 +275,29 @@ class DownloadManagerImpl {
             const cachedBlob = await this.fileCache?.get(cacheKey);
             let encryptedArrayBuffer = await cachedBlob?.arrayBuffer();
             if (!encryptedArrayBuffer) {
-                const array = await this.downloadClient.downloadFile(
+                const array = await downloadClient.downloadFile(
                     file,
                     onDownloadProgress,
                 );
                 encryptedArrayBuffer = array.buffer;
-                this.fileCache?.put(cacheKey, new Blob([encryptedArrayBuffer]));
+                await this.fileCache?.put(
+                    cacheKey,
+                    new Blob([encryptedArrayBuffer]),
+                );
             }
             this.clearDownloadProgress(file.id);
             try {
-                const decrypted = await this.cryptoWorker.decryptFile(
+                const decrypted = await cryptoWorker.decryptFile(
                     new Uint8Array(encryptedArrayBuffer),
-                    await this.cryptoWorker.fromB64(file.file.decryptionHeader),
+                    await cryptoWorker.fromB64(file.file.decryptionHeader),
                     file.key,
                 );
                 return new Response(decrypted).body;
             } catch (e) {
-                if (e.message === CustomError.PROCESSING_FAILED) {
+                if (
+                    e instanceof Error &&
+                    e.message == CustomError.PROCESSING_FAILED
+                ) {
                     log.error(
                         `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
                         e,
@@ -287,7 +311,7 @@ class DownloadManagerImpl {
         let res: Response;
         if (cachedBlob) res = new Response(cachedBlob);
         else {
-            res = await this.downloadClient.downloadFileStream(file);
+            res = await downloadClient.downloadFileStream(file);
             // We don't have a files cache currently, so this was already a
             // no-op. But even if we had a cache, this seems sus, because
             // res.blob() will read the stream and I'd think then trying to do
@@ -295,20 +319,20 @@ class DownloadManagerImpl {
 
             // this.fileCache?.put(cacheKey, await res.blob());
         }
-        const reader = res.body.getReader();
+        const body = res.body;
+        if (!body) return null;
+        const reader = body.getReader();
 
-        const contentLength = +res.headers.get("Content-Length") ?? 0;
+        const contentLength =
+            parseInt(res.headers.get("Content-Length") ?? "") || 0;
         let downloadedBytes = 0;
 
-        const decryptionHeader = await this.cryptoWorker.fromB64(
+        const decryptionHeader = await cryptoWorker.fromB64(
             file.file.decryptionHeader,
         );
-        const fileKey = await this.cryptoWorker.fromB64(file.key);
+        const fileKey = await cryptoWorker.fromB64(file.key);
         const { pullState, decryptionChunkSize } =
-            await this.cryptoWorker.initChunkDecryption(
-                decryptionHeader,
-                fileKey,
-            );
+            await cryptoWorker.initChunkDecryption(decryptionHeader, fileKey);
 
         let leftoverBytes = new Uint8Array();
 
@@ -342,7 +366,7 @@ class DownloadManagerImpl {
                     // and we might need multiple iterations to drain it all.
                     while (data.length >= decryptionChunkSize) {
                         const { decryptedData } =
-                            await this.cryptoWorker.decryptFileChunk(
+                            await cryptoWorker.decryptFileChunk(
                                 data.slice(0, decryptionChunkSize),
                                 pullState,
                             );
@@ -356,7 +380,7 @@ class DownloadManagerImpl {
                         // full chunk, no more bytes are going to come.
                         if (data.length) {
                             const { decryptedData } =
-                                await this.cryptoWorker.decryptFileChunk(
+                                await cryptoWorker.decryptFileChunk(
                                     data,
                                     pullState,
                                 );
