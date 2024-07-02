@@ -195,17 +195,17 @@ function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
     return parsedMetadata;
 }
 
-function parseAppleISOLocation(isoLocation: string) {
+const parseAppleISOLocation = (isoLocation: string | undefined) => {
     let location = { ...NULL_LOCATION };
     if (isoLocation) {
-        const [latitude, longitude] = isoLocation
+        const m = isoLocation
             .match(/(\+|-)\d+\.*\d+/g)
-            .map((x) => parseFloat(x));
+            ?.map((x) => parseFloat(x));
 
-        location = { latitude, longitude };
+        location = { latitude: m?.at(0) ?? null, longitude: m?.at(1) ?? null };
     }
     return location;
-}
+};
 
 function parseCreationTime(creationTime: string) {
     let dateTime = null;
