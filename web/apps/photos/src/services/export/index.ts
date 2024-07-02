@@ -1,6 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import downloadManager from "@/new/photos/services/download";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
@@ -38,7 +39,6 @@ import {
 } from "utils/collection";
 import { getPersonalFiles, getUpdatedEXIFFileForDownload } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
-import downloadManager from "../download";
 import { migrateExport } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
