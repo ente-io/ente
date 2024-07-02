@@ -5,7 +5,7 @@ import log from "@/next/log";
 import { expose } from "comlink";
 import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
-import { indexFaces } from "./f-index";
+import { indexFaces } from "./index-face";
 
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
