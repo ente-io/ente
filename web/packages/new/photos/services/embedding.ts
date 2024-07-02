@@ -5,9 +5,9 @@ import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
 import { decryptFileMetadata } from "../../common/crypto/ente";
-import { saveFaceIndex } from "./face/db";
-import { faceIndexingVersion, type FaceIndex } from "./face/types";
 import { getAllLocalFiles } from "./files";
+import { saveFaceIndex } from "./ml/db";
+import { faceIndexingVersion, type FaceIndex } from "./ml/types";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
