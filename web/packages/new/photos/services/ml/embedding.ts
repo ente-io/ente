@@ -242,33 +242,6 @@ const getEmbeddingsDiff = async (
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     return z.array(RemoteEmbedding).parse(await res.json());
 };
-/*
-export const putEmbedding = async (
-    putEmbeddingReq: PutEmbeddingRequest,
-): Promise<EncryptedEmbedding> => {
-    try {
-        const token = inWorker()
-            ? await workerBridge.getAuthToken()
-            : getToken();
-        if (!token) {
-            log.info("putEmbedding failed: token not found");
-            throw Error(CustomError.TOKEN_MISSING);
-        }
-        const resp = await HTTPService.put(
-            await apiURL("/embeddings"),
-            putEmbeddingReq,
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return resp.data;
-    } catch (e) {
-        log.error("put embedding failed", e);
-        throw e;
-    }
-};
-*/
 
 /**
  * Upload an embedding to remote.
@@ -298,32 +271,13 @@ export const putEmbedding = async (
         method: "PUT",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
+            fileID: enteFile.id,
+            encryptedEmbedding: encryptedMetadataB64,
+            decryptionHeader: decryptionHeaderB64,
             model,
         }),
     });
     if (!res.ok) throw new HTTPError(url, res);
-
-    // Sanity check
-
-    const rt = await decryptFileMetadata(
-        encryptedMetadataB64,
-        decryptionHeaderB64,
-        enteFile.key,
-    );
-    console.log("put", embedding == rt);
-
-    // const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
-    // const { file: encryptedEmbeddingData } =
-    //     await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
-    // // TODO(MR): Indexing
-    // console.log(encryptedEmbeddingData);
-    // throw new Error("Unimplemented");
-    // await putEmbedding({
-    //     fileID: enteFile.id,
-    //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
-    //     decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-    //     model:,
-    // });
 };
 
 // MARK: - Face
@@ -431,5 +385,9 @@ const FaceIndex = z
     // Retain fields we might not (currently) understand.
     .passthrough();
 
+/**
+ * Save the face index for the given {@link enteFile} on remote so that other
+ * clients can directly pull it instead of needing to reindex.
+ */
 export const putFaceIndex = async (enteFile: EnteFile, faceIndex: FaceIndex) =>
     putEmbedding(enteFile, "file-ml-clip-face", JSON.stringify(faceIndex));
