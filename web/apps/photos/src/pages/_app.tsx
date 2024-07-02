@@ -50,12 +50,12 @@ import "photoswipe/dist/photoswipe.css";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
+import { photosLogout } from "services/logout";
 import {
     isFaceIndexingEnabled,
     setIsFaceIndexingEnabled,
-} from "services/face/indexer";
-import mlWorkManager from "services/face/mlWorkManager";
-import { photosLogout } from "services/logout";
+} from "services/ml/indexer";
+import mlWorkManager from "services/ml/mlWorkManager";
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,

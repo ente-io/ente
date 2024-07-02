@@ -2,11 +2,11 @@ import DownloadManager from "@/new/photos/services/download";
 import { terminateFaceWorker } from "@/new/photos/services/face";
 import { clearFaceData } from "@/new/photos/services/face/db";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
+import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import log from "@/next/log";
 import { accountLogout } from "@ente/accounts/services/logout";
 import { clipService } from "services/clip-service";
 import exportService from "./export";
-import mlWorkManager from "./face/mlWorkManager";
 
 /**
  * Logout sequence for the photos app.

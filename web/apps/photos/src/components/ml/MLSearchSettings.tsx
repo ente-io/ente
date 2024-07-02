@@ -18,7 +18,7 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { canEnableFaceIndexing } from "services/face/indexer";
+import { canEnableFaceIndexing } from "services/ml/indexer";
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,

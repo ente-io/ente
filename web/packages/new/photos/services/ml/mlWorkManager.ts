@@ -8,7 +8,7 @@ import { Events, eventBus } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
 import PQueue from "p-queue";
-import type { DedicatedMLWorker } from "services/face/face.worker";
+import type { DedicatedMLWorker } from "services/ml/face.worker";
 
 export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
