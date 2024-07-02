@@ -1,9 +1,9 @@
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
 import PQueue from "p-queue";
-import { syncWithLocalFilesAndGetFilesToIndex } from "services/ml/indexer";
-import { FaceIndexerWorker } from "services/ml/indexer.worker";
+import { syncWithLocalFilesAndGetFilesToIndex } from "./indexer";
+import { FaceIndexerWorker } from "./indexer.worker";
 
 const batchSize = 200;
 
@@ -12,10 +12,10 @@ class MLSyncContext {
     public userID: number;
     public userAgent: string;
 
-    public localFilesMap: Map<number, EnteFile>;
+    public localFilesMap: Map<number, EnteFile> | undefined;
     public outOfSyncFiles: EnteFile[];
     public nSyncedFiles: number;
-    public error?: Error;
+    public error?: unknown;
 
     public syncQueue: PQueue;
 
@@ -42,8 +42,8 @@ const getConcurrency = () =>
     Math.max(2, Math.ceil(navigator.hardwareConcurrency / 2));
 
 class MachineLearningService {
-    private localSyncContext: Promise<MLSyncContext>;
-    private syncContext: Promise<MLSyncContext>;
+    private localSyncContext: Promise<MLSyncContext> | undefined;
+    private syncContext: Promise<MLSyncContext> | undefined;
 
     public async sync(
         token: string,
@@ -183,18 +183,21 @@ class MachineLearningService {
             syncContext.nSyncedFiles += 1;
         } catch (e) {
             let error = e;
-            if ("status" in error) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ("status" in (error as any)) {
                 const parsedMessage = parseUploadErrorCodes(error);
                 error = parsedMessage;
             }
-            // TODO: throw errors not related to specific file
-            // sync job run should stop after these errors
-            // don't persist these errors against file,
-            // can include indexeddb/cache errors too
-            switch (error.message) {
-                case CustomError.SESSION_EXPIRED:
-                case CustomError.NETWORK_ERROR:
-                    throw error;
+            if (error instanceof Error) {
+                // TODO: throw errors not related to specific file
+                // sync job run should stop after these errors
+                // don't persist these errors against file,
+                // can include indexeddb/cache errors too
+                switch (error.message) {
+                    case CustomError.SESSION_EXPIRED:
+                    case CustomError.NETWORK_ERROR:
+                        throw error;
+                }
             }
 
             syncContext.nSyncedFiles += 1;
