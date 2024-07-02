@@ -634,8 +634,9 @@ const applyLaplacian = (
     const numCols = paddedImage[0]!.length - 2;
 
     // Create an output image initialized to 0.
-    const outputImage: number[][] = Array.from({ length: numRows }, () =>
-        new Array(numCols).fill(0),
+    const outputImage = Array.from(
+        { length: numRows },
+        () => new Array(numCols).fill(0) as number[],
     );
 
     // Define the Laplacian kernel.
@@ -671,11 +672,12 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
     const paddedNumRows = numRows + 2;
 
     // Create a new matrix with extra padding.
-    const paddedImage: number[][] = Array.from({ length: paddedNumRows }, () =>
-        new Array(paddedNumCols).fill(0),
+    const paddedImage = Array.from(
+        { length: paddedNumRows },
+        () => new Array(paddedNumCols).fill(0) as number[],
     );
 
-    if (direction === "straight") {
+    if (direction == "straight") {
         // Copy original image into the center of the padded image.
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < paddedNumCols - 2; j++) {
@@ -683,7 +685,7 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
                     image[i]![j + Math.round(removeSideColumns / 2)]!;
             }
         }
-    } else if (direction === "left") {
+    } else if (direction == "left") {
         // If the face is facing left, we only take the right side of the face
         // image.
         for (let i = 0; i < numRows; i++) {
@@ -692,7 +694,6 @@ const padImage = (image: number[][], direction: FaceDirection): number[][] => {
             }
         }
     } else {
-        // "right"
         // If the face is facing right, we only take the left side of the face
         // image.
         for (let i = 0; i < numRows; i++) {
