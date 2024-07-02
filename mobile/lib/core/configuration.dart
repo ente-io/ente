@@ -34,7 +34,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -620,8 +620,8 @@ class Configuration {
   }
 
   Future<bool> shouldShowLockScreen() async {
-    final bool isPin = await LockscreenSetting.instance.isPinSet();
-    final bool isPass = await LockscreenSetting.instance.isPasswordSet();
+    final bool isPin = await LockScreenSettings.instance.isPinSet();
+    final bool isPass = await LockScreenSettings.instance.isPasswordSet();
     return isPin || isPass || shouldShowSystemLockScreen();
   }
 

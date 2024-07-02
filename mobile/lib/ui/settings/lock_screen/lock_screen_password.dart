@@ -8,10 +8,10 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
-import "package:photos/ui/settings/lockscreen/lock_screen_option.dart";
-import "package:photos/ui/settings/lockscreen/lockscreen_confirm_password.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_confirm_password.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:photos/utils/crypto_util.dart";
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreenPassword extends StatefulWidget {
   const LockScreenPassword({
@@ -38,7 +38,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   final _submitNotifier = ValueNotifier(false);
   int invalidAttemptsCount = 0;
 
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
+  final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   late String enteredHashedPassword;
   @override
   void initState() {
@@ -74,7 +74,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => const LockScreenOption(),
+                builder: (context) => const LockScreenOptions(),
               ),
             );
       return true;

@@ -1,23 +1,125 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/utils/lockscreen_setting.dart";
-import "package:pinput/pinput.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_confirm_pin.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
+import "package:photos/utils/crypto_util.dart";
+import "package:photos/utils/lock_screen_settings.dart";
+import 'package:pinput/pinput.dart';
 
-class LockScreenConfirmPin extends StatefulWidget {
-  const LockScreenConfirmPin({super.key, required this.pin});
-  final String pin;
+class LockScreenPin extends StatefulWidget {
+  const LockScreenPin({
+    super.key,
+    this.isAuthenticating = false,
+    this.isLockscreenAuth = false,
+    this.authPin,
+  });
+
+  /// If [isLockscreenAuth] is true then we are authenticating the user at the Lock screen
+  /// If [isAuthenticating] is true then we are authenticating the user at the Setting screen
+  final bool isAuthenticating;
+  final bool isLockscreenAuth;
+  final String? authPin;
   @override
-  State<LockScreenConfirmPin> createState() => _LockScreenConfirmPinState();
+  State<LockScreenPin> createState() => _LockScreenPinState();
 }
 
-class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
-  final _confirmPinController = TextEditingController(text: null);
+class _LockScreenPinState extends State<LockScreenPin> {
+  final _pinController = TextEditingController(text: null);
 
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
+  final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
+  late String enteredHashedPin;
+  bool isPinValid = false;
+  int invalidAttemptsCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    invalidAttemptsCount = _lockscreenSetting.getInvalidAttemptCount();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _pinController.dispose();
+  }
+
+  void _onKeyTap(String number) {
+    _pinController.text += number;
+    return;
+  }
+
+  void _onBackspace() {
+    if (_pinController.text.isNotEmpty) {
+      _pinController.text =
+          _pinController.text.substring(0, _pinController.text.length - 1);
+    }
+    return;
+  }
+
+  Future<bool> confirmPinAuth(String code) async {
+    final Uint8List? salt = await _lockscreenSetting.getSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(code),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    enteredHashedPin = base64Encode(hash);
+    if (widget.authPin == enteredHashedPin) {
+      invalidAttemptsCount = 0;
+      await _lockscreenSetting.setInvalidAttemptCount(0);
+      widget.isLockscreenAuth
+          ? Navigator.of(context).pop(true)
+          : Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LockScreenOptions(),
+              ),
+            );
+      return true;
+    } else {
+      setState(() {
+        isPinValid = true;
+      });
+      await HapticFeedback.vibrate();
+      await Future.delayed(const Duration(milliseconds: 75));
+      _pinController.clear();
+      setState(() {
+        isPinValid = false;
+      });
+
+      if (widget.isLockscreenAuth) {
+        invalidAttemptsCount++;
+        if (invalidAttemptsCount > 4) {
+          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
+          Navigator.of(context).pop(false);
+        }
+      }
+      return false;
+    }
+  }
+
+  Future<void> _confirmPin(String code) async {
+    if (widget.isAuthenticating) {
+      await confirmPinAuth(code);
+      return;
+    } else {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) => LockScreenConfirmPin(pin: code),
+        ),
+      );
+      _pinController.clear();
+    }
+  }
+
   final _pinPutDecoration = PinTheme(
     height: 48,
     width: 48,
@@ -27,37 +129,6 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
       borderRadius: BorderRadius.circular(15.0),
     ),
   );
-
-  @override
-  void dispose() {
-    super.dispose();
-    _confirmPinController.dispose();
-  }
-
-  void _onKeyTap(String number) {
-    _confirmPinController.text += number;
-    return;
-  }
-
-  void _onBackspace() {
-    if (_confirmPinController.text.isNotEmpty) {
-      _confirmPinController.text = _confirmPinController.text
-          .substring(0, _confirmPinController.text.length - 1);
-    }
-    return;
-  }
-
-  Future<void> _confirmPinMatch() async {
-    if (widget.pin == _confirmPinController.text) {
-      await _lockscreenSetting.setPin(_confirmPinController.text);
-
-      Navigator.of(context).pop(true);
-      Navigator.of(context).pop(true);
-      return;
-    }
-    await HapticFeedback.vibrate();
-    _confirmPinController.clear();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +159,11 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
     );
   }
 
-  Widget _getBody(colorTheme, textTheme, {required bool isPortrait}) {
+  Widget _getBody(
+    EnteColorScheme colorTheme,
+    EnteTextTheme textTheme, {
+    required bool isPortrait,
+  }) {
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -104,12 +179,12 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                     height: 75,
                     width: 75,
                     child: ValueListenableBuilder(
-                      valueListenable: _confirmPinController,
+                      valueListenable: _pinController,
                       builder: (context, value, child) {
                         return TweenAnimationBuilder<double>(
                           tween: Tween<double>(
                             begin: 0,
-                            end: _confirmPinController.text.length / 4,
+                            end: _pinController.text.length / 4,
                           ),
                           curve: Curves.ease,
                           duration: const Duration(milliseconds: 250),
@@ -138,14 +213,14 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             ),
           ),
           Text(
-            'Re-enter PIN',
+            widget.isAuthenticating ? "Enter PIN" : "Set new PIN",
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),
           Pinput(
             length: 4,
-            pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
-            controller: _confirmPinController,
+            useNativeKeyboard: false,
+            controller: _pinController,
             defaultPinTheme: _pinPutDecoration,
             submittedPinTheme: _pinPutDecoration.copyWith(
               textStyle: textTheme.h3Bold,
@@ -169,23 +244,19 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
-                  color: colorTheme.fillBase,
+                  color: colorTheme.warning400,
                 ),
               ),
               textStyle:
                   textTheme.h3Bold.copyWith(color: colorTheme.warning400),
             ),
-            errorText: '',
+            forceErrorState: isPinValid,
             obscureText: true,
             obscuringCharacter: '*',
-            validator: (value) {
-              if (value == widget.pin) {
-                return null;
-              }
-              return 'PIN does not match';
-            },
+            errorText: '',
             onCompleted: (value) async {
-              await _confirmPinMatch();
+              await Future.delayed(const Duration(milliseconds: 250));
+              await _confirmPin(_pinController.text);
             },
           ),
           isPortrait
@@ -374,7 +445,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                             ),
                             Text(
                               text,
-                              style: textTheme.small,
+                              style: textTheme.miniBold,
                             ),
                           ],
                         ),

@@ -53,7 +53,7 @@ import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -210,7 +210,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     CryptoUtil.init();
 
     _logger.info("Lockscreen init");
-    LockscreenSetting.instance.init(preferences);
+    LockScreenSettings.instance.init(preferences);
 
     _logger.info("Configuration init");
     await Configuration.instance.init();

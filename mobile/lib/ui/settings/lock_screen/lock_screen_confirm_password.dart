@@ -5,7 +5,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/dynamic_fab.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreenConfirmPassword extends StatefulWidget {
   const LockScreenConfirmPassword({
@@ -23,7 +23,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
   /// _confirmPasswordController is disposed by the [TextInputWidget]
   final _confirmPasswordController = TextEditingController(text: null);
 
-  final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
+  final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   final _focusNode = FocusNode();
   final _isFormValid = ValueNotifier<bool>(false);
   final _submitNotifier = ValueNotifier(false);

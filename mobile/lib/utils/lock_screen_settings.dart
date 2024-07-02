@@ -6,11 +6,11 @@ import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
-class LockscreenSetting {
-  LockscreenSetting._privateConstructor();
+class LockScreenSettings {
+  LockScreenSettings._privateConstructor();
 
-  static final LockscreenSetting instance =
-      LockscreenSetting._privateConstructor();
+  static final LockScreenSettings instance =
+      LockScreenSettings._privateConstructor();
   static const password = "user_pass";
   static const pin = "user_pin";
   static const saltKey = "user_salt";
