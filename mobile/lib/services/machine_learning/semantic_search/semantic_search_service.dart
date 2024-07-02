@@ -222,10 +222,7 @@ class SemanticSearchService {
     final embeddedFileIDs =
         await EmbeddingsDB.instance.getFileIDs(_currentModel);
 
-    uploadedFileIDs.removeWhere(
-      (id) => embeddedFileIDs.contains(id),
-    );
-    return uploadedFileIDs;
+    return uploadedFileIDs.difference(embeddedFileIDs).toList();
   }
 
   Future<void> clearQueue() async {

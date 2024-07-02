@@ -14,8 +14,10 @@ final _logger = Logger("MlUtil");
 
 enum FileDataForML { thumbnailData, fileData }
 
-Future<List<int>> getIndexableFileIDs() async {
-  return FilesDB.instance.getOwnedFileIDs(Configuration.instance.getUserID()!);
+Future<Set<int>> getIndexableFileIDs() async {
+  final fileIDs = await FilesDB.instance
+      .getOwnedFileIDs(Configuration.instance.getUserID()!);
+  return fileIDs.toSet();
 }
 
 Future<String> getImagePathForML(
