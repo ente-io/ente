@@ -1,8 +1,3 @@
-/** The face indexing version supported by the current client. */
-// TODO: This belongs better to f-index.ts, but that file's in a different
-// package currently, move it there once these two files are together again.
-export const faceIndexingVersion = 1;
-
 /**
  * The faces in a file (and an embedding for each of them).
  *

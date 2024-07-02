@@ -7,7 +7,8 @@ import { z } from "zod";
 import { decryptFileMetadata } from "../../common/crypto/ente";
 import { getAllLocalFiles } from "./files";
 import { saveFaceIndex } from "./ml/db";
-import { faceIndexingVersion, type FaceIndex } from "./ml/types";
+import { faceIndexingVersion } from "./ml/f-index";
+import { type FaceIndex } from "./ml/types";
 
 /**
  * The embeddings that we (the current client) knows how to handle.

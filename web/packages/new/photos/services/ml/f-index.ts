@@ -7,7 +7,6 @@ import type {
     Face,
     Point,
 } from "@/new/photos/services/ml/types";
-import { faceIndexingVersion } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import { getRenderableImage } from "@/new/photos/utils/file";
 import log from "@/next/log";
@@ -28,6 +27,11 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+
+/**
+ * The version of the face indexing pipeline implemented by the current client.
+ */
+export const faceIndexingVersion = 1;
 
 /**
  * Index faces in the given file.
