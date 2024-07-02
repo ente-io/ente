@@ -1,10 +1,4 @@
 import {
-    faceIndex,
-    indexableFileIDs,
-    indexedAndIndexableCounts,
-    updateAssumingLocalFiles,
-} from "@/new/photos/services/ml/db";
-import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
@@ -12,11 +6,17 @@ import {
     getAllLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
+import {
+    faceIndex,
+    indexableFileIDs,
+    indexedAndIndexableCounts,
+    updateAssumingLocalFiles,
+} from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
+// import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
-import type { Remote } from "comlink";
-import type { FaceIndexerWorker } from "./indexer.worker";
+// import type { Remote } from "comlink";
+// import type { FaceIndexerWorker } from "./indexer.worker";
 
 /**
  * Face indexing orchestrator.
@@ -38,12 +38,12 @@ import type { FaceIndexerWorker } from "./indexer.worker";
  * Live indexing has higher priority, backfilling runs otherwise. If nothing
  * remains to be indexed, the indexer goes to sleep for a while.
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class FaceIndexer {
     /** Live indexing queue. */
-    private liveItems: { enteFile: EnteFile; file: File | undefined }[];
+    // private liveItems: { enteFile: EnteFile; file: File | undefined }[];
     /** Timeout for when the next time we will wake up. */
-    private wakeTimeout: ReturnType<typeof setTimeout> | undefined;
-
+    // private wakeTimeout: ReturnType<typeof setTimeout> | undefined;
     // /**
     //  * Add a file to the live indexing queue.
     //  *
@@ -57,11 +57,9 @@ class FaceIndexer {
     //     // the user turns on face indexing these files will get indexed as part
     //     // of the backfilling anyway, the live indexing is just an optimization.
     //     if (!mlWorkManager.isMlSearchEnabled) return;
-
     //     this.liveItems.push({ enteFile, file });
     //     this.wakeUpIfNeeded();
     // }
-
     // private wakeUpIfNeeded() {
     //     // Already awake.
     //     if (!this.wakeTimeout) return;
@@ -71,26 +69,22 @@ class FaceIndexer {
     //     // Get to work.
     //     this.tick();
     // }
-
     /* TODO-ML(MR): This code is not currently in use */
-
     /**
      * A promise for the lazily created singleton {@link FaceIndexerWorker} remote
      * exposed by this module.
      */
-    _faceIndexer: Promise<Remote<FaceIndexerWorker>>;
+    // _faceIndexer: Promise<Remote<FaceIndexerWorker>>;
     /**
      * Main thread interface to the face indexer.
      *
      * This function provides a promise that resolves to a lazily created singleton
      * remote with a {@link FaceIndexerWorker} at the other end.
      */
-    faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
-        (this._faceIndexer ??= createFaceIndexerComlinkWorker().remote);
-
+    // faceIndexer = (): Promise<Remote<FaceIndexerWorker>> =>
+    //     (this._faceIndexer ??= createFaceIndexerComlinkWorker().remote);
     //     private async tick() {
     //         console.log("tick");
-
     //         const item = this.liveItems.pop();
     //         if (!item) {
     //             // TODO-ML: backfill instead if needed here.
@@ -116,7 +110,6 @@ class FaceIndexer {
     //         // TODO
     //         // this.tick();
     //     }
-
     /**
      * Add a newly uploaded file to the face indexing queue.
      *
@@ -137,11 +130,11 @@ class FaceIndexer {
 /** The singleton instance of {@link FaceIndexer}. */
 export default new FaceIndexer();
 
-const createFaceIndexerComlinkWorker = () =>
-    new ComlinkWorker<typeof FaceIndexerWorker>(
-        "face-indexer",
-        new Worker(new URL("indexer.worker.ts", import.meta.url)),
-    );
+// const createFaceIndexerComlinkWorker = () =>
+//     new ComlinkWorker<typeof FaceIndexerWorker>(
+//         "face-indexer",
+//         new Worker(new URL("indexer.worker.ts", import.meta.url)),
+//     );
 
 export interface FaceIndexingStatus {
     /**
@@ -251,7 +244,7 @@ export const syncWithLocalFilesAndGetFilesToIndex = async (
     const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
 
     await updateAssumingLocalFiles(
-        [...localFilesByID.keys()],
+        Array.from(localFilesByID.keys()),
         localTrashFileIDs,
     );
 
