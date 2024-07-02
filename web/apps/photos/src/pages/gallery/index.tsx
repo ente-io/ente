@@ -1,5 +1,6 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
+import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -92,7 +93,6 @@ import {
     getHiddenItemsSummary,
     getSectionSummaries,
 } from "services/collectionService";
-import downloadManager from "services/download";
 import { syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
 import { sync } from "services/sync";

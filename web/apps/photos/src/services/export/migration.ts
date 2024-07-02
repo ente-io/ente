@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import downloadManager from "@/new/photos/services/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
@@ -16,7 +17,6 @@ import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { getLocalCollections } from "services/collectionService";
-import downloadManager from "services/download";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,

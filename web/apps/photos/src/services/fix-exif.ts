@@ -1,4 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
+import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import log from "@/next/log";
@@ -8,7 +9,6 @@ import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from "utils/file";
-import downloadManager from "./download";
 import { getParsedExifData } from "./exif";
 
 const EXIF_TIME_TAGS = [

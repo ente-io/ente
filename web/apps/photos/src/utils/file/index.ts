@@ -1,5 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import DownloadManager from "@/new/photos/services/download";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -24,7 +25,6 @@ import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import { moveToHiddenCollection } from "services/collectionService";
-import DownloadManager from "services/download";
 import { updateFileCreationDateInEXIF } from "services/exif";
 import {
     deleteFromTrash,

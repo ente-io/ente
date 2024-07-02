@@ -15,6 +15,7 @@ import {
 
 import { FILE_TYPE } from "@/media/file-type";
 import { isNonWebImageFileExtension } from "@/media/formats";
+import downloadManager from "@/new/photos/services/download";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { isNativeConvertibleToJPEG } from "@/new/photos/utils/file";
@@ -45,7 +46,6 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import downloadManager from "services/download";
 import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
