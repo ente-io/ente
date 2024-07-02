@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";
 import {
@@ -24,7 +25,6 @@ import {
 //
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
 // @ts-ignore
-import { ensure } from "@/utils/ensure";
 import { createFFmpeg, type FFmpeg } from "ffmpeg-wasm";
 
 export class DedicatedFFmpegWorker {
