@@ -1,4 +1,7 @@
-import { decryptFileMetadata } from "@/new/common/crypto/ente";
+import {
+    decryptFileMetadata,
+    encryptFileMetadata,
+} from "@/new/common/crypto/ente";
 import {
     getAllLocalFiles,
     getLocalTrashedFiles,
@@ -8,12 +11,10 @@ import { authenticatedRequestHeaders } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { z } from "zod";
 import { saveFaceIndex } from "./db";
 import { faceIndexingVersion } from "./f-index";
 import { type FaceIndex } from "./types";
-// import { putEmbedding } from "services/embeddingService";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
@@ -251,12 +252,24 @@ export const putFaceIndex = async (
         d: JSON.stringify(faceIndex),
     }));
 
-    const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
-    const { file: encryptedEmbeddingData } =
-        await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
-    // TODO(MR): Indexing
-    console.log(encryptedEmbeddingData);
-    throw new Error("Unimplemented");
+    const { encryptedMetadataB64, decryptionHeaderB64 } =
+        await encryptFileMetadata(JSON.stringify(faceIndex), enteFile.key);
+
+    // Sanity check
+
+    const rt = await decryptFileMetadata(
+        encryptedMetadataB64,
+        decryptionHeaderB64,
+        enteFile.key,
+    );
+    console.log("put", JSON.stringify(faceIndex) == rt);
+
+    // const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
+    // const { file: encryptedEmbeddingData } =
+    //     await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
+    // // TODO(MR): Indexing
+    // console.log(encryptedEmbeddingData);
+    // throw new Error("Unimplemented");
     // await putEmbedding({
     //     fileID: enteFile.id,
     //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
