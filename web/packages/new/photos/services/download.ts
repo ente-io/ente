@@ -1,16 +1,20 @@
+// TODO: Remove this override
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
-import {
+import type {
     EnteFile,
-    type LivePhotoSourceURL,
-    type SourceURLs,
+    LivePhotoSourceURL,
+    SourceURLs,
 } from "@/new/photos/types/file";
 import { getRenderableImage } from "@/new/photos/utils/file";
 import { isDesktop } from "@/next/app";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
 import { customAPIOrigin } from "@/next/origins";
+import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
@@ -38,8 +42,8 @@ interface DownloadClient {
 }
 
 class DownloadManagerImpl {
-    private ready: boolean = false;
-    private downloadClient: DownloadClient;
+    private ready = false;
+    private downloadClient: DownloadClient | undefined;
     /** Local cache for thumbnails. Might not be available. */
     private thumbnailCache?: BlobCache;
     /**
@@ -48,7 +52,7 @@ class DownloadManagerImpl {
      * Only available when we're running in the desktop app.
      */
     private fileCache?: BlobCache;
-    private cryptoWorker: Remote<DedicatedCryptoWorker>;
+    private cryptoWorker: Remote<DedicatedCryptoWorker> | undefined;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
@@ -57,6 +61,10 @@ class DownloadManagerImpl {
     private fileDownloadProgress = new Map<number, number>();
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
+
+    private ensureClient() {
+        return ensure(this.downloadClient);
+    }
 
     async init(token?: string) {
         if (this.ready) {
@@ -87,12 +95,17 @@ class DownloadManagerImpl {
             throw new Error(
                 "Attempting to use an uninitialized download manager",
             );
+
+        return {
+            downloadClient: ensure(this.downloadClient),
+            cryptoWorker: ensure(this.cryptoWorker),
+        };
     }
 
-    async logout() {
+    logout() {
         this.ready = false;
-        this.cryptoWorker = null;
-        this.downloadClient = null;
+        this.cryptoWorker = undefined;
+        this.downloadClient = undefined;
         this.fileObjectURLPromises.clear();
         this.fileConversionPromises.clear();
         this.thumbnailObjectURLPromises.clear();
@@ -101,11 +114,8 @@ class DownloadManagerImpl {
     }
 
     updateToken(token: string, passwordToken?: string) {
-        this.downloadClient.updateTokens(token, passwordToken);
-    }
-
-    updateCryptoWorker(cryptoWorker: Remote<DedicatedCryptoWorker>) {
-        this.cryptoWorker = cryptoWorker;
+        const { downloadClient } = this.ensureInitialized();
+        downloadClient.updateTokens(token, passwordToken);
     }
 
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
@@ -113,10 +123,12 @@ class DownloadManagerImpl {
     }
 
     private downloadThumb = async (file: EnteFile) => {
-        const encrypted = await this.downloadClient.downloadThumbnail(file);
-        const decrypted = await this.cryptoWorker.decryptThumbnail(
+        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+
+        const encrypted = await downloadClient.downloadThumbnail(file);
+        const decrypted = await cryptoWorker.decryptThumbnail(
             encrypted,
-            await this.cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+            await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
             file.key,
         );
         return decrypted;
@@ -131,7 +143,7 @@ class DownloadManagerImpl {
         if (localOnly) return null;
 
         const thumb = await this.downloadThumb(file);
-        this.thumbnailCache?.put(key, new Blob([thumb]));
+        await this.thumbnailCache?.put(key, new Blob([thumb]));
         return thumb;
     }
 
@@ -396,7 +408,7 @@ const DownloadManager = new DownloadManagerImpl();
 
 export default DownloadManager;
 
-const createDownloadClient = (token: string): DownloadClient => {
+const createDownloadClient = (token: string | undefined): DownloadClient => {
     const timeout = 300000; // 5 minute
     if (token) {
         return new PhotosDownloadClient(token, timeout);

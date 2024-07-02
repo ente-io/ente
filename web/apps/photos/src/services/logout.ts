@@ -31,7 +31,7 @@ export const photosLogout = async () => {
     }
 
     try {
-        await DownloadManager.logout();
+        DownloadManager.logout();
     } catch (e) {
         ignoreError("download", e);
     }
