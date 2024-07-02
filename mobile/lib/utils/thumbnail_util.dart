@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
-import 'dart:typed_data';
+import "dart:typed_data";
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
