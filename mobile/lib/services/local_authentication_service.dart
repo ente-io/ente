@@ -39,7 +39,7 @@ class LocalAuthenticationService {
     BuildContext context,
     String? savedPin,
     String? savedPassword, {
-    bool isLockscreenAuth = false,
+    bool isOnOpeningApp = false,
   }) async {
     if (savedPassword != null) {
       final result = await Navigator.of(context).push(
@@ -47,7 +47,7 @@ class LocalAuthenticationService {
           builder: (BuildContext context) {
             return LockScreenPassword(
               isAuthenticating: true,
-              isLockscreenAuth: isLockscreenAuth,
+              isOnOpeningApp: isOnOpeningApp,
               authPass: savedPassword,
             );
           },
@@ -63,7 +63,7 @@ class LocalAuthenticationService {
           builder: (BuildContext context) {
             return LockScreenPin(
               isAuthenticating: true,
-              isLockscreenAuth: isLockscreenAuth,
+              isOnOpeningApp: isOnOpeningApp,
               authPin: savedPin,
             );
           },

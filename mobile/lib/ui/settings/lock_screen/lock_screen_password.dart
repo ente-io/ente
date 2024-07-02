@@ -17,14 +17,13 @@ class LockScreenPassword extends StatefulWidget {
   const LockScreenPassword({
     super.key,
     this.isAuthenticating = false,
-    this.isLockscreenAuth = false,
+    this.isOnOpeningApp = false,
     this.authPass,
   });
 
-  /// If [isLockscreenAuth] is true then we are authenticating the user at Lock screen
-  /// If [isAuthenticating] is true then we are authenticating the user at Setting screen
+  //Is false when setting a new password
   final bool isAuthenticating;
-  final bool isLockscreenAuth;
+  final bool isOnOpeningApp;
   final String? authPass;
   @override
   State<LockScreenPassword> createState() => _LockScreenPasswordState();
@@ -38,8 +37,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   final _submitNotifier = ValueNotifier(false);
   int invalidAttemptsCount = 0;
 
-  final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
-  late String enteredHashedPassword;
+  final _lockscreenSetting = LockScreenSettings.instance;
   @override
   void initState() {
     super.initState();
@@ -55,57 +53,6 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     _submitNotifier.dispose();
     _focusNode.dispose();
     _isFormValid.dispose();
-  }
-
-  Future<bool> confirmPasswordAuth(String code) async {
-    final Uint8List? salt = await _lockscreenSetting.getSalt();
-    final hash = cryptoPwHash({
-      "password": utf8.encode(code),
-      "salt": salt,
-      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
-      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
-    });
-
-    enteredHashedPassword = base64Encode(hash);
-    if (widget.authPass == enteredHashedPassword) {
-      await _lockscreenSetting.setInvalidAttemptCount(0);
-
-      widget.isLockscreenAuth
-          ? Navigator.of(context).pop(true)
-          : Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const LockScreenOptions(),
-              ),
-            );
-      return true;
-    } else {
-      if (widget.isLockscreenAuth) {
-        invalidAttemptsCount++;
-        if (invalidAttemptsCount > 4) {
-          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
-          Navigator.of(context).pop(false);
-        }
-      }
-
-      await HapticFeedback.vibrate();
-      throw Exception("Incorrect password");
-    }
-  }
-
-  Future<void> _confirmPassword() async {
-    if (widget.isAuthenticating) {
-      await confirmPasswordAuth(_passwordController.text);
-      return;
-    } else {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) => LockScreenConfirmPassword(
-            password: _passwordController.text,
-          ),
-        ),
-      );
-      _passwordController.clear();
-    }
   }
 
   @override
@@ -217,5 +164,55 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
         ),
       ),
     );
+  }
+
+  Future<bool> _confirmPasswordAuth(String inputtedPassword) async {
+    final Uint8List? salt = await _lockscreenSetting.getSalt();
+    final hash = cryptoPwHash({
+      "password": utf8.encode(inputtedPassword),
+      "salt": salt,
+      "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
+      "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
+    });
+
+    if (widget.authPass == base64Encode(hash)) {
+      await _lockscreenSetting.setInvalidAttemptCount(0);
+
+      widget.isOnOpeningApp
+          ? Navigator.of(context).pop(true)
+          : Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LockScreenOptions(),
+              ),
+            );
+      return true;
+    } else {
+      if (widget.isOnOpeningApp) {
+        invalidAttemptsCount++;
+        if (invalidAttemptsCount > 4) {
+          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
+          Navigator.of(context).pop(false);
+        }
+      }
+
+      await HapticFeedback.vibrate();
+      throw Exception("Incorrect password");
+    }
+  }
+
+  Future<void> _confirmPassword() async {
+    if (widget.isAuthenticating) {
+      await _confirmPasswordAuth(_passwordController.text);
+      return;
+    } else {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) => LockScreenConfirmPassword(
+            password: _passwordController.text,
+          ),
+        ),
+      );
+      _passwordController.clear();
+    }
   }
 }

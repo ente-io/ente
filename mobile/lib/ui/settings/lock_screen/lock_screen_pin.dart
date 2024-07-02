@@ -18,14 +18,13 @@ class LockScreenPin extends StatefulWidget {
   const LockScreenPin({
     super.key,
     this.isAuthenticating = false,
-    this.isLockscreenAuth = false,
+    this.isOnOpeningApp = false,
     this.authPin,
   });
 
-  /// If [isLockscreenAuth] is true then we are authenticating the user at the Lock screen
-  /// If [isAuthenticating] is true then we are authenticating the user at the Setting screen
+  //Is false when setting a new password
   final bool isAuthenticating;
-  final bool isLockscreenAuth;
+  final bool isOnOpeningApp;
   final String? authPin;
   @override
   State<LockScreenPin> createState() => _LockScreenPinState();
@@ -35,7 +34,6 @@ class _LockScreenPinState extends State<LockScreenPin> {
   final _pinController = TextEditingController(text: null);
 
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
-  late String enteredHashedPin;
   bool isPinValid = false;
   int invalidAttemptsCount = 0;
 
@@ -51,19 +49,6 @@ class _LockScreenPinState extends State<LockScreenPin> {
     _pinController.dispose();
   }
 
-  void _onKeyTap(String number) {
-    _pinController.text += number;
-    return;
-  }
-
-  void _onBackspace() {
-    if (_pinController.text.isNotEmpty) {
-      _pinController.text =
-          _pinController.text.substring(0, _pinController.text.length - 1);
-    }
-    return;
-  }
-
   Future<bool> confirmPinAuth(String code) async {
     final Uint8List? salt = await _lockscreenSetting.getSalt();
     final hash = cryptoPwHash({
@@ -73,11 +58,10 @@ class _LockScreenPinState extends State<LockScreenPin> {
       "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
     });
 
-    enteredHashedPin = base64Encode(hash);
-    if (widget.authPin == enteredHashedPin) {
+    if (widget.authPin == base64Encode(hash)) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      widget.isLockscreenAuth
+      widget.isOnOpeningApp
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -96,7 +80,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
         isPinValid = false;
       });
 
-      if (widget.isLockscreenAuth) {
+      if (widget.isOnOpeningApp) {
         invalidAttemptsCount++;
         if (invalidAttemptsCount > 4) {
           await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);

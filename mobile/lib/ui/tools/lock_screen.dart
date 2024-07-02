@@ -296,7 +296,7 @@ class _LockScreenState extends State<LockScreen>
           : await requestAuthentication(
               context,
               context.l10n.authToViewYourMemories,
-              isLockscreenAuth: true,
+              isOnOpeningApp: true,
             );
       _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;

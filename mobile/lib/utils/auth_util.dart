@@ -10,7 +10,7 @@ import "package:photos/utils/lock_screen_settings.dart";
 Future<bool> requestAuthentication(
   BuildContext context,
   String reason, {
-  bool isLockscreenAuth = false,
+  bool isOnOpeningApp = false,
 }) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
@@ -24,7 +24,7 @@ Future<bool> requestAuthentication(
       context,
       savedPin,
       savedPassword,
-      isLockscreenAuth: isLockscreenAuth,
+      isOnOpeningApp: isOnOpeningApp,
     );
   } else {
     return await LocalAuthentication().authenticate(
