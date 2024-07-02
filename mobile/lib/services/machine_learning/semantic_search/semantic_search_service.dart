@@ -18,6 +18,7 @@ import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ggml.dart';
 import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
@@ -502,22 +503,6 @@ List<QueryResult> computeBulkSimilarities(Map args) {
 
   queryResults.sort((first, second) => second.score.compareTo(first.score));
   return queryResults;
-}
-
-double computeCosineSimilarity(
-  List<double> imageEmbedding,
-  List<double> textEmbedding,
-) {
-  assert(
-    imageEmbedding.length == textEmbedding.length,
-    "The two embeddings should have the same length",
-  );
-  double cosineSimilarity = 0;
-  final length = imageEmbedding.length;
-  for (int index = 0; index < length; index++) {
-    cosineSimilarity += imageEmbedding[index] * textEmbedding[index];
-  }
-  return cosineSimilarity;
 }
 
 class QueryResult {
