@@ -7,7 +7,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
-import { authenticatedRequestHeaders } from "@/next/http";
+import { HTTPError, authenticatedRequestHeaders } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
@@ -293,24 +293,15 @@ export const putEmbedding = async (
     const { encryptedMetadataB64, decryptionHeaderB64 } =
         await encryptFileMetadata(embedding, enteFile.key);
 
-        await apiURL("/"),
-        putEmbeddingReq,
-        null,
-        {
-            "X-Auth-Token": token,
-        },
-
-        const url = apiURL("/embeddings")
+    const url = await apiURL("/embeddings");
     const res = await fetch(url, {
         method: "PUT",
-        headers: authenticatedRequestHeaders(),
+        headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
-
-        })
-    }
-    if (!res.ok) throw new Error()
-
-    )
+            model,
+        }),
+    });
+    if (!res.ok) throw new HTTPError(url, res);
 
     // Sanity check
 
@@ -319,7 +310,7 @@ export const putEmbedding = async (
         decryptionHeaderB64,
         enteFile.key,
     );
-    console.log("put", JSON.stringify(faceIndex) == rt);
+    console.log("put", embedding == rt);
 
     // const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
     // const { file: encryptedEmbeddingData } =
@@ -331,42 +322,7 @@ export const putEmbedding = async (
     //     fileID: enteFile.id,
     //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
     //     decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-    //     model: "file-ml-clip-face",
-    // });
-};
-
-export const putFaceIndex = async (
-    enteFile: EnteFile,
-    faceIndex: FaceIndex,
-) => {
-    log.debug(() => ({
-        t: "Uploading faceEmbedding",
-        d: JSON.stringify(faceIndex),
-    }));
-
-    const { encryptedMetadataB64, decryptionHeaderB64 } =
-        await encryptFileMetadata(JSON.stringify(faceIndex), enteFile.key);
-
-    // Sanity check
-
-    const rt = await decryptFileMetadata(
-        encryptedMetadataB64,
-        decryptionHeaderB64,
-        enteFile.key,
-    );
-    console.log("put", JSON.stringify(faceIndex) == rt);
-
-    // const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
-    // const { file: encryptedEmbeddingData } =
-    //     await comlinkCryptoWorker.encryptMetadata(faceIndex, enteFile.key);
-    // // TODO(MR): Indexing
-    // console.log(encryptedEmbeddingData);
-    // throw new Error("Unimplemented");
-    // await putEmbedding({
-    //     fileID: enteFile.id,
-    //     encryptedEmbedding: encryptedEmbeddingData.encryptedData,
-    //     decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-    //     model: "file-ml-clip-face",
+    //     model:,
     // });
 };
 
@@ -474,3 +430,6 @@ const FaceIndex = z
     })
     // Retain fields we might not (currently) understand.
     .passthrough();
+
+export const putFaceIndex = async (enteFile: EnteFile, faceIndex: FaceIndex) =>
+    putEmbedding(enteFile, "file-ml-clip-face", JSON.stringify(faceIndex));

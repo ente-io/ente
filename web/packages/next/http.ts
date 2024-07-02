@@ -33,7 +33,7 @@ export class HTTPError extends Error {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (Error.captureStackTrace) Error.captureStackTrace(this, HTTPError);
 
-        this.name = "HTTPError";
+        this.name = this.constructor.name;
         this.res = res;
     }
 }
