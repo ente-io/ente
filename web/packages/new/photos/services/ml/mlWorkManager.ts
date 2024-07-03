@@ -4,6 +4,7 @@ import { clientPackageName } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { wait } from "@/utils/promise";
 import { Events, eventBus } from "@ente/shared/events";
 import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
 import debounce from "debounce";
@@ -147,7 +148,9 @@ class MLWorkManager {
                 this,
             );
 
-            await this.startSyncJob();
+            // TODO-ML:
+            // await this.startSyncJob();
+            await wait(0);
         } else if (this.mlSearchEnabled && !enabled) {
             log.info("Disabling MLWorkManager");
             this.mlSearchEnabled = false;
