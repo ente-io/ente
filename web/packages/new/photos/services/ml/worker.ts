@@ -128,6 +128,8 @@ export class MLWorker {
             idleDuration: this.idleDuration,
         }));
 
+        const scheduleTick = () => void setTimeout(() => this.tick(), 0);
+
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldSync) {
             this.shouldSync = false;
@@ -135,7 +137,7 @@ export class MLWorker {
                 // Reset the idle duration if we did pull something.
                 if (didPull) this.idleDuration = idleDurationStart;
                 // Either ways, tick again.
-                void setTimeout(() => this.tick(), 0);
+                scheduleTick();
             });
             // Return without waiting for the pull.
             return;
@@ -148,7 +150,7 @@ export class MLWorker {
             // Everything is running smoothly. Reset the idle duration.
             this.idleDuration = idleDurationStart;
             // And tick again.
-            void setTimeout(() => this.tick(), 0);
+            scheduleTick();
             return;
         }
 
@@ -163,7 +165,7 @@ export class MLWorker {
         // (limited to some maximum).
 
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
-        this.idleTimeout = setTimeout(next, this.idleDuration * 1000);
+        this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
     }
 }
 
