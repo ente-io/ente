@@ -79,6 +79,21 @@ export const logoutML = async () => {
     await clearFaceDB();
 };
 
+/**
+ * Trigger a "sync", whatever that means for the ML subsystem.
+ *
+ * This is called during the global sync sequence. If ML is enabled, then we use
+ * this as a signal to pull embeddings from remote, and start backfilling if
+ * needed.
+ *
+ * This function does not wait for these processes to run to completion, and
+ * returns immediately.
+ */
+export const triggerMLSync = () => {
+    if (!_isMLEnabled) return;
+    void worker().then((w) => w.sync());
+};
+
 export interface FaceIndexingStatus {
     /**
      * Which phase we are in within the indexing pipeline when viewed across the

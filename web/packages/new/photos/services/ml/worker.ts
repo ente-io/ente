@@ -53,6 +53,10 @@ export class MLWorker {
      *
      * This function enqueues the pull and returns immediately without waiting
      * for the pull to complete.
+     *
+     * While it only triggers a pull, once the pull is done it also checks for
+     * pending items to backfill. So it implicitly also triggers a backfill
+     * (which is why call it a less-precise sync instead of pull).
      */
     sync() {
         this.shouldSync = true;
