@@ -1,10 +1,6 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import DownloadManager from "@/new/photos/services/download";
-import {
-    initML,
-    isFaceIndexingEnabled,
-    setIsFaceIndexingEnabled,
-} from "@/new/photos/services/ml";
+import { disableML, enableML, initML, isFaceIndexingEnabled } from "@/new/photos/services/ml";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
@@ -298,7 +294,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const updateMlSearchEnabled = async (enabled: boolean) => {
         try {
-            setIsFaceIndexingEnabled(enabled);
+            enabled ? enableML() : disableML();
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {

@@ -101,6 +101,7 @@ export class MLWorker {
      * representation of the file's contents with us and won't need to download
      * the file from remote.
      */
+    // TODO-ML: Call me
     didUpload(file: EnteFile) {
         // Add the recently uploaded file to the live indexing queue.
         //

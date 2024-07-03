@@ -183,10 +183,41 @@ export const isFaceIndexingEnabled = () =>
 /**
  * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
  */
-export const setIsFaceIndexingEnabled = (enabled: boolean) =>
+const setIsFaceIndexingEnabled = (enabled: boolean) =>
     enabled
         ? localStorage.setItem("faceIndexingEnabled", "1")
         : localStorage.removeItem("faceIndexingEnabled");
+
+/**
+ * Return true if the user has enabled machine learning in their preferences.
+ *
+ * TODO-ML: The UI for this needs rework. We might retain the older remote (and
+ * local) storage key, but otherwise this setting now reflects the state of ML
+ * overall and not just face search.
+ */
+export const isMLEnabled = () => _isMLEnabled;
+
+/**
+ * Enable ML.
+ *
+ * Persist the user's preference and trigger a sync.
+ */
+export const enableML = () => {
+    setIsFaceIndexingEnabled(true);
+    _isMLEnabled = true;
+    triggerMLSync();
+};
+
+/**
+ * Disable ML
+ *
+ * Stop any in-progress ML tasks and persist the user's preference.
+ */
+export const disableML = () => {
+    terminateMLWorker();
+    setIsFaceIndexingEnabled(false);
+    _isMLEnabled = false;
+};
 
 /**
  * Sync face DB with the local (and potentially indexable) files that we know
