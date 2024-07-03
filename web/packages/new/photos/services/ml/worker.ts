@@ -42,6 +42,7 @@ export class MLWorker {
     private userAgent: string | undefined;
     private shouldSync = false;
     private liveQ: EnteFile[] = [];
+    private haveStarted = false;
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
 
@@ -78,12 +79,18 @@ export class MLWorker {
 
     /** Invoked in response to external events. */
     private wakeUp() {
-        if (this.idleTimeout) {
+        if (!this.haveStarted) {
+            // First time something happened.
+            this.haveStarted = true;
+            void this.tick();
+        } else if (this.idleTimeout) {
+            // Currently paused. Get back to work.
             clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
             void this.tick();
         } else {
-            // this.tick will get run when the current task finishes.
+            // In the middle of a task. Do nothing, `this.tick` will
+            // automatically be invoked when the current task finishes.
         }
     }
 
@@ -114,6 +121,13 @@ export class MLWorker {
     }
 
     private async tick() {
+        log.debug(() => ({
+            t: "ml-tick",
+            shouldSync: this.shouldSync,
+            liveQ: this.liveQ,
+            idleDuration: this.idleDuration,
+        }));
+
         const next = () => void setTimeout(() => this.tick(), 0);
 
         // If we've been asked to sync, do that irrespective of anything else.
