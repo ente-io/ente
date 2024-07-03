@@ -3,7 +3,9 @@ import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 // import { expose } from "comlink";
+import downloadManager from "@/new/photos/services/download";
 import { getKVN } from "@/next/kv";
+import { ensureAuthToken } from "@/next/local-user";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { syncWithLocalFilesAndGetFilesToIndex } from ".";
@@ -52,8 +54,11 @@ export class MLWorker {
      * @param userAgent The user agent string to use as the client field in the
      * embeddings generated during indexing by this client.
      */
-    init(userAgent: string) {
+    async init(userAgent: string) {
         this.userAgent = userAgent;
+        // Initialize the downloadManager running in the web worker with the
+        // user's token. It'll be used to download files to index if needed.
+        await downloadManager.init(await ensureAuthToken());
     }
 
     /**

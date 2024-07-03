@@ -41,15 +41,18 @@ let _isMLEnabled = false;
 let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
-export const worker = async () =>
-    (_comlinkWorker ??= createComlinkWorker()).remote;
+export const worker = async () => {
+    if (!_comlinkWorker) _comlinkWorker = await createComlinkWorker();
+    return _comlinkWorker.remote;
+};
 
-const createComlinkWorker = () => {
+const createComlinkWorker = async () => {
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ml",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-    void cw.remote.then((w) => getUserAgent().then((ua) => w.init(ua)));
+    const ua = await getUserAgent();
+    await cw.remote.then((w) => w.init(ua));
     return cw;
 };
 
@@ -196,6 +199,7 @@ export const setIsFaceIndexingEnabled = (enabled: boolean) =>
  *
  * @param count Limit the resulting list of indexable files to {@link count}.
  */
+// TODO-ML: Move to worker
 export const syncWithLocalFilesAndGetFilesToIndex = async (
     userID: number,
     count: number,
