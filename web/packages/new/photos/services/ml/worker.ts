@@ -15,26 +15,8 @@ import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { indexFaces } from "./index-face";
 
-/**
- * The MLWorker state machine.
- *
- *     ext. event      state           then state
- *    ------------- --------------- --------------
- *     sync         -> "pull"       -> "idle"
- *     upload       -> "liveq"      -> "idle"
- *     idleTimeout  -> "backfillq"  -> "idle"
- *
- * where
- *
- * -   "pull": pulling embeddings from remote
- * -   "liveq": indexing items that are being uploaded
- * -   "backfillq": indexing unindexed items otherwise
- * -   "idle": in between state transitions
- */
-type MLWorkerState = "idle" | "pull" | "liveq" | "backfillq";
-
-const durationStart = 5; /* 5 seconds */
-const durationMax = 16 * 60; /* 16 minutes */
+const idleDurationStart = 5; /* 5 seconds */
+const idleDurationMax = 16 * 60; /* 16 minutes */
 
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
@@ -42,15 +24,28 @@ const durationMax = 16 * 60; /* 16 minutes */
  * This is a normal class that is however exposed (via comlink) as a proxy
  * running inside a Web Worker. This way, we do not bother the main thread with
  * tasks that might degrade interactivity.
+ *
+ * Conceptually, the MLWorker state machine is as follows:
+ *
+ *     ext. event      state           then state
+ *    ------------- --------------- --------------
+ *     sync         -> "pull"       -> "idle"
+ *     upload       -> "liveq"      -> "idle"
+ *     idleTimeout  -> "backfillq"  -> "idle"
+ *
+ * where:
+ *
+ * -   "pull": pulling embeddings from remote
+ * -   "liveq": indexing items that are being uploaded
+ * -   "backfillq": indexing unindexed items otherwise
+ * -   "idle": in between state transitions
  */
 export class MLWorker {
-    private state: MLWorkerState = "idle";
     private userAgent: string | undefined;
     private shouldSync = false;
     private liveQ: EnteFile[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
-    private idleDuration = durationStart; /* unit: seconds */
-    private backfillPauseDuration = durationStart; /* unit: seconds */
+    private idleDuration = idleDurationStart; /* unit: seconds */
 
     /**
      * Initialize a new {@link MLWorker}.
@@ -80,6 +75,7 @@ export class MLWorker {
         this.wakeUp();
     }
 
+    /** Invoked in response to external events. */
     private wakeUp() {
         if (this.idleTimeout) {
             clearTimeout(this.idleTimeout);
@@ -96,21 +92,21 @@ export class MLWorker {
         // unnecessary; I'm doing this partially out of superstition, aiming to
         // to give GC a chance to run if needed, and also generally ease
         // execution and memory pressure.
-        const next = () => setTimeout(() => this.tick(), 0);
+        const next = () => void setTimeout(() => this.tick(), 0);
 
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldSync) {
             this.shouldSync = false;
-            this.state = "pull";
-            this.idleDuration = durationStart;
-            void this.pull().then(next);
+            // Reset the idle duration too.
+            this.idleDuration = idleDurationStart;
+            await this.pull();
+            next();
             return;
         }
 
         // Otherwise see if there is something in the live queue.
         if (this.liveQ.length > 0) {
-            this.state = "liveq";
-            this.idleDuration = durationStart;
+            this.idleDuration = idleDurationStart;
             void this.liveq().then(next);
             return;
         }
@@ -118,17 +114,28 @@ export class MLWorker {
         // Otherwise check to see if there is something to backfill.
         const { indexableCount } = await indexedAndIndexableCounts();
         if (indexableCount > 0) {
-            this.state = "backfillq";
-            this.idleDuration = durationStart;
-            void this.backfillq().then(next);
-            return;
+            const allSuccess = await backfill(ensure(this.userAgent));
+            if (allSuccess) {
+                // Everything is running smoothly. Reset the idle duration.
+                this.idleDuration = idleDurationStart;
+                // And tick again.
+                next();
+                return;
+            }
         }
 
-        // Nothing to do. Go to sleep for exponentially longer durations of
-        // time (limited to some maximum).
+        // We come here in two scenarios:
+        //
+        // 1.  Nothing to do.
+        //
+        // 2.  We encountered failures during backfill. Failures are not really
+        //     expected, so something unexpected might be going on, or remote
+        //     might be having issues.
+        //
+        // In both cases, we pause for exponentially longer durations of time
+        // (limited to some maximum).
 
-        this.state = "idle";
-        this.idleDuration = Math.min(this.idleDuration * 2, durationMax);
+        this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(next, this.idleDuration * 1000);
     }
 
@@ -139,21 +146,6 @@ export class MLWorker {
     async liveq() {
         console.log("liveq");
         await wait(0);
-    }
-
-    async backfillq() {
-        const allSuccess = await backfill(ensure(this.userAgent));
-        if (allSuccess) {
-            // Everything is running smoothly. Reset the backfill pause.
-            this.backfillPauseDuration = durationStart;
-        } else {
-            // If we encountered failures in the batch, pause for increasing
-            // durations of time. Failures are not really expected, so something
-            // unexpected might be going on, or remote might be having issues.
-            const d = Math.min(this.backfillPauseDuration * 2, durationMax);
-            this.backfillPauseDuration = d;
-            await wait(d);
-        }
     }
 }
 
