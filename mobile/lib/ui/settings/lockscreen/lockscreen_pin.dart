@@ -172,42 +172,63 @@ class _LockScreenPinState extends State<LockScreenPin> {
             height: 120,
             width: 120,
             child: Stack(
+              alignment: Alignment.center,
               children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: 75,
-                    width: 75,
-                    child: ValueListenableBuilder(
-                      valueListenable: _pinController,
-                      builder: (context, value, child) {
-                        return TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                            begin: 0,
-                            end: _pinController.text.length / 4,
-                          ),
-                          curve: Curves.ease,
-                          duration: const Duration(milliseconds: 250),
-                          builder: (context, value, _) =>
-                              CircularProgressIndicator(
-                            backgroundColor: colorTheme.fillStrong,
-                            value: value,
-                            color: colorTheme.primary400,
-                            strokeWidth: 1.5,
-                          ),
-                        );
-                      },
+                Container(
+                  width: 82,
+                  height: 82,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.grey.shade500.withOpacity(0.2),
+                        Colors.grey.shade50.withOpacity(0.1),
+                        Colors.grey.shade400.withOpacity(0.2),
+                        Colors.grey.shade300.withOpacity(0.4),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorTheme.backgroundBase,
+                      ),
                     ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.center,
-                  child: IconButtonWidget(
-                    size: 30,
-                    icon: Icons.lock,
-                    iconButtonType: IconButtonType.primary,
-                    iconColor: colorTheme.tabIcon,
+                SizedBox(
+                  height: 75,
+                  width: 75,
+                  child: ValueListenableBuilder(
+                    valueListenable: _pinController,
+                    builder: (context, value, child) {
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: 0,
+                          end: _pinController.text.length / 4,
+                        ),
+                        curve: Curves.ease,
+                        duration: const Duration(milliseconds: 250),
+                        builder: (context, value, _) =>
+                            CircularProgressIndicator(
+                          backgroundColor: colorTheme.fillStrong,
+                          value: value,
+                          color: colorTheme.primary400,
+                          strokeWidth: 1.5,
+                        ),
+                      );
+                    },
                   ),
+                ),
+                IconButtonWidget(
+                  size: 30,
+                  icon: Icons.lock,
+                  iconButtonType: IconButtonType.primary,
+                  iconColor: colorTheme.tabIcon,
                 ),
               ],
             ),
@@ -255,7 +276,6 @@ class _LockScreenPinState extends State<LockScreenPin> {
             obscuringCharacter: '*',
             errorText: '',
             onCompleted: (value) async {
-              await Future.delayed(const Duration(milliseconds: 250));
               await _confirmPin(_pinController.text);
             },
           ),

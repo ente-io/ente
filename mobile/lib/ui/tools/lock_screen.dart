@@ -3,13 +3,17 @@ import "dart:io";
 import "dart:math";
 
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/common/gradient_button.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 
 class LockScreen extends StatefulWidget {
@@ -30,16 +34,7 @@ class _LockScreenState extends State<LockScreen>
   int lockedTime = 0;
   int invalidAttemptCount = 0;
   int remainingTime = 0;
-  bool showErrorMessage = true;
   final _lockscreenSetting = LockscreenSetting.instance;
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 500),
-    vsync: this,
-  );
-  late final animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeInOut,
-  );
 
   @override
   void initState() {
@@ -59,6 +54,7 @@ class _LockScreenState extends State<LockScreen>
   @override
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -70,113 +66,100 @@ class _LockScreenState extends State<LockScreen>
           ),
         ),
         child: Center(
-          child: isTimerRunning
-              ? Column(
+          child: Column(
+            children: [
+              const Spacer(),
+              SizedBox(
+                height: 120,
+                width: 120,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    const Spacer(),
-                    SizedBox(
-                      height: 120,
-                      width: 120,
-                      child: Stack(
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: Container(
-                              width: 82,
-                              height: 82,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.white70.withOpacity(0.2),
-                                    Colors.white10.withOpacity(0.2),
-                                    Colors.white70.withOpacity(0.4),
-                                    Colors.white60.withOpacity(0.8),
-                                  ],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(1.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: colorTheme.backgroundBase,
-                                  ),
-                                ),
-                              ),
-                            ),
+                    Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.shade500.withOpacity(0.2),
+                            Colors.grey.shade50.withOpacity(0.1),
+                            Colors.grey.shade400.withOpacity(0.2),
+                            Colors.grey.shade300.withOpacity(0.4),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorTheme.backgroundBase,
                           ),
-                          Align(
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              height: 75,
-                              width: 75,
-                              child: TweenAnimationBuilder<double>(
-                                tween: Tween<double>(
-                                  begin: 0,
-                                  end: calculateRemainingTime(),
-                                ),
-                                curve: Curves.ease,
-                                duration: const Duration(milliseconds: 50),
-                                builder: (context, value, _) =>
-                                    CircularProgressIndicator(
-                                  backgroundColor: colorTheme.backdropBase,
-                                  value: value,
-                                  color: colorTheme.primary400,
-                                  strokeWidth: 1.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.center,
-                            child: IconButtonWidget(
-                              size: 30,
-                              icon: Icons.lock,
-                              iconButtonType: IconButtonType.primary,
-                              iconColor: colorTheme.tabIcon,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                    const Spacer(),
-                    AnimatedSwitcher(
-                      duration: const Duration(seconds: 1),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: showErrorMessage
-                          ? const Text(
-                              "Too many incorrect attempts",
-                              key: ValueKey<int>(1),
-                            )
-                          : Text(
-                              formatTime(remainingTime),
-                              key: const ValueKey<int>(2),
-                            ),
-                    ),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
                     SizedBox(
-                      width: 180,
-                      child: GradientButton(
-                        text: context.l10n.unlock,
-                        iconData: Icons.lock_open_outlined,
-                        onTap: () async {
-                          await _showLockScreen(source: "tapUnlock");
-                        },
+                      height: 75,
+                      width: 75,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: 0,
+                          end: calculateRemainingTime(),
+                        ),
+                        curve: Curves.ease,
+                        duration: const Duration(milliseconds: 50),
+                        builder: (context, value, _) =>
+                            CircularProgressIndicator(
+                          backgroundColor: colorTheme.fillFaintPressed,
+                          value: value,
+                          color: colorTheme.primary400,
+                          strokeWidth: 1.5,
+                        ),
                       ),
+                    ),
+                    IconButtonWidget(
+                      size: 30,
+                      icon: Icons.lock,
+                      iconButtonType: IconButtonType.primary,
+                      iconColor: colorTheme.tabIcon,
                     ),
                   ],
                 ),
+              ),
+              const Spacer(),
+              isTimerRunning
+                  ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          "Too many incorrect attempts",
+                          style: textTheme.body,
+                        )
+                            .animate(delay: const Duration(milliseconds: 2000))
+                            .fadeOut(duration: 400.ms),
+                        Text(
+                          formatTime(remainingTime),
+                          style: textTheme.body,
+                        )
+                            .animate(delay: const Duration(milliseconds: 2250))
+                            .fadeIn(duration: 400.ms),
+                      ],
+                    )
+                  : GestureDetector(
+                      onTap: () => _showLockScreen(source: "tap"),
+                      child: Text(
+                        "Tap to unlock",
+                        style: textTheme.body,
+                      ),
+                    ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -188,6 +171,39 @@ class _LockScreenState extends State<LockScreen>
     }
     final shortestSide = MediaQuery.of(context).size.shortestSide;
     return shortestSide > 600 ? true : false;
+  }
+
+  Future<void> _autoLogoutOnMaxInvalidAttempts() async {
+    final AlertDialog alert = AlertDialog(
+      title: const Text("Too many incorrect attempts"),
+      content: Text(S.of(context).pleaseLoginAgain),
+      actions: [
+        TextButton(
+          child: Text(
+            S.of(context).ok,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.greenAlternative,
+            ),
+          ),
+          onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            final dialog =
+                createProgressDialog(context, S.of(context).loggingOut);
+            await dialog.show();
+            await Configuration.instance.logout();
+            await dialog.hide();
+          },
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -230,7 +246,6 @@ class _LockScreenState extends State<LockScreen>
   @override
   void dispose() {
     _logger.info('disposing');
-    _controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -314,15 +329,16 @@ class _LockScreenState extends State<LockScreen>
               invalidAttemptCount !=
                   _lockscreenSetting.getInvalidAttemptCount()) {
             invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
+
+            if (invalidAttemptCount > 9) {
+              await _autoLogoutOnMaxInvalidAttempts();
+              return;
+            }
+
             lockedTime = pow(2, invalidAttemptCount - 5).toInt() * 30;
             await _lockscreenSetting.setLastInvalidAttemptTime(
               DateTime.now().millisecondsSinceEpoch + lockedTime * 1000,
             );
-            Timer(const Duration(seconds: 2), () {
-              setState(() {
-                showErrorMessage = false;
-              });
-            });
             await startLockTimer(lockedTime);
           }
           _hasAuthenticationFailed = true;

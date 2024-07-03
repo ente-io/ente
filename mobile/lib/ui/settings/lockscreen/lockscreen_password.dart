@@ -161,27 +161,48 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                 height: 120,
                 width: 120,
                 child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: SizedBox(
-                        height: 75,
-                        width: 75,
-                        child: CircularProgressIndicator(
-                          backgroundColor: colorTheme.fillStrong,
-                          value: 1,
-                          strokeWidth: 1.5,
+                    Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.shade500.withOpacity(0.2),
+                            Colors.grey.shade50.withOpacity(0.1),
+                            Colors.grey.shade400.withOpacity(0.2),
+                            Colors.grey.shade300.withOpacity(0.4),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorTheme.backgroundBase,
+                          ),
                         ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: IconButtonWidget(
-                        size: 30,
-                        icon: Icons.lock,
-                        iconButtonType: IconButtonType.primary,
-                        iconColor: colorTheme.tabIcon,
+                    SizedBox(
+                      height: 75,
+                      width: 75,
+                      child: CircularProgressIndicator(
+                        backgroundColor: colorTheme.fillStrong,
+                        value: 1,
+                        strokeWidth: 1.5,
                       ),
+                    ),
+                    IconButtonWidget(
+                      size: 30,
+                      icon: Icons.lock,
+                      iconButtonType: IconButtonType.primary,
+                      iconColor: colorTheme.tabIcon,
                     ),
                   ],
                 ),

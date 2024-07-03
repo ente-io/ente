@@ -16,7 +16,7 @@ class LockScreenConfirmPin extends StatefulWidget {
 
 class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
-
+  bool isConfirmPinValid = false;
   final LockscreenSetting _lockscreenSetting = LockscreenSetting.instance;
   final _pinPutDecoration = PinTheme(
     height: 48,
@@ -55,8 +55,15 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
       Navigator.of(context).pop(true);
       return;
     }
+    setState(() {
+      isConfirmPinValid = true;
+    });
     await HapticFeedback.vibrate();
+    await Future.delayed(const Duration(milliseconds: 75));
     _confirmPinController.clear();
+    setState(() {
+      isConfirmPinValid = false;
+    });
   }
 
   @override
@@ -97,42 +104,63 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             height: 120,
             width: 120,
             child: Stack(
+              alignment: Alignment.center,
               children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: 75,
-                    width: 75,
-                    child: ValueListenableBuilder(
-                      valueListenable: _confirmPinController,
-                      builder: (context, value, child) {
-                        return TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                            begin: 0,
-                            end: _confirmPinController.text.length / 4,
-                          ),
-                          curve: Curves.ease,
-                          duration: const Duration(milliseconds: 250),
-                          builder: (context, value, _) =>
-                              CircularProgressIndicator(
-                            backgroundColor: colorTheme.fillStrong,
-                            value: value,
-                            color: colorTheme.primary400,
-                            strokeWidth: 1.5,
-                          ),
-                        );
-                      },
+                Container(
+                  width: 82,
+                  height: 82,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.grey.shade500.withOpacity(0.2),
+                        Colors.grey.shade50.withOpacity(0.1),
+                        Colors.grey.shade400.withOpacity(0.2),
+                        Colors.grey.shade300.withOpacity(0.4),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorTheme.backgroundBase,
+                      ),
                     ),
                   ),
                 ),
-                Align(
-                  alignment: Alignment.center,
-                  child: IconButtonWidget(
-                    size: 30,
-                    icon: Icons.lock,
-                    iconButtonType: IconButtonType.primary,
-                    iconColor: colorTheme.tabIcon,
+                SizedBox(
+                  height: 75,
+                  width: 75,
+                  child: ValueListenableBuilder(
+                    valueListenable: _confirmPinController,
+                    builder: (context, value, child) {
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: 0,
+                          end: _confirmPinController.text.length / 4,
+                        ),
+                        curve: Curves.ease,
+                        duration: const Duration(milliseconds: 250),
+                        builder: (context, value, _) =>
+                            CircularProgressIndicator(
+                          backgroundColor: colorTheme.fillStrong,
+                          value: value,
+                          color: colorTheme.primary400,
+                          strokeWidth: 1.5,
+                        ),
+                      );
+                    },
                   ),
+                ),
+                IconButtonWidget(
+                  size: 30,
+                  icon: Icons.lock,
+                  iconButtonType: IconButtonType.primary,
+                  iconColor: colorTheme.tabIcon,
                 ),
               ],
             ),
@@ -144,7 +172,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
           const Padding(padding: EdgeInsets.all(12)),
           Pinput(
             length: 4,
-            pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+            useNativeKeyboard: false,
             controller: _confirmPinController,
             defaultPinTheme: _pinPutDecoration,
             submittedPinTheme: _pinPutDecoration.copyWith(
@@ -169,7 +197,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
-                  color: colorTheme.fillBase,
+                  color: colorTheme.warning400,
                 ),
               ),
               textStyle:
@@ -178,12 +206,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             errorText: '',
             obscureText: true,
             obscuringCharacter: '*',
-            validator: (value) {
-              if (value == widget.pin) {
-                return null;
-              }
-              return 'PIN does not match';
-            },
+            forceErrorState: isConfirmPinValid,
             onCompleted: (value) async {
               await _confirmPinMatch();
             },
