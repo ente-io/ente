@@ -13,7 +13,7 @@ import {
     indexedAndIndexableCounts,
 } from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
-import { clientPackageName } from "@/next/app";
+import { clientPackageName, isDesktop } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
@@ -36,7 +36,7 @@ let _isMLEnabled = false;
 let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
-export const worker = async () => {
+const worker = async () => {
     if (!_comlinkWorker) _comlinkWorker = await createComlinkWorker();
     return _comlinkWorker.remote;
 };
@@ -72,7 +72,9 @@ export const terminateMLWorker = () => {
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
-    // TODO-ML: Rename
+    // ML currently only works when we're running in our desktop app.
+    if (!isDesktop) return;
+    // TODO-ML: Rename the isFace* flag since it now drives ML as a whole.
     _isMLEnabled = isFaceIndexingEnabled();
 };
 
@@ -132,7 +134,7 @@ export const disableML = () => {
  * on any client. This {@link isFaceIndexingEnabled} property, on the other
  * hand, denotes whether or not indexing is enabled on the current client.
  */
-export const isFaceIndexingEnabled = () =>
+const isFaceIndexingEnabled = () =>
     localStorage.getItem("faceIndexingEnabled") == "1";
 
 /**

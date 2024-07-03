@@ -4,9 +4,8 @@ import {
     disableML,
     enableML,
     initML,
-    isFaceIndexingEnabled,
+    isMLEnabled,
 } from "@/new/photos/services/ml";
-import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
@@ -183,6 +182,9 @@ export default function App({ Component, pageProps }: AppProps) {
             }
         };
 
+        initML();
+        setMlSearchEnabled(isMLEnabled());
+
         electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
@@ -190,23 +192,6 @@ export default function App({ Component, pageProps }: AppProps) {
             electron.onOpenURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
-
-    useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-        const loadMlSearchState = async () => {
-            try {
-                const enabled = isFaceIndexingEnabled();
-                setMlSearchEnabled(enabled);
-                mlWorkManager.setMlSearchEnabled(enabled);
-                initML();
-            } catch (e) {
-                log.error("Error while loading mlSearchEnabled", e);
-            }
-        };
-        loadMlSearchState();
     }, []);
 
     useEffect(() => {
@@ -301,7 +286,6 @@ export default function App({ Component, pageProps }: AppProps) {
         try {
             enabled ? enableML() : disableML();
             setMlSearchEnabled(enabled);
-            mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {
             log.error("Error while updating mlSearchEnabled", e);
         }
