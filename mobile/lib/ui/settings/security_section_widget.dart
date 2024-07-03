@@ -164,7 +164,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           } else {
             await showErrorDialog(
               context,
-              "",
+              "No system lock",
               "To enable app lock, please setup device passcode or screen lock in your system settings.",
             );
           }
