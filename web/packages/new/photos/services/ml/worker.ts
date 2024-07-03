@@ -7,11 +7,13 @@ import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 // import { expose } from "comlink";
+import { getKVN } from "@/next/kv";
+import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
+import { syncWithLocalFilesAndGetFilesToIndex } from ".";
 import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { indexFaces } from "./index-face";
-import { getKV } from "@/next/kv";
 
 /**
  * The MLWorker state machine.
@@ -137,12 +139,10 @@ export class MLWorker {
  * Find out files which need to be indexed. Then index the next batch of them.
  */
 const backfill = async () => {
-    const userID = await getKV("userID");
+    const userID = ensure(await getKVN("userID"));
 
-    // const files = await syncWithLocalFilesAndGetFilesToIndex(
-    //     userID,
-    //     batchSize,
-    // );
+    const files = await syncWithLocalFilesAndGetFilesToIndex(userID, 200);
+    if (files.length == 0) return;
 
     // if (syncContext.outOfSyncFiles.length > 0) {
     //     await this.syncFiles(syncContext);
@@ -151,8 +151,8 @@ const backfill = async () => {
     // const error = syncContext.error;
     // const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
     // return !error && nOutOfSyncFiles > 0;
+};
 
-}
 /**
  * Index faces in a file, save the persist the results locally, and put them
  * on remote.
