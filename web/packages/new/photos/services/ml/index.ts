@@ -120,7 +120,7 @@ export const enableML = () => {
 };
 
 /**
- * Disable ML
+ * Disable ML.
  *
  * Stop any in-progress ML tasks and persist the user's preference.
  */

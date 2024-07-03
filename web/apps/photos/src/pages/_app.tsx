@@ -1,6 +1,11 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import DownloadManager from "@/new/photos/services/download";
-import { disableML, enableML, initML, isFaceIndexingEnabled } from "@/new/photos/services/ml";
+import {
+    disableML,
+    enableML,
+    initML,
+    isFaceIndexingEnabled,
+} from "@/new/photos/services/ml";
 import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";

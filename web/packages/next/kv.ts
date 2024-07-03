@@ -104,13 +104,13 @@ export const clearKVDB = async () => {
  */
 export const getKV = async (key: string) => _getKV<string>(key, "string");
 
-export const _getKV = async <T>(
+export const _getKV = async <T extends string | number | boolean>(
     key: string,
     type: string,
 ): Promise<T | undefined> => {
     const db = await kvDB();
     const v = await db.get("kv", key);
-    if (v === undefined) return v;
+    if (v === undefined) return undefined;
     if (typeof v != type)
         throw new Error(
             `Expected the value corresponding to key ${key} to be a ${type}, but instead got ${v}`,
