@@ -39,7 +39,7 @@ class FaceDetectionService extends MlModel {
   factory FaceDetectionService() => instance;
 
   /// Detects faces in the given image data.
-  static Future<(List<FaceDetectionRelative>, Dimensions)> predict(
+  static Future<List<FaceDetectionRelative>> predict(
     ui.Image image,
     ByteData imageByteData,
     int sessionAddress,
@@ -49,7 +49,7 @@ class FaceDetectionService extends MlModel {
     final stopwatch = Stopwatch()..start();
 
     final stopwatchPreprocessing = Stopwatch()..start();
-    final (inputImageList, originalSize, newSize) =
+    final (inputImageList, newSize) =
         await preprocessImageToFloat32ChannelsFirst(
       image,
       imageByteData,
@@ -77,7 +77,6 @@ class FaceDetectionService extends MlModel {
     _logger.info(
       'Image decoding and preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
     );
-    _logger.info('original size: $originalSize \n new size: $newSize');
 
     // Run inference
     final stopwatchInterpreter = Stopwatch()..start();
@@ -104,7 +103,7 @@ class FaceDetectionService extends MlModel {
       'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',
     );
 
-    return (relativeDetections, originalSize);
+    return relativeDetections;
   }
 
   static List<FaceDetectionRelative> _yoloPostProcessOutputs(

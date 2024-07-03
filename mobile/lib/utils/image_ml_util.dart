@@ -120,8 +120,7 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   }
 }
 
-Future<(Float32List, Dimensions, Dimensions)>
-    preprocessImageToFloat32ChannelsFirst(
+Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
   Image image,
   ByteData imgByteData, {
   required int normalization,
@@ -135,19 +134,6 @@ Future<(Float32List, Dimensions, Dimensions)>
       : normalization == 1
           ? _normalizePixelRange1
           : _normalizePixelNoRange;
-  final originalSize = Dimensions(width: image.width, height: image.height);
-
-  if (image.width == requiredWidth && image.height == requiredHeight) {
-    return (
-      _createFloat32ListFromImageChannelsFirst(
-        image,
-        imgByteData,
-        normFunction: normFunction,
-      ),
-      originalSize,
-      originalSize
-    );
-  }
 
   double scaleW = requiredWidth / image.width;
   double scaleH = requiredHeight / image.height;
@@ -186,11 +172,7 @@ Future<(Float32List, Dimensions, Dimensions)>
     }
   }
 
-  return (
-    processedBytes,
-    originalSize,
-    Dimensions(width: scaledWidth, height: scaledHeight)
-  );
+  return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
 }
 
 Future<Float32List> preprocessImageClip(
