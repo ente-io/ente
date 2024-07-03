@@ -13,7 +13,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
-import "package:photos/utils/lockscreen_setting.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
 class LockScreen extends StatefulWidget {
   const LockScreen({Key? key}) : super(key: key);
@@ -34,7 +35,7 @@ class _LockScreenState extends State<LockScreen>
   int invalidAttemptCount = 0;
   int remainingTime = 0;
   bool showErrorMessage = true;
-  final _lockscreenSetting = LockscreenSetting.instance;
+  final _lockscreenSetting = LockScreenSettings.instance;
   late final AnimationController _controller = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
