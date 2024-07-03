@@ -47,7 +47,7 @@ export class MLWorker {
     private userAgent: string | undefined;
     private shouldSync = false;
     private liveQ: EnteFile[] = [];
-    private haveStarted = false;
+    private state: "idle" | "pull" | "indexing" = "idle";
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
 
@@ -84,13 +84,9 @@ export class MLWorker {
 
     /** Invoked in response to external events. */
     private wakeUp() {
-        if (!this.haveStarted) {
-            // First time something happened.
-            this.haveStarted = true;
-            void this.tick();
-        } else if (this.idleTimeout) {
+        if (this.state == "idle") {
             // Currently paused. Get back to work.
-            clearTimeout(this.idleTimeout);
+            if (this.idleTimeout) clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
             void this.tick();
         } else {
@@ -125,9 +121,17 @@ export class MLWorker {
         }
     }
 
+    /**
+     * Return true if we're currently indexing.
+     */
+    isIndexing() {
+        return this.state == "indexing";
+    }
+
     private async tick() {
         log.debug(() => ({
             t: "ml-tick",
+            state: this.state,
             shouldSync: this.shouldSync,
             liveQ: this.liveQ,
             idleDuration: this.idleDuration,
@@ -138,6 +142,7 @@ export class MLWorker {
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldSync) {
             this.shouldSync = false;
+            this.state = "pull";
             void pull().then((didPull) => {
                 // Reset the idle duration if we did pull something.
                 if (didPull) this.idleDuration = idleDurationStart;
@@ -150,6 +155,7 @@ export class MLWorker {
 
         const liveQ = this.liveQ;
         this.liveQ = [];
+        this.state = "indexing";
         const allSuccess = await indexNextBatch(ensure(this.userAgent), liveQ);
         if (allSuccess) {
             // Everything is running smoothly. Reset the idle duration.
@@ -169,6 +175,7 @@ export class MLWorker {
         // So in all cases, we pause for exponentially longer durations of time
         // (limited to some maximum).
 
+        this.state = "idle";
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
     }
@@ -208,8 +215,7 @@ const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
     for (const file of files) {
         try {
             await index(file, undefined, userAgent);
-            // Let the event loop run so that other events (like onUpload) can
-            // be acknowledged and noted down.
+            // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
             allSuccess = false;

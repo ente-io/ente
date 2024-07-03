@@ -1,6 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { faceIndexingStatus, isMLEnabled } from "@/new/photos/services/ml";
-import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
@@ -178,8 +177,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     try {
-        const isSyncing = mlWorkManager.isSyncing;
-        const indexStatus = await faceIndexingStatus(isSyncing);
+        const indexStatus = await faceIndexingStatus();
 
         let label: string;
         switch (indexStatus.phase) {

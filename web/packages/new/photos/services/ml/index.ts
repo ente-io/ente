@@ -201,18 +201,21 @@ export interface FaceIndexingStatus {
     nTotalFiles: number;
 }
 
-export const faceIndexingStatus = async (
-    isSyncing: boolean,
-): Promise<FaceIndexingStatus> => {
+/**
+ * Return the current state of the face indexing pipeline.
+ *
+ * Precondition: ML must be enabled.
+ */
+export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
+    if (!isMLEnabled())
+        throw new Error("Cannot get indexing status when ML is not enabled");
+
     const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
+    const isIndexing = await (await worker()).isIndexing();
 
     let phase: FaceIndexingStatus["phase"];
     if (indexableCount > 0) {
-        if (!isSyncing) {
-            phase = "scheduled";
-        } else {
-            phase = "indexing";
-        }
+        phase = !isIndexing ? "scheduled" : "indexing";
     } else {
         phase = "done";
     }
