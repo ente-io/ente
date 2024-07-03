@@ -91,6 +91,64 @@ export const logoutML = async () => {
 };
 
 /**
+ * Return true if we should show an option to the user to allow them to enable
+ * face search in the UI.
+ */
+export const canEnableFaceIndexing = async () =>
+    (await isInternalUser()) || (await isBetaUser());
+
+/**
+ * Return true if the user has enabled machine learning in their preferences.
+ *
+ * TODO-ML: The UI for this needs rework. We might retain the older remote (and
+ * local) storage key, but otherwise this setting now reflects the state of ML
+ * overall and not just face search.
+ */
+export const isMLEnabled = () => _isMLEnabled;
+
+/**
+ * Enable ML.
+ *
+ * Persist the user's preference and trigger a sync.
+ */
+export const enableML = () => {
+    setIsFaceIndexingEnabled(true);
+    _isMLEnabled = true;
+    triggerMLSync();
+};
+
+/**
+ * Disable ML
+ *
+ * Stop any in-progress ML tasks and persist the user's preference.
+ */
+export const disableML = () => {
+    terminateMLWorker();
+    setIsFaceIndexingEnabled(false);
+    _isMLEnabled = false;
+};
+
+/**
+ * Return true if the user has enabled face indexing in the app's settings.
+ *
+ * This setting is persisted locally (in local storage) and is not synced with
+ * remote. There is a separate setting, "faceSearchEnabled" that is synced with
+ * remote, but that tracks whether or not the user has enabled face search once
+ * on any client. This {@link isFaceIndexingEnabled} property, on the other
+ * hand, denotes whether or not indexing is enabled on the current client.
+ */
+export const isFaceIndexingEnabled = () =>
+    localStorage.getItem("faceIndexingEnabled") == "1";
+
+/**
+ * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
+ */
+const setIsFaceIndexingEnabled = (enabled: boolean) =>
+    enabled
+        ? localStorage.setItem("faceIndexingEnabled", "1")
+        : localStorage.removeItem("faceIndexingEnabled");
+
+/**
  * Trigger a "sync", whatever that means for the ML subsystem.
  *
  * This is called during the global sync sequence. If ML is enabled, then we use
@@ -159,64 +217,6 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
     return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
-};
-
-/**
- * Return true if we should show an option to the user to allow them to enable
- * face search in the UI.
- */
-export const canEnableFaceIndexing = async () =>
-    (await isInternalUser()) || (await isBetaUser());
-
-/**
- * Return true if the user has enabled face indexing in the app's settings.
- *
- * This setting is persisted locally (in local storage) and is not synced with
- * remote. There is a separate setting, "faceSearchEnabled" that is synced with
- * remote, but that tracks whether or not the user has enabled face search once
- * on any client. This {@link isFaceIndexingEnabled} property, on the other
- * hand, denotes whether or not indexing is enabled on the current client.
- */
-export const isFaceIndexingEnabled = () =>
-    localStorage.getItem("faceIndexingEnabled") == "1";
-
-/**
- * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
- */
-const setIsFaceIndexingEnabled = (enabled: boolean) =>
-    enabled
-        ? localStorage.setItem("faceIndexingEnabled", "1")
-        : localStorage.removeItem("faceIndexingEnabled");
-
-/**
- * Return true if the user has enabled machine learning in their preferences.
- *
- * TODO-ML: The UI for this needs rework. We might retain the older remote (and
- * local) storage key, but otherwise this setting now reflects the state of ML
- * overall and not just face search.
- */
-export const isMLEnabled = () => _isMLEnabled;
-
-/**
- * Enable ML.
- *
- * Persist the user's preference and trigger a sync.
- */
-export const enableML = () => {
-    setIsFaceIndexingEnabled(true);
-    _isMLEnabled = true;
-    triggerMLSync();
-};
-
-/**
- * Disable ML
- *
- * Stop any in-progress ML tasks and persist the user's preference.
- */
-export const disableML = () => {
-    terminateMLWorker();
-    setIsFaceIndexingEnabled(false);
-    _isMLEnabled = false;
 };
 
 /**
