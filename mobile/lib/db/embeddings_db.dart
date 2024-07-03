@@ -16,7 +16,6 @@ class EmbeddingsDB {
   static const databaseName = "ente.embeddings.db";
   static const tableName = "embeddings";
   static const columnFileID = "file_id";
-  static const columnModel = "model";
   static const columnEmbedding = "embedding";
   static const columnUpdationTime = "updation_time";
 
@@ -42,7 +41,7 @@ class EmbeddingsDB {
           1,
           (tx) async {
             await tx.execute(
-              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnModel INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID, $columnModel))',
+              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID))',
             );
           },
         ),
@@ -57,19 +56,16 @@ class EmbeddingsDB {
     await db.execute('DELETE FROM $tableName');
   }
 
-  Future<List<Embedding>> getAll(Model model) async {
+  Future<List<Embedding>> getAll() async {
     final db = await _database;
     final results = await db.getAll('SELECT * FROM $tableName');
     return _convertToEmbeddings(results);
   }
 
   // Get FileIDs for a specific model
-  Future<Set<int>> getFileIDs(Model model) async {
+  Future<Set<int>> getFileIDs() async {
     final db = await _database;
-    final results = await db.getAll(
-      'SELECT $columnFileID FROM $tableName WHERE $columnModel = ?',
-      [modelToInt(model)!],
-    );
+    final results = await db.getAll('SELECT $columnFileID FROM $tableName');
     if (results.isEmpty) {
       return <int>{};
     }
@@ -79,7 +75,7 @@ class EmbeddingsDB {
   Future<void> put(Embedding embedding) async {
     final db = await _database;
     await db.execute(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding, $columnUpdationTime) VALUES (?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnEmbedding, $columnUpdationTime) VALUES (?, ?, ?, ?)',
       _getRowFromEmbedding(embedding),
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -89,7 +85,7 @@ class EmbeddingsDB {
     final db = await _database;
     final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
     await db.executeBatch(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding, $columnUpdationTime) values(?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnEmbedding, $columnUpdationTime) values(?, ?, ?, ?)',
       inputs,
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -111,12 +107,9 @@ class EmbeddingsDB {
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
-  Future<void> deleteAllForModel(Model model) async {
+  Future<void> deleteAll() async {
     final db = await _database;
-    await db.execute(
-      'DELETE FROM $tableName WHERE $columnModel = ?',
-      [modelToInt(model)!],
-    );
+    await db.execute('DELETE FROM $tableName');
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
@@ -132,16 +125,14 @@ class EmbeddingsDB {
 
   Embedding _getEmbeddingFromRow(Map<String, dynamic> row) {
     final fileID = row[columnFileID];
-    final model = intToModel(row[columnModel])!;
     final bytes = row[columnEmbedding] as Uint8List;
     final list = Float32List.view(bytes.buffer);
-    return Embedding(fileID: fileID, model: model, embedding: list);
+    return Embedding(fileID: fileID, embedding: list);
   }
 
   List<Object?> _getRowFromEmbedding(Embedding embedding) {
     return [
       embedding.fileID,
-      modelToInt(embedding.model)!,
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),
       embedding.updationTime,
     ];
@@ -155,28 +146,6 @@ class EmbeddingsDB {
     final deprecatedIsar = File(dir.path + "/default.isar");
     if (await deprecatedIsar.exists()) {
       await deprecatedIsar.delete();
-    }
-  }
-
-  int? modelToInt(Model model) {
-    switch (model) {
-      case Model.onnxClip:
-        return 1;
-      case Model.ggmlClip:
-        return 2;
-      default:
-        return null;
-    }
-  }
-
-  Model? intToModel(int model) {
-    switch (model) {
-      case 1:
-        return Model.onnxClip;
-      case 2:
-        return Model.ggmlClip;
-      default:
-        return null;
     }
   }
 }

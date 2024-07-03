@@ -33,17 +33,16 @@ class EmbeddingStore {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<bool> pullEmbeddings(Model model) async {
-    return true; // TODO: remove this
+  Future<bool> pullEmbeddings() async {
     if (_remoteSyncStatus != null) {
       return _remoteSyncStatus!.future;
     }
     _remoteSyncStatus = Completer();
     try {
-      var remoteEmbeddings = await _getRemoteEmbeddings(model);
+      var remoteEmbeddings = await _getRemoteEmbeddings();
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
       while (remoteEmbeddings.hasMore) {
-        remoteEmbeddings = await _getRemoteEmbeddings(model);
+        remoteEmbeddings = await _getRemoteEmbeddings();
         await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
       }
       _remoteSyncStatus!.complete(true);
@@ -85,8 +84,8 @@ class EmbeddingStore {
     unawaited(_pushEmbedding(file, embedding));
   }
 
-  Future<void> clearEmbeddings(Model model) async {
-    await EmbeddingsDB.instance.deleteAllForModel(model);
+  Future<void> clearEmbeddings() async {
+    await EmbeddingsDB.instance.deleteAll();
     await _preferences.remove(kEmbeddingsSyncTimeKey);
   }
 
@@ -106,7 +105,6 @@ class EmbeddingStore {
         "/embeddings",
         data: {
           "fileID": embedding.fileID,
-          "model": embedding.model.name,
           "encryptedEmbedding": encryptedData,
           "decryptionHeader": header,
         },
@@ -119,10 +117,7 @@ class EmbeddingStore {
     }
   }
 
-  Future<RemoteEmbeddings> _getRemoteEmbeddings(
-    Model model, {
-    int limit = 200,
-  }) async {
+  Future<RemoteEmbeddings> _getRemoteEmbeddings({int limit = 200}) async {
     final remoteEmbeddings = <RemoteEmbedding>[];
     try {
       final sinceTime = _preferences.getInt(kEmbeddingsSyncTimeKey) ?? 0;
@@ -130,7 +125,6 @@ class EmbeddingStore {
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
-          "model": model.name,
           "sinceTime": sinceTime,
           "limit": limit,
         },
@@ -212,7 +206,6 @@ Future<List<Embedding>> _decodeEmbeddings(Map<String, dynamic> args) async {
     embeddings.add(
       Embedding(
         fileID: input.embedding.fileID,
-        model: deserialize(input.embedding.model),
         embedding: decodedEmbedding,
         updationTime: input.embedding.updatedAt,
       ),
