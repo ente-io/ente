@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:typed_data";
 
 import 'package:flutter/material.dart';
+import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -146,17 +147,25 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          final bool result = await requestAuthentication(
-            context,
-            S.of(context).authToChangeLockscreenSetting,
-          );
-          if (result) {
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const LockScreenOptions();
-                },
-              ),
+          if (await LocalAuthentication().isDeviceSupported()) {
+            final bool result = await requestAuthentication(
+              context,
+              S.of(context).authToChangeLockscreenSetting,
+            );
+            if (result) {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const LockScreenOptions();
+                  },
+                ),
+              );
+            }
+          } else {
+            await showErrorDialog(
+              context,
+              "",
+              "To enable app lock, please setup device passcode or screen lock in your system settings.",
             );
           }
         },
