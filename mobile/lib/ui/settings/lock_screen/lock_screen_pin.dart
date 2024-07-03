@@ -225,6 +225,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
           const Padding(padding: EdgeInsets.all(12)),
           Pinput(
             length: 4,
+            showCursor: false,
             useNativeKeyboard: false,
             controller: _pinController,
             defaultPinTheme: _pinPutDecoration,
@@ -253,8 +254,6 @@ class _LockScreenPinState extends State<LockScreenPin> {
                   color: colorTheme.warning400,
                 ),
               ),
-              textStyle:
-                  textTheme.h3Bold.copyWith(color: colorTheme.warning400),
             ),
             forceErrorState: isPinValid,
             obscureText: true,

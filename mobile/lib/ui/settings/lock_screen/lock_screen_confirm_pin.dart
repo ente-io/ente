@@ -159,6 +159,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
           const Padding(padding: EdgeInsets.all(12)),
           Pinput(
             length: 4,
+            showCursor: false,
             useNativeKeyboard: false,
             controller: _confirmPinController,
             defaultPinTheme: _pinPutDecoration,
@@ -187,8 +188,6 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                   color: colorTheme.warning400,
                 ),
               ),
-              textStyle:
-                  textTheme.h3Bold.copyWith(color: colorTheme.warning400),
             ),
             errorText: '',
             obscureText: true,
