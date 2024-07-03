@@ -8,13 +8,13 @@ import log from "./log";
  * motivation is to allow these to also be accessed from web workers (local
  * storage is limited to the main thread).
  *
- * The "kv" database consists of one object store, "kv". Each entry is a string.
- * The key is also a string.
+ * The "kv" database consists of one object store, "kv". Keys are strings.
+ * Values can be strings or number or booleans.
  */
 interface KVDBSchema extends DBSchema {
     kv: {
         key: string;
-        value: string;
+        value: string | number | boolean;
     };
 }
 
@@ -99,19 +99,36 @@ export const clearKVDB = async () => {
 };
 
 /**
- * Return the value stored corresponding to {@link key}, or `undefined` if there
- * is no such entry.
+ * Return the string value stored corresponding to {@link key}, or `undefined`
+ * if there is no such entry.
  */
-export const getKV = async (key: string) => {
+export const getKV = async (key: string) => _getKV<string>(key, "string");
+
+export const _getKV = async <T extends string | number | boolean>(
+    key: string,
+    type: string,
+): Promise<T | undefined> => {
     const db = await kvDB();
-    return await db.get("kv", key);
+    const v = await db.get("kv", key);
+    if (v === undefined) return undefined;
+    if (typeof v != type)
+        throw new Error(
+            `Expected the value corresponding to key ${key} to be a ${type}, but instead got ${v}`,
+        );
+    return v as T;
 };
+
+/** Numeric variant of {@link getKV}. */
+export const getKVN = async (key: string) => _getKV<number>(key, "number");
+
+/** Boolean variant of {@link getKV} */
+export const getKVB = async (key: string) => _getKV<boolean>(key, "boolean");
 
 /**
  * Save the given {@link value} corresponding to {@link key}, overwriting any
  * existing value.
  */
-export const setKV = async (key: string, value: string) => {
+export const setKV = async (key: string, value: string | number | boolean) => {
     const db = await kvDB();
     await db.put("kv", value, key);
 };

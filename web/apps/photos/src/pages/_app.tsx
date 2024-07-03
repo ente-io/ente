@@ -1,10 +1,6 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import DownloadManager from "@/new/photos/services/download";
-import {
-    isFaceIndexingEnabled,
-    setIsFaceIndexingEnabled,
-} from "@/new/photos/services/ml";
-import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
+import { initML } from "@/new/photos/services/ml";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
@@ -80,9 +76,7 @@ const redirectMap = new Map([
  * Properties available via {@link AppContext} to the Photos app's React tree.
  */
 type AppContextT = AccountsContextT & {
-    mlSearchEnabled: boolean;
     mapEnabled: boolean;
-    updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
     updateMapEnabled: (enabled: boolean) => Promise<void>;
     startLoading: () => void;
     finishLoading: () => void;
@@ -115,7 +109,6 @@ export default function App({ Component, pageProps }: AppProps) {
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const [redirectName, setRedirectName] = useState<string>(null);
-    const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const [mapEnabled, setMapEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
@@ -181,6 +174,8 @@ export default function App({ Component, pageProps }: AppProps) {
             }
         };
 
+        initML();
+
         electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
@@ -188,22 +183,6 @@ export default function App({ Component, pageProps }: AppProps) {
             electron.onOpenURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
-
-    useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-        const loadMlSearchState = async () => {
-            try {
-                const enabled = isFaceIndexingEnabled();
-                setMlSearchEnabled(enabled);
-                mlWorkManager.setMlSearchEnabled(enabled);
-            } catch (e) {
-                log.error("Error while loading mlSearchEnabled", e);
-            }
-        };
-        loadMlSearchState();
     }, []);
 
     useEffect(() => {
@@ -294,15 +273,6 @@ export default function App({ Component, pageProps }: AppProps) {
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
-    const updateMlSearchEnabled = async (enabled: boolean) => {
-        try {
-            setIsFaceIndexingEnabled(enabled);
-            setMlSearchEnabled(enabled);
-            mlWorkManager.setMlSearchEnabled(enabled);
-        } catch (e) {
-            log.error("Error while updating mlSearchEnabled", e);
-        }
-    };
 
     const updateMapEnabled = async (enabled: boolean) => {
         try {
@@ -336,14 +306,11 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
     const logout = () => {
-        setMlSearchEnabled(false);
         void photosLogout().then(() => router.push(PAGES.ROOT));
     };
 
     const appContext = {
         showNavBar,
-        mlSearchEnabled,
-        updateMlSearchEnabled,
         startLoading,
         finishLoading,
         closeMessageDialog,

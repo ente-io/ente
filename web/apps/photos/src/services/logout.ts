@@ -1,9 +1,7 @@
 import { accountLogout } from "@/accounts/services/logout";
 import DownloadManager from "@/new/photos/services/download";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
-import { terminateMLWorker } from "@/new/photos/services/ml";
-import { clearFaceDB } from "@/new/photos/services/ml/db";
-import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
+import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import log from "@/next/log";
 import { clipService } from "services/clip-service";
 import exportService from "./export";
@@ -59,15 +57,9 @@ export const photosLogout = async () => {
     const electron = globalThis.electron;
     if (electron) {
         try {
-            await mlWorkManager.logout();
+            await logoutML();
         } catch (e) {
             ignoreError("ML", e);
-        }
-
-        try {
-            await clearFaceDB();
-        } catch (e) {
-            ignoreError("face", e);
         }
 
         try {
