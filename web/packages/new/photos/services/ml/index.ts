@@ -1,5 +1,5 @@
 /**
- * @file Main thread interface to {@link MLWorker}.
+ * @file Main thread interface to the ML subsystem.
  */
 
 import { FILE_TYPE } from "@/media/file-type";
@@ -8,22 +8,15 @@ import {
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
 import {
-    getAllLocalFiles,
-    getLocalTrashedFiles,
-} from "@/new/photos/services/files";
-import {
     clearFaceDB,
     faceIndex,
-    indexableFileIDs,
     indexedAndIndexableCounts,
-    updateAssumingLocalFiles,
 } from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
 import { clientPackageName } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { ensure } from "@/utils/ensure";
 import { MLWorker } from "./worker";
 
 /**
@@ -236,38 +229,4 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
     return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
-};
-
-/**
- * Sync face DB with the local (and potentially indexable) files that we know
- * about. Then return the next {@link count} files that still need to be
- * indexed.
- *
- * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
- *
- * @param userID Sync only files owned by a {@link userID} with the face DB.
- *
- * @param count Limit the resulting list of indexable files to {@link count}.
- */
-// TODO-ML: Move to worker
-export const syncWithLocalFilesAndGetFilesToIndex = async (
-    userID: number,
-    count: number,
-): Promise<EnteFile[]> => {
-    const isIndexable = (f: EnteFile) => f.ownerID == userID;
-
-    const localFiles = await getAllLocalFiles();
-    const localFilesByID = new Map(
-        localFiles.filter(isIndexable).map((f) => [f.id, f]),
-    );
-
-    const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
-
-    await updateAssumingLocalFiles(
-        Array.from(localFilesByID.keys()),
-        localTrashFileIDs,
-    );
-
-    const fileIDsToIndex = await indexableFileIDs(count);
-    return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
 };

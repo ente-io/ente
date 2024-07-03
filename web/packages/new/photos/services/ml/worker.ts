@@ -1,5 +1,10 @@
 import downloadManager from "@/new/photos/services/download";
-import { markIndexingFailed, saveFaceIndex } from "@/new/photos/services/ml/db";
+import {
+    indexableFileIDs,
+    markIndexingFailed,
+    saveFaceIndex,
+    updateAssumingLocalFiles,
+} from "@/new/photos/services/ml/db";
 import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import { getKVN } from "@/next/kv";
@@ -8,8 +13,8 @@ import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
-import { syncWithLocalFilesAndGetFilesToIndex } from ".";
 import { fileLogID } from "../../utils/file";
+import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { indexFaces } from "./index-face";
 
@@ -116,7 +121,7 @@ export class MLWorker {
             this.liveQ.push(file);
             this.wakeUp();
         } else {
-            log.debug(() => "Ignoring liveQ item since liveQ is full");
+            log.debug(() => "Ignoring live item since liveQ is full");
         }
     }
 
@@ -212,6 +217,39 @@ const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
     }
 
     return allSuccess;
+};
+
+/**
+ * Sync face DB with the local (and potentially indexable) files that we know
+ * about. Then return the next {@link count} files that still need to be
+ * indexed.
+ *
+ * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
+ *
+ * @param userID Sync only files owned by a {@link userID} with the face DB.
+ *
+ * @param count Limit the resulting list of indexable files to {@link count}.
+ */
+const syncWithLocalFilesAndGetFilesToIndex = async (
+    userID: number,
+    count: number,
+): Promise<EnteFile[]> => {
+    const isIndexable = (f: EnteFile) => f.ownerID == userID;
+
+    const localFiles = await getAllLocalFiles();
+    const localFilesByID = new Map(
+        localFiles.filter(isIndexable).map((f) => [f.id, f]),
+    );
+
+    const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
+
+    await updateAssumingLocalFiles(
+        Array.from(localFilesByID.keys()),
+        localTrashFileIDs,
+    );
+
+    const fileIDsToIndex = await indexableFileIDs(count);
+    return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
 };
 
 /**
