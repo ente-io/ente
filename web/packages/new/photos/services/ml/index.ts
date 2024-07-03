@@ -18,6 +18,8 @@ import {
     updateAssumingLocalFiles,
 } from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
+import { clientPackageName } from "@/next/app";
+import { ensureElectron } from "@/next/electron";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { MLWorker } from "./worker";
@@ -42,11 +44,17 @@ let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
 export const worker = async () =>
     (_comlinkWorker ??= createComlinkWorker()).remote;
 
-const createComlinkWorker = () =>
-    new ComlinkWorker<typeof MLWorker>(
+const createComlinkWorker = () => {
+    const cw = new ComlinkWorker<typeof MLWorker>(
         "ml",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
+    void cw.remote.then((w) => getUserAgent().then((ua) => w.init(ua)));
+    return cw;
+};
+
+const getUserAgent = async () =>
+    `${clientPackageName}/${await ensureElectron().appVersion()}`;
 
 /**
  * Terminate {@link worker} (if any).
@@ -73,7 +81,7 @@ export const initML = () => {
 export const logoutML = async () => {
     // `terminateMLWorker` is conceptually also part of this, but for the
     // reasons mentioned in [Note: Caching IDB instances in separate execution
-    // contexts], it gets called first in the logout sequence, and this this
+    // contexts], it gets called first in the logout sequence, and then this
     // `logoutML` gets called at a later point in time.
     _isMLEnabled = false;
     await clearFaceDB();

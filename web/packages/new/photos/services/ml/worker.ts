@@ -33,8 +33,8 @@ import { indexFaces } from "./index-face";
  */
 type MLWorkerState = "idle" | "pull" | "liveq" | "backfillq";
 
-const idleDurationStart = 5; /* 5 seconds */
-const idleDurationMax = 16 * 60; /* 16 minutes */
+const durationStart = 5; /* 5 seconds */
+const durationMax = 16 * 60; /* 16 minutes */
 
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
@@ -45,11 +45,25 @@ const idleDurationMax = 16 * 60; /* 16 minutes */
  */
 export class MLWorker {
     private state: MLWorkerState = "idle";
-    private isSyncing = false;
+    private userAgent: string | undefined;
     private shouldSync = false;
     private liveQ: EnteFile[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
-    private idleDuration = idleDurationStart; /* unit: seconds */
+    private idleDuration = durationStart; /* unit: seconds */
+    private backfillPauseDuration = durationStart; /* unit: seconds */
+
+    /**
+     * Initialize a new {@link MLWorker}.
+     *
+     * This is conceptually the constructor, however it is easier to have this
+     * as a separate function to avoid confounding the comlink types too much.
+     *
+     * @param userAgent The user agent string to use as the client field in the
+     * embeddings generated during indexing by this client.
+     */
+    init(userAgent: string) {
+        this.userAgent = userAgent;
+    }
 
     /**
      * Pull embeddings from remote, and start backfilling if needed.
@@ -88,7 +102,7 @@ export class MLWorker {
         if (this.shouldSync) {
             this.shouldSync = false;
             this.state = "pull";
-            this.idleDuration = idleDurationStart;
+            this.idleDuration = durationStart;
             void this.pull().then(next);
             return;
         }
@@ -96,7 +110,7 @@ export class MLWorker {
         // Otherwise see if there is something in the live queue.
         if (this.liveQ.length > 0) {
             this.state = "liveq";
-            this.idleDuration = idleDurationStart;
+            this.idleDuration = durationStart;
             void this.liveq().then(next);
             return;
         }
@@ -105,7 +119,7 @@ export class MLWorker {
         const { indexableCount } = await indexedAndIndexableCounts();
         if (indexableCount > 0) {
             this.state = "backfillq";
-            this.idleDuration = idleDurationStart;
+            this.idleDuration = durationStart;
             void this.backfillq().then(next);
             return;
         }
@@ -114,7 +128,7 @@ export class MLWorker {
         // time (limited to some maximum).
 
         this.state = "idle";
-        this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
+        this.idleDuration = Math.min(this.idleDuration * 2, durationMax);
         this.idleTimeout = setTimeout(next, this.idleDuration * 1000);
     }
 
@@ -128,7 +142,18 @@ export class MLWorker {
     }
 
     async backfillq() {
-        await backfill();
+        const allSuccess = await backfill(ensure(this.userAgent));
+        if (allSuccess) {
+            // Everything is running smoothly. Reset the backfill pause.
+            this.backfillPauseDuration = durationStart;
+        } else {
+            // If we encountered failures in the batch, pause for increasing
+            // durations of time. Failures are not really expected, so something
+            // unexpected might be going on, or remote might be having issues.
+            const d = Math.min(this.backfillPauseDuration * 2, durationMax);
+            this.backfillPauseDuration = d;
+            await wait(d);
+        }
     }
 }
 
@@ -138,19 +163,21 @@ export class MLWorker {
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
  */
-const backfill = async () => {
+const backfill = async (userAgent: string) => {
     const userID = ensure(await getKVN("userID"));
 
     const files = await syncWithLocalFilesAndGetFilesToIndex(userID, 200);
-    if (files.length == 0) return;
 
-    // if (syncContext.outOfSyncFiles.length > 0) {
-    //     await this.syncFiles(syncContext);
-    // }
+    let allSuccess = true;
+    for (const file of files) {
+        try {
+            await index(file, undefined, userAgent);
+        } catch {
+            allSuccess = false;
+        }
+    }
 
-    // const error = syncContext.error;
-    // const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
-    // return !error && nOutOfSyncFiles > 0;
+    return allSuccess;
 };
 
 /**
