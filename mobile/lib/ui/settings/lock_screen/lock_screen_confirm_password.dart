@@ -155,7 +155,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
                 ),
               ),
               Text(
-                'Re-enter Password',
+                S.of(context).reenterPassword,
                 style: textTheme.bodyBold,
               ),
               const Padding(padding: EdgeInsets.all(12)),

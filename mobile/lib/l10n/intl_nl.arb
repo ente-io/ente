@@ -1231,5 +1231,18 @@
   "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
   "foundFaces": "Found faces",
   "clusteringProgress": "Clustering progress",
-  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready"
+  "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready",
+  "reenterPassword": "Re-enter password",
+  "reenterPin": "Re-enter PIN",
+  "deviceLock": "Device lock",
+  "pinLock": "PIN lock",
+  "next": "Next",
+  "setNewPassword": "Set new password",
+  "enterPin": "Enter PIN",
+  "setNewPin": "Set new PIN",
+  "appLock": "App lock",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "tapToUnlock": "Tap to unlock",
+  "tooManyIncorrectAttempts": "Too many incorrect attempts"
 }

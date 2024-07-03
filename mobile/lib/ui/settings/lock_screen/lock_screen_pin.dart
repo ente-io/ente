@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
@@ -219,7 +220,9 @@ class _LockScreenPinState extends State<LockScreenPin> {
             ),
           ),
           Text(
-            widget.isAuthenticating ? "Enter PIN" : "Set new PIN",
+            widget.isAuthenticating
+                ? S.of(context).enterPin
+                : S.of(context).setNewPin,
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

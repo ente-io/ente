@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/settings/lock_screen/custom_pin_keypad.dart";
@@ -153,7 +154,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             ),
           ),
           Text(
-            'Re-enter PIN',
+            S.of(context).reenterPin,
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

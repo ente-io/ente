@@ -141,8 +141,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: 'App lock',
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).appLock,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -164,8 +164,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           } else {
             await showErrorDialog(
               context,
-              "No system lock",
-              "To enable app lock, please setup device passcode or screen lock in your system settings.",
+              S.of(context).noSystemLockFound,
+              S.of(context).toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
             );
           }
         },

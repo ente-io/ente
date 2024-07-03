@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
@@ -155,9 +156,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                             ? Column(
                                 children: [
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: 'Device Lock',
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: S.of(context).deviceLock,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: false,
@@ -175,9 +175,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     bgColor: colorTheme.fillFaint,
                                   ),
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: 'PIN lock',
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: S.of(context).pinLock,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: true,
@@ -193,9 +192,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     bgColor: colorTheme.fillFaint,
                                   ),
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: 'Password lock',
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: S.of(context).passwordLock,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: true,

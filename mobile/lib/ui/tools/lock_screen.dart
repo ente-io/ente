@@ -153,7 +153,7 @@ class _LockScreenState extends State<LockScreen>
                         alignment: Alignment.center,
                         children: [
                           Text(
-                            "Too many incorrect attempts",
+                            S.of(context).tooManyIncorrectAttempts,
                             style: textTheme.small,
                           )
                               .animate(
@@ -179,7 +179,7 @@ class _LockScreenState extends State<LockScreen>
                     : GestureDetector(
                         onTap: () => _showLockScreen(source: "tap"),
                         child: Text(
-                          "Tap to unlock",
+                          S.of(context).tapToUnlock,
                           style: textTheme.small,
                         ),
                       ),
@@ -204,7 +204,7 @@ class _LockScreenState extends State<LockScreen>
 
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
     final AlertDialog alert = AlertDialog(
-      title: const Text("Too many incorrect attempts"),
+      title: Text(S.of(context).tooManyIncorrectAttempts),
       content: Text(S.of(context).pleaseLoginAgain),
       actions: [
         TextButton(

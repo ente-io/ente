@@ -89,7 +89,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
         builder: (context, isFormValid, child) {
           return DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            buttonText: "Next",
+            buttonText: S.of(context).next,
             isFormValid: isFormValid,
             onPressedFunction: () async {
               _submitNotifier.value = !_submitNotifier.value;
@@ -155,7 +155,9 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                 ),
               ),
               Text(
-                widget.isAuthenticating ? 'Enter Password' : 'Set new Password',
+                widget.isAuthenticating
+                    ? S.of(context).enterPassword
+                    : S.of(context).setNewPassword,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyBold,
               ),
