@@ -27,13 +27,13 @@ abstract class MlModel {
           await RemoteAssetsService.instance.getAsset(modelRemotePath);
       final startTime = DateTime.now();
       try {
+        await ONNXEnv.instance.initONNX(modelName);
         sessionAddress = await computer.compute(
           _loadModel,
           param: {
             "modelPath": model.path,
           },
         );
-        await ONNXEnv.instance.initONNX(modelName);
         isInitialized = true;
         final endTime = DateTime.now();
         logger.info(

@@ -508,7 +508,6 @@ class FaceMlService {
       _logger.info("client: $client");
 
       // Initialize models
-      await _computer.compute(() => OrtEnv.instance.init());
       try {
         await FaceDetectionService.instance.init();
       } catch (e, s) {
