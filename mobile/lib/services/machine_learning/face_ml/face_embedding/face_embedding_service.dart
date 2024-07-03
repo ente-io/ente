@@ -18,6 +18,9 @@ class FaceEmbeddingService extends MlModel {
   Logger get logger => _logger;
   static final _logger = Logger('FaceEmbeddingService');
 
+  @override
+  String get modelName => "MobileFaceNet";
+
   static const int kInputSize = 112;
   static const int kEmbeddingSize = 192;
   static const int kNumChannels = 3;

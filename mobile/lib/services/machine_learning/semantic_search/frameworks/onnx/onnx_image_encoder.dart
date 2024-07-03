@@ -17,6 +17,9 @@ class ClipImageEncoder extends MlModel {
   Logger get logger => _logger;
   static final _logger = Logger('ClipImageEncoder');
 
+  @override
+  String get modelName => "ClipImageEncoder";
+
   // Singleton pattern
   ClipImageEncoder._privateConstructor();
   static final instance = ClipImageEncoder._privateConstructor();

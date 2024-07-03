@@ -24,6 +24,9 @@ class FaceDetectionService extends MlModel {
   Logger get logger => _logger;
   static final _logger = Logger('FaceDetectionService');
 
+  @override
+  String get modelName => "YOLOv5Face";
+
   static const int kInputWidth = 640;
   static const int kInputHeight = 640;
   static const double kIouThreshold = 0.4;

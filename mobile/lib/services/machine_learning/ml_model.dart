@@ -3,6 +3,7 @@ import "dart:io" show File;
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:photos/services/machine_learning/onnx_env.dart";
 import "package:photos/services/remote_assets_service.dart";
 
 abstract class MlModel {
@@ -11,6 +12,8 @@ abstract class MlModel {
   String get kModelBucketEndpoint => "https://models.ente.io/";
 
   String get modelRemotePath;
+
+  String get modelName;
 
   bool isInitialized = false;
   int sessionAddress = 0;
@@ -30,6 +33,7 @@ abstract class MlModel {
             "modelPath": model.path,
           },
         );
+        await ONNXEnv.instance.initONNX(modelName);
         isInitialized = true;
         final endTime = DateTime.now();
         logger.info(
@@ -44,6 +48,7 @@ abstract class MlModel {
   Future<void> release() async {
     if (isInitialized) {
       await computer.compute(_releaseModel, param: {'address': sessionAddress});
+      await ONNXEnv.instance.releaseONNX(modelName);
       isInitialized = false;
       sessionAddress = 0;
     }

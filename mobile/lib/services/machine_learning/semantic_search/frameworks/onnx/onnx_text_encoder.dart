@@ -4,39 +4,39 @@ import "dart:math";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:photos/services/machine_learning/ml_model.dart";
 import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart';
 import "package:photos/services/remote_assets_service.dart";
 
-class OnnxTextEncoder {
-  static const kVocabRemotePath =
-      "https://models.ente.io/bpe_simple_vocab_16e6.txt";
-  final _logger = Logger("OnnxTextEncoder");
+class ClipTextEncoder extends MlModel {
+  static const kRemoteBucketModelPath = "clip-text-vit-32-float32-int32.onnx";
+  // static const kRemoteBucketModelPath = "clip-text-vit-32-uint8.onnx";
+  static const kRemoteBucketVocabPath = "bpe_simple_vocab_16e6.txt";
+
+  @override
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  String get kVocabRemotePath => kModelBucketEndpoint + kRemoteBucketVocabPath;
+
+  @override
+  Logger get logger => _logger;
+  static final _logger = Logger('ClipTextEncoder');
+
+  @override
+  String get modelName => "ClipTextEncoder";
+
+  // Singleton pattern
+  ClipTextEncoder._privateConstructor();
+  static final instance = ClipTextEncoder._privateConstructor();
+  factory ClipTextEncoder() => instance;
 
   final OnnxTextTokenizer _tokenizer = OnnxTextTokenizer();
-
 
   Future<void> initTokenizer() async {
     final File vocabFile =
         await RemoteAssetsService.instance.getAsset(kVocabRemotePath);
     final String vocab = await vocabFile.readAsString();
     await _tokenizer.init(vocab);
-  }
-
-  Future<int> loadModel(Map args) async {
-    final sessionOptions = OrtSessionOptions()
-      ..setInterOpNumThreads(1)
-      ..setIntraOpNumThreads(1)
-      ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    try {
-      _logger.info("Loading text model");
-      final session =
-          OrtSession.fromFile(File(args["textModelPath"]), sessionOptions);
-      _logger.info('text model loaded');
-      return session.address;
-    } catch (e, s) {
-      _logger.severe('text model not loaded', e, s);
-    }
-    return -1;
   }
 
   Future<List<double>> infer(Map args) async {
@@ -54,7 +54,7 @@ class OnnxTextEncoder {
     for (int i = 0; i < 512; i++) {
       textNormalization += embedding[i] * embedding[i];
     }
-    
+
     final double sqrtTextNormalization = sqrt(textNormalization);
     for (int i = 0; i < 512; i++) {
       embedding[i] = embedding[i] / sqrtTextNormalization;
