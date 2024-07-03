@@ -134,7 +134,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                         duration: const Duration(milliseconds: 250),
                         builder: (context, value, _) =>
                             CircularProgressIndicator(
-                          backgroundColor: colorTheme.fillStrong,
+                          backgroundColor: colorTheme.fillFaintPressed,
                           value: value,
                           color: colorTheme.primary400,
                           strokeWidth: 1.5,

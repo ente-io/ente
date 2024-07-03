@@ -140,7 +140,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                       height: 75,
                       width: 75,
                       child: CircularProgressIndicator(
-                        backgroundColor: colorTheme.fillStrong,
+                        backgroundColor: colorTheme.fillFaintPressed,
                         value: 1,
                         strokeWidth: 1.5,
                       ),
