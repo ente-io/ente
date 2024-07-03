@@ -5,7 +5,7 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
-import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart';
+import 'package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart';
 import "package:photos/services/remote_assets_service.dart";
 
 class ClipTextEncoder extends MlModel {
