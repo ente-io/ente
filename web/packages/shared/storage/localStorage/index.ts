@@ -74,8 +74,8 @@ export const migrateKVToken = async (user: unknown) => {
     typeof user == "object" &&
     "id" in user &&
     typeof user.id == "number"
-        ? await setKV("uid", user.id)
-        : await removeKV("uid");
+        ? await setKV("userID", user.id)
+        : await removeKV("userID");
 
     user &&
     typeof user == "object" &&

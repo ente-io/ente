@@ -11,6 +11,7 @@ import { wait } from "@/utils/promise";
 import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { indexFaces } from "./index-face";
+import { getKV } from "@/next/kv";
 
 /**
  * The MLWorker state machine.
@@ -125,14 +126,33 @@ export class MLWorker {
     }
 
     async backfillq() {
-        console.log("backfillq");
-        await wait(0);
+        await backfill();
     }
 }
 
 // TODO-ML: Temorarily disable
 // expose(MLWorker);
 
+/**
+ * Find out files which need to be indexed. Then index the next batch of them.
+ */
+const backfill = async () => {
+    const userID = await getKV("userID");
+
+    // const files = await syncWithLocalFilesAndGetFilesToIndex(
+    //     userID,
+    //     batchSize,
+    // );
+
+    // if (syncContext.outOfSyncFiles.length > 0) {
+    //     await this.syncFiles(syncContext);
+    // }
+
+    // const error = syncContext.error;
+    // const nOutOfSyncFiles = syncContext.outOfSyncFiles.length;
+    // return !error && nOutOfSyncFiles > 0;
+
+}
 /**
  * Index faces in a file, save the persist the results locally, and put them
  * on remote.
