@@ -1,6 +1,7 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import DownloadManager from "@/new/photos/services/download";
 import {
+    initML,
     isFaceIndexingEnabled,
     setIsFaceIndexingEnabled,
 } from "@/new/photos/services/ml";
@@ -199,6 +200,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 const enabled = isFaceIndexingEnabled();
                 setMlSearchEnabled(enabled);
                 mlWorkManager.setMlSearchEnabled(enabled);
+                initML();
             } catch (e) {
                 log.error("Error while loading mlSearchEnabled", e);
             }

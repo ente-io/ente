@@ -72,9 +72,9 @@ export class MLWorker {
     private async tick() {
         // Schedule a new macrotask (by using setTimeout) instead of scheduling
         // a new microtask (by directly resolving the promise). This is likely
-        // unnecessary; I'm doing this as a partially out of superstition aiming
-        // to to give GC a chance to run if needed, and generally ease execution
-        // and memory pressure.
+        // unnecessary; I'm doing this partially out of superstition, aiming to
+        // to give GC a chance to run if needed, and also generally ease
+        // execution and memory pressure.
         const next = () => setTimeout(() => this.tick(), 0);
 
         // If we've been asked to sync, do that irrespective of anything else.

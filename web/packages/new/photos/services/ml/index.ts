@@ -11,6 +11,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import {
+    clearFaceDB,
     faceIndex,
     indexableFileIDs,
     indexedAndIndexableCounts,
@@ -20,6 +21,19 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { MLWorker } from "./worker";
+
+/**
+ * In-memory flag that tracks if ML is enabled.
+ *
+ * -   On app start, this is read from local storage in the `initML` function.
+ *
+ * -   If the user updates their preference, then `setMLEnabled` will get called
+ *     with the updated preference where this value will be updated (in addition
+ *     to updating local storage).
+ *
+ * -   It is cleared in `logoutML`.
+ */
+let _isMLEnabled = false;
 
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
 let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
@@ -46,6 +60,23 @@ export const terminateMLWorker = () => {
         _comlinkWorker.terminate();
         _comlinkWorker = undefined;
     }
+};
+
+/**
+ * Initialize the ML subsystem if the user has enabled it in preferences.
+ */
+export const initML = () => {
+    // TODO-ML: Rename
+    _isMLEnabled = isFaceIndexingEnabled();
+};
+
+export const logoutML = async () => {
+    // `terminateMLWorker` is conceptually also part of this, but for the
+    // reasons mentioned in [Note: Caching IDB instances in separate execution
+    // contexts], it gets called first in the logout sequence, and this this
+    // `logoutML` gets called at a later point in time.
+    _isMLEnabled = false;
+    await clearFaceDB();
 };
 
 export interface FaceIndexingStatus {
