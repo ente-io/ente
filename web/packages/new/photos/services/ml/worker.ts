@@ -1,12 +1,16 @@
-import { markIndexingFailed, saveFaceIndex } from "@/new/photos/services/ml/db";
+import {
+    indexedAndIndexableCounts,
+    markIndexingFailed,
+    saveFaceIndex,
+} from "@/new/photos/services/ml/db";
 import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 // import { expose } from "comlink";
+import { wait } from "@/utils/promise";
 import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { indexFaces } from "./index-face";
-import { wait } from "@/utils/promise";
 
 /**
  * The MLWorker state machine.
@@ -26,6 +30,9 @@ import { wait } from "@/utils/promise";
  */
 type MLWorkerState = "idle" | "pull" | "liveq" | "backfillq";
 
+const idleDurationStart = 5; /* 5 seconds */
+const idleDurationMax = 16 * 60; /* 16 minutes */
+
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
  *
@@ -39,6 +46,7 @@ export class MLWorker {
     private shouldSync = false;
     private liveQ: EnteFile[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
+    private idleDuration = idleDurationStart; /* unit: seconds */
 
     /**
      * Pull embeddings from remote, and start backfilling if needed.
@@ -48,27 +56,32 @@ export class MLWorker {
      */
     sync() {
         this.shouldSync = true;
+        this.wakeUp();
+    }
+
+    private wakeUp() {
         if (this.idleTimeout) {
             clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
-            this.tick();
+            void this.tick();
         } else {
             // this.tick will get run when the current task finishes.
         }
     }
 
-    private tick() {
+    private async tick() {
         // Schedule a new macrotask (by using setTimeout) instead of scheduling
         // a new microtask (by directly resolving the promise). This is likely
         // unnecessary; I'm doing this as a partially out of superstition aiming
-        // to to give GC a chance to run if needed and generally ease execution
-        // / memory pressure.
+        // to to give GC a chance to run if needed, and generally ease execution
+        // and memory pressure.
         const next = () => setTimeout(() => this.tick(), 0);
 
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldSync) {
             this.shouldSync = false;
             this.state = "pull";
+            this.idleDuration = idleDurationStart;
             void this.pull().then(next);
             return;
         }
@@ -76,22 +89,26 @@ export class MLWorker {
         // Otherwise see if there is something in the live queue.
         if (this.liveQ.length > 0) {
             this.state = "liveq";
+            this.idleDuration = idleDurationStart;
             void this.liveq().then(next);
             return;
         }
 
-        // // Otherwise check to see if there is something to backfill.
-        // const { indexableCount } = await indexedAndIndexableCounts();
-        // if (indexableCount > 0) {
-        //     this.state = "backfillq";
-        //     void this.liveq().then(() => this.tick());
-        //     return;
-        // }
+        // Otherwise check to see if there is something to backfill.
+        const { indexableCount } = await indexedAndIndexableCounts();
+        if (indexableCount > 0) {
+            this.state = "backfillq";
+            this.idleDuration = idleDurationStart;
+            void this.backfillq().then(next);
+            return;
+        }
 
-        // if (this.isSyncing) return;
-        // this.isSyncing = true;
-        // this.isSyncing = false;
-        // void this.next();
+        // Nothing to do. Go to sleep for exponentially longer durations of
+        // time (limited to some maximum).
+
+        this.state = "idle";
+        this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
+        this.idleTimeout = setTimeout(next, this.idleDuration * 1000);
     }
 
     async pull() {
@@ -100,6 +117,11 @@ export class MLWorker {
 
     async liveq() {
         console.log("liveq");
+        await wait(0);
+    }
+
+    async backfillq() {
+        console.log("backfillq");
         await wait(0);
     }
 }
