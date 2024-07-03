@@ -1,13 +1,13 @@
+import downloadManager from "@/new/photos/services/download";
 import { markIndexingFailed, saveFaceIndex } from "@/new/photos/services/ml/db";
 import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
-// import { expose } from "comlink";
-import downloadManager from "@/new/photos/services/download";
 import { getKVN } from "@/next/kv";
 import { ensureAuthToken } from "@/next/local-user";
+import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
+import { expose } from "comlink";
 import { syncWithLocalFilesAndGetFilesToIndex } from ".";
 import { fileLogID } from "../../utils/file";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
@@ -128,15 +128,15 @@ export class MLWorker {
             idleDuration: this.idleDuration,
         }));
 
-        const next = () => void setTimeout(() => this.tick(), 0);
-
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldSync) {
             this.shouldSync = false;
-            // Reset the idle duration as we start pulling.
-            this.idleDuration = idleDurationStart;
-            // Call tick again once the pull is done.
-            void this.pull().then(next);
+            void pull().then((didPull) => {
+                // Reset the idle duration if we did pull something.
+                if (didPull) this.idleDuration = idleDurationStart;
+                // Either ways, tick again.
+                void setTimeout(() => this.tick(), 0);
+            });
             // Return without waiting for the pull.
             return;
         }
@@ -148,7 +148,7 @@ export class MLWorker {
             // Everything is running smoothly. Reset the idle duration.
             this.idleDuration = idleDurationStart;
             // And tick again.
-            next();
+            void setTimeout(() => this.tick(), 0);
             return;
         }
 
@@ -165,14 +165,14 @@ export class MLWorker {
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(next, this.idleDuration * 1000);
     }
-
-    private async pull() {
-        await pullFaceEmbeddings();
-    }
 }
 
-// TODO-ML: Temorarily disable
-// expose(MLWorker);
+expose(MLWorker);
+
+/**
+ * Pull embeddings from remote.
+ */
+const pull = pullFaceEmbeddings;
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.

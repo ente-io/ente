@@ -94,6 +94,8 @@ type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
  *
  * This function should be called only after we have synced files with remote.
  * See: [Note: Ignoring embeddings for unknown files].
+ *
+ * @returns true if at least one embedding was pulled, false otherwise.
  */
 const pullEmbeddings = async (
     model: EmbeddingModel,
@@ -127,6 +129,7 @@ const pullEmbeddings = async (
     //     scenario where this happens.
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
+    let didPull = false;
     let sinceTime = await embeddingSyncTime(model);
     // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
@@ -149,6 +152,7 @@ const pullEmbeddings = async (
                         file.key,
                     ),
                 );
+                didPull = true;
                 count++;
             } catch (e) {
                 log.warn(`Ignoring unparseable ${model} embedding`, e);
@@ -157,6 +161,7 @@ const pullEmbeddings = async (
         await saveEmbeddingSyncTime(sinceTime, model);
         log.info(`Fetched ${count} ${model} embeddings`);
     }
+    return didPull;
 };
 
 /**
@@ -291,6 +296,8 @@ export const putEmbedding = async (
  *
  * This function should be called only after we have synced files with remote.
  * See: [Note: Ignoring embeddings for unknown files].
+ *
+ * @returns true if at least one embedding was pulled, false otherwise.
  */
 export const pullFaceEmbeddings = () =>
     pullEmbeddings("file-ml-clip-face", (jsonString: string) =>
