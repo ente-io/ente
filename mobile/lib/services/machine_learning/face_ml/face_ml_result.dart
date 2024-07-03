@@ -7,7 +7,7 @@ import 'package:photos/services/machine_learning/face_ml/face_alignment/alignmen
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
-class FaceMlResult {
+class MLResult {
   int fileId;
 
   List<FaceResult> faces = <FaceResult>[];
@@ -20,7 +20,7 @@ class FaceMlResult {
 
   bool get hasFaces => faces.isNotEmpty;
 
-  FaceMlResult({
+  MLResult({
     this.fileId = -1,
     this.faces = const <FaceResult>[],
     this.mlVersion = faceMlVersion,
@@ -29,57 +29,13 @@ class FaceMlResult {
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
-  FaceMlResult.fromEnteFileID(
+  MLResult.fromEnteFileID(
     fileID, {
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
-
-  void addNewlyDetectedFaces(
-    List<FaceDetectionRelative> faceDetections,
-    Dimensions originalSize,
-  ) {
-    decodedImageSize = originalSize;
-    for (var i = 0; i < faceDetections.length; i++) {
-      faces.add(
-        FaceResult.fromFaceDetection(
-          faceDetections[i],
-          resultBuilder: this,
-        ),
-      );
-    }
-  }
-
-  void addAlignmentResults(
-    List<AlignmentResult> alignmentResults,
-    List<double> blurValues,
-  ) {
-    if (alignmentResults.length != faces.length) {
-      throw Exception(
-        "The amount of alignment results (${alignmentResults.length}) does not match the number of faces (${faces.length})",
-      );
-    }
-
-    for (var i = 0; i < alignmentResults.length; i++) {
-      faces[i].alignment = alignmentResults[i];
-      faces[i].blurValue = blurValues[i];
-    }
-  }
-
-  void addEmbeddingsToExistingFaces(
-    List<Embedding> embeddings,
-  ) {
-    if (embeddings.length != faces.length) {
-      throw Exception(
-        "The amount of embeddings (${embeddings.length}) does not match the number of faces (${faces.length})",
-      );
-    }
-    for (var faceIndex = 0; faceIndex < faces.length; faceIndex++) {
-      faces[faceIndex].embedding = embeddings[faceIndex];
-    }
-  }
 
   void noFaceDetected() {
     faces = <FaceResult>[];
@@ -104,8 +60,8 @@ class FaceMlResult {
 
   String toJsonString() => jsonEncode(_toJson());
 
-  static FaceMlResult _fromJson(Map<String, dynamic> json) {
-    return FaceMlResult(
+  static MLResult _fromJson(Map<String, dynamic> json) {
+    return MLResult(
       fileId: json['fileId'],
       faces: (json['faces'] as List)
           .map((item) => FaceResult.fromJson(item as Map<String, dynamic>))
@@ -129,7 +85,7 @@ class FaceMlResult {
     );
   }
 
-  static FaceMlResult fromJsonString(String jsonString) {
+  static MLResult fromJsonString(String jsonString) {
     return _fromJson(jsonDecode(jsonString));
   }
 }
@@ -154,11 +110,11 @@ class FaceResult {
   });
 
   FaceResult.fromFaceDetection(
-    FaceDetectionRelative faceDetection, {
-    required FaceMlResult resultBuilder,
-  }) {
-    fileId = resultBuilder.fileId;
-    faceId = faceDetection.toFaceID(fileID: resultBuilder.fileId);
+    FaceDetectionRelative faceDetection,
+    int fileID,
+  ) {
+    fileId = fileID;
+    faceId = faceDetection.toFaceID(fileID: fileID);
     detection = faceDetection;
   }
 

@@ -19,6 +19,7 @@ import "package:photos/extensions/list.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
+import "package:photos/face/model/dimension.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/landmark.dart";
 import "package:photos/models/file/file.dart";
@@ -390,7 +391,7 @@ class FaceMlService {
     );
 
     try {
-      final FaceMlResult? result = await _analyzeImageInSingleIsolate(
+      final MLResult? result = await _analyzeImageInSingleIsolate(
         enteFile,
         // preferUsingThumbnailForEverything: false,
         // disposeImageIsolateAfterUse: false,
@@ -590,8 +591,7 @@ class FaceMlService {
         switch (function) {
           case FaceMlOperation.analyzeImage:
             final time = DateTime.now();
-            final FaceMlResult result =
-                await FaceMlService._analyzeImageSync(args);
+            final MLResult result = await FaceMlService._analyzeImageSync(args);
             dev.log(
               "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
             );
@@ -676,12 +676,12 @@ class FaceMlService {
   }
 
   /// Analyzes the given image data by running the full pipeline for faces, using [_analyzeImageSync] in the isolate.
-  Future<FaceMlResult?> _analyzeImageInSingleIsolate(EnteFile enteFile) async {
+  Future<MLResult?> _analyzeImageInSingleIsolate(EnteFile enteFile) async {
     final String filePath =
         await getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
 
     final Stopwatch stopwatch = Stopwatch()..start();
-    late FaceMlResult result;
+    late MLResult result;
 
     try {
       final resultJsonString = await _runInIsolate(
@@ -703,7 +703,7 @@ class FaceMlService {
         }
         return null;
       }
-      result = FaceMlResult.fromJsonString(resultJsonString);
+      result = MLResult.fromJsonString(resultJsonString);
     } catch (e, s) {
       _logger.severe(
         "Could not analyze image with ID ${enteFile.uploadedFileID} \n",
@@ -713,9 +713,8 @@ class FaceMlService {
       debugPrint(
         "This image with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}.",
       );
-      final resultBuilder =
-          FaceMlResult.fromEnteFileID(enteFile.uploadedFileID!)
-            ..errorOccurred();
+      final resultBuilder = MLResult.fromEnteFileID(enteFile.uploadedFileID!)
+        ..errorOccurred();
       return resultBuilder;
     }
     stopwatch.stop();
@@ -727,7 +726,7 @@ class FaceMlService {
     return result;
   }
 
-  static Future<FaceMlResult> _analyzeImageSync(Map args) async {
+  static Future<MLResult> _analyzeImageSync(Map args) async {
     try {
       final int enteFileID = args["enteFileID"] as int;
       final String imagePath = args["filePath"] as String;
@@ -745,6 +744,8 @@ class FaceMlService {
       final ByteData imageByteData = await getByteDataFromImage(image);
       dev.log('Reading and decoding image took '
           '${DateTime.now().difference(time).inMilliseconds} ms');
+      final decodedImageSize =
+          Dimensions(height: image.height, width: image.width);
 
       final resultFaces = await FaceRecognitionService.runFacesPipeline(
         enteFileID,
@@ -753,8 +754,14 @@ class FaceMlService {
         faceDetectionAddress,
         faceEmbeddingAddress,
       );
+      if (resultFaces.isEmpty) {
+        return MLResult.fromEnteFileID(enteFileID)..noFaceDetected();
+      }
 
-      return resultFaces;
+      final result = MLResult.fromEnteFileID(enteFileID);
+      result.faces = resultFaces;
+
+      return result;
     } catch (e, s) {
       dev.log("Could not analyze image: \n e: $e \n s: $s");
       rethrow;

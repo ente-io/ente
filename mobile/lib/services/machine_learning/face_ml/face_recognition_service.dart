@@ -160,14 +160,14 @@ class FaceRecognitionService {
     _logger.info('Fetched $fetchedCount embeddings');
   }
 
-  static Future<FaceMlResult> runFacesPipeline(
+  static Future<List<FaceResult>> runFacesPipeline(
     int enteFileID,
     Image image,
     ByteData imageByteData,
     int faceDetectionAddress,
     int faceEmbeddingAddress,
   ) async {
-    final resultBuilder = FaceMlResult.fromEnteFileID(enteFileID);
+    final faceResults = <FaceResult>[];
 
     final Stopwatch stopwatch = Stopwatch()..start();
     final startTime = DateTime.now();
@@ -175,10 +175,11 @@ class FaceRecognitionService {
     // Get the faces
     final List<FaceDetectionRelative> faceDetectionResult =
         await _detectFacesSync(
+      enteFileID,
       image,
       imageByteData,
       faceDetectionAddress,
-      resultBuilder,
+      faceResults,
     );
     dev.log(
         "${faceDetectionResult.length} faces detected with scores ${faceDetectionResult.map((e) => e.score).toList()}: completed `detectFacesSync` function, in "
@@ -189,8 +190,7 @@ class FaceRecognitionService {
       dev.log(
           "No faceDetectionResult, Completed analyzing image with uploadedFileID $enteFileID, in "
           "${stopwatch.elapsedMilliseconds} ms");
-      resultBuilder.noFaceDetected();
-      return resultBuilder;
+      return [];
     }
 
     stopwatch.reset();
@@ -199,7 +199,7 @@ class FaceRecognitionService {
       image,
       imageByteData,
       faceDetectionResult,
-      resultBuilder,
+      faceResults,
     );
     dev.log("Completed `alignFacesSync` function, in "
         "${stopwatch.elapsedMilliseconds} ms");
@@ -209,7 +209,7 @@ class FaceRecognitionService {
     final embeddings = await _embedFacesSync(
       faceAlignmentResult,
       faceEmbeddingAddress,
-      resultBuilder,
+      faceResults,
     );
     dev.log("Completed `embedFacesSync` function, in "
         "${stopwatch.elapsedMilliseconds} ms");
@@ -219,27 +219,35 @@ class FaceRecognitionService {
         "uploadedFileID $enteFileID, in "
         "${DateTime.now().difference(startTime).inMilliseconds} ms");
 
-    return resultBuilder;
+    return faceResults;
   }
 
   /// Runs face recognition on the given image data.
   static Future<List<FaceDetectionRelative>> _detectFacesSync(
+    int fileID,
     Image image,
     ByteData imageByteData,
     int interpreterAddress,
-    FaceMlResult resultBuilder,
+    List<FaceResult> faceResults,
   ) async {
     try {
       // Get the bounding boxes of the faces
-      final (List<FaceDetectionRelative> faces, dataSize) =
+      final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
         image,
         imageByteData,
         interpreterAddress,
       );
 
-      // Add detected faces to the resultBuilder
-      resultBuilder.addNewlyDetectedFaces(faces, dataSize);
+      // Add detected faces to the faceResults
+      for (var i = 0; i < faces.length; i++) {
+        faceResults.add(
+          FaceResult.fromFaceDetection(
+            faces[i],
+            fileID,
+          ),
+        );
+      }
 
       return faces;
     } on YOLOFaceInterpreterRunException {
@@ -256,25 +264,26 @@ class FaceRecognitionService {
     Image image,
     ByteData imageByteData,
     List<FaceDetectionRelative> faces,
-    FaceMlResult resultBuilder,
+    List<FaceResult> faceResults,
   ) async {
     try {
-      final stopwatch = Stopwatch()..start();
       final (alignedFaces, alignmentResults, _, blurValues, _) =
           await preprocessToMobileFaceNetFloat32List(
         image,
         imageByteData,
         faces,
       );
-      stopwatch.stop();
-      dev.log(
-        "Face alignment image decoding and processing took ${stopwatch.elapsedMilliseconds} ms",
-      );
 
-      resultBuilder.addAlignmentResults(
-        alignmentResults,
-        blurValues,
-      );
+      // Store the results
+      if (alignmentResults.length != faces.length) {
+        throw Exception(
+          "The amount of alignment results (${alignmentResults.length}) does not match the number of faces (${faces.length})",
+        );
+      }
+      for (var i = 0; i < alignmentResults.length; i++) {
+        faceResults[i].alignment = alignmentResults[i];
+        faceResults[i].blurValue = blurValues[i];
+      }
 
       return alignedFaces;
     } catch (e, s) {
@@ -286,15 +295,22 @@ class FaceRecognitionService {
   static Future<List<List<double>>> _embedFacesSync(
     Float32List facesList,
     int interpreterAddress,
-    FaceMlResult resultBuilder,
+    List<FaceResult> faceResults,
   ) async {
     try {
       // Get the embedding of the faces
       final List<List<double>> embeddings =
           await FaceEmbeddingService.predict(facesList, interpreterAddress);
 
-      // Add the embeddings to the resultBuilder
-      resultBuilder.addEmbeddingsToExistingFaces(embeddings);
+      // Store the results
+      if (embeddings.length != faceResults.length) {
+        throw Exception(
+          "The amount of embeddings (${embeddings.length}) does not match the number of faces (${faceResults.length})",
+        );
+      }
+      for (var faceIndex = 0; faceIndex < faceResults.length; faceIndex++) {
+        faceResults[faceIndex].embedding = embeddings[faceIndex];
+      }
 
       return embeddings;
     } on MobileFaceNetInterpreterRunException {
