@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/models/embedding.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class EmbeddingsDB {
@@ -62,14 +63,16 @@ class EmbeddingsDB {
     return _convertToEmbeddings(results);
   }
 
-  // Get FileIDs for a specific model
-  Future<Set<int>> getFileIDs() async {
+  // Get indexed FileIDs
+  Future<Map<int, int>> getIndexedFileIds() async {
     final db = await _database;
-    final results = await db.getAll('SELECT $columnFileID FROM $tableName');
-    if (results.isEmpty) {
-      return <int>{};
+    final maps = await db.getAll('SELECT $columnFileID FROM $tableName');
+    final Map<int, int> result = {};
+    for (final map in maps) {
+      result[map[columnFileID] as int] =
+          clipMlVersion; // TODO: Add an actual column for version
     }
-    return results.map((e) => e[columnFileID] as int).toSet();
+    return result;
   }
 
   Future<void> put(Embedding embedding) async {

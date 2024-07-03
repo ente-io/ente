@@ -4,16 +4,95 @@ import "dart:math" as math show sqrt;
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/face/db.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("MlUtil");
 
 enum FileDataForML { thumbnailData, fileData }
+
+class FileMLInstruction {
+  final EnteFile enteFile;
+
+  final bool shouldRunFaces;
+  final bool shouldRunClip;
+
+  FileMLInstruction({
+    required this.enteFile,
+    required this.shouldRunFaces,
+    required this.shouldRunClip,
+  });
+}
+
+Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
+  _logger.info('getFilesForMlIndexing called');
+  final time = DateTime.now();
+  // Get indexed fileIDs for each ML service
+  final Map<int, int> faceIndexedFileIDs =
+      await FaceMLDataDB.instance.getIndexedFileIds();
+  final Map<int, int> clipIndexedFileIDs =
+      await EmbeddingsDB.instance.getIndexedFileIds();
+
+  // Get all regular files and all hidden files
+  final enteFiles = await SearchService.instance.getAllFiles();
+  final hiddenFiles = await SearchService.instance.getHiddenFiles();
+
+  // Sort out what should be indexed and in what order
+  final List<FileMLInstruction> filesWithLocalID = [];
+  final List<FileMLInstruction> filesWithoutLocalID = [];
+  final List<FileMLInstruction> hiddenFilesToIndex = [];
+  for (final EnteFile enteFile in enteFiles) {
+    final skip = _skipAnalysisEnteFile(enteFile);
+    final shouldRunFaces = _shouldRunIndexing(enteFile, faceIndexedFileIDs);
+    final shouldRunClip = _shouldRunIndexing(enteFile, clipIndexedFileIDs);
+    if (skip && !shouldRunFaces && !shouldRunClip) {
+      continue;
+    }
+    final instruction = FileMLInstruction(
+      enteFile: enteFile,
+      shouldRunFaces: shouldRunFaces,
+      shouldRunClip: shouldRunClip,
+    );
+    if ((enteFile.localID ?? '').isEmpty) {
+      filesWithoutLocalID.add(instruction);
+    } else {
+      filesWithLocalID.add(instruction);
+    }
+  }
+  for (final EnteFile enteFile in hiddenFiles) {
+    final skip = _skipAnalysisEnteFile(enteFile);
+    final shouldRunFaces = _shouldRunIndexing(enteFile, faceIndexedFileIDs);
+    final shouldRunClip = _shouldRunIndexing(enteFile, clipIndexedFileIDs);
+    if (skip && !shouldRunFaces && !shouldRunClip) {
+      continue;
+    }
+    final instruction = FileMLInstruction(
+      enteFile: enteFile,
+      shouldRunFaces: shouldRunFaces,
+      shouldRunClip: shouldRunClip,
+    );
+    hiddenFilesToIndex.add(instruction);
+  }
+  final sortedBylocalID = <FileMLInstruction>[
+    ...filesWithLocalID,
+    ...filesWithoutLocalID,
+    ...hiddenFilesToIndex,
+  ];
+  _logger.info(
+    "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+  );
+
+  return sortedBylocalID;
+}
 
 Future<Set<int>> getIndexableFileIDs() async {
   final fileIDs = await FilesDB.instance
@@ -89,6 +168,23 @@ Future<String> getImagePathForML(
   }
 
   return imagePath;
+}
+
+bool _skipAnalysisEnteFile(EnteFile enteFile) {
+  // Skip if the file is not uploaded or not owned by the user
+  if (!enteFile.isUploaded || enteFile.isOwner == false) {
+    return true;
+  }
+  // I don't know how motionPhotos and livePhotos work, so I'm also just skipping them for now
+  if (enteFile.fileType == FileType.other) {
+    return true;
+  }
+  return false;
+}
+
+bool _shouldRunIndexing(EnteFile enteFile, Map<int, int> indexedFileIds) {
+  final id = enteFile.uploadedFileID!;
+  return !indexedFileIds.containsKey(id) || indexedFileIds[id]! < faceMlVersion;
 }
 
 void normalizeEmbedding(List<double> embedding) {
