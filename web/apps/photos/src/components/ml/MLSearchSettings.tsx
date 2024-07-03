@@ -1,4 +1,9 @@
-import { canEnableFaceIndexing } from "@/new/photos/services/ml";
+import {
+    canEnableFaceIndexing,
+    disableML,
+    enableML,
+    isMLEnabled,
+} from "@/new/photos/services/ml";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -26,8 +31,6 @@ import {
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
-        updateMlSearchEnabled,
-        mlSearchEnabled,
         setDialogMessage,
         somethingWentWrong,
         startLoading,
@@ -49,7 +52,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             if (!hasEnabledFaceSearch) {
                 openEnableFaceSearch();
             } else {
-                updateMlSearchEnabled(true);
+                enableML();
             }
         } catch (e) {
             log.error("Enable ML search failed", e);
@@ -62,7 +65,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             startLoading();
             // Update the consent flag.
             await updateFaceSearchEnabledStatus(true);
-            updateMlSearchEnabled(true);
+            enableML();
             closeEnableFaceSearch();
             finishLoading();
         } catch (e) {
@@ -73,7 +76,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
 
     const disableMlSearch = async () => {
         try {
-            await updateMlSearchEnabled(false);
+            disableML();
             onClose();
         } catch (e) {
             log.error("Disable ML search failed", e);
@@ -133,7 +136,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
                     sx: { "&&&": { backgroundColor: "transparent" } },
                 }}
             >
-                {mlSearchEnabled ? (
+                {isMLEnabled() ? (
                     <ManageMLSearch
                         onClose={onClose}
                         disableMlSearch={disableMlSearch}

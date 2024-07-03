@@ -1,4 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isMLEnabled } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
@@ -200,9 +201,7 @@ export default function SearchInput(props: Iprops) {
                 onInputChange={handleInputChange}
                 escapeClearsValue
                 styles={SelectStyles}
-                defaultOptions={
-                    appContext.mlSearchEnabled ? defaultOptions : null
-                }
+                defaultOptions={isMLEnabled() ? defaultOptions : null}
                 noOptionsMessage={() => null}
             />
 

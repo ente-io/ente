@@ -101,7 +101,9 @@ export const canEnableFaceIndexing = async () =>
  * local) storage key, but otherwise this setting now reflects the state of ML
  * overall and not just face search.
  */
-export const isMLEnabled = () => _isMLEnabled;
+export const isMLEnabled = () =>
+    // Impl note: Keep it fast, the UI directly calls this multiple times.
+    _isMLEnabled;
 
 /**
  * Enable ML.
