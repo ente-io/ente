@@ -31,9 +31,9 @@ class _LockScreenState extends State<LockScreen>
   bool _hasAuthenticationFailed = false;
   int? lastAuthenticatingTime;
   bool isTimerRunning = false;
-  int lockedTime = 0;
+  int lockedTimeInSeconds = 0;
   int invalidAttemptCount = 0;
-  int remainingTime = 0;
+  int remainingTimeInSeconds = 0;
   bool showErrorMessage = true;
   final _lockscreenSetting = LockScreenSettings.instance;
   late final AnimationController _controller = AnimationController(
@@ -120,7 +120,7 @@ class _LockScreenState extends State<LockScreen>
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
                             begin: 0,
-                            end: calculateRemainingTime(),
+                            end: _getFractionOfTimeElapsed(),
                           ),
                           curve: Curves.ease,
                           duration: const Duration(milliseconds: 50),
@@ -156,7 +156,7 @@ class _LockScreenState extends State<LockScreen>
                               )
                               .fadeOut(duration: 400.ms),
                           Text(
-                            formatTime(remainingTime),
+                            _formatTime(remainingTimeInSeconds),
                             style: textTheme.body,
                           )
                               .animate(
@@ -268,20 +268,20 @@ class _LockScreenState extends State<LockScreen>
     super.dispose();
   }
 
-  Future<void> startLockTimer(int time) async {
+  Future<void> startLockTimer(int timeInSeconds) async {
     if (isTimerRunning) {
       return;
     }
 
     setState(() {
       isTimerRunning = true;
-      remainingTime = time;
+      remainingTimeInSeconds = timeInSeconds;
     });
 
-    while (remainingTime > 0) {
+    while (remainingTimeInSeconds > 0) {
       await Future.delayed(const Duration(seconds: 1));
       setState(() {
-        remainingTime--;
+        remainingTimeInSeconds--;
       });
     }
 
@@ -290,15 +290,15 @@ class _LockScreenState extends State<LockScreen>
     });
   }
 
-  double calculateRemainingTime() {
+  double _getFractionOfTimeElapsed() {
     final int totalLockedTime =
-        lockedTime = pow(2, invalidAttemptCount - 5).toInt() * 30;
-    if (remainingTime == 0) return 1;
+        lockedTimeInSeconds = pow(2, invalidAttemptCount - 5).toInt() * 30;
+    if (remainingTimeInSeconds == 0) return 1;
 
-    return 1 - remainingTime / totalLockedTime;
+    return 1 - remainingTimeInSeconds / totalLockedTime;
   }
 
-  String formatTime(int seconds) {
+  String _formatTime(int seconds) {
     final int hours = seconds ~/ 3600;
     final int minutes = (seconds % 3600) ~/ 60;
     final int remainingSeconds = seconds % 60;
@@ -313,15 +313,17 @@ class _LockScreenState extends State<LockScreen>
   }
 
   Future<void> _showLockScreen({String source = ''}) async {
-    final int id = DateTime.now().millisecondsSinceEpoch;
-    _logger.info("Showing lock screen $source $id");
+    final int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
+    _logger.info("Showing lock screen $source $currentTimestamp");
     try {
-      if (id < _lockscreenSetting.getlastInvalidAttemptTime() &&
+      if (currentTimestamp < _lockscreenSetting.getlastInvalidAttemptTime() &&
           !_isShowingLockScreen) {
-        final int time =
-            (_lockscreenSetting.getlastInvalidAttemptTime() - id) ~/ 1000;
+        final int remainingTime =
+            (_lockscreenSetting.getlastInvalidAttemptTime() -
+                    currentTimestamp) ~/
+                1000;
 
-        await startLockTimer(time);
+        await startLockTimer(remainingTime);
       }
       _isShowingLockScreen = true;
       final result = isTimerRunning
@@ -331,14 +333,14 @@ class _LockScreenState extends State<LockScreen>
               context.l10n.authToViewYourMemories,
               isOpeningApp: true,
             );
-      _logger.finest("LockScreen Result $result $id");
+      _logger.finest("LockScreen Result $result");
       _isShowingLockScreen = false;
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
         AppLock.of(context)!.didUnlock();
         await _lockscreenSetting.setInvalidAttemptCount(0);
         setState(() {
-          lockedTime = 15;
+          lockedTimeInSeconds = 15;
           isTimerRunning = false;
         });
       } else {
@@ -353,11 +355,12 @@ class _LockScreenState extends State<LockScreen>
               return;
             }
 
-            lockedTime = pow(2, invalidAttemptCount - 5).toInt() * 30;
+            lockedTimeInSeconds = pow(2, invalidAttemptCount - 5).toInt() * 30;
             await _lockscreenSetting.setLastInvalidAttemptTime(
-              DateTime.now().millisecondsSinceEpoch + lockedTime * 1000,
+              DateTime.now().millisecondsSinceEpoch +
+                  lockedTimeInSeconds * 1000,
             );
-            await startLockTimer(lockedTime);
+            await startLockTimer(lockedTimeInSeconds);
           }
           _hasAuthenticationFailed = true;
           _logger.info("Authentication failed");
