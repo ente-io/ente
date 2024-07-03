@@ -17,8 +17,14 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
-import { useAppContext } from "components/context";
+import {
+    Box,
+    Button,
+    Stack,
+    Typography,
+    styled,
+    useMediaQuery,
+} from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -28,6 +34,7 @@ import {
     renamePasskey,
     type Passkey,
 } from "services/passkey";
+import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
     const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();
@@ -204,15 +211,26 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
     passkey,
     onClick,
 }) => {
+    const labelComponent = (
+        <PasskeyLabel>
+            <Typography fontWeight="bold">{passkey.friendlyName}</Typography>
+        </PasskeyLabel>
+    );
     return (
         <EnteMenuItem
             onClick={() => onClick(passkey)}
             startIcon={<KeyIcon />}
             endIcon={<ChevronRightIcon />}
-            label={passkey.friendlyName}
+            labelComponent={labelComponent}
         />
     );
 };
+
+const PasskeyLabel = styled("div")`
+    /* If the name of the passkey does not fit in one line, break the text into
+       multiple lines as necessary */
+    white-space: normal;
+`;
 
 interface ManagePasskeyDrawerProps {
     /** If `true`, then the drawer is shown. */

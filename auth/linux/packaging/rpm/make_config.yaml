@@ -9,6 +9,8 @@ url: https://github.com/ente-io/ente
 
 display_name: Auth
 
+metainfo: linux/packaging/ente_auth.appdata.xml
+
 requires:
   - libsqlite3x
   - webkit2gtk4.0
@@ -28,4 +30,4 @@ categories:
 startup_notify: false
 
 supported_mime_type:
-  - x-scheme-handler/ente
+  - x-scheme-handler/enteauth

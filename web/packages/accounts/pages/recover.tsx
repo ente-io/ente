@@ -1,7 +1,7 @@
+import { sendOtt } from "@/accounts/api/user";
+import { PAGES } from "@/accounts/constants/pages";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
-import { sendOtt } from "@ente/accounts/api/user";
-import { PAGES } from "@ente/accounts/constants/pages";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -30,7 +30,7 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
+    const { showNavBar, setDialogBoxAttributesV2 } = appContext;
 
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
@@ -47,7 +47,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            sendOtt(appName, user.email);
+            sendOtt(user.email);
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.RECOVER);
             router.push(PAGES.VERIFY);
             return;
@@ -55,11 +55,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         if (!keyAttributes) {
             router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push(appHomeRoute(appName));
+            router.push(appHomeRoute);
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
 
     const recover: SingleInputFormProps["callback"] = async (
@@ -98,13 +98,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         }
     };
 
-    const showNoRecoveryKeyMessage = () => {
-        appContext.setDialogBoxAttributesV2({
+    const showNoRecoveryKeyMessage = () =>
+        setDialogBoxAttributesV2({
             title: t("SORRY"),
             close: {},
             content: t("NO_RECOVERY_KEY_MESSAGE"),
         });
-    };
 
     return (
         <VerticallyCentered>

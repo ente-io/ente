@@ -1,6 +1,6 @@
-import { Box, styled, Typography } from "@mui/material";
+import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
+import { Box, Typography, styled } from "@mui/material";
 import { t } from "i18next";
-import { bytesInGB, formattedStorageByteSize } from "utils/units";
 
 const MobileSmallBox = styled(Box)`
     display: none;

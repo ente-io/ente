@@ -53,23 +53,24 @@ This'll trigger the workflow and create a new pre-release. We can edit this to
 add the release notes, convert it to a release. Once it is marked as latest, the
 release goes live.
 
-We are done at this point, and can now create a new pre-release to host
+We are done at this point, and can now update the other pre-release that hosts
 subsequent nightly builds.
 
 1.  Update `package.json` in the source repo to use version `1.x.x-rc`, and
     merge these changes into `main`.
 
-2.  In the release repo:
+2.  In the release repo, delete the existing _nightly_ pre-release, then:
 
     ```sh
     git tag 1.x.x-rc
     git push origin 1.x.x-rc
     ```
 
-3.  Once the workflow finishes and the pre-release is created, edit its
-    description to "Nightly builds".
+3.  Start a new run of the workflow (`gh workflow run desktop-release.yml`).
 
-4.  Delete the pre-release for the previous (already released) version.
+Once the workflow finishes and the 1.x.x-rc pre-release is created, edit its
+description to "Nightly builds". Subsequent scheduled nightly builds will update
+this pre-release.
 
 ## Workflow - Extra pre-releases
 

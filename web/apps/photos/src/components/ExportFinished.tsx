@@ -1,3 +1,4 @@
+import { EnteFile } from "@/new/photos/types/file";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { formatDateTime } from "@ente/shared/time/format";
 import {
@@ -9,7 +10,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { EnteFile } from "types/file";
 import { formatNumber } from "utils/number/format";
 import ExportPendingList from "./ExportPendingList";
 import LinkButton from "./pages/gallery/LinkButton";
@@ -19,7 +19,8 @@ interface Props {
     collectionNameMap: Map<number, string>;
     onHide: () => void;
     lastExportTime: number;
-    startExport: () => void;
+    /** Called when the user presses the "Resync" button. */
+    onResync: () => void;
 }
 
 export default function ExportFinished(props: Props) {
@@ -67,11 +68,7 @@ export default function ExportFinished(props: Props) {
                 <Button color="secondary" size="large" onClick={props.onHide}>
                     {t("CLOSE")}
                 </Button>
-                <Button
-                    size="large"
-                    color="primary"
-                    onClick={props.startExport}
-                >
+                <Button size="large" color="primary" onClick={props.onResync}>
                     {t("EXPORT_AGAIN")}
                 </Button>
             </DialogActions>

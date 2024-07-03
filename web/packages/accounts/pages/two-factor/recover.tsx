@@ -1,12 +1,12 @@
-import log from "@/next/log";
-import type { BaseAppContextT } from "@/next/types/app";
-import { ensure } from "@/utils/ensure";
 import {
     recoverTwoFactor,
     removeTwoFactor,
     type TwoFactorType,
-} from "@ente/accounts/api/user";
-import { PAGES } from "@ente/accounts/constants/pages";
+} from "@/accounts/api/user";
+import { PAGES } from "@/accounts/constants/pages";
+import type { AccountsContextT } from "@/accounts/types/context";
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -18,9 +18,14 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError } from "@ente/shared/error";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import { Link } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
@@ -33,7 +38,7 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
-    appContext: BaseAppContextT;
+    appContext: AccountsContextT;
     twoFactorType: TwoFactorType;
 }
 
@@ -126,7 +131,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 twoFactorType,
             );
             const { keyAttributes, encryptedToken, token, id } = resp;
-            setData(LS_KEYS.USER, {
+            await setLSUser({
                 ...getData(LS_KEYS.USER),
                 token,
                 encryptedToken,

@@ -1,4 +1,4 @@
-import type { TwoFactorSecret } from "@ente/accounts/types/user";
+import type { TwoFactorSecret } from "@/accounts/types/user";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import { Typography } from "@mui/material";
 import { t } from "i18next";

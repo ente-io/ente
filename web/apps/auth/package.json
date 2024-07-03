@@ -3,9 +3,9 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
+        "@/accounts": "*",
         "@/build-config": "*",
         "@/next": "*",
-        "@ente/accounts": "*",
         "@ente/eslint-config": "*",
         "@ente/shared": "*",
         "jssha": "~3.3.1",

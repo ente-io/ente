@@ -125,6 +125,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(albumName) => "Moved successfully to ${albumName}";
 
+  static String m70(name) => "Not ${name}?";
+
   static String m37(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
@@ -999,6 +1001,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("No results"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("No results found"),
+        "notPersonLabel": m70,
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere":
@@ -1210,6 +1213,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
+        "reviewSuggestions":
+            MessageLookupByLibrary.simpleMessage("Review suggestions"),
         "right": MessageLookupByLibrary.simpleMessage("Right"),
         "rotate": MessageLookupByLibrary.simpleMessage("Rotate"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Rotate left"),
@@ -1514,6 +1519,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Upto 50% off, until 4th Dec."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
+        "useAsCover": MessageLookupByLibrary.simpleMessage("Use as cover"),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Use public links for people not on Ente"),

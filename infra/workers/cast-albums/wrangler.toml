@@ -1,8 +1,11 @@
 name = "cast-albums"
 main = "src/index.ts"
-compatibility_date = "2024-03-14"
+compatibility_date = "2024-06-14"
 
-[[routes]]
-pattern = "cast-albums.ente.io"
-zone_name = "ente.io"
-custom_domain = true
+routes = [
+    { pattern = "cast-albums.ente.io", custom_domain = true }
+]
+
+tail_consumers = [
+    { service = "tail" }
+]

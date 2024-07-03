@@ -65,12 +65,9 @@ independently maintained and deployed:
 -   `apps/cast`: Browser and Chromecast casting support.
 -   `apps/payments`: Handle subscription payments.
 
-> [!NOTE]
->
-> Some older code is being deployed from our other repositories like the family
-> portal (https://github.com/ente-io/families) and still needs to be brought
-> here. Likewise, some of the Cloudflare workers we use for fixing headers etc.
-> We'll gradually bring all these into this monorepo one by one.
+> Apart from these, we also have the manage family portal whose code is
+> currently in a separate repository (https://github.com/ente-io/families) and
+> still needs to be brought here.
 
 The apps take use various `packages/` to share code amongst themselves.
 

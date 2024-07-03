@@ -1,9 +1,5 @@
 {
     "name": "github-discord-notifier",
-    "private": true,
-    "devDependencies": {
-        "@cloudflare/workers-types": "^4.20240314.0",
-        "typescript": "^5",
-        "wrangler": "^3"
-    }
+    "version": "0.0.0",
+    "private": true
 }

@@ -1,9 +1,9 @@
+import { EnteFile } from "@/new/photos/types/file";
 import * as Comlink from "comlink";
 import {
     isInsideCity,
     isInsideLocationTag,
 } from "services/locationSearchService";
-import { EnteFile } from "types/file";
 import { Search } from "types/search";
 import { isSameDayAnyYear } from "utils/search";
 

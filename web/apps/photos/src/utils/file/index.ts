@@ -1,28 +1,6 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { isNonWebImageFileExtension } from "@/media/formats";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { lowercaseExtension } from "@/next/file";
-import log from "@/next/log";
-import { CustomErrorMessage, type Electron } from "@/next/types/ipc";
-import { workerBridge } from "@/next/worker/worker-bridge";
-import { withTimeout } from "@/utils/promise";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor } from "@ente/shared/utils";
-import { t } from "i18next";
-import isElectron from "is-electron";
-import { moveToHiddenCollection } from "services/collectionService";
-import { detectFileTypeInfo } from "services/detect-type";
-import DownloadManager from "services/download";
-import { updateFileCreationDateInEXIF } from "services/exif";
-import {
-    deleteFromTrash,
-    trashFiles,
-    updateFileMagicMetadata,
-    updateFilePublicMagicMetadata,
-} from "services/fileService";
-import { heicToJPEG } from "services/heic-convert";
+import DownloadManager from "@/new/photos/services/download";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -31,29 +9,35 @@ import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-} from "types/file";
+} from "@/new/photos/types/file";
+import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
+import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
+import { mergeMetadata } from "@/new/photos/utils/file";
+import { safeFileName } from "@/new/photos/utils/native-fs";
+import { writeStream } from "@/new/photos/utils/native-stream";
+import { lowercaseExtension } from "@/next/file";
+import log from "@/next/log";
+import { type Electron } from "@/next/types/ipc";
+import { withTimeout } from "@/utils/promise";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import type { User } from "@ente/shared/user/types";
+import { downloadUsingAnchor } from "@ente/shared/utils";
+import { t } from "i18next";
+import { moveToHiddenCollection } from "services/collectionService";
+import { updateFileCreationDateInEXIF } from "services/exif";
+import {
+    deleteFromTrash,
+    trashFiles,
+    updateFileMagicMetadata,
+    updateFilePublicMagicMetadata,
+} from "services/fileService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { VISIBILITY_STATE } from "types/magicMetadata";
 import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
-import { safeFileName } from "utils/native-fs";
-import { writeStream } from "utils/native-stream";
-
-const SUPPORTED_RAW_FORMATS = [
-    "heic",
-    "rw2",
-    "tiff",
-    "arw",
-    "cr3",
-    "cr2",
-    "nef",
-    "psd",
-    "dng",
-    "tif",
-];
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
@@ -64,30 +48,6 @@ export enum FILE_OPS_TYPE {
     TRASH,
     DELETE_PERMANENTLY,
 }
-
-class ModuleState {
-    /**
-     * This will be set to true if we get an error from the Node.js side of our
-     * desktop app telling us that native JPEG conversion is not available for
-     * the current OS/arch combination.
-     *
-     * That way, we can stop pestering it again and again (saving an IPC
-     * round-trip).
-     *
-     * Note the double negative when it is used.
-     */
-    isNativeJPEGConversionNotAvailable = false;
-}
-
-const moduleState = new ModuleState();
-
-/**
- * @returns a string to use as an identifier when logging information about the
- * given {@link enteFile}. The returned string contains the file name (for ease
- * of debugging) and the file ID (for exactness).
- */
-export const fileLogID = (enteFile: EnteFile) =>
-    `file ${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
 
 export async function getUpdatedEXIFFileForDownload(
     fileReader: FileReader,
@@ -197,20 +157,6 @@ export function sortFiles(files: EnteFile[], sortAsc = false) {
     });
 }
 
-export function sortTrashFiles(files: EnteFile[]) {
-    return files.sort((a, b) => {
-        if (a.deleteBy === b.deleteBy) {
-            if (a.metadata.creationTime === b.metadata.creationTime) {
-                return (
-                    b.metadata.modificationTime - a.metadata.modificationTime
-                );
-            }
-            return b.metadata.creationTime - a.metadata.creationTime;
-        }
-        return a.deleteBy - b.deleteBy;
-    });
-}
-
 export async function decryptFile(
     file: EncryptedEnteFile,
     collectionKey: string,
@@ -268,80 +214,6 @@ export async function decryptFile(
         log.error("file decryption failed", e);
         throw e;
     }
-}
-
-/**
- * The returned blob.type is filled in, whenever possible, with the MIME type of
- * the data that we're dealing with.
- */
-export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
-    try {
-        const tempFile = new File([imageBlob], fileName);
-        const fileTypeInfo = await detectFileTypeInfo(tempFile);
-        log.debug(
-            () =>
-                `Need renderable image for ${JSON.stringify({ fileName, ...fileTypeInfo })}`,
-        );
-        const { extension } = fileTypeInfo;
-
-        if (!isNonWebImageFileExtension(extension)) {
-            // Either it is something that the browser already knows how to
-            // render, or something we don't even about yet.
-            const mimeType = fileTypeInfo.mimeType;
-            if (!mimeType) {
-                log.info(
-                    "Trying to render a file without a MIME type",
-                    fileName,
-                );
-                return imageBlob;
-            } else {
-                return new Blob([imageBlob], { type: mimeType });
-            }
-        }
-
-        const available = !moduleState.isNativeJPEGConversionNotAvailable;
-        if (isElectron() && available && isSupportedRawFormat(extension)) {
-            // If we're running in our desktop app, see if our Node.js layer can
-            // convert this into a JPEG using native tools for us.
-            try {
-                return await nativeConvertToJPEG(imageBlob);
-            } catch (e) {
-                if (e.message.endsWith(CustomErrorMessage.NotAvailable)) {
-                    moduleState.isNativeJPEGConversionNotAvailable = true;
-                } else {
-                    log.error("Native conversion to JPEG failed", e);
-                }
-            }
-        }
-
-        if (extension == "heic" || extension == "heif") {
-            // For HEIC/HEIF files we can use our web HEIC converter.
-            return await heicToJPEG(imageBlob);
-        }
-
-        return undefined;
-    } catch (e) {
-        log.error(`Failed to get renderable image for ${fileName}`, e);
-        return undefined;
-    }
-};
-
-const nativeConvertToJPEG = async (imageBlob: Blob) => {
-    const startTime = Date.now();
-    const imageData = new Uint8Array(await imageBlob.arrayBuffer());
-    const electron = globalThis.electron;
-    // If we're running in a worker, we need to reroute the request back to
-    // the main thread since workers don't have access to the `window` (and
-    // thus, to the `window.electron`) object.
-    const jpegData = electron
-        ? await electron.convertToJPEG(imageData)
-        : await workerBridge.convertToJPEG(imageData);
-    log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
-    return new Blob([jpegData], { type: "image/jpeg" });
-};
-
-export function isSupportedRawFormat(exactType: string) {
-    return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
 
 export async function changeFilesVisibility(
@@ -430,31 +302,6 @@ export function isSharedFile(user: User, file: EnteFile) {
         return false;
     }
     return file.ownerID !== user.id;
-}
-
-/**
- * [Note: File name for local EnteFile objects]
- *
- * The title property in a file's metadata is the original file's name. The
- * metadata of a file cannot be edited. So if later on the file's name is
- * changed, then the edit is stored in the `editedName` property of the public
- * metadata of the file.
- *
- * This function merges these edits onto the file object that we use locally.
- * Effectively, post this step, the file's metadata.title can be used in lieu of
- * its filename.
- */
-export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => {
-        if (file.pubMagicMetadata?.data.editedTime) {
-            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-        }
-        if (file.pubMagicMetadata?.data.editedName) {
-            file.metadata.title = file.pubMagicMetadata.data.editedName;
-        }
-
-        return file;
-    });
 }
 
 export function updateExistingFilePubMetadata(

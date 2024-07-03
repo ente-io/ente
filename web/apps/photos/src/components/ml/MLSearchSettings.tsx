@@ -1,3 +1,4 @@
+import { canEnableFaceIndexing } from "@/new/photos/services/ml";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -18,7 +19,6 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { canEnableFaceIndexing } from "services/face/indexer";
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,

@@ -1,3 +1,5 @@
+import { EnteFile } from "@/new/photos/types/file";
+import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
@@ -21,10 +23,8 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { EnteFile } from "types/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { formattedByteSize } from "utils/units";
 
 const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;

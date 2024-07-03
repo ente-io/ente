@@ -370,6 +370,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkForUpdates": MessageLookupByLibrary.simpleMessage("检查更新"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证"),
+        "checkStatus": MessageLookupByLibrary.simpleMessage("检查状态"),
         "checking": MessageLookupByLibrary.simpleMessage("正在检查..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage("领取免费存储"),
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
@@ -448,6 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "creatingLink": MessageLookupByLibrary.simpleMessage("正在创建链接..."),
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("可用的关键更新"),
+        "crop": MessageLookupByLibrary.simpleMessage("裁剪"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage("当前用量 "),
         "custom": MessageLookupByLibrary.simpleMessage("自定义"),
         "customEndpoint": m15,
@@ -723,7 +725,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("离开相册"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("离开家庭计划"),
         "leaveSharedAlbum": MessageLookupByLibrary.simpleMessage("要离开共享相册吗？"),
-        "light": MessageLookupByLibrary.simpleMessage("浅色"),
+        "left": MessageLookupByLibrary.simpleMessage("向左"),
+        "light": MessageLookupByLibrary.simpleMessage("亮度"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("浅色"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("链接已复制到剪贴板"),
@@ -768,6 +771,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockscreen": MessageLookupByLibrary.simpleMessage("锁屏"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("登录"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("正在退出登录..."),
+        "loginSessionExpired": MessageLookupByLibrary.simpleMessage("会话已过期"),
+        "loginSessionExpiredDetails":
+            MessageLookupByLibrary.simpleMessage("您的会话已过期。请重新登录。"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "点击登录时，默认我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("退出登录"),
@@ -865,6 +871,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pair": MessageLookupByLibrary.simpleMessage("配对"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("用 PIN 配对"),
         "pairingComplete": MessageLookupByLibrary.simpleMessage("配对完成"),
+        "passKeyPendingVerification":
+            MessageLookupByLibrary.simpleMessage("仍需进行验证"),
         "passkey": MessageLookupByLibrary.simpleMessage("通行密钥"),
         "passkeyAuthTitle": MessageLookupByLibrary.simpleMessage("通行密钥认证"),
         "password": MessageLookupByLibrary.simpleMessage("密码"),
@@ -1007,6 +1015,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("重试"),
         "reviewDeduplicateItems":
             MessageLookupByLibrary.simpleMessage("请检查并删除您认为重复的项目。"),
+        "reviewSuggestions": MessageLookupByLibrary.simpleMessage("查看建议"),
+        "right": MessageLookupByLibrary.simpleMessage("向右"),
+        "rotate": MessageLookupByLibrary.simpleMessage("旋转"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("向左旋转"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("向右旋转"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("安全存储"),
@@ -1017,6 +1028,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage("若您尚未保存，请妥善保存此恢复密钥"),
         "saving": MessageLookupByLibrary.simpleMessage("正在保存..."),
+        "savingEdits": MessageLookupByLibrary.simpleMessage("正在保存编辑内容..."),
         "scanCode": MessageLookupByLibrary.simpleMessage("扫描二维码/条码"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage("用您的身份验证器应用\n扫描此条码"),
@@ -1222,6 +1234,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "totalSize": MessageLookupByLibrary.simpleMessage("总大小"),
         "trash": MessageLookupByLibrary.simpleMessage("回收站"),
         "trashDaysLeft": m64,
+        "trim": MessageLookupByLibrary.simpleMessage("修剪"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("请再试一次"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "打开备份可自动上传添加到此设备文件夹的文件至 Ente。"),
@@ -1300,6 +1313,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weHaveSendEmailTo": m67,
         "weakStrength": MessageLookupByLibrary.simpleMessage("弱"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("欢迎回来！"),
+        "whatsNew": MessageLookupByLibrary.simpleMessage("更新日志"),
         "yearly": MessageLookupByLibrary.simpleMessage("每年"),
         "yearsAgo": m68,
         "yes": MessageLookupByLibrary.simpleMessage("是"),

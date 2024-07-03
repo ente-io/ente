@@ -1,7 +1,4 @@
-import type {
-    UpdatedKey,
-    UserVerificationResponse,
-} from "@ente/accounts/types/user";
+import type { UpdatedKey, UserVerificationResponse } from "./user";
 
 export interface SRPAttributes {
     srpUserID: string;
@@ -65,6 +62,11 @@ export interface UpdateSRPAndKeysRequest {
     srpM1: string;
     setupID: string;
     updatedKeyAttr: UpdatedKey;
+    /**
+     * If true (default), then all existing sessions for the user will be
+     * invalidated.
+     */
+    logOutOtherDevices?: boolean;
 }
 
 export interface UpdateSRPAndKeysResponse {

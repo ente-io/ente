@@ -21,14 +21,6 @@ export function setJustSignedUp(status: boolean) {
     setData(LS_KEYS.JUST_SIGNED_UP, { status });
 }
 
-export function getLivePhotoInfoShownCount() {
-    return getData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT)?.count ?? 0;
-}
-
-export function setLivePhotoInfoShownCount(count: boolean) {
-    setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
-}
-
 export function getLocalMapEnabled(): boolean {
     return getData(LS_KEYS.MAP_ENABLED)?.value ?? false;
 }

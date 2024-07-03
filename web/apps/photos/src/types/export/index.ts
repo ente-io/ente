@@ -1,5 +1,5 @@
+import { EnteFile } from "@/new/photos/types/file";
 import type { ExportStage } from "services/export";
-import { EnteFile } from "types/file";
 
 export interface ExportProgress {
     success: number;

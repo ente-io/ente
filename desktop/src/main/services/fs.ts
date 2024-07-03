@@ -4,6 +4,7 @@
 
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import path from "node:path";
 
 export const fsExists = (path: string) => existsSync(path);
 
@@ -27,4 +28,18 @@ export const fsIsDir = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
     const stat = await fs.stat(dirPath);
     return stat.isDirectory();
+};
+
+export const fsFindFiles = async (dirPath: string) => {
+    const items = await fs.readdir(dirPath, { withFileTypes: true });
+    let paths: string[] = [];
+    for (const item of items) {
+        const itemPath = path.posix.join(dirPath, item.name);
+        if (item.isFile()) {
+            paths.push(itemPath);
+        } else if (item.isDirectory()) {
+            paths = [...paths, ...(await fsFindFiles(itemPath))];
+        }
+    }
+    return paths;
 };

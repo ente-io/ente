@@ -1,4 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
+import DownloadManager from "@/new/photos/services/download";
+import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
@@ -12,11 +15,6 @@ import PhotoSwipe from "photoswipe";
 import { useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Duplicate } from "services/deduplicationService";
-import DownloadManager, {
-    LivePhotoSourceURL,
-    SourceURLs,
-} from "services/download";
-import { EnteFile } from "types/file";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,

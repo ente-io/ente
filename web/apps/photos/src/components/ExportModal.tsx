@@ -1,3 +1,4 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
@@ -22,9 +23,9 @@ import { useContext, useEffect, useState } from "react";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
+    type ExportOpts,
 } from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
-import { EnteFile } from "types/file";
 import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
 import { DirectoryPath } from "./Directory";
 import ExportFinished from "./ExportFinished";
@@ -144,10 +145,10 @@ export default function ExportModal(props: Props) {
         setContinuousExport(newContinuousExport);
     };
 
-    const startExport = async () => {
+    const startExport = async (opts?: ExportOpts) => {
         if (!(await verifyExportFolderExists())) return;
 
-        await exportService.scheduleExport();
+        await exportService.scheduleExport(opts ?? {});
     };
 
     const stopExport = () => {
@@ -240,7 +241,7 @@ const ExportDynamicContent = ({
     collectionNameMap,
 }: {
     exportStage: ExportStage;
-    startExport: () => void;
+    startExport: (opts?: ExportOpts) => void;
     stopExport: () => void;
     onHide: () => void;
     lastExportTime: number;
@@ -273,7 +274,7 @@ const ExportDynamicContent = ({
                     lastExportTime={lastExportTime}
                     pendingExports={pendingExports}
                     collectionNameMap={collectionNameMap}
-                    startExport={startExport}
+                    onResync={() => startExport({ resync: true })}
                 />
             );
 

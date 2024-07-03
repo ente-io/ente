@@ -276,7 +276,7 @@ class UserService {
         throw Exception("delete action failed");
       }
     } catch (e) {
-      _logger.severe(e);
+      _logger.warning(e);
       await showGenericErrorDialog(context: context, error: e);
       return null;
     }
@@ -304,7 +304,7 @@ class UserService {
         throw Exception("delete action failed");
       }
     } catch (e) {
-      _logger.severe(e);
+      _logger.warning(e);
       rethrow;
     }
   }
@@ -329,7 +329,7 @@ class UserService {
       }
       rethrow;
     } catch (e, s) {
-      _logger.severe("unexpected error", e, s);
+      _logger.warning("unexpected error", e, s);
       rethrow;
     }
   }
@@ -340,23 +340,33 @@ class UserService {
     await dialog.show();
     try {
       final userPassword = Configuration.instance.getVolatilePassword();
-      if (userPassword == null) throw Exception("volatile password is null");
-
       await _saveConfiguration(response);
-
-      if (Configuration.instance.getEncryptedToken() != null) {
-        await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-          userPassword,
-          Configuration.instance.getKeyAttributes()!,
+      if (userPassword == null) {
+        await dialog.hide();
+        // ignore: unawaited_futures
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const PasswordReentryPage();
+            },
+          ),
+          (route) => route.isFirst,
         );
       } else {
-        throw Exception("unexpected response during passkey verification");
+        if (Configuration.instance.getEncryptedToken() != null) {
+          await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+            userPassword,
+            Configuration.instance.getKeyAttributes()!,
+          );
+        } else {
+          throw Exception("unexpected response during passkey verification");
+        }
+        await dialog.hide();
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        Bus.instance.fire(AccountConfiguredEvent());
       }
-      await dialog.hide();
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      Bus.instance.fire(AccountConfiguredEvent());
     } catch (e) {
-      _logger.severe(e);
+      _logger.warning(e);
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
@@ -384,10 +394,14 @@ class UserService {
       await dialog.hide();
       if (response.statusCode == 200) {
         Widget page;
+        final String passkeySessionID = response.data["passkeySessionID"];
         final String twoFASessionID = response.data["twoFactorSessionID"];
+
         if (twoFASessionID.isNotEmpty) {
           await setTwoFactor(value: true);
           page = TwoFactorAuthenticationPage(twoFASessionID);
+        } else if (passkeySessionID.isNotEmpty) {
+          page = PasskeyPage(passkeySessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
@@ -434,7 +448,7 @@ class UserService {
       }
     } catch (e) {
       await dialog.hide();
-      _logger.severe(e);
+      _logger.warning(e);
       // ignore: unawaited_futures
       showErrorDialog(
         context,
@@ -505,7 +519,7 @@ class UserService {
       }
     } catch (e) {
       await dialog.hide();
-      _logger.severe(e);
+      _logger.warning(e);
       // ignore: unawaited_futures
       showErrorDialog(
         context,

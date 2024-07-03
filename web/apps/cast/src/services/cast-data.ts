@@ -19,8 +19,10 @@ export const storeCastData = (payload: unknown) => {
     // Iterate through all the keys of the payload object and save them to
     // localStorage. We don't validate here, we'll validate when we read these
     // values back in `readCastData`.
-    for (const key in payload) {
-        window.localStorage.setItem(key, payload[key]);
+    for (const [key, value] of Object.entries(payload)) {
+        typeof value == "string" || typeof value == "number"
+            ? localStorage.setItem(key, value.toString())
+            : localStorage.removeItem(key);
     }
 };
 

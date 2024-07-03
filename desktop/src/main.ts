@@ -455,20 +455,51 @@ const allowExternalLinks = (webContents: WebContents) =>
 /**
  * Allow uploading to arbitrary S3 buckets.
  *
- * The files in the desktop app are served over the ente:// protocol. During
- * testing or self-hosting, we might be using a S3 bucket that does not allow
- * whitelisting a custom URI scheme. To avoid requiring the bucket to set an
- * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
- * workaround here instead, intercepting the ACAO header and allowing `*`.
+ * The files in the desktop app are served over the ente:// protocol. When that
+ * is returned as the CORS allowed origin, "Access-Control-Allow-Origin:
+ * ente://app", CORS requests fail.
+ *
+ * Further, during testing or self-hosting, file uploads involve a redirection
+ * (This doesn't affect our production systems since we upload via a worker,
+ * See: [Note: Passing credentials for self-hosted file fetches]).
+ *
+ * In some cases, we might be using a S3 bucket that does not allow whitelisting
+ * a custom URI scheme. Echoing back the value of `Origin` (even if the bucket
+ * would allow us to) would also not work, since the browser sends `null` as the
+ * `Origin` for the redirected request (this is as per the CORS spec). So the
+ * only way in such cases would be to require the bucket to set an
+ * "Access-Control-Allow-Origin: *".
+ *
+ * To avoid these issues, we intercepting the ACAO header and set it to `*`.
+ *
+ * However, that cause problems with requests that use credentials since "*" is
+ * not a valid value in such cases. One such example is the HCaptcha requests
+ * made by Stripe when we initiate a payment within the desktop app:
+ *
+ * > Access to XMLHttpRequest at 'https://api2.hcaptcha.com/getcaptcha/xxx' from
+ * > origin 'https://newassets.hcaptcha.com' has been blocked by CORS policy:
+ * > The value of the 'Access-Control-Allow-Origin' header in the response must
+ * > not be the wildcard '*' when the request's credentials mode is 'include'.
+ * > The credentials mode of requests initiated by the XMLHttpRequest is
+ * > controlled by the withCredentials attribute.
+ *
+ * So we only do this workaround if there was either no ACAO specified in the
+ * response, or if the ACAO was "ente://app".
  */
 const allowAllCORSOrigins = (webContents: WebContents) =>
     webContents.session.webRequest.onHeadersReceived(
         ({ responseHeaders }, callback) => {
             const headers: NonNullable<typeof responseHeaders> = {};
-            for (const [key, value] of Object.entries(responseHeaders ?? {}))
-                if (key.toLowerCase() != "access-control-allow-origin")
-                    headers[key] = value;
+
             headers["Access-Control-Allow-Origin"] = ["*"];
+            for (const [key, value] of Object.entries(responseHeaders ?? {}))
+                if (key.toLowerCase() == "access-control-allow-origin") {
+                    headers["Access-Control-Allow-Origin"] =
+                        value[0] == rendererURL ? ["*"] : value;
+                } else {
+                    headers[key] = value;
+                }
+
             callback({ responseHeaders: headers });
         },
     );

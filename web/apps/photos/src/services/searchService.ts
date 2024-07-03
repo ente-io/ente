@@ -1,11 +1,17 @@
 import { FILE_TYPE } from "@/media/file-type";
+import {
+    faceIndexingStatus,
+    isFaceIndexingEnabled,
+} from "@/new/photos/services/ml";
+import mlWorkManager from "@/new/photos/services/ml/mlWorkManager";
+import type { Person } from "@/new/photos/services/ml/people";
+import { EnteFile } from "@/new/photos/types/file";
+import { isDesktop } from "@/next/app";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
-import type { Person } from "services/face/people";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
-import { EnteFile } from "types/file";
 import {
     ClipSearchScores,
     DateValue,
@@ -20,8 +26,6 @@ import { getFormattedDate } from "utils/search";
 import { clipService, computeClipMatchScore } from "./clip-service";
 import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
-import { faceIndexingStatus, isFaceIndexingEnabled } from "./face/indexer";
-import mlWorkManager from "./face/mlWorkManager";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -32,9 +36,7 @@ export const getDefaultOptions = async () => {
     return [
         // TODO-ML(MR): Skip this for now if indexing is disabled (eventually
         // the indexing status should not be tied to results).
-        ...((await isFaceIndexingEnabled())
-            ? [await getIndexStatusSuggestion()]
-            : []),
+        ...(isFaceIndexingEnabled() ? [await getIndexStatusSuggestion()] : []),
         ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };
@@ -297,9 +299,7 @@ async function getLocationSuggestions(searchPhrase: string) {
 async function getClipSuggestion(
     searchPhrase: string,
 ): Promise<Suggestion | undefined> {
-    if (!clipService.isPlatformSupported()) {
-        return null;
-    }
+    if (!isDesktop) return undefined;
 
     const clipResults = await searchClip(searchPhrase);
     if (!clipResults) return undefined;

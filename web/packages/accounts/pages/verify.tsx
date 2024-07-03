@@ -1,26 +1,33 @@
+import type { UserVerificationResponse } from "@/accounts/types/user";
 import { ensure } from "@/utils/ensure";
-import type { UserVerificationResponse } from "@ente/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import { VerifyingPasskey } from "@ente/shared/components/LoginComponents";
+import {
+    LoginFlowFormFooter,
+    VerifyingPasskey,
+} from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -37,7 +44,7 @@ import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -65,7 +72,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         main();
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -85,7 +92,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             } = resp.data as UserVerificationResponse;
             if (passkeySessionID) {
                 const user = getData(LS_KEYS.USER);
-                setData(LS_KEYS.USER, {
+                await setLSUser({
                     ...user,
                     passkeySessionID,
                     isTwoFactorEnabled: true,
@@ -93,15 +100,15 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 });
                 // TODO: This is not the first login though if they already have
                 // 2FA. Does this flag mean first login on this device?
+                //
+                // Update: This flag causes the interactive encryption key to be
+                // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
-                const url = passkeyVerificationRedirectURL(
-                    appName,
-                    passkeySessionID,
-                );
+                const url = passkeyVerificationRedirectURL(passkeySessionID);
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
-                setData(LS_KEYS.USER, {
+                await setLSUser({
                     email,
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
@@ -109,7 +116,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 setIsFirstLogin(true);
                 router.push(PAGES.TWO_FACTOR_VERIFY);
             } else {
-                setData(LS_KEYS.USER, {
+                await setLSUser({
                     email,
                     token,
                     encryptedToken,
@@ -159,7 +166,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const resendEmail = async () => {
         setResend(1);
-        await sendOtt(appName, email);
+        await sendOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
@@ -197,7 +204,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                appContext={appContext}
+                {...{ logout, setDialogBoxAttributesV2 }}
             />
         );
     }
@@ -225,18 +232,20 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     callback={onSubmit}
                 />
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    {resend === 0 && (
-                        <LinkButton onClick={resendEmail}>
-                            {t("RESEND_MAIL")}
+                <LoginFlowFormFooter>
+                    <Stack direction="row" justifyContent="space-between">
+                        {resend === 0 && (
+                            <LinkButton onClick={resendEmail}>
+                                {t("RESEND_MAIL")}
+                            </LinkButton>
+                        )}
+                        {resend === 1 && <span>{t("SENDING")}</span>}
+                        {resend === 2 && <span>{t("SENT")}</span>}
+                        <LinkButton onClick={logout}>
+                            {t("CHANGE_EMAIL")}
                         </LinkButton>
-                    )}
-                    {resend === 1 && <span>{t("SENDING")}</span>}
-                    {resend === 2 && <span>{t("SENT")}</span>}
-                    <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
-                </FormPaperFooter>
+                    </Stack>
+                </LoginFlowFormFooter>
             </FormPaper>
         </VerticallyCentered>
     );

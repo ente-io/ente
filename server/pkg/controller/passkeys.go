@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -9,6 +10,10 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/google/uuid"
+)
+
+const (
+	_passKeyNameMaxLength = 256
 )
 
 type PasskeyController struct {
@@ -52,8 +57,8 @@ func (c *PasskeyController) RemovePasskey2FA(userID int64) (err error) {
 }
 
 func (c *PasskeyController) RenamePasskey(userID int64, passkeyID uuid.UUID, newName string) (err error) {
-	if len(newName) < 1 || len(newName) > 32 {
-		err = ente.ErrInvalidName
+	if len(newName) < 1 || len(newName) > _passKeyNameMaxLength {
+		err = ente.NewBadRequestWithMessage(fmt.Sprintf("friendlyName must be between 1 and %d characters", _passKeyNameMaxLength))
 		return
 	}
 
@@ -75,10 +80,13 @@ func (c *PasskeyController) BeginRegistration(userID int64) (options *protocol.C
 }
 
 func (c *PasskeyController) FinishRegistration(userID int64, friendlyName string, req *http.Request, sessionID uuid.UUID) (err error) {
+	if len(friendlyName) < 1 || len(friendlyName) > _passKeyNameMaxLength {
+		err = ente.NewBadRequestWithMessage(fmt.Sprintf("friendlyName must be between 1 and %d characters", _passKeyNameMaxLength))
+		return
+	}
 	user, err := c.UserRepo.Get(userID)
 	if err != nil {
 		return
 	}
-
 	return c.Repo.FinishRegistration(&user, friendlyName, req, sessionID)
 }

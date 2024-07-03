@@ -1,7 +1,5 @@
 import chokidar, { type FSWatcher } from "chokidar";
 import { BrowserWindow } from "electron/main";
-import fs from "node:fs/promises";
-import path from "node:path";
 import { FolderWatch, type CollectionMapping } from "../../types/ipc";
 import log from "../log";
 import { watchStore } from "../stores/watch";
@@ -23,6 +21,12 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
     const folderPaths = folderWatches().map((watch) => watch.folderPath);
 
     const watcher = chokidar.watch(folderPaths, {
+        // Don't emit "add" events for matching paths when instantiating the
+        // watch (we do a full disk scan on launch on our own, and also getting
+        // the same events from the watcher causes duplicates).
+        ignoreInitial: true,
+        // Ask the watcher to wait for a the file size to stabilize before
+        // telling us about a new file. By default, it waits for 2 seconds.
         awaitWriteFinish: true,
     });
 
@@ -135,20 +139,6 @@ export const watchUpdateIgnoredFiles = (
             return watch;
         }),
     );
-};
-
-export const watchFindFiles = async (dirPath: string) => {
-    const items = await fs.readdir(dirPath, { withFileTypes: true });
-    let paths: string[] = [];
-    for (const item of items) {
-        const itemPath = path.posix.join(dirPath, item.name);
-        if (item.isFile()) {
-            paths.push(itemPath);
-        } else if (item.isDirectory()) {
-            paths = [...paths, ...(await watchFindFiles(itemPath))];
-        }
-    }
-    return paths;
 };
 
 /**

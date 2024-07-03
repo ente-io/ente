@@ -1,5 +1,7 @@
+import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
-import { clientPackageName } from "@/next/types/app";
+import { clientPackageHeader } from "@/next/http";
+import { apiURL } from "@/next/origins";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -8,7 +10,6 @@ import {
     toB64URLSafeNoPadding,
     toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
-import { apiOrigin } from "@ente/shared/network/api";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -22,12 +23,10 @@ export const isWebAuthnSupported = () => !!navigator.credentials;
  */
 const accountsAuthenticatedRequestHeaders = (
     token: string,
-): Record<string, string> => {
-    return {
-        "X-Auth-Token": token,
-        "X-Client-Package": clientPackageName("accounts"),
-    };
-};
+): Record<string, string> => ({
+    "X-Auth-Token": token,
+    "X-Client-Package": clientPackageName,
+});
 
 const Passkey = z.object({
     /** A unique ID for the passkey */
@@ -58,7 +57,7 @@ const GetPasskeysResponse = z.object({
  * has no passkeys.
  */
 export const getPasskeys = async (token: string) => {
-    const url = `${apiOrigin()}/passkeys`;
+    const url = await apiURL("/passkeys");
     const res = await fetch(url, {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
@@ -82,7 +81,7 @@ export const renamePasskey = async (
     name: string,
 ) => {
     const params = new URLSearchParams({ friendlyName: name });
-    const url = `${apiOrigin()}/passkeys/${id}`;
+    const url = await apiURL(`/passkeys/${id}`);
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -98,7 +97,7 @@ export const renamePasskey = async (
  * @param id The `id` of the existing passkey to delete.
  */
 export const deletePasskey = async (token: string, id: string) => {
-    const url = `${apiOrigin()}/passkeys/${id}`;
+    const url = await apiURL(`/passkeys/${id}`);
     const res = await fetch(url, {
         method: "DELETE",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -149,7 +148,7 @@ interface BeginPasskeyRegistrationResponse {
 }
 
 const beginPasskeyRegistration = async (token: string) => {
-    const url = `${apiOrigin()}/passkeys/registration/begin`;
+    const url = await apiURL("/passkeys/registration/begin");
     const res = await fetch(url, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -293,7 +292,7 @@ const finishPasskeyRegistration = async ({
     const transports = attestationResponse.getTransports();
 
     const params = new URLSearchParams({ friendlyName, sessionID });
-    const url = `${apiOrigin()}/passkeys/registration/finish`;
+    const url = await apiURL("/passkeys/registration/finish");
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
@@ -343,13 +342,34 @@ const authenticatorAttestationResponse = (credential: Credential) => {
  * Return `true` if the given {@link redirectURL} (obtained from the redirect
  * query parameter passed around during the passkey verification flow) is one of
  * the whitelisted URLs that we allow redirecting to on success.
+ *
+ * This check is likely not necessary but we've only kept it just to be on the
+ * safer side. However, this gets in the way of people who are self hosting
+ * Ente. So only do this check if we're running on our production servers (or
+ * localhost).
  */
 export const isWhitelistedRedirect = (redirectURL: URL) =>
+    shouldRestrictToWhitelistedRedirect()
+        ? _isWhitelistedRedirect(redirectURL)
+        : true;
+
+export const shouldRestrictToWhitelistedRedirect = () => {
+    // host includes port, hostname is sans port
+    const hostname = new URL(window.location.origin).hostname;
+    return (
+        hostname.endsWith("localhost") ||
+        hostname.endsWith(".ente.io") ||
+        hostname.endsWith(".ente.sh")
+    );
+};
+
+const _isWhitelistedRedirect = (redirectURL: URL) =>
     (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh") ||
     redirectURL.protocol == "ente:" ||
-    redirectURL.protocol == "enteauth:";
+    redirectURL.protocol == "enteauth:" ||
+    redirectURL.protocol == "ente-cli:";
 
 export interface BeginPasskeyAuthenticationResponse {
     /**
@@ -369,6 +389,13 @@ export interface BeginPasskeyAuthenticationResponse {
 }
 
 /**
+ * The passkey session which we are trying to start an authentication ceremony
+ * for has already finished elsewhere.
+ */
+export const passkeySessionAlreadyClaimedErrorMessage =
+    "Passkey session already claimed";
+
+/**
  * Create a authentication ceremony session and return a challenge and a list of
  * public key credentials that can be used to attest that challenge.
  *
@@ -379,16 +406,24 @@ export interface BeginPasskeyAuthenticationResponse {
  *
  * @param passkeySessionID A session created by the requesting app that can be
  * used to initiate a passkey authentication ceremony on the accounts app.
+ *
+ * @throws In addition to arbitrary errors, it throws errors with the message
+ * {@link passkeySessionAlreadyClaimedErrorMessage}.
  */
 export const beginPasskeyAuthentication = async (
     passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
-    const url = `${apiOrigin()}/users/two-factor/passkeys/begin`;
+    const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
+        headers: clientPackageHeader(),
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    if (!res.ok) {
+        if (res.status == 409)
+            throw new Error(passkeySessionAlreadyClaimedErrorMessage);
+        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    }
 
     // See: [Note: Converting binary data in WebAuthn API payloads]
 
@@ -469,10 +504,12 @@ export const finishPasskeyAuthentication = async ({
         ceremonySessionID,
         clientPackage,
     });
-    const url = `${apiOrigin()}/users/two-factor/passkeys/finish`;
+    const url = await apiURL("/users/two-factor/passkeys/finish");
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: {
+            // Note: Unlike the other requests, this is the clientPackage of the
+            // _requesting_ app, not the accounts app.
             "X-Client-Package": clientPackage,
         },
         body: JSON.stringify({

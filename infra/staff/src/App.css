@@ -1,0 +1,456 @@
+.fetch-button-container {
+    margin-right: 180px;
+    margin-left: 10px;
+}
+
+.content-wrapper {
+    display: flex;
+    align-items: flex-start;
+    margin-left: 175px;
+}
+
+.fetch-button-container button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #009879;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+#submitbtn {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #009879;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+#submitbtn:hover {
+    background-color: #007c6c;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.sidebar {
+    padding: 20px;
+    flex: 0 0 auto;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.error-message {
+    margin-top: 20px;
+    color: red;
+}
+
+.message {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.message.error {
+    background-color: #f44336;
+    color: white;
+}
+
+.message.success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.dropdown-container {
+    margin-bottom: 20px;
+    position: relative; /* Ensure relative positioning for dropdown menu */
+}
+
+.more-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #009879;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 1px;
+}
+
+.more-button:hover {
+    background-color: #007c6c;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 5px); /* Position right below the More button */
+    left: 0;
+    z-index: 100;
+    display: block;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    max-height: 150px; /* Example: Set max height for scrollability */
+    overflow-y: auto; /* Enable vertical scroll */
+}
+
+/* Remove bullets from unordered list */
+.dropdown-menu ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #333;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu button:hover {
+    background-color: #f0f0f0;
+}
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.modal-header .close-btn {
+    cursor: pointer;
+    color: #777;
+    font-size: 20px;
+}
+
+.modal-content {
+    margin-top: 10px;
+}
+
+/* Styles for draggable modal */
+.modal.draggable {
+    cursor: move;
+}
+
+.modal.draggable .modal-header {
+    cursor: move;
+}
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: lightgreen;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.popup-content div {
+    margin-bottom: 10px;
+}
+:root {
+    --popup-bg-color-light: #fff;
+    --popup-bg-color-dark: #2c2c2c;
+    --popup-border-color-light: #ccc;
+    --popup-border-color-dark: #444;
+    --popup-text-color-light: #000;
+    --popup-text-color-dark: #fff;
+    --popup-shadow-light: rgba(0, 0, 0, 0.1);
+    --popup-shadow-dark: rgba(255, 255, 255, 0.1);
+}
+
+.update-subscription-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    transform: translate(-50%, -50%);
+    background-color: var(--popup-bg-color-light);
+    border: 1px solid var(--popup-border-color-light);
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0px 0px 10px var(--popup-shadow-light);
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.close-button {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--popup-text-color-light);
+}
+
+.popup-content h2 {
+    margin-top: 0;
+}
+
+.popup-content form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.popup-content form input,
+.popup-content form select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    background-color: var(--popup-bg-color-light);
+    color: var(--popup-text-color-light);
+    border: 1px solid var(--popup-border-color-light);
+}
+
+.popup-content form button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    background-color: var(--popup-bg-color-light);
+    color: var(--popup-text-color-light);
+    border: 1px solid var(--popup-border-color-light);
+}
+
+.custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select select {
+    width: 100%;
+    padding: 8px;
+    cursor: pointer;
+    background-color: var(--popup-bg-color-light);
+    color: var(--popup-text-color-light);
+    border: 1px solid var(--popup-border-color-light);
+    appearance: none;
+}
+
+.custom-select::after {
+    content: "\25BC";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+@media (prefers-color-scheme: dark) {
+    .update-subscription-popup {
+        background-color: var(--popup-bg-color-dark);
+        border-color: var(--popup-border-color-dark);
+        color: var(--popup-text-color-dark);
+        box-shadow: 0px 0px 10px var(--popup-shadow-dark);
+    }
+
+    .close-button {
+        color: var(--popup-text-color-dark);
+    }
+
+    .popup-content form input,
+    .popup-content form select {
+        background-color: var(--popup-bg-color-dark);
+        color: var(--popup-text-color-dark);
+        border: 1px solid var(--popup-border-color-dark);
+    }
+
+    .popup-content form button {
+        background-color: var(--popup-bg-color-dark);
+        color: var(--popup-text-color-dark);
+        border: 1px solid var(--popup-border-color-dark);
+    }
+}
+:root {
+    --popup-bg-color-light: #fff;
+    --popup-bg-color-dark: #2c2c2c;
+    --popup-border-color-light: #ccc;
+    --popup-border-color-dark: #444;
+    --popup-text-color-light: #000;
+    --popup-text-color-dark: #fff;
+    --popup-shadow-light: rgba(0, 0, 0, 0.1);
+    --popup-shadow-dark: rgba(255, 255, 255, 0.1);
+}
+
+.update-subscription-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--popup-bg-color-light);
+    border: 1px solid var(--popup-border-color-light);
+    padding: 20px;
+    z-index: 1000;
+    box-shadow: 0px 0px 10px var(--popup-shadow-light);
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.close-button {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--popup-text-color-light);
+}
+
+.popup-content h2 {
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    background-color: var(--popup-bg-color-light);
+    color: var(--popup-text-color-light);
+    border: 1px solid var(--popup-border-color-light);
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select select {
+    width: 100%;
+    padding: 8px;
+    cursor: pointer;
+    background-color: var(--popup-bg-color-light);
+    color: var(--popup-text-color-light);
+    border: 1px solid var(--popup-border-color-light);
+    appearance: none;
+}
+
+.custom-select::after {
+    content: "\25BC";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+@media (prefers-color-scheme: dark) {
+    .update-subscription-popup {
+        background-color: var(--popup-bg-color-dark);
+        border-color: var(--popup-border-color-dark);
+        color: var(--popup-text-color-dark);
+        box-shadow: 0px 0px 10px var(--popup-shadow-dark);
+    }
+
+    .close-button {
+        color: var(--popup-text-color-dark);
+    }
+
+    .form-group input,
+    .form-group select {
+        background-color: var(--popup-bg-color-dark);
+        color: var(--popup-text-color-dark);
+        border: 1px solid var(--popup-border-color-dark);
+    }
+
+    .form-group button {
+        background-color: var(--popup-bg-color-dark);
+        color: var(--popup-text-color-dark);
+        border: 1px solid var(--popup-border-color-dark);
+    }
+}

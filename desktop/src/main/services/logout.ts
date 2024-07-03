@@ -3,6 +3,7 @@ import log from "../log";
 import { clearConvertToMP4Results } from "../stream";
 import { clearStores } from "./store";
 import { watchReset } from "./watch";
+import { clearOpenZipCache } from "./zip";
 
 /**
  * Perform the native side logout sequence.
@@ -29,5 +30,10 @@ export const logout = (watcher: FSWatcher) => {
         clearStores();
     } catch (e) {
         ignoreError("native stores", e);
+    }
+    try {
+        clearOpenZipCache();
+    } catch (e) {
+        ignoreError("zip cache", e);
     }
 };

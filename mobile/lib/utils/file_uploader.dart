@@ -286,7 +286,7 @@ class FileUploader {
         kFileUploadTimeout,
         onTimeout: () {
           final message = "Upload timed out for file " + file.toString();
-          _logger.severe(message);
+          _logger.warning(message);
           throw TimeoutException(message);
         },
       );
@@ -1184,7 +1184,7 @@ class FileUploader {
             clearQueue(error);
             throw error;
           } else {
-            _logger.severe("Could not fetch upload URLs", e, s);
+            _logger.warning("Could not fetch upload URLs", e, s);
           }
         }
         rethrow;

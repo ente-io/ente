@@ -37,6 +37,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -306,6 +307,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       preferences,
     );
 
+    MagicCacheService.instance.init(preferences);
+
     initComplete = true;
     _logger.info("Initialization done");
   } catch (e, s) {
@@ -333,7 +336,7 @@ Future<void> _sync(String caller) async {
     await SyncService.instance.sync();
   } catch (e, s) {
     if (!isHandledSyncError(e)) {
-      _logger.severe("Sync error", e, s);
+      _logger.warning("Sync error", e, s);
     }
   }
 }

@@ -2,28 +2,13 @@ import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
-import { ensureElectron } from "@/next/electron";
-import { basename } from "@/next/file";
-import log from "@/next/log";
-import { CustomErrorMessage } from "@/next/types/ipc";
-import { ensure } from "@/utils/ensure";
-import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/constants";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
-import { CustomError, handleUploadError } from "@ente/shared/error";
-import type { Remote } from "comlink";
+import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
-} from "constants/upload";
-import { addToCollection } from "services/collectionService";
-import { parseImageMetadata } from "services/exif";
-import * as ffmpeg from "services/ffmpeg";
-import {
-    PublicUploadProps,
-    type LivePhotoAssets,
-} from "services/upload/uploadManager";
+} from "@/new/photos/services/upload/types";
 import {
     EnteFile,
     MetadataFileAttributes,
@@ -31,16 +16,32 @@ import {
     type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
-} from "types/file";
-import { EncryptedMagicMetadata } from "types/magicMetadata";
-import type { ParsedExtractedMetadata } from "types/metadata";
+} from "@/new/photos/types/file";
+import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
+import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
+import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
+import { readStream } from "@/new/photos/utils/native-stream";
+import { ensureElectron } from "@/next/electron";
+import { basename } from "@/next/file";
+import log from "@/next/log";
+import { CustomErrorMessage } from "@/next/types/ipc";
+import { ensure } from "@/utils/ensure";
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
+import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
+import { CustomError, handleUploadError } from "@ente/shared/error";
+import type { Remote } from "comlink";
+import { addToCollection } from "services/collectionService";
+import { parseImageMetadata } from "services/exif";
+import {
+    PublicUploadProps,
+    type LivePhotoAssets,
+} from "services/upload/uploadManager";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "utils/magicMetadata";
-import { readStream } from "utils/native-stream";
 import * as convert from "xml-js";
-import { detectFileTypeInfoFromChunk } from "../detect-type";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -50,7 +51,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import type { UploadItem } from "./types";
 import UploadHttpClient from "./uploadHttpClient";
 import type { UploadableUploadItem } from "./uploadManager";
 

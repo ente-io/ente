@@ -15,6 +15,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
@@ -57,7 +58,8 @@ class _ClusterPageState extends State<ClusterPage> {
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
 
-  bool get showNamingBanner => (!userDismissedNamingBanner && widget.showNamingBanner);
+  bool get showNamingBanner =>
+      (!userDismissedNamingBanner && widget.showNamingBanner);
 
   bool userDismissedNamingBanner = false;
 
@@ -66,7 +68,8 @@ class _ClusterPageState extends State<ClusterPage> {
     super.initState();
     ClusterFeedbackService.setLastViewedClusterID(widget.clusterID);
     files = widget.searchResult;
-    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _filesUpdatedEvent =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
@@ -111,7 +114,8 @@ class _ClusterPageState extends State<ClusterPage> {
         final result = files
             .where(
               (file) =>
-                  file.creationTime! >= creationStartTime && file.creationTime! <= creationEndTime,
+                  file.creationTime! >= creationStartTime &&
+                  file.creationTime! <= creationEndTime,
             )
             .toList();
         return Future.value(
@@ -148,16 +152,19 @@ class _ClusterPageState extends State<ClusterPage> {
       body: Column(
         children: [
           Expanded(
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                gallery,
-                FileSelectionOverlayBar(
-                  ClusterPage.overlayType,
-                  _selectedFiles,
-                  clusterID: widget.clusterID,
-                ),
-              ],
+            child: SelectionState(
+              selectedFiles: _selectedFiles,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  gallery,
+                  FileSelectionOverlayBar(
+                    ClusterPage.overlayType,
+                    _selectedFiles,
+                    clusterID: widget.clusterID,
+                  ),
+                ],
+              ),
             ),
           ),
           showNamingBanner
@@ -185,7 +192,8 @@ class _ClusterPageState extends State<ClusterPage> {
                             context,
                             clusterID: widget.clusterID,
                           );
-                          if (result != null && result is (PersonEntity, EnteFile)) {
+                          if (result != null &&
+                              result is (PersonEntity, EnteFile)) {
                             Navigator.pop(context);
                             // ignore: unawaited_futures
                             routeToPage(context, PeoplePage(person: result.$1));

@@ -1,4 +1,4 @@
-import 'dart:math' show max, min, pow, sqrt;
+import 'dart:math' show max, min;
 
 import "package:photos/face/model/dimension.dart";
 
@@ -31,27 +31,6 @@ abstract class Detection {
 
   @override
   String toString();
-}
-
-@Deprecated('Old method only used in other deprecated methods')
-extension BBoxExtension on List<double> {
-  void roundBoxToDouble() {
-    final widthRounded = (this[2] - this[0]).roundToDouble();
-    final heightRounded = (this[3] - this[1]).roundToDouble();
-    this[0] = this[0].roundToDouble();
-    this[1] = this[1].roundToDouble();
-    this[2] = this[0] + widthRounded;
-    this[3] = this[1] + heightRounded;
-  }
-
-  // double get xMinBox =>
-  //     isNotEmpty ? this[0] : throw IndexError.withLength(0, length);
-  // double get yMinBox =>
-  //     length >= 2 ? this[1] : throw IndexError.withLength(1, length);
-  // double get xMaxBox =>
-  //     length >= 3 ? this[2] : throw IndexError.withLength(2, length);
-  // double get yMaxBox =>
-  //     length >= 4 ? this[3] : throw IndexError.withLength(3, length);
 }
 
 /// This class represents a face detection with relative coordinates in the range [0, 1].
@@ -100,102 +79,6 @@ class FaceDetectionRelative extends Detection {
             )
             .toList(),
         super(score: score);
-
-  factory FaceDetectionRelative.zero() {
-    return FaceDetectionRelative(
-      score: 0,
-      box: <double>[0, 0, 0, 0],
-      allKeypoints: <List<double>>[
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-      ],
-    );
-  }
-
-  /// This is used to initialize the FaceDetectionRelative object with default values.
-  /// This constructor is useful because it can be used to initialize a FaceDetectionRelative object as a constant.
-  /// Contrary to the `FaceDetectionRelative.zero()` constructor, this one gives immutable attributes [box] and [allKeypoints].
-  FaceDetectionRelative.defaultInitialization()
-      : box = const <double>[0, 0, 0, 0],
-        allKeypoints = const <List<double>>[
-          [0, 0],
-          [0, 0],
-          [0, 0],
-          [0, 0],
-          [0, 0],
-        ],
-        super.empty();
-
-  FaceDetectionRelative getNearestDetection(
-    List<FaceDetectionRelative> detections,
-  ) {
-    if (detections.isEmpty) {
-      throw ArgumentError("The detection list cannot be empty.");
-    }
-
-    var nearestDetection = detections[0];
-    var minDistance = double.infinity;
-
-    // Calculate the center of the current instance
-    final centerX1 = (xMinBox + xMaxBox) / 2;
-    final centerY1 = (yMinBox + yMaxBox) / 2;
-
-    for (var detection in detections) {
-      final centerX2 = (detection.xMinBox + detection.xMaxBox) / 2;
-      final centerY2 = (detection.yMinBox + detection.yMaxBox) / 2;
-      final distance =
-          sqrt(pow(centerX2 - centerX1, 2) + pow(centerY2 - centerY1, 2));
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestDetection = detection;
-      }
-    }
-    return nearestDetection;
-  }
-
-  void transformRelativeToOriginalImage(
-    List<double> fromBox, // [xMin, yMin, xMax, yMax]
-    List<double> toBox, // [xMin, yMin, xMax, yMax]
-  ) {
-    // Return if all elements of fromBox and toBox are equal
-    for (int i = 0; i < fromBox.length; i++) {
-      if (fromBox[i] != toBox[i]) {
-        break;
-      }
-      if (i == fromBox.length - 1) {
-        return;
-      }
-    }
-
-    // Account for padding
-    final double paddingXRatio =
-        (fromBox[0] - toBox[0]) / (toBox[2] - toBox[0]);
-    final double paddingYRatio =
-        (fromBox[1] - toBox[1]) / (toBox[3] - toBox[1]);
-
-    // Calculate the scaling and translation
-    final double scaleX = (fromBox[2] - fromBox[0]) / (1 - 2 * paddingXRatio);
-    final double scaleY = (fromBox[3] - fromBox[1]) / (1 - 2 * paddingYRatio);
-    final double translateX = fromBox[0] - paddingXRatio * scaleX;
-    final double translateY = fromBox[1] - paddingYRatio * scaleY;
-
-    // Transform Box
-    _transformBox(box, scaleX, scaleY, translateX, translateY);
-
-    // Transform All Keypoints
-    for (int i = 0; i < allKeypoints.length; i++) {
-      allKeypoints[i] = _transformPoint(
-        allKeypoints[i],
-        scaleX,
-        scaleY,
-        translateX,
-        translateY,
-      );
-    }
-  }
 
   void correctForMaintainedAspectRatio(
     Dimensions originalSize,
@@ -311,16 +194,6 @@ class FaceDetectionRelative extends Detection {
     return faceID;
   }
 
-  /// This method is used to generate a faceID for a face detection that was manually added by the user.
-  static String toFaceIDEmpty({required int fileID}) {
-    return fileID.toString() + '_0';
-  }
-
-  /// This method is used to check if a faceID corresponds to a manually added face detection and not an actual face detection.
-  static bool isFaceIDEmpty(String faceID) {
-    return faceID.split('_')[1] == '0';
-  }
-
   @override
   String toString() {
     return 'FaceDetectionRelative( with relative coordinates: \n score: $score \n Box: xMinBox: $xMinBox, yMinBox: $yMinBox, xMaxBox: $xMaxBox, yMaxBox: $yMaxBox, \n Keypoints: leftEye: $leftEye, rightEye: $rightEye, nose: $nose, leftMouth: $leftMouth, rightMouth: $rightMouth \n )';
@@ -348,6 +221,7 @@ class FaceDetectionRelative extends Detection {
 
   /// The width of the bounding box of the face detection, in relative range [0, 1].
   double get width => xMaxBox - xMinBox;
+
   @override
 
   /// The height of the bounding box of the face detection, in relative range [0, 1].
@@ -385,55 +259,10 @@ class FaceDetectionAbsolute extends Detection {
     required this.allKeypoints,
   }) : super(score: score);
 
-  factory FaceDetectionAbsolute._zero() {
-    return FaceDetectionAbsolute(
-      score: 0,
-      box: <double>[0, 0, 0, 0],
-      allKeypoints: <List<double>>[
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-        [0, 0],
-      ],
-    );
-  }
-
-  FaceDetectionAbsolute.defaultInitialization()
-      : box = const <double>[0, 0, 0, 0],
-        allKeypoints = const <List<double>>[
-          [0, 0],
-          [0, 0],
-          [0, 0],
-          [0, 0],
-          [0, 0],
-        ],
-        super.empty();
-
   @override
   String toString() {
     return 'FaceDetectionAbsolute( with absolute coordinates: \n score: $score \n Box: xMinBox: $xMinBox, yMinBox: $yMinBox, xMaxBox: $xMaxBox, yMaxBox: $yMaxBox, \n Keypoints: leftEye: $leftEye, rightEye: $rightEye, nose: $nose, leftMouth: $leftMouth, rightMouth: $rightMouth \n )';
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'score': score,
-      'box': box,
-      'allKeypoints': allKeypoints,
-    };
-  }
-
-  factory FaceDetectionAbsolute.fromJson(Map<String, dynamic> json) {
-    return FaceDetectionAbsolute(
-      score: (json['score'] as num).toDouble(),
-      box: List<double>.from(json['box']),
-      allKeypoints: (json['allKeypoints'] as List)
-          .map((item) => List<double>.from(item))
-          .toList(),
-    );
-  }
-
-  static FaceDetectionAbsolute empty = FaceDetectionAbsolute._zero();
 
   @override
 
@@ -481,36 +310,13 @@ List<FaceDetectionAbsolute> relativeToAbsoluteDetections({
   required int imageWidth,
   required int imageHeight,
 }) {
-  final numberOfDetections = relativeDetections.length;
-  final absoluteDetections = List<FaceDetectionAbsolute>.filled(
-    numberOfDetections,
-    FaceDetectionAbsolute._zero(),
-  );
+  final absoluteDetections = <FaceDetectionAbsolute>[];
   for (var i = 0; i < relativeDetections.length; i++) {
-    final relativeDetection = relativeDetections[i];
-    final absoluteDetection = relativeDetection.toAbsolute(
+    final absoluteDetection = relativeDetections[i].toAbsolute(
       imageWidth: imageWidth,
       imageHeight: imageHeight,
     );
-
-    absoluteDetections[i] = absoluteDetection;
+    absoluteDetections.add(absoluteDetection);
   }
-
   return absoluteDetections;
-}
-
-/// Returns an enlarged version of the [box] by a factor of [factor].
-List<double> getEnlargedRelativeBox(List<double> box, [double factor = 2]) {
-  final boxCopy = List<double>.from(box, growable: false);
-  // The four values of the box in order are: [xMinBox, yMinBox, xMaxBox, yMaxBox].
-
-  final width = boxCopy[2] - boxCopy[0];
-  final height = boxCopy[3] - boxCopy[1];
-
-  boxCopy[0] -= width * (factor - 1) / 2;
-  boxCopy[1] -= height * (factor - 1) / 2;
-  boxCopy[2] += width * (factor - 1) / 2;
-  boxCopy[3] += height * (factor - 1) / 2;
-
-  return boxCopy;
 }

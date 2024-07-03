@@ -1,3 +1,4 @@
+import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
 import log from "@/next/log";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -18,7 +19,6 @@ import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
 import { Collection } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { VISIBILITY_STATE } from "types/magicMetadata";
 import {
     changeCollectionOrder,
     changeCollectionSortOrder,

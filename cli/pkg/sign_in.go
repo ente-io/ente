@@ -7,7 +7,9 @@ import (
 	"github.com/ente-io/cli/internal/api"
 	eCrypto "github.com/ente-io/cli/internal/crypto"
 	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/utils/browser"
 	"github.com/ente-io/cli/utils/encoding"
+	"github.com/spf13/viper"
 	"log"
 
 	"github.com/kong/go-srp"
@@ -131,6 +133,31 @@ func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationR
 			return nil, flowErr
 		}
 		totpResp, err := c.Client.VerifyTotp(ctx, authResp.TwoFactorSessionID, totp)
+		if err != nil {
+			log.Printf("failed to verify %v", err)
+			continue
+		}
+		return totpResp, nil
+	}
+}
+
+func (c *ClICtrl) verifyPassKey(ctx context.Context, authResp *api.AuthorizationResponse) (*api.AuthorizationResponse, error) {
+	if !authResp.IsPasskeyRequired() {
+		return authResp, nil
+	}
+	baseAccountUrl := viper.GetString("endpoint.accounts")
+	passkeyAuthUrl := fmt.Sprintf("%s/passkeys/verify?passkeySessionID=%s&redirect=ente-cli://passkey&clientPackage=io.ente.photos", baseAccountUrl, authResp.PassKeySessionID)
+	fmt.Printf("Open this url in browser to verify passkey: %s\n", passkeyAuthUrl)
+	err := browser.OpenURL(passkeyAuthUrl)
+	if err != nil {
+		fmt.Printf("Failed to open browser: %v\n", err)
+	}
+	for {
+		err = internal.WaitForEnter("Press enter once you have completed the passkey verification")
+		if err != nil {
+			return nil, err
+		}
+		totpResp, err := c.Client.CheckPasskeyStatus(ctx, authResp.PassKeySessionID)
 		if err != nil {
 			log.Printf("failed to verify %v", err)
 			continue

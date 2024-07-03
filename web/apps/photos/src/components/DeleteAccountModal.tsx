@@ -1,7 +1,7 @@
+import { initiateEmail } from "@/new/photos/utils/web";
 import log from "@/next/log";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { DELETE_ACCOUNT_EMAIL } from "@ente/shared/constants/urls";
 import { Button, Link, Stack } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -10,7 +10,7 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
-import { initiateEmail, preloadImage } from "utils/common";
+import { preloadImage } from "utils/common";
 import { decryptDeleteAccountChallenge } from "utils/crypto";
 import * as Yup from "yup";
 import { CheckboxInput } from "./CheckboxInput";
@@ -26,20 +26,6 @@ interface FormValues {
     reason: string;
     feedback: string;
 }
-
-enum DELETE_REASON {
-    MISSING_FEATURE = "It's missing a key feature that I need",
-    BROKEN_BEHAVIOR = "The app or a certain feature does not behave as I think it should",
-    FOUND_ANOTHER_SERVICE = "I found another service that I like better",
-    NOT_LISTED = "My reason isn't listed",
-}
-
-const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
-    return Object.keys(DELETE_REASON).map((reason) => ({
-        label: t(`DELETE_REASON.${reason}`),
-        value: DELETE_REASON[reason],
-    }));
-};
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { setDialogBoxAttributesV2, isMobile, logout } =
@@ -70,14 +56,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             feedback = feedback.trim();
             if (feedback.length === 0) {
                 switch (reason) {
-                    case DELETE_REASON.FOUND_ANOTHER_SERVICE:
+                    case "found_another_service":
                         setFieldError(
                             "feedback",
-                            t("FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE"),
+                            t("feedback_required_found_another_service"),
                         );
                         break;
                     default:
-                        setFieldError("feedback", t("FEEDBACK_REQUIRED"));
+                        setFieldError("feedback", t("feedback_required"));
                 }
                 return;
             }
@@ -101,8 +87,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const confirmAccountDeletion = () => {
         setDialogBoxAttributesV2({
-            title: t("DELETE_ACCOUNT"),
-            content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
+            title: t("delete_account"),
+            content: <Trans i18nKey="delete_account_confirm_message" />,
             proceed: {
                 text: t("DELETE"),
                 action: solveChallengeAndDeleteAccount,
@@ -113,22 +99,20 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     };
 
     const askToMailForDeletion = () => {
+        const emailID = "account-deletion@ente.io";
+
         setDialogBoxAttributesV2({
-            title: t("DELETE_ACCOUNT"),
+            title: t("delete_account"),
             content: (
                 <Trans
-                    i18nKey="DELETE_ACCOUNT_MESSAGE"
-                    components={{
-                        a: <Link href={`mailto:${DELETE_ACCOUNT_EMAIL}`} />,
-                    }}
-                    values={{ emailID: DELETE_ACCOUNT_EMAIL }}
+                    i18nKey="delete_account_manually_message"
+                    components={{ a: <Link href={`mailto:${emailID}`} /> }}
+                    values={{ emailID }}
                 />
             ),
             proceed: {
                 text: t("DELETE"),
-                action: () => {
-                    initiateEmail("account-deletion@ente.io");
-                },
+                action: () => initiateEmail(emailID),
                 variant: "critical",
             },
             close: { text: t("CANCEL") },
@@ -162,7 +146,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 onClose={onClose}
                 fullScreen={isMobile}
                 attributes={{
-                    title: t("DELETE_ACCOUNT"),
+                    title: t("delete_account"),
                     secondary: {
                         action: onClose,
                         text: t("CANCEL"),
@@ -190,10 +174,10 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         <form noValidate onSubmit={handleSubmit}>
                             <Stack spacing={"24px"}>
                                 <DropdownInput
-                                    options={getReasonOptions()}
-                                    label={t("DELETE_ACCOUNT_REASON_LABEL")}
+                                    options={deleteReasonOptions()}
+                                    label={t("delete_account_reason_label")}
                                     placeholder={t(
-                                        "DELETE_ACCOUNT_REASON_PLACEHOLDER",
+                                        "delete_account_reason_placeholder",
                                     )}
                                     selected={values.reason}
                                     setSelected={handleChange("reason")}
@@ -201,9 +185,9 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     message={errors.reason}
                                 />
                                 <MultilineInput
-                                    label={t("DELETE_ACCOUNT_FEEDBACK_LABEL")}
+                                    label={t("delete_account_feedback_label")}
                                     placeholder={t(
-                                        "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER",
+                                        "delete_account_feedback_placeholder",
                                     )}
                                     value={values.feedback}
                                     onChange={handleChange("feedback")}
@@ -215,7 +199,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     checked={acceptDataDeletion}
                                     onChange={setAcceptDataDeletion}
                                     label={t(
-                                        "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL",
+                                        "delete_account_confirm_checkbox_label",
                                     )}
                                 />
                                 <Stack spacing={"8px"}>
@@ -226,7 +210,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                         disabled={!acceptDataDeletion}
                                         loading={loading}
                                     >
-                                        {t("CONFIRM_DELETE_ACCOUNT")}
+                                        {t("delete_account_confirm")}
                                     </EnteButton>
                                     <Button
                                         size="large"
@@ -246,3 +230,22 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 };
 
 export default DeleteAccountModal;
+
+/**
+ * All of these must have a corresponding localized string nested under the
+ * "delete_reason" key.
+ */
+const deleteReasons = [
+    "missing_feature",
+    "behaviour",
+    "found_another_service",
+    "not_listed",
+] as const;
+
+type DeleteReason = (typeof deleteReasons)[number];
+
+const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
+    deleteReasons.map((reason) => ({
+        label: t(`delete_reason.${reason}`),
+        value: reason,
+    }));

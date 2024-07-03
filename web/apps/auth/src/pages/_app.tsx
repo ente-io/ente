@@ -1,18 +1,13 @@
+import { accountLogout } from "@/accounts/services/logout";
+import type { AccountsContextT } from "@/accounts/types/context";
+import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
-import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import {
-    appTitle,
-    clientPackageName,
-    type AppName,
-    type BaseAppContextT,
-} from "@/next/types/app";
 import { ensure } from "@/utils/ensure";
-import { accountLogout } from "@ente/accounts/services/logout";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -22,7 +17,11 @@ import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    migrateKVToken,
+} from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
@@ -42,9 +41,9 @@ import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
 import "../../public/css/global.css";
 
 /**
- * Properties available via the {@link AppContext} to the Auth app's React tree.
+ * Properties available via {@link AppContext} to the Auth app's React tree.
  */
-type AppContextT = BaseAppContextT & {
+type AppContextT = AccountsContextT & {
     startLoading: () => void;
     finishLoading: () => void;
     themeColor: THEME_COLOR;
@@ -59,8 +58,6 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
-    const appName: AppName = "auth";
-
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -82,13 +79,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
-        const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(appName, userId);
+        const user = getData(LS_KEYS.USER) as User | undefined | null;
+        migrateKVToken(user);
+        logStartupBanner(user?.id);
+        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
-        setAppNameForAuthenticatedRequests(appName);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName(appName),
-        });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
@@ -147,7 +142,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     };
 
     const appContext = {
-        appName,
         logout,
         showNavBar,
         isMobile,
@@ -161,7 +155,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const title = isI18nReady
         ? t("title", { context: "auth" })
-        : appTitle[appName];
+        : staticAppTitle;
 
     return (
         <>

@@ -7,6 +7,7 @@ import {
     SxProps,
     Theme,
     Typography,
+    styled,
     type ButtonProps,
 } from "@mui/material";
 import { NotificationAttributes } from "types/Notification";
@@ -72,6 +73,7 @@ export default function Notification({
                     spacing={2}
                     direction="row"
                     alignItems={"center"}
+                    width={"100%"}
                 >
                     <Box sx={{ svg: { fontSize: "36px" } }}>
                         {attributes.startIcon ?? <InfoIcon />}
@@ -82,26 +84,29 @@ export default function Notification({
                         spacing={0.5}
                         flex={1}
                         textAlign="left"
+                        // This is necessary to trigger the ellipsizing of the
+                        // text in children.
+                        overflow="hidden"
                     >
                         {attributes.subtext && (
-                            <Typography variant="small">
+                            <EllipsizedTypography variant="small">
                                 {attributes.subtext}
-                            </Typography>
+                            </EllipsizedTypography>
                         )}
                         {attributes.message && (
-                            <Typography fontWeight="bold">
+                            <EllipsizedTypography fontWeight="bold">
                                 {attributes.message}
-                            </Typography>
+                            </EllipsizedTypography>
                         )}
                         {attributes.title && (
-                            <Typography fontWeight="bold">
+                            <EllipsizedTypography fontWeight="bold">
                                 {attributes.title}
-                            </Typography>
+                            </EllipsizedTypography>
                         )}
                         {attributes.caption && (
-                            <Typography variant="small">
+                            <EllipsizedTypography variant="small">
                                 {attributes.caption}
-                            </Typography>
+                            </EllipsizedTypography>
                         )}
                     </Stack>
 
@@ -122,3 +127,9 @@ export default function Notification({
         </Snackbar>
     );
 }
+
+const EllipsizedTypography = styled(Typography)`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+`;

@@ -20,7 +20,11 @@ start it, then you might need to install the VC++ runtime from Microsoft.
 
 This is what the error looks like:
 
+<div style="border: 1px solid black">
+
 ![Error when VC++ runtime is not installed](windows-vc.png){width=500px}
+
+</div>
 
 You can install the Microsoft VC++ redistributable runtime from here:<br/>
 https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version

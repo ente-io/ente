@@ -1,14 +1,12 @@
 import log from "@/next/log";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { HttpStatusCode } from "axios";
 import { codeFromURIString, type Code } from "services/code";
-
-const ENDPOINT = getEndpoint();
 
 export const getAuthCodes = async (): Promise<Code[]> => {
     const masterKey = await getActualKey();
@@ -83,7 +81,7 @@ interface AuthKey {
 export const getAuthKey = async (): Promise<AuthKey> => {
     try {
         const resp = await HTTPService.get(
-            `${ENDPOINT}/authenticator/key`,
+            await apiURL("/authenticator/key"),
             {},
             {
                 "X-Auth-Token": getToken(),
@@ -110,7 +108,7 @@ export const getDiff = async (
 ): Promise<AuthEntity[]> => {
     try {
         const resp = await HTTPService.get(
-            `${ENDPOINT}/authenticator/entity/diff`,
+            await apiURL("/authenticator/entity/diff"),
             {
                 sinceTime,
                 limit,

@@ -1,11 +1,11 @@
+import { unidentifiedFaceIDs } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/people";
+import { EnteFile } from "@/new/photos/types/file";
 import { blobCache } from "@/next/blob-cache";
 import { Skeleton, styled } from "@mui/material";
 import { Legend } from "components/PhotoViewer/styledComponents/Legend";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { unidentifiedFaceIDs } from "services/face/indexer";
-import type { Person } from "services/face/people";
-import { EnteFile } from "types/file";
 
 const FaceChipContainer = styled("div")`
     display: flex;

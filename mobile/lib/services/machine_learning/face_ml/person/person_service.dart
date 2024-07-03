@@ -65,11 +65,6 @@ class PersonService {
     return map;
   }
 
-  Future<Set<String>> personIDs() async {
-    final entities = await entityService.getEntities(EntityType.person);
-    return entities.map((e) => e.id).toSet();
-  }
-
   Future<void> reconcileClusters() async {
     final EnteWatch? w = kDebugMode ? EnteWatch("reconcileClusters") : null;
     w?.start();
@@ -197,6 +192,38 @@ class PersonService {
     await faceMLDataDB.removeClusterToPerson(
       personID: personID,
       clusterID: clusterID,
+    );
+    personData.logStats();
+  }
+
+  Future<void> removeFilesFromPerson({
+    required PersonEntity person,
+    required Set<String> faceIDs,
+  }) async {
+    final personData = person.data;
+    final List<int> emptiedClusters = [];
+    for (final cluster in personData.assigned!) {
+      cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
+      if (cluster.faces.isEmpty) {
+        emptiedClusters.add(cluster.id);
+      }
+    }
+
+    // Safety check to make sure we haven't created an empty cluster now, if so delete it
+    for (final emptyClusterID in emptiedClusters) {
+      personData.assigned!
+          .removeWhere((element) => element.id != emptyClusterID);
+      await faceMLDataDB.removeClusterToPerson(
+        personID: person.remoteID,
+        clusterID: emptyClusterID,
+      );
+    }
+
+    
+    await entityService.addOrUpdate(
+      EntityType.person,
+      json.encode(personData.toJson()),
+      id: person.remoteID,
     );
     personData.logStats();
   }

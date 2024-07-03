@@ -1,40 +1,45 @@
-import type { AppName } from "@/next/types/app";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
     TwoFactorSecret,
     TwoFactorVerificationResponse,
     UserVerificationResponse,
-} from "@ente/accounts/types/user";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+} from "@/accounts/types/user";
+import { appName } from "@/next/app";
+import { apiURL } from "@/next/origins";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 
-const ENDPOINT = getEndpoint();
-
-export const sendOtt = (appName: AppName, email: string) => {
-    return HTTPService.post(`${ENDPOINT}/users/ott`, {
+export const sendOtt = async (email: string) => {
+    return HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: appName == "auth" ? "totp" : "web",
     });
 };
 
-export const verifyOtt = (email: string, ott: string, referral: string) => {
+export const verifyOtt = async (
+    email: string,
+    ott: string,
+    referral: string,
+) => {
     const cleanedReferral = `web:${referral?.trim() || ""}`;
-    return HTTPService.post(`${ENDPOINT}/users/verify-email`, {
+    return HTTPService.post(await apiURL("/users/verify-email"), {
         email,
         ott,
         source: cleanedReferral,
     });
 };
 
-export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
+export const putAttributes = async (
+    token: string,
+    keyAttributes: KeyAttributes,
+) =>
     HTTPService.put(
-        `${ENDPOINT}/users/attributes`,
+        await apiURL("/users/attributes"),
         { keyAttributes },
         undefined,
         {
@@ -45,7 +50,7 @@ export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
 export const logout = async () => {
     try {
         const token = getToken();
-        await HTTPService.post(`${ENDPOINT}/users/logout`, null, undefined, {
+        await HTTPService.post(await apiURL("/users/logout"), null, undefined, {
             "X-Auth-Token": token,
         });
     } catch (e) {
@@ -65,10 +70,13 @@ export const logout = async () => {
 };
 
 export const verifyTwoFactor = async (code: string, sessionID: string) => {
-    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/verify`, {
-        code,
-        sessionID,
-    });
+    const resp = await HTTPService.post(
+        await apiURL("/users/two-factor/verify"),
+        {
+            code,
+            sessionID,
+        },
+    );
     return resp.data as UserVerificationResponse;
 };
 
@@ -79,10 +87,13 @@ export const recoverTwoFactor = async (
     sessionID: string,
     twoFactorType: TwoFactorType,
 ) => {
-    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
-        sessionID,
-        twoFactorType,
-    });
+    const resp = await HTTPService.get(
+        await apiURL("/users/two-factor/recover"),
+        {
+            sessionID,
+            twoFactorType,
+        },
+    );
     return resp.data as TwoFactorRecoveryResponse;
 };
 
@@ -91,17 +102,20 @@ export const removeTwoFactor = async (
     secret: string,
     twoFactorType: TwoFactorType,
 ) => {
-    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
-        sessionID,
-        secret,
-        twoFactorType,
-    });
+    const resp = await HTTPService.post(
+        await apiURL("/users/two-factor/remove"),
+        {
+            sessionID,
+            secret,
+            twoFactorType,
+        },
+    );
     return resp.data as TwoFactorVerificationResponse;
 };
 
 export const changeEmail = async (email: string, ott: string) => {
     await HTTPService.post(
-        `${ENDPOINT}/users/change-email`,
+        await apiURL("/users/change-email"),
         {
             email,
             ott,
@@ -114,7 +128,7 @@ export const changeEmail = async (email: string, ott: string) => {
 };
 
 export const sendOTTForEmailChange = async (email: string) => {
-    await HTTPService.post(`${ENDPOINT}/users/ott`, {
+    await HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: "web",
         purpose: "change",
@@ -123,7 +137,7 @@ export const sendOTTForEmailChange = async (email: string) => {
 
 export const setupTwoFactor = async () => {
     const resp = await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/setup`,
+        await apiURL("/users/two-factor/setup"),
         null,
         undefined,
         {
@@ -138,7 +152,7 @@ export const enableTwoFactor = async (
     recoveryEncryptedTwoFactorSecret: B64EncryptionResult,
 ) => {
     await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/enable`,
+        await apiURL("/users/two-factor/enable"),
         {
             code,
             encryptedTwoFactorSecret:
@@ -153,14 +167,19 @@ export const enableTwoFactor = async (
     );
 };
 
-export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
-    HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, undefined, {
-        "X-Auth-Token": token,
-    });
+export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
+    HTTPService.put(
+        await apiURL("/users/recovery-key"),
+        recoveryKey,
+        undefined,
+        {
+            "X-Auth-Token": token,
+        },
+    );
 
 export const disableTwoFactor = async () => {
     await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/disable`,
+        await apiURL("/users/two-factor/disable"),
         null,
         undefined,
         {

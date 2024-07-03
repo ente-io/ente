@@ -6,12 +6,22 @@ class Embedding {
   final List<double> embedding;
   int? updationTime;
 
+  bool get isEmpty => embedding.isEmpty;
+
   Embedding({
     required this.fileID,
     required this.model,
     required this.embedding,
     this.updationTime,
   });
+
+  factory Embedding.empty(int fileID, Model model) {
+    return Embedding(
+      fileID: fileID,
+      model: model,
+      embedding: <double>[],
+    );
+  }
 
   static List<double> decodeEmbedding(String embedding) {
     return List<double>.from(jsonDecode(embedding) as List);

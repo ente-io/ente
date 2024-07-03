@@ -1,8 +1,8 @@
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { Box, styled, Typography } from "@mui/material";
 
+import { formattedStorageByteSize } from "@/new/photos/utils/units";
 import { Trans } from "react-i18next";
-import { formattedStorageByteSize } from "utils/units";
 
 const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
     // gap: theme.spacing(1.5),

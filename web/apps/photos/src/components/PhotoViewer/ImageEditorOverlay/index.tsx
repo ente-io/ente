@@ -1,3 +1,5 @@
+import downloadManager from "@/new/photos/services/download";
+import { EnteFile } from "@/new/photos/types/file";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
@@ -34,9 +36,7 @@ import { AppContext } from "pages/_app";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getLocalCollections } from "services/collectionService";
-import downloadManager from "services/download";
 import uploadManager from "services/upload/uploadManager";
-import { EnteFile } from "types/file";
 import { getEditorCloseConfirmationMessage } from "utils/ui";
 import ColoursMenu from "./ColoursMenu";
 import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";

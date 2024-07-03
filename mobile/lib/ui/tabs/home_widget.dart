@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import "dart:io";
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import 'package:logging/logging.dart';
-import 'package:media_extension/media_extension_action_types.dart';
+import "package:media_extension/media_extension_action_types.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:move_to_background/move_to_background.dart';
+import "package:move_to_background/move_to_background.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -320,6 +320,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         onPopInvoked: (didPop) async {
           if (didPop) return;
           if (_selectedTabIndex == 0) {
+            if (_selectedFiles.files.isNotEmpty) {
+              _selectedFiles.clearAll();
+              return;
+            }
             if (isSettingsOpen) {
               Navigator.pop(context);
             } else if (Platform.isAndroid && action == IntentAction.main) {
