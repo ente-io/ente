@@ -13,7 +13,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
-import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/lockscreen_setting.dart";
 
 class LockScreen extends StatefulWidget {
@@ -34,7 +33,16 @@ class _LockScreenState extends State<LockScreen>
   int lockedTime = 0;
   int invalidAttemptCount = 0;
   int remainingTime = 0;
+  bool showErrorMessage = true;
   final _lockscreenSetting = LockscreenSetting.instance;
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(milliseconds: 500),
+    vsync: this,
+  );
+  late final animation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
 
   @override
   void initState() {
@@ -169,7 +177,7 @@ class _LockScreenState extends State<LockScreen>
     if (Platform.isAndroid) {
       return false;
     }
-    final shortestSide = MediaQuery.of(context).size.shortestSide;
+    final shortestSide = MediaQuery.sizeOf(context).shortestSide;
     return shortestSide > 600 ? true : false;
   }
 
@@ -311,7 +319,7 @@ class _LockScreenState extends State<LockScreen>
           : await requestAuthentication(
               context,
               context.l10n.authToViewYourMemories,
-              isLockscreenAuth: true,
+              isOpeningApp: true,
             );
       _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;
