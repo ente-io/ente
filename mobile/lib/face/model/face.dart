@@ -1,6 +1,6 @@
 import "package:photos/face/model/detection.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 
 // FileInfo contains the image width and height of the image the face was detected in.
 class FileInfo {
