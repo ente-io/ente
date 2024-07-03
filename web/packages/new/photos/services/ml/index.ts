@@ -2,6 +2,7 @@
  * @file Main thread interface to {@link MLWorker}.
  */
 
+import { FILE_TYPE } from "@/media/file-type";
 import {
     isBetaUser,
     isInternalUser,
@@ -20,6 +21,7 @@ import {
 import type { EnteFile } from "@/new/photos/types/file";
 import { clientPackageName } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
+import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { MLWorker } from "./worker";
@@ -161,6 +163,23 @@ const setIsFaceIndexingEnabled = (enabled: boolean) =>
 export const triggerMLSync = () => {
     if (!_isMLEnabled) return;
     void worker().then((w) => w.sync());
+};
+
+/**
+ * Called by the uploader when it uploads a new file from this client.
+ *
+ * @param enteFile The {@link EnteFile} that got uploaded.
+ *
+ * @param file When available, the web {@link File} object representing the
+ * contents of the file that got uploaded.
+ */
+export const onUpload = (enteFile: EnteFile, file: File | undefined) => {
+    if (!_isMLEnabled) return;
+    if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
+    log.debug(() => ({ t: "ml-liveq", enteFile, file }));
+    // TODO-ML: 1. Use this file!
+    // TODO-ML: 2. Handle cases when File is something else (e.g. on desktop).
+    void worker().then((w) => w.onUpload(enteFile));
 };
 
 export interface FaceIndexingStatus {

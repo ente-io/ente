@@ -102,7 +102,7 @@ export class MLWorker {
      * the file from remote.
      */
     // TODO-ML: Call me
-    didUpload(file: EnteFile) {
+    onUpload(file: EnteFile) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing
@@ -204,7 +204,7 @@ const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
     for (const file of files) {
         try {
             await index(file, undefined, userAgent);
-            // Let the event loop run so that other events (like didUpload) can
+            // Let the event loop run so that other events (like onUpload) can
             // be acknowledged and noted down.
             await wait(0);
         } catch {
