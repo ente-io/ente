@@ -3,8 +3,7 @@ import "dart:developer" as dev show log;
 import "dart:io" show File;
 import "dart:isolate";
 import "dart:math" show min;
-import "dart:typed_data" show Uint8List, Float32List, ByteData;
-import "dart:ui" show Image;
+import "dart:typed_data" show Uint8List, ByteData;
 
 import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
@@ -26,7 +25,6 @@ import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
-import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
@@ -736,175 +734,30 @@ class FaceMlService {
       final int faceDetectionAddress = args["faceDetectionAddress"] as int;
       final int faceEmbeddingAddress = args["faceEmbeddingAddress"] as int;
 
-      final resultBuilder = FaceMlResult.fromEnteFileID(enteFileID);
-
       dev.log(
         "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
       );
-      final stopwatchTotal = Stopwatch()..start();
-      final stopwatch = Stopwatch()..start();
+      final time = DateTime.now();
 
       // Decode the image once to use for both face detection and alignment
       final imageData = await File(imagePath).readAsBytes();
       final image = await decodeImageFromData(imageData);
-      final ByteData imgByteData = await getByteDataFromImage(image);
+      final ByteData imageByteData = await getByteDataFromImage(image);
       dev.log('Reading and decoding image took '
-          '${stopwatch.elapsedMilliseconds} ms');
-      stopwatch.reset();
+          '${DateTime.now().difference(time).inMilliseconds} ms');
 
-      // Get the faces
-      final List<FaceDetectionRelative> faceDetectionResult =
-          await FaceMlService._detectFacesSync(
+      final resultFaces = await FaceRecognitionService.runFacesPipeline(
+        enteFileID,
         image,
-        imgByteData,
+        imageByteData,
         faceDetectionAddress,
-        resultBuilder: resultBuilder,
-      );
-
-      dev.log(
-          "${faceDetectionResult.length} faces detected with scores ${faceDetectionResult.map((e) => e.score).toList()}: completed `detectFacesSync` function, in "
-          "${stopwatch.elapsedMilliseconds} ms");
-
-      // If no faces were detected, return a result with no faces. Otherwise, continue.
-      if (faceDetectionResult.isEmpty) {
-        dev.log(
-            "No faceDetectionResult, Completed analyzing image with uploadedFileID $enteFileID, in "
-            "${stopwatch.elapsedMilliseconds} ms");
-        resultBuilder.noFaceDetected();
-        return resultBuilder;
-      }
-
-      stopwatch.reset();
-      // Align the faces
-      final Float32List faceAlignmentResult =
-          await FaceMlService._alignFacesSync(
-        image,
-        imgByteData,
-        faceDetectionResult,
-        resultBuilder: resultBuilder,
-      );
-
-      dev.log("Completed `alignFacesSync` function, in "
-          "${stopwatch.elapsedMilliseconds} ms");
-
-      stopwatch.reset();
-      // Get the embeddings of the faces
-      final embeddings = await FaceMlService._embedFacesSync(
-        faceAlignmentResult,
         faceEmbeddingAddress,
-        resultBuilder: resultBuilder,
       );
 
-      dev.log("Completed `embedFacesSync` function, in "
-          "${stopwatch.elapsedMilliseconds} ms");
-
-      stopwatch.stop();
-      stopwatchTotal.stop();
-      dev.log("Finished Analyze image (${embeddings.length} faces) with "
-          "uploadedFileID $enteFileID, in "
-          "${stopwatchTotal.elapsedMilliseconds} ms");
-
-      return resultBuilder;
+      return resultFaces;
     } catch (e, s) {
       dev.log("Could not analyze image: \n e: $e \n s: $s");
       rethrow;
-    }
-  }
-
-  /// Detects faces in the given image data.
-  ///
-  /// `imageData`: The image data to analyze.
-  ///
-  /// Returns a list of face detection results.
-  static Future<List<FaceDetectionRelative>> _detectFacesSync(
-    Image image,
-    ByteData imageByteData,
-    int interpreterAddress, {
-    FaceMlResult? resultBuilder,
-  }) async {
-    try {
-      // Get the bounding boxes of the faces
-      final (List<FaceDetectionRelative> faces, dataSize) =
-          await FaceDetectionService.predict(
-        image,
-        imageByteData,
-        interpreterAddress,
-      );
-
-      // Add detected faces to the resultBuilder
-      if (resultBuilder != null) {
-        resultBuilder.addNewlyDetectedFaces(faces, dataSize);
-      }
-
-      return faces;
-    } on YOLOFaceInterpreterRunException {
-      throw CouldNotRunFaceDetector();
-    } catch (e) {
-      dev.log('[SEVERE] Face detection failed: $e');
-      throw GeneralFaceMlException('Face detection failed: $e');
-    }
-  }
-
-  /// Aligns multiple faces from the given image data.
-  ///
-  /// `imageData`: The image data in [Uint8List] that contains the faces.
-  /// `faces`: The face detection results in a list of [FaceDetectionAbsolute] for the faces to align.
-  ///
-  /// Returns a list of the aligned faces as image data.
-  static Future<Float32List> _alignFacesSync(
-    Image image,
-    ByteData imageByteData,
-    List<FaceDetectionRelative> faces, {
-    FaceMlResult? resultBuilder,
-  }) async {
-    try {
-      final stopwatch = Stopwatch()..start();
-      final (alignedFaces, alignmentResults, _, blurValues, _) =
-          await preprocessToMobileFaceNetFloat32List(
-        image,
-        imageByteData,
-        faces,
-      );
-      stopwatch.stop();
-      dev.log(
-        "Face alignment image decoding and processing took ${stopwatch.elapsedMilliseconds} ms",
-      );
-
-      if (resultBuilder != null) {
-        resultBuilder.addAlignmentResults(
-          alignmentResults,
-          blurValues,
-        );
-      }
-
-      return alignedFaces;
-    } catch (e, s) {
-      dev.log('[SEVERE] Face alignment failed: $e $s');
-      throw CouldNotWarpAffine();
-    }
-  }
-
-  static Future<List<List<double>>> _embedFacesSync(
-    Float32List facesList,
-    int interpreterAddress, {
-    FaceMlResult? resultBuilder,
-  }) async {
-    try {
-      // Get the embedding of the faces
-      final List<List<double>> embeddings =
-          await FaceEmbeddingService.predict(facesList, interpreterAddress);
-
-      // Add the embeddings to the resultBuilder
-      if (resultBuilder != null) {
-        resultBuilder.addEmbeddingsToExistingFaces(embeddings);
-      }
-
-      return embeddings;
-    } on MobileFaceNetInterpreterRunException {
-      throw CouldNotRunFaceEmbeddor();
-    } catch (e) {
-      dev.log('[SEVERE] Face embedding (batch) failed: $e');
-      throw GeneralFaceMlException('Face embedding (batch) failed: $e');
     }
   }
 
