@@ -122,8 +122,7 @@ class _LockScreenState extends State<LockScreen>
                             begin: 0,
                             end: _getFractionOfTimeElapsed(),
                           ),
-                          curve: Curves.ease,
-                          duration: const Duration(milliseconds: 50),
+                          duration: const Duration(seconds: 1),
                           builder: (context, value, _) =>
                               CircularProgressIndicator(
                             backgroundColor: colorTheme.fillFaintPressed,
@@ -149,31 +148,37 @@ class _LockScreenState extends State<LockScreen>
                         children: [
                           Text(
                             "Too many incorrect attempts",
-                            style: textTheme.body,
+                            style: textTheme.small,
                           )
                               .animate(
                                 delay: const Duration(milliseconds: 2000),
                               )
-                              .fadeOut(duration: 400.ms),
+                              .fadeOut(
+                                duration: 400.ms,
+                                curve: Curves.easeInOutCirc,
+                              ),
                           Text(
                             _formatTime(remainingTimeInSeconds),
-                            style: textTheme.body,
+                            style: textTheme.small,
                           )
                               .animate(
                                 delay: const Duration(milliseconds: 2250),
                               )
-                              .fadeIn(duration: 400.ms),
+                              .fadeIn(
+                                duration: 400.ms,
+                                curve: Curves.easeInOutCirc,
+                              ),
                         ],
                       )
                     : GestureDetector(
                         onTap: () => _showLockScreen(source: "tap"),
                         child: Text(
                           "Tap to unlock",
-                          style: textTheme.body,
+                          style: textTheme.small,
                         ),
                       ),
                 const Padding(
-                  padding: EdgeInsets.only(bottom: 20),
+                  padding: EdgeInsets.only(bottom: 24),
                 ),
               ],
             ),
