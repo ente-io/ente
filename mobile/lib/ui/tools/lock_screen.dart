@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 
 import 'package:flutter/material.dart';
+import "package:flutter/scheduler.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
@@ -44,6 +45,7 @@ class _LockScreenState extends State<LockScreen>
     parent: _controller,
     curve: Curves.easeInOut,
   );
+  late Brightness _platformBrightness;
 
   @override
   void initState() {
@@ -58,6 +60,9 @@ class _LockScreenState extends State<LockScreen>
       }
       _showLockScreen(source: "postFrameInit");
     });
+
+    _platformBrightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
   }
 
   @override
@@ -70,10 +75,11 @@ class _LockScreenState extends State<LockScreen>
           isTimerRunning ? null : _showLockScreen(source: "tap");
         },
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             image: DecorationImage(
-              image: ExactAssetImage(
-                'assets/loading_photos_background_fullscreen.png',
+              opacity: _platformBrightness == Brightness.light ? 0.08 : 0.12,
+              image: const ExactAssetImage(
+                'assets/lock_screen_background.png',
               ),
               fit: BoxFit.cover,
             ),
