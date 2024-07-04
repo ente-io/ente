@@ -1,22 +1,21 @@
-import downloadManager from "@/new/photos/services/download";
-import {
-    indexableFileIDs,
-    markIndexingFailed,
-    saveFaceIndex,
-    updateAssumingLocalFiles,
-} from "@/new/photos/services/ml/db";
-import type { FaceIndex } from "@/new/photos/services/ml/types";
 import type { EnteFile } from "@/new/photos/types/file";
+import { fileLogID } from "@/new/photos/utils/file";
 import { getKVN } from "@/next/kv";
 import { ensureAuthToken } from "@/next/local-user";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
-import { fileLogID } from "../../utils/file";
+import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
+import {
+    indexableFileIDs,
+    markIndexingFailed,
+    saveFaceIndex,
+    updateAssumingLocalFiles,
+} from "./db";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
-import { indexFaces } from "./index-face";
+import { type FaceIndex, indexFaces } from "./face";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */

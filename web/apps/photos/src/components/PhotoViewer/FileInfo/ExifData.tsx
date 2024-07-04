@@ -3,6 +3,7 @@ import { formatDateTimeFull } from "@ente/shared/time/format";
 import { Box, Stack, styled, Typography } from "@mui/material";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
+import React from "react";
 import { FileInfoSidebar } from ".";
 
 const ExifItem = styled(Box)`
@@ -84,7 +85,7 @@ export function ExifData(props: {
                                 </Typography>
                             </ExifItem>
                         ) : (
-                            <></>
+                            <React.Fragment key={key}></React.Fragment>
                         ),
                     )}
             </Stack>

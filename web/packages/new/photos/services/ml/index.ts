@@ -7,16 +7,14 @@ import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
-import {
-    clearFaceDB,
-    faceIndex,
-    indexedAndIndexableCounts,
-} from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
 import { clientPackageName, isDesktop } from "@/next/app";
+import { blobCache } from "@/next/blob-cache";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { regenerateFaceCrops } from "./crop";
+import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
@@ -210,7 +208,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     if (!isMLEnabled())
         throw new Error("Cannot get indexing status when ML is not enabled");
 
-    const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
+    const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
     const isIndexing = await (await worker()).isIndexing();
 
     let phase: FaceIndexingStatus["phase"];
@@ -236,4 +234,27 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
     return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
+};
+
+/**
+ * Check to see if any of the faces in the given file do not have a face crop
+ * present locally. If so, then regenerate the face crops for all the faces in
+ * the file (updating the "face-crops" {@link BlobCache}).
+ *
+ * @returns true if one or more face crops were regenerated; false otherwise.
+ */
+export const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
+    const index = await faceIndex(enteFile.id);
+    if (!index) return false;
+
+    const faceIDs = index.faceEmbedding.faces.map((f) => f.faceID);
+    const cache = await blobCache("face-crops");
+    for (const id of faceIDs) {
+        if (!(await cache.has(id))) {
+            await regenerateFaceCrops(enteFile, index);
+            return true;
+        }
+    }
+
+    return false;
 };

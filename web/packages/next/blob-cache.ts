@@ -57,6 +57,10 @@ export interface BlobCache {
      */
     get: (key: string) => Promise<Blob | undefined>;
     /**
+     * Check if there is an item corresponding to {@link key} in the cache.
+     */
+    has: (key: string) => Promise<boolean>;
+    /**
      * Add the given {@link key}-value ({@link blob}) pair to the cache.
      */
     put: (key: string, blob: Blob) => Promise<void>;
@@ -153,6 +157,7 @@ const openWebCache = async (name: BlobCacheNamespace) => {
             const res = await cache.match(key);
             return await res?.blob();
         },
+        has: async (key: string) => cache.match(key).then((v) => !!v),
         put: (key: string, blob: Blob) => cache.put(key, new Response(blob)),
         delete: (key: string) => cache.delete(key),
     };
@@ -184,6 +189,16 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
                 throw e;
             }
         },
+        has: async (key: string) => {
+            try {
+                await cache.getFileHandle(key);
+                return true;
+            } catch (e) {
+                if (e instanceof DOMException && e.name == "NotFoundError")
+                    return false;
+                throw e;
+            }
+        },
         put: async (key: string, blob: Blob) => {
             const fileHandle = await cache.getFileHandle(key, {
                 create: true,
@@ -203,25 +218,6 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
             }
         },
     };
-};
-
-/**
- * Return a cached blob for {@link key} in {@link cacheName}. If the blob is not
- * found in the cache, recreate/fetch it using {@link get}, cache it, and then
- * return it.
- */
-export const cachedOrNew = async (
-    cacheName: BlobCacheNamespace,
-    key: string,
-    get: () => Promise<Blob>,
-): Promise<Blob> => {
-    const cache = await openBlobCache(cacheName);
-    const cachedBlob = await cache.get(key);
-    if (cachedBlob) return cachedBlob;
-
-    const blob = await get();
-    await cache.put(key, blob);
-    return blob;
 };
 
 /**
