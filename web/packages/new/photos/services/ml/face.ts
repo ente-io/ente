@@ -25,7 +25,7 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import { saveFaceCrop } from "./crop";
+import { saveFaceCrops } from "./crop";
 import {
     clamp,
     grayscaleIntMatrixFromNormalized2List,
@@ -234,7 +234,7 @@ export const indexFaces = async (
     const fileID = enteFile.id;
 
     try {
-        return {
+        const faceIndex = {
             fileID,
             width,
             height,
@@ -244,6 +244,16 @@ export const indexFaces = async (
                 faces: await indexFacesInBitmap(fileID, imageBitmap),
             },
         };
+        // This step, saving face crops, is not part of the indexing pipeline;
+        // we just do it here since we have already have the ImageBitmap at
+        // hand. Ignore errors that happen during this since it does not impact
+        // the generated face index.
+        try {
+            await saveFaceCrops(imageBitmap, faceIndex);
+        } catch (e) {
+            log.error(`Failed to save face crops for file ${fileID}`, e);
+        }
+        return faceIndex;
     } finally {
         imageBitmap.close();
     }
@@ -308,18 +318,9 @@ const indexFacesInBitmap = async (
 
     const alignments: FaceAlignment[] = [];
 
-    for (const { faceID, detection } of partialResult) {
+    for (const { detection } of partialResult) {
         const alignment = computeFaceAlignment(detection);
         alignments.push(alignment);
-
-        // This step is not part of the indexing pipeline, we just do it here
-        // since we have already computed the face alignment. Ignore errors that
-        // happen during this since it does not impact the generated face index.
-        try {
-            await saveFaceCrop(imageBitmap, faceID, alignment);
-        } catch (e) {
-            log.error(`Failed to save face crop for faceID ${faceID}`, e);
-        }
     }
 
     const alignedFacesData = convertToMobileFaceNetInput(
