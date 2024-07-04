@@ -7,16 +7,16 @@ import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
-import {
-    clearFaceDB,
-    faceIndex,
-    indexedAndIndexableCounts,
-} from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
-import { clientPackageName, isDesktop } from "@/next/app";
+import { isDesktop } from "@/next/app";
+import { blobCache } from "@/next/blob-cache";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { proxy } from "comlink";
+import type { UploadItem } from "../upload/types";
+import { regenerateFaceCrops } from "./crop";
+import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
@@ -42,17 +42,20 @@ const worker = async () => {
 };
 
 const createComlinkWorker = async () => {
+    const electron = ensureElectron();
+    const mlWorkerElectron = {
+        appVersion: electron.appVersion,
+        detectFaces: electron.detectFaces,
+        computeFaceEmbeddings: electron.computeFaceEmbeddings,
+    };
+
     const cw = new ComlinkWorker<typeof MLWorker>(
-        "ml",
+        "ML",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-    const ua = await getUserAgent();
-    await cw.remote.then((w) => w.init(ua));
+    await cw.remote.then((w) => w.init(proxy(mlWorkerElectron)));
     return cw;
 };
-
-const getUserAgent = async () =>
-    `${clientPackageName}/${await ensureElectron().appVersion()}`;
 
 /**
  * Terminate {@link worker} (if any).
@@ -163,20 +166,25 @@ export const triggerMLSync = () => {
 };
 
 /**
- * Called by the uploader when it uploads a new file from this client.
+ * Run indexing on a file which was uploaded from this client.
+ *
+ * This function is called by the uploader when it uploads a new file from this
+ * client, giving us the opportunity to index it live. This is only an
+ * optimization - if we don't index it now it'll anyways get indexed later as
+ * part of the batch jobs, but that might require downloading the file's
+ * contents again.
  *
  * @param enteFile The {@link EnteFile} that got uploaded.
  *
- * @param file When available, the web {@link File} object representing the
- * contents of the file that got uploaded.
+ * @param uploadItem The item that was uploaded. This can be used to get at the
+ * contents of the file that got uploaded. In case of live photos, this is the
+ * image part of the live photo that was uploaded.
  */
-export const onUpload = (enteFile: EnteFile, file: File | undefined) => {
+export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
-    log.debug(() => ({ t: "ml-liveq", enteFile, file }));
-    // TODO-ML: 1. Use this file!
-    // TODO-ML: 2. Handle cases when File is something else (e.g. on desktop).
-    void worker().then((w) => w.onUpload(enteFile));
+    log.debug(() => ({ t: "ml/liveq", enteFile, uploadItem }));
+    void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
 export interface FaceIndexingStatus {
@@ -210,7 +218,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     if (!isMLEnabled())
         throw new Error("Cannot get indexing status when ML is not enabled");
 
-    const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
+    const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
     const isIndexing = await (await worker()).isIndexing();
 
     let phase: FaceIndexingStatus["phase"];
@@ -236,4 +244,27 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
     return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
+};
+
+/**
+ * Check to see if any of the faces in the given file do not have a face crop
+ * present locally. If so, then regenerate the face crops for all the faces in
+ * the file (updating the "face-crops" {@link BlobCache}).
+ *
+ * @returns true if one or more face crops were regenerated; false otherwise.
+ */
+export const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
+    const index = await faceIndex(enteFile.id);
+    if (!index) return false;
+
+    const faceIDs = index.faceEmbedding.faces.map((f) => f.faceID);
+    const cache = await blobCache("face-crops");
+    for (const id of faceIDs) {
+        if (!(await cache.has(id))) {
+            await regenerateFaceCrops(enteFile, index);
+            return true;
+        }
+    }
+
+    return false;
 };

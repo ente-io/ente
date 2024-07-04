@@ -332,7 +332,7 @@ export function FileInfo({
                 {isMLEnabled() && (
                     <>
                         {/* <PhotoPeopleList file={file} /> */}
-                        <UnidentifiedFaces file={file} />
+                        <UnidentifiedFaces enteFile={file} />
                     </>
                 )}
             </Stack>

@@ -13,8 +13,7 @@ import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
 import { saveFaceIndex } from "./db";
-import { faceIndexingVersion } from "./index-face";
-import { type FaceIndex } from "./types";
+import { type FaceIndex, faceIndexingVersion } from "./face";
 
 /**
  * The embeddings that we (the current client) knows how to handle.

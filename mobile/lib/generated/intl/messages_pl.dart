@@ -38,6 +38,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewers": m1,
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Jaka jest przyczyna usunięcia konta?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Anuluj"),
@@ -91,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Twoje żądanie zostanie przetworzone w ciągu 72 godzin."),
         "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Spróbuj później"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
@@ -105,6 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
         "enterPersonName":
             MessageLookupByLibrary.simpleMessage("Enter person name"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Podaj poprawny adres e-mail."),
         "enterYourEmailAddress":
@@ -147,18 +150,23 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Ze względu na charakter naszego protokołu szyfrowania end-to-end, dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Hasło zostało pomyślnie zmienione"),
+        "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
         "passwordStrength": m37,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Spróbuj ponownie"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Proszę czekać..."),
@@ -175,6 +183,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jeśli zapomnisz hasła, jedynym sposobem odzyskania danych jest ten klucz."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Odzyskano pomyślnie!"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Remove person label"),
         "resendEmail":
@@ -189,6 +200,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Akceptuję <u-terms>warunki korzystania z usługi</u-terms> i <u-policy>politykę prywatności</u-policy>"),
@@ -197,6 +211,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Coś poszło nie tak, spróbuj ponownie"),
         "sorry": MessageLookupByLibrary.simpleMessage("Przepraszamy"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Silne"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "terminate": MessageLookupByLibrary.simpleMessage("Zakończ"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Zakończyć sesję?"),
@@ -208,6 +223,11 @@ class MessageLookup extends MessageLookupByLibrary {
                 "To wyloguje Cię z tego urządzenia:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "To wyloguje Cię z tego urządzenia!"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Spróbuj ponownie"),
         "twofactorAuthenticationPageTitle":
             MessageLookupByLibrary.simpleMessage(

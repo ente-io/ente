@@ -310,6 +310,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Android, iOS, Web, Computadora"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autentificación requerida"),
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("ID de Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
@@ -616,6 +617,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Introduce el código"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Los archivos añadidos a este álbum de dispositivo se subirán automáticamente a Ente."),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Deshabilita el bloqueo de pantalla del dispositivo cuando Ente está en primer plano y haya una copia de seguridad en curso. Normalmente esto no es necesario, pero puede ayudar a que las grandes cargas y las importaciones iniciales de grandes bibliotecas se completen más rápido."),
         "deviceNotFound":
@@ -713,6 +715,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Introduce una contraseña que podamos usar para cifrar tus datos"),
         "enterPersonName": MessageLookupByLibrary.simpleMessage(
             "Ingresar el nombre de una persona"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Ingresar código de referencia"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -1021,6 +1024,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nuevo álbum"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nuevo en Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Más reciente"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Aún no has compartido ningún álbum"),
@@ -1050,6 +1054,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Sin resultados"),
         "noResultsFound": MessageLookupByLibrary.simpleMessage(
             "No se han encontrado resultados"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Aún no hay nada compartido contigo"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -1122,6 +1128,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Elegir punto central"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Fijar álbum"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "playOnTv":
             MessageLookupByLibrary.simpleMessage("Reproducir álbum en TV"),
         "playStoreFreeTrialValidTill": m39,
@@ -1204,6 +1211,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Recrear contraseña"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "referFriendsAnd2xYourPlan": MessageLookupByLibrary.simpleMessage(
             "Refiere a amigos y 2x su plan"),
         "referralStep1": MessageLookupByLibrary.simpleMessage(
@@ -1369,6 +1379,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAs": MessageLookupByLibrary.simpleMessage("Establecer como"),
         "setCover": MessageLookupByLibrary.simpleMessage("Definir portada"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Establecer"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Establecer contraseña"),
         "setRadius": MessageLookupByLibrary.simpleMessage("Establecer radio"),
@@ -1499,6 +1512,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tapToCopy": MessageLookupByLibrary.simpleMessage("toca para copiar"),
         "tapToEnterCode": MessageLookupByLibrary.simpleMessage(
             "Toca para introducir el código"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Parece que algo salió mal. Por favor, vuelve a intentarlo después de algún tiempo. Si el error persiste, ponte en contacto con nuestro equipo de soporte."),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminar"),
@@ -1543,11 +1557,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Esto cerrará la sesión del siguiente dispositivo:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "¡Esto cerrará la sesión de este dispositivo!"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Para ocultar una foto o video"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "Para restablecer tu contraseña, por favor verifica tu correo electrónico primero."),
         "todaysLogs": MessageLookupByLibrary.simpleMessage("Registros de hoy"),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Tamaño total"),
         "trash": MessageLookupByLibrary.simpleMessage("Papelera"),
