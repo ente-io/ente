@@ -389,6 +389,7 @@ class FaceMlService {
     _logger.info(
       "`processImage` start processing image with uploadedFileID: ${enteFile.uploadedFileID}",
     );
+    bool actuallyRanML = false;
 
     try {
       final MLResult? result = await _analyzeImageInSingleIsolate(
@@ -402,82 +403,86 @@ class FaceMlService {
             "Failed to analyze image with uploadedFileID: ${enteFile.uploadedFileID}",
           );
         }
-        return false;
+        return actuallyRanML;
       }
-      final List<Face> faces = [];
-      if (!result.hasFaces) {
-        debugPrint(
-          'No faces detected for file with name:${enteFile.displayName}',
-        );
-        faces.add(
-          Face.empty(result.fileId, error: result.errorOccured),
-        );
-      } else {
-        if (result.decodedImageSize.width == -1 ||
-            result.decodedImageSize.height == -1) {
-          _logger
-              .severe("decodedImageSize is not stored correctly for image with "
-                  "ID: ${enteFile.uploadedFileID}");
-          _logger.info(
-            "Using aligned image size for image with ID: ${enteFile.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${enteFile.width}x${enteFile.height} in the metadata",
-          );
-        }
-        for (int i = 0; i < result.faces.length; ++i) {
-          final FaceResult faceRes = result.faces[i];
-          final detection = face_detection.Detection(
-            box: FaceBox(
-              x: faceRes.detection.xMinBox,
-              y: faceRes.detection.yMinBox,
-              width: faceRes.detection.width,
-              height: faceRes.detection.height,
-            ),
-            landmarks: faceRes.detection.allKeypoints
-                .map(
-                  (keypoint) => Landmark(
-                    x: keypoint[0],
-                    y: keypoint[1],
-                  ),
-                )
-                .toList(),
+      if (result.facesRan) {
+        actuallyRanML = true;
+        final List<Face> faces = [];
+        if (result.foundNoFaces) {
+          debugPrint(
+            'No faces detected for file with name:${enteFile.displayName}',
           );
           faces.add(
-            Face(
-              faceRes.faceId,
-              result.fileId,
-              faceRes.embedding,
-              faceRes.detection.score,
-              detection,
-              faceRes.blurValue,
-              fileInfo: FileInfo(
-                imageHeight: result.decodedImageSize.height,
-                imageWidth: result.decodedImageSize.width,
-              ),
-            ),
+            Face.empty(result.fileId, error: result.errorOccured),
           );
         }
-      }
-      _logger.info("inserting ${faces.length} faces for ${result.fileId}");
-      if (!result.errorOccured) {
-        await RemoteFileMLService.instance.putFileEmbedding(
-          enteFile,
-          FileMl(
-            enteFile.uploadedFileID!,
-            FaceEmbeddings(
-              faces,
-              result.mlVersion,
-              client: client,
+        if (result.foundFaces) {
+          if (result.decodedImageSize.width == -1 ||
+              result.decodedImageSize.height == -1) {
+            _logger.severe(
+                "decodedImageSize is not stored correctly for image with "
+                "ID: ${enteFile.uploadedFileID}");
+            _logger.info(
+              "Using aligned image size for image with ID: ${enteFile.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${enteFile.width}x${enteFile.height} in the metadata",
+            );
+          }
+          for (int i = 0; i < result.faces!.length; ++i) {
+            final FaceResult faceRes = result.faces![i];
+            final detection = face_detection.Detection(
+              box: FaceBox(
+                x: faceRes.detection.xMinBox,
+                y: faceRes.detection.yMinBox,
+                width: faceRes.detection.width,
+                height: faceRes.detection.height,
+              ),
+              landmarks: faceRes.detection.allKeypoints
+                  .map(
+                    (keypoint) => Landmark(
+                      x: keypoint[0],
+                      y: keypoint[1],
+                    ),
+                  )
+                  .toList(),
+            );
+            faces.add(
+              Face(
+                faceRes.faceId,
+                result.fileId,
+                faceRes.embedding,
+                faceRes.detection.score,
+                detection,
+                faceRes.blurValue,
+                fileInfo: FileInfo(
+                  imageHeight: result.decodedImageSize.height,
+                  imageWidth: result.decodedImageSize.width,
+                ),
+              ),
+            );
+          }
+        }
+        _logger.info("inserting ${faces.length} faces for ${result.fileId}");
+        if (!result.errorOccured) {
+          await RemoteFileMLService.instance.putFileEmbedding(
+            enteFile,
+            FileMl(
+              enteFile.uploadedFileID!,
+              FaceEmbeddings(
+                faces,
+                result.mlVersion,
+                client: client,
+              ),
+              height: result.decodedImageSize.height,
+              width: result.decodedImageSize.width,
             ),
-            height: result.decodedImageSize.height,
-            width: result.decodedImageSize.width,
-          ),
-        );
-      } else {
-        _logger.warning(
-          'Skipped putting embedding because of error ${result.toJsonString()}',
-        );
+          );
+        } else {
+          _logger.warning(
+            'Skipped putting embedding because of error ${result.toJsonString()}',
+          );
+        }
+        await FaceMLDataDB.instance.bulkInsertFaces(faces);
+        return actuallyRanML;
       }
-      await FaceMLDataDB.instance.bulkInsertFaces(faces);
-      return true;
     } on ThumbnailRetrievalException catch (e, s) {
       _logger.severe(
         'ThumbnailRetrievalException while processing image with ID ${enteFile.uploadedFileID}, storing empty face so indexing does not get stuck',
@@ -495,6 +500,7 @@ class FaceMlService {
       );
       return false;
     }
+    return actuallyRanML;
   }
 
   Future<void> _initModels() async {
@@ -718,7 +724,7 @@ class FaceMlService {
     }
     stopwatch.stop();
     _logger.info(
-      "Finished Analyze image (${result.faces.length} faces) with uploadedFileID ${enteFile.uploadedFileID}, in "
+      "Finished Analyze image with uploadedFileID ${enteFile.uploadedFileID}, in "
       "${stopwatch.elapsedMilliseconds} ms (including time waiting for inference engine availability)",
     );
 
@@ -745,6 +751,8 @@ class FaceMlService {
           '${DateTime.now().difference(time).inMilliseconds} ms');
       final decodedImageSize =
           Dimensions(height: image.height, width: image.width);
+      final result = MLResult.fromEnteFileID(enteFileID);
+      result.decodedImageSize = decodedImageSize;
 
       final resultFaces = await FaceRecognitionService.runFacesPipeline(
         enteFileID,
@@ -754,10 +762,9 @@ class FaceMlService {
         faceEmbeddingAddress,
       );
       if (resultFaces.isEmpty) {
-        return MLResult.fromEnteFileID(enteFileID)..noFaceDetected();
+        return result..noFaceDetected();
       }
 
-      final result = MLResult.fromEnteFileID(enteFileID);
       result.faces = resultFaces;
 
       return result;

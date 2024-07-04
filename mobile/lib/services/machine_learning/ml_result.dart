@@ -10,7 +10,8 @@ import 'package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 class MLResult {
   int fileId;
 
-  List<FaceResult> faces = <FaceResult>[];
+  List<FaceResult>? faces = <FaceResult>[];
+  ClipResult? clip;
 
   Dimensions decodedImageSize;
 
@@ -18,11 +19,16 @@ class MLResult {
   bool errorOccured;
   bool onlyThumbnailUsed;
 
-  bool get hasFaces => faces.isNotEmpty;
+  bool get facesRan => faces != null;
+  bool get clipRan => clip != null;
+
+  bool get foundFaces => facesRan && faces!.isNotEmpty;
+  bool get foundNoFaces => facesRan && faces!.isEmpty;
 
   MLResult({
     this.fileId = -1,
     this.faces = const <FaceResult>[],
+    this.clip,
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
@@ -48,7 +54,8 @@ class MLResult {
 
   Map<String, dynamic> _toJson() => {
         'fileId': fileId,
-        'faces': faces.map((face) => face.toJson()).toList(),
+        'faces': faces?.map((face) => face.toJson()).toList(),
+        'clip': clip?.toJson(),
         'mlVersion': mlVersion,
         'errorOccured': errorOccured,
         'onlyThumbnailUsed': onlyThumbnailUsed,
@@ -63,9 +70,14 @@ class MLResult {
   static MLResult _fromJson(Map<String, dynamic> json) {
     return MLResult(
       fileId: json['fileId'],
-      faces: (json['faces'] as List)
-          .map((item) => FaceResult.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      faces: json['faces'] != null
+          ? (json['faces'] as List)
+              .map((item) => FaceResult.fromJson(item as Map<String, dynamic>))
+              .toList()
+          : null,
+      clip: json['clip'] != null
+          ? ClipResult.fromJson(json['clip'] as Map<String, dynamic>)
+          : null,
       mlVersion: json['mlVersion'],
       errorOccured: json['errorOccured'] ?? false,
       onlyThumbnailUsed: json['onlyThumbnailUsed'] ?? false,
@@ -87,6 +99,28 @@ class MLResult {
 
   static MLResult fromJsonString(String jsonString) {
     return _fromJson(jsonDecode(jsonString));
+  }
+}
+
+class ClipResult {
+  final int fileID;
+  final Embedding embedding;
+
+  ClipResult({
+    required this.fileID,
+    required this.embedding,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'fileID': fileID,
+        'embedding': embedding,
+      };
+
+  static ClipResult fromJson(Map<String, dynamic> json) {
+    return ClipResult(
+      fileID: json['fileID'],
+      embedding: Embedding.from(json['embedding']),
+    );
   }
 }
 
