@@ -17,10 +17,20 @@ import { ensureLocalUser } from "../local-user";
  *
  * It also exposes an object of type {@link WorkerBridge} _to_ the code running
  * inside the web worker.
+ *
+ * It all gets a bit confusing sometimes, so here is a legend of the parties
+ * involved:
+ *
+ * -  ComlinkWorker (wraps the web worker)
+ * -  Web `Worker` (exposes class T)
+ * -  ComlinkWorker.remote (the exposed class T running inside the web worker)
  */
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
+    /** The class (T) exposed by the web worker */
     public remote: Promise<Remote<InstanceType<T>>>;
+    /** The web worker */
     private worker: Worker;
+    /** An arbitrary name associated with this ComlinkWorker for debugging. */
     private name: string;
 
     constructor(name: string, worker: Worker) {
@@ -45,14 +55,14 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
 }
 
 /**
- * A set of utility functions that we expose to all workers that we create.
+ * A set of utility functions that we expose to all web workers that we create.
  *
  * Inside the worker's code, this can be accessed by using the sibling
  * `workerBridge` object after importing it from `worker-bridge.ts`.
  *
  * Not all workers need access to all these functions, and this can indeed be
  * done in a more fine-grained, per-worker, manner if needed. For now, since it
- * is a motley bunch, we just inject them all.
+ * is a motley bunch, we just inject them all to all workers.
  */
 const workerBridge = {
     // Needed by all workers (likely, not necessarily).
