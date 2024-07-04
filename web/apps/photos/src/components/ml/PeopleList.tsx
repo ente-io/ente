@@ -5,42 +5,14 @@ import {
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { blobCache } from "@/next/blob-cache";
-import { Skeleton, styled } from "@mui/material";
-import { Legend } from "components/PhotoViewer/styledComponents/Legend";
+import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
-const FaceChipContainer = styled("div")`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    overflow: auto;
-`;
-
-const FaceChip = styled("div")<{ clickable?: boolean }>`
-    width: 112px;
-    height: 112px;
-    margin: 5px;
-    border-radius: 50%;
-    overflow: hidden;
-    position: relative;
-    cursor: ${({ clickable }) => (clickable ? "pointer" : "normal")};
-    & > img {
-        width: 100%;
-        height: 100%;
-    }
-`;
-
-interface PeopleListPropsBase {
-    onSelect?: (person: Person, index: number) => void;
-}
-
-export interface PeopleListProps extends PeopleListPropsBase {
+export interface PeopleListProps {
     people: Array<Person>;
     maxRows?: number;
+    onSelect?: (person: Person, index: number) => void;
 }
 
 export const PeopleList = React.memo((props: PeopleListProps) => {
@@ -67,8 +39,33 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
     );
 });
 
-export interface PhotoPeopleListProps extends PeopleListPropsBase {
+const FaceChipContainer = styled("div")`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    overflow: auto;
+`;
+
+const FaceChip = styled("div")<{ clickable?: boolean }>`
+    width: 112px;
+    height: 112px;
+    margin: 5px;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    cursor: ${({ clickable }) => (clickable ? "pointer" : "normal")};
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
+`;
+
+export interface PhotoPeopleListProps {
     file: EnteFile;
+    onSelect?: (person: Person, index: number) => void;
 }
 
 export function PhotoPeopleList() {
@@ -78,6 +75,7 @@ export function PhotoPeopleList() {
 interface UnidentifiedFacesProps {
     enteFile: EnteFile;
 }
+
 /**
  * Show the list of faces in the given file that are not linked to a specific
  * person ("face cluster").
@@ -112,9 +110,9 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
 
     return (
         <>
-            <div>
-                <Legend>{t("UNIDENTIFIED_FACES")}</Legend>
-            </div>
+            <Typography variant="large" p={1}>
+                {t("UNIDENTIFIED_FACES")}
+            </Typography>
             <FaceChipContainer key={didRegen ? 1 : 0}>
                 {faceIDs.map((faceID) => (
                     <FaceChip key={faceID}>
