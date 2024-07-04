@@ -1,5 +1,6 @@
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
+import { clientPackageName } from "@/next/app";
 import { getKVN } from "@/next/kv";
 import { ensureAuthToken } from "@/next/local-user";
 import log from "@/next/log";
@@ -17,6 +18,7 @@ import {
 } from "./db";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { type FaceIndex, indexFaces } from "./face";
+import type { MLWorkerDelegate } from "./worker-delegate";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -44,6 +46,7 @@ const idleDurationMax = 16 * 60; /* 16 minutes */
  * -   "idle": in between state transitions
  */
 export class MLWorker {
+    private delegate: MLWorkerDelegate | undefined;
     private userAgent: string | undefined;
     private shouldSync = false;
     private liveQ: { enteFile: EnteFile; uploadItem: UploadItem }[] = [];
@@ -57,11 +60,13 @@ export class MLWorker {
      * This is conceptually the constructor, however it is easier to have this
      * as a separate function to avoid confounding the comlink types too much.
      *
-     * @param userAgent The user agent string to use as the client field in the
-     * embeddings generated during indexing by this client.
+     * @param delegate The {@link MLWorkerDelegate} that allows the worker to
+     * call back into the main thread.
      */
-    async init(userAgent: string) {
-        this.userAgent = userAgent;
+    async init(delegate: MLWorkerDelegate) {
+        this.delegate = delegate;
+        // Set the user agent that'll be set in the generated embeddings.
+        this.userAgent = `${clientPackageName}/${await delegate.appVersion()}`;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
@@ -130,7 +135,7 @@ export class MLWorker {
 
     private async tick() {
         log.debug(() => ({
-            t: "ml-tick",
+            t: "ml/tick",
             state: this.state,
             shouldSync: this.shouldSync,
             liveQ: this.liveQ,
@@ -156,7 +161,11 @@ export class MLWorker {
         const liveQ = this.liveQ.map((i) => i.enteFile);
         this.liveQ = [];
         this.state = "indexing";
-        const allSuccess = await indexNextBatch(ensure(this.userAgent), liveQ);
+        const allSuccess = await indexNextBatch(
+            liveQ,
+            ensure(this.delegate),
+            ensure(this.userAgent),
+        );
         if (allSuccess) {
             // Everything is running smoothly. Reset the idle duration.
             this.idleDuration = idleDurationStart;
@@ -197,7 +206,11 @@ const pull = pullFaceEmbeddings;
  * Which means that when it returns true, all is well and there are more
  * things pending to process, so we should chug along at full speed.
  */
-const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
+const indexNextBatch = async (
+    liveQ: EnteFile[],
+    delegate: MLWorkerDelegate,
+    userAgent: string,
+) => {
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
         return false;
@@ -214,7 +227,7 @@ const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
     let allSuccess = true;
     for (const file of files) {
         try {
-            await index(file, undefined, userAgent);
+            await index(file, undefined, delegate, userAgent);
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
@@ -275,6 +288,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
 export const index = async (
     enteFile: EnteFile,
     file: File | undefined,
+    delegate: MLWorkerDelegate,
     userAgent: string,
 ) => {
     const f = fileLogID(enteFile);
@@ -282,7 +296,7 @@ export const index = async (
 
     let faceIndex: FaceIndex;
     try {
-        faceIndex = await indexFaces(enteFile, file, userAgent);
+        faceIndex = await indexFaces(enteFile, file, delegate, userAgent);
     } catch (e) {
         // Mark indexing as having failed only if the indexing itself
         // failed, not if there were subsequent failures (like when trying

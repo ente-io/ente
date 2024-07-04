@@ -8,11 +8,12 @@ import {
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
 import type { EnteFile } from "@/new/photos/types/file";
-import { clientPackageName, isDesktop } from "@/next/app";
+import { isDesktop } from "@/next/app";
 import { blobCache } from "@/next/blob-cache";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { proxy } from "comlink";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
@@ -41,17 +42,20 @@ const worker = async () => {
 };
 
 const createComlinkWorker = async () => {
+    const electron = ensureElectron();
+    const delegate = {
+        appVersion: electron.appVersion,
+        detectFaces: electron.detectFaces,
+        computeFaceEmbeddings: electron.computeFaceEmbeddings,
+    };
+
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ml",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-    const ua = await getUserAgent();
-    await cw.remote.then((w) => w.init(ua));
+    await cw.remote.then((w) => w.init(proxy(delegate)));
     return cw;
 };
-
-const getUserAgent = async () =>
-    `${clientPackageName}/${await ensureElectron().appVersion()}`;
 
 /**
  * Terminate {@link worker} (if any).
@@ -173,12 +177,13 @@ export const triggerMLSync = () => {
  * @param enteFile The {@link EnteFile} that got uploaded.
  *
  * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded.
+ * contents of the file that got uploaded. In case of live photos, this is the
+ * image part of the live photo that was uploaded.
  */
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
-    log.debug(() => ({ t: "ml-liveq", enteFile, uploadItem }));
+    log.debug(() => ({ t: "ml/liveq", enteFile, uploadItem }));
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 

@@ -9,7 +9,6 @@
 
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { workerBridge } from "@/next/worker/worker-bridge";
 import { ensure } from "@/utils/ensure";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
@@ -28,6 +27,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+import type { MLWorkerDelegate } from "./worker-delegate";
 
 /**
  * The version of the face indexing pipeline implemented by the current client.
@@ -221,6 +221,7 @@ export interface Box {
 export const indexFaces = async (
     enteFile: EnteFile,
     file: File | undefined,
+    delegate: MLWorkerDelegate,
     userAgent: string,
 ) => {
     const imageBitmap = await renderableImageBitmap(enteFile, file);
@@ -235,7 +236,7 @@ export const indexFaces = async (
             faceEmbedding: {
                 version: faceIndexingVersion,
                 client: userAgent,
-                faces: await indexFacesInBitmap(fileID, imageBitmap),
+                faces: await indexFacesInBitmap(fileID, imageBitmap, delegate),
             },
         };
         // This step, saving face crops, is not part of the indexing pipeline;
@@ -256,11 +257,12 @@ export const indexFaces = async (
 const indexFacesInBitmap = async (
     fileID: number,
     imageBitmap: ImageBitmap,
+    delegate: MLWorkerDelegate,
 ): Promise<Face[]> => {
     const { width, height } = imageBitmap;
     const imageDimensions = { width, height };
 
-    const yoloFaceDetections = await detectFaces(imageBitmap);
+    const yoloFaceDetections = await detectFaces(imageBitmap, delegate);
     const partialResult = yoloFaceDetections.map(
         ({ box, landmarks, score }) => {
             const faceID = makeFaceID(fileID, box, imageDimensions);
@@ -281,7 +283,7 @@ const indexFacesInBitmap = async (
         alignments,
     );
 
-    const embeddings = await computeEmbeddings(alignedFacesData);
+    const embeddings = await computeEmbeddings(alignedFacesData, delegate);
     const blurs = detectBlur(
         alignedFacesData,
         partialResult.map((f) => f.detection),
@@ -303,6 +305,7 @@ const indexFacesInBitmap = async (
  */
 const detectFaces = async (
     imageBitmap: ImageBitmap,
+    delegate: MLWorkerDelegate,
 ): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }: Dimensions) => ({
         x: 0,
@@ -313,7 +316,7 @@ const detectFaces = async (
 
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
-    const yoloOutput = await workerBridge.detectFaces(yoloInput);
+    const yoloOutput = await delegate.detectFaces(yoloInput);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
     const faceDetections = transformYOLOFaceDetections(
         faces,
@@ -871,8 +874,9 @@ const mobileFaceNetEmbeddingSize = 192;
  */
 const computeEmbeddings = async (
     faceData: Float32Array,
+    delegate: MLWorkerDelegate,
 ): Promise<Float32Array[]> => {
-    const outputData = await workerBridge.computeFaceEmbeddings(faceData);
+    const outputData = await delegate.computeFaceEmbeddings(faceData);
 
     const embeddingSize = mobileFaceNetEmbeddingSize;
     const embeddings = new Array<Float32Array>(
