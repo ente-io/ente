@@ -1,7 +1,40 @@
 import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
+import type { EnteFile } from "../../types/file";
+import { renderableImageBlob } from "./blob";
 import { type Box, type FaceIndex } from "./face";
 import { clamp } from "./image";
+
+/**
+ * Regenerate and locally save face crops for faces in the given file.
+ *
+ * Face crops (the rectangular regions of the original image where a particular
+ * face was detected) are not stored on remote and are generated on demand. On
+ * the client where the indexing occurred, they get generated during the face
+ * indexing pipeline itself. But we need to regenerate them locally if the user
+ * views that item on any other client.
+ *
+ * @param enteFile The {@link EnteFile} whose face crops we want to generate.
+ *
+ * @param faceIndex The {@link FaceIndex} containing information about the faces
+ * detected in the given image.
+ *
+ * The generated face crops are saved in a local cache and can subsequently be
+ * retrieved from the {@link BlobCache} named "face-crops".
+ */
+export const regenerateFaceCrops = async (
+    enteFile: EnteFile,
+    faceIndex: FaceIndex,
+) => {
+    const imageBitmap =
+        await renderableImageBlob(enteFile).then(createImageBitmap);
+
+    try {
+        await saveFaceCrops(imageBitmap, faceIndex);
+    } finally {
+        imageBitmap.close();
+    }
+};
 
 /**
  * Extract and locally save the face crops (the rectangle of the original image
