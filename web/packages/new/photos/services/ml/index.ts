@@ -174,10 +174,7 @@ export const triggerMLSync = () => {
  * @param file When available, the web {@link File} object representing the
  * contents of the file that got uploaded.
  */
-export const indexNewlyUploadedFile = (
-    enteFile: EnteFile,
-    file: File | undefined,
-) => {
+export const indexNewUpload = (enteFile: EnteFile, file: File | undefined) => {
     if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
     log.debug(() => ({ t: "ml-liveq", enteFile, file }));
