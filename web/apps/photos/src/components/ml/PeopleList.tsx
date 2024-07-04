@@ -1,4 +1,7 @@
-import { unidentifiedFaceIDs } from "@/new/photos/services/ml";
+import {
+    regenerateFaceCropsIfNeeded,
+    unidentifiedFaceIDs,
+} from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { blobCache } from "@/next/blob-cache";
@@ -72,21 +75,37 @@ export function PhotoPeopleList() {
     return <></>;
 }
 
-export function UnidentifiedFaces({ file }: { file: EnteFile }) {
+interface UnidentifiedFacesProps {
+    enteFile: EnteFile;
+}
+/**
+ * Show the list of faces in the given file that are not linked to a specific
+ * person ("face cluster").
+ */
+export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
+    enteFile,
+}) => {
     const [faceIDs, setFaceIDs] = useState<string[]>([]);
+    const [, setDidRegen] = useState(false);
 
     useEffect(() => {
         let didCancel = false;
 
         (async () => {
-            const faceIDs = await unidentifiedFaceIDs(file);
+            const faceIDs = await unidentifiedFaceIDs(enteFile);
             !didCancel && setFaceIDs(faceIDs);
+            // Don't block for the regeneration to happen. If anything got
+            // regenerated, the result will be true, which'll cause our state to
+            // change and us to be redrawn (and fetch the regenerated crops).
+            void regenerateFaceCropsIfNeeded(enteFile).then((r) =>
+                setDidRegen(r),
+            );
         })();
 
         return () => {
             didCancel = true;
         };
-    }, [file]);
+    }, [enteFile]);
 
     if (faceIDs.length == 0) return <></>;
 
@@ -104,12 +123,18 @@ export function UnidentifiedFaces({ file }: { file: EnteFile }) {
             </FaceChipContainer>
         </>
     );
-}
+};
 
 interface FaceCropImageViewProps {
     faceID: string;
 }
 
+/**
+ * An image view showing the face crop for the given {@link faceID}.
+ *
+ * The image is read from the "face-crops" {@link BlobCache}. While the image is
+ * being fetched, or if it doesn't exist, a placeholder is shown.
+ */
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -119,11 +144,6 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
             blobCache("face-crops")
                 .then((cache) => cache.get(faceID))
                 .then((data) => {
-                    /*
-                    TODO(MR): regen if needed and get this to work on web too.
-                    cachedOrNew("face-crops", cacheKey, async () => {
-                        return regenerateFaceCrop(faceId);
-                    })*/
                     if (data) {
                         const blob = new Blob([data]);
                         if (!didCancel) setObjectURL(URL.createObjectURL(blob));
