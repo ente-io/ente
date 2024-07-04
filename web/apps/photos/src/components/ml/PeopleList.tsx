@@ -86,7 +86,7 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
     enteFile,
 }) => {
     const [faceIDs, setFaceIDs] = useState<string[]>([]);
-    const [, setDidRegen] = useState(false);
+    const [didRegen, setDidRegen] = useState(false);
 
     useEffect(() => {
         let didCancel = false;
@@ -95,8 +95,9 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             const faceIDs = await unidentifiedFaceIDs(enteFile);
             !didCancel && setFaceIDs(faceIDs);
             // Don't block for the regeneration to happen. If anything got
-            // regenerated, the result will be true, which'll cause our state to
-            // change and us to be redrawn (and fetch the regenerated crops).
+            // regenerated, the result will be true, in response to which we'll
+            // change the key of the face list and cause it to be rerendered
+            // (fetching the regenerated crops).
             void regenerateFaceCropsIfNeeded(enteFile).then((r) =>
                 setDidRegen(r),
             );
@@ -114,7 +115,7 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             <div>
                 <Legend>{t("UNIDENTIFIED_FACES")}</Legend>
             </div>
-            <FaceChipContainer>
+            <FaceChipContainer key={didRegen ? 1 : 0}>
                 {faceIDs.map((faceID) => (
                     <FaceChip key={faceID}>
                         <FaceCropImageView {...{ faceID }} />
