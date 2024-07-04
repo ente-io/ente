@@ -50,7 +50,7 @@ const createComlinkWorker = async () => {
     };
 
     const cw = new ComlinkWorker<typeof MLWorker>(
-        "ml",
+        "ML",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
     await cw.remote.then((w) => w.init(proxy(mlWorkerElectron)));
