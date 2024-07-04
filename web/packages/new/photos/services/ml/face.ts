@@ -336,7 +336,7 @@ const indexFacesInBitmap = async (
 
     return partialResult.map(({ faceID, detection, score }, i) => ({
         faceID,
-        detection: normalizeToImageDimensions(detection, imageDimensions),
+        detection: normalizeByImageDimensions(detection, imageDimensions),
         score,
         blur: blurs[i]!,
         embedding: Array.from(embeddings[i]!),
@@ -629,7 +629,10 @@ export interface FaceAlignment {
  *
  * @param faceDetection A geometry indicating a face detected in an image.
  */
-const computeFaceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
+// TODO-ML: Unexport?
+export const computeFaceAlignment = (
+    faceDetection: FaceDetection,
+): FaceAlignment =>
     computeFaceAlignmentUsingSimilarityTransform(
         faceDetection,
         normalizeLandmarks(idealMobileFaceNetLandmarks, mobileFaceNetFaceSize),
@@ -936,7 +939,7 @@ const computeEmbeddings = async (
 /**
  * Convert the coordinates to between 0-1, normalized by the image's dimensions.
  */
-const normalizeToImageDimensions = (
+const normalizeByImageDimensions = (
     faceDetection: FaceDetection,
     { width, height }: Dimensions,
 ): FaceDetection => {
@@ -950,6 +953,29 @@ const normalizeToImageDimensions = (
     const landmarks = faceDetection.landmarks.map((l) => ({
         x: l.x / width,
         y: l.y / height,
+    }));
+    return { box, landmarks };
+};
+
+/**
+ * Scale normalized coordinates from 0-1 back to the image's dimensions.
+ *
+ * Inverse of {@link normalizeByImageDimensions}.
+ */
+export const restoreToImageDimensions = (
+    faceDetection: FaceDetection,
+    { width, height }: Dimensions,
+): FaceDetection => {
+    const oldBox: Box = faceDetection.box;
+    const box = {
+        x: oldBox.x * width,
+        y: oldBox.y * height,
+        width: oldBox.width * width,
+        height: oldBox.height * height,
+    };
+    const landmarks = faceDetection.landmarks.map((l) => ({
+        x: l.x * width,
+        y: l.y * height,
     }));
     return { box, landmarks };
 };

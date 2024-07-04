@@ -1,6 +1,12 @@
 import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
-import type { Box, FaceAlignment, FaceIndex } from "./face";
+import {
+    computeFaceAlignment,
+    restoreToImageDimensions,
+    type Box,
+    type FaceAlignment,
+    type FaceIndex,
+} from "./face";
 import { clamp } from "./image";
 
 /**
@@ -23,9 +29,13 @@ export const saveFaceCrops = async (
 
     return Promise.all(
         faceIndex.faceEmbedding.faces.map(({ faceID, detection }) =>
-            extractFaceCrop2(imageBitmap, detection.box).then((b) =>
-                cache.put(faceID, b),
-            ),
+            // extractFaceCrop2(imageBitmap, detection.box).then((b) =>
+            extractFaceCrop(
+                imageBitmap,
+                computeFaceAlignment(
+                    restoreToImageDimensions(detection, imageBitmap),
+                ),
+            ).then((b) => cache.put(faceID, b)),
         ),
     );
 };
@@ -81,31 +91,46 @@ export const extractFaceCrop2 = (imageBitmap: ImageBitmap, faceBox: Box) => {
     return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
-export const saveFaceCrop = async (
-    imageBitmap: ImageBitmap,
-    faceID: string,
-    alignment: FaceAlignment,
-) => {
-    const faceCrop = extractFaceCrop(imageBitmap, alignment);
-    const blob = await imageBitmapToBlob(faceCrop);
-    faceCrop.close();
+// export const saveFaceCrop = async (
+//     imageBitmap: ImageBitmap,
+//     faceID: string,
+//     alignment: FaceAlignment,
+// ) => {
+//     const faceCrop = extractFaceCrop(imageBitmap, alignment);
+//     const blob = await imageBitmapToBlob(faceCrop);
+//     faceCrop.close();
 
-    const cache = await blobCache("face-crops");
-    await cache.put(faceID, blob);
+//     const cache = await blobCache("face-crops");
+//     await cache.put(faceID, blob);
 
-    return blob;
-};
+//     return blob;
+// };
 
-const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
-    const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-    ensure(canvas.getContext("2d")).drawImage(imageBitmap, 0, 0);
-    return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
+// const imageBitmapToBlob = (imageBitmap: ImageBitmap) => {
+//     const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+//     ensure(canvas.getContext("2d")).drawImage(imageBitmap, 0, 0);
+//     return canvas.convertToBlob({ type: "image/jpeg", quality: 0.8 });
+// };
+
+const unnormalizeBox = (imageBitmap: ImageBitmap, alignment: FaceAlignment) => {
+    const { width: imageWidth, height: imageHeight } = imageBitmap;
+
+    const obb = alignment.boundingBox;
+    // The faceBox is relative to the image size, and we need to convert
+    // them to absolute values first.
+    const faceX = obb.x * imageWidth;
+    const faceY = obb.y * imageHeight;
+    const faceWidth = obb.width * imageWidth;
+    const faceHeight = obb.height * imageHeight;
+
+    const bb = { x: faceX, y: faceY, width: faceWidth, height: faceHeight };
+    return bb;
 };
 
 const extractFaceCrop = (
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
-): ImageBitmap => {
+) => {
     // TODO-ML: This algorithm is different from what is used by the mobile app.
     // Also, it needs to be something that can work fully using the embedding we
     // receive from remote - the `alignment.boundingBox` will not be available
@@ -152,7 +177,7 @@ const extractFaceCrop = (
         enlargedOutputBox.height,
     );
 
-    return offscreen.transferToImageBitmap();
+    return offscreen.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
 /** Round all the components of the box. */
