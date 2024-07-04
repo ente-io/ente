@@ -30,6 +30,8 @@ export class HTTPError extends Error {
     constructor(url: string, res: Response) {
         super(`Failed to fetch ${url}: HTTP ${res.status}`);
 
+        // Cargo culted from
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (Error.captureStackTrace) Error.captureStackTrace(this, HTTPError);
 
