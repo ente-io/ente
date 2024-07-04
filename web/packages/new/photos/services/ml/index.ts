@@ -10,7 +10,7 @@ import {
 import {
     clearFaceDB,
     faceIndex,
-    indexedAndIndexableCounts,
+    indexableAndIndexedCounts,
 } from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
 import { clientPackageName, isDesktop } from "@/next/app";
@@ -210,7 +210,7 @@ export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
     if (!isMLEnabled())
         throw new Error("Cannot get indexing status when ML is not enabled");
 
-    const { indexedCount, indexableCount } = await indexedAndIndexableCounts();
+    const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
     const isIndexing = await (await worker()).isIndexing();
 
     let phase: FaceIndexingStatus["phase"];

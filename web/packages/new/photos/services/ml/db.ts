@@ -271,7 +271,7 @@ export const updateAssumingLocalFiles = async (
  * These counts are mutually exclusive. The total number of files that fall
  * within the purview of the indexer is thus indexable + indexed.
  */
-export const indexedAndIndexableCounts = async () => {
+export const indexableAndIndexedCounts = async () => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
     const indexableCount = await tx.store
