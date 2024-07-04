@@ -2,9 +2,11 @@ import "dart:async";
 import "dart:collection";
 import "dart:developer" as dev show log;
 import "dart:math" show min;
+import "dart:typed_data" show ByteData;
+import "dart:ui" show Image;
 
 import "package:computer/computer.dart";
-import "package:flutter/services.dart";
+import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/configuration.dart";
@@ -17,14 +19,13 @@ import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
-import 'package:photos/services/machine_learning/semantic_search/frameworks/ggml.dart';
-import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
-import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 // import "package:photos/utils/thumbnail_util.dart";
@@ -44,12 +45,9 @@ class SemanticSearchService {
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
-  final _frameworkInitialization = Completer<bool>();
   final _embeddingLoaderDebouncer =
       Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
 
-  late Model _currentModel;
-  late MLFramework _mlFramework;
   bool _hasInitialized = false;
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
@@ -70,12 +68,6 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
-    final shouldDownloadOverMobileData =
-        Configuration.instance.shouldBackupOverMobileData();
-    _currentModel = await _getCurrentModel();
-    _mlFramework = _currentModel == Model.onnxClip
-        ? ONNX(shouldDownloadOverMobileData)
-        : GGML(shouldDownloadOverMobileData);
     await EmbeddingStore.instance.init();
     await EmbeddingsDB.instance.init();
     await _loadEmbeddings();
@@ -115,19 +107,12 @@ class SemanticSearchService {
     });
   }
 
-  Future<void> release() async {
-    if (_frameworkInitialization.isCompleted) {
-      await _mlFramework.release();
-    }
-  }
-
   Future<void> sync() async {
     if (_isSyncing) {
       return;
     }
     _isSyncing = true;
-    final fetchCompleted =
-        await EmbeddingStore.instance.pullEmbeddings(_currentModel);
+    final fetchCompleted = await EmbeddingStore.instance.pullEmbeddings();
     if (fetchCompleted) {
       await _backFill();
     }
@@ -183,14 +168,14 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await EmbeddingStore.instance.clearEmbeddings(_currentModel);
-    _logger.info("Indexes cleared for $_currentModel");
+    await EmbeddingStore.instance.clearEmbeddings();
+    _logger.info("Indexes cleared");
   }
 
   Future<void> _loadEmbeddings() async {
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
-    _cachedEmbeddings = await EmbeddingsDB.instance.getAll(_currentModel);
+    _cachedEmbeddings = await EmbeddingsDB.instance.getAll();
     final endTime = DateTime.now();
     _logger.info(
       "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
@@ -219,10 +204,10 @@ class SemanticSearchService {
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
     final uploadedFileIDs = await getIndexableFileIDs();
-    final embeddedFileIDs =
-        await EmbeddingsDB.instance.getFileIDs(_currentModel);
+    final embeddedFileIDs = await EmbeddingsDB.instance.getIndexedFileIds();
+    embeddedFileIDs.removeWhere((key, value) => value < clipMlVersion);
 
-    return uploadedFileIDs.difference(embeddedFileIDs).toList();
+    return uploadedFileIDs.difference(embeddedFileIDs.keys.toSet()).toList();
   }
 
   Future<void> clearQueue() async {
@@ -386,7 +371,6 @@ class SemanticSearchService {
 
       final embedding = Embedding(
         fileID: file.uploadedFileID!,
-        model: _currentModel,
         embedding: result,
       );
       await EmbeddingStore.instance.storeEmbedding(
@@ -398,7 +382,7 @@ class SemanticSearchService {
         "Could not get embedding for $file because FormatException occured, storing empty result locally",
         e,
       );
-      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      final embedding = Embedding.empty(file.uploadedFileID!);
       await EmbeddingsDB.instance.put(embedding);
     } on PlatformException catch (e, s) {
       _logger.severe(
@@ -406,11 +390,30 @@ class SemanticSearchService {
         e,
         s,
       );
-      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      final embedding = Embedding.empty(file.uploadedFileID!);
       await EmbeddingsDB.instance.put(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
+  }
+
+  static Future<void> storeClipImageResult(
+    ClipResult clipResult,
+    EnteFile entefile,
+  ) async {
+    final embedding = Embedding(
+      fileID: clipResult.fileID,
+      embedding: clipResult.embedding,
+    );
+    await EmbeddingStore.instance.storeEmbedding(
+      entefile,
+      embedding,
+    );
+  }
+
+  static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
+    final embedding = Embedding.empty(entefile.uploadedFileID!);
+    await EmbeddingsDB.instance.put(embedding);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
@@ -453,14 +456,6 @@ class SemanticSearchService {
     return queryResults;
   }
 
-  Future<Model> _getCurrentModel() async {
-    if (await isGrapheneOS()) {
-      return Model.ggmlClip;
-    } else {
-      return Model.onnxClip;
-    }
-  }
-
   void _startIndexing() {
     _logger.info("Start indexing");
     if (!_mlController.isCompleted) {
@@ -473,6 +468,19 @@ class SemanticSearchService {
       _logger.info("Pausing indexing");
       _mlController = Completer<void>();
     }
+  }
+
+  static Future<ClipResult> runClipImage(
+    int enteFileID,
+    Image image,
+    ByteData imageByteData,
+    int clipImageAddress,
+  ) async {
+    final embedding =
+        await ClipImageEncoder.predict(image, imageByteData, clipImageAddress);
+    final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);
+
+    return clipResult;
   }
 }
 

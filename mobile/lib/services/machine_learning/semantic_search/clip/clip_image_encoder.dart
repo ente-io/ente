@@ -1,5 +1,5 @@
-import "dart:io";
-import "dart:typed_data";
+import "dart:typed_data" show ByteData;
+import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
@@ -25,17 +25,17 @@ class ClipImageEncoder extends MlModel {
   static final instance = ClipImageEncoder._privateConstructor();
   factory ClipImageEncoder() => instance;
 
-  static Future<List<double>> predict(Map args) async {
-    final imageData = await File(args["imagePath"]).readAsBytes();
-    final image = await decodeImageFromData(imageData);
-    final ByteData imgByteData = await getByteDataFromImage(image);
-
-    final inputList = await preprocessImageClip(image, imgByteData);
+  static Future<List<double>> predict(
+    Image image,
+    ByteData imageByteData,
+    int sessionAddress,
+  ) async {
+    final inputList = await preprocessImageClip(image, imageByteData);
 
     final inputOrt =
         OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 224, 224]);
     final inputs = {'input': inputOrt};
-    final session = OrtSession.fromAddress(args["address"]);
+    final session = OrtSession.fromAddress(sessionAddress);
     final runOptions = OrtRunOptions();
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
