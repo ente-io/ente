@@ -135,7 +135,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           child: Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.threesixty,
                 color: Colors.white,
               ),
