@@ -423,7 +423,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
     return { yoloInput, yoloSize };
 };
 
-export interface YOLOFaceDetection {
+interface YOLOFaceDetection {
     box: Box;
     landmarks: Point[];
     score: number;
@@ -607,7 +607,7 @@ const makeFaceID = (fileID: number, box: Box, image: Dimensions) => {
     return [`${fileID}`, xMin, yMin, xMax, yMax].join("_");
 };
 
-export interface FaceAlignment {
+interface FaceAlignment {
     /**
      * An affine transformation matrix (rotation, translation, scaling) to align
      * the face extracted from the image.
@@ -629,10 +629,7 @@ export interface FaceAlignment {
  *
  * @param faceDetection A geometry indicating a face detected in an image.
  */
-// TODO-ML: Unexport?
-export const computeFaceAlignment = (
-    faceDetection: FaceDetection,
-): FaceAlignment =>
+const computeFaceAlignment = (faceDetection: FaceDetection): FaceAlignment =>
     computeFaceAlignmentUsingSimilarityTransform(
         faceDetection,
         normalizeLandmarks(idealMobileFaceNetLandmarks, mobileFaceNetFaceSize),
@@ -953,29 +950,6 @@ const normalizeByImageDimensions = (
     const landmarks = faceDetection.landmarks.map((l) => ({
         x: l.x / width,
         y: l.y / height,
-    }));
-    return { box, landmarks };
-};
-
-/**
- * Scale normalized coordinates from 0-1 back to the image's dimensions.
- *
- * Inverse of {@link normalizeByImageDimensions}.
- */
-export const restoreToImageDimensions = (
-    faceDetection: FaceDetection,
-    { width, height }: Dimensions,
-): FaceDetection => {
-    const oldBox: Box = faceDetection.box;
-    const box = {
-        x: oldBox.x * width,
-        y: oldBox.y * height,
-        width: oldBox.width * width,
-        height: oldBox.height * height,
-    };
-    const landmarks = faceDetection.landmarks.map((l) => ({
-        x: l.x * width,
-        y: l.y * height,
     }));
     return { box, landmarks };
 };
