@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.3+903
+version: 0.9.4+904
 publish_to: none
 
 environment:
@@ -138,7 +138,7 @@ dependencies:
   permission_handler: ^11.0.1
   photo_manager: ^3.2.0
   photo_view: ^0.14.0
-  pinput: ^1.2.2
+  pinput: ^2.0.2
   pointycastle: ^3.7.3
   pool: ^1.5.1
   protobuf: ^3.1.0

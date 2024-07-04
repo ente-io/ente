@@ -1250,5 +1250,18 @@
   "rotate": "Повернуть",
   "left": "Влево",
   "right": "Вправо",
-  "whatsNew": "Что нового"
+  "whatsNew": "Что нового",
+  "reenterPassword": "Re-enter password",
+  "reenterPin": "Re-enter PIN",
+  "deviceLock": "Device lock",
+  "pinLock": "PIN lock",
+  "next": "Next",
+  "setNewPassword": "Set new password",
+  "enterPin": "Enter PIN",
+  "setNewPin": "Set new PIN",
+  "appLock": "App lock",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "tapToUnlock": "Tap to unlock",
+  "tooManyIncorrectAttempts": "Too many incorrect attempts"
 }

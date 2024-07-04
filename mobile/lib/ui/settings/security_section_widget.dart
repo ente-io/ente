@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:typed_data";
 
 import 'package:flutter/material.dart';
+import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -21,6 +22,8 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
+import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -139,20 +142,33 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).lockscreen,
+          title: S.of(context).appLock,
         ),
-        trailingWidget: ToggleSwitchWidget(
-          value: () => _config.shouldShowLockScreen(),
-          onChanged: () async {
-            await LocalAuthenticationService.instance
-                .requestLocalAuthForLockScreen(
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          if (await LocalAuthentication().isDeviceSupported()) {
+            final bool result = await requestAuthentication(
               context,
-              !_config.shouldShowLockScreen(),
               S.of(context).authToChangeLockscreenSetting,
-              S.of(context).lockScreenEnablePreSteps,
             );
-          },
-        ),
+            if (result) {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const LockScreenOptions();
+                  },
+                ),
+              );
+            }
+          } else {
+            await showErrorDialog(
+              context,
+              S.of(context).noSystemLockFound,
+              S.of(context).toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+            );
+          }
+        },
       ),
       sectionOptionSpacing,
       MenuItemWidget(
