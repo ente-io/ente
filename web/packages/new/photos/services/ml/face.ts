@@ -19,7 +19,11 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import { renderableImageBitmap } from "./bitmap";
+import type { UploadItem } from "../upload/types";
+import {
+    renderableImageBitmap,
+    renderableUploadItemImageBitmap,
+} from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
     clamp,
@@ -212,19 +216,24 @@ export interface Box {
  *
  * @param enteFile The {@link EnteFile} to index.
  *
- * @param file The contents of {@link enteFile} as a web {@link File}, if
- * available. These are used when they are provided, otherwise the file is
- * downloaded and decrypted from remote.
+ * @param uploadItem If we're called during the upload process, then this will
+ * be set to the {@link UploadItem} that was uploaded. This way, we can directly
+ * use the on-disk file instead of needing to download the original from remote.
+ *
+ * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * our Node.js layer for various functionality.
  *
  * @param userAgent The UA of the client that is doing the indexing (us).
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    file: File | undefined,
+    uploadItem: UploadItem | undefined,
     electron: MLWorkerElectron,
     userAgent: string,
-) => {
-    const imageBitmap = await renderableImageBitmap(enteFile, file);
+): Promise<FaceIndex> => {
+    const imageBitmap = uploadItem
+        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
+        : await renderableImageBitmap(enteFile);
     const { width, height } = imageBitmap;
     const fileID = enteFile.id;
 

@@ -23,6 +23,12 @@ import type { MLWorkerElectron } from "./worker-electron";
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
+/** An entry in the liveQ maintained by the worker */
+interface LiveQItem {
+    enteFile: EnteFile;
+    uploadItem: UploadItem;
+}
+
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
  *
@@ -49,7 +55,7 @@ export class MLWorker {
     private electron: MLWorkerElectron | undefined;
     private userAgent: string | undefined;
     private shouldSync = false;
-    private liveQ: { enteFile: EnteFile; uploadItem: UploadItem }[] = [];
+    private liveQ: LiveQItem[] = [];
     private state: "idle" | "pull" | "indexing" = "idle";
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -159,7 +165,7 @@ export class MLWorker {
             return;
         }
 
-        const liveQ = this.liveQ.map((i) => i.enteFile);
+        const liveQ = this.liveQ;
         this.liveQ = [];
         this.state = "indexing";
         const allSuccess = await indexNextBatch(
@@ -208,7 +214,7 @@ const pull = pullFaceEmbeddings;
  * things pending to process, so we should chug along at full speed.
  */
 const indexNextBatch = async (
-    liveQ: EnteFile[],
+    liveQ: LiveQItem[],
     electron: MLWorkerElectron,
     userAgent: string,
 ) => {
@@ -219,16 +225,23 @@ const indexNextBatch = async (
 
     const userID = ensure(await getKVN("userID"));
 
-    const files =
+    // Use the liveQ if present, otherwise get the next batch to backfill.
+    const items =
         liveQ.length > 0
             ? liveQ
-            : await syncWithLocalFilesAndGetFilesToIndex(userID, 200);
-    if (files.length == 0) return false;
+            : await syncWithLocalFilesAndGetFilesToIndex(userID, 200).then(
+                  (fs) =>
+                      fs.map((f) => ({ enteFile: f, uploadItem: undefined })),
+              );
 
+    // Nothing to do.
+    if (items.length == 0) return false;
+
+    // Index, keeping track if any of the items failed.
     let allSuccess = true;
-    for (const file of files) {
+    for (const { enteFile, uploadItem } of items) {
         try {
-            await index(file, undefined, electron, userAgent);
+            await index(enteFile, uploadItem, electron, userAgent);
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
@@ -236,6 +249,7 @@ const indexNextBatch = async (
         }
     }
 
+    // Return true if nothing failed.
     return allSuccess;
 };
 
@@ -278,7 +292,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  *
  * @param enteFile The {@link EnteFile} to index.
  *
- * @param file If the file is one which is being uploaded from the current
+ * @param uploadItem If the file is one which is being uploaded from the current
  * client, then we will also have access to the file's content. In such
  * cases, pass a web {@link File} object to use that its data directly for
  * face indexing. If this is not provided, then the file's contents will be
@@ -288,7 +302,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  */
 export const index = async (
     enteFile: EnteFile,
-    file: File | undefined,
+    uploadItem: UploadItem | undefined,
     electron: MLWorkerElectron,
     userAgent: string,
 ) => {
@@ -297,7 +311,7 @@ export const index = async (
 
     let faceIndex: FaceIndex;
     try {
-        faceIndex = await indexFaces(enteFile, file, electron, userAgent);
+        faceIndex = await indexFaces(enteFile, uploadItem, electron, userAgent);
     } catch (e) {
         // Mark indexing as having failed only if the indexing itself
         // failed, not if there were subsequent failures (like when trying
