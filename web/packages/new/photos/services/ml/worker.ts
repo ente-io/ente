@@ -1,5 +1,6 @@
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
+import { clientPackageName } from "@/next/app";
 import { getKVN } from "@/next/kv";
 import { ensureAuthToken } from "@/next/local-user";
 import log from "@/next/log";
@@ -8,6 +9,7 @@ import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
+import type { UploadItem } from "../upload/types";
 import {
     indexableFileIDs,
     markIndexingFailed,
@@ -16,9 +18,16 @@ import {
 } from "./db";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { type FaceIndex, indexFaces } from "./face";
+import type { MLWorkerElectron } from "./worker-electron";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
+
+/** An entry in the liveQ maintained by the worker */
+interface LiveQItem {
+    enteFile: EnteFile;
+    uploadItem: UploadItem;
+}
 
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
@@ -43,9 +52,10 @@ const idleDurationMax = 16 * 60; /* 16 minutes */
  * -   "idle": in between state transitions
  */
 export class MLWorker {
+    private electron: MLWorkerElectron | undefined;
     private userAgent: string | undefined;
     private shouldSync = false;
-    private liveQ: EnteFile[] = [];
+    private liveQ: LiveQItem[] = [];
     private state: "idle" | "pull" | "indexing" = "idle";
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -56,11 +66,14 @@ export class MLWorker {
      * This is conceptually the constructor, however it is easier to have this
      * as a separate function to avoid confounding the comlink types too much.
      *
-     * @param userAgent The user agent string to use as the client field in the
-     * embeddings generated during indexing by this client.
+     * @param electron The {@link MLWorkerElectron} that allows the worker to
+     * use the functionality provided by our Node.js layer when running in the
+     * context of our desktop app
      */
-    async init(userAgent: string) {
-        this.userAgent = userAgent;
+    async init(electron: MLWorkerElectron) {
+        this.electron = electron;
+        // Set the user agent that'll be set in the generated embeddings.
+        this.userAgent = `${clientPackageName}/${await electron.appVersion()}`;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
@@ -101,7 +114,7 @@ export class MLWorker {
      * representation of the file's contents with us and won't need to download
      * the file from remote.
      */
-    onUpload(file: EnteFile) {
+    onUpload(enteFile: EnteFile, uploadItem: UploadItem) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing
@@ -112,11 +125,11 @@ export class MLWorker {
         // long as we're not systematically ignoring it). This is because the
         // live queue is just an optimization: if a file doesn't get indexed via
         // the live queue, it'll later get indexed anyway when we backfill.
-        if (this.liveQ.length < 50) {
-            this.liveQ.push(file);
+        if (this.liveQ.length < 200) {
+            this.liveQ.push({ enteFile, uploadItem });
             this.wakeUp();
         } else {
-            log.debug(() => "Ignoring live item since liveQ is full");
+            log.debug(() => "Ignoring upload item since liveQ is full");
         }
     }
 
@@ -129,7 +142,7 @@ export class MLWorker {
 
     private async tick() {
         log.debug(() => ({
-            t: "ml-tick",
+            t: "ml/tick",
             state: this.state,
             shouldSync: this.shouldSync,
             liveQ: this.liveQ,
@@ -155,7 +168,11 @@ export class MLWorker {
         const liveQ = this.liveQ;
         this.liveQ = [];
         this.state = "indexing";
-        const allSuccess = await indexNextBatch(ensure(this.userAgent), liveQ);
+        const allSuccess = await indexNextBatch(
+            liveQ,
+            ensure(this.electron),
+            ensure(this.userAgent),
+        );
         if (allSuccess) {
             // Everything is running smoothly. Reset the idle duration.
             this.idleDuration = idleDurationStart;
@@ -196,7 +213,11 @@ const pull = pullFaceEmbeddings;
  * Which means that when it returns true, all is well and there are more
  * things pending to process, so we should chug along at full speed.
  */
-const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
+const indexNextBatch = async (
+    liveQ: LiveQItem[],
+    electron: MLWorkerElectron,
+    userAgent: string,
+) => {
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
         return false;
@@ -204,16 +225,23 @@ const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
 
     const userID = ensure(await getKVN("userID"));
 
-    const files =
+    // Use the liveQ if present, otherwise get the next batch to backfill.
+    const items =
         liveQ.length > 0
             ? liveQ
-            : await syncWithLocalFilesAndGetFilesToIndex(userID, 200);
-    if (files.length == 0) return false;
+            : await syncWithLocalFilesAndGetFilesToIndex(userID, 200).then(
+                  (fs) =>
+                      fs.map((f) => ({ enteFile: f, uploadItem: undefined })),
+              );
 
+    // Nothing to do.
+    if (items.length == 0) return false;
+
+    // Index, keeping track if any of the items failed.
     let allSuccess = true;
-    for (const file of files) {
+    for (const { enteFile, uploadItem } of items) {
         try {
-            await index(file, undefined, userAgent);
+            await index(enteFile, uploadItem, electron, userAgent);
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
@@ -221,6 +249,7 @@ const indexNextBatch = async (userAgent: string, liveQ: EnteFile[]) => {
         }
     }
 
+    // Return true if nothing failed.
     return allSuccess;
 };
 
@@ -263,7 +292,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  *
  * @param enteFile The {@link EnteFile} to index.
  *
- * @param file If the file is one which is being uploaded from the current
+ * @param uploadItem If the file is one which is being uploaded from the current
  * client, then we will also have access to the file's content. In such
  * cases, pass a web {@link File} object to use that its data directly for
  * face indexing. If this is not provided, then the file's contents will be
@@ -273,7 +302,8 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  */
 export const index = async (
     enteFile: EnteFile,
-    file: File | undefined,
+    uploadItem: UploadItem | undefined,
+    electron: MLWorkerElectron,
     userAgent: string,
 ) => {
     const f = fileLogID(enteFile);
@@ -281,7 +311,7 @@ export const index = async (
 
     let faceIndex: FaceIndex;
     try {
-        faceIndex = await indexFaces(enteFile, file, userAgent);
+        faceIndex = await indexFaces(enteFile, uploadItem, electron, userAgent);
     } catch (e) {
         // Mark indexing as having failed only if the indexing itself
         // failed, not if there were subsequent failures (like when trying

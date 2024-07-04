@@ -9,7 +9,6 @@
 
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { workerBridge } from "@/next/worker/worker-bridge";
 import { ensure } from "@/utils/ensure";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
@@ -20,7 +19,11 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import { renderableImageBlob } from "./blob";
+import type { UploadItem } from "../upload/types";
+import {
+    renderableImageBitmap,
+    renderableUploadItemImageBitmap,
+} from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
     clamp,
@@ -28,6 +31,7 @@ import {
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+import type { MLWorkerElectron } from "./worker-electron";
 
 /**
  * The version of the face indexing pipeline implemented by the current client.
@@ -212,20 +216,24 @@ export interface Box {
  *
  * @param enteFile The {@link EnteFile} to index.
  *
- * @param file The contents of {@link enteFile} as a web {@link File}, if
- * available. These are used when they are provided, otherwise the file is
- * downloaded and decrypted from remote.
+ * @param uploadItem If we're called during the upload process, then this will
+ * be set to the {@link UploadItem} that was uploaded. This way, we can directly
+ * use the on-disk file instead of needing to download the original from remote.
+ *
+ * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * our Node.js layer for various functionality.
  *
  * @param userAgent The UA of the client that is doing the indexing (us).
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    file: File | undefined,
+    uploadItem: UploadItem | undefined,
+    electron: MLWorkerElectron,
     userAgent: string,
-) => {
-    const imageBitmap = await renderableImageBlob(enteFile, file).then(
-        createImageBitmap,
-    );
+): Promise<FaceIndex> => {
+    const imageBitmap = uploadItem
+        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
+        : await renderableImageBitmap(enteFile);
     const { width, height } = imageBitmap;
     const fileID = enteFile.id;
 
@@ -237,7 +245,7 @@ export const indexFaces = async (
             faceEmbedding: {
                 version: faceIndexingVersion,
                 client: userAgent,
-                faces: await indexFacesInBitmap(fileID, imageBitmap),
+                faces: await indexFacesInBitmap(fileID, imageBitmap, electron),
             },
         };
         // This step, saving face crops, is not part of the indexing pipeline;
@@ -258,11 +266,12 @@ export const indexFaces = async (
 const indexFacesInBitmap = async (
     fileID: number,
     imageBitmap: ImageBitmap,
+    electron: MLWorkerElectron,
 ): Promise<Face[]> => {
     const { width, height } = imageBitmap;
     const imageDimensions = { width, height };
 
-    const yoloFaceDetections = await detectFaces(imageBitmap);
+    const yoloFaceDetections = await detectFaces(imageBitmap, electron);
     const partialResult = yoloFaceDetections.map(
         ({ box, landmarks, score }) => {
             const faceID = makeFaceID(fileID, box, imageDimensions);
@@ -271,19 +280,16 @@ const indexFacesInBitmap = async (
         },
     );
 
-    const alignments: FaceAlignment[] = [];
-
-    for (const { detection } of partialResult) {
-        const alignment = computeFaceAlignment(detection);
-        alignments.push(alignment);
-    }
+    const alignments = partialResult.map(({ detection }) =>
+        computeFaceAlignment(detection),
+    );
 
     const alignedFacesData = convertToMobileFaceNetInput(
         imageBitmap,
         alignments,
     );
 
-    const embeddings = await computeEmbeddings(alignedFacesData);
+    const embeddings = await computeEmbeddings(alignedFacesData, electron);
     const blurs = detectBlur(
         alignedFacesData,
         partialResult.map((f) => f.detection),
@@ -305,6 +311,7 @@ const indexFacesInBitmap = async (
  */
 const detectFaces = async (
     imageBitmap: ImageBitmap,
+    electron: MLWorkerElectron,
 ): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }: Dimensions) => ({
         x: 0,
@@ -315,7 +322,7 @@ const detectFaces = async (
 
     const { yoloInput, yoloSize } =
         convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
-    const yoloOutput = await workerBridge.detectFaces(yoloInput);
+    const yoloOutput = await electron.detectFaces(yoloInput);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
     const faceDetections = transformYOLOFaceDetections(
         faces,
@@ -873,8 +880,9 @@ const mobileFaceNetEmbeddingSize = 192;
  */
 const computeEmbeddings = async (
     faceData: Float32Array,
+    electron: MLWorkerElectron,
 ): Promise<Float32Array[]> => {
-    const outputData = await workerBridge.computeFaceEmbeddings(faceData);
+    const outputData = await electron.computeFaceEmbeddings(faceData);
 
     const embeddingSize = mobileFaceNetEmbeddingSize;
     const embeddings = new Array<Float32Array>(

@@ -149,7 +149,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 };
 
 const Title_ = styled("div")`
-    padding: 32px 16px 16px 24px;
+    padding: 16px 12px 16px 16px;
 `;
 
 interface WatchList {

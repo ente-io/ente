@@ -63,10 +63,38 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
 }
 
 /**
- * The returned blob.type is filled in, whenever possible, with the MIME type of
+ * Return a new {@link Blob} containing data in a format that the browser
+ * (likely) knows how to render (in an img tag, or on the canvas).
+ *
+ * The type of the returned blob is set, whenever possible, to the MIME type of
  * the data that we're dealing with.
+ *
+ * @param fileName The name of the file whose data is {@link imageBlob}.
+ *
+ * @param imageBlob A {@link Blob} containing the contents of an image file.
+ *
+ * The logic used by this function is:
+ *
+ * 1.  Try to detect the MIME type of the file from its contents and/or name.
+ *
+ * 2.  If this detected type is one of the types that we know that the browser
+ *     doesn't know how to render, continue. Otherwise return the imageBlob that
+ *     was passed in (after setting its MIME type).
+ *
+ * 3.  If we're running in our desktop app and this MIME type is something our
+ *     desktop app can natively convert to a JPEG (using ffmpeg), do that and
+ *     return the resultant JPEG blob.
+ *
+ * 4.  If this is an HEIC file, use our (WASM) HEIC converter and return the
+ *     resultant JPEG blob.
+ *
+ * 5.  Otherwise (or if any error occurs in the aforementioned steps), return
+ *     `undefined`.
  */
-export const getRenderableImage = async (fileName: string, imageBlob: Blob) => {
+export const renderableImageBlob = async (
+    fileName: string,
+    imageBlob: Blob,
+) => {
     try {
         const tempFile = new File([imageBlob], fileName);
         const fileTypeInfo = await detectFileTypeInfo(tempFile);
