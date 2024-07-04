@@ -18,7 +18,7 @@ import {
 } from "./db";
 import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
 import { type FaceIndex, indexFaces } from "./face";
-import type { MLWorkerDelegate } from "./worker-delegate";
+import type { MLWorkerElectron } from "./worker-electron";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -46,7 +46,7 @@ const idleDurationMax = 16 * 60; /* 16 minutes */
  * -   "idle": in between state transitions
  */
 export class MLWorker {
-    private delegate: MLWorkerDelegate | undefined;
+    private electron: MLWorkerElectron | undefined;
     private userAgent: string | undefined;
     private shouldSync = false;
     private liveQ: { enteFile: EnteFile; uploadItem: UploadItem }[] = [];
@@ -60,13 +60,14 @@ export class MLWorker {
      * This is conceptually the constructor, however it is easier to have this
      * as a separate function to avoid confounding the comlink types too much.
      *
-     * @param delegate The {@link MLWorkerDelegate} that allows the worker to
-     * call back into the main thread.
+     * @param electron The {@link MLWorkerElectron} that allows the worker to
+     * use the functionality provided by our Node.js layer when running in the
+     * context of our desktop app
      */
-    async init(delegate: MLWorkerDelegate) {
-        this.delegate = delegate;
+    async init(electron: MLWorkerElectron) {
+        this.electron = electron;
         // Set the user agent that'll be set in the generated embeddings.
-        this.userAgent = `${clientPackageName}/${await delegate.appVersion()}`;
+        this.userAgent = `${clientPackageName}/${await electron.appVersion()}`;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
@@ -163,7 +164,7 @@ export class MLWorker {
         this.state = "indexing";
         const allSuccess = await indexNextBatch(
             liveQ,
-            ensure(this.delegate),
+            ensure(this.electron),
             ensure(this.userAgent),
         );
         if (allSuccess) {
@@ -208,7 +209,7 @@ const pull = pullFaceEmbeddings;
  */
 const indexNextBatch = async (
     liveQ: EnteFile[],
-    delegate: MLWorkerDelegate,
+    electron: MLWorkerElectron,
     userAgent: string,
 ) => {
     if (!self.navigator.onLine) {
@@ -227,7 +228,7 @@ const indexNextBatch = async (
     let allSuccess = true;
     for (const file of files) {
         try {
-            await index(file, undefined, delegate, userAgent);
+            await index(file, undefined, electron, userAgent);
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
@@ -288,7 +289,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
 export const index = async (
     enteFile: EnteFile,
     file: File | undefined,
-    delegate: MLWorkerDelegate,
+    electron: MLWorkerElectron,
     userAgent: string,
 ) => {
     const f = fileLogID(enteFile);
@@ -296,7 +297,7 @@ export const index = async (
 
     let faceIndex: FaceIndex;
     try {
-        faceIndex = await indexFaces(enteFile, file, delegate, userAgent);
+        faceIndex = await indexFaces(enteFile, file, electron, userAgent);
     } catch (e) {
         // Mark indexing as having failed only if the indexing itself
         // failed, not if there were subsequent failures (like when trying

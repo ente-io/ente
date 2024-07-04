@@ -43,7 +43,7 @@ const worker = async () => {
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const delegate = {
+    const mlWorkerElectron = {
         appVersion: electron.appVersion,
         detectFaces: electron.detectFaces,
         computeFaceEmbeddings: electron.computeFaceEmbeddings,
@@ -53,7 +53,7 @@ const createComlinkWorker = async () => {
         "ml",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-    await cw.remote.then((w) => w.init(proxy(delegate)));
+    await cw.remote.then((w) => w.init(proxy(mlWorkerElectron)));
     return cw;
 };
 
