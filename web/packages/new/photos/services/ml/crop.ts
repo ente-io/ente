@@ -3,6 +3,29 @@ import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
 import type { FaceAlignment } from "./index-face";
 
+/**
+ * Return the rectangle ("crop") of the original image that contains the face
+ * that was detected by the face detection algorithm during indexing.
+ *
+ * @param imageBitmap
+ * @param faceID
+ * @param alignment
+ * @returns
+ */
+
+/**
+ * Return the face crops corresponding to each of the given face detections.
+ *
+ * @param imageBitmap The original image.
+ *
+ * @param faceBoxes Box (rectangles) marking the bounds of each of the faces
+ * that were detected in the given image.
+ */
+export const extractFaceCrops = async (
+    imageBitmap: ImageBitmap,
+    faceBoxes: Box[],
+) => {};
+
 export const saveFaceCrop = async (
     imageBitmap: ImageBitmap,
     faceID: string,
