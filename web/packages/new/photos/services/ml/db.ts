@@ -1,6 +1,6 @@
 import log from "@/next/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
-import type { FaceIndex } from "./types";
+import type { FaceIndex } from "./face";
 
 /**
  * Face DB schema.

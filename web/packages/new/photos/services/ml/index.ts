@@ -7,16 +7,12 @@ import {
     isBetaUser,
     isInternalUser,
 } from "@/new/photos/services/feature-flags";
-import {
-    clearFaceDB,
-    faceIndex,
-    indexableAndIndexedCounts,
-} from "@/new/photos/services/ml/db";
 import type { EnteFile } from "@/new/photos/types/file";
 import { clientPackageName, isDesktop } from "@/next/app";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
