@@ -635,7 +635,11 @@ class UploadManager {
                         enteFile: decryptedFile,
                         localFile: file,
                     });
-                    if (UPLOAD_RESULT.UPLOADED == uploadResult)
+                    if (
+                        uploadResult == UPLOAD_RESULT.UPLOADED ||
+                        uploadResult ==
+                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+                    )
                         indexNewUpload(decryptedFile, file);
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);
