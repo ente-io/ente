@@ -52,8 +52,10 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
     final skip = _skipAnalysisEnteFile(enteFile);
-    final shouldRunFaces = _shouldRunIndexing(enteFile, faceIndexedFileIDs);
-    final shouldRunClip = _shouldRunIndexing(enteFile, clipIndexedFileIDs);
+    final shouldRunFaces =
+        _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
+    final shouldRunClip =
+        _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
     if (skip && !shouldRunFaces && !shouldRunClip) {
       continue;
     }
@@ -70,8 +72,10 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   }
   for (final EnteFile enteFile in hiddenFiles) {
     final skip = _skipAnalysisEnteFile(enteFile);
-    final shouldRunFaces = _shouldRunIndexing(enteFile, faceIndexedFileIDs);
-    final shouldRunClip = _shouldRunIndexing(enteFile, clipIndexedFileIDs);
+    final shouldRunFaces =
+        _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
+    final shouldRunClip =
+        _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
     if (skip && !shouldRunFaces && !shouldRunClip) {
       continue;
     }
@@ -100,65 +104,38 @@ Future<Set<int>> getIndexableFileIDs() async {
   return fileIDs.toSet();
 }
 
-Future<String> getImagePathForML(
-  EnteFile enteFile, {
-  FileDataForML typeOfData = FileDataForML.fileData,
-}) async {
+Future<String> getImagePathForML(EnteFile enteFile) async {
   String? imagePath;
 
-  switch (typeOfData) {
-    case FileDataForML.fileData:
-      final stopwatch = Stopwatch()..start();
-      File? file;
-      if (enteFile.fileType == FileType.video) {
-        try {
-          file = await getThumbnailForUploadedFile(enteFile);
-        } on PlatformException catch (e, s) {
-          _logger.severe(
-            "Could not get thumbnail for $enteFile due to PlatformException",
-            e,
-            s,
-          );
-          throw ThumbnailRetrievalException(e.toString(), s);
-        }
-      } else {
-        try {
-          file = await getFile(enteFile, isOrigin: true);
-        } catch (e, s) {
-          _logger.severe(
-            "Could not get file for $enteFile",
-            e,
-            s,
-          );
-        }
-      }
-      if (file == null) {
-        _logger.warning(
-          "Could not get file for $enteFile of type ${enteFile.fileType.toString()}",
-        );
-        break;
-      }
-      imagePath = file.path;
-      stopwatch.stop();
-      _logger.info(
-        "Getting file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
+  final stopwatch = Stopwatch()..start();
+  File? file;
+  if (enteFile.fileType == FileType.video) {
+    try {
+      file = await getThumbnailForUploadedFile(enteFile);
+    } on PlatformException catch (e, s) {
+      _logger.severe(
+        "Could not get thumbnail for $enteFile due to PlatformException",
+        e,
+        s,
       );
-      break;
-
-    case FileDataForML.thumbnailData:
-      final stopwatch = Stopwatch()..start();
-      final File? thumbnail = await getThumbnailForUploadedFile(enteFile);
-      if (thumbnail == null) {
-        _logger.warning("Could not get thumbnail for $enteFile");
-        break;
-      }
-      imagePath = thumbnail.path;
-      stopwatch.stop();
-      _logger.info(
-        "Getting thumbnail data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
+      throw ThumbnailRetrievalException(e.toString(), s);
+    }
+  } else {
+    try {
+      file = await getFile(enteFile, isOrigin: true);
+    } catch (e, s) {
+      _logger.severe(
+        "Could not get file for $enteFile",
+        e,
+        s,
       );
-      break;
+    }
   }
+  imagePath = file?.path;
+  stopwatch.stop();
+  _logger.info(
+    "Getting file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
+  );
 
   if (imagePath == null) {
     _logger.warning(
@@ -182,9 +159,13 @@ bool _skipAnalysisEnteFile(EnteFile enteFile) {
   return false;
 }
 
-bool _shouldRunIndexing(EnteFile enteFile, Map<int, int> indexedFileIds) {
+bool _shouldRunIndexing(
+  EnteFile enteFile,
+  Map<int, int> indexedFileIds,
+  int newestVersion,
+) {
   final id = enteFile.uploadedFileID!;
-  return !indexedFileIds.containsKey(id) || indexedFileIds[id]! < faceMlVersion;
+  return !indexedFileIds.containsKey(id) || indexedFileIds[id]! < newestVersion;
 }
 
 void normalizeEmbedding(List<double> embedding) {

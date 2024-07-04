@@ -5,7 +5,6 @@ import "dart:isolate";
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List, ByteData;
 
-import "package:computer/computer.dart";
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
@@ -67,8 +66,6 @@ class FaceMlService {
   final _initModelLock = Lock();
   final _functionLock = Lock();
   final _initIsolateLock = Lock();
-
-  final _computer = Computer.shared();
 
   bool _isInitialized = false;
   bool _isModelsInitialized = false;
@@ -132,6 +129,7 @@ class FaceMlService {
 
   Future<void> sync() async {
     await FaceRecognitionService.instance.sync();
+    await SemanticSearchService.instance.sync();
   }
 
   Future<void> runAllFaceML({bool force = false}) async {
@@ -385,7 +383,8 @@ class FaceMlService {
     }
   }
 
-  Future<bool> processImage(FileMLInstruction instruction) async { // TODO: clean this function up
+  Future<bool> processImage(FileMLInstruction instruction) async {
+    // TODO: clean this function up
     _logger.info(
       "`processImage` start processing image with uploadedFileID: ${instruction.enteFile.uploadedFileID}",
     );
