@@ -138,7 +138,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     }, [faceID]);
 
     return objectURL ? (
-        <img src={objectURL} />
+        <img style={{ objectFit: "cover" }} src={objectURL} />
     ) : (
         <Skeleton variant="circular" height={120} width={120} />
     );
