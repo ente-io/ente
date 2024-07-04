@@ -13,6 +13,7 @@ import { blobCache } from "@/next/blob-cache";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
@@ -171,16 +172,14 @@ export const triggerMLSync = () => {
  *
  * @param enteFile The {@link EnteFile} that got uploaded.
  *
- * @param file When available, the web {@link File} object representing the
+ * @param uploadItem The item that was uploaded. This can be used to get at the
  * contents of the file that got uploaded.
  */
-export const indexNewUpload = (enteFile: EnteFile, file: File | undefined) => {
+export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
-    log.debug(() => ({ t: "ml-liveq", enteFile, file }));
-    // TODO-ML: 1. Use this file!
-    // TODO-ML: 2. Handle cases when File is something else (e.g. on desktop).
-    void worker().then((w) => w.onUpload(enteFile));
+    log.debug(() => ({ t: "ml-liveq", enteFile, uploadItem }));
+    void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
 export interface FaceIndexingStatus {

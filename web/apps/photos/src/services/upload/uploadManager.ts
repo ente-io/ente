@@ -614,11 +614,11 @@ class UploadManager {
                     UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
                 ].includes(uploadResult)
             ) {
+                const uploadItem =
+                    uploadableItem.uploadItem ??
+                    uploadableItem.livePhotoAssets.image;
                 try {
                     let file: File | undefined;
-                    const uploadItem =
-                        uploadableItem.uploadItem ??
-                        uploadableItem.livePhotoAssets.image;
                     if (uploadItem) {
                         if (uploadItem instanceof File) {
                             file = uploadItem;
@@ -635,14 +635,16 @@ class UploadManager {
                         enteFile: decryptedFile,
                         localFile: file,
                     });
-                    if (
-                        uploadResult == UPLOAD_RESULT.UPLOADED ||
-                        uploadResult ==
-                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-                    )
-                        indexNewUpload(decryptedFile, file);
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);
+                }
+                if (
+                    uploadItem &&
+                    (uploadResult == UPLOAD_RESULT.UPLOADED ||
+                        uploadResult ==
+                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL)
+                ) {
+                    indexNewUpload(decryptedFile, uploadItem);
                 }
                 this.updateExistingFiles(decryptedFile);
             }

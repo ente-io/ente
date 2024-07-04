@@ -8,6 +8,7 @@ import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
+import type { UploadItem } from "../upload/types";
 import {
     indexableFileIDs,
     markIndexingFailed,
@@ -45,7 +46,7 @@ const idleDurationMax = 16 * 60; /* 16 minutes */
 export class MLWorker {
     private userAgent: string | undefined;
     private shouldSync = false;
-    private liveQ: EnteFile[] = [];
+    private liveQ: { enteFile: EnteFile; uploadItem: UploadItem }[] = [];
     private state: "idle" | "pull" | "indexing" = "idle";
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -101,7 +102,7 @@ export class MLWorker {
      * representation of the file's contents with us and won't need to download
      * the file from remote.
      */
-    onUpload(file: EnteFile) {
+    onUpload(enteFile: EnteFile, uploadItem: UploadItem) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing
@@ -113,10 +114,10 @@ export class MLWorker {
         // live queue is just an optimization: if a file doesn't get indexed via
         // the live queue, it'll later get indexed anyway when we backfill.
         if (this.liveQ.length < 50) {
-            this.liveQ.push(file);
+            this.liveQ.push({ enteFile, uploadItem });
             this.wakeUp();
         } else {
-            log.debug(() => "Ignoring live item since liveQ is full");
+            log.debug(() => "Ignoring upload item since liveQ is full");
         }
     }
 
@@ -152,7 +153,7 @@ export class MLWorker {
             return;
         }
 
-        const liveQ = this.liveQ;
+        const liveQ = this.liveQ.map((i) => i.enteFile);
         this.liveQ = [];
         this.state = "indexing";
         const allSuccess = await indexNextBatch(ensure(this.userAgent), liveQ);
