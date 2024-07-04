@@ -125,7 +125,7 @@ export class MLWorker {
         // long as we're not systematically ignoring it). This is because the
         // live queue is just an optimization: if a file doesn't get indexed via
         // the live queue, it'll later get indexed anyway when we backfill.
-        if (this.liveQ.length < 50) {
+        if (this.liveQ.length < 200) {
             this.liveQ.push({ enteFile, uploadItem });
             this.wakeUp();
         } else {
