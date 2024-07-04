@@ -1,6 +1,7 @@
 import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
 import type { Box, FaceAlignment } from "./face";
+import { clamp } from "./image";
 
 /**
  * Return the rectangle ("crop") of the original image that contains the face
@@ -17,13 +18,67 @@ import type { Box, FaceAlignment } from "./face";
  *
  * @param imageBitmap The original image.
  *
- * @param faceBoxes Box (rectangles) marking the bounds of each of the faces
- * that were detected in the given image.
+ * @param faceBoxes Boxes (rectangles relative to the image size) marking the
+ * bounds of each of the faces that were detected in the given image.
  */
-export const extractFaceCrops = async (
+export const extractFaceCrops = (
     imageBitmap: ImageBitmap,
     faceBoxes: Box[],
-) => {};
+) => {
+    const { width: imageWidth, height: imageHeight } = imageBitmap;
+    return faceBoxes.map((faceBox) => {
+        // The faceBox is relative to the image size, and we need to convert
+        // them to absolute values first.
+        const faceX = faceBox.x * imageWidth;
+        const faceY = faceBox.y * imageHeight;
+        const faceWidth = faceBox.width * imageWidth;
+        const faceHeight = faceBox.height * imageHeight;
+
+        // Calculate the crop values by adding some padding around the face and
+        // making sure it's centered.
+        const regularPadding = 0.4;
+        const minimumPadding = 0.1;
+        const xCrop = faceX - faceWidth * regularPadding;
+        const xOvershoot = Math.abs(Math.min(0, xCrop)) / faceWidth;
+        const widthCrop =
+            faceWidth * (1 + 2 * regularPadding) -
+            2 *
+                Math.min(xOvershoot, regularPadding - minimumPadding) *
+                faceWidth;
+
+        const yCrop = faceY - faceHeight * regularPadding;
+        const yOvershoot = Math.abs(Math.min(0, yCrop)) / faceHeight;
+        const heightCrop =
+            faceHeight * (1 + 2 * regularPadding) -
+            2 *
+                Math.min(yOvershoot, regularPadding - minimumPadding) *
+                faceHeight;
+
+        // Prevent the crop from going out of image bounds.
+        const x = clamp(xCrop, 0, imageWidth);
+        const y = clamp(yCrop, 0, imageHeight);
+        const width = clamp(widthCrop, 0, imageWidth - x);
+        const height = clamp(heightCrop, 0, imageHeight - y);
+
+        const offscreenCanvas = new OffscreenCanvas(width, height);
+        const offscreenCtx = ensure(offscreenCanvas.getContext("2d"));
+        offscreenCtx.imageSmoothingQuality = "high";
+
+        offscreenCtx.drawImage(
+            imageBitmap,
+            x,
+            y,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height,
+        );
+
+        return offscreenCanvas.transferToImageBitmap();
+    });
+};
 
 export const saveFaceCrop = async (
     imageBitmap: ImageBitmap,
