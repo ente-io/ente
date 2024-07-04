@@ -15,12 +15,15 @@ import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/ui/settings/lock_screen/lock_screen_options.dart';
+import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
@@ -134,25 +137,34 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.lockscreen,
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "App lock",
         ),
-        trailingWidget: ToggleSwitchWidget(
-          value: () => _config.shouldShowLockScreen(),
-          onChanged: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthForLockScreen(
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          if (await LocalAuthentication().isDeviceSupported()) {
+            final bool result = await requestAuthentication(
               context,
-              !_config.shouldShowLockScreen(),
-              context.l10n.authToChangeLockscreenSetting,
-              context.l10n.lockScreenEnablePreSteps,
+              "Please authenticate to change lockscreen setting",
             );
-            if (hasAuthenticated) {
-              FocusScope.of(context).requestFocus();
-              setState(() {});
+            if (result) {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const LockScreenOptions();
+                  },
+                ),
+              );
             }
-          },
-        ),
+          } else {
+            await showErrorDialog(
+              context,
+              "No system lock found",
+              "To enable app lock, please setup device passcode or screen lock in your system settings.",
+            );
+          }
+        },
       ),
       sectionOptionSpacing,
     ]);

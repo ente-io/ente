@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/services/local_authentication_service.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
@@ -8,8 +10,24 @@ import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/types/auth_messages_ios.dart';
 import 'package:logging/logging.dart';
 
-Future<bool> requestAuthentication(BuildContext context, String reason) async {
+Future<bool> requestAuthentication(
+  BuildContext context,
+  String reason, {
+  bool isOpeningApp = false,
+}) async {
   Logger("AuthUtil").info("Requesting authentication");
+
+  final String? savedPin = await LockScreenSettings.instance.getPin();
+  final String? savedPassword = await LockScreenSettings.instance.getPassword();
+  if (savedPassword != null || savedPin != null) {
+    return await LocalAuthenticationService.instance
+        .requestEnteAuthForLockScreen(
+      context,
+      savedPin,
+      savedPassword,
+      isOnOpeningApp: isOpeningApp,
+    );
+  }
   if (Platform.isMacOS || Platform.isLinux) {
     return await FlutterLocalAuthentication().authenticate();
   } else {

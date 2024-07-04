@@ -22,6 +22,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
@@ -114,7 +115,7 @@ Future<void> _runInForeground() async {
       AppLock(
         builder: (args) => App(locale: locale),
         lockScreen: const LockScreen(),
-        enabled: Configuration.instance.shouldShowLockScreen(),
+        enabled: await Configuration.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
@@ -173,6 +174,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
+  await LockScreenSettings.instance.init();
 }
 
 Future<void> _setupPrivacyScreen() async {

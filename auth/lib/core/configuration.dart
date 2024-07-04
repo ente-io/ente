@@ -13,6 +13,7 @@ import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/models/private_key_attributes.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -469,7 +470,13 @@ class Configuration {
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
   }
 
-  bool shouldShowLockScreen() {
+  Future<bool> shouldShowLockScreen() async {
+    final bool isPin = await LockScreenSettings.instance.isPinSet();
+    final bool isPass = await LockScreenSettings.instance.isPasswordSet();
+    return isPin || isPass || shouldShowSystemLockScreen();
+  }
+
+  bool shouldShowSystemLockScreen() {
     if (_preferences.containsKey(keyShouldShowLockScreen)) {
       return _preferences.getBool(keyShouldShowLockScreen)!;
     } else {
@@ -477,7 +484,7 @@ class Configuration {
     }
   }
 
-  Future<void> setShouldShowLockScreen(bool value) {
+  Future<void> setSystemLockScreen(bool value) {
     return _preferences.setBool(keyShouldShowLockScreen, value);
   }
 
