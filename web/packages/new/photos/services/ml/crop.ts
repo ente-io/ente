@@ -1,17 +1,26 @@
 import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
-import type { Box, FaceAlignment } from "./face";
+import type { Box, FaceAlignment, FaceIndex } from "./face";
 import { clamp } from "./image";
 
 /**
- * Return the rectangle ("crop") of the original image that contains the face
- * that was detected by the face detection algorithm during indexing.
+ * Extract and locally save the face crops (the rectangle of the original image
+ * that contain the detected face) for each of the faces detected in an image.
  *
- * @param imageBitmap
- * @param faceID
- * @param alignment
- * @returns
+ * @param imageBitmap The original image.
+ *
+ * @param faceIndex The {@link FaceIndex} containing information about the faces
+ * detected in the given image.
+ *
+ * The face crops are saved in a local cache and can subsequently be retrieved
+ * from the {@link BlobCache} named "face-crops".
  */
+export const saveFaceCrops = (
+    imageBitmap: ImageBitmap,
+    faceIndex: FaceIndex,
+) => {
+
+}
 
 /**
  * Return the face crops corresponding to each of the given face detections.
