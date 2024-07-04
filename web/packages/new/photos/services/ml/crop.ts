@@ -1,12 +1,6 @@
 import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
-import {
-    computeFaceAlignment,
-    restoreToImageDimensions,
-    type Box,
-    type FaceAlignment,
-    type FaceIndex,
-} from "./face";
+import { type Box, type FaceAlignment, type FaceIndex } from "./face";
 import { clamp } from "./image";
 
 /**
@@ -27,17 +21,106 @@ export const saveFaceCrops = async (
 ) => {
     const cache = await blobCache("face-crops");
 
+    const faces = faceIndex.faceEmbedding.faces;
+    const blobs = await generateFaceThumbnailsUsingCanvas(
+        imageBitmap,
+        faces.map(({ detection }) => detection.box),
+    );
+    for (let i = 0; i < faces.length; i++) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        await cache.put(faces[i]!.faceID, blobs[i]!);
+    }
+    /*
     return Promise.all(
         faceIndex.faceEmbedding.faces.map(({ faceID, detection }) =>
             // extractFaceCrop2(imageBitmap, detection.box).then((b) =>
-            extractFaceCrop(
-                imageBitmap,
-                computeFaceAlignment(
-                    restoreToImageDimensions(detection, imageBitmap),
-                ),
-            ).then((b) => cache.put(faceID, b)),
+            // extractFaceCrop(
+            //     imageBitmap,
+            //     computeFaceAlignment(
+            //         restoreToImageDimensions(detection, imageBitmap),
+            //     ),
+            // ).then((b) => cache.put(faceID, b)),
+
         ),
     );
+    */
+};
+
+const generateFaceThumbnailsUsingCanvas = async (
+    imageBitmap: ImageBitmap,
+    faceBoxes: Box[],
+) => {
+    const img = imageBitmap;
+
+    const futureFaceThumbnails: Promise<Blob>[] = [];
+    for (const faceBox of faceBoxes) {
+        // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
+        const xMinAbs = faceBox.x * img.width;
+        const yMinAbs = faceBox.y * img.height;
+        const widthAbs = faceBox.width * img.width;
+        const heightAbs = faceBox.height * img.height;
+
+        // Calculate the crop values by adding some padding around the face and making sure it's centered
+        const regularPadding = 0.4;
+        const minimumPadding = 0.1;
+        const xCrop = xMinAbs - widthAbs * regularPadding;
+        const xOvershoot = Math.abs(Math.min(0, xCrop)) / widthAbs;
+        const widthCrop =
+            widthAbs * (1 + 2 * regularPadding) -
+            2 *
+                Math.min(xOvershoot, regularPadding - minimumPadding) *
+                widthAbs;
+        const yCrop = yMinAbs - heightAbs * regularPadding;
+        const yOvershoot = Math.abs(Math.min(0, yCrop)) / heightAbs;
+        const heightCrop =
+            heightAbs * (1 + 2 * regularPadding) -
+            2 *
+                Math.min(yOvershoot, regularPadding - minimumPadding) *
+                heightAbs;
+
+        // Prevent the face from going out of image bounds
+        const xCropSafe = clamp(xCrop, 0, img.width);
+        const yCropSafe = clamp(yCrop, 0, img.height);
+        const widthCropSafe = clamp(widthCrop, 0, img.width - xCropSafe);
+        const heightCropSafe = clamp(heightCrop, 0, img.height - yCropSafe);
+
+        futureFaceThumbnails.push(
+            _cropAndEncodeCanvas(
+                img,
+                xCropSafe,
+                yCropSafe,
+                widthCropSafe,
+                heightCropSafe,
+            ),
+        );
+    }
+    return Promise.all(futureFaceThumbnails);
+};
+
+const _cropAndEncodeCanvas = async (
+    imageBitmap: ImageBitmap,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+) => {
+    const offscreen = new OffscreenCanvas(width, height);
+    const offscreenCtx = ensure(offscreen.getContext("2d"));
+    offscreenCtx.imageSmoothingQuality = "high";
+
+    offscreenCtx.drawImage(
+        imageBitmap,
+        x,
+        y,
+        width,
+        height,
+        0,
+        0,
+        width,
+        height,
+    );
+
+    return offscreen.convertToBlob({ type: "image/jpeg", quality: 0.8 });
 };
 
 /**
