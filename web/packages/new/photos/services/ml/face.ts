@@ -20,7 +20,7 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import { renderableImageBlob } from "./blob";
+import { renderableImageBitmap } from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
     clamp,
@@ -223,9 +223,7 @@ export const indexFaces = async (
     file: File | undefined,
     userAgent: string,
 ) => {
-    const imageBitmap = await renderableImageBlob(enteFile, file).then(
-        createImageBitmap,
-    );
+    const imageBitmap = await renderableImageBitmap(enteFile, file);
     const { width, height } = imageBitmap;
     const fileID = enteFile.id;
 

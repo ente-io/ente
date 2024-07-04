@@ -9,7 +9,7 @@ import type {
     LivePhotoSourceURL,
     SourceURLs,
 } from "@/new/photos/types/file";
-import { getRenderableImage } from "@/new/photos/utils/file";
+import { renderableImageBlob } from "@/new/photos/utils/file";
 import { isDesktop } from "@/next/app";
 import { blobCache, type BlobCache } from "@/next/blob-cache";
 import log from "@/next/log";
@@ -458,7 +458,7 @@ async function getRenderableFileURL(
 
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
-            const convertedBlob = await getRenderableImage(
+            const convertedBlob = await renderableImageBlob(
                 file.metadata.title,
                 fileBlob,
             );
@@ -511,7 +511,7 @@ async function getRenderableLivePhotoURL(
     const getRenderableLivePhotoImageURL = async () => {
         try {
             const imageBlob = new Blob([livePhoto.imageData]);
-            const convertedImageBlob = await getRenderableImage(
+            const convertedImageBlob = await renderableImageBlob(
                 livePhoto.imageFileName,
                 imageBlob,
             );
