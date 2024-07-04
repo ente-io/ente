@@ -280,12 +280,9 @@ const indexFacesInBitmap = async (
         },
     );
 
-    const alignments: FaceAlignment[] = [];
-
-    for (const { detection } of partialResult) {
-        const alignment = computeFaceAlignment(detection);
-        alignments.push(alignment);
-    }
+    const alignments = partialResult.map(({ detection }) =>
+        computeFaceAlignment(detection),
+    );
 
     const alignedFacesData = convertToMobileFaceNetInput(
         imageBitmap,
