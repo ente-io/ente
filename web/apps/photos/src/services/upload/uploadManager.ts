@@ -1,7 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
-import { onUpload as onUploadML } from "@/new/photos/services/ml";
+import { indexNewlyUploadedFile } from "@/new/photos/services/ml";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -635,7 +635,8 @@ class UploadManager {
                         enteFile: decryptedFile,
                         localFile: file,
                     });
-                    onUploadML(decryptedFile, file);
+                    if (UPLOAD_RESULT.UPLOADED == uploadResult)
+                        indexNewlyUploadedFile(decryptedFile, file);
                 } catch (e) {
                     log.warn("Ignoring error in fileUploaded handlers", e);
                 }

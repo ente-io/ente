@@ -161,14 +161,23 @@ export const triggerMLSync = () => {
 };
 
 /**
- * Called by the uploader when it uploads a new file from this client.
+ * Run indexing on a file which was uploaded from this client.
+ *
+ * This function is called by the uploader when it uploads a new file from this
+ * client, giving us the opportunity to index it live. This is only an
+ * optimization - if we don't index it now it'll anyways get indexed later as
+ * part of the batch jobs, but that might require downloading the file's
+ * contents again.
  *
  * @param enteFile The {@link EnteFile} that got uploaded.
  *
  * @param file When available, the web {@link File} object representing the
  * contents of the file that got uploaded.
  */
-export const onUpload = (enteFile: EnteFile, file: File | undefined) => {
+export const indexNewlyUploadedFile = (
+    enteFile: EnteFile,
+    file: File | undefined,
+) => {
     if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
     log.debug(() => ({ t: "ml-liveq", enteFile, file }));
