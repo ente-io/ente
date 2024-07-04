@@ -42,7 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m7(versionValue) => "Version: ${versionValue}";
 
   static String m8(freeAmount, storageUnit) =>
-      "${freeAmount} ${storageUnit} kostenlos";
+      "${freeAmount} ${storageUnit} frei";
 
   static String m9(paymentProvider) =>
       "Bitte kündigen Sie Ihr aktuelles Abo über ${paymentProvider} zuerst";

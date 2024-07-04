@@ -131,6 +131,7 @@ dependencies:
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
+  panorama_viewer: ^1.0.5
   password_strength: ^0.2.0
   path: #dart
   path_provider: ^2.1.1

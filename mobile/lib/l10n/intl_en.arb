@@ -1262,6 +1262,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "panorama": "Panorama"
 }
 

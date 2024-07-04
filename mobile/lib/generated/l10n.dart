@@ -8974,6 +8974,16 @@ class S {
       args: [name],
     );
   }
+
+  /// `Panorama`
+  String get panorama {
+    return Intl.message(
+      'Panorama',
+      name: 'panorama',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
