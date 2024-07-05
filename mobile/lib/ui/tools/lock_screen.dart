@@ -7,7 +7,6 @@ import "package:flutter/scheduler.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -123,7 +122,7 @@ class _LockScreenState extends State<LockScreen>
                           ),
                           duration: isTimerRunning
                               ? const Duration(seconds: 1)
-                              : const Duration(seconds: 1),
+                              : const Duration(seconds: 0),
                           builder: (context, value, _) =>
                               CircularProgressIndicator(
                             backgroundColor: colorTheme.fillFaintPressed,
@@ -198,36 +197,20 @@ class _LockScreenState extends State<LockScreen>
   }
 
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
-    final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).tooManyIncorrectAttempts),
-      content: Text(S.of(context).pleaseLoginAgain),
-      actions: [
-        TextButton(
-          child: Text(
-            S.of(context).ok,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            Navigator.of(context).popUntil((route) => route.isFirst);
-            final dialog =
-                createProgressDialog(context, S.of(context).loggingOut);
-            await dialog.show();
-            await Configuration.instance.logout();
-            await dialog.hide();
-          },
-        ),
-      ],
+    _logger.info("Auto logout on max invalid attempts");
+    await _lockscreenSetting.setInvalidAttemptCount(0);
+    await showErrorDialog(
+      context,
+      "Too many incorrect attempts",
+      "Please login again",
+      isDismissable: false,
     );
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
+    Navigator.of(context, rootNavigator: true).pop('dialog');
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    final dialog = createProgressDialog(context, S.of(context).loggingOut);
+    await dialog.show();
+    await Configuration.instance.logout();
+    await dialog.hide();
   }
 
   @override
@@ -356,7 +339,7 @@ class _LockScreenState extends State<LockScreen>
                   _lockscreenSetting.getInvalidAttemptCount()) {
             invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
 
-            if (invalidAttemptCount > 9) {
+            if (invalidAttemptCount > 5) {
               await _autoLogoutOnMaxInvalidAttempts();
               return;
             }
