@@ -17,16 +17,12 @@ export default {
 const handleOPTIONS = (request: Request) => {
     const origin = request.headers.get("Origin");
     if (!isAllowedOrigin(origin)) console.warn("Unknown origin", origin);
-    const headers = request.headers.get("Access-Control-Request-Headers");
-    if (!areAllowedHeaders(headers))
-        console.warn("Unknown header in list", headers);
     return new Response("", {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package",
             "Access-Control-Max-Age": "86400",
-            // "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package",
-            "Access-Control-Allow-Headers": "*",
         },
     });
 };
@@ -46,16 +42,6 @@ const isAllowedOrigin = (origin: string | null) => {
         // `origin` is likely an invalid URL.
         return false;
     }
-};
-
-const areAllowedHeaders = (headers: string | null) => {
-    const allowed = ["x-auth-token", "x-client-package"];
-
-    if (!headers) return true;
-    for (const header of headers.split(",")) {
-        if (!allowed.includes(header.trim().toLowerCase())) return false;
-    }
-    return true;
 };
 
 const handleGET = async (request: Request) => {
