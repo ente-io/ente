@@ -702,10 +702,7 @@ class FaceMlService {
   Future<MLResult?> _analyzeImageInSingleIsolate(
     FileMLInstruction instruction,
   ) async {
-    final String filePath = await getImagePathForML(
-      instruction.enteFile,
-      typeOfData: FileDataForML.fileData,
-    );
+    final String filePath = await getImagePathForML(instruction.enteFile);
 
     final Stopwatch stopwatch = Stopwatch()..start();
     late MLResult result;
