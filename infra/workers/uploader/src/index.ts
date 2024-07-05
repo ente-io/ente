@@ -116,7 +116,7 @@ const handlePOSTOrPUT = async (request: Request) => {
     response.headers.set("Access-Control-Allow-Origin", "*");
     response.headers.set(
         "Access-Control-Expose-Headers",
-        "X-Request-Id, CF-Ray"
+        "X-Request-Id, CF-Ray",
     );
     return response;
 };

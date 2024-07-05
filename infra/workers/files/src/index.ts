@@ -91,7 +91,7 @@ const handleGET = async (request: Request) => {
             headers: {
                 "User-Agent": request.headers.get("User-Agent") ?? "",
             },
-        }
+        },
     );
 
     if (!response.ok) console.log("Upstream error", response.status);

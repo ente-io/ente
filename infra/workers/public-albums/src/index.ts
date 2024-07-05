@@ -90,7 +90,7 @@ const handleGET = async (request: Request) => {
     if (accessTokenJWT) params.set("accessTokenJWT", accessTokenJWT);
 
     let response = await fetch(
-        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`
+        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`,
     );
 
     if (!response.ok) console.log("Upstream error", response.status);
