@@ -61,6 +61,7 @@ class SemanticSearchService {
     await EmbeddingsDB.instance.init();
     await _loadImageEmbeddings();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
+      if (!_hasInitialized) return;
       _embeddingLoaderDebouncer.run(() async {
         await _loadImageEmbeddings();
       });
@@ -72,6 +73,13 @@ class SemanticSearchService {
       await _getTextEmbedding("warm up text encoder");
       _logger.info("Got text embedding");
     });
+  }
+
+  Future<void> dispose() async {
+    if (!_hasInitialized) return;
+    _hasInitialized = false;
+    await ClipTextEncoder.instance.release();
+    _cachedImageEmbeddings.clear();
   }
 
   Future<void> sync() async {
@@ -88,6 +96,11 @@ class SemanticSearchService {
     return LocalSettings.instance.hasEnabledMagicSearch() &&
         _textModelIsLoaded &&
         _cachedImageEmbeddings.isNotEmpty;
+  }
+
+  bool bothClipModelsLoaded() {
+    return ClipImageEncoder.instance.isInitialized &&
+        ClipTextEncoder.instance.isInitialized;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
