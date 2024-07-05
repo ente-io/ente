@@ -23,10 +23,9 @@ import type { MLWorkerElectron } from "./worker-electron";
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
-/** An entry in the liveQ maintained by the worker */
-interface LiveQItem {
+interface IndexableItem {
     enteFile: EnteFile;
-    uploadItem: UploadItem;
+    uploadItem: UploadItem | undefined;
 }
 
 /**
@@ -54,9 +53,10 @@ interface LiveQItem {
 export class MLWorker {
     private electron: MLWorkerElectron | undefined;
     private userAgent: string | undefined;
-    private shouldSync = false;
-    private liveQ: LiveQItem[] = [];
     private state: "idle" | "pull" | "indexing" = "idle";
+    private shouldPull = false;
+    private havePulledAtLeastOnce = false;
+    private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
 
@@ -90,7 +90,7 @@ export class MLWorker {
      * (which is why call it a less-precise sync instead of pull).
      */
     sync() {
-        this.shouldSync = true;
+        this.shouldPull = true;
         this.wakeUp();
     }
 
@@ -144,7 +144,7 @@ export class MLWorker {
         log.debug(() => ({
             t: "ml/tick",
             state: this.state,
-            shouldSync: this.shouldSync,
+            shouldSync: this.shouldPull,
             liveQ: this.liveQ,
             idleDuration: this.idleDuration,
         }));
@@ -152,10 +152,13 @@ export class MLWorker {
         const scheduleTick = () => void setTimeout(() => this.tick(), 0);
 
         // If we've been asked to sync, do that irrespective of anything else.
-        if (this.shouldSync) {
-            this.shouldSync = false;
+        if (this.shouldPull) {
+            this.shouldPull = false;
             this.state = "pull";
             void pull().then((didPull) => {
+                // Mark that we completed once attempt at pulling successfully
+                // (irrespective of whether or not that got us some data).
+                this.havePulledAtLeastOnce = true;
                 // Reset the idle duration if we did pull something.
                 if (didPull) this.idleDuration = idleDurationStart;
                 // Either ways, tick again.
@@ -168,8 +171,21 @@ export class MLWorker {
         const liveQ = this.liveQ;
         this.liveQ = [];
         this.state = "indexing";
+
+        // Use the liveQ if present, otherwise get the next batch to backfill,
+        // but only if we've pulled once from remote successfully (otherwise we
+        // might end up reindexing files that were already indexed on remote but
+        // which we didn't know about since pull failed, say, for transient
+        // network issues).
+        const items =
+            liveQ.length > 0
+                ? liveQ
+                : this.havePulledAtLeastOnce
+                  ? await this.backfillQ()
+                  : [];
+
         const allSuccess = await indexNextBatch(
-            liveQ,
+            items,
             ensure(this.electron),
             ensure(this.userAgent),
         );
@@ -195,6 +211,14 @@ export class MLWorker {
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
     }
+
+    /** Return the next batch of items to backfill (if any). */
+    async backfillQ() {
+        const userID = ensure(await getKVN("userID"));
+        return syncWithLocalFilesAndGetFilesToIndex(userID, 200).then((fs) =>
+            fs.map((f) => ({ enteFile: f, uploadItem: undefined })),
+        );
+    }
 }
 
 expose(MLWorker);
@@ -214,25 +238,17 @@ const pull = pullFaceEmbeddings;
  * things pending to process, so we should chug along at full speed.
  */
 const indexNextBatch = async (
-    liveQ: LiveQItem[],
+    items: IndexableItem[],
     electron: MLWorkerElectron,
     userAgent: string,
 ) => {
+    // Don't try to index if we wouldn't be able to upload them anyway. The
+    // liveQ has already been drained, but that's fine, it'll be rare that we
+    // are able to upload just a bit ago but don't have network now.
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
         return false;
     }
-
-    const userID = ensure(await getKVN("userID"));
-
-    // Use the liveQ if present, otherwise get the next batch to backfill.
-    const items =
-        liveQ.length > 0
-            ? liveQ
-            : await syncWithLocalFilesAndGetFilesToIndex(userID, 200).then(
-                  (fs) =>
-                      fs.map((f) => ({ enteFile: f, uploadItem: undefined })),
-              );
 
     // Nothing to do.
     if (items.length == 0) return false;
