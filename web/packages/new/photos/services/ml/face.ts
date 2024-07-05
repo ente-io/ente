@@ -280,20 +280,39 @@ const indexFacesInBitmap = async (
         },
     );
 
-    const alignments = partialResult.map(({ detection }) =>
+    const allAlignments = partialResult.map(({ detection }) =>
         computeFaceAlignment(detection),
     );
 
-    const alignedFacesData = convertToMobileFaceNetInput(
-        imageBitmap,
-        alignments,
-    );
+    let embeddings: Float32Array[] = [];
+    let blurs: number[] = [];
 
-    const embeddings = await computeEmbeddings(alignedFacesData, electron);
-    const blurs = detectBlur(
-        alignedFacesData,
-        partialResult.map((f) => f.detection),
-    );
+    // Process the faces in batches of 50 to:
+    //
+    // 1. Avoid memory pressure (as on ONNX 1.80.0, we can reproduce a crash if
+    //    we try to compute MFNet embeddings for a file with ~280 faces).
+    //
+    // 2. Reduce the time the main (Node.js) process is unresponsive (whenever
+    //    the main thread of the Node.js process is CPU bound, the renderer also
+    //    becomes unresponsive since events are routed via the main process).
+    //
+    const batchSize = 50;
+    for (let i = 0; i < yoloFaceDetections.length; i += batchSize) {
+        const alignments = allAlignments.slice(i, i + batchSize);
+        const detections = partialResult
+            .slice(i, i + batchSize)
+            .map((f) => f.detection);
+
+        const alignedFacesData = convertToMobileFaceNetInput(
+            imageBitmap,
+            alignments,
+        );
+
+        embeddings = embeddings.concat(
+            await computeEmbeddings(alignedFacesData, electron),
+        );
+        blurs = blurs.concat(detectBlur(alignedFacesData, detections));
+    }
 
     return partialResult.map(({ faceID, detection, score }, i) => ({
         faceID,
