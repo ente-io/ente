@@ -35,16 +35,7 @@ class _LockScreenState extends State<LockScreen>
   int lockedTimeInSeconds = 0;
   int invalidAttemptCount = 0;
   int remainingTimeInSeconds = 0;
-  bool showErrorMessage = true;
   final _lockscreenSetting = LockScreenSettings.instance;
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 500),
-    vsync: this,
-  );
-  late final animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeInOut,
-  );
   late Brightness _platformBrightness;
 
   @override
@@ -126,9 +117,13 @@ class _LockScreenState extends State<LockScreen>
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
                             begin: 0,
-                            end: _getFractionOfTimeElapsed(),
+                            end: isTimerRunning
+                                ? _getFractionOfTimeElapsed()
+                                : 1,
                           ),
-                          duration: const Duration(seconds: 1),
+                          duration: isTimerRunning
+                              ? const Duration(seconds: 1)
+                              : const Duration(seconds: 1),
                           builder: (context, value, _) =>
                               CircularProgressIndicator(
                             backgroundColor: colorTheme.fillFaintPressed,
