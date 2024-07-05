@@ -212,8 +212,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     } else {
       if (widget.isOnOpeningApp) {
         invalidAttemptsCount++;
+        await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
         if (invalidAttemptsCount > 4) {
-          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
           Navigator.of(context).pop(false);
         }
       }

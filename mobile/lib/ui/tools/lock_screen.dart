@@ -120,9 +120,7 @@ class _LockScreenState extends State<LockScreen>
                                 ? _getFractionOfTimeElapsed()
                                 : 1,
                           ),
-                          duration: isTimerRunning
-                              ? const Duration(seconds: 1)
-                              : const Duration(seconds: 0),
+                          duration: const Duration(seconds: 1),
                           builder: (context, value, _) =>
                               CircularProgressIndicator(
                             backgroundColor: colorTheme.fillFaintPressed,
@@ -339,7 +337,7 @@ class _LockScreenState extends State<LockScreen>
                   _lockscreenSetting.getInvalidAttemptCount()) {
             invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
 
-            if (invalidAttemptCount > 5) {
+            if (invalidAttemptCount > 9) {
               await _autoLogoutOnMaxInvalidAttempts();
               return;
             }
