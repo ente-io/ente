@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Container } from "./components/Container";
-import { parseAndHandleRequest } from "./services/billing-service";
+import { parseAndHandleRequest } from "./services/billing";
 import S from "./utils/strings";
 
 export const App: React.FC = () => {
