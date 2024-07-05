@@ -244,7 +244,7 @@ const indexNextBatch = async (
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
     // liveQ has already been drained, but that's fine, it'll be rare that we
-    // are able to upload just a bit ago but don't have network now.
+    // were able to upload just a bit ago but don't have network now.
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
         return false;
