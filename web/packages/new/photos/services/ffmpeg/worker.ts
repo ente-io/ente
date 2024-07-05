@@ -128,4 +128,4 @@ const substitutePlaceholders = (
                 return segment;
             }
         })
-        .filter((s) => !!s);
+        .filter((s) => s !== undefined);
