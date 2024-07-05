@@ -79,7 +79,7 @@ const handleGET = async (request: Request) => {
     if (token) params.set("token", token);
 
     let response = await fetch(
-        `https://api.ente.io/files/preview/${fileID}?${params.toString()}`
+        `https://api.ente.io/files/preview/${fileID}?${params.toString()}`,
     );
 
     if (!response.ok) console.log("Upstream error", response.status);
