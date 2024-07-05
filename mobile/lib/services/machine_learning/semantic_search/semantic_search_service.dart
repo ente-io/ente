@@ -42,7 +42,7 @@ class SemanticSearchService {
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
   bool _isSyncing = false;
-  List<Embedding> _cachedEmbeddings = <Embedding>[];
+  List<Embedding> _cachedImageEmbeddings = <Embedding>[];
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -59,10 +59,10 @@ class SemanticSearchService {
     _hasInitialized = true;
     await EmbeddingStore.instance.init();
     await EmbeddingsDB.instance.init();
-    await _loadEmbeddings();
+    await _loadImageEmbeddings();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       _embeddingLoaderDebouncer.run(() async {
-        await _loadEmbeddings();
+        await _loadImageEmbeddings();
       });
     });
 
@@ -85,7 +85,9 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return LocalSettings.instance.hasEnabledMagicSearch() && _textModelIsLoaded;
+    return LocalSettings.instance.hasEnabledMagicSearch() &&
+        _textModelIsLoaded &&
+        _cachedImageEmbeddings.isNotEmpty;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -119,7 +121,7 @@ class SemanticSearchService {
   Future<IndexStatus> getIndexStatus() async {
     final indexableFileIDs = await getIndexableFileIDs();
     return IndexStatus(
-      min(_cachedEmbeddings.length, indexableFileIDs.length),
+      min(_cachedImageEmbeddings.length, indexableFileIDs.length),
       (await _getFileIDsToBeIndexed()).length,
     );
   }
@@ -129,16 +131,17 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<void> _loadEmbeddings() async {
+  Future<void> _loadImageEmbeddings() async {
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
-    _cachedEmbeddings = await EmbeddingsDB.instance.getAll();
+    _cachedImageEmbeddings = await EmbeddingsDB.instance.getAll();
     final endTime = DateTime.now();
     _logger.info(
-      "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+      "Loading ${_cachedImageEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
     Bus.instance.fire(EmbeddingCacheUpdatedEvent());
-    _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
+    _logger
+        .info("Cached embeddings: " + _cachedImageEmbeddings.length.toString());
   }
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
@@ -303,7 +306,7 @@ class SemanticSearchService {
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkSimilarities,
       param: {
-        "imageEmbeddings": _cachedEmbeddings,
+        "imageEmbeddings": _cachedImageEmbeddings,
         "textEmbedding": textEmbedding,
         "minimumSimilarity": minimumSimilarity,
       },
