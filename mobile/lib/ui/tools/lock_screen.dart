@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
@@ -60,6 +61,16 @@ class _LockScreenState extends State<LockScreen>
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.logout_outlined),
+          color: Theme.of(context).iconTheme.color,
+          onPressed: () {
+            _onLogoutTapped(context);
+          },
+        ),
+      ),
       body: GestureDetector(
         onTap: () {
           isTimerRunning ? null : _showLockScreen(source: "tap");
@@ -192,6 +203,18 @@ class _LockScreenState extends State<LockScreen>
     }
     final shortestSide = MediaQuery.sizeOf(context).shortestSide;
     return shortestSide > 600 ? true : false;
+  }
+
+  void _onLogoutTapped(BuildContext context) {
+    showChoiceActionSheet(
+      context,
+      title: S.of(context).areYouSureYouWantToLogout,
+      firstButtonLabel: S.of(context).yesLogout,
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await UserService.instance.logout(context);
+      },
+    );
   }
 
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
