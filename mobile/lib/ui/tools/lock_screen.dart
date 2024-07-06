@@ -196,14 +196,6 @@ class _LockScreenState extends State<LockScreen>
 
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
     _logger.info("Auto logout on max invalid attempts");
-    await _lockscreenSetting.setInvalidAttemptCount(0);
-    await showErrorDialog(
-      context,
-      "Too many incorrect attempts",
-      "Please login again",
-      isDismissable: false,
-    );
-    Navigator.of(context, rootNavigator: true).pop('dialog');
     Navigator.of(context).popUntil((route) => route.isFirst);
     final dialog = createProgressDialog(context, S.of(context).loggingOut);
     await dialog.show();
