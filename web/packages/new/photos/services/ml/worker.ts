@@ -1,6 +1,7 @@
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { clientPackageName } from "@/next/app";
+import { isHTTP4xxError } from "@/next/http";
 import { getKVN } from "@/next/kv";
 import { ensureAuthToken } from "@/next/local-user";
 import log from "@/next/log";
@@ -153,18 +154,26 @@ export class MLWorker {
 
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldPull) {
+            // Allow this flag to be reset while we're busy pulling (triggering
+            // another pull when we tick next).
             this.shouldPull = false;
             this.state = "pull";
-            void pull().then((didPull) => {
+            try {
+                const didPull = await pull();
                 // Mark that we completed once attempt at pulling successfully
                 // (irrespective of whether or not that got us some data).
                 this.havePulledAtLeastOnce = true;
                 // Reset the idle duration if we did pull something.
                 if (didPull) this.idleDuration = idleDurationStart;
-                // Either ways, tick again.
-                scheduleTick();
-            });
-            // Return without waiting for the pull.
+            } catch (e) {
+                log.error("Failed to pull face embeddings", e);
+            }
+            // Tick again, even if we got an error.
+            //
+            // While the backfillQ won't be processed until at least a pull has
+            // happened once (`havePulledAtLeastOnce`), the liveQ can still be
+            // processed since these are new files without remote embeddings.
+            scheduleTick();
             return;
         }
 
@@ -329,19 +338,47 @@ export const index = async (
     try {
         faceIndex = await indexFaces(enteFile, uploadItem, electron, userAgent);
     } catch (e) {
-        // Mark indexing as having failed only if the indexing itself
-        // failed, not if there were subsequent failures (like when trying
-        // to put the result to remote or save it to the local face DB).
         log.error(`Failed to index faces in ${f}`, e);
         await markIndexingFailed(enteFile.id);
         throw e;
     }
+
+    // [Note: Transient and permanent indexing failures]
+    //
+    // Generally speaking, we mark indexing for a file as having failed only if
+    // the indexing itself failed, not if there were subsequent failures (like
+    // when trying to put the result to remote or save it to the local face DB).
+    //
+    // When we mark it as failed, then a flag is persisted corresponding to this
+    // file in the ML DB so that it won't get reindexed in future runs. This are
+    // thus considered as permanent failures.
+    //
+    // > We might retry in future versions if we identify reasons for indexing
+    // > to fail (it shouldn't) and rectify them.
+    //
+    // On the other hand, saving the face index to remote might fail for
+    // transient issues (network issues, or remote having hiccups). We don't
+    // mark a file as failed permanently in such cases, so that it gets retried
+    // at some point. These are considered as transient failures.
+    //
+    // However, this opens the possibility of some non-transient failure getting
+    // classified as a transient failure and causing the client to try and index
+    // the same file again and again, when in fact there is a issue specific to
+    // that file which is preventing the index from being saved. What exactly?
+    // We don't know, but the possibility exists.
+    //
+    // To reduce the chances of this happening, we treat HTTP 4xx responses as
+    // permanent failures too - there are no known cases where a client retrying
+    // a 4xx response would work, and there are known (but rare) cases where a
+    // client might get a 4xx (e.g. if the file has over ~700 faces, then remote
+    // will return a 413 Request Entity Too Large).
 
     try {
         await putFaceIndex(enteFile, faceIndex);
         await saveFaceIndex(faceIndex);
     } catch (e) {
         log.error(`Failed to put/save face index for ${f}`, e);
+        if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
         throw e;
     }
 

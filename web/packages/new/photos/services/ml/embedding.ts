@@ -7,7 +7,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
-import { HTTPError, authenticatedRequestHeaders } from "@/next/http";
+import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
@@ -243,8 +243,7 @@ const getEmbeddingsDiff = async (
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
-
+    ensureOk(res);
     return z.object({ diff: z.array(RemoteEmbedding) }).parse(await res.json())
         .diff;
 };
@@ -272,8 +271,7 @@ export const putEmbedding = async (
     const { encryptedMetadataB64, decryptionHeaderB64 } =
         await encryptFileMetadata(embedding, enteFile.key);
 
-    const url = await apiURL("/embeddings");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/embeddings"), {
         method: "PUT",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
@@ -283,7 +281,7 @@ export const putEmbedding = async (
             model,
         }),
     });
-    if (!res.ok) throw new HTTPError(url, res);
+    ensureOk(res);
 };
 
 // MARK: - Face

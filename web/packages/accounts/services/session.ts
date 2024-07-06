@@ -1,8 +1,8 @@
-import { authenticatedRequestHeaders } from "@/next/http";
+import { authenticatedRequestHeaders, HTTPError } from "@/next/http";
 import { ensureLocalUser } from "@/next/local-user";
 import { apiURL } from "@/next/origins";
 import { ensure } from "@/utils/ensure";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { getSRPAttributes } from "../api/srp";
 import type { SRPAttributes } from "../types/srp";
@@ -62,14 +62,13 @@ type SessionValidity =
  * subsequently.
  */
 export const checkSessionValidity = async (): Promise<SessionValidity> => {
-    const url = await apiURL("/users/session-validity/v2");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/users/session-validity/v2"), {
         headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) {
         if (res.status == 401)
             return { status: "invalid" }; /* session is no longer valid */
-        else throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        else throw new HTTPError(res);
     }
 
     // See if the response contains keyAttributes (they might not for older
