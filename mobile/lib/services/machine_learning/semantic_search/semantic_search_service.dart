@@ -375,9 +375,3 @@ class QueryResult {
 
   QueryResult(this.id, this.score);
 }
-
-class IndexStatus {
-  final int indexedItems, pendingItems;
-
-  IndexStatus(this.indexedItems, this.pendingItems);
-}

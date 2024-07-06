@@ -1,5 +1,5 @@
 import "dart:io" show File;
-import "dart:math" as math show sqrt;
+import "dart:math" as math show sqrt, min, max;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
@@ -20,6 +20,12 @@ final _logger = Logger("MlUtil");
 
 enum FileDataForML { thumbnailData, fileData }
 
+class IndexStatus {
+  final int indexedItems, pendingItems;
+
+  IndexStatus(this.indexedItems, this.pendingItems);
+}
+
 class FileMLInstruction {
   final EnteFile enteFile;
 
@@ -31,6 +37,24 @@ class FileMLInstruction {
     required this.shouldRunFaces,
     required this.shouldRunClip,
   });
+}
+
+Future<IndexStatus> getIndexStatus() async {
+  try {
+    final int indexableFiles = (await getIndexableFileIDs()).length;
+    final int facesIndexedFiles =
+        await FaceMLDataDB.instance.getIndexedFileCount();
+    final int clipIndexedFiles =
+        await EmbeddingsDB.instance.getIndexedFileCount();
+    final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
+
+    final showIndexedFiles = math.min(indexedFiles, indexableFiles);
+    final showPendingFiles = math.max(indexableFiles - indexedFiles, 0);
+    return IndexStatus(showIndexedFiles, showPendingFiles);
+  } catch (e, s) {
+    _logger.severe('Error getting ML status', e, s);
+    rethrow;
+  }
 }
 
 Future<List<FileMLInstruction>> getFilesForMlIndexing() async {

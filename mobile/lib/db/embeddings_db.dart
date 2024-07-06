@@ -75,6 +75,15 @@ class EmbeddingsDB {
     return result;
   }
 
+  // TODO: Add actual colomn for version and use here, similar to faces
+  Future<int> getIndexedFileCount() async {
+    final db = await _database;
+    const String query =
+        'SELECT COUNT(DISTINCT $columnFileID) as count FROM $tableName';
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    return maps.first['count'] as int;
+  }
+
   Future<void> put(Embedding embedding) async {
     final db = await _database;
     await db.execute(
