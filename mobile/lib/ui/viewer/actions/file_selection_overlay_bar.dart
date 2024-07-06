@@ -3,7 +3,6 @@ import "package:photos/face/model/person.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
@@ -86,15 +85,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              flagService.internalUser
-                  ? Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: SelectAllButton(
-                        backgroundColor: widget.backgroundColor,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              if (flagService.internalUser) const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: SelectAllButton(
+                  backgroundColor: widget.backgroundColor,
+                ),
+              ),
+              const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(
                   boxShadow: shadowFloatFaintLight,
