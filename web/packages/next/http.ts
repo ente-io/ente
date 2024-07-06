@@ -39,3 +39,13 @@ export class HTTPError extends Error {
         this.res = res;
     }
 }
+
+/**
+ * Return true if this is a HTTP "client" error.
+ *
+ * This is a convenience matcher to check if {@link e} is an instance of
+ * {@link HTTPError} with a 4xx status code. Such errors are client errors, and
+ * (generally) retrying them will not help.
+ */
+export const isHTTP4xxError = (e: unknown) =>
+    e instanceof HTTPError && e.res.status >= 400 && e.res.status <= 499;
