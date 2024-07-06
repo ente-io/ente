@@ -47,7 +47,16 @@ const messageWithError = (message: string, e?: unknown) => {
     if (e instanceof Error) {
         // In practice, we expect ourselves to be called with Error objects, so
         // this is the happy path so to say.
-        es = [`${e.name}: ${e.message}`, e.stack].filter((x) => x).join("\n");
+        es = `${e.name}: ${e.message}`;
+        const st = e.stack;
+        if (st) {
+            // On V8 (as of 2024), the stack trace begins by repeating the error's
+            // name and message, trim that off.
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/stack
+            es = st.startsWith(es)
+                ? es.concat(st.slice(es.length)) /* retain the '\n' */
+                : [es, st].join("\n");
+        }
     } else {
         // For the rest rare cases, use the default string serialization of e.
         es = String(e);
