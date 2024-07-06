@@ -115,7 +115,7 @@ class _LockScreenState extends State<LockScreen>
                         width: 75,
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
-                            begin: 0,
+                            begin: isTimerRunning ? 0 : 1,
                             end: isTimerRunning
                                 ? _getFractionOfTimeElapsed()
                                 : 1,
