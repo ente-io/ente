@@ -10,6 +10,7 @@ import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -157,15 +158,15 @@ class FaceMLDataDB {
   }
 
   /// Returns a map of fileID to the indexed ML version
-  Future<Map<int, int>> getIndexedFileIds({int? minimumMlVersion}) async {
+  Future<Map<int, int>> getIndexedFileIds({
+    int minimumMlVersion = faceMlVersion,
+  }) async {
     final db = await instance.asyncDB;
-    String query = '''
+    final String query = '''
         SELECT $fileIDColumn, $mlVersionColumn
-        FROM $facesTable
+        FROM $facesTable 
+        WHERE $mlVersionColumn >= $minimumMlVersion
       ''';
-    if (minimumMlVersion != null) {
-      query += ' WHERE $mlVersionColumn >= $minimumMlVersion';
-    }
     final List<Map<String, dynamic>> maps = await db.getAll(query);
     final Map<int, int> result = {};
     for (final map in maps) {
@@ -174,13 +175,12 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<int> getIndexedFileCount({int? minimumMlVersion}) async {
+  Future<int> getIndexedFileCount({
+    int minimumMlVersion = faceMlVersion,
+  }) async {
     final db = await instance.asyncDB;
-    String query =
-        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $facesTable';
-    if (minimumMlVersion != null) {
-      query += ' WHERE $mlVersionColumn >= $minimumMlVersion';
-    }
+    final String query =
+        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $facesTable WHERE $mlVersionColumn >= $minimumMlVersion';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
     return maps.first['count'] as int;
   }
