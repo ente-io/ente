@@ -3,11 +3,6 @@ import "../App.css";
 import { apiOrigin } from "../services/support";
 import UpdateSubscription from "./UpdateSubscription"; // Import the UpdateSubscription component
 
-interface SidebarProps {
-    token: string;
-    email: string;
-}
-
 interface UserData {
     user: {
         ID: string;
