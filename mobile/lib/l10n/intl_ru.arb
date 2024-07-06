@@ -1250,5 +1250,6 @@
   "rotate": "Повернуть",
   "left": "Влево",
   "right": "Вправо",
-  "whatsNew": "Что нового"
+  "whatsNew": "Что нового",
+  "mlFunctions": "ML functions"
 }

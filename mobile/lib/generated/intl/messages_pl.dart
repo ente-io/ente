@@ -141,6 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Long press an email to verify end to end encryption."),
+        "mlFunctions": MessageLookupByLibrary.simpleMessage("ML functions"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(

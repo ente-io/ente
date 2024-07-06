@@ -1200,7 +1200,7 @@
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
   "passKeyPendingVerification": "Verification is still pending",
-  "loginSessionExpired" : "Session expired",
+  "loginSessionExpired": "Session expired",
   "loginSessionExpiredDetails": "Your session has expired. Please login again.",
   "verifyPasskey": "Verify passkey",
   "playOnTv": "Play album on TV",
@@ -1262,6 +1262,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "mlFunctions": "ML functions"
 }
-

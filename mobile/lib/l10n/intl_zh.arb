@@ -1251,5 +1251,6 @@
   "left": "向左",
   "right": "向右",
   "whatsNew": "更新日志",
-  "reviewSuggestions": "查看建议"
+  "reviewSuggestions": "查看建议",
+  "mlFunctions": "ML functions"
 }

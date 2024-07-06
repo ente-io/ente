@@ -1251,5 +1251,6 @@
   "left": "Esquerda",
   "right": "Direita",
   "whatsNew": "O que há de novo",
-  "reviewSuggestions": "Revisar sugestões"
+  "reviewSuggestions": "Revisar sugestões",
+  "mlFunctions": "ML functions"
 }

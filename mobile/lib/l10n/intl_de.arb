@@ -1251,5 +1251,6 @@
   "left": "Links",
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
-  "reviewSuggestions": "Vorschläge überprüfen"
+  "reviewSuggestions": "Vorschläge überprüfen",
+  "mlFunctions": "ML functions"
 }
