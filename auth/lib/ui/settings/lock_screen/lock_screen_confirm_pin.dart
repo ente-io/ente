@@ -69,14 +69,19 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
           ),
         ),
       ),
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          return orientation == Orientation.portrait
-              ? _getBody(colorTheme, textTheme, isPortrait: true)
-              : SingleChildScrollView(
-                  child: _getBody(colorTheme, textTheme, isPortrait: false),
-                );
-        },
+      floatingActionButton: CustomPinKeypad(controller: _confirmPinController),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // body: OrientationBuilder(
+      //   builder: (context, orientation) {
+      //     return orientation == Orientation.portrait
+      //         ? _getBody(colorTheme, textTheme, isPortrait: true)
+      //         : SingleChildScrollView(
+      //             child: _getBody(colorTheme, textTheme, isPortrait: false),
+      //           );
+      //   },
+      // ),
+      body: SingleChildScrollView(
+        child: _getBody(colorTheme, textTheme, isPortrait: true),
       ),
     );
   }
@@ -195,10 +200,10 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
               await _confirmPinMatch();
             },
           ),
-          isPortrait
-              ? const Spacer()
-              : const Padding(padding: EdgeInsets.all(12)),
-          CustomPinKeypad(controller: _confirmPinController),
+          // isPortrait
+          //     ? const Spacer()
+          //     : const Padding(padding: EdgeInsets.all(12)),
+          // CustomPinKeypad(controller: _confirmPinController),
         ],
       ),
     );

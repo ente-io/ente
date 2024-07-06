@@ -10,108 +10,116 @@ class CustomPinKeypad extends StatelessWidget {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(2),
-        color: getEnteColorScheme(context).strokeFainter,
+        // color: getEnteColorScheme(context).strokeFainter,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Row(
-              children: [
-                _Button(
-                  text: '',
-                  number: '1',
-                  onTap: () {
-                    _onKeyTap('1');
-                  },
-                ),
-                _Button(
-                  text: "ABC",
-                  number: '2',
-                  onTap: () {
-                    _onKeyTap('2');
-                  },
-                ),
-                _Button(
-                  text: "DEF",
-                  number: '3',
-                  onTap: () {
-                    _onKeyTap('3');
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                _Button(
-                  number: '4',
-                  text: "GHI",
-                  onTap: () {
-                    _onKeyTap('4');
-                  },
-                ),
-                _Button(
-                  number: '5',
-                  text: 'JKL',
-                  onTap: () {
-                    _onKeyTap('5');
-                  },
-                ),
-                _Button(
-                  number: '6',
-                  text: 'MNO',
-                  onTap: () {
-                    _onKeyTap('6');
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                _Button(
-                  number: '7',
-                  text: 'PQRS',
-                  onTap: () {
-                    _onKeyTap('7');
-                  },
-                ),
-                _Button(
-                  number: '8',
-                  text: 'TUV',
-                  onTap: () {
-                    _onKeyTap('8');
-                  },
-                ),
-                _Button(
-                  number: '9',
-                  text: 'WXYZ',
-                  onTap: () {
-                    _onKeyTap('9');
-                  },
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                const _Button(
-                  number: '',
-                  text: '',
-                  muteButton: true,
-                  onTap: null,
-                ),
-                _Button(
-                  number: '0',
-                  text: '',
-                  onTap: () {
-                    _onKeyTap('0');
-                  },
-                ),
-                _Button(
-                  number: '',
-                  text: '',
-                  icon: const Icon(Icons.backspace_outlined),
-                  onTap: () {
-                    _onBackspace();
-                  },
-                ),
-              ],
+            Container(
+              color: getEnteColorScheme(context).strokeFainter,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      _Button(
+                        text: '',
+                        number: '1',
+                        onTap: () {
+                          _onKeyTap('1');
+                        },
+                      ),
+                      _Button(
+                        text: "ABC",
+                        number: '2',
+                        onTap: () {
+                          _onKeyTap('2');
+                        },
+                      ),
+                      _Button(
+                        text: "DEF",
+                        number: '3',
+                        onTap: () {
+                          _onKeyTap('3');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _Button(
+                        number: '4',
+                        text: "GHI",
+                        onTap: () {
+                          _onKeyTap('4');
+                        },
+                      ),
+                      _Button(
+                        number: '5',
+                        text: 'JKL',
+                        onTap: () {
+                          _onKeyTap('5');
+                        },
+                      ),
+                      _Button(
+                        number: '6',
+                        text: 'MNO',
+                        onTap: () {
+                          _onKeyTap('6');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      _Button(
+                        number: '7',
+                        text: 'PQRS',
+                        onTap: () {
+                          _onKeyTap('7');
+                        },
+                      ),
+                      _Button(
+                        number: '8',
+                        text: 'TUV',
+                        onTap: () {
+                          _onKeyTap('8');
+                        },
+                      ),
+                      _Button(
+                        number: '9',
+                        text: 'WXYZ',
+                        onTap: () {
+                          _onKeyTap('9');
+                        },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const _Button(
+                        number: '',
+                        text: '',
+                        muteButton: true,
+                        onTap: null,
+                      ),
+                      _Button(
+                        number: '0',
+                        text: '',
+                        onTap: () {
+                          _onKeyTap('0');
+                        },
+                      ),
+                      _Button(
+                        number: '',
+                        text: '',
+                        icon: const Icon(Icons.backspace_outlined),
+                        onTap: () {
+                          _onBackspace();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

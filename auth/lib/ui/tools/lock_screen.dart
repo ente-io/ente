@@ -109,8 +109,10 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                         width: 75,
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
-                            begin: 0,
-                            end: _getFractionOfTimeElapsed(),
+                            begin: isTimerRunning ? 0 : 1,
+                            end: isTimerRunning
+                                ? _getFractionOfTimeElapsed()
+                                : 1,
                           ),
                           duration: const Duration(seconds: 1),
                           builder: (context, value, _) =>

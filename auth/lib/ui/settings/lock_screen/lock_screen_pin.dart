@@ -77,8 +77,8 @@ class _LockScreenPinState extends State<LockScreenPin> {
 
       if (widget.isOnOpeningApp) {
         invalidAttemptsCount++;
+        await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
         if (invalidAttemptsCount > 4) {
-          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
           Navigator.of(context).pop(false);
         }
       }
@@ -128,14 +128,19 @@ class _LockScreenPinState extends State<LockScreenPin> {
           ),
         ),
       ),
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          return orientation == Orientation.portrait
-              ? _getBody(colorTheme, textTheme, isPortrait: true)
-              : SingleChildScrollView(
-                  child: _getBody(colorTheme, textTheme, isPortrait: false),
-                );
-        },
+      floatingActionButton: CustomPinKeypad(controller: _pinController),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // body: OrientationBuilder(
+      //   builder: (context, orientation) {
+      //     return orientation == Orientation.portrait
+      //         ? _getBody(colorTheme, textTheme, isPortrait: true)
+      //         : SingleChildScrollView(
+      //             child: _getBody(colorTheme, textTheme, isPortrait: false),
+      //           );
+      //   },
+      // ),
+      body: SingleChildScrollView(
+        child: _getBody(colorTheme, textTheme, isPortrait: true),
       ),
     );
   }
@@ -258,10 +263,10 @@ class _LockScreenPinState extends State<LockScreenPin> {
               await _confirmPin(_pinController.text);
             },
           ),
-          isPortrait
-              ? const Spacer()
-              : const Padding(padding: EdgeInsets.all(12)),
-          CustomPinKeypad(controller: _pinController),
+          // isPortrait
+          //     ? const Spacer()
+          //     : const Padding(padding: EdgeInsets.all(12)),
+          // CustomPinKeypad(controller: _pinController),
         ],
       ),
     );
