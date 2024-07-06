@@ -149,7 +149,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               FaceMlService.instance.debugIndexingDisabled = false;
-              unawaited(FaceMlService.instance.runAllFaceML());
+              unawaited(FaceMlService.instance.runAllML());
             } catch (e, s) {
               _logger.warning('indexAndClusterAll failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
