@@ -46,7 +46,7 @@ export class HTTPError extends Error {
  * A convenience method that throws an {@link HTTPError} if the given
  * {@link Response} does not have a HTTP 2xx status.
  */
-export const ensure2xx = (res: Response) => {
+export const ensureOk = (res: Response) => {
     if (!res.ok) throw new HTTPError(res);
 };
 

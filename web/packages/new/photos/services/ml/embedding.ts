@@ -7,7 +7,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
-import { authenticatedRequestHeaders, ensure2xx } from "@/next/http";
+import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
@@ -243,7 +243,7 @@ const getEmbeddingsDiff = async (
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });
-    ensure2xx(res);
+    ensureOk(res);
     return z.object({ diff: z.array(RemoteEmbedding) }).parse(await res.json())
         .diff;
 };
@@ -281,7 +281,7 @@ export const putEmbedding = async (
             model,
         }),
     });
-    ensure2xx(res);
+    ensureOk(res);
 };
 
 // MARK: - Face
