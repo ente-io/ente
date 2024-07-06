@@ -9,6 +9,7 @@ import "package:photos/face/model/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -18,14 +19,14 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/local_settings.dart";
 import 'package:photos/utils/toast_util.dart';
 
-class FaceDebugSectionWidget extends StatefulWidget {
-  const FaceDebugSectionWidget({Key? key}) : super(key: key);
+class MLDebugSectionWidget extends StatefulWidget {
+  const MLDebugSectionWidget({Key? key}) : super(key: key);
 
   @override
-  State<FaceDebugSectionWidget> createState() => _FaceDebugSectionWidgetState();
+  State<MLDebugSectionWidget> createState() => _MLDebugSectionWidgetState();
 }
 
-class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
+class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   Timer? _timer;
   @override
   void initState() {
@@ -46,14 +47,14 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Faces Debug",
+      title: "ML Debug",
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.bug_report_outlined,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final Logger _logger = Logger("FaceDebugSectionWidget");
+    final Logger _logger = Logger("MLDebugSectionWidget");
     return Column(
       children: [
         MenuItemWidget(
@@ -252,7 +253,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback",
+            title: "Reset faces feedback",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -281,7 +282,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback and clustering",
+            title: "Reset faces feedback and clustering",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -314,7 +315,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset everything (embeddings)",
+            title: "Reset faces everything (embeddings)",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -338,6 +339,17 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                 }
               },
             );
+          },
+        ),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset clip embeddings",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await SemanticSearchService.instance.clearIndexes();
           },
         ),
       ],
