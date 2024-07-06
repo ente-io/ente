@@ -1,5 +1,5 @@
 import { isDevBuild } from "@/next/env";
-import { authenticatedRequestHeaders } from "@/next/http";
+import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import { localUser } from "@/next/local-user";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
@@ -65,11 +65,10 @@ const fetchAndSaveFeatureFlags = () =>
         .then(saveFlagJSONString);
 
 const fetchFeatureFlags = async () => {
-    const url = await apiURL("/remote-store/feature-flags");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/remote-store/feature-flags"), {
         headers: await authenticatedRequestHeaders(),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
     return res;
 };
 

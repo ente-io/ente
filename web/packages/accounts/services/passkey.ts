@@ -1,5 +1,5 @@
 import { clientPackageName, isDesktop } from "@/next/app";
-import { clientPackageHeader } from "@/next/http";
+import { clientPackageHeader, HTTPError } from "@/next/http";
 import log from "@/next/log";
 import { accountsAppOrigin, apiURL } from "@/next/origins";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
@@ -240,7 +240,7 @@ export const checkPasskeyVerificationStatus = async (
         if (res.status == 404 || res.status == 410)
             throw new Error(passkeySessionExpiredErrorMessage);
         if (res.status == 400) return undefined; /* verification pending */
-        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        throw new HTTPError(res);
     }
     return TwoFactorAuthorizationResponse.parse(await res.json());
 };

@@ -1,6 +1,6 @@
 import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
-import { clientPackageHeader } from "@/next/http";
+import { clientPackageHeader, ensureOk, HTTPError } from "@/next/http";
 import { apiURL } from "@/next/origins";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
@@ -57,11 +57,10 @@ const GetPasskeysResponse = z.object({
  * has no passkeys.
  */
 export const getPasskeys = async (token: string) => {
-    const url = await apiURL("/passkeys");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/passkeys"), {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
     return passkeys ?? [];
 };
@@ -86,7 +85,7 @@ export const renamePasskey = async (
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -97,12 +96,11 @@ export const renamePasskey = async (
  * @param id The `id` of the existing passkey to delete.
  */
 export const deletePasskey = async (token: string, id: string) => {
-    const url = await apiURL(`/passkeys/${id}`);
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL(`/passkeys/${id}`), {
         method: "DELETE",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -148,12 +146,11 @@ interface BeginPasskeyRegistrationResponse {
 }
 
 const beginPasskeyRegistration = async (token: string) => {
-    const url = await apiURL("/passkeys/registration/begin");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/passkeys/registration/begin"), {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     // [Note: Converting binary data in WebAuthn API payloads]
     //
@@ -310,7 +307,7 @@ const finishPasskeyRegistration = async ({
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -422,7 +419,7 @@ export const beginPasskeyAuthentication = async (
     if (!res.ok) {
         if (res.status == 409)
             throw new Error(passkeySessionAlreadyClaimedErrorMessage);
-        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        throw new HTTPError(res);
     }
 
     // See: [Note: Converting binary data in WebAuthn API payloads]
@@ -527,7 +524,7 @@ export const finishPasskeyAuthentication = async ({
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     return TwoFactorAuthorizationResponse.parse(await res.json());
 };
