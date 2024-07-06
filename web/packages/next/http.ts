@@ -28,9 +28,16 @@ export class HTTPError extends Error {
     res: Response;
 
     constructor(res: Response) {
+        // Trim off any query parameters from the URL before logging, it may
+        // have tokens.
+        //
         // Nb: res.url is URL obtained after any redirects, and thus is not
         // necessarily the same as the request's URL.
-        super(`Fetch failed: ${res.url}: HTTP ${res.status} ${res.statusText}`);
+        const url = new URL(res.url);
+        url.search = "";
+        super(
+            `Fetch failed: ${url.href}: HTTP ${res.status} ${res.statusText}`,
+        );
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
