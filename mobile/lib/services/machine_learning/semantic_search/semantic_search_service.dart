@@ -49,7 +49,7 @@ class SemanticSearchService {
   get hasInitialized => _hasInitialized;
 
   Future<void> init() async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+    if (!LocalSettings.instance.isFaceIndexingEnabled) {
       return;
     }
     if (_hasInitialized) {
@@ -93,7 +93,7 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return LocalSettings.instance.hasEnabledMagicSearch() &&
+    return LocalSettings.instance.isFaceIndexingEnabled &&
         _textModelIsLoaded &&
         _cachedImageEmbeddings.isNotEmpty;
   }

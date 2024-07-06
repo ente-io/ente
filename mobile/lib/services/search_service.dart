@@ -178,7 +178,7 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getMagicSectionResutls() async {
-    if (LocalSettings.instance.hasEnabledMagicSearch() &&
+    if (LocalSettings.instance.isFaceIndexingEnabled &&
         flagService.internalUser) {
       return MagicCacheService.instance.getMagicGenericSearchResult();
     } else {
