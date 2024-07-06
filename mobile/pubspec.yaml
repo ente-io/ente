@@ -181,6 +181,7 @@ dependencies:
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
   xml: ^6.3.0
+  xmp: ^1.0.3
 
 dependency_overrides:
   # Remove this after removing dependency from flutter_sodium.
@@ -199,7 +200,7 @@ flutter_intl:
 
 dev_dependencies:
   build_runner: ^2.4.7
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
   freezed: ^2.5.2

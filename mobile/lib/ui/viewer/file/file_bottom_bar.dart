@@ -15,6 +15,7 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/share_util.dart';
 
 class FileBottomBar extends StatefulWidget {
@@ -41,6 +42,25 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
+  bool isPanorama = false;
+
+  Future<void> _checkPanoroma() async {
+    if (widget.file.fileType != FileType.image) {
+      return;
+    }
+
+    final file = await getFile(widget.file);
+    if (file == null) {
+      return;
+    }
+
+    final result = await checkIfPanorama(file);
+
+    if (mounted && isPanorama == !result) {
+      isPanorama = result;
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,23 +149,25 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       }
 
-      children.add(
-        Tooltip(
-          message: S.of(context).panorama,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
-            child: IconButton(
-              icon: const Icon(
-                Icons.threesixty,
-                color: Colors.white,
+      if (isPanorama) {
+        children.add(
+          Tooltip(
+            message: S.of(context).panorama,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.threesixty,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  await openPanoramaViewerPage(widget.file);
+                },
               ),
-              onPressed: () async {
-                await openPanoramaViewerPage(widget.file);
-              },
             ),
           ),
-        ),
-      );
+        );
+      }
       children.add(
         Tooltip(
           message: S.of(context).share,
