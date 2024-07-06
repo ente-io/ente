@@ -348,7 +348,22 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await SemanticSearchService.instance.clearIndexes();
+            await showChoiceDialog(
+              context,
+              title: "Are you sure?",
+              body:
+                  "You will need to again re-index or fetch all clip image embeddings.",
+              firstButtonLabel: "Yes, confirm",
+              firstButtonOnTap: () async {
+                try {
+                  await SemanticSearchService.instance.clearIndexes();
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('drop clip embeddings failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
+              },
+            );
           },
         ),
       ],
