@@ -47,7 +47,7 @@ enum FaceMlOperation { analyzeImage }
 /// WARNING: For getting the ML results needed for the UI, you should use `FaceSearchService` instead of this class!
 ///
 /// The pipeline consists of face detection, face alignment and face embedding.
-class FaceMlService {
+class MLService {
   final _logger = Logger("FaceMlService");
 
   // Flutter isolate things for running the image ml pipeline
@@ -59,9 +59,9 @@ class FaceMlService {
   late SendPort _mainSendPort;
 
   // Singleton pattern
-  FaceMlService._privateConstructor();
-  static final instance = FaceMlService._privateConstructor();
-  factory FaceMlService() => instance;
+  MLService._privateConstructor();
+  static final instance = MLService._privateConstructor();
+  factory MLService() => instance;
 
   final _initModelLock = Lock();
   final _functionLock = Lock();
@@ -76,6 +76,8 @@ class FaceMlService {
   bool get isInitialized => _isInitialized;
 
   bool get showClusteringIsHappening => _showClusteringIsHappening;
+
+  bool get allModelsLoaded => _isModelsInitialized;
 
   bool debugIndexingDisabled = false;
   bool _showClusteringIsHappening = false;
@@ -614,7 +616,7 @@ class FaceMlService {
         switch (function) {
           case FaceMlOperation.analyzeImage:
             final time = DateTime.now();
-            final MLResult result = await FaceMlService._analyzeImageSync(args);
+            final MLResult result = await MLService._analyzeImageSync(args);
             dev.log(
               "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
             );

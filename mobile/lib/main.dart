@@ -292,7 +292,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
     _logger.info("MachineLearningController done");
     if (flagService.faceSearchEnabled) {
-      unawaited(FaceMlService.instance.init());
+      unawaited(MLService.instance.init());
     } else {
       if (LocalSettings.instance.isFaceIndexingEnabled) {
         unawaited(LocalSettings.instance.toggleFaceIndexing());

@@ -79,7 +79,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final isEnabled =
                   await LocalSettings.instance.toggleFaceIndexing();
               if (!isEnabled) {
-                FaceMlService.instance.pauseIndexingAndClustering();
+                MLService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});
@@ -115,7 +115,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: FaceMlService.instance.debugIndexingDisabled
+            title: MLService.instance.debugIndexingDisabled
                 ? "Debug enable indexing again"
                 : "Debug disable indexing",
           ),
@@ -124,10 +124,10 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.debugIndexingDisabled =
-                  !FaceMlService.instance.debugIndexingDisabled;
-              if (FaceMlService.instance.debugIndexingDisabled) {
-                FaceMlService.instance.pauseIndexingAndClustering();
+              MLService.instance.debugIndexingDisabled =
+                  !MLService.instance.debugIndexingDisabled;
+              if (MLService.instance.debugIndexingDisabled) {
+                MLService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});
@@ -148,8 +148,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.debugIndexingDisabled = false;
-              unawaited(FaceMlService.instance.runAllML());
+              MLService.instance.debugIndexingDisabled = false;
+              unawaited(MLService.instance.runAllML());
             } catch (e, s) {
               _logger.warning('indexAndClusterAll failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
@@ -166,8 +166,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.debugIndexingDisabled = false;
-              unawaited(FaceMlService.instance.indexAllImages());
+              MLService.instance.debugIndexingDisabled = false;
+              unawaited(MLService.instance.indexAllImages());
             } catch (e, s) {
               _logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
@@ -194,9 +194,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               await PersonService.instance.fetchRemoteClusterFeedback();
-              FaceMlService.instance.debugIndexingDisabled = false;
-              await FaceMlService.instance
-                  .clusterAllImages(clusterInBuckets: true);
+              MLService.instance.debugIndexingDisabled = false;
+              await MLService.instance.clusterAllImages(clusterInBuckets: true);
               Bus.instance.fire(PeopleChangedEvent());
               showShortToast(context, "Done");
             } catch (e, s) {
