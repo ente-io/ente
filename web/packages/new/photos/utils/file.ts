@@ -1,4 +1,4 @@
-import { isNonWebImageFileExtension } from "@/media/formats";
+import { hasPartialBrowserSupport, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { isDesktop } from "@/next/app";
 import log from "@/next/log";
@@ -104,45 +104,52 @@ export const renderableImageBlob = async (
         );
         const { extension } = fileTypeInfo;
 
-        if (!isNonWebImageFileExtension(extension)) {
-            // Either it is something that the browser already knows how to
-            // render, or something we don't even about yet.
-            const mimeType = fileTypeInfo.mimeType;
-            if (!mimeType) {
-                log.info(
-                    "Trying to render a file without a MIME type",
-                    fileName,
-                );
-                return imageBlob;
-            } else {
-                return new Blob([imageBlob], { type: mimeType });
-            }
-        }
-
-        const available = !moduleState.isNativeJPEGConversionNotAvailable;
-        if (isDesktop && available && isNativeConvertibleToJPEG(extension)) {
-            // If we're running in our desktop app, see if our Node.js layer can
-            // convert this into a JPEG using native tools for us.
-            try {
-                return await nativeConvertToJPEG(imageBlob);
-            } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message.endsWith(CustomErrorMessage.NotAvailable)
-                ) {
-                    moduleState.isNativeJPEGConversionNotAvailable = true;
-                } else {
-                    log.error("Native conversion to JPEG failed", e);
+        if (needsJPEGConversion(extension)) {
+            const available = !moduleState.isNativeJPEGConversionNotAvailable;
+            if (isDesktop && available) {
+                // If we're running in our desktop app, see if our Node.js layer
+                // can convert this into a JPEG using native tools.
+                try {
+                    return await nativeConvertToJPEG(imageBlob);
+                } catch (e) {
+                    if (
+                        e instanceof Error &&
+                        e.message.endsWith(CustomErrorMessage.NotAvailable)
+                    ) {
+                        moduleState.isNativeJPEGConversionNotAvailable = true;
+                    } else {
+                        log.error("Native conversion to JPEG failed", e);
+                    }
                 }
             }
+
+            if (extension == "heic" || extension == "heif") {
+                // If the previous step failed, or if native JPEG conversion is
+                // not available on this platform, for HEIC/HEIF files we can
+                // fallback to our web HEIC converter.
+                return await heicToJPEG(imageBlob);
+            }
+
+            // Continue if it might be possibly supported in some browsers,
+            // otherwise bail out.
+            if (!hasPartialBrowserSupport(extension)) return undefined;
         }
 
-        if (extension == "heic" || extension == "heif") {
-            // For HEIC/HEIF files we can use our web HEIC converter.
-            return await heicToJPEG(imageBlob);
-        }
+        // Either it is something that the browser already knows how to render
+        // (e.g. JPEG/PNG), or is a file extension that might be supported in
+        // some browsers (e.g. JPEG 2000), or a file extension that we haven't
+        // specifically whitelisted for conversion (any arbitrary extension not
+        // part of `needsJPEGConversion`).
+        //
+        // Give it to the browser, attaching the mime type if possible.
 
-        return undefined;
+        const mimeType = fileTypeInfo.mimeType;
+        if (!mimeType) {
+            log.info("Trying to render a file without a MIME type", fileName);
+            return imageBlob;
+        } else {
+            return new Blob([imageBlob], { type: mimeType });
+        }
     } catch (e) {
         log.error(`Failed to get renderable image for ${fileName}`, e);
         return undefined;
@@ -150,29 +157,12 @@ export const renderableImageBlob = async (
 };
 
 /**
- * File extensions which our native JPEG conversion code should be able to
- * convert to a renderable image.
+ * Convert {@link imageBlob} to a JPEG blob.
+ *
+ * The presumption is that method used by our desktop app for converting to JPEG
+ * should be able to handle files with all extensions for which
+ * {@link needsJPEGConversion} returns true.
  */
-const convertibleToJPEGExtensions = [
-    "heic",
-    "rw2",
-    "tiff",
-    "arw",
-    "cr3",
-    "cr2",
-    "nef",
-    "psd",
-    "dng",
-    "tif",
-];
-
-/**
- * Return true if {@link extension} is amongst the file extensions which we
- * expect our native JPEG conversion to be able to process.
- */
-export const isNativeConvertibleToJPEG = (extension: string) =>
-    convertibleToJPEGExtensions.includes(extension.toLowerCase());
-
 const nativeConvertToJPEG = async (imageBlob: Blob) => {
     const startTime = Date.now();
     const imageData = new Uint8Array(await imageBlob.arrayBuffer());
