@@ -27,8 +27,10 @@ export const clientPackageHeader = () => ({
 export class HTTPError extends Error {
     res: Response;
 
-    constructor(url: string, res: Response) {
-        super(`Failed to fetch ${url}: HTTP ${res.status}`);
+    constructor(res: Response) {
+        // Nb: res.url is URL obtained after any redirects, and thus is not
+        // necessarily the same as the request's URL.
+        super(`Fetch failed: ${res.url}: HTTP ${res.status} ${res.statusText}`);
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
@@ -39,6 +41,14 @@ export class HTTPError extends Error {
         this.res = res;
     }
 }
+
+/**
+ * A convenience method that throws an {@link HTTPError} if the given
+ * {@link Response} does not have a HTTP 2xx status.
+ */
+export const ensure2xx = (res: Response) => {
+    if (!res.ok) throw new HTTPError(res);
+};
 
 /**
  * Return true if this is a HTTP "client" error.
