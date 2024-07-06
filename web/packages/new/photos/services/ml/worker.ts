@@ -154,18 +154,26 @@ export class MLWorker {
 
         // If we've been asked to sync, do that irrespective of anything else.
         if (this.shouldPull) {
+            // Allow this flag to be reset while we're busy pulling (triggering
+            // another pull when we tick next).
             this.shouldPull = false;
             this.state = "pull";
-            void pull().then((didPull) => {
+            try {
+                const didPull = await pull();
                 // Mark that we completed once attempt at pulling successfully
                 // (irrespective of whether or not that got us some data).
                 this.havePulledAtLeastOnce = true;
                 // Reset the idle duration if we did pull something.
                 if (didPull) this.idleDuration = idleDurationStart;
-                // Either ways, tick again.
-                scheduleTick();
-            });
-            // Return without waiting for the pull.
+            } catch (e) {
+                log.error("Failed to pull face embeddings", e);
+            }
+            // Tick again, even if we got an error.
+            //
+            // While the backfillQ won't be processed until at least a pull has
+            // happened once (`havePulledAtLeastOnce`), the liveQ can still be
+            // processed since these are new files without remote embeddings.
+            scheduleTick();
             return;
         }
 
