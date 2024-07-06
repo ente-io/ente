@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/auth_util.dart';
@@ -54,6 +55,16 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.logout_outlined),
+          color: Theme.of(context).iconTheme.color,
+          onPressed: () {
+            _onLogoutTapped(context);
+          },
+        ),
+      ),
       body: GestureDetector(
         onTap: () {
           isTimerRunning ? null : _showLockScreen(source: "tap");
@@ -187,6 +198,18 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     return shortestSide > 600 ? true : false;
   }
 
+  void _onLogoutTapped(BuildContext context) {
+    showChoiceActionSheet(
+      context,
+      title: "Are you sure you want to logout?",
+      firstButtonLabel: "Yes, logout",
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await UserService.instance.logout(context);
+      },
+    );
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logger.info(state.toString());
@@ -278,7 +301,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
     _logger.info("Auto logout on max invalid attempts");
-    await _lockscreenSetting.setInvalidAttemptCount(0);
     await showErrorDialog(
       context,
       "Too many incorrect attempts",
