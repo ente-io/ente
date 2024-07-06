@@ -1,4 +1,4 @@
-import { needsJPEGConversion } from "@/media/formats";
+import { hasPartialBrowserSupport, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { isDesktop } from "@/next/app";
 import log from "@/next/log";
@@ -130,21 +130,25 @@ export const renderableImageBlob = async (
                 return await heicToJPEG(imageBlob);
             }
 
-            return undefined;
+            // Continue if it might be possibly supported in some browsers,
+            // otherwise bail out.
+            if (!hasPartialBrowserSupport(extension)) return undefined;
+        }
+
+        // Either it is something that the browser already knows how to render
+        // (e.g. JPEG/PNG), or is a file extension that might be supported in
+        // some browsers (e.g. JPEG 2000), or a file extension that we haven't
+        // specifically whitelisted for conversion (any arbitrary extension not
+        // part of `needsJPEGConversion`).
+        //
+        // Give it to the browser, attaching the mime type if possible.
+
+        const mimeType = fileTypeInfo.mimeType;
+        if (!mimeType) {
+            log.info("Trying to render a file without a MIME type", fileName);
+            return imageBlob;
         } else {
-            // Either it is something that the browser already knows how to
-            // render, or a file extension that we haven't specifically
-            // whitelisted for conversion.
-            const mimeType = fileTypeInfo.mimeType;
-            if (!mimeType) {
-                log.info(
-                    "Trying to render a file without a MIME type",
-                    fileName,
-                );
-                return imageBlob;
-            } else {
-                return new Blob([imageBlob], { type: mimeType });
-            }
+            return new Blob([imageBlob], { type: mimeType });
         }
     } catch (e) {
         log.error(`Failed to get renderable image for ${fileName}`, e);
