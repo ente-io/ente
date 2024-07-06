@@ -41,7 +41,7 @@
         "onnxruntime-node": "^1.18"
     },
     "devDependencies": {
-        "@eslint/js": "^9.4.0",
+        "@eslint/js": "^9",
         "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0",
         "@types/eslint__js": "^8.42.3",
@@ -50,7 +50,7 @@
         "cross-env": "^7.0.3",
         "electron": "^30",
         "electron-builder": "25.0.0-alpha.8",
-        "eslint": "^9.4.0",
+        "eslint": "^9",
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3",
         "prettier-plugin-packagejson": "^2",
