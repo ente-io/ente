@@ -1,9 +1,9 @@
-import { ensure } from "@/utils/ensure";
-import { verifyTwoFactor } from "@ente/accounts/api/user";
+import { verifyTwoFactor } from "@/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
-} from "@ente/accounts/components/two-factor/VerifyForm";
-import { PAGES } from "@ente/accounts/constants/pages";
+} from "@/accounts/components/two-factor/VerifyForm";
+import { PAGES } from "@/accounts/constants/pages";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";

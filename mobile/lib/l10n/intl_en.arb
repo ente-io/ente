@@ -1200,7 +1200,7 @@
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
   "passKeyPendingVerification": "Verification is still pending",
-  "loginSessionExpired" : "Session expired",
+  "loginSessionExpired": "Session expired",
   "loginSessionExpiredDetails": "Your session has expired. Please login again.",
   "verifyPasskey": "Verify passkey",
   "playOnTv": "Play album on TV",
@@ -1262,6 +1262,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "reenterPassword": "Re-enter password",
+  "reenterPin": "Re-enter PIN",
+  "deviceLock": "Device lock",
+  "pinLock": "PIN lock",
+  "next": "Next",
+  "setNewPassword": "Set new password",
+  "enterPin": "Enter PIN",
+  "setNewPin": "Set new PIN",
+  "appLock": "App lock",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "tapToUnlock": "Tap to unlock",
+  "tooManyIncorrectAttempts": "Too many incorrect attempts"
 }
-

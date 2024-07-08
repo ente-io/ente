@@ -32,6 +32,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewers": m1,
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
         "clusteringProgress":
@@ -42,12 +43,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
         "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
         "enterPersonName":
             MessageLookupByLibrary.simpleMessage("Enter person name"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
@@ -64,6 +67,14 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
+        "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Remove person label"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
@@ -71,6 +82,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select a location"),
         "selectALocationFirst":
             MessageLookupByLibrary.simpleMessage("Select a location first"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
       };
 }

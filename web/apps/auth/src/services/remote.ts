@@ -41,8 +41,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                     }
                 }),
         );
-        // Remove undefined values
-        const filteredAuthCodes = authCodes.filter((f): f is Code => !!f);
+        const filteredAuthCodes = authCodes.filter((f) => f !== undefined);
         filteredAuthCodes.sort((a, b) => {
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);

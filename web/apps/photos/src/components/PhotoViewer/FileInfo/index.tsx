@@ -1,3 +1,4 @@
+import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -328,10 +329,10 @@ export function FileInfo({
                     </InfoItem>
                 )}
 
-                {appContext.mlSearchEnabled && (
+                {isMLEnabled() && (
                     <>
                         {/* <PhotoPeopleList file={file} /> */}
-                        <UnidentifiedFaces file={file} />
+                        <UnidentifiedFaces enteFile={file} />
                     </>
                 )}
             </Stack>

@@ -1,5 +1,5 @@
+import InvalidInputMessage from "@/accounts/components/two-factor/InvalidInputMessage";
 import { wait } from "@/utils/promise";
-import InvalidInputMessage from "@ente/accounts/components/two-factor/InvalidInputMessage";
 import {
     CenteredFlex,
     VerticallyCentered,

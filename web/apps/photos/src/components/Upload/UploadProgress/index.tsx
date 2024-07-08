@@ -1,4 +1,4 @@
-import { UPLOAD_STAGES } from "constants/upload";
+import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import UploadProgressContext from "contexts/uploadProgress";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";

@@ -1,7 +1,7 @@
+import { sendOtt } from "@/accounts/api/user";
+import { PAGES } from "@/accounts/constants/pages";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
-import { sendOtt } from "@ente/accounts/api/user";
-import { PAGES } from "@ente/accounts/constants/pages";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";

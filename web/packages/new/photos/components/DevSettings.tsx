@@ -1,3 +1,4 @@
+import { ensureOk } from "@/next/http";
 import { getKV, removeKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -220,9 +221,8 @@ const updateAPIOrigin = async (origin: string) => {
         return;
     }
 
-    const url = `${origin}/ping`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const res = await fetch(`${origin}/ping`);
+    ensureOk(res);
     try {
         PingResponse.parse(await res.json());
     } catch (e) {

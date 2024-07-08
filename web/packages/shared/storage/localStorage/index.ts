@@ -54,12 +54,7 @@ export const clearData = () => localStorage.clear();
 //
 // Creating a new function here to act as a funnel point.
 export const setLSUser = async (user: object) => {
-    user &&
-    typeof user == "object" &&
-    "token" in user &&
-    typeof user.token == "string"
-        ? await setKV("token", user.token)
-        : await removeKV("token");
+    await migrateKVToken(user);
     setData(LS_KEYS.USER, user);
 };
 
@@ -71,9 +66,17 @@ export const setLSUser = async (user: object) => {
  * at an early point in the app startup to also copy over the token into KV DB
  * for existing users.
  *
- * This was added 1 July 2024, can be removed after a while (tag: Migration).
+ * This was added 1 July 2024, can be removed after a while and this code
+ * inlined into `setLSUser` (tag: Migration).
  */
 export const migrateKVToken = async (user: unknown) => {
+    user &&
+    typeof user == "object" &&
+    "id" in user &&
+    typeof user.id == "number"
+        ? await setKV("userID", user.id)
+        : await removeKV("userID");
+
     user &&
     typeof user == "object" &&
     "token" in user &&

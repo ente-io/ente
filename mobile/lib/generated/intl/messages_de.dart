@@ -42,7 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m7(versionValue) => "Version: ${versionValue}";
 
   static String m8(freeAmount, storageUnit) =>
-      "${freeAmount} ${storageUnit} kostenlos";
+      "${freeAmount} ${storageUnit} frei";
 
   static String m9(paymentProvider) =>
       "Bitte kündigen Sie Ihr aktuelles Abo über ${paymentProvider} zuerst";
@@ -309,6 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage(
             "Authentifizierung erforderlich"),
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),
@@ -612,6 +613,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceCodeHint": MessageLookupByLibrary.simpleMessage("Code eingeben"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Dateien, die zu diesem Album hinzugefügt werden, werden automatisch zu Ente hochgeladen."),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Verhindern, dass der Bildschirm gesperrt wird, während die App im Vordergrund ist und eine Sicherung läuft. Das ist normalerweise nicht notwendig, kann aber dabei helfen, große Uploads wie einen Erstimport schneller abzuschließen."),
         "deviceNotFound":
@@ -706,6 +708,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Gib ein Passwort ein, mit dem wir deine Daten verschlüsseln können"),
         "enterPersonName":
             MessageLookupByLibrary.simpleMessage("Namen der Person eingeben"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
             "Gib den Weiterempfehlungs-Code ein"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -1012,6 +1015,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Neues Album"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Neu bei Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Zuletzt"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Noch keine Alben von dir geteilt"),
@@ -1041,6 +1045,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Keine Ergebnisse"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Keine Ergebnisse gefunden"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("Noch nichts mit Dir geteilt"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -1113,6 +1119,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Mittelpunkt auswählen"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Album anheften"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "playOnTv": MessageLookupByLibrary.simpleMessage(
             "Album auf dem Fernseher wiedergeben"),
         "playStoreFreeTrialValidTill": m39,
@@ -1195,6 +1202,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Passwort wiederherstellen"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "referFriendsAnd2xYourPlan": MessageLookupByLibrary.simpleMessage(
             "Begeistere Freunde für uns und verdopple deinen Speicher"),
         "referralStep1": MessageLookupByLibrary.simpleMessage(
@@ -1356,6 +1366,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAs": MessageLookupByLibrary.simpleMessage("Festlegen als"),
         "setCover": MessageLookupByLibrary.simpleMessage("Titelbild festlegen"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Festlegen"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Passwort festlegen"),
         "setRadius": MessageLookupByLibrary.simpleMessage("Radius festlegen"),
@@ -1485,6 +1498,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("zum Kopieren antippen"),
         "tapToEnterCode": MessageLookupByLibrary.simpleMessage(
             "Antippen, um den Code einzugeben"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Etwas ist schiefgelaufen. Bitte versuche es später noch einmal. Sollte der Fehler weiter bestehen, kontaktiere unser Supportteam."),
         "terminate": MessageLookupByLibrary.simpleMessage("Beenden"),
@@ -1529,12 +1543,17 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dadurch wirst du von folgendem Gerät abgemeldet:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dadurch wirst du von diesem Gerät abgemeldet!"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
         "toHideAPhotoOrVideo":
             MessageLookupByLibrary.simpleMessage("Foto oder Video verstecken"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "Um dein Passwort zurückzusetzen, verifiziere bitte zuerst deine E-Mail Adresse."),
         "todaysLogs":
             MessageLookupByLibrary.simpleMessage("Heutiges Protokoll"),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "total": MessageLookupByLibrary.simpleMessage("Gesamt"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Gesamtgröße"),
         "trash": MessageLookupByLibrary.simpleMessage("Papierkorb"),

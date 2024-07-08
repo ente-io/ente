@@ -1,7 +1,7 @@
+import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
+import { PAGES } from "@/accounts/constants/pages";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
-import { PAGES } from "@ente/accounts/constants/pages";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";

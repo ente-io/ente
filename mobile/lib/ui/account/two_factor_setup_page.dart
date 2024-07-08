@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -12,7 +11,7 @@ import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:pinput/pin_put/pin_put.dart';
+import "package:pinput/pinput.dart";
 
 class TwoFactorSetupPage extends StatefulWidget {
   final String secretCode;
@@ -34,9 +33,13 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _pinController = TextEditingController();
-  final _pinPutDecoration = BoxDecoration(
-    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
-    borderRadius: BorderRadius.circular(15.0),
+  final _pinPutDecoration = PinTheme(
+    height: 45,
+    width: 45,
+    decoration: BoxDecoration(
+      border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
+      borderRadius: BorderRadius.circular(15.0),
+    ),
   );
   String _code = "";
   late ImageProvider _imageProvider;
@@ -219,9 +222,9 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         const Padding(padding: EdgeInsets.all(16)),
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-          child: PinPut(
-            fieldsCount: 6,
-            onSubmit: (String code) {
+          child: Pinput(
+            length: 6,
+            onCompleted: (String code) {
               _enableTwoFactor(code);
             },
             onChanged: (String pin) {
@@ -230,20 +233,22 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
               });
             },
             controller: _pinController,
-            submittedFieldDecoration: _pinPutDecoration.copyWith(
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            selectedFieldDecoration: _pinPutDecoration,
-            followingFieldDecoration: _pinPutDecoration.copyWith(
-              borderRadius: BorderRadius.circular(5.0),
-              border: Border.all(
-                color: const Color.fromRGBO(45, 194, 98, 0.5),
+            submittedPinTheme: _pinPutDecoration.copyWith(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(
+                  color: const Color.fromRGBO(45, 194, 98, 0.5),
+                ),
               ),
             ),
-            inputDecoration: const InputDecoration(
-              focusedBorder: InputBorder.none,
-              border: InputBorder.none,
-              counterText: '',
+            defaultPinTheme: _pinPutDecoration,
+            followingPinTheme: _pinPutDecoration.copyWith(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(
+                  color: const Color.fromRGBO(45, 194, 98, 0.5),
+                ),
+              ),
             ),
           ),
         ),

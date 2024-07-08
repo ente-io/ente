@@ -1,4 +1,4 @@
-import { estimatePasswordStrength } from "@ente/accounts/utils";
+import { estimatePasswordStrength } from "@/accounts/utils";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";

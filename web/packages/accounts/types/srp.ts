@@ -1,7 +1,4 @@
-import type {
-    UpdatedKey,
-    UserVerificationResponse,
-} from "@ente/accounts/types/user";
+import type { UpdatedKey, UserVerificationResponse } from "./user";
 
 export interface SRPAttributes {
     srpUserID: string;

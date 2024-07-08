@@ -1,3 +1,8 @@
+// TODO: These arise from the array indexing in the pre-processing code. Isolate
+// once that code settles down to its final place (currently duplicated across
+// web and desktop).
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 /**
  * @file Compute CLIP embeddings for images and text.
  *
@@ -49,73 +54,201 @@ const clipImageEmbedding_ = async (jpegFilePath: string) => {
     return normalizeEmbedding(imageEmbedding);
 };
 
-const getRGBData = async (jpegFilePath: string): Promise<number[]> => {
+const getRGBData = async (jpegFilePath: string): Promise<Float32Array> => {
     const jpegData = await fs.readFile(jpegFilePath);
     const rawImageData = jpeg.decode(jpegData, {
         useTArray: true,
-        formatAsRGBA: false,
-    });
+        formatAsRGBA: true,
+    }); // TODO: manav: make sure this works on all images, not just jpeg
+    const pixelData = rawImageData.data;
 
-    const nx = rawImageData.width;
-    const ny = rawImageData.height;
-    const inputImage = rawImageData.data;
-
-    const nx2 = 224;
-    const ny2 = 224;
-    const totalSize = 3 * nx2 * ny2;
-
-    const result = Array<number>(totalSize).fill(0);
-    const scale = Math.max(nx, ny) / 224;
-
-    const nx3 = Math.round(nx / scale);
-    const ny3 = Math.round(ny / scale);
-
+    const requiredWidth = 224;
+    const requiredHeight = 224;
+    const requiredSize = 3 * requiredWidth * requiredHeight;
     const mean: number[] = [0.48145466, 0.4578275, 0.40821073];
     const std: number[] = [0.26862954, 0.26130258, 0.27577711];
 
-    for (let y = 0; y < ny3; y++) {
-        for (let x = 0; x < nx3; x++) {
-            for (let c = 0; c < 3; c++) {
-                // Linear interpolation
-                const sx = (x + 0.5) * scale - 0.5;
-                const sy = (y + 0.5) * scale - 0.5;
+    const scale = Math.max(
+        requiredWidth / rawImageData.width,
+        requiredHeight / rawImageData.height,
+    );
+    const scaledWidth = Math.round(rawImageData.width * scale);
+    const scaledHeight = Math.round(rawImageData.height * scale);
+    const widthOffset = Math.max(0, scaledWidth - requiredWidth) / 2;
+    const heightOffset = Math.max(0, scaledHeight - requiredHeight) / 2;
 
-                const x0 = Math.max(0, Math.floor(sx));
-                const y0 = Math.max(0, Math.floor(sy));
+    const processedImage = new Float32Array(requiredSize);
 
-                const x1 = Math.min(x0 + 1, nx - 1);
-                const y1 = Math.min(y0 + 1, ny - 1);
-
-                const dx = sx - x0;
-                const dy = sy - y0;
-
-                const j00 = 3 * (y0 * nx + x0) + c;
-                const j01 = 3 * (y0 * nx + x1) + c;
-                const j10 = 3 * (y1 * nx + x0) + c;
-                const j11 = 3 * (y1 * nx + x1) + c;
-
-                const v00 = inputImage[j00] ?? 0;
-                const v01 = inputImage[j01] ?? 0;
-                const v10 = inputImage[j10] ?? 0;
-                const v11 = inputImage[j11] ?? 0;
-
-                const v0 = v00 * (1 - dx) + v01 * dx;
-                const v1 = v10 * (1 - dx) + v11 * dx;
-
-                const v = v0 * (1 - dy) + v1 * dy;
-
-                const v2 = Math.min(Math.max(Math.round(v), 0), 255);
-
-                // createTensorWithDataList is dumb compared to reshape and
-                // hence has to be given with one channel after another
-                const i = y * nx3 + x + (c % 3) * 224 * 224;
-
-                result[i] = (v2 / 255 - (mean[c] ?? 0)) / (std[c] ?? 1);
-            }
+    // Populate the Float32Array with normalized pixel values.
+    let pi = 0;
+    const cOffsetG = requiredHeight * requiredWidth; // ChannelOffsetGreen
+    const cOffsetB = 2 * requiredHeight * requiredWidth; // ChannelOffsetBlue
+    for (let h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
+        for (let w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
+            const { r, g, b } = pixelRGBBicubic(
+                w / scale,
+                h / scale,
+                pixelData,
+                rawImageData.width,
+                rawImageData.height,
+            );
+            processedImage[pi] = (r / 255.0 - mean[0]!) / std[0]!;
+            processedImage[pi + cOffsetG] = (g / 255.0 - mean[1]!) / std[1]!;
+            processedImage[pi + cOffsetB] = (b / 255.0 - mean[2]!) / std[2]!;
+            pi++;
         }
     }
+    return processedImage;
+};
 
-    return result;
+// NOTE: exact duplicate of the function in web/apps/photos/src/services/face/image.ts
+const pixelRGBBicubic = (
+    fx: number,
+    fy: number,
+    imageData: Uint8Array,
+    imageWidth: number,
+    imageHeight: number,
+) => {
+    // Clamp to image boundaries.
+    fx = clamp(fx, 0, imageWidth - 1);
+    fy = clamp(fy, 0, imageHeight - 1);
+
+    const x = Math.trunc(fx) - (fx >= 0.0 ? 0 : 1);
+    const px = x - 1;
+    const nx = x + 1;
+    const ax = x + 2;
+    const y = Math.trunc(fy) - (fy >= 0.0 ? 0 : 1);
+    const py = y - 1;
+    const ny = y + 1;
+    const ay = y + 2;
+    const dx = fx - x;
+    const dy = fy - y;
+
+    const cubic = (
+        dx: number,
+        ipp: number,
+        icp: number,
+        inp: number,
+        iap: number,
+    ) =>
+        icp +
+        0.5 *
+            (dx * (-ipp + inp) +
+                dx * dx * (2 * ipp - 5 * icp + 4 * inp - iap) +
+                dx * dx * dx * (-ipp + 3 * icp - 3 * inp + iap));
+
+    const icc = pixelRGBA(imageData, imageWidth, imageHeight, x, y);
+
+    const ipp =
+        px < 0 || py < 0
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, px, py);
+    const icp =
+        px < 0 ? icc : pixelRGBA(imageData, imageWidth, imageHeight, x, py);
+    const inp =
+        py < 0 || nx >= imageWidth
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, py);
+    const iap =
+        ax >= imageWidth || py < 0
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, py);
+
+    const ip0 = cubic(dx, ipp.r, icp.r, inp.r, iap.r);
+    const ip1 = cubic(dx, ipp.g, icp.g, inp.g, iap.g);
+    const ip2 = cubic(dx, ipp.b, icp.b, inp.b, iap.b);
+    // const ip3 = cubic(dx, ipp.a, icp.a, inp.a, iap.a);
+
+    const ipc =
+        px < 0 ? icc : pixelRGBA(imageData, imageWidth, imageHeight, px, y);
+    const inc =
+        nx >= imageWidth
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, y);
+    const iac =
+        ax >= imageWidth
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, y);
+
+    const ic0 = cubic(dx, ipc.r, icc.r, inc.r, iac.r);
+    const ic1 = cubic(dx, ipc.g, icc.g, inc.g, iac.g);
+    const ic2 = cubic(dx, ipc.b, icc.b, inc.b, iac.b);
+    // const ic3 = cubic(dx, ipc.a, icc.a, inc.a, iac.a);
+
+    const ipn =
+        px < 0 || ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, px, ny);
+    const icn =
+        ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, x, ny);
+    const inn =
+        nx >= imageWidth || ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, ny);
+    const ian =
+        ax >= imageWidth || ny >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, ny);
+
+    const in0 = cubic(dx, ipn.r, icn.r, inn.r, ian.r);
+    const in1 = cubic(dx, ipn.g, icn.g, inn.g, ian.g);
+    const in2 = cubic(dx, ipn.b, icn.b, inn.b, ian.b);
+    // const in3 = cubic(dx, ipn.a, icn.a, inn.a, ian.a);
+
+    const ipa =
+        px < 0 || ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, px, ay);
+    const ica =
+        ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, x, ay);
+    const ina =
+        nx >= imageWidth || ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, nx, ay);
+    const iaa =
+        ax >= imageWidth || ay >= imageHeight
+            ? icc
+            : pixelRGBA(imageData, imageWidth, imageHeight, ax, ay);
+
+    const ia0 = cubic(dx, ipa.r, ica.r, ina.r, iaa.r);
+    const ia1 = cubic(dx, ipa.g, ica.g, ina.g, iaa.g);
+    const ia2 = cubic(dx, ipa.b, ica.b, ina.b, iaa.b);
+    // const ia3 = cubic(dx, ipa.a, ica.a, ina.a, iaa.a);
+
+    const c0 = Math.trunc(clamp(cubic(dy, ip0, ic0, in0, ia0), 0, 255));
+    const c1 = Math.trunc(clamp(cubic(dy, ip1, ic1, in1, ia1), 0, 255));
+    const c2 = Math.trunc(clamp(cubic(dy, ip2, ic2, in2, ia2), 0, 255));
+    // const c3 = cubic(dy, ip3, ic3, in3, ia3);
+
+    return { r: c0, g: c1, b: c2 };
+};
+
+// NOTE: exact duplicate of the function in web/apps/photos/src/services/face/image.ts
+const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+// NOTE: exact duplicate of the function in web/apps/photos/src/services/face/image.ts
+const pixelRGBA = (
+    imageData: Uint8Array,
+    width: number,
+    height: number,
+    x: number,
+    y: number,
+) => {
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return { r: 0, g: 0, b: 0, a: 0 };
+    }
+    const index = (y * width + x) * 4;
+    return {
+        r: ensure(imageData[index]),
+        g: ensure(imageData[index + 1]),
+        b: ensure(imageData[index + 2]),
+        a: ensure(imageData[index + 3]),
+    };
 };
 
 const normalizeEmbedding = (embedding: Float32Array) => {

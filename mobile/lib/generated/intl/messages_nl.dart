@@ -307,6 +307,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Verificatie vereist"),
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Toepassen"),
@@ -607,6 +608,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Voer de code in"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Bestanden toegevoegd aan dit album van dit apparaat zullen automatisch geüpload worden naar Ente."),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Schakel de schermvergrendeling van het apparaat uit wanneer Ente op de voorgrond is en er een back-up aan de gang is. Dit is normaal gesproken niet nodig, maar kan grote uploads en initiële imports van grote mappen sneller laten verlopen."),
         "deviceNotFound":
@@ -700,6 +702,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Voer wachtwoord in"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Voer een wachtwoord in dat we kunnen gebruiken om je gegevens te versleutelen"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "enterReferralCode":
             MessageLookupByLibrary.simpleMessage("Voer verwijzingscode in"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -992,6 +995,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nieuw album"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nieuw bij Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nieuwste"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
         "no": MessageLookupByLibrary.simpleMessage("Nee"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Nog geen albums gedeeld door jou"),
@@ -1022,6 +1026,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Geen resultaten"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Geen resultaten gevonden"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("Nog niets met je gedeeld"),
         "nothingToSeeHere":
@@ -1091,6 +1097,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kies middelpunt"),
         "pinAlbum":
             MessageLookupByLibrary.simpleMessage("Album bovenaan vastzetten"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "playOnTv":
             MessageLookupByLibrary.simpleMessage("Album afspelen op TV"),
         "playStoreFreeTrialValidTill": m39,
@@ -1170,6 +1177,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "recreatePasswordTitle": MessageLookupByLibrary.simpleMessage(
             "Wachtwoord opnieuw instellen"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "referFriendsAnd2xYourPlan": MessageLookupByLibrary.simpleMessage(
             "Verwijs vrienden en 2x uw abonnement"),
         "referralStep1": MessageLookupByLibrary.simpleMessage(
@@ -1324,6 +1334,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAs": MessageLookupByLibrary.simpleMessage("Instellen als"),
         "setCover": MessageLookupByLibrary.simpleMessage("Omslag instellen"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Instellen"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Wachtwoord instellen"),
         "setRadius": MessageLookupByLibrary.simpleMessage("Radius instellen"),
@@ -1447,6 +1460,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tapToCopy": MessageLookupByLibrary.simpleMessage("tik om te kopiëren"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tik om code in te voeren"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Het lijkt erop dat er iets fout is gegaan. Probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met ons supportteam."),
         "terminate": MessageLookupByLibrary.simpleMessage("Beëindigen"),
@@ -1491,12 +1505,17 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dit zal je uitloggen van het volgende apparaat:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dit zal je uitloggen van dit apparaat!"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Om een foto of video te verbergen"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "Verifieer eerst je e-mailadres om je wachtwoord opnieuw in te stellen."),
         "todaysLogs":
             MessageLookupByLibrary.simpleMessage("Logboeken van vandaag"),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "total": MessageLookupByLibrary.simpleMessage("totaal"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Totale grootte"),
         "trash": MessageLookupByLibrary.simpleMessage("Prullenbak"),

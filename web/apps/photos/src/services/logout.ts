@@ -1,12 +1,10 @@
-import { terminateFaceWorker } from "@/new/photos/services/face";
-import { clearFaceData } from "@/new/photos/services/face/db";
+import { accountLogout } from "@/accounts/services/logout";
+import DownloadManager from "@/new/photos/services/download";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
+import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import log from "@/next/log";
-import { accountLogout } from "@ente/accounts/services/logout";
 import { clipService } from "services/clip-service";
-import DownloadManager from "./download";
 import exportService from "./export";
-import mlWorkManager from "./face/mlWorkManager";
 
 /**
  * Logout sequence for the photos app.
@@ -19,10 +17,22 @@ export const photosLogout = async () => {
     const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
+    // - Workers
+
     // Terminate any workers before clearing persistent state.
     // See: [Note: Caching IDB instances in separate execution contexts].
 
+    try {
+        terminateMLWorker();
+    } catch (e) {
+        ignoreError("face", e);
+    }
+
+    // - Remote logout and clear state
+
     await accountLogout();
+
+    // - Photos specific logout
 
     try {
         clearFeatureFlagSessionState();
@@ -31,7 +41,7 @@ export const photosLogout = async () => {
     }
 
     try {
-        await DownloadManager.logout();
+        DownloadManager.logout();
     } catch (e) {
         ignoreError("download", e);
     }
@@ -42,24 +52,14 @@ export const photosLogout = async () => {
         ignoreError("CLIP", e);
     }
 
-    try {
-        terminateFaceWorker();
-    } catch (e) {
-        ignoreError("face", e);
-    }
+    // - Desktop
 
     const electron = globalThis.electron;
     if (electron) {
         try {
-            await mlWorkManager.logout();
+            await logoutML();
         } catch (e) {
             ignoreError("ML", e);
-        }
-
-        try {
-            await clearFaceData();
-        } catch (e) {
-            ignoreError("face", e);
         }
 
         try {
@@ -69,7 +69,7 @@ export const photosLogout = async () => {
         }
 
         try {
-            await electron?.logout();
+            await electron.logout();
         } catch (e) {
             ignoreError("electron", e);
         }

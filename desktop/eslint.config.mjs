@@ -38,6 +38,13 @@ export default ts.config(
                     ignoreArrowShorthand: true,
                 },
             ],
+            // Allow free standing ternary expressions.
+            "@typescript-eslint/no-unused-expressions": [
+                "error",
+                {
+                    allowTernary: true,
+                },
+            ],
         },
     },
 );

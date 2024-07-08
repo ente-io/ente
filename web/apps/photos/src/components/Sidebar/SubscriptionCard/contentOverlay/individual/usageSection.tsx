@@ -1,7 +1,7 @@
+import { formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { Box, Typography } from "@mui/material";
 import { t } from "i18next";
-import { formattedStorageByteSize } from "utils/units";
 
 import { Progressbar } from "../../styledComponents";
 

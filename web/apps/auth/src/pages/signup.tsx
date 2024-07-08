@@ -1,4 +1,4 @@
-import Page_ from "@ente/accounts/pages/signup";
+import Page_ from "@/accounts/pages/signup";
 import { useAppContext } from "./_app";
 
 const Page = () => <Page_ appContext={useAppContext()} />;

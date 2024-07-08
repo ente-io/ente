@@ -1,4 +1,4 @@
-## @ente/accounts
+## @/accounts
 
 A package for sharing the pages involved in the signup/login flow.
 

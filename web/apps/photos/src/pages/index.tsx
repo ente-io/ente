@@ -1,8 +1,8 @@
+import { Login } from "@/accounts/components/Login";
+import { SignUp } from "@/accounts/components/SignUp";
 import { DevSettings } from "@/new/photos/components/DevSettings";
 import log from "@/next/log";
 import { albumsAppOrigin, customAPIHost } from "@/next/origins";
-import { Login } from "@ente/accounts/components/Login";
-import { SignUp } from "@ente/accounts/components/SignUp";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";

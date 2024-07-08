@@ -1047,7 +1047,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "availableStorageSpace": "{freeAmount} {storageUnit} kostenlos",
+  "availableStorageSpace": "{freeAmount} {storageUnit} frei",
   "appVersion": "Version: {versionValue}",
   "verifyIDLabel": "Überprüfen",
   "fileInfoAddDescHint": "Beschreibung hinzufügen …",
@@ -1251,5 +1251,18 @@
   "left": "Links",
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
-  "reviewSuggestions": "Vorschläge überprüfen"
+  "reviewSuggestions": "Vorschläge überprüfen",
+  "reenterPassword": "Re-enter password",
+  "reenterPin": "Re-enter PIN",
+  "deviceLock": "Device lock",
+  "pinLock": "PIN lock",
+  "next": "Next",
+  "setNewPassword": "Set new password",
+  "enterPin": "Enter PIN",
+  "setNewPin": "Set new PIN",
+  "appLock": "App lock",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "tapToUnlock": "Tap to unlock",
+  "tooManyIncorrectAttempts": "Too many incorrect attempts"
 }

@@ -268,6 +268,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("安卓, iOS, 网页端, 桌面端"),
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage("需要身份验证"),
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("应用"),
@@ -506,6 +507,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceCodeHint": MessageLookupByLibrary.simpleMessage("输入代码"),
         "deviceFilesAutoUploading":
             MessageLookupByLibrary.simpleMessage("添加到此设备相册的文件将自动上传到 Ente。"),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "当 Ente 置于前台且正在进行备份时将禁用设备屏幕锁定。这通常是不需要的，但可能有助于更快地完成大型上传和大型库的初始导入。"),
         "deviceNotFound": MessageLookupByLibrary.simpleMessage("未发现设备"),
@@ -580,6 +582,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterPasswordToEncrypt":
             MessageLookupByLibrary.simpleMessage("输入我们可以用来加密您的数据的密码"),
         "enterPersonName": MessageLookupByLibrary.simpleMessage("输入人物名称"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage("输入推荐代码"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage("从你的身份验证器应用中\n输入6位数字代码"),
@@ -825,6 +828,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("新建相册"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("初来 Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("最新"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
         "no": MessageLookupByLibrary.simpleMessage("否"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("您尚未共享任何相册"),
@@ -847,6 +851,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "由于我们端到端加密协议的性质，如果没有您的密码或恢复密钥，您的数据将无法解密"),
         "noResults": MessageLookupByLibrary.simpleMessage("无结果"),
         "noResultsFound": MessageLookupByLibrary.simpleMessage("未找到任何结果"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("尚未与您共享任何内容"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage("这里空空如也! 👀"),
@@ -904,6 +910,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您添加的照片将从相册中移除"),
         "pickCenterPoint": MessageLookupByLibrary.simpleMessage("选择中心点"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("置顶相册"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "playOnTv": MessageLookupByLibrary.simpleMessage("在电视上播放相册"),
         "playStoreFreeTrialValidTill": m39,
         "playstoreSubscription":
@@ -965,6 +972,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "当前设备的功能不足以验证您的密码，但我们可以以适用于所有设备的方式重新生成。\n\n请使用您的恢复密钥登录并重新生成您的密码（如果您希望，可以再次使用相同的密码）。"),
         "recreatePasswordTitle": MessageLookupByLibrary.simpleMessage("重新创建密码"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "referFriendsAnd2xYourPlan":
             MessageLookupByLibrary.simpleMessage("把我们推荐给你的朋友然后获得延长一倍的订阅计划"),
         "referralStep1": MessageLookupByLibrary.simpleMessage("1. 将此代码提供给您的朋友"),
@@ -1086,6 +1096,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAs": MessageLookupByLibrary.simpleMessage("设置为"),
         "setCover": MessageLookupByLibrary.simpleMessage("设置封面"),
         "setLabel": MessageLookupByLibrary.simpleMessage("设置"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("设置密码"),
         "setRadius": MessageLookupByLibrary.simpleMessage("设定半径"),
         "setupComplete": MessageLookupByLibrary.simpleMessage("设置完成"),
@@ -1188,6 +1201,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "systemTheme": MessageLookupByLibrary.simpleMessage("适应系统"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("点击以复制"),
         "tapToEnterCode": MessageLookupByLibrary.simpleMessage("点击以输入代码"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "tempErrorContactSupportIfPersists":
             MessageLookupByLibrary.simpleMessage(
                 "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。"),
@@ -1226,10 +1240,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("这将使您在以下设备中退出登录："),
         "thisWillLogYouOutOfThisDevice":
             MessageLookupByLibrary.simpleMessage("这将使您在此设备上退出登录！"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage("隐藏照片或视频"),
         "toResetVerifyEmail":
             MessageLookupByLibrary.simpleMessage("要重置您的密码，请先验证您的电子邮件。"),
         "todaysLogs": MessageLookupByLibrary.simpleMessage("当天日志"),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "total": MessageLookupByLibrary.simpleMessage("总计"),
         "totalSize": MessageLookupByLibrary.simpleMessage("总大小"),
         "trash": MessageLookupByLibrary.simpleMessage("回收站"),

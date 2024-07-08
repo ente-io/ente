@@ -1,3 +1,4 @@
+import { bytesInGB } from "@/new/photos/utils/units";
 import log from "@/next/log";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
@@ -27,7 +28,6 @@ import {
     planForSubscription,
     updateSubscription,
 } from "utils/billing";
-import { bytesInGB } from "utils/units";
 import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 import { ManageSubscription } from "./manageSubscription";

@@ -3,8 +3,8 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
+        "@/accounts": "*",
         "@/next": "*",
-        "@ente/accounts": "*",
         "@ente/shared": "*"
     },
     "devDependencies": {

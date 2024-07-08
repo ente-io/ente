@@ -1,10 +1,10 @@
-import { faceWorker } from "@/new/photos/services/face";
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
+import { triggerMLSync } from "@/new/photos/services/ml";
+import { isDesktop } from "@/next/app";
 import { clipService } from "services/clip-service";
 import { syncCLIPEmbeddings } from "services/embeddingService";
 import { syncEntities } from "services/entityService";
 import { syncMapEnabled } from "services/userService";
-import { isFaceIndexingEnabled } from "./face/indexer";
 
 /**
  * Perform a soft "refresh" by making various API calls to fetch state from
@@ -19,12 +19,9 @@ export const sync = async () => {
     await syncEntities();
     await syncMapEnabled();
     fetchAndSaveFeatureFlagsIfNeeded();
-    const electron = globalThis.electron;
-    if (electron) {
+    if (isDesktop) {
         await syncCLIPEmbeddings();
-        if (isFaceIndexingEnabled()) await (await faceWorker()).sync();
-    }
-    if (clipService.isPlatformSupported()) {
+        triggerMLSync();
         void clipService.scheduleImageEmbeddingExtraction();
     }
 };

@@ -1,12 +1,12 @@
-import { appName } from "@/next/app";
-import { apiURL } from "@/next/origins";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
     TwoFactorSecret,
     TwoFactorVerificationResponse,
     UserVerificationResponse,
-} from "@ente/accounts/types/user";
+} from "@/accounts/types/user";
+import { appName } from "@/next/app";
+import { apiURL } from "@/next/origins";
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

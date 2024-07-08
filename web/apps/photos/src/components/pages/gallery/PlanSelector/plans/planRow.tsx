@@ -1,3 +1,4 @@
+import { bytesInGB } from "@/new/photos/utils/units";
 import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import Done from "@mui/icons-material/Done";
@@ -7,7 +8,6 @@ import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { Plan, Subscription } from "types/billing";
 import { hasPaidSubscription, isUserSubscribedPlan } from "utils/billing";
-import { bytesInGB } from "utils/units";
 
 interface Iprops {
     plan: Plan;

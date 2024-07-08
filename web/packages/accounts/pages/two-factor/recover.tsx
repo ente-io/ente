@@ -1,12 +1,12 @@
-import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
 import {
     recoverTwoFactor,
     removeTwoFactor,
     type TwoFactorType,
-} from "@ente/accounts/api/user";
-import { PAGES } from "@ente/accounts/constants/pages";
-import type { AccountsContextT } from "@ente/accounts/types/context";
+} from "@/accounts/api/user";
+import { PAGES } from "@/accounts/constants/pages";
+import type { AccountsContextT } from "@/accounts/types/context";
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
