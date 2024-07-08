@@ -58,7 +58,7 @@ const getRGBData = async (jpegFilePath: string): Promise<Float32Array> => {
     const jpegData = await fs.readFile(jpegFilePath);
     const rawImageData = jpeg.decode(jpegData, {
         useTArray: true,
-        formatAsRGBA: false,
+        formatAsRGBA: true,
     }); // TODO: manav: make sure this works on all images, not just jpeg
     const pixelData = rawImageData.data;
 
@@ -154,9 +154,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, py);
 
-    const ip0 = cubic(dx, ipp.r!, icp.r!, inp.r!, iap.r!);
-    const ip1 = cubic(dx, ipp.g!, icp.g!, inp.g!, iap.g!);
-    const ip2 = cubic(dx, ipp.b!, icp.b!, inp.b!, iap.b!);
+    const ip0 = cubic(dx, ipp.r, icp.r, inp.r, iap.r);
+    const ip1 = cubic(dx, ipp.g, icp.g, inp.g, iap.g);
+    const ip2 = cubic(dx, ipp.b, icp.b, inp.b, iap.b);
     // const ip3 = cubic(dx, ipp.a, icp.a, inp.a, iap.a);
 
     const ipc =
@@ -170,9 +170,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, y);
 
-    const ic0 = cubic(dx, ipc.r!, icc.r!, inc.r!, iac.r!);
-    const ic1 = cubic(dx, ipc.g!, icc.g!, inc.g!, iac.g!);
-    const ic2 = cubic(dx, ipc.b!, icc.b!, inc.b!, iac.b!);
+    const ic0 = cubic(dx, ipc.r, icc.r, inc.r, iac.r);
+    const ic1 = cubic(dx, ipc.g, icc.g, inc.g, iac.g);
+    const ic2 = cubic(dx, ipc.b, icc.b, inc.b, iac.b);
     // const ic3 = cubic(dx, ipc.a, icc.a, inc.a, iac.a);
 
     const ipn =
@@ -192,9 +192,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, ny);
 
-    const in0 = cubic(dx, ipn.r!, icn.r!, inn.r!, ian.r!);
-    const in1 = cubic(dx, ipn.g!, icn.g!, inn.g!, ian.g!);
-    const in2 = cubic(dx, ipn.b!, icn.b!, inn.b!, ian.b!);
+    const in0 = cubic(dx, ipn.r, icn.r, inn.r, ian.r);
+    const in1 = cubic(dx, ipn.g, icn.g, inn.g, ian.g);
+    const in2 = cubic(dx, ipn.b, icn.b, inn.b, ian.b);
     // const in3 = cubic(dx, ipn.a, icn.a, inn.a, ian.a);
 
     const ipa =
@@ -214,9 +214,9 @@ const pixelRGBBicubic = (
             ? icc
             : pixelRGBA(imageData, imageWidth, imageHeight, ax, ay);
 
-    const ia0 = cubic(dx, ipa.r!, ica.r!, ina.r!, iaa.r!);
-    const ia1 = cubic(dx, ipa.g!, ica.g!, ina.g!, iaa.g!);
-    const ia2 = cubic(dx, ipa.b!, ica.b!, ina.b!, iaa.b!);
+    const ia0 = cubic(dx, ipa.r, ica.r, ina.r, iaa.r);
+    const ia1 = cubic(dx, ipa.g, ica.g, ina.g, iaa.g);
+    const ia2 = cubic(dx, ipa.b, ica.b, ina.b, iaa.b);
     // const ia3 = cubic(dx, ipa.a, ica.a, ina.a, iaa.a);
 
     const c0 = Math.trunc(clamp(cubic(dy, ip0, ic0, in0, ia0), 0, 255));
@@ -244,10 +244,10 @@ const pixelRGBA = (
     }
     const index = (y * width + x) * 4;
     return {
-        r: imageData[index],
-        g: imageData[index + 1],
-        b: imageData[index + 2],
-        a: imageData[index + 3],
+        r: ensure(imageData[index]),
+        g: ensure(imageData[index + 1]),
+        b: ensure(imageData[index + 2]),
+        a: ensure(imageData[index + 3]),
     };
 };
 
