@@ -8,6 +8,7 @@ import "package:tuple/tuple.dart";
 class ClipTextTokenizer {
   static const String kVocabRemotePath =
       "https://models.ente.io/bpe_simple_vocab_16e6.txt";
+  static const int totalTokens = 77;
 
   late String vocabulary;
   late Map<int, String> byteEncoder;
@@ -37,19 +38,12 @@ class ClipTextTokenizer {
   static final instance = ClipTextTokenizer._privateConstructor();
   factory ClipTextTokenizer() => instance;
 
-  Future<List<int>> tokenize(
-    String text, {
-    int nText = 76,
-    bool pad = true,
-  }) async {
+  Future<List<int>> tokenize(String text) async {
     await _init();
     var tokens = _encode(text);
-    tokens = [sot] + tokens.sublist(0, min(nText - 1, tokens.length)) + [eot];
-    if (pad) {
-      return tokens + List.filled(nText + 1 - tokens.length, 0);
-    } else {
-      return tokens;
-    }
+    tokens =
+        [sot] + tokens.sublist(0, min(totalTokens - 2, tokens.length)) + [eot];
+    return tokens + List.filled(totalTokens - tokens.length, 0);
   }
 
   Future<void> _init() async {
