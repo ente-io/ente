@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>ente_auth</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>AGPL-3.0</project_license>
+    <name>Ente Auth</name>
+    <summary>Open source 2FA authenticator, with end-to-end encrypted backups</summary>
+    <description>
+        <p>Auth provides end-to-end encrypted cloud backups so you don't have to worry about losing your tokens. Our cryptography has been externally audited.</p>
+        <p>Auth has an app for every platform. Mobile, desktop and web. Your codes sync across all your devices, end-to-end encrypted.</p>
+        <p>Auth also comes with Offline mode, tags, icons, pins, import/export and more</p>
+    </description>
+    <launchable type="desktop-id">ente_auth.desktop</launchable>
+    <url type="homepage">https://ente.io/auth</url>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://raw.githubusercontent.com/ente-io/ente/main/.github/assets/auth.png</image>
+        </screenshot>
+    </screenshots>
+    <releases>
+        <release version="3.0.12" date="2024-06-17"/>
+    </releases>
+    <provides>
+        <id>ente_auth.desktop</id>
+    </provides>
+    <content_rating type="oars-1.0" />
+    <developer id="io.github.ente-io.ente">
+        <name>Ente.io Developers</name>
+    </developer>
+    <update_contact>human@ente.io</update_contact>
+</component>

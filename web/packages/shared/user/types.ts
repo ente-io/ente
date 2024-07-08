@@ -7,8 +7,10 @@ export interface KeyAttributes {
     publicKey: string;
     encryptedSecretKey: string;
     secretKeyDecryptionNonce: string;
+    /** Doesn't change after being initially created. */
     masterKeyEncryptedWithRecoveryKey: string;
     masterKeyDecryptionNonce: string;
+    /** Doesn't change after being initially created. */
     recoveryKeyEncryptedWithMasterKey: string;
     recoveryKeyDecryptionNonce: string;
 }

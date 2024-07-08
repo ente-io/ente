@@ -159,5 +159,6 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "noInternetConnection": "Ingen internetanslutning",
-  "pleaseCheckYourInternetConnectionAndTryAgain": "Kontrollera din internetanslutning och försök igen."
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Kontrollera din internetanslutning och försök igen.",
+  "loginSessionExpiredDetails": "Din session har upphört. Logga in igen."
 }

@@ -2,7 +2,6 @@
  * @file stream data to-from renderer using a custom protocol handler.
  */
 import { net, protocol } from "electron/main";
-import StreamZip from "node-stream-zip";
 import { randomUUID } from "node:crypto";
 import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -11,6 +10,7 @@ import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ffmpegConvertToMP4 } from "./services/ffmpeg";
+import { markClosableZip, openZip } from "./services/zip";
 import { ensure } from "./utils/common";
 import {
     deleteTempFile,
@@ -113,14 +113,17 @@ const handleRead = async (path: string) => {
 };
 
 const handleReadZip = async (zipPath: string, entryName: string) => {
-    const zip = new StreamZip.async({ file: zipPath });
+    const zip = openZip(zipPath);
     const entry = await zip.entry(entryName);
-    if (!entry) return new Response("", { status: 404 });
+    if (!entry) {
+        markClosableZip(zipPath);
+        return new Response("", { status: 404 });
+    }
 
     // This returns an "old style" NodeJS.ReadableStream.
     const stream = await zip.stream(entry);
     // Convert it into a new style NodeJS.Readable.
-    const nodeReadable = new Readable().wrap(stream);
+    const nodeReadable = new Readable({ emitClose: true }).wrap(stream);
     // Then convert it into a Web stream.
     const webReadableStreamAny = Readable.toWeb(nodeReadable);
     // However, we get a ReadableStream<any> now. This doesn't go into the
@@ -129,8 +132,8 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     const webReadableStream =
         webReadableStreamAny as ReadableStream<Uint8Array>;
 
-    // Close the zip handle when the underlying stream closes.
-    stream.on("end", () => void zip.close());
+    // Let go of the zip handle when the underlying stream closes.
+    nodeReadable.on("close", () => markClosableZip(zipPath));
 
     // While it is documented that entry.time is the modification time,
     // the units are not mentioned. By seeing the source code, we can

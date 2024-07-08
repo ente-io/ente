@@ -101,7 +101,7 @@ class UserService {
         );
         return;
       }
-      unawaited(showGenericErrorDialog(context: context));
+      unawaited(showGenericErrorDialog(context: context, error: null));
     } on DioException catch (e) {
       await dialog.hide();
       _logger.info(e);
@@ -114,12 +114,12 @@ class UserService {
           ),
         );
       } else {
-        unawaited(showGenericErrorDialog(context: context));
+        unawaited(showGenericErrorDialog(context: context, error: e));
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      unawaited(showGenericErrorDialog(context: context));
+      unawaited(showGenericErrorDialog(context: context, error: e));
     }
   }
 
@@ -165,7 +165,11 @@ class UserService {
       return userDetails;
     } catch (e) {
       _logger.warning("Failed to fetch", e);
-      rethrow;
+      if (e is DioException && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -213,11 +217,17 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      // check if token is already invalid
+      if (e is DioException && e.response?.statusCode == 401) {
+        await Configuration.instance.logout();
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return;
+      }
       //This future is for waiting for the dialog from which logout() is called
       //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
-        () => showGenericErrorDialog(context: context),
+        () => showGenericErrorDialog(context: context, error: e),
       );
       rethrow;
     }
@@ -238,7 +248,10 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      await showGenericErrorDialog(context: context);
+      await showGenericErrorDialog(
+        context: context,
+        error: e,
+      );
       return null;
     }
   }

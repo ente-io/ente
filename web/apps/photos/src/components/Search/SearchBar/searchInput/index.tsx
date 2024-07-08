@@ -1,4 +1,7 @@
 import { FILE_TYPE } from "@/media/file-type";
+import { isMLEnabled } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/people";
+import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { t } from "i18next";
@@ -9,7 +12,6 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { InputActionMeta } from "react-select/src/types";
-import type { Person } from "services/face/people";
 import { City } from "services/locationSearchService";
 import {
     getAutoCompleteSuggestions,
@@ -17,7 +19,6 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 import { LocationTagData } from "types/entity";
-import { EnteFile } from "types/file";
 import {
     ClipSearchScores,
     DateValue,
@@ -200,9 +201,7 @@ export default function SearchInput(props: Iprops) {
                 onInputChange={handleInputChange}
                 escapeClearsValue
                 styles={SelectStyles}
-                defaultOptions={
-                    appContext.mlSearchEnabled ? defaultOptions : null
-                }
+                defaultOptions={isMLEnabled() ? defaultOptions : null}
                 noOptionsMessage={() => null}
             />
 

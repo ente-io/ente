@@ -81,12 +81,12 @@ PODS:
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
-  - ReachabilitySwift (5.2.2)
+  - ReachabilitySwift (5.2.3)
   - SDWebImage (5.19.2):
     - SDWebImage/Core (= 5.19.2)
   - SDWebImage/Core (5.19.2)
   - Sentry/HybridSDK (8.25.0)
-  - sentry_flutter (7.20.1):
+  - sentry_flutter (7.20.2):
     - Flutter
     - FlutterMacOS
     - Sentry/HybridSDK (= 8.25.0)
@@ -100,18 +100,21 @@ PODS:
   - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
-  - "sqlite3 (3.45.3+1)":
-    - "sqlite3/common (= 3.45.3+1)"
-  - "sqlite3/common (3.45.3+1)"
-  - "sqlite3/fts5 (3.45.3+1)":
+  - "sqlite3 (3.46.0+1)":
+    - "sqlite3/common (= 3.46.0+1)"
+  - "sqlite3/common (3.46.0+1)"
+  - "sqlite3/dbstatvtab (3.46.0+1)":
     - sqlite3/common
-  - "sqlite3/perf-threadsafe (3.45.3+1)":
+  - "sqlite3/fts5 (3.46.0+1)":
     - sqlite3/common
-  - "sqlite3/rtree (3.45.3+1)":
+  - "sqlite3/perf-threadsafe (3.46.0+1)":
+    - sqlite3/common
+  - "sqlite3/rtree (3.46.0+1)":
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
-    - "sqlite3 (~> 3.45.3+1)"
+    - "sqlite3 (~> 3.46.0+1)"
+    - sqlite3/dbstatvtab
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
@@ -233,29 +236,29 @@ SPEC CHECKSUMS:
   flutter_local_authentication: 1172a4dd88f6306dadce067454e2c4caf07977bb
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
-  flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
-  fluttertoast: 9f2f8e81bb5ce18facb9748d7855bf5a756fe3db
-  local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
+  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
+  local_auth_darwin: 4d56c90c2683319835a61274b57620df9c4520ab
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
-  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
-  ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
+  ReachabilitySwift: 7f151ff156cea1481a8411701195ac6a984f4979
   SDWebImage: dfe95b2466a9823cf9f0c6d01217c06550d7b29a
   Sentry: cd86fc55628f5b7c572cabe66cc8f95a9d2f165a
-  sentry_flutter: 4cb24c1055c556d7b27262ab2e179d1e5a0b9b0c
+  sentry_flutter: 0cf2507eb90ff7a6aa3304e900dd7f08edbbefdf
   share_plus: c3fef564749587fc939ef86ffb283ceac0baf9f5
-  shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sodium_libs: 1faae17af662384acbd13e41867a0008cd2e2318
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
-  sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
-  sqlite3_flutter_libs: 9bfe005308998aeca155330bbc2ea6dddf834a3b
+  sqlite3: 292c3e1bfe89f64e51ea7fc7dab9182a017c8630
+  sqlite3_flutter_libs: c00457ebd31e59fa6bb830380ddba24d44fbcd3b
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
-  url_launcher_ios: 6116280ddcfe98ab8820085d8d76ae7449447586
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
 PODFILE CHECKSUM: b4e3a7eabb03395b66e81fc061789f61526ee6bb
 

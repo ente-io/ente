@@ -1,7 +1,7 @@
 import log from "@/next/log";
+import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
@@ -14,8 +14,6 @@ import {
     EntityType,
 } from "types/entity";
 import { getLatestVersionEntities } from "utils/entity";
-
-const ENDPOINT = getEndpoint();
 
 const DIFF_LIMIT = 500;
 
@@ -60,7 +58,7 @@ const getEntityKey = async (type: EntityType) => {
             return;
         }
         const resp = await HTTPService.get(
-            `${ENDPOINT}/user-entity/key`,
+            await apiURL("/user-entity/key"),
             {
                 type,
             },
@@ -175,7 +173,7 @@ const getEntityDiff = async (
             return;
         }
         const resp = await HTTPService.get(
-            `${ENDPOINT}/user-entity/entity/diff`,
+            await apiURL("/user-entity/entity/diff"),
             {
                 sinceTime: time,
                 type,

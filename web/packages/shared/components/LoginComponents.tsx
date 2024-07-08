@@ -1,17 +1,15 @@
-import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
-import type { BaseAppContextT } from "@/next/types/app";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
-} from "@ente/accounts/services/passkey";
+} from "@/accounts/services/passkey";
+import log from "@/next/log";
+import { customAPIHost } from "@/next/origins";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { apiOrigin } from "@ente/shared/network/api";
-import { CircularProgress, Typography, styled } from "@mui/material";
+import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { VerticallyCentered } from "./Container";
 import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
 import { genericErrorAttributes } from "./ErrorComponents";
@@ -46,21 +44,27 @@ const Header_ = styled("div")`
     gap: 8px;
 `;
 
-export const ConnectionDetails: React.FC = () => {
-    const host = new URL(apiOrigin()).host;
+export const LoginFlowFormFooter: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => {
+    const [host, setHost] = useState<string | undefined>();
+
+    useEffect(() => void customAPIHost().then(setHost), []);
 
     return (
-        <ConnectionDetails_>
-            <Typography variant="small" color="text.faint">
-                {host}
-            </Typography>
-        </ConnectionDetails_>
+        <FormPaperFooter>
+            <Stack gap="16px" width="100%" textAlign="start">
+                {children}
+
+                {host && (
+                    <Typography variant="small" color="text.faint">
+                        {host}
+                    </Typography>
+                )}
+            </Stack>
+        </FormPaperFooter>
     );
 };
-
-const ConnectionDetails_ = styled("div")`
-    margin-block-start: 1rem;
-`;
 
 interface VerifyingPasskeyProps {
     /** ID of the current passkey verification session. */
@@ -69,23 +73,18 @@ interface VerifyingPasskeyProps {
     email: string | undefined;
     /** Called when the user wants to redirect again. */
     onRetry: () => void;
-    /**
-     * The appContext.
-     *
-     * Needs to be explicitly passed since this component is used in a package
-     * where the pages are not wrapped in the provider.
-     */
-    appContext: BaseAppContextT;
+    /** Perform the (possibly app specific) logout sequence. */
+    logout: () => void;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     passkeySessionID,
     email,
     onRetry,
-    appContext,
+    logout,
+    setDialogBoxAttributesV2,
 }) => {
-    const { logout, setDialogBoxAttributesV2 } = appContext;
-
     type VerificationStatus = "waiting" | "checking" | "pending";
     const [verificationStatus, setVerificationStatus] =
         useState<VerificationStatus>("waiting");
@@ -103,7 +102,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
             if (!response) setVerificationStatus("pending");
-            else router.push(saveCredentialsAndNavigateTo(response));
+            else router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             setDialogBoxAttributesV2(
@@ -161,16 +160,16 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                     </ButtonStack>
                 </VerifyingPasskeyMiddle>
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={handleRecover}>
-                        {t("RECOVER_ACCOUNT")}
-                    </LinkButton>
-                    <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
-                </FormPaperFooter>
-
-                {isDevBuild && <ConnectionDetails />}
+                <LoginFlowFormFooter>
+                    <Stack direction="row" justifyContent="space-between">
+                        <LinkButton onClick={handleRecover}>
+                            {t("RECOVER_ACCOUNT")}
+                        </LinkButton>
+                        <LinkButton onClick={logout}>
+                            {t("CHANGE_EMAIL")}
+                        </LinkButton>
+                    </Stack>
+                </LoginFlowFormFooter>
             </FormPaper>
         </VerticallyCentered>
     );

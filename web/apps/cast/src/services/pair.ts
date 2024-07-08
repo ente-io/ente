@@ -81,11 +81,12 @@ export const register = async (): Promise<Registration> => {
         await generateKeyPair();
 
     // Register keypair with museum to get a pairing code.
-    let pairingCode: string;
-    // eslint has fixed this spurious warning, but we're not on the latest
+    let pairingCode: string | undefined;
+    // TODO: eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
     // https://github.com/eslint/eslint/pull/18286
     /* eslint-disable no-constant-condition */
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
         try {
             pairingCode = await castGateway.registerDevice(publicKeyB64);
@@ -126,5 +127,7 @@ export const getCastData = async (registration: Registration) => {
         privateKeyB64,
     );
 
+    // TODO:
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return JSON.parse(atob(decryptedCastData));
 };

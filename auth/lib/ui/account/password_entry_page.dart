@@ -412,7 +412,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       _logger.severe(e, s);
       await dialog.hide();
       // ignore: unawaited_futures
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(
+        context: context,
+        error: e,
+      );
     }
   }
 
@@ -472,7 +475,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           _logger.severe(e, s);
           await dialog.hide();
           // ignore: unawaited_futures
-          showGenericErrorDialog(context: context);
+          showGenericErrorDialog(
+            context: context,
+            error: e,
+          );
         }
       }
 
@@ -500,7 +506,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         );
       } else {
         // ignore: unawaited_futures
-        showGenericErrorDialog(context: context);
+        showGenericErrorDialog(
+          context: context,
+          error: e,
+        );
       }
     }
   }

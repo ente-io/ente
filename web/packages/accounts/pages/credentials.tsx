@@ -1,15 +1,14 @@
-import { isDevBuild } from "@/next/env";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
-    ConnectionDetails,
+    LoginFlowFormFooter,
     PasswordHeader,
     VerifyingPasskey,
+    sessionExpiredDialogAttributes,
 } from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
@@ -21,7 +20,7 @@ import {
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
@@ -29,6 +28,7 @@ import {
     clearData,
     getData,
     setData,
+    setLSUser,
 } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -42,9 +42,10 @@ import {
     setKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
+import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
 import {
@@ -52,6 +53,7 @@ import {
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
 import { appHomeRoute } from "../services/redirect";
+import { checkSessionValidity } from "../services/session";
 import {
     configureSRP,
     generateSRPSetupAttributes,
@@ -61,7 +63,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -69,8 +71,47 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+    const [sessionValidityCheck, setSessionValidityCheck] = useState<
+        Promise<void> | undefined
+    >();
 
     const router = useRouter();
+
+    const validateSession = useCallback(async () => {
+        const showSessionExpiredDialog = () =>
+            setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+
+        try {
+            const session = await checkSessionValidity();
+            switch (session.status) {
+                case "invalid":
+                    showSessionExpiredDialog();
+                    break;
+                case "valid":
+                    break;
+                case "validButPasswordChanged":
+                    setData(
+                        LS_KEYS.KEY_ATTRIBUTES,
+                        session.updatedKeyAttributes,
+                    );
+                    setData(
+                        LS_KEYS.SRP_ATTRIBUTES,
+                        session.updatedSRPAttributes,
+                    );
+                    // Set a flag that causes new interactive key attributes to
+                    // be generated.
+                    setIsFirstLogin(true);
+                    // This should be a rare occurence, instead of building the
+                    // scaffolding to update all the in-memory state, just
+                    // reload everything.
+                    window.location.reload();
+            }
+        } catch (e) {
+            // Ignore errors since we shouldn't be logging the user out for
+            // potentially transient issues.
+            log.warn("Ignoring error when determining session validity", e);
+        }
+    }, [setDialogBoxAttributesV2, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -98,7 +139,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const token = getToken();
             if (key && token) {
-                router.push(appHomeRoute(appName));
+                router.push(appHomeRoute);
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -107,6 +148,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES,
             );
+            const srpAttributes: SRPAttributes = getData(
+                LS_KEYS.SRP_ATTRIBUTES,
+            );
+
+            if (token) {
+                setSessionValidityCheck(validateSession());
+            }
+
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -136,9 +185,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 return;
             }
 
-            const srpAttributes: SRPAttributes = getData(
-                LS_KEYS.SRP_ATTRIBUTES,
-            );
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
             } else {
@@ -146,12 +192,21 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         main();
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
+    // TODO: ^ validateSession is a dependency, but add that only after we've
+    // wrapped items from the callback (like logout) in useCallback too.
 
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {
             try {
+                // Currently the page will get reloaded if any of the attributes
+                // have changed, so we don't need to worry about the kek having
+                // been generated using stale credentials. This await on the
+                // promise is here to only ensure we're done with the check
+                // before we let the user in.
+                if (sessionValidityCheck) await sessionValidityCheck;
+
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const {
                     keyAttributes,
@@ -170,17 +225,15 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         passkeySessionID,
                         isTwoFactorEnabled: true,
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    const url = passkeyVerificationRedirectURL(
-                        appName,
-                        passkeySessionID,
-                    );
+                    const url =
+                        passkeyVerificationRedirectURL(passkeySessionID);
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
@@ -192,7 +245,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
@@ -201,7 +254,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         token,
                         encryptedToken,
@@ -261,7 +314,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? appHomeRoute(appName));
+            router.push(redirectURL ?? appHomeRoute);
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }
@@ -300,7 +353,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                appContext={appContext}
+                {...{ logout, setDialogBoxAttributesV2 }}
             />
         );
     }
@@ -321,16 +374,16 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     srpAttributes={srpAttributes}
                 />
 
-                <FormPaperFooter style={{ justifyContent: "space-between" }}>
-                    <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
-                        {t("FORGOT_PASSWORD")}
-                    </LinkButton>
-                    <LinkButton onClick={logout}>
-                        {t("CHANGE_EMAIL")}
-                    </LinkButton>
-                </FormPaperFooter>
-
-                {isDevBuild && <ConnectionDetails />}
+                <LoginFlowFormFooter>
+                    <Stack direction="row" justifyContent="space-between">
+                        <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
+                            {t("FORGOT_PASSWORD")}
+                        </LinkButton>
+                        <LinkButton onClick={logout}>
+                            {t("CHANGE_EMAIL")}
+                        </LinkButton>
+                    </Stack>
+                </LoginFlowFormFooter>
             </FormPaper>
         </VerticallyCentered>
     );

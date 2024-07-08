@@ -49,9 +49,8 @@ services:
           "-U",
           "pguser"
         ]
-      interval: 1s
-      timeout: 5s
-      retries: 20
+      start_period: 40s
+      start_interval: 1s
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:

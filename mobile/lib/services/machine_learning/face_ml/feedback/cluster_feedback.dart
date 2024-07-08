@@ -139,6 +139,7 @@ class ClusterFeedbackService {
     PersonEntity p,
   ) async {
     try {
+      _logger.info('removeFilesFromPerson called');
       // Get the relevant faces to be removed
       final faceIDs = await FaceMLDataDB.instance
           .getFaceIDsForPerson(p.remoteID)
@@ -149,6 +150,13 @@ class ClusterFeedbackService {
       });
       final embeddings =
           await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+
+      if (faceIDs.isEmpty || embeddings.isEmpty) {
+        _logger.severe(
+          'No faces or embeddings found for person ${p.remoteID} that match the given files',
+        );
+        return;
+      }
 
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
@@ -161,7 +169,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.20,
       );
       if (clusterResult.isEmpty) {
-        _logger.warning('No clusters found or something went wrong');
+        _logger.severe('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
@@ -179,7 +187,12 @@ class ClusterFeedbackService {
       await FaceMLDataDB.instance
           .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
 
+      // Update remote so new sync does not undo this change
+      await PersonService.instance
+          .removeFilesFromPerson(person: p, faceIDs: faceIDs.toSet());
+
       Bus.instance.fire(PeopleChangedEvent());
+      _logger.info('removeFilesFromPerson done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromPerson", e, s);
@@ -191,6 +204,7 @@ class ClusterFeedbackService {
     List<EnteFile> files,
     int clusterID,
   ) async {
+    _logger.info('removeFilesFromCluster called');
     try {
       // Get the relevant faces to be removed
       final faceIDs = await FaceMLDataDB.instance
@@ -203,6 +217,13 @@ class ClusterFeedbackService {
       final embeddings =
           await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
 
+      if (faceIDs.isEmpty || embeddings.isEmpty) {
+        _logger.severe(
+          'No faces or embeddings found for cluster $clusterID that match the given files',
+        );
+        return;
+      }
+
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
 
@@ -214,6 +235,7 @@ class ClusterFeedbackService {
         distanceThreshold: 0.20,
       );
       if (clusterResult.isEmpty) {
+        _logger.severe('No clusters found or something went wrong');
         return;
       }
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
@@ -230,13 +252,7 @@ class ClusterFeedbackService {
           source: "$clusterID",
         ),
       );
-      // Bus.instance.fire(
-      //   LocalPhotosUpdatedEvent(
-      //     files,
-      //     type: EventType.peopleClusterChanged,
-      //     source: "$clusterID",
-      //   ),
-      // );
+      _logger.info('removeFilesFromCluster done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);
@@ -244,8 +260,12 @@ class ClusterFeedbackService {
     }
   }
 
-  Future<void> addFilesToCluster(List<String> faceIDs, int clusterID) async {
-    await FaceMLDataDB.instance.addFacesToCluster(faceIDs, clusterID);
+  Future<void> addFacesToCluster(List<String> faceIDs, int clusterID) async {
+    final faceIDToClusterID = <String, int>{};
+    for (final faceID in faceIDs) {
+      faceIDToClusterID[faceID] = clusterID;
+    }
+    await FaceMLDataDB.instance.forceUpdateClusterIds(faceIDToClusterID);
     Bus.instance.fire(PeopleChangedEvent());
     return;
   }
@@ -411,7 +431,6 @@ class ClusterFeedbackService {
     return susClusters;
   }
 
-  // TODO: iterate over this method to find sweet spot
   Future<ClusteringResult> breakUpCluster(
     int clusterID, {
     bool useDbscan = false,
@@ -468,178 +487,6 @@ class ClusterFeedbackService {
     return clusterResult;
   }
 
-  /// WARNING: this method is purely for debugging purposes, never use in production
-  Future<void> createFakeClustersByBlurValue() async {
-    try {
-      // Delete old clusters
-      await FaceMLDataDB.instance.dropClustersAndPersonTable();
-      final List<PersonEntity> persons =
-          await PersonService.instance.getPersons();
-      for (final PersonEntity p in persons) {
-        await PersonService.instance.deletePerson(p.remoteID);
-      }
-
-      // Create new fake clusters based on blur value. One for values between 0 and 10, one for 10-20, etc till 200
-      final int startClusterID = DateTime.now().microsecondsSinceEpoch;
-      final faceIDsToBlurValues =
-          await FaceMLDataDB.instance.getFaceIDsToBlurValues(200);
-      final faceIdToCluster = <String, int>{};
-      for (final entry in faceIDsToBlurValues.entries) {
-        final faceID = entry.key;
-        final blurValue = entry.value;
-        final newClusterID = startClusterID + blurValue ~/ 10;
-        faceIdToCluster[faceID] = newClusterID;
-      }
-      await FaceMLDataDB.instance.updateFaceIdToClusterId(faceIdToCluster);
-
-      Bus.instance.fire(PeopleChangedEvent());
-    } catch (e, s) {
-      _logger.severe("Error in createFakeClustersByBlurValue", e, s);
-      rethrow;
-    }
-  }
-
-  Future<void> debugLogClusterBlurValues(
-    int clusterID, {
-    int? clusterSize,
-    bool logClusterSummary = false,
-    bool logBlurValues = false,
-  }) async {
-    if (!kDebugMode) return;
-
-    // Logging the clusterID
-    _logger.info(
-      "Debug logging for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}",
-    );
-    const int biggestClusterID = 1715061228725148;
-
-    // Logging the cluster summary for the cluster
-    if (logClusterSummary) {
-      final summaryMap = await FaceMLDataDB.instance.getClusterToClusterSummary(
-        [clusterID, biggestClusterID],
-      );
-      final summary = summaryMap[clusterID];
-      if (summary != null) {
-        _logger.info(
-          "Cluster summary for cluster $clusterID says the amount of faces is: ${summary.$2}",
-        );
-      }
-
-      final biggestClusterSummary = summaryMap[biggestClusterID];
-      final clusterSummary = summaryMap[clusterID];
-      if (biggestClusterSummary != null && clusterSummary != null) {
-        _logger.info(
-          "Cluster summary for biggest cluster $biggestClusterID says the size is: ${biggestClusterSummary.$2}",
-        );
-        _logger.info(
-          "Cluster summary for current cluster $clusterID says the size is: ${clusterSummary.$2}",
-        );
-
-        // Mean distance
-        final biggestMean = Vector.fromList(
-          EVector.fromBuffer(biggestClusterSummary.$1).values,
-          dtype: DType.float32,
-        );
-        final currentMean = Vector.fromList(
-          EVector.fromBuffer(clusterSummary.$1).values,
-          dtype: DType.float32,
-        );
-        final bigClustersMeanDistance = 1 - biggestMean.dot(currentMean);
-        _logger.info(
-          "Mean distance between biggest cluster and current cluster: $bigClustersMeanDistance",
-        );
-        _logger.info(
-          'Element differences between the two means are ${biggestMean - currentMean}',
-        );
-        final currentL2Norm = currentMean.norm();
-        _logger.info(
-          'L2 norm of current mean: $currentL2Norm',
-        );
-        final trueDistance =
-            biggestMean.distanceTo(currentMean, distance: Distance.cosine);
-        _logger.info('True distance between the two means: $trueDistance');
-
-        // Median distance
-        const sampleSize = 100;
-        final Iterable<Uint8List> biggestEmbeddings = await FaceMLDataDB
-            .instance
-            .getFaceEmbeddingsForCluster(biggestClusterID);
-        final List<Uint8List> biggestSampledEmbeddingsProto =
-            _randomSampleWithoutReplacement(
-          biggestEmbeddings,
-          sampleSize,
-        );
-        final List<Vector> biggestSampledEmbeddings =
-            biggestSampledEmbeddingsProto
-                .map(
-                  (embedding) => Vector.fromList(
-                    EVector.fromBuffer(embedding).values,
-                    dtype: DType.float32,
-                  ),
-                )
-                .toList(growable: false);
-
-        final Iterable<Uint8List> currentEmbeddings =
-            await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
-        final List<Uint8List> currentSampledEmbeddingsProto =
-            _randomSampleWithoutReplacement(
-          currentEmbeddings,
-          sampleSize,
-        );
-        final List<Vector> currentSampledEmbeddings =
-            currentSampledEmbeddingsProto
-                .map(
-                  (embedding) => Vector.fromList(
-                    EVector.fromBuffer(embedding).values,
-                    dtype: DType.float32,
-                  ),
-                )
-                .toList(growable: false);
-
-        // Calculate distances and find the median
-        final List<double> distances = [];
-        final List<double> trueDistances = [];
-        for (final biggestEmbedding in biggestSampledEmbeddings) {
-          for (final currentEmbedding in currentSampledEmbeddings) {
-            distances.add(1 - biggestEmbedding.dot(currentEmbedding));
-            trueDistances.add(
-              biggestEmbedding.distanceTo(
-                currentEmbedding,
-                distance: Distance.cosine,
-              ),
-            );
-          }
-        }
-        distances.sort();
-        trueDistances.sort();
-        final double medianDistance = distances[distances.length ~/ 2];
-        final double trueMedianDistance =
-            trueDistances[trueDistances.length ~/ 2];
-        _logger.info(
-          "Median distance between biggest cluster and current cluster: $medianDistance (using sample of $sampleSize)",
-        );
-        _logger.info(
-          'True distance median between the two embeddings: $trueMedianDistance',
-        );
-      }
-    }
-
-    // Logging the blur values for the cluster
-    if (logBlurValues) {
-      final List<double> blurValues = await FaceMLDataDB.instance
-          .getBlurValuesForCluster(clusterID)
-          .then((value) => value.toList());
-      final blurValuesIntegers =
-          blurValues.map((value) => value.round()).toList();
-      blurValuesIntegers.sort();
-      _logger.info(
-        "Blur values for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}: $blurValuesIntegers",
-      );
-    }
-
-    return;
-  }
-
   /// Returns a list of suggestions. For each suggestion we return a record consisting of the following elements:
   /// 1. clusterID: the ID of the cluster
   /// 2. distance: the distance between the person's cluster and the suggestion
@@ -673,7 +520,7 @@ class ClusterFeedbackService {
         .map((clusterID) => allClusterIdsToCountMap[clusterID] ?? 0)
         .reduce((value, element) => min(value, element));
     final checkSizes = [100, 20, kMinimumClusterSizeSearchResult, 10, 5, 1];
-    late Map<int, Vector> clusterAvgBigClusters;
+    Map<int, Vector> clusterAvgBigClusters = <int, Vector>{};
     final List<(int, double)> suggestionsMean = [];
     for (final minimumSize in checkSizes.toSet()) {
       if (smallestPersonClusterSize >=
@@ -1125,6 +972,147 @@ class ClusterFeedbackService {
     _logger.info(
       "Sorting suggestions based on distance to person took ${endTime.difference(startTime).inMilliseconds} ms for ${suggestions.length} suggestions, of which ${clusterSummaryCallTime.difference(startTime).inMilliseconds} ms was spent on the cluster summary call",
     );
+  }
+
+  Future<void> debugLogClusterBlurValues(
+    int clusterID, {
+    int? clusterSize,
+    bool logClusterSummary = false,
+    bool logBlurValues = false,
+  }) async {
+    if (!kDebugMode) return;
+
+    // Logging the clusterID
+    _logger.info(
+      "Debug logging for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}",
+    );
+    const int biggestClusterID = 1715061228725148;
+
+    // Logging the cluster summary for the cluster
+    if (logClusterSummary) {
+      final summaryMap = await FaceMLDataDB.instance.getClusterToClusterSummary(
+        [clusterID, biggestClusterID],
+      );
+      final summary = summaryMap[clusterID];
+      if (summary != null) {
+        _logger.info(
+          "Cluster summary for cluster $clusterID says the amount of faces is: ${summary.$2}",
+        );
+      }
+
+      final biggestClusterSummary = summaryMap[biggestClusterID];
+      final clusterSummary = summaryMap[clusterID];
+      if (biggestClusterSummary != null && clusterSummary != null) {
+        _logger.info(
+          "Cluster summary for biggest cluster $biggestClusterID says the size is: ${biggestClusterSummary.$2}",
+        );
+        _logger.info(
+          "Cluster summary for current cluster $clusterID says the size is: ${clusterSummary.$2}",
+        );
+
+        // Mean distance
+        final biggestMean = Vector.fromList(
+          EVector.fromBuffer(biggestClusterSummary.$1).values,
+          dtype: DType.float32,
+        );
+        final currentMean = Vector.fromList(
+          EVector.fromBuffer(clusterSummary.$1).values,
+          dtype: DType.float32,
+        );
+        final bigClustersMeanDistance = 1 - biggestMean.dot(currentMean);
+        _logger.info(
+          "Mean distance between biggest cluster and current cluster: $bigClustersMeanDistance",
+        );
+        _logger.info(
+          'Element differences between the two means are ${biggestMean - currentMean}',
+        );
+        final currentL2Norm = currentMean.norm();
+        _logger.info(
+          'L2 norm of current mean: $currentL2Norm',
+        );
+        final trueDistance =
+            biggestMean.distanceTo(currentMean, distance: Distance.cosine);
+        _logger.info('True distance between the two means: $trueDistance');
+
+        // Median distance
+        const sampleSize = 100;
+        final Iterable<Uint8List> biggestEmbeddings = await FaceMLDataDB
+            .instance
+            .getFaceEmbeddingsForCluster(biggestClusterID);
+        final List<Uint8List> biggestSampledEmbeddingsProto =
+            _randomSampleWithoutReplacement(
+          biggestEmbeddings,
+          sampleSize,
+        );
+        final List<Vector> biggestSampledEmbeddings =
+            biggestSampledEmbeddingsProto
+                .map(
+                  (embedding) => Vector.fromList(
+                    EVector.fromBuffer(embedding).values,
+                    dtype: DType.float32,
+                  ),
+                )
+                .toList(growable: false);
+
+        final Iterable<Uint8List> currentEmbeddings =
+            await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
+        final List<Uint8List> currentSampledEmbeddingsProto =
+            _randomSampleWithoutReplacement(
+          currentEmbeddings,
+          sampleSize,
+        );
+        final List<Vector> currentSampledEmbeddings =
+            currentSampledEmbeddingsProto
+                .map(
+                  (embedding) => Vector.fromList(
+                    EVector.fromBuffer(embedding).values,
+                    dtype: DType.float32,
+                  ),
+                )
+                .toList(growable: false);
+
+        // Calculate distances and find the median
+        final List<double> distances = [];
+        final List<double> trueDistances = [];
+        for (final biggestEmbedding in biggestSampledEmbeddings) {
+          for (final currentEmbedding in currentSampledEmbeddings) {
+            distances.add(1 - biggestEmbedding.dot(currentEmbedding));
+            trueDistances.add(
+              biggestEmbedding.distanceTo(
+                currentEmbedding,
+                distance: Distance.cosine,
+              ),
+            );
+          }
+        }
+        distances.sort();
+        trueDistances.sort();
+        final double medianDistance = distances[distances.length ~/ 2];
+        final double trueMedianDistance =
+            trueDistances[trueDistances.length ~/ 2];
+        _logger.info(
+          "Median distance between biggest cluster and current cluster: $medianDistance (using sample of $sampleSize)",
+        );
+        _logger.info(
+          'True distance median between the two embeddings: $trueMedianDistance',
+        );
+      }
+    }
+
+    // Logging the blur values for the cluster
+    if (logBlurValues) {
+      final List<double> blurValues = await FaceMLDataDB.instance
+          .getBlurValuesForCluster(clusterID)
+          .then((value) => value.toList());
+      final blurValuesIntegers =
+          blurValues.map((value) => value.round()).toList();
+      blurValuesIntegers.sort();
+      _logger.info(
+        "Blur values for cluster $clusterID${clusterSize != null ? ' with $clusterSize photos' : ''}: $blurValuesIntegers",
+      );
+    }
+
+    return;
   }
 }
 

@@ -1,3 +1,4 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
@@ -6,7 +7,6 @@ import { Box, IconButton, TextField } from "@mui/material";
 import { Formik } from "formik";
 import { t } from "i18next";
 import { useState } from "react";
-import { EnteFile } from "types/file";
 import { changeCaption, updateExistingFilePubMetadata } from "utils/file";
 import * as Yup from "yup";
 import { SmallLoadingSpinner } from "../styledComponents/SmallLoadingSpinner";

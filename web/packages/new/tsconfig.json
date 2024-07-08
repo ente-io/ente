@@ -1,7 +1,7 @@
 {
     "extends": "@/build-config/tsconfig-typecheck.json",
     "compilerOptions": {
-        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
         "exactOptionalPropertyTypes": false
     },
     "include": [

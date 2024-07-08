@@ -1,12 +1,10 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
+import { apiURL } from "@/next/origins";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
-import { EnteFile } from "types/file";
 import { retryHTTPCall } from "./uploadHttpClient";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
-
-const ENDPOINT = getEndpoint();
 
 const MAX_URL_REQUESTS = 50;
 
@@ -22,19 +20,15 @@ class PublicUploadHttpClient {
             if (!token) {
                 throw Error(CustomError.TOKEN_MISSING);
             }
+            const url = await apiURL("/public-collection/file");
             const response = await retryHTTPCall(
                 () =>
-                    HTTPService.post(
-                        `${ENDPOINT}/public-collection/file`,
-                        uploadFile,
-                        null,
-                        {
-                            "X-Auth-Access-Token": token,
-                            ...(passwordToken && {
-                                "X-Auth-Access-Token-JWT": passwordToken,
-                            }),
-                        },
-                    ),
+                    HTTPService.post(url, uploadFile, null, {
+                        "X-Auth-Access-Token": token,
+                        ...(passwordToken && {
+                            "X-Auth-Access-Token-JWT": passwordToken,
+                        }),
+                    }),
                 handleUploadError,
             );
             return response.data;
@@ -57,7 +51,7 @@ class PublicUploadHttpClient {
                         throw Error(CustomError.TOKEN_MISSING);
                     }
                     this.uploadURLFetchInProgress = HTTPService.get(
-                        `${ENDPOINT}/public-collection/upload-urls`,
+                        await apiURL("/public-collection/upload-urls"),
                         {
                             count: Math.min(MAX_URL_REQUESTS, count * 2),
                         },
@@ -93,7 +87,7 @@ class PublicUploadHttpClient {
                 throw Error(CustomError.TOKEN_MISSING);
             }
             const response = await HTTPService.get(
-                `${ENDPOINT}/public-collection/multipart-upload-urls`,
+                await apiURL("/public-collection/multipart-upload-urls"),
                 {
                     count,
                 },

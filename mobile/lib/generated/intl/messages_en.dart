@@ -125,6 +125,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(albumName) => "Moved successfully to ${albumName}";
 
+  static String m70(name) => "Not ${name}?";
+
   static String m37(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
@@ -298,6 +300,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Authentication required"),
+        "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
@@ -594,6 +597,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter the code"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Files added to this device album will automatically get uploaded to Ente."),
+        "deviceLock": MessageLookupByLibrary.simpleMessage("Device lock"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Disable the device screen lock when Ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
         "deviceNotFound":
@@ -683,6 +687,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Enter a password we can use to encrypt your data"),
         "enterPersonName":
             MessageLookupByLibrary.simpleMessage("Enter person name"),
+        "enterPin": MessageLookupByLibrary.simpleMessage("Enter PIN"),
         "enterReferralCode":
             MessageLookupByLibrary.simpleMessage("Enter referral code"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -971,6 +976,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("New to Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Newest"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
@@ -999,6 +1005,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("No results"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("No results found"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
+        "notPersonLabel": m70,
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere":
@@ -1066,6 +1075,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Pick center point"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Pin album"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "playOnTv": MessageLookupByLibrary.simpleMessage("Play album on TV"),
         "playStoreFreeTrialValidTill": m39,
         "playstoreSubscription":
@@ -1144,6 +1154,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Recreate password"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "referFriendsAnd2xYourPlan": MessageLookupByLibrary.simpleMessage(
             "Refer friends and 2x your plan"),
         "referralStep1": MessageLookupByLibrary.simpleMessage(
@@ -1210,6 +1223,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
+        "reviewSuggestions":
+            MessageLookupByLibrary.simpleMessage("Review suggestions"),
         "right": MessageLookupByLibrary.simpleMessage("Right"),
         "rotate": MessageLookupByLibrary.simpleMessage("Rotate"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Rotate left"),
@@ -1297,6 +1312,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAs": MessageLookupByLibrary.simpleMessage("Set as"),
         "setCover": MessageLookupByLibrary.simpleMessage("Set cover"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Set"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Set password"),
         "setRadius": MessageLookupByLibrary.simpleMessage("Set radius"),
@@ -1418,6 +1436,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tapToCopy": MessageLookupByLibrary.simpleMessage("tap to copy"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tap to enter code"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
@@ -1461,11 +1480,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This will log you out of the following device:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
         "toHideAPhotoOrVideo":
             MessageLookupByLibrary.simpleMessage("To hide a photo or video"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "To reset your password, please verify your email first."),
         "todaysLogs": MessageLookupByLibrary.simpleMessage("Today\'s logs"),
+        "tooManyIncorrectAttempts":
+            MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Total size"),
         "trash": MessageLookupByLibrary.simpleMessage("Trash"),
@@ -1514,6 +1538,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Upto 50% off, until 4th Dec."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
+        "useAsCover": MessageLookupByLibrary.simpleMessage("Use as cover"),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Use public links for people not on Ente"),

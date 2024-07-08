@@ -38,6 +38,17 @@ func GetUserInput(label string) (string, error) {
 	return input, nil
 }
 
+func WaitForEnter(prompt string) error {
+	fmt.Println(prompt)
+	// Create a new reader from standard input.
+	reader := bufio.NewReader(os.Stdin)
+	_, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetAppType() api.App {
 	for {
 		app, err := GetUserInput("Enter app type (default: photos)")

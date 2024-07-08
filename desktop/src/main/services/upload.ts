@@ -1,29 +1,30 @@
-import StreamZip from "node-stream-zip";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { existsSync } from "original-fs";
 import type { PendingUploads, ZipItem } from "../../types/ipc";
 import log from "../log";
 import { uploadStatusStore } from "../stores/upload-status";
+import { clearOpenZipCache, markClosableZip, openZip } from "./zip";
 
 export const listZipItems = async (zipPath: string): Promise<ZipItem[]> => {
-    const zip = new StreamZip.async({ file: zipPath });
+    const zip = openZip(zipPath);
 
-    const entries = await zip.entries();
-    const entryNames: string[] = [];
+    try {
+        const entries = await zip.entries();
+        const entryNames: string[] = [];
 
-    for (const entry of Object.values(entries)) {
-        const basename = path.basename(entry.name);
-        // Ignore "hidden" files (files whose names begins with a dot).
-        if (entry.isFile && !basename.startsWith(".")) {
-            // `entry.name` is the path within the zip.
-            entryNames.push(entry.name);
+        for (const entry of Object.values(entries)) {
+            const basename = path.basename(entry.name);
+            // Ignore "hidden" files (files whose names begins with a dot).
+            if (entry.isFile && !basename.startsWith(".")) {
+                // `entry.name` is the path within the zip.
+                entryNames.push(entry.name);
+            }
         }
+        return entryNames.map((entryName) => [zipPath, entryName]);
+    } finally {
+        markClosableZip(zipPath);
     }
-
-    await zip.close();
-
-    return entryNames.map((entryName) => [zipPath, entryName]);
 };
 
 export const pathOrZipItemSize = async (
@@ -34,15 +35,17 @@ export const pathOrZipItemSize = async (
         return stat.size;
     } else {
         const [zipPath, entryName] = pathOrZipItem;
-        const zip = new StreamZip.async({ file: zipPath });
-        const entry = await zip.entry(entryName);
-        if (!entry)
-            throw new Error(
-                `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
-            );
-        const size = entry.size;
-        await zip.close();
-        return size;
+        const zip = openZip(zipPath);
+        try {
+            const entry = await zip.entry(entryName);
+            if (!entry)
+                throw new Error(
+                    `An entry with name ${entryName} does not exist in the zip file at ${zipPath}`,
+                );
+            return entry.size;
+        } finally {
+            markClosableZip(zipPath);
+        }
     }
 };
 
@@ -152,4 +155,7 @@ export const markUploadedZipItems = (
     uploadStatusStore.set("zipItems", updated);
 };
 
-export const clearPendingUploads = () => uploadStatusStore.clear();
+export const clearPendingUploads = () => {
+    uploadStatusStore.clear();
+    clearOpenZipCache();
+};

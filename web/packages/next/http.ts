@@ -1,60 +1,68 @@
+import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";
-import { clientPackageName, type AppName } from "./types/app";
-
-/**
- * Value for the the "X-Client-Package" header in authenticated requests.
- */
-let _clientPackage: string | undefined;
-
-/**
- * Remember that we should include the client package corresponding to the given
- * {@link appName} as the "X-Client-Package" header in authenticated requests.
- *
- * This state is persisted in memory, and can be cleared using
- * {@link clearHTTPState}.
- *
- * @param appName The {@link AppName} of the current app.
- */
-export const setAppNameForAuthenticatedRequests = (appName: AppName) => {
-    _clientPackage = clientPackageName(appName);
-};
-
-/**
- * Variant of {@link setAppNameForAuthenticatedRequests} that sets directly sets
- * the client package to the provided string.
- */
-export const setClientPackageForAuthenticatedRequests = (p: string) => {
-    _clientPackage = p;
-};
-
-/**
- * Forget the effects of a previous {@link setAppNameForAuthenticatedRequests}
- * or {@link setClientPackageForAuthenticatedRequests}.
- */
-export const clearHTTPState = () => {
-    _clientPackage = undefined;
-};
 
 /**
  * Return headers that should be passed alongwith (almost) all authenticated
  * `fetch` calls that we make to our API servers.
  *
- * This uses in-memory state (See {@link clearHTTPState}).
+ * -   The auth token
+ * -   The client package name.
  */
-export const authenticatedRequestHeaders = (): Record<string, string> => {
-    const headers: Record<string, string> = {
-        "X-Auth-Token": ensureAuthToken(),
-    };
-    if (_clientPackage) headers["X-Client-Package"] = _clientPackage;
-    return headers;
+export const authenticatedRequestHeaders = async () => ({
+    "X-Auth-Token": await ensureAuthToken(),
+    "X-Client-Package": clientPackageName,
+});
+
+/**
+ * Return a headers object with "X-Client-Package" header set to the client
+ * package name of the current app.
+ */
+export const clientPackageHeader = () => ({
+    "X-Client-Package": clientPackageName,
+});
+
+/**
+ * A custom Error that is thrown if a fetch fails with a non-2xx HTTP status.
+ */
+export class HTTPError extends Error {
+    res: Response;
+
+    constructor(res: Response) {
+        // Trim off any query parameters from the URL before logging, it may
+        // have tokens.
+        //
+        // Nb: res.url is URL obtained after any redirects, and thus is not
+        // necessarily the same as the request's URL.
+        const url = new URL(res.url);
+        url.search = "";
+        super(
+            `Fetch failed: ${url.href}: HTTP ${res.status} ${res.statusText}`,
+        );
+
+        // Cargo culted from
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (Error.captureStackTrace) Error.captureStackTrace(this, HTTPError);
+
+        this.name = this.constructor.name;
+        this.res = res;
+    }
+}
+
+/**
+ * A convenience method that throws an {@link HTTPError} if the given
+ * {@link Response} does not have a HTTP 2xx status.
+ */
+export const ensureOk = (res: Response) => {
+    if (!res.ok) throw new HTTPError(res);
 };
 
 /**
- * Return a headers object with "X-Client-Package" header if we have the client
- * package value available to us from local storage.
+ * Return true if this is a HTTP "client" error.
+ *
+ * This is a convenience matcher to check if {@link e} is an instance of
+ * {@link HTTPError} with a 4xx status code. Such errors are client errors, and
+ * (generally) retrying them will not help.
  */
-export const clientPackageHeaderIfPresent = (): Record<string, string> => {
-    const headers: Record<string, string> = {};
-    if (_clientPackage) headers["X-Client-Package"] = _clientPackage;
-    return headers;
-};
+export const isHTTP4xxError = (e: unknown) =>
+    e instanceof HTTPError && e.res.status >= 400 && e.res.status <= 499;

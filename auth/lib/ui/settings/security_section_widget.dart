@@ -182,7 +182,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       PasskeyService.instance.openPasskeyPage(buildContext).ignore();
     } catch (e, s) {
       _logger.severe("failed to open passkey page", e, s);
-      await showGenericErrorDialog(context: context);
+      await showGenericErrorDialog(
+        context: context,
+        error: e,
+      );
     }
   }
 

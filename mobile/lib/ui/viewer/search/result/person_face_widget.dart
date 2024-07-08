@@ -1,5 +1,4 @@
 import "dart:developer";
-// import "dart:io";
 import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
@@ -11,8 +10,6 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/file_details/face_widget.dart";
-import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
@@ -54,54 +51,30 @@ class PersonFaceWidget extends StatelessWidget {
         ],
       );
     }
-    if (useGeneratedFaceCrops) {
-      return FutureBuilder<Uint8List?>(
-        future: getFaceCrop(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final ImageProvider imageProvider = MemoryImage(snapshot.data!);
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                Image(
-                  image: imageProvider,
-                  fit: BoxFit.cover,
-                ),
-              ],
-            );
-          } else {
-            if (snapshot.hasError) {
-              log('Error getting cover face for person: ${snapshot.error}');
-            }
-            return thumbnailFallback
-                ? ThumbnailWidget(file)
-                : const EnteLoadingWidget();
+    return FutureBuilder<Uint8List?>(
+      future: getFaceCrop(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final ImageProvider imageProvider = MemoryImage(snapshot.data!);
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Image(
+                image: imageProvider,
+                fit: BoxFit.cover,
+              ),
+            ],
+          );
+        } else {
+          if (snapshot.hasError) {
+            log('Error getting cover face for person: ${snapshot.error}');
           }
-        },
-      );
-    } else {
-      return FutureBuilder<Face?>(
-        future: _getFace(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final Face face = snapshot.data!;
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                CroppedFaceImageView(enteFile: file, face: face),
-              ],
-            );
-          } else {
-            if (snapshot.hasError) {
-              log('Error getting cover face for person: ${snapshot.error}');
-            }
-            return thumbnailFallback
-                ? ThumbnailWidget(file)
-                : const EnteLoadingWidget();
-          }
-        },
-      );
-    }
+          return thumbnailFallback
+              ? ThumbnailWidget(file)
+              : const EnteLoadingWidget();
+        }
+      },
+    );
   }
 
   Future<Face?> _getFace() async {
@@ -188,7 +161,7 @@ class PersonFaceWidget extends StatelessWidget {
         stackTrace: s,
       );
       resetPool(fullFile: useFullFile);
-      if(fetchAttempt <= retryLimit) {
+      if (fetchAttempt <= retryLimit) {
         return getFaceCrop(fetchAttempt: fetchAttempt + 1);
       }
       return null;

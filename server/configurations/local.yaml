@@ -317,7 +317,7 @@ internal:
 replication:
     enabled: false
     # The Cloudflare worker to use to download files from the primary hot
-    # bucket. Must be specified if replication is enabled.
+    # bucket. If this isn't specified, files will be downloaded directly.
     worker-url:
     # Number of go routines to spawn for replication
     # This is not related to the worker-url above.

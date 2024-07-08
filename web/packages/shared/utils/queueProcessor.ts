@@ -1,9 +1,10 @@
+import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
     successCallback: (response: any) => void;
-    failureCallback: (error: Error) => void;
+    failureCallback: (error: unknown) => void;
     isCanceled: { status: boolean };
     canceller: { exec: () => void };
 }
@@ -50,7 +51,7 @@ export default class QueueProcessor<T> {
         this.isProcessingRequest = true;
 
         while (this.requestQueue.length > 0) {
-            const queueItem = this.requestQueue.shift();
+            const queueItem = ensure(this.requestQueue.shift());
             let response = null;
 
             if (queueItem.isCanceled.status) {

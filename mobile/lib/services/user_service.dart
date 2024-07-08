@@ -276,7 +276,7 @@ class UserService {
         throw Exception("delete action failed");
       }
     } catch (e) {
-      _logger.severe(e);
+      _logger.warning(e);
       await showGenericErrorDialog(context: context, error: e);
       return null;
     }
@@ -304,7 +304,7 @@ class UserService {
         throw Exception("delete action failed");
       }
     } catch (e) {
-      _logger.severe(e);
+      _logger.warning(e);
       rethrow;
     }
   }
@@ -329,7 +329,7 @@ class UserService {
       }
       rethrow;
     } catch (e, s) {
-      _logger.severe("unexpected error", e, s);
+      _logger.warning("unexpected error", e, s);
       rethrow;
     }
   }
@@ -366,7 +366,7 @@ class UserService {
         Bus.instance.fire(AccountConfiguredEvent());
       }
     } catch (e) {
-      _logger.severe(e);
+      _logger.warning(e);
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
@@ -448,7 +448,7 @@ class UserService {
       }
     } catch (e) {
       await dialog.hide();
-      _logger.severe(e);
+      _logger.warning(e);
       // ignore: unawaited_futures
       showErrorDialog(
         context,
@@ -519,7 +519,7 @@ class UserService {
       }
     } catch (e) {
       await dialog.hide();
-      _logger.severe(e);
+      _logger.warning(e);
       // ignore: unawaited_futures
       showErrorDialog(
         context,

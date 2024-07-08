@@ -13,7 +13,7 @@ import FileType from "file-type";
  * For the list of returned extensions, see (for our installed version):
  * https://github.com/sindresorhus/file-type/blob/main/core.d.ts
  */
-export const detectMediaMIMEType = async (file: File): Promise<string> => {
+export const detectMediaMIMEType = async (file: File) => {
     const chunkSizeForTypeDetection = 4100;
     const fileChunk = file.slice(0, chunkSizeForTypeDetection);
     const chunk = new Uint8Array(await fileChunk.arrayBuffer());

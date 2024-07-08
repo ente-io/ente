@@ -42,7 +42,7 @@ class AutoLauncher {
         if (this.autoLaunch) {
             return app.commandLine.hasSwitch("hidden");
         } else {
-            return app.getLoginItemSettings().openAtLogin;
+            return app.getLoginItemSettings().wasOpenedAtLogin;
         }
     }
 }

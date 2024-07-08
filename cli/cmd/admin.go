@@ -58,6 +58,27 @@ var _disable2faCmd = &cobra.Command{
 	},
 }
 
+var _disablePasskeyCmd = &cobra.Command{
+	Use:   "disable-passkey",
+	Short: "Disable passkey for a user",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		recoverWithLog()
+		var flags = &model.AdminActionForUser{}
+		cmd.Flags().VisitAll(func(f *pflag.Flag) {
+			if f.Name == "admin-user" {
+				flags.AdminEmail = f.Value.String()
+			}
+			if f.Name == "user" {
+				flags.UserEmail = f.Value.String()
+			}
+		})
+		if flags.UserEmail == "" {
+			return fmt.Errorf("user email is required")
+		}
+		return ctrl.DisablePasskeys(context.Background(), *flags)
+	},
+}
+
 var _deleteUser = &cobra.Command{
 	Use:   "delete-user",
 	Short: "Delete  a user",
@@ -130,11 +151,13 @@ func init() {
 	_listUsers.Flags().StringP("admin-user", "a", "", "The email of the admin user. ")
 	_disable2faCmd.Flags().StringP("admin-user", "a", "", "The email of the admin user. ")
 	_disable2faCmd.Flags().StringP("user", "u", "", "The email of the user to disable 2FA for. (required)")
+	_disablePasskeyCmd.Flags().StringP("admin-user", "a", "", "The email of the admin user. ")
+	_disablePasskeyCmd.Flags().StringP("user", "u", "", "The email of the user to disable passkey for. (required)")
 	_deleteUser.Flags().StringP("admin-user", "a", "", "The email of the admin user. ")
 	_deleteUser.Flags().StringP("user", "u", "", "The email of the user to delete. (required)")
 	_updateFreeUserStorage.Flags().StringP("admin-user", "a", "", "The email of the admin user.")
 	_updateFreeUserStorage.Flags().StringP("user", "u", "", "The email of the user to update subscription for. (required)")
 	// add a flag with no value --no-limit
 	_updateFreeUserStorage.Flags().String("no-limit", "True", "When true, sets 100TB as storage limit, and expiry to current date + 100 years")
-	_adminCmd.AddCommand(_userDetailsCmd, _disable2faCmd, _updateFreeUserStorage, _listUsers, _deleteUser)
+	_adminCmd.AddCommand(_userDetailsCmd, _disable2faCmd, _disablePasskeyCmd, _updateFreeUserStorage, _listUsers, _deleteUser)
 }

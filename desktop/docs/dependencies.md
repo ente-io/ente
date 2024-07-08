@@ -83,12 +83,16 @@ are similar to that in the web code.
 
 Some extra ones specific to the code here are:
 
--   [shx](https://github.com/shelljs/shx) for providing a portable way to use
-    Unix commands in our `package.json` scripts. This allows us to use the same
-    commands (like `ln`) across different platforms like Linux and Windows.
-
 -   [@tsconfig/recommended](https://github.com/tsconfig/bases) gives us a base
     tsconfig for the Node.js version that our current Electron version uses.
+
+-   [shx](https://github.com/shelljs/shx) provides us a portable way to use Unix
+    commands in our `package.json` scripts. This allows us to use the same
+    commands (like `ln`) across both POSIX platforms (Linux, macOS) and Windows.
+
+-   [cross-env](https://github.com/kentcdodds/cross-env) is similar to shx, but
+    for allowing us to set environment variables in a way that also works on
+    Windows.
 
 ## Functionality
 
@@ -128,3 +132,6 @@ watcher for the watch folders functionality.
 
 [node-stream-zip](https://github.com/antelle/node-stream-zip) is used for
 reading of large ZIP files (e.g. during imports of Google Takeout ZIPs).
+
+[lru-cache](https://github.com/isaacs/node-lru-cache) is used to cache file ZIP
+handles to avoid reopening them for every operation.

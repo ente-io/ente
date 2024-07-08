@@ -1,7 +1,8 @@
 import log from "@/next/log";
+import { apiURL } from "@/next/origins";
+import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
-
+import { HttpStatusCode } from "axios";
 import type {
     CompleteSRPSetupRequest,
     CompleteSRPSetupResponse,
@@ -13,19 +14,18 @@ import type {
     SetupSRPResponse,
     UpdateSRPAndKeysRequest,
     UpdateSRPAndKeysResponse,
-} from "@ente/accounts/types/srp";
-import { ApiError, CustomError } from "@ente/shared/error";
-import { HttpStatusCode } from "axios";
-
-const ENDPOINT = getEndpoint();
+} from "../types/srp";
 
 export const getSRPAttributes = async (
     email: string,
 ): Promise<SRPAttributes | null> => {
     try {
-        const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
-            email,
-        });
+        const resp = await HTTPService.get(
+            await apiURL("/users/srp/attributes"),
+            {
+                email,
+            },
+        );
         return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
         log.error("failed to get SRP attributes", e);
@@ -39,7 +39,7 @@ export const startSRPSetup = async (
 ): Promise<SetupSRPResponse> => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/setup`,
+            await apiURL("/users/srp/setup"),
             setupSRPRequest,
             undefined,
             {
@@ -60,7 +60,7 @@ export const completeSRPSetup = async (
 ) => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/complete`,
+            await apiURL("/users/srp/complete"),
             completeSRPSetupRequest,
             undefined,
             {
@@ -77,7 +77,7 @@ export const completeSRPSetup = async (
 export const createSRPSession = async (srpUserID: string, srpA: string) => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/create-session`,
+            await apiURL("/users/srp/create-session"),
             {
                 srpUserID,
                 srpA,
@@ -97,7 +97,7 @@ export const verifySRPSession = async (
 ) => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/verify-session`,
+            await apiURL("/users/srp/verify-session"),
             {
                 sessionID,
                 srpUserID,
@@ -125,7 +125,7 @@ export const updateSRPAndKeys = async (
 ): Promise<UpdateSRPAndKeysResponse> => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/update`,
+            await apiURL("/users/srp/update"),
             updateSRPAndKeyRequest,
             undefined,
             {

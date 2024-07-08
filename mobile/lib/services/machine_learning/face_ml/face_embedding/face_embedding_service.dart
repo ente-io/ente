@@ -1,14 +1,13 @@
 import "dart:io" show File;
-import 'dart:math' as math show max, min, sqrt;
+import 'dart:math' as math show sqrt;
 import 'dart:typed_data' show Float32List;
 
 import 'package:computer/computer.dart';
 import 'package:logging/logging.dart';
 import 'package:onnxruntime/onnxruntime.dart';
-import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/remote_assets_service.dart";
-import "package:photos/utils/image_ml_isolate.dart";
-import "package:synchronized/synchronized.dart";
+
+class MobileFaceNetInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face embedding model (MobileFaceNet) on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingService.instance].
 class FaceEmbeddingService {
@@ -21,24 +20,15 @@ class FaceEmbeddingService {
   static const int kNumChannels = 3;
   static const bool kPreWhiten = false;
 
-  static final _logger = Logger('FaceEmbeddingOnnx');
+  static final _logger = Logger('FaceEmbeddingService');
 
   bool isInitialized = false;
   int sessionAddress = 0;
 
   final _computer = Computer.shared();
 
-  final _computerLock = Lock();
-
-  // singleton pattern
+  // Singleton pattern
   FaceEmbeddingService._privateConstructor();
-
-  /// Use this instance to access the FaceEmbedding service. Make sure to call `init()` before using it.
-  /// e.g. `await FaceEmbedding.instance.init();`
-  ///
-  /// Then you can use `predict()` to get the embedding of a face, so `FaceEmbedding.instance.predict(imageData)`
-  ///
-  /// config options: faceEmbeddingEnte
   static final instance = FaceEmbeddingService._privateConstructor();
   factory FaceEmbeddingService() => instance;
 
@@ -81,13 +71,11 @@ class FaceEmbeddingService {
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
     try {
-      // _logger.info('Loading face embedding model');
       final session =
           OrtSession.fromFile(File(args["modelPath"]), sessionOptions);
-      // _logger.info('Face embedding model loaded');
       return session.address;
-    } catch (e, _) {
-      // _logger.severe('Face embedding model not loaded', e, s);
+    } catch (e, s) {
+      _logger.severe('Face embedding model not loaded', e, s);
     }
     return -1;
   }
@@ -102,89 +90,7 @@ class FaceEmbeddingService {
     return;
   }
 
-  Future<(List<double>, bool, double)> predictFromImageDataInComputer(
-    String imagePath,
-    FaceDetectionRelative face,
-  ) async {
-    assert(sessionAddress != 0 && sessionAddress != -1 && isInitialized);
-
-    try {
-      final stopwatchDecoding = Stopwatch()..start();
-      final (inputImageList, _, isBlur, blurValue, _) =
-          await ImageMlIsolate.instance.preprocessMobileFaceNetOnnx(
-        imagePath,
-        [face],
-      );
-      stopwatchDecoding.stop();
-      _logger.info(
-        'MobileFaceNet image decoding and preprocessing is finished, in ${stopwatchDecoding.elapsedMilliseconds}ms',
-      );
-
-      final stopwatch = Stopwatch()..start();
-      _logger.info('MobileFaceNet interpreter.run is called');
-      final embedding = await _computer.compute(
-        inferFromMap,
-        param: {
-          'input': inputImageList,
-          'address': sessionAddress,
-          'inputSize': kInputSize,
-        },
-        taskName: 'createFaceEmbedding',
-      ) as List<double>;
-      stopwatch.stop();
-      _logger.info(
-        'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
-      );
-
-      _logger.info(
-        'MobileFaceNet results (only first few numbers): embedding ${embedding.sublist(0, 5)}',
-      );
-      _logger.info(
-        'Mean of embedding: ${embedding.reduce((a, b) => a + b) / embedding.length}',
-      );
-      _logger.info(
-        'Max of embedding: ${embedding.reduce(math.max)}',
-      );
-      _logger.info(
-        'Min of embedding: ${embedding.reduce(math.min)}',
-      );
-
-      return (embedding, isBlur[0], blurValue[0]);
-    } catch (e) {
-      _logger.info('MobileFaceNet Error while running inference: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<List<double>>> predictInComputer(Float32List input) async {
-    assert(sessionAddress != 0 && sessionAddress != -1 && isInitialized);
-    return await _computerLock.synchronized(() async {
-      try {
-        final stopwatch = Stopwatch()..start();
-        _logger.info('MobileFaceNet interpreter.run is called');
-        final embeddings = await _computer.compute(
-          inferFromMap,
-          param: {
-            'input': input,
-            'address': sessionAddress,
-            'inputSize': kInputSize,
-          },
-          taskName: 'createFaceEmbedding',
-        ) as List<List<double>>;
-        stopwatch.stop();
-        _logger.info(
-          'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
-        );
-
-        return embeddings;
-      } catch (e) {
-        _logger.info('MobileFaceNet Error while running inference: $e');
-        rethrow;
-      }
-    });
-  }
-
-  static Future<List<List<double>>> predictSync(
+  static Future<List<List<double>>> predict(
     Float32List input,
     int sessionAddress,
   ) async {
@@ -192,11 +98,27 @@ class FaceEmbeddingService {
     try {
       final stopwatch = Stopwatch()..start();
       _logger.info('MobileFaceNet interpreter.run is called');
-      final embeddings = await infer(
+      final runOptions = OrtRunOptions();
+      final int numberOfFaces = input.length ~/ (kInputSize * kInputSize * 3);
+      final inputOrt = OrtValueTensor.createTensorWithDataList(
         input,
-        sessionAddress,
-        kInputSize,
+        [numberOfFaces, kInputSize, kInputSize, kNumChannels],
       );
+      final inputs = {'img_inputs': inputOrt};
+      final session = OrtSession.fromAddress(sessionAddress);
+      final List<OrtValue?> outputs = session.run(runOptions, inputs);
+      final embeddings = outputs[0]?.value as List<List<double>>;
+
+      for (final embedding in embeddings) {
+        double normalization = 0;
+        for (int i = 0; i < kEmbeddingSize; i++) {
+          normalization += embedding[i] * embedding[i];
+        }
+        final double sqrtNormalization = math.sqrt(normalization);
+        for (int i = 0; i < kEmbeddingSize; i++) {
+          embedding[i] = embedding[i] / sqrtNormalization;
+        }
+      }
       stopwatch.stop();
       _logger.info(
         'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
@@ -205,45 +127,7 @@ class FaceEmbeddingService {
       return embeddings;
     } catch (e) {
       _logger.info('MobileFaceNet Error while running inference: $e');
-      rethrow;
+      throw MobileFaceNetInterpreterRunException();
     }
-  }
-
-  static Future<List<List<double>>> inferFromMap(Map args) async {
-    final inputImageList = args['input'] as Float32List;
-    final address = args['address'] as int;
-    final inputSize = args['inputSize'] as int;
-    return await infer(inputImageList, address, inputSize);
-  }
-
-  static Future<List<List<double>>> infer(
-    Float32List inputImageList,
-    int address,
-    int inputSize,
-  ) async {
-    final runOptions = OrtRunOptions();
-    final int numberOfFaces =
-        inputImageList.length ~/ (inputSize * inputSize * 3);
-    final inputOrt = OrtValueTensor.createTensorWithDataList(
-      inputImageList,
-      [numberOfFaces, inputSize, inputSize, 3],
-    );
-    final inputs = {'img_inputs': inputOrt};
-    final session = OrtSession.fromAddress(address);
-    final List<OrtValue?> outputs = session.run(runOptions, inputs);
-    final embeddings = outputs[0]?.value as List<List<double>>;
-
-    for (final embedding in embeddings) {
-      double normalization = 0;
-      for (int i = 0; i < kEmbeddingSize; i++) {
-        normalization += embedding[i] * embedding[i];
-      }
-      final double sqrtNormalization = math.sqrt(normalization);
-      for (int i = 0; i < kEmbeddingSize; i++) {
-        embedding[i] = embedding[i] / sqrtNormalization;
-      }
-    }
-
-    return embeddings;
   }
 }

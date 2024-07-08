@@ -1,3 +1,9 @@
+import { exportMetadataDirectoryName } from "@/new/photos/services/export";
+import type {
+    FileAndPath,
+    UploadItem,
+} from "@/new/photos/services/upload/types";
+import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { basename } from "@/next/file";
 import log from "@/next/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
@@ -7,7 +13,6 @@ import { CustomError } from "@ente/shared/error";
 import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
-import { UPLOAD_STAGES } from "constants/upload";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
@@ -15,13 +20,11 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
-import { exportMetadataDirectoryName } from "services/export";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from "services/publicCollectionService";
-import type { FileAndPath, UploadItem } from "services/upload/types";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -39,7 +42,6 @@ import {
     SetCollections,
     SetFiles,
     SetLoading,
-    UploadTypeSelectorIntent,
 } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -50,7 +52,10 @@ import {
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
-import UploadTypeSelector from "./UploadTypeSelector";
+import {
+    UploadTypeSelector,
+    type UploadTypeSelectorIntent,
+} from "./UploadTypeSelector";
 
 enum PICKED_UPLOAD_TYPE {
     FILES = "files",
@@ -767,12 +772,12 @@ export default function Uploader({
                 didSelect={didSelectCollectionMapping}
             />
             <UploadTypeSelector
-                show={props.uploadTypeSelectorView}
+                open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
+                intent={props.uploadTypeSelectorIntent}
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
-                uploadTypeSelectorIntent={props.uploadTypeSelectorIntent}
             />
             <UploadProgress
                 open={uploadProgressView}

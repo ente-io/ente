@@ -2,7 +2,7 @@
  * Forward notifications from GitHub to Discord.
  *
  * This worker receives webhooks from GitHub, filters out the ones we don't
- * need, and forwards them to a Discord webhook.
+ * need, and forwards the rest to a Discord webhook.
  */
 export default {
     async fetch(request: Request, env: Env) {
@@ -33,13 +33,13 @@ const handleRequest = async (request: Request, discordWebhookURL: string) => {
     // doesn't work for get silently ignored (Discord responds with a 204).
     // https://github.com/discord/discord-api-docs/issues/6203#issuecomment-1608151265
 
-    let response = await fetch(`${discordWebhookURL}/github`, {
+    const response = await fetch(`${discordWebhookURL}/github`, {
         method: request.method,
         headers: request.headers,
         body: requestBody,
     });
 
-    if (response.status === 429) {
+    if (response.status == 429) {
         // Sometimes Discord starts returning 429 Rate Limited responses when we
         // try to invoke the webhook.
         //
@@ -79,7 +79,7 @@ const handleRequest = async (request: Request, discordWebhookURL: string) => {
         const action = requestJSON["action"];
 
         if (activityURL && ["created", "opened"].includes(action)) {
-            response = await fetch(discordWebhookURL, {
+            return fetch(discordWebhookURL, {
                 method: request.method,
                 headers: request.headers,
                 body: JSON.stringify({
@@ -89,12 +89,5 @@ const handleRequest = async (request: Request, discordWebhookURL: string) => {
         }
     }
 
-    const responseBody = await response.text();
-    const newResponse = new Response(responseBody, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers,
-    });
-
-    return newResponse;
+    return response;
 };

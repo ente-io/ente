@@ -137,24 +137,7 @@ class _FileSelectionActionsWidgetState
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-    if (widget.type == GalleryType.peopleTag && widget.person != null) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.remove_circle_outline,
-          labelText: 'Not ${widget.person!.data.name}?',
-          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
-        ),
-      );
-      if (ownedFilesCount == 1) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.image_outlined,
-            labelText: 'Use as cover',
-            onTap: anyUploadedFiles ? _setPersonCover : null,
-          ),
-        );
-      }
-    }
+
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
         items.add(
@@ -172,6 +155,24 @@ class _FileSelectionActionsWidgetState
             onTap: anyUploadedFiles ? _onSendLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
             key: sendLinkButtonKey,
+          ),
+        );
+      }
+    }
+    if (widget.type == GalleryType.peopleTag && widget.person != null) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.remove_circle_outline,
+          labelText: S.of(context).notPersonLabel(widget.person!.data.name),
+          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
+        ),
+      );
+      if (ownedFilesCount == 1) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.image_outlined,
+            labelText: S.of(context).useAsCover,
+            onTap: anyUploadedFiles ? _setPersonCover : null,
           ),
         );
       }
@@ -695,7 +696,6 @@ class _FileSelectionActionsWidgetState
           widget.person!,
         );
       }
-      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {
@@ -738,7 +738,6 @@ class _FileSelectionActionsWidgetState
           widget.clusterID!,
         );
       }
-      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {

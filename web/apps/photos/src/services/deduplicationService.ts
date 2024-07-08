@@ -1,13 +1,11 @@
 import { hasFileHash } from "@/media/file";
 import { FILE_TYPE } from "@/media/file-type";
 import type { Metadata } from "@/media/types/file";
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
+import { apiURL } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { EnteFile } from "types/file";
-
-const ENDPOINT = getEndpoint();
 
 interface DuplicatesResponse {
     duplicates: Array<{
@@ -148,7 +146,7 @@ function groupDupesByFileHashes(dupe: Duplicate) {
 async function fetchDuplicateFileIDs() {
     try {
         const response = await HTTPService.get(
-            `${ENDPOINT}/files/duplicates`,
+            await apiURL("/files/duplicates"),
             null,
             {
                 "X-Auth-Token": getToken(),

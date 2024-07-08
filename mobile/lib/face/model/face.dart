@@ -31,13 +31,6 @@ class Face {
 
   bool get isHighQuality => (!isBlurry) && hasHighScore;
 
-  int area({int? w, int? h}) {
-    return detection.getFaceArea(
-      fileInfo?.imageWidth ?? w ?? 0,
-      fileInfo?.imageHeight ?? h ?? 0,
-    );
-  }
-
   Face(
     this.faceID,
     this.fileID,

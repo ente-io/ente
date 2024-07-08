@@ -31,6 +31,7 @@ import {
 import { ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
+    fsFindFiles,
     fsIsDir,
     fsMkdirIfNeeded,
     fsReadTextFile,
@@ -63,7 +64,6 @@ import {
 } from "./services/upload";
 import {
     watchAdd,
-    watchFindFiles,
     watchGet,
     watchRemove,
     watchUpdateIgnoredFiles,
@@ -153,6 +153,10 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
+
+    ipcMain.handle("fsFindFiles", (_, folderPath: string) =>
+        fsFindFiles(folderPath),
+    );
 
     // - Conversion
 
@@ -261,10 +265,6 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
         "watchUpdateIgnoredFiles",
         (_, ignoredFiles: FolderWatch["ignoredFiles"], folderPath: string) =>
             watchUpdateIgnoredFiles(ignoredFiles, folderPath),
-    );
-
-    ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
-        watchFindFiles(folderPath),
     );
 };
 

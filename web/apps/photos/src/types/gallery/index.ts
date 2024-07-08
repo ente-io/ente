@@ -1,9 +1,9 @@
+import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
 import { CollectionSelectorAttributes } from "components/Collections/CollectionSelector";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { TimeStampListItem } from "components/PhotoList";
 import { Collection } from "types/collection";
-import { EnteFile } from "types/file";
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -38,11 +38,7 @@ export type MergedSourceURL = {
     original: string;
     converted: string;
 };
-export enum UploadTypeSelectorIntent {
-    normalUpload,
-    import,
-    collectPhotos,
-}
+
 export type GalleryContextType = {
     showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;

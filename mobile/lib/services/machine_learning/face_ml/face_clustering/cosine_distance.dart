@@ -67,11 +67,3 @@ double cosineDistForNormVectors(List<double> vector1, List<double> vector2) {
   }
   return 1.0 - dotProduct;
 }
-
-double calculateSqrDistance(List<double> v1, List<double> v2) {
-  double sum = 0;
-  for (int i = 0; i < v1.length; i++) {
-    sum += (v1[i] - v2[i]) * (v1[i] - v2[i]);
-  }
-  return sqrt(sum);
-}

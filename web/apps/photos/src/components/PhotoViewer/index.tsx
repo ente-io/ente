@@ -1,3 +1,4 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
@@ -6,16 +7,18 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from "services/collectionService";
-import { EnteFile } from "types/file";
 import {
     copyFileToClipboard,
     downloadSingleFile,
     getFileFromURL,
-    isSupportedRawFormat,
 } from "utils/file";
 
 import { FILE_TYPE } from "@/media/file-type";
-import { isNonWebImageFileExtension } from "@/media/formats";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import downloadManager from "@/new/photos/services/download";
+import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
+import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
+import { isDesktop } from "@/next/app";
 import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -43,8 +46,6 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { detectFileTypeInfo } from "services/detect-type";
-import downloadManager, { LoadedLivePhotoSourceURL } from "services/download";
 import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
@@ -349,9 +350,16 @@ function PhotoViewer(props: Iprops) {
 
     function updateShowEditButton(file: EnteFile) {
         const extension = lowercaseExtension(file.metadata.title);
-        const isSupported =
-            !isNonWebImageFileExtension(extension) ||
-            isSupportedRawFormat(extension);
+        // Assume it is supported.
+        let isSupported = true;
+        if (needsJPEGConversion(extension)) {
+            // See if the file is on the whitelist of extensions that we know
+            // will not be directly renderable.
+            if (!isDesktop) {
+                // On the web, we only support HEIC conversion.
+                isSupported = isHEICExtension(extension);
+            }
+        }
         setShowEditButton(
             file.metadata.fileType === FILE_TYPE.IMAGE && isSupported,
         );

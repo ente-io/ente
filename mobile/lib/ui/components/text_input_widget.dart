@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:logging/logging.dart";
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -7,6 +8,8 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
 
+///To show wrong password state, throw an exception with the message
+///"Incorrect password" in onSubmit.
 class TextInputWidget extends StatefulWidget {
   final String? label;
   final String? message;
@@ -19,7 +22,7 @@ class TextInputWidget extends StatefulWidget {
   final double borderRadius;
 
   ///TextInputWidget will listen to this notifier and executes onSubmit when
-  ///notified.
+  ///notified. Value of this notifier is irrelevant.
   final ValueNotifier? submitNotifier;
 
   ///TextInputWidget will listen to this notifier and clears and unfocuses the
@@ -32,6 +35,9 @@ class TextInputWidget extends StatefulWidget {
   final bool popNavAfterSubmission;
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
+  @Deprecated(
+    "Do not use this widget for password input. Create a separate PasswordInputWidget. This widget is becoming bloated and hard to maintain, so will create a PasswordInputWidget and remove this field from this widget in future",
+  )
   final bool isPasswordInput;
 
   ///Clear comes in the form of a suffix icon. It is unrelated to onCancel.
@@ -43,6 +49,7 @@ class TextInputWidget extends StatefulWidget {
   final ValueNotifier? isEmptyNotifier;
   final List<TextInputFormatter>? textInputFormatter;
   final TextInputType? textInputType;
+  final bool enableFillColor;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -71,6 +78,7 @@ class TextInputWidget extends StatefulWidget {
     this.isEmptyNotifier,
     this.textInputFormatter,
     this.textInputType,
+    this.enableFillColor = true,
     super.key,
   });
 
@@ -79,6 +87,7 @@ class TextInputWidget extends StatefulWidget {
 }
 
 class _TextInputWidgetState extends State<TextInputWidget> {
+  final _logger = Logger("TextInputWidget");
   ExecutionState executionState = ExecutionState.idle;
   late final TextEditingController _textController;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
@@ -87,6 +96,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   ///This is to pass if the TextInputWidget is in a dialog and an error is
   ///thrown in executing onSubmit by passing it as arg in Navigator.pop()
   Exception? _exception;
+  bool _incorrectPassword = false;
 
   @override
   void initState() {
@@ -156,7 +166,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
-              filled: true,
+              filled: widget.enableFillColor,
               fillColor: colorScheme.fillFaint,
               contentPadding: const EdgeInsets.fromLTRB(
                 12,
@@ -168,7 +178,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: colorScheme.strokeFaint),
+                borderSide: BorderSide(
+                  color: _incorrectPassword
+                      ? const Color.fromRGBO(245, 42, 42, 1)
+                      : colorScheme.strokeFaint,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               suffixIcon: Padding(
@@ -263,6 +277,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       executionState = ExecutionState.error;
       _debouncer.cancelDebounce();
       _exception = e as Exception;
+      if (e.toString().contains("Incorrect password")) {
+        _logger.warning("Incorrect password");
+        _surfaceWrongPasswordState();
+      }
       if (!widget.popNavAfterSubmission) {
         rethrow;
       }
@@ -380,6 +398,20 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
 
     return formattedValue;
+  }
+
+  void _surfaceWrongPasswordState() {
+    setState(() {
+      _incorrectPassword = true;
+      HapticFeedback.vibrate();
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          setState(() {
+            _incorrectPassword = false;
+          });
+        }
+      });
+    });
   }
 }
 

@@ -10,8 +10,7 @@ import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/face/db_fields.dart';
 import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
-import "package:photos/models/file/file.dart";
-import "package:photos/services/machine_learning/face_ml/face_clustering/face_info_for_clustering.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
 import "package:photos/utils/ml_util.dart";
@@ -360,18 +359,6 @@ class FaceMLDataDB {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
-  Future<Face?> getFaceForFaceID(String faceID) async {
-    final db = await instance.asyncDB;
-    final result = await db.getAll(
-      'SELECT * FROM $facesTable where $faceIDColumn = ?',
-      [faceID],
-    );
-    if (result.isEmpty) {
-      return null;
-    }
-    return mapRowToFace(result.first);
-  }
-
   Future<Map<int, Iterable<String>>> getClusterToFaceIDs(
     Set<int> clusterIDs,
   ) async {
@@ -476,20 +463,6 @@ class FaceMLDataDB {
     return maps.map((e) => e[faceBlur] as double).toSet();
   }
 
-  Future<Map<String, double>> getFaceIDsToBlurValues(
-    int maxBlurValue,
-  ) async {
-    final db = await instance.asyncDB;
-    final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $faceIDColumn, $faceBlur FROM $facesTable WHERE $faceBlur < $maxBlurValue AND $faceBlur > 1 ORDER BY $faceBlur ASC',
-    );
-    final Map<String, double> result = {};
-    for (final map in maps) {
-      result[map[faceIDColumn] as String] = map[faceBlur] as double;
-    }
-    return result;
-  }
-
   Future<Map<String, int?>> getFaceIdsToClusterIds(
     Iterable<String> faceIds,
   ) async {
@@ -550,7 +523,7 @@ class FaceMLDataDB {
     });
   }
 
-  Future<List<FaceInfoForClustering>> getFaceInfoForClustering({
+  Future<List<FaceDbInfoForClustering>> getFaceInfoForClustering({
     double minScore = kMinimumQualityFaceScore,
     int minClarity = kLaplacianHardThreshold,
     int maxFaces = 20000,
@@ -564,7 +537,7 @@ class FaceMLDataDB {
       );
       final db = await instance.asyncDB;
 
-      final List<FaceInfoForClustering> result = <FaceInfoForClustering>[];
+      final List<FaceDbInfoForClustering> result = <FaceDbInfoForClustering>[];
       while (true) {
         // Query a batch of rows
         final List<Map<String, dynamic>> maps = await db.getAll(
@@ -584,7 +557,7 @@ class FaceMLDataDB {
         final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
         for (final map in maps) {
           final faceID = map[faceIDColumn] as String;
-          final faceInfo = FaceInfoForClustering(
+          final faceInfo = FaceDbInfoForClustering(
             faceID: faceID,
             clusterId: faceIdToClusterId[faceID],
             embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
@@ -605,53 +578,6 @@ class FaceMLDataDB {
       _logger.severe('err in getFaceInfoForClustering', e);
       rethrow;
     }
-  }
-
-  Future<Map<String, Uint8List>> getFaceEmbeddingMapForFile(
-    List<int> fileIDs,
-  ) async {
-    _logger.info('reading face embeddings for ${fileIDs.length} files');
-    final db = await instance.asyncDB;
-
-    // Define the batch size
-    const batchSize = 10000;
-    int offset = 0;
-
-    final Map<String, Uint8List> result = {};
-    while (true) {
-      // Query a batch of rows
-
-      final List<Map<String, dynamic>> maps = await db.getAll('''
-        SELECT $faceIDColumn, $faceEmbeddingBlob 
-        FROM $facesTable 
-        WHERE $faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold AND $fileIDColumn IN (${fileIDs.join(",")}) 
-        ORDER BY $faceIDColumn DESC 
-        LIMIT $batchSize OFFSET $offset         
-      ''');
-      // final List<Map<String, dynamic>> maps = await db.query(
-      //   facesTable,
-      //   columns: [faceIDColumn, faceEmbeddingBlob],
-      //   where:
-      //       '$faceScore > $kMinimumQualityFaceScore AND $faceBlur > $kLaplacianHardThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
-      //   limit: batchSize,
-      //   offset: offset,
-      //   orderBy: '$faceIDColumn DESC',
-      // );
-      // Break the loop if no more rows
-      if (maps.isEmpty) {
-        break;
-      }
-      for (final map in maps) {
-        final faceID = map[faceIDColumn] as String;
-        result[faceID] = map[faceEmbeddingBlob] as Uint8List;
-      }
-      if (result.length > 10000) {
-        break;
-      }
-      offset += batchSize;
-    }
-    _logger.info('done reading face embeddings for ${fileIDs.length} files');
-    return result;
   }
 
   Future<Map<String, Uint8List>> getFaceEmbeddingMapForFaces(
@@ -753,29 +679,6 @@ class FaceMLDataDB {
     return maps.length;
   }
 
-  Future<int> getBlurryFaceCount([
-    int blurThreshold = kLaplacianHardThreshold,
-  ]) async {
-    final db = await instance.asyncDB;
-    final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceBlur <= $blurThreshold AND $faceScore > $kMinimumQualityFaceScore',
-    );
-    return maps.first['count'] as int;
-  }
-
-  /// WARNING: This method does not drop the persons and other feedback. Consider using [dropClustersAndPersonTable] instead.
-  Future<void> resetClusterIDs() async {
-    try {
-      final db = await instance.asyncDB;
-
-      await db.execute(deleteFaceClustersTable);
-      await db.execute(createFaceClustersTable);
-      await db.execute(fcClusterIDIndex);
-    } catch (e, s) {
-      _logger.severe('Error resetting clusterIDs', e, s);
-    }
-  }
-
   Future<void> assignClusterToPerson({
     required String personID,
     required int clusterID,
@@ -799,20 +702,6 @@ class FaceMLDataDB {
     final parameterSets =
         clusterToPersonID.entries.map((e) => [e.value, e.key]).toList();
     await db.executeBatch(sql, parameterSets);
-    // final batch = db.batch();
-    // for (final entry in clusterToPersonID.entries) {
-    //   final clusterID = entry.key;
-    //   final personID = entry.value;
-    //   batch.insert(
-    //     clusterPersonTable,
-    //     {
-    //       personIdColumn: personID,
-    //       clusterIDColumn: clusterID,
-    //     },
-    //     conflictAlgorithm: ConflictAlgorithm.replace,
-    //   );
-    // }
-    // await batch.commit(noResult: true);
   }
 
   Future<void> captureNotPersonFeedback({
@@ -1026,70 +915,5 @@ class FaceMLDataDB {
     } catch (e) {
       _logger.severe('Error dropping feedback tables', e);
     }
-  }
-
-  Future<void> removeFilesFromPerson(
-    List<EnteFile> files,
-    String personID,
-  ) async {
-    final db = await instance.asyncDB;
-    final faceIdsResult = await db.getAll(
-      'SELECT $fcFaceId FROM $faceClustersTable LEFT JOIN $clusterPersonTable '
-      'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$clusterIDColumn '
-      'WHERE $clusterPersonTable.$personIdColumn = ?',
-      [personID],
-    );
-    final Set<String> fileIds = {};
-    for (final enteFile in files) {
-      fileIds.add(enteFile.uploadedFileID.toString());
-    }
-    int maxClusterID = DateTime.now().microsecondsSinceEpoch;
-    final Map<String, int> faceIDToClusterID = {};
-    for (final row in faceIdsResult) {
-      final faceID = row[fcFaceId] as String;
-      if (fileIds.contains(getFileIdFromFaceId(faceID))) {
-        maxClusterID += 1;
-        faceIDToClusterID[faceID] = maxClusterID;
-      }
-    }
-    await forceUpdateClusterIds(faceIDToClusterID);
-  }
-
-  Future<void> removeFilesFromCluster(
-    List<EnteFile> files,
-    int clusterID,
-  ) async {
-    final db = await instance.asyncDB;
-    final faceIdsResult = await db.getAll(
-      'SELECT $fcFaceId FROM $faceClustersTable '
-      'WHERE $faceClustersTable.$fcClusterID = ?',
-      [clusterID],
-    );
-    final Set<String> fileIds = {};
-    for (final enteFile in files) {
-      fileIds.add(enteFile.uploadedFileID.toString());
-    }
-    int maxClusterID = DateTime.now().microsecondsSinceEpoch;
-    final Map<String, int> faceIDToClusterID = {};
-    for (final row in faceIdsResult) {
-      final faceID = row[fcFaceId] as String;
-      if (fileIds.contains(getFileIdFromFaceId(faceID))) {
-        maxClusterID += 1;
-        faceIDToClusterID[faceID] = maxClusterID;
-      }
-    }
-    await forceUpdateClusterIds(faceIDToClusterID);
-  }
-
-  Future<void> addFacesToCluster(
-    List<String> faceIDs,
-    int clusterID,
-  ) async {
-    final faceIDToClusterID = <String, int>{};
-    for (final faceID in faceIDs) {
-      faceIDToClusterID[faceID] = clusterID;
-    }
-
-    await forceUpdateClusterIds(faceIDToClusterID);
   }
 }

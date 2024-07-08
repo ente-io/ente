@@ -36,6 +36,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -51,6 +52,7 @@ import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -92,7 +94,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         builder: (args) =>
             EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled: Configuration.instance.shouldShowLockScreen(),
+        enabled: await Configuration.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
@@ -193,7 +195,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _isProcessRunning = true;
     _logger.info("Initializing...  inBG =$isBackground via: $via");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-
     await _logFGHeartBeatInfo();
     _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
@@ -206,6 +207,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
+
+    _logger.info("Lockscreen init");
+    LockScreenSettings.instance.init(preferences);
 
     _logger.info("Configuration init");
     await Configuration.instance.init();
@@ -301,6 +305,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       preferences,
     );
 
+    MagicCacheService.instance.init(preferences);
+
     initComplete = true;
     _logger.info("Initialization done");
   } catch (e, s) {
@@ -328,7 +334,7 @@ Future<void> _sync(String caller) async {
     await SyncService.instance.sync();
   } catch (e, s) {
     if (!isHandledSyncError(e)) {
-      _logger.severe("Sync error", e, s);
+      _logger.warning("Sync error", e, s);
     }
   }
 }

@@ -1,5 +1,9 @@
 {
   "icons": [
+     { "title": "1xBet", 
+       "altNames": ["1x", "1x bet", "1x-bet"
+       ]
+     },
     {
       "title": "3Commas"
     },
@@ -21,6 +25,9 @@
       "title": "Bitfinex"
     },
     {
+      "title": "bitget"
+    },
+    {
       "title": "BitMEX"
     },
     {
@@ -39,11 +46,15 @@
     {
       "title": "Bloom Host",
       "slug": "bloom_host",
-      "altNames": ["Bloom Host Billing"]
+      "altNames": [
+        "Bloom Host Billing"
+      ]
     },
     {
       "title": "BorgBase",
-      "altNames": ["borg"],
+      "altNames": [
+        "borg"
+      ],
       "slug": "BorgBase"
     },
     {
@@ -68,6 +79,16 @@
       "title": "Cloudflare"
     },
     {
+      "title": "CloudAMQP"
+    },
+    {
+      "title": "ConfigCat",
+      "slug": "configcat"
+    },
+    {
+      "title": "CoinDCX"
+    },
+    {
       "title": "ConfigCat"
     },
     {
@@ -79,8 +100,14 @@
       "title": "Crowdpear"
     },
     {
+      "title": "crypto.com",
+      "altNames": ["crypto"]
+    },
+    {
       "title": "DCS",
-      "altNames": ["Digital Combat Simulator"],
+      "altNames": [
+        "Digital Combat Simulator"
+      ],
       "slug": "dcs"
     },
     {
@@ -140,7 +167,9 @@
     },
     {
       "title": "Gosuslugi",
-      "altNames": ["Госуслуги"],
+      "altNames": [
+        "Госуслуги"
+      ],
       "slug": "Gosuslugi"
     },
     {
@@ -216,7 +245,11 @@
     {
       "title": "Local",
       "slug": "local_wp",
-      "altNames": ["LocalWP", "Local WP", "Local Wordpress"]
+      "altNames": [
+        "LocalWP",
+        "Local WP",
+        "Local Wordpress"
+      ]
     },
     {
       "title": "Marketplace.tf",
@@ -224,14 +257,23 @@
     },
     {
       "title": "Mastodon",
-      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
+      "altNames": [
+        "mstdn",
+        "fediscience",
+        "mathstodon",
+        "fosstodon"
+      ],
       "slug": "mastodon",
       "hex": "6364FF"
     },
     {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
-      "altNames": ["Mercado Libre", "MercadoLibre", "MercadoLivre"]
+      "altNames": [
+        "Mercado Libre",
+        "MercadoLibre",
+        "MercadoLivre"
+      ]
     },
     {
       "title": "Microsoft"
@@ -247,7 +289,9 @@
     },
     {
       "title": "Murena",
-      "altNames": ["eCloud"],
+      "altNames": [
+        "eCloud"
+      ],
       "slug": "ecloud"
     },
     {
@@ -275,11 +319,17 @@
       "title": "Notion"
     },
     {
+      "title": "NuCommunity",
+      "slug": "nucommunity"
+    },
+    {
       "title": "NVIDIA"
     },
     {
       "title": "Odido"
     },
+     { "title": "okx", 
+       "hex": "858585" },
     {
       "title": "Parsec"
     },
@@ -332,8 +382,16 @@
       "slug": "real_debrid"
     },
     {
-      "title": "Registro.br",
-      "slug": "registro_br"
+      "title": "Registro br",
+      "slug": "registro_br",
+      "altNames": [
+        "Registro br",
+        "registrobr",
+        "Registro.br"
+      ]
+    },
+    {
+      "title": "Render"
     },
     {
       "title": "Revolt",
@@ -351,6 +409,9 @@
       "title": "Rust Language Forum",
       "slug": "rust_language_forum",
       "hex": "000000"
+    },
+    {
+      "title": "Samsung"
     },
     {
       "title": "Sendgrid"
@@ -393,7 +454,10 @@
     },
     {
       "title": "Techlore",
-      "altNames": ["Techlore Courses", "Techlore Forums"]
+      "altNames": [
+        "Techlore Courses",
+        "Techlore Forums"
+      ]
     },
     {
       "title": "Termius",
@@ -422,6 +486,13 @@
     {
       "title": "Twingate",
       "hex": "858585"
+    },
+    {
+      "title": "Twitch",
+      "altNames": [
+        "Twitch.tv",
+        "Twitch tv"
+      ]
     },
     {
       "title": "Ubisoft",
@@ -457,21 +528,32 @@
     {
       "title": "WorkOS",
       "slug": "workos",
-      "altNames": ["Work OS"]
+      "altNames": [
+        "Work OS"
+      ]
     },
     {
       "title": "X",
-      "altNames": ["twitter"],
+      "altNames": [
+        "twitter"
+      ],
       "slug": "x"
     },
     {
       "title": "Yandex",
-      "altNames": ["Ya", "Яндекс"],
+      "altNames": [
+        "Ya",
+        "Яндекс"
+      ],
       "slug": "Yandex"
     },
+     { "title": "yahoo" },
+    {
     {
       "title": "YNAB",
-      "altNames": ["You Need A Budget"],
+      "altNames": [
+        "You Need A Budget"
+      ],
       "slug": "ynab",
       "hex": "3B5EDA"
     }

@@ -1,6 +1,16 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import downloadManager from "@/new/photos/services/download";
+import {
+    exportMetadataDirectoryName,
+    exportTrashDirectoryName,
+} from "@/new/photos/services/export";
+import { getAllLocalFiles } from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
+import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
+import { writeStream } from "@/new/photos/utils/native-stream";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { wait } from "@/utils/promise";
@@ -22,22 +32,13 @@ import {
     ExportUIUpdaters,
     FileExportNames,
 } from "types/export";
-import { EnteFile } from "types/file";
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
-import {
-    getPersonalFiles,
-    getUpdatedEXIFFileForDownload,
-    mergeMetadata,
-} from "utils/file";
-import { safeDirectoryName, safeFileName } from "utils/native-fs";
-import { writeStream } from "utils/native-stream";
+import { getPersonalFiles, getUpdatedEXIFFileForDownload } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
-import downloadManager from "../download";
-import { getAllLocalFiles } from "../fileService";
 import { migrateExport } from "./migration";
 
 /** Name of the JSON file in which we keep the state of the export. */
@@ -48,18 +49,6 @@ const exportRecordFileName = "export_status.json";
  * directory when the user starts an export to the file system.
  */
 const exportDirectoryName = "Ente Photos";
-
-/**
- * Name of the directory in which we put our metadata when exporting to the file
- * system.
- */
-export const exportMetadataDirectoryName = "metadata";
-
-/**
- * Name of the directory in which we keep trash items when deleting files that
- * have been exported to the local disk previously.
- */
-export const exportTrashDirectoryName = "Trash";
 
 export enum ExportStage {
     INIT = 0,
@@ -80,9 +69,22 @@ export const NULL_EXPORT_RECORD: ExportRecord = {
     collectionExportNames: {},
 };
 
+export interface ExportOpts {
+    /**
+     * If true, perform an additional on-disk check to determine which files
+     * need to be exported.
+     *
+     * This has performance implications for huge libraries, so we only do this:
+     * - For the first export after an app start
+     * - If the user explicitly presses the "Resync" button.
+     */
+    resync?: boolean;
+}
+
 class ExportService {
     private exportSettings: ExportSettings;
     private exportInProgress: RequestCanceller = null;
+    private resync = true;
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>();
     private fileReader: FileReader = null;
@@ -164,6 +166,16 @@ class ExportService {
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
+    private resyncOnce() {
+        const resync = this.resync;
+        this.resync = false;
+        return resync;
+    }
+
+    resumeExport() {
+        this.scheduleExport({ resync: this.resyncOnce() });
+    }
+
     enableContinuousExport() {
         try {
             if (this.continuousExportEventHandler) {
@@ -172,7 +184,7 @@ class ExportService {
             }
             log.info("enabling continuous export");
             this.continuousExportEventHandler = () => {
-                this.scheduleExport();
+                this.scheduleExport({ resync: this.resyncOnce() });
             };
             this.continuousExportEventHandler();
             eventBus.addListener(
@@ -225,6 +237,7 @@ class ExportService {
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord,
+                undefined,
             );
             return unExportedFiles;
         } catch (e) {
@@ -276,7 +289,7 @@ class ExportService {
         }
     }
 
-    scheduleExport = async () => {
+    scheduleExport = async (exportOpts: ExportOpts) => {
         try {
             if (this.exportInProgress) {
                 log.info("export in progress, scheduling re-run");
@@ -297,7 +310,7 @@ class ExportService {
                 const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);
                 log.info("export started");
-                await this.runExport(exportFolder, isCanceled);
+                await this.runExport(exportFolder, isCanceled, exportOpts);
                 log.info("export completed");
             } finally {
                 if (isCanceled.status) {
@@ -312,7 +325,7 @@ class ExportService {
                     if (this.reRunNeeded) {
                         this.reRunNeeded = false;
                         log.info("re-running export");
-                        setTimeout(() => this.scheduleExport(), 0);
+                        setTimeout(() => this.scheduleExport(exportOpts), 0);
                     }
                 }
             }
@@ -329,6 +342,7 @@ class ExportService {
     private async runExport(
         exportFolder: string,
         isCanceled: CancellationStatus,
+        { resync }: ExportOpts,
     ) {
         try {
             const user: User = getData(LS_KEYS.USER);
@@ -370,10 +384,23 @@ class ExportService {
                 personalFiles,
                 exportRecord,
             );
+
+            const diskFileRecordIDs = resync
+                ? await readOnDiskFileExportRecordIDs(
+                      personalFiles,
+                      collectionIDExportNameMap,
+                      exportFolder,
+                      exportRecord,
+                      isCanceled,
+                  )
+                : undefined;
+
             const filesToExport = getUnExportedFiles(
                 personalFiles,
                 exportRecord,
+                diskFileRecordIDs,
             );
+
             const deletedExportedCollections = getDeletedExportedCollections(
                 nonEmptyPersonalCollections,
                 exportRecord,
@@ -1122,7 +1149,7 @@ export const resumeExportsIfNeeded = async () => {
     }
     if (isExportInProgress(exportRecord.stage)) {
         log.debug(() => "Resuming in-progress export");
-        exportService.scheduleExport();
+        exportService.resumeExport();
     }
 };
 
@@ -1229,21 +1256,98 @@ const getDeletedExportedCollections = (
     return deletedExportedCollections;
 };
 
+/**
+ * Return export record IDs of {@link files} for which there is also exists a
+ * file on disk.
+ */
+const readOnDiskFileExportRecordIDs = async (
+    files: EnteFile[],
+    collectionIDFolderNameMap: Map<number, string>,
+    exportDir: string,
+    exportRecord: ExportRecord,
+    isCanceled: CancellationStatus,
+): Promise<Set<string>> => {
+    const fs = ensureElectron().fs;
+
+    const result = new Set<string>();
+    if (!(await fs.exists(exportDir))) return result;
+
+    // Both the paths involved are guaranteed to use POSIX separators and thus
+    // can directly be compared.
+    //
+    // -   `exportDir` traces its origin to `electron.selectDirectory()`, which
+    //     returns POSIX paths. Down below we use it as the base directory when
+    //     construction paths for the items to export.
+    //
+    // -   `findFiles` is also guaranteed to return POSIX paths.
+    //
+    const ls = new Set(await ensureElectron().fs.findFiles(exportDir));
+
+    const fileExportNames = exportRecord.fileExportNames ?? {};
+
+    for (const file of files) {
+        if (isCanceled.status) throw Error(CustomError.EXPORT_STOPPED);
+
+        const collectionExportName = collectionIDFolderNameMap.get(
+            file.collectionID,
+        );
+        if (!collectionExportName) continue;
+
+        const collectionExportPath = `${exportDir}/${collectionExportName}`;
+        const recordID = getExportRecordFileUID(file);
+        const exportName = fileExportNames[recordID];
+        if (!exportName) continue;
+
+        if (ls.has(`${collectionExportPath}/${exportName}`)) {
+            result.add(recordID);
+        } else {
+            // It might be a live photo - these store a JSON string instead of
+            // the file's name as the exportName.
+            try {
+                const { image, video } = parseLivePhotoExportName(exportName);
+                if (
+                    ls.has(`${collectionExportPath}/${image}`) &&
+                    ls.has(`${collectionExportPath}/${video}`)
+                ) {
+                    result.add(recordID);
+                }
+            } catch {
+                /* Not an error, the file just might not exist on disk yet */
+            }
+        }
+    }
+
+    return result;
+};
+
+/**
+ * Return the list of files from amongst {@link allFiles} that still need to be
+ * exported.
+ *
+ * @param allFiles The list of files to export.
+ *
+ * @param exportRecord The export record containing bookkeeping for the export.
+ *
+ * @paramd diskFileRecordIDs (Optional) The export record IDs of files from
+ * amongst {@link allFiles} that already exist on disk. If provided (e.g. when
+ * doing a resync), we perform an extra check for on-disk existence instead of
+ * relying solely on the export record.
+ */
 const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord,
+    diskFileRecordIDs: Set<string> | undefined,
 ) => {
     if (!exportRecord?.fileExportNames) {
         return allFiles;
     }
     const exportedFiles = new Set(Object.keys(exportRecord?.fileExportNames));
-    const unExportedFiles = allFiles.filter((file) => {
-        if (!exportedFiles.has(getExportRecordFileUID(file))) {
-            return true;
-        }
+    return allFiles.filter((file) => {
+        const recordID = getExportRecordFileUID(file);
+        if (!exportedFiles.has(recordID)) return true;
+        if (diskFileRecordIDs && !diskFileRecordIDs.has(recordID)) return true;
         return false;
     });
-    return unExportedFiles;
 };
 
 const getDeletedExportedFiles = (

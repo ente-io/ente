@@ -2,7 +2,7 @@
 
 "Services" are Docker images we run on our instances and manage using systemd.
 
-All our services (including museum itself) follow the same pattern:
+Generally our services (including museum itself) follow the same pattern:
 
 -   They're run on vanilla Ubuntu instances. The only expectation they have is
     for Docker to be installed.
@@ -22,6 +22,8 @@ All our services (including museum itself) follow the same pattern:
 -   Any credentials and/or configuration should be read by mounting the
     appropriate file from `/root/service-name` into the running Docker
     container.
+
+-   There are exceptions to this general pattern (See [sentry](sentry)).
 
 ## Systemd cheatsheet
 

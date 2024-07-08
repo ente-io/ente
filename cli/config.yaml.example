@@ -5,6 +5,8 @@
 
 endpoint:
   api: "http://localhost:8080"
+  # Endpoint for the account service for passkey
+  accounts: "http://localhost:3001"
 
 log:
  http: false # log status code & time taken by requests

@@ -1,10 +1,10 @@
+import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import {
     IconButtonWithBG,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import { Box, DialogTitle, Stack, Typography } from "@mui/material";
-import { UPLOAD_STAGES } from "constants/upload";
 import { t } from "i18next";
 import { useContext } from "react";
 

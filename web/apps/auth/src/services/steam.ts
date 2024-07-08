@@ -31,12 +31,12 @@ export class Steam {
         const digest = sha1HMACDigest(this.secret.buffer, uintToArray(counter));
 
         // Same calculation as regular HOTP.
-        const offset = digest[digest.length - 1] & 15;
+        const offset = digest[digest.length - 1]! & 15;
         let otp =
-            ((digest[offset] & 127) << 24) |
-            ((digest[offset + 1] & 255) << 16) |
-            ((digest[offset + 2] & 255) << 8) |
-            (digest[offset + 3] & 255);
+            ((digest[offset]! & 127) << 24) |
+            ((digest[offset + 1]! & 255) << 16) |
+            ((digest[offset + 2]! & 255) << 8) |
+            (digest[offset + 3]! & 255);
 
         // However, instead of using this as the OTP, use it to index into
         // the steam OTP alphabet.

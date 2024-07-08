@@ -1,91 +1,113 @@
+/**
+ * @file A thin-ish layer over the actual libsodium APIs, to make them more
+ * palatable to the rest of our Javascript code.
+ *
+ * All functions are stateless, async, and safe to use in Web Workers.
+ *
+ * Docs for the JS library: https://github.com/jedisct1/libsodium.js
+ */
+import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
-import { ENCRYPTION_CHUNK_SIZE } from "../constants";
-import type { B64EncryptionResult } from "../types";
 
-export async function decryptChaChaOneShot(
-    data: Uint8Array,
-    header: Uint8Array,
-    key: string,
-) {
+/**
+ * Convert a {@link Uint8Array} to a Base64 encoded string.
+ *
+ * See also {@link toB64URLSafe} and {@link toB64URLSafeNoPadding}.
+ */
+export const toB64 = async (input: Uint8Array) => {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        await fromB64(key),
-    );
-    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
-        pullState,
-        data,
-        null,
-    );
-    return pullResult.message;
+    return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
+};
+
+/**
+ * Convert a Base64 encoded string to a {@link Uint8Array}.
+ *
+ * This is the converse of {@link toBase64}.
+ */
+export const fromB64 = async (input: string) => {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+};
+
+/**
+ * Convert a {@link Uint8Array} to a URL-safe Base64 encoded string.
+ *
+ * See also {@link toB64URLSafe} and {@link toB64URLSafeNoPadding}.
+ */
+export const toB64URLSafe = async (input: Uint8Array) => {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
+};
+
+/**
+ * Convert a {@link Uint8Array} to a unpadded URL-safe Base64 encoded string.
+ *
+ * This differs from {@link toB64URLSafe} in that it does not append any
+ * trailing padding character(s) "=" to make the resultant string's length be an
+ * integer multiple of 4.
+ *
+ * -   In some contexts, for example when serializing WebAuthn binary for
+ *     transmission over the network, this is the required / recommended
+ *     approach.
+ *
+ * -   In other cases, for example when trying to pass an arbitrary JSON string
+ *     via a URL parameter, this is also convenient so that we do not have to
+ *     deal with any ambiguity surrounding the "=" which is also the query
+ *     parameter key value separator.
+ */
+export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
+    await sodium.ready;
+    return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
+
+/**
+ * Convert a unpadded URL-safe Base64 encoded string to a {@link Uint8Array}.
+ *
+ * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
+ * its input string's length to be a an integer multiple of 4.
+ */
+export const fromB64URLSafeNoPadding = async (input: string) => {
+    await sodium.ready;
+    return sodium.from_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
+};
+
+/**
+ * Variant of {@link toB64URLSafeNoPadding} that works with {@link string}
+ * inputs. See also its sibling method {@link fromB64URLSafeNoPaddingString}.
+ */
+export const toB64URLSafeNoPaddingString = async (input: string) => {
+    await sodium.ready;
+    return toB64URLSafeNoPadding(sodium.from_string(input));
+};
+
+/**
+ * Variant of {@link fromB64URLSafeNoPadding} that works with {@link strings}. See also
+ * its sibling method {@link toB64URLSafeNoPaddingString}.
+ */
+export const fromB64URLSafeNoPaddingString = async (input: string) => {
+    await sodium.ready;
+    return sodium.to_string(await fromB64URLSafeNoPadding(input));
+};
+
+export async function fromUTF8(input: string) {
+    await sodium.ready;
+    return sodium.from_string(input);
 }
 
-export async function decryptChaCha(
-    data: Uint8Array,
-    header: Uint8Array,
-    key: string,
-) {
+export async function toUTF8(input: string) {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        await fromB64(key),
-    );
-    const decryptionChunkSize =
-        ENCRYPTION_CHUNK_SIZE +
-        sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
-    let bytesRead = 0;
-    const decryptedData = [];
-    let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
-        let chunkSize = decryptionChunkSize;
-        if (bytesRead + chunkSize > data.length) {
-            chunkSize = data.length - bytesRead;
-        }
-        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
-        const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
-            pullState,
-            buffer,
-        );
-        if (!pullResult.message) {
-            throw new Error(CustomError.PROCESSING_FAILED);
-        }
-        for (let index = 0; index < pullResult.message.length; index++) {
-            decryptedData.push(pullResult.message[index]);
-        }
-        tag = pullResult.tag;
-        bytesRead += chunkSize;
-    }
-    return Uint8Array.from(decryptedData);
+    return sodium.to_string(await fromB64(input));
 }
 
-export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
+export async function toHex(input: string) {
     await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        key,
-    );
-    const decryptionChunkSize =
-        ENCRYPTION_CHUNK_SIZE +
-        sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
-    const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    return { pullState, decryptionChunkSize, tag };
+    return sodium.to_hex(await fromB64(input));
 }
 
-export async function decryptFileChunk(
-    data: Uint8Array,
-    pullState: StateAddress,
-) {
+export async function fromHex(input: string) {
     await sodium.ready;
-    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
-        pullState,
-        data,
-    );
-    if (!pullResult.message) {
-        throw new Error(CustomError.PROCESSING_FAILED);
-    }
-    const newTag = pullResult.tag;
-    return { decryptedData: pullResult.message, newTag };
+    return await toB64(sodium.from_hex(input));
 }
 
 export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
@@ -111,7 +133,9 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     };
 }
 
-export async function encryptChaCha(data: Uint8Array) {
+export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
+
+export const encryptChaCha = async (data: Uint8Array) => {
     await sodium.ready;
 
     const uintkey: Uint8Array =
@@ -123,7 +147,7 @@ export async function encryptChaCha(data: Uint8Array) {
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
 
-    const encryptedData = [];
+    const encryptedChunks = [];
 
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
         let chunkSize = ENCRYPTION_CHUNK_SIZE;
@@ -140,18 +164,16 @@ export async function encryptChaCha(data: Uint8Array) {
             null,
             tag,
         );
-        for (let index = 0; index < pushResult.length; index++) {
-            encryptedData.push(pushResult[index]);
-        }
+        encryptedChunks.push(pushResult);
     }
     return {
         key: await toB64(uintkey),
         file: {
-            encryptedData: new Uint8Array(encryptedData),
+            encryptedData: mergeUint8Arrays(encryptedChunks),
             decryptionHeader: await toB64(header),
         },
     };
-}
+};
 
 export async function initChunkEncryption() {
     await sodium.ready;
@@ -184,6 +206,96 @@ export async function encryptFileChunk(
 
     return pushResult;
 }
+
+export async function decryptChaChaOneShot(
+    data: Uint8Array,
+    header: Uint8Array,
+    key: string,
+) {
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        header,
+        await fromB64(key),
+    );
+    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+        pullState,
+        data,
+        null,
+    );
+    return pullResult.message;
+}
+
+export const decryptChaCha = async (
+    data: Uint8Array,
+    header: Uint8Array,
+    key: string,
+) => {
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        header,
+        await fromB64(key),
+    );
+    const decryptionChunkSize =
+        ENCRYPTION_CHUNK_SIZE +
+        sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
+    let bytesRead = 0;
+    const decryptedChunks = [];
+    let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+    while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
+        let chunkSize = decryptionChunkSize;
+        if (bytesRead + chunkSize > data.length) {
+            chunkSize = data.length - bytesRead;
+        }
+        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
+        const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+            pullState,
+            buffer,
+        );
+        if (!pullResult.message) {
+            throw new Error(CustomError.PROCESSING_FAILED);
+        }
+        decryptedChunks.push(pullResult.message);
+        tag = pullResult.tag;
+        bytesRead += chunkSize;
+    }
+    return mergeUint8Arrays(decryptedChunks);
+};
+
+export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        header,
+        key,
+    );
+    const decryptionChunkSize =
+        ENCRYPTION_CHUNK_SIZE +
+        sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
+    const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+    return { pullState, decryptionChunkSize, tag };
+}
+
+export async function decryptFileChunk(
+    data: Uint8Array,
+    pullState: StateAddress,
+) {
+    await sodium.ready;
+    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+        pullState,
+        data,
+    );
+    if (!pullResult.message) {
+        throw new Error(CustomError.PROCESSING_FAILED);
+    }
+    const newTag = pullResult.tag;
+    return { decryptedData: pullResult.message, newTag };
+}
+
+export interface B64EncryptionResult {
+    encryptedData: string;
+    key: string;
+    nonce: string;
+}
+
 export async function encryptToB64(data: string, key: string) {
     await sodium.ready;
     const encrypted = await encrypt(await fromB64(data), await fromB64(key));
@@ -390,89 +502,4 @@ export async function generateSubKey(
             await fromB64(key),
         ),
     );
-}
-
-export async function fromB64(input: string) {
-    await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
-}
-
-export async function toB64(input: Uint8Array) {
-    await sodium.ready;
-    return sodium.to_base64(input, sodium.base64_variants.ORIGINAL);
-}
-
-/** Convert a {@link Uint8Array} to a URL safe Base64 encoded string. */
-export const toB64URLSafe = async (input: Uint8Array) => {
-    await sodium.ready;
-    return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
-};
-
-/**
- * Convert a {@link Uint8Array} to a URL safe Base64 encoded string.
- *
- * This differs from {@link toB64URLSafe} in that it does not append any
- * trailing padding character(s) "=" to make the resultant string's length be an
- * integer multiple of 4.
- *
- * -   In some contexts, for example when serializing WebAuthn binary for
- *     transmission over the network, this is the required / recommended
- *     approach.
- *
- * -   In other cases, for example when trying to pass an arbitrary JSON string
- *     via a URL parameter, this is also convenient so that we do not have to
- *     deal with any ambiguity surrounding the "=" which is also the query
- *     parameter key value separator.
- */
-export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
-    await sodium.ready;
-    return sodium.to_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
-};
-
-/**
- * Convert a Base64 encoded string to a {@link Uint8Array}.
- *
- * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
- * its input string's length to be a an integer multiple of 4.
- */
-export const fromB64URLSafeNoPadding = async (input: string) => {
-    await sodium.ready;
-    return sodium.from_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
-};
-
-/**
- * Variant of {@link toB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link fromB64URLSafeNoPaddingString}.
- */
-export const toB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return toB64URLSafeNoPadding(sodium.from_string(input));
-};
-
-/**
- * Variant of {@link fromB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link toB64URLSafeNoPaddingString}.
- */
-export const fromB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return sodium.to_string(await fromB64URLSafeNoPadding(input));
-};
-
-export async function fromUTF8(input: string) {
-    await sodium.ready;
-    return sodium.from_string(input);
-}
-
-export async function toUTF8(input: string) {
-    await sodium.ready;
-    return sodium.to_string(await fromB64(input));
-}
-export async function toHex(input: string) {
-    await sodium.ready;
-    return sodium.to_hex(await fromB64(input));
-}
-
-export async function fromHex(input: string) {
-    await sodium.ready;
-    return await toB64(sodium.from_hex(input));
 }

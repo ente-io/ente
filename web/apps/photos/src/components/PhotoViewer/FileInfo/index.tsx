@@ -1,3 +1,5 @@
+import { isMLEnabled } from "@/new/photos/services/ml";
+import { EnteFile } from "@/new/photos/types/file";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -18,7 +20,6 @@ import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { getEXIFLocation } from "services/exif";
-import { EnteFile } from "types/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
     getMapDisableConfirmationDialog,
@@ -328,10 +329,10 @@ export function FileInfo({
                     </InfoItem>
                 )}
 
-                {appContext.mlSearchEnabled && (
+                {isMLEnabled() && (
                     <>
                         {/* <PhotoPeopleList file={file} /> */}
-                        <UnidentifiedFaces file={file} />
+                        <UnidentifiedFaces enteFile={file} />
                     </>
                 )}
             </Stack>

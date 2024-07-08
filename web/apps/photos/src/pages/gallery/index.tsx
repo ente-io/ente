@@ -1,6 +1,12 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
-import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
+import downloadManager from "@/new/photos/services/download";
+import {
+    getLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
+import { EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -49,6 +55,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import SearchResultInfo from "components/Search/SearchResultInfo";
 import Sidebar from "components/Sidebar";
+import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { GalleryNavbar } from "components/pages/gallery/Navbar";
@@ -86,22 +93,18 @@ import {
     getHiddenItemsSummary,
     getSectionSummaries,
 } from "services/collectionService";
-import downloadManager from "services/download";
-import { syncCLIPEmbeddings } from "services/embeddingService";
-import { syncEntities } from "services/entityService";
-import { getLocalFiles, syncFiles } from "services/fileService";
+import { syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
-import { getLocalTrashedFiles, syncTrash } from "services/trashService";
+import { sync } from "services/sync";
+import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
-import { isTokenValid, syncMapEnabled } from "services/userService";
+import { isTokenValid } from "services/userService";
 import { Collection, CollectionSummaries } from "types/collection";
-import { EnteFile } from "types/file";
 import {
     GalleryContextType,
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
-    UploadTypeSelectorIntent,
 } from "types/gallery";
 import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
@@ -124,7 +127,6 @@ import {
     getSelectedFiles,
     getUniqueFiles,
     handleFileOps,
-    mergeMetadata,
     sortFiles,
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
@@ -278,9 +280,7 @@ export default function Gallery() {
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
-        useState<UploadTypeSelectorIntent>(
-            UploadTypeSelectorIntent.normalUpload,
-        );
+        useState<UploadTypeSelectorIntent>("upload");
 
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -718,19 +718,7 @@ export default function Gallery() {
             await syncFiles("normal", normalCollections, setFiles);
             await syncFiles("hidden", hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
-            await syncEntities();
-            await syncMapEnabled();
-            fetchAndSaveFeatureFlagsIfNeeded();
-            const electron = globalThis.electron;
-            if (electron) {
-                await syncCLIPEmbeddings();
-                // TODO-ML(MR): Disable fetch until we start storing it in the
-                // same place as the local ones.
-                // if (isFaceIndexingEnabled()) await syncFaceEmbeddings();
-            }
-            if (clipService.isPlatformSupported()) {
-                void clipService.scheduleImageEmbeddingExtraction();
-            }
+            await sync();
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:
@@ -992,12 +980,12 @@ export default function Gallery() {
         }
     };
 
-    const openUploader = (intent = UploadTypeSelectorIntent.normalUpload) => {
+    const openUploader = (intent?: UploadTypeSelectorIntent) => {
         if (!uploadManager.shouldAllowNewUpload()) {
             return;
         }
         setUploadTypeSelectorView(true);
-        setUploadTypeSelectorIntent(intent);
+        setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
     const closeCollectionSelector = () => {

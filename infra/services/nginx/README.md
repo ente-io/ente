@@ -48,10 +48,12 @@ When adding new services that sit behind Nginx,
 All the files we put into `/root/nginx/conf.d` get included in an `http` block.
 We can see this in the default configuration of nginx:
 
-   http {
-       ...
-       include /etc/nginx/conf.d/*.conf;
-   }
+```
+http {
+    ...
+    include /etc/nginx/conf.d/*.conf;
+}
+```
 
 > To view the default configuration, run the following command against the
 > [official Docker image for Nginx](https://hub.docker.com/_/nginx), which is

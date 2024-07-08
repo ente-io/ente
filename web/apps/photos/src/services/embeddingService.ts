@@ -1,24 +1,26 @@
+import {
+    getAllLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
+import type { EmbeddingModel } from "@/new/photos/services/ml/embedding";
+import type { FaceIndex } from "@/new/photos/services/ml/face";
+import { EnteFile } from "@/new/photos/types/file";
 import { inWorker } from "@/next/env";
 import log from "@/next/log";
+import { apiURL } from "@/next/origins";
 import { workerBridge } from "@/next/worker/worker-bridge";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint } from "@ente/shared/network/api";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type {
     Embedding,
-    EmbeddingModel,
     EncryptedEmbedding,
     GetEmbeddingDiffResponse,
     PutEmbeddingRequest,
 } from "types/embedding";
-import { EnteFile } from "types/file";
 import { getLocalCollections } from "./collectionService";
-import type { FaceIndex } from "./face/types";
-import { getAllLocalFiles } from "./fileService";
-import { getLocalTrashedFiles } from "./trashService";
 
 type FileML = FaceIndex & {
     updatedAt: number;
@@ -285,7 +287,7 @@ export const getEmbeddingsDiff = async (
             return;
         }
         const response = await HTTPService.get(
-            `${getEndpoint()}/embeddings/diff`,
+            await apiURL("/embeddings/diff"),
             {
                 sinceTime,
                 limit: DIFF_LIMIT,
@@ -314,7 +316,7 @@ export const putEmbedding = async (
             throw Error(CustomError.TOKEN_MISSING);
         }
         const resp = await HTTPService.put(
-            `${getEndpoint()}/embeddings`,
+            await apiURL("/embeddings"),
             putEmbeddingReq,
             null,
             {

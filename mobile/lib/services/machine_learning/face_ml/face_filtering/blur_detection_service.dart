@@ -3,14 +3,14 @@ import "package:photos/services/machine_learning/face_ml/face_detection/detectio
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
 class BlurDetectionService {
-  final _logger = Logger('BlurDetectionService');
+  static final _logger = Logger('BlurDetectionService');
 
   // singleton pattern
   BlurDetectionService._privateConstructor();
   static final instance = BlurDetectionService._privateConstructor();
   factory BlurDetectionService() => instance;
 
-  Future<(bool, double)> predictIsBlurGrayLaplacian(
+  static Future<(bool, double)> predictIsBlurGrayLaplacian(
     List<List<int>> grayImage, {
     int threshold = kLaplacianHardThreshold,
     FaceDirection faceDirection = FaceDirection.straight,
@@ -22,7 +22,7 @@ class BlurDetectionService {
     return (variance < threshold, variance);
   }
 
-  double _calculateVariance(List<List<int>> matrix) {
+  static double _calculateVariance(List<List<int>> matrix) {
     final int numRows = matrix.length;
     final int numCols = matrix[0].length;
     final int totalElements = numRows * numCols;
@@ -49,7 +49,7 @@ class BlurDetectionService {
     return variance;
   }
 
-  List<List<int>> _padImage(
+  static List<List<int>> _padImage(
     List<List<int>> image, {
     int removeSideColumns = 56,
     FaceDirection faceDirection = FaceDirection.straight,
@@ -115,7 +115,7 @@ class BlurDetectionService {
     return paddedImage;
   }
 
-  List<List<int>> _applyLaplacian(
+  static List<List<int>> _applyLaplacian(
     List<List<int>> image, {
     FaceDirection faceDirection = FaceDirection.straight,
   }) {

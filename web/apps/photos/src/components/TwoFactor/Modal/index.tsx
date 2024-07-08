@@ -1,4 +1,4 @@
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
@@ -37,7 +37,7 @@ function TwoFactorModal(props: Props) {
         const main = async () => {
             const isTwoFactorEnabled = await getTwoFactorStatus();
             setTwoFactorStatus(isTwoFactorEnabled);
-            setData(LS_KEYS.USER, {
+            await setLSUser({
                 ...getData(LS_KEYS.USER),
                 isTwoFactorEnabled,
             });

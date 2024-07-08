@@ -1,9 +1,9 @@
 import type { Metadata } from "@/media/types/file";
-import {
+import type {
     EncryptedMagicMetadata,
     MagicMetadataCore,
     VISIBILITY_STATE,
-} from "types/magicMetadata";
+} from "@/new/photos/types/magicMetadata";
 
 export interface MetadataFileAttributes {
     encryptedData: string;

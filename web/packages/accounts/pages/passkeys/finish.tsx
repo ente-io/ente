@@ -4,7 +4,12 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { fromB64URLSafeNoPaddingString } from "@ente/shared/crypto/internal/libsodium";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { PAGES } from "../../constants/pages";
@@ -99,7 +104,7 @@ const saveCredentialsAndNavigateTo = async (
     //   user is signing into an existing account).
     const { keyAttributes, encryptedToken, token, id } = decodedResponse;
 
-    setData(LS_KEYS.USER, {
+    await setLSUser({
         ...getData(LS_KEYS.USER),
         token,
         encryptedToken,

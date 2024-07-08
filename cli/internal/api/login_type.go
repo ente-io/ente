@@ -37,6 +37,7 @@ type AuthorizationResponse struct {
 	EncryptedToken     string         `json:"encryptedToken,omitempty"`
 	Token              string         `json:"token,omitempty"`
 	TwoFactorSessionID string         `json:"twoFactorSessionID"`
+	PassKeySessionID   string         `json:"passkeySessionID"`
 	// SrpM2 is sent only if the user is logging via SRP
 	// SrpM2 is the SRP M2 value aka the proof that the server has the verifier
 	SrpM2 *string `json:"srpM2,omitempty"`
@@ -44,4 +45,8 @@ type AuthorizationResponse struct {
 
 func (a *AuthorizationResponse) IsMFARequired() bool {
 	return a.TwoFactorSessionID != ""
+}
+
+func (a *AuthorizationResponse) IsPasskeyRequired() bool {
+	return a.PassKeySessionID != ""
 }

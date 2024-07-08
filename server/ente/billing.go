@@ -50,7 +50,7 @@ const (
 	SubscriptionEndedEmailTemplate = "subscription_ended.html"
 
 	// Subject for `SubscriptionEndedEmailTemplate`.
-	SubscriptionEndedEmailSubject = "Your subscription to ente Photos has ended"
+	SubscriptionEndedEmailSubject = "Your subscription to Ente Photos has ended"
 )
 
 // PaymentProvider represents the payment provider via which a purchase was made

@@ -3,6 +3,7 @@ import "dart:collection";
 import "dart:math" show min;
 
 import "package:computer/computer.dart";
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/configuration.dart";
@@ -204,25 +205,14 @@ class SemanticSearchService {
     await _frameworkInitialization.future;
     _logger.info("Attempting backfill for image embeddings");
     final fileIDs = await _getFileIDsToBeIndexed();
+    if (fileIDs.isEmpty) {
+      return;
+    }
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
     // await _cacheThumbnails(files);
     _queue.addAll(files);
     unawaited(_pollQueue());
-  }
-
-  Future<void> _cacheThumbnails(List<EnteFile> files) async {
-    int counter = 0;
-    const batchSize = 100;
-    for (var i = 0; i < files.length;) {
-      final futures = <Future>[];
-      for (var j = 0; j < batchSize && i < files.length; j++, i++) {
-        futures.add(getThumbnail(files[i]));
-      }
-      await Future.wait(futures);
-      counter += futures.length;
-      _logger.info("$counter/${files.length} thumbnails cached");
-    }
   }
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
@@ -275,6 +265,49 @@ class SemanticSearchService {
     }
 
     return results;
+  }
+
+  Future<List<int>> getMatchingFileIDs(String query, double minScore) async {
+    final textEmbedding = await _getTextEmbedding(query);
+
+    final queryResults =
+        await _getScores(textEmbedding, scoreThreshold: minScore);
+
+    final queryResultIds = <int>[];
+    for (QueryResult result in queryResults) {
+      queryResultIds.add(result.id);
+    }
+
+    final filesMap = await FilesDB.instance.getFilesFromIDs(
+      queryResultIds,
+    );
+    final results = <EnteFile>[];
+
+    final ignoredCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
+    final deletedEntries = <int>[];
+    for (final result in queryResults) {
+      final file = filesMap[result.id];
+      if (file != null && !ignoredCollections.contains(file.collectionID)) {
+        results.add(file);
+      }
+      if (file == null) {
+        deletedEntries.add(result.id);
+      }
+    }
+
+    _logger.info(results.length.toString() + " results");
+
+    if (deletedEntries.isNotEmpty) {
+      unawaited(EmbeddingsDB.instance.deleteEmbeddings(deletedEntries));
+    }
+
+    final matchingFileIDs = <int>[];
+    for (EnteFile file in results) {
+      matchingFileIDs.add(file.uploadedFileID!);
+    }
+
+    return matchingFileIDs;
   }
 
   void _addToQueue(EnteFile file) {
@@ -344,6 +377,21 @@ class SemanticSearchService {
         file,
         embedding,
       );
+    } on FormatException catch (e, _) {
+      _logger.severe(
+        "Could not get embedding for $file because FormatException occured, storing empty result locally",
+        e,
+      );
+      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      await EmbeddingsDB.instance.put(embedding);
+    } on PlatformException catch (e, s) {
+      _logger.severe(
+        "Could not get thumbnail for $file due to PlatformException related to thumbnails, storing empty result locally",
+        e,
+        s,
+      );
+      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      await EmbeddingsDB.instance.put(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }

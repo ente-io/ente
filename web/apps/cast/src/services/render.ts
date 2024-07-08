@@ -1,33 +1,33 @@
+/* TODO: Various lint issues in the decryptEnteFile function */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { FILE_TYPE } from "@/media/file-type";
-import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { createHEICConvertComlinkWorker } from "@/media/worker/heic-convert";
-import type { DedicatedHEICConvertWorker } from "@/media/worker/heic-convert.worker";
-import { nameAndExtension } from "@/next/file";
-import log from "@/next/log";
-import type { ComlinkWorker } from "@/next/worker/comlink-worker";
-import { shuffled } from "@/utils/array";
-import { wait } from "@/utils/promise";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { ApiError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { apiOrigin, customAPIOrigin } from "@ente/shared/network/api";
-import type { AxiosResponse } from "axios";
-import type { CastData } from "services/cast-data";
-import { detectMediaMIMEType } from "services/detect-type";
-import {
+import type {
     EncryptedEnteFile,
     EnteFile,
     FileMagicMetadata,
     FilePublicMagicMetadata,
-} from "types/file";
+} from "@/new/photos/types/file";
+import { nameAndExtension } from "@/next/file";
+import log from "@/next/log";
+import { apiURL, customAPIOrigin } from "@/next/origins";
+import { shuffled } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { ApiError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import type { AxiosResponse } from "axios";
+import type { CastData } from "services/cast-data";
+import { detectMediaMIMEType } from "services/detect-type";
 import { isChromecast } from "./chromecast";
-
-/**
- * If we're using HEIC conversion, then this variable caches the comlink web
- * worker we're using to perform the actual conversion.
- */
-let heicWorker: ComlinkWorker<typeof DedicatedHEICConvertWorker> | undefined;
 
 /**
  * An async generator function that loops through all the files in the
@@ -133,7 +133,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
             // The last to last element is the one that was shown prior to that,
             // and now can be safely revoked.
             if (previousURLs.length > 1)
-                URL.revokeObjectURL(previousURLs.shift());
+                URL.revokeObjectURL(ensure(previousURLs.shift()));
 
             previousURLs.push(url);
 
@@ -164,7 +164,7 @@ const getEncryptedCollectionFiles = async (
     let resp: AxiosResponse;
     do {
         resp = await HTTPService.get(
-            `${apiOrigin()}/cast/diff`,
+            await apiURL("/cast/diff"),
             { sinceTime },
             {
                 "Cache-Control": "no-cache",
@@ -207,8 +207,8 @@ const decryptEnteFile = async (
         metadata.decryptionHeader,
         fileKey,
     );
-    let fileMagicMetadata: FileMagicMetadata;
-    let filePubMagicMetadata: FilePublicMagicMetadata;
+    let fileMagicMetadata: FileMagicMetadata | undefined;
+    let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
@@ -242,11 +242,15 @@ const decryptEnteFile = async (
     if (file.pubMagicMetadata?.data.editedName) {
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
+    // @ts-expect-error TODO: The core types need to be updated to allow the
+    // possibility of missing metadata fields.
     return file;
 };
 
 const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
+    // @ts-expect-error TODO: The core types need to be updated to allow the
+    // possibility of missing info fields (or do they?)
     if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
     // This check is fast but potentially incorrect because in practice we do
@@ -254,8 +258,8 @@ const isFileEligible = (file: EnteFile) => {
     // extension. To detect the actual type, we need to sniff the MIME type, but
     // that requires downloading and decrypting the file first.
     const [, extension] = nameAndExtension(file.metadata.title);
-    if (isNonWebImageFileExtension(extension)) {
-        // Of the known non-web types, we support HEIC.
+    if (extension && needsJPEGConversion(extension)) {
+        // On the web, we only support HEIC conversion.
         return isHEICExtension(extension);
     }
 
@@ -265,12 +269,6 @@ const isFileEligible = (file: EnteFile) => {
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
     return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
-};
-
-export const heicToJPEG = async (heicBlob: Blob) => {
-    let worker = heicWorker;
-    if (!worker) heicWorker = worker = createHEICConvertComlinkWorker();
-    return await (await worker.remote).heicToJPEG(heicBlob);
 };
 
 /**
@@ -321,8 +319,9 @@ const downloadFile = async (
     if (!isImageOrLivePhoto(file))
         throw new Error("Can only cast images and live photos");
 
+    const customOrigin = await customAPIOrigin();
+
     const getFile = () => {
-        const customOrigin = customAPIOrigin();
         if (customOrigin) {
             // See: [Note: Passing credentials for self-hosted file fetches]
             const params = new URLSearchParams({ castToken });
