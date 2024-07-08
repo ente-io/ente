@@ -207,22 +207,17 @@ const pixelRGBBicubic = (
 
 /**
  * Transform {@link inputData} starting at {@link inputStartIndex}.
+ *
+ * @param imageData The {@link ImageData} from which these alignments originate.
  */
 export const warpAffineFloat32List = (
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     faceAlignmentAffineMatrix: number[][],
     faceSize: number,
     inputData: Float32Array,
     inputStartIndex: number,
 ): void => {
-    const { width, height } = imageBitmap;
-
-    // Get the pixel data.
-    const offscreenCanvas = new OffscreenCanvas(width, height);
-    const ctx = ensure(offscreenCanvas.getContext("2d"));
-    ctx.drawImage(imageBitmap, 0, 0, width, height);
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const pixelData = imageData.data;
+    const { width, height, data: pixelData } = imageData;
 
     const transformationMatrix = faceAlignmentAffineMatrix.map((row) =>
         row.map((val) => (val != 1.0 ? val * faceSize : 1.0)),

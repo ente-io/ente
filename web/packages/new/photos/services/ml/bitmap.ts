@@ -9,6 +9,51 @@ import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
 import type { MLWorkerElectron } from "./worker-electron";
 
+export interface ImageBitmapAndData {
+    bitmap: ImageBitmap;
+    data: ImageData;
+}
+
+/**
+ * Return an {@link ImageBitmap} and its {@link ImageData}.
+ *
+ * @param enteFile The {@link EnteFile} to index.
+ *
+ * @param uploadItem If we're called during the upload process, then this will
+ * be set to the {@link UploadItem} that was uploaded. This way, we can directly
+ * use the on-disk file instead of needing to download the original from remote.
+ *
+ * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * our Node.js layer for various functionality.
+ */
+export const imageBitmapAndData = async (
+    enteFile: EnteFile,
+    uploadItem: UploadItem | undefined,
+    electron: MLWorkerElectron,
+): Promise<ImageBitmapAndData> => {
+    const imageBitmap = uploadItem
+        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
+        : await renderableImageBitmap(enteFile);
+
+    // Use an OffscreenCanvas to get the bitmap's data.
+
+    const { width, height } = imageBitmap;
+
+    const offscreenCanvas = new OffscreenCanvas(width, height);
+    const ctx = ensure(offscreenCanvas.getContext("2d"));
+    ctx.drawImage(imageBitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+
+    // TODO-ML: This check isn't needed, keeping it around during scaffolding.
+    if (
+        imageBitmap.width != imageData.width ||
+        imageBitmap.height != imageData.height
+    )
+        throw new Error("Dimension mismatch");
+
+    return { bitmap: imageBitmap, data: imageData };
+};
+
 /**
  * Return a {@link ImageBitmap} that downloads the source image corresponding to
  * {@link enteFile} from remote.

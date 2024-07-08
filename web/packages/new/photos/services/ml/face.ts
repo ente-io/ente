@@ -9,7 +9,6 @@
 
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
@@ -19,11 +18,7 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import type { UploadItem } from "../upload/types";
-import {
-    renderableImageBitmap,
-    renderableUploadItemImageBitmap,
-} from "./bitmap";
+import type { ImageBitmapAndData } from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
     clamp,
@@ -227,51 +222,48 @@ export interface Box {
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    uploadItem: UploadItem | undefined,
+    image: ImageBitmapAndData,
     electron: MLWorkerElectron,
     userAgent: string,
 ): Promise<FaceIndex> => {
-    const imageBitmap = uploadItem
-        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
-        : await renderableImageBitmap(enteFile);
+    const { bitmap: imageBitmap, data: imageData } = image;
+
     const { width, height } = imageBitmap;
     const fileID = enteFile.id;
 
+    const faceIndex = {
+        fileID,
+        width,
+        height,
+        faceEmbedding: {
+            version: faceIndexingVersion,
+            client: userAgent,
+            faces: await indexFaces_(fileID, imageData, electron),
+        },
+    };
+
+    // This step, saving face crops, is not part of the indexing pipeline;
+    // we just do it here since we have already have the ImageBitmap at
+    // hand. Ignore errors that happen during this since it does not impact
+    // the generated face index.
     try {
-        const faceIndex = {
-            fileID,
-            width,
-            height,
-            faceEmbedding: {
-                version: faceIndexingVersion,
-                client: userAgent,
-                faces: await indexFacesInBitmap(fileID, imageBitmap, electron),
-            },
-        };
-        // This step, saving face crops, is not part of the indexing pipeline;
-        // we just do it here since we have already have the ImageBitmap at
-        // hand. Ignore errors that happen during this since it does not impact
-        // the generated face index.
-        try {
-            await saveFaceCrops(imageBitmap, faceIndex);
-        } catch (e) {
-            log.error(`Failed to save face crops for file ${fileID}`, e);
-        }
-        return faceIndex;
-    } finally {
-        imageBitmap.close();
+        await saveFaceCrops(imageBitmap, faceIndex);
+    } catch (e) {
+        log.error(`Failed to save face crops for file ${fileID}`, e);
     }
+
+    return faceIndex;
 };
 
-const indexFacesInBitmap = async (
+const indexFaces_ = async (
     fileID: number,
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     electron: MLWorkerElectron,
 ): Promise<Face[]> => {
-    const { width, height } = imageBitmap;
+    const { width, height } = imageData;
     const imageDimensions = { width, height };
 
-    const yoloFaceDetections = await detectFaces(imageBitmap, electron);
+    const yoloFaceDetections = await detectFaces(imageData, electron);
     const partialResult = yoloFaceDetections.map(
         ({ box, landmarks, score }) => {
             const faceID = makeFaceID(fileID, box, imageDimensions);
@@ -304,7 +296,7 @@ const indexFacesInBitmap = async (
             .map((f) => f.detection);
 
         const alignedFacesData = convertToMobileFaceNetInput(
-            imageBitmap,
+            imageData,
             alignments,
         );
 
@@ -324,12 +316,12 @@ const indexFacesInBitmap = async (
 };
 
 /**
- * Detect faces in the given {@link imageBitmap}.
+ * Detect faces in the given image.
  *
  * The model used is YOLOv5Face, running in an ONNX runtime.
  */
 const detectFaces = async (
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     electron: MLWorkerElectron,
 ): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }: Dimensions) => ({
@@ -340,34 +332,27 @@ const detectFaces = async (
     });
 
     const { yoloInput, yoloSize } =
-        convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
+        convertToYOLOInputFloat32ChannelsFirst(imageData);
     const yoloOutput = await electron.detectFaces(yoloInput);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
     const faceDetections = transformYOLOFaceDetections(
         faces,
         rect(yoloSize),
-        rect(imageBitmap),
+        rect(imageData),
     );
 
     return naiveNonMaxSuppression(faceDetections, 0.4);
 };
 
 /**
- * Convert {@link imageBitmap} into the format that the YOLO face detection
+ * Convert {@link imageData} into the format that the YOLOv5 face detection
  * model expects.
  */
-const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
+const convertToYOLOInputFloat32ChannelsFirst = (imageData: ImageData) => {
     const requiredWidth = 640;
     const requiredHeight = 640;
 
-    const { width, height } = imageBitmap;
-
-    // Create an OffscreenCanvas and set its size.
-    const offscreenCanvas = new OffscreenCanvas(width, height);
-    const ctx = ensure(offscreenCanvas.getContext("2d"));
-    ctx.drawImage(imageBitmap, 0, 0, width, height);
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const pixelData = imageData.data;
+    const { width, height, data: pixelData } = imageData;
 
     // Maintain aspect ratio.
     const scale = Math.min(requiredWidth / width, requiredHeight / height);
@@ -675,7 +660,7 @@ const computeFaceAlignmentUsingSimilarityTransform = (
 };
 
 const convertToMobileFaceNetInput = (
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     faceAlignments: FaceAlignment[],
 ): Float32Array => {
     const faceSize = mobileFaceNetFaceSize;
@@ -686,7 +671,7 @@ const convertToMobileFaceNetInput = (
         const { affineMatrix } = faceAlignments[i]!;
         const faceDataOffset = i * faceSize * faceSize * 3;
         warpAffineFloat32List(
-            imageBitmap,
+            imageData,
             affineMatrix,
             faceSize,
             faceData,
