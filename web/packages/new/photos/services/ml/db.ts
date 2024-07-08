@@ -146,26 +146,15 @@ export const clearFaceDB = async () => {
 };
 
 /**
- * Return a new object suitable for use as the initial value of the entry for a
- * file in the file status store.
- */
-const newFileStatus = (fileID: number): FileStatus => ({
-    fileID,
-    status: "indexable",
-    pending: ["file-ml-clip-face", "onnx-clip"],
-    failureCount: 0,
-});
-
-/**
  * Save the given {@link faceIndex} locally.
  *
  * @param faceIndex A {@link FaceIndex} representing the faces that we detected
- * (and their corresponding embeddings) in some file.
+ * (and their corresponding embeddings) in a particular file.
  *
  * This function adds a new entry for the face index, overwriting any existing
  * ones (No merging is performed, the existing entry is unconditionally
  * overwritten). The file status is updated to remove the entry for face from
- * the pending embeddings. If there are no other pending embeddings, the file
+ * the pending embeddings. If there are no other pending embeddings, the
  * status changes to "indexed".
  */
 export const saveFaceIndex = async (faceIndex: FaceIndex) => {
@@ -192,6 +181,19 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
 };
 
 /**
+ * Return a new object suitable for use as the initial value of the entry for a
+ * file in the file status store.
+ */
+const newFileStatus = (fileID: number): FileStatus => ({
+    fileID,
+    status: "indexable",
+    // TODO-ML:
+    // pending: ["file-ml-clip-face", "onnx-clip"],
+    pending: ["file-ml-clip-face"],
+    failureCount: 0,
+});
+
+/**
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
  */
 export const faceIndex = async (fileID: number) => {
@@ -213,13 +215,8 @@ export const faceIndex = async (fileID: number) => {
 export const addFileEntry = async (fileID: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
-    if ((await tx.store.getKey(fileID)) === undefined) {
-        await tx.store.put({
-            fileID,
-            status: "indexable",
-            failureCount: 0,
-        });
-    }
+    if ((await tx.store.getKey(fileID)) === undefined)
+        await tx.store.put(newFileStatus(fileID));
     return tx.done;
 };
 
