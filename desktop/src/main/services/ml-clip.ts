@@ -58,7 +58,7 @@ const getRGBData = async (jpegFilePath: string): Promise<Float32Array> => {
     const jpegData = await fs.readFile(jpegFilePath);
     const rawImageData = jpeg.decode(jpegData, {
         useTArray: true,
-        formatAsRGBA: false,
+        formatAsRGBA: true,
     }); // TODO: manav: make sure this works on all images, not just jpeg
     const pixelData = rawImageData.data;
 
