@@ -297,7 +297,7 @@ class SemanticSearchService {
     try {
       final int clipAddress = ClipTextEncoder.instance.sessionAddress;
       final textEmbedding = await _computer.compute(
-        ClipTextEncoder.instance.infer,
+        ClipTextEncoder.infer,
         param: {
           "text": query,
           "address": clipAddress,
