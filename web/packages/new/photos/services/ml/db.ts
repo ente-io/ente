@@ -1,5 +1,6 @@
 import log from "@/next/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
+import type { EmbeddingModel } from "./embedding";
 import type { FaceIndex } from "./face";
 
 /**
@@ -53,6 +54,13 @@ interface FileStatus {
      * buckets.
      */
     status: "indexable" | "indexed" | "failed";
+    /**
+     * A list of embeddings that we still need to compute for the file.
+     *
+     * This is guaranteed to be empty if status is "indexed", and will have at
+     * least one entry otherwise.
+     */
+    pending: EmbeddingModel[];
     /**
      * The number of times attempts to index this file failed.
      *
@@ -138,26 +146,47 @@ export const clearFaceDB = async () => {
 };
 
 /**
+ * Return a new object suitable for use as the initial value of the entry for a
+ * file in the file status store.
+ */
+const newFileStatus = (fileID: number): FileStatus => ({
+    fileID,
+    status: "indexable",
+    pending: ["file-ml-clip-face", "onnx-clip"],
+    failureCount: 0,
+});
+
+/**
  * Save the given {@link faceIndex} locally.
  *
  * @param faceIndex A {@link FaceIndex} representing the faces that we detected
  * (and their corresponding embeddings) in some file.
  *
- * This function adds a new entry, overwriting any existing ones (No merging is
- * performed, the existing entry is unconditionally overwritten).
+ * This function adds a new entry for the face index, overwriting any existing
+ * ones (No merging is performed, the existing entry is unconditionally
+ * overwritten). The file status is updated to remove the entry for face from
+ * the pending embeddings. If there are no other pending embeddings, the file
+ * status changes to "indexed".
  */
 export const saveFaceIndex = async (faceIndex: FaceIndex) => {
+    const { fileID } = faceIndex;
+
     const db = await faceDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const indexStore = tx.objectStore("face-index");
     const statusStore = tx.objectStore("file-status");
+
+    const fileStatus =
+        (await statusStore.get(IDBKeyRange.only(fileID))) ??
+        newFileStatus(fileID);
+    fileStatus.pending = fileStatus.pending.filter(
+        (v) => v != "file-ml-clip-face",
+    );
+    if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
+
     await Promise.all([
         indexStore.put(faceIndex),
-        statusStore.put({
-            fileID: faceIndex.fileID,
-            status: "indexed",
-            failureCount: 0,
-        }),
+        statusStore.put(fileStatus),
         tx.done,
     ]);
 };
