@@ -166,7 +166,7 @@ export class MLWorker {
                 // Reset the idle duration if we did pull something.
                 if (didPull) this.idleDuration = idleDurationStart;
             } catch (e) {
-                log.error("Failed to pull face embeddings", e);
+                log.error("Failed to pull embeddings", e);
             }
             // Tick again, even if we got an error.
             //
@@ -234,8 +234,12 @@ expose(MLWorker);
 
 /**
  * Pull embeddings from remote.
+ *
+ * Return true atleast one embedding was pulled.
  */
-const pull = pullFaceEmbeddings;
+const pull = async () => {
+    return pullFaceEmbeddings();
+};
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
@@ -312,15 +316,14 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
 };
 
 /**
- * Index faces in a file, save the persist the results locally, and put them
- * on remote.
+ * Index file, save the persist the results locally, and put them on remote.
  *
  * @param enteFile The {@link EnteFile} to index.
  *
  * @param uploadItem If the file is one which is being uploaded from the current
- * client, then we will also have access to the file's content. In such
- * cases, pass a web {@link File} object to use that its data directly for
- * face indexing. If this is not provided, then the file's contents will be
+ * client, then we will also have access to the file's content. In such cases,
+ * passing a web {@link File} object will directly use that its data when
+ * indexing. Otherwise (when this is not provided), the file's contents will be
  * downloaded and decrypted from remote.
  *
  * @param userAgent The UA of the client that is doing the indexing (us).
