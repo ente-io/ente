@@ -11,6 +11,7 @@ import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
+import { imageBitmapAndData } from "./bitmap";
 import {
     indexableFileIDs,
     markIndexingFailed,
@@ -328,7 +329,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  *
  * @param userAgent The UA of the client that is doing the indexing (us).
  */
-export const index = async (
+const index = async (
     enteFile: EnteFile,
     uploadItem: UploadItem | undefined,
     electron: MLWorkerElectron,
@@ -337,13 +338,16 @@ export const index = async (
     const f = fileLogID(enteFile);
     const startTime = Date.now();
 
+    const image = await imageBitmapAndData(enteFile, uploadItem, electron);
     let faceIndex: FaceIndex;
     try {
-        faceIndex = await indexFaces(enteFile, uploadItem, electron, userAgent);
+        faceIndex = await indexFaces(enteFile, image, electron, userAgent);
     } catch (e) {
         log.error(`Failed to index faces in ${f}`, e);
         await markIndexingFailed(enteFile.id);
         throw e;
+    } finally {
+        image.bitmap.close();
     }
 
     // [Note: Transient and permanent indexing failures]

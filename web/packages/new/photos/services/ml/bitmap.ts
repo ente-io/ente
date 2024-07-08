@@ -9,6 +9,34 @@ import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
 import type { MLWorkerElectron } from "./worker-electron";
 
+export interface ImageBitmapAndData {
+    bitmap: ImageBitmap;
+}
+
+/**
+ * Return an {@link ImageBitmap} and its {@link ImageData}.
+ *
+ * @param enteFile The {@link EnteFile} to index.
+ *
+ * @param uploadItem If we're called during the upload process, then this will
+ * be set to the {@link UploadItem} that was uploaded. This way, we can directly
+ * use the on-disk file instead of needing to download the original from remote.
+ *
+ * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * our Node.js layer for various functionality.
+ */
+export const imageBitmapAndData = async (
+    enteFile: EnteFile,
+    uploadItem: UploadItem | undefined,
+    electron: MLWorkerElectron,
+): Promise<ImageBitmapAndData> => {
+    const imageBitmap = uploadItem
+        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
+        : await renderableImageBitmap(enteFile);
+
+    return { bitmap: imageBitmap };
+};
+
 /**
  * Return a {@link ImageBitmap} that downloads the source image corresponding to
  * {@link enteFile} from remote.

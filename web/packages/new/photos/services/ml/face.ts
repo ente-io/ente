@@ -19,11 +19,7 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import type { UploadItem } from "../upload/types";
-import {
-    renderableImageBitmap,
-    renderableUploadItemImageBitmap,
-} from "./bitmap";
+import type { ImageBitmapAndData } from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
     clamp,
@@ -227,40 +223,37 @@ export interface Box {
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    uploadItem: UploadItem | undefined,
+    image: ImageBitmapAndData,
     electron: MLWorkerElectron,
     userAgent: string,
 ): Promise<FaceIndex> => {
-    const imageBitmap = uploadItem
-        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
-        : await renderableImageBitmap(enteFile);
+    const imageBitmap = image.bitmap;
+
     const { width, height } = imageBitmap;
     const fileID = enteFile.id;
 
+    const faceIndex = {
+        fileID,
+        width,
+        height,
+        faceEmbedding: {
+            version: faceIndexingVersion,
+            client: userAgent,
+            faces: await indexFacesInBitmap(fileID, imageBitmap, electron),
+        },
+    };
+
+    // This step, saving face crops, is not part of the indexing pipeline;
+    // we just do it here since we have already have the ImageBitmap at
+    // hand. Ignore errors that happen during this since it does not impact
+    // the generated face index.
     try {
-        const faceIndex = {
-            fileID,
-            width,
-            height,
-            faceEmbedding: {
-                version: faceIndexingVersion,
-                client: userAgent,
-                faces: await indexFacesInBitmap(fileID, imageBitmap, electron),
-            },
-        };
-        // This step, saving face crops, is not part of the indexing pipeline;
-        // we just do it here since we have already have the ImageBitmap at
-        // hand. Ignore errors that happen during this since it does not impact
-        // the generated face index.
-        try {
-            await saveFaceCrops(imageBitmap, faceIndex);
-        } catch (e) {
-            log.error(`Failed to save face crops for file ${fileID}`, e);
-        }
-        return faceIndex;
-    } finally {
-        imageBitmap.close();
+        await saveFaceCrops(imageBitmap, faceIndex);
+    } catch (e) {
+        log.error(`Failed to save face crops for file ${fileID}`, e);
     }
+
+    return faceIndex;
 };
 
 const indexFacesInBitmap = async (
