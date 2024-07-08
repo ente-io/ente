@@ -1,11 +1,12 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import "dart:io" show File;
-import 'dart:typed_data' show ByteData;
+import "dart:io" show File, Platform;
+import 'dart:typed_data' show ByteBuffer, ByteData, Float32List, Uint8List;
 import 'dart:ui' as ui show Image;
 
 import "package:computer/computer.dart";
 import 'package:logging/logging.dart';
+import "package:onnx_dart/onnx_dart.dart";
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/face/model/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -34,6 +35,7 @@ class FaceDetectionService {
   static const double kIouThreshold = 0.4;
   static const double kMinScoreSigmoidThreshold = 0.7;
   static const int kNumKeypoints = 5;
+  static bool useCustomPlugin = Platform.isAndroid;
 
   bool isInitialized = false;
 
@@ -49,19 +51,23 @@ class FaceDetectionService {
       final model =
           await RemoteAssetsService.instance.getAsset(modelRemotePath);
       final startTime = DateTime.now();
-      sessionAddress = await _computer.compute(
-        _loadModel,
-        param: {
-          "modelPath": model.path,
-        },
-      );
+      if (useCustomPlugin) {
+        final OnnxDart plugin = OnnxDart();
+        final bool? initResult = await plugin.init("YOLO_FACE", model.path);
+        isInitialized = initResult ?? false;
+      } else {
+        sessionAddress = await _computer.compute(
+          _loadModel,
+          param: {
+            "modelPath": model.path,
+          },
+        );
+        isInitialized = sessionAddress != -1;
+      }
       final endTime = DateTime.now();
       _logger.info(
         "Face detection model loaded, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
       );
-      if (sessionAddress != -1) {
-        isInitialized = true;
-      }
     }
   }
 
@@ -80,7 +86,10 @@ class FaceDetectionService {
     ByteData imageByteData,
     int sessionAddress,
   ) async {
-    assert(sessionAddress != 0 && sessionAddress != -1);
+    assert(
+      !useCustomPlugin ? (sessionAddress != 0 && sessionAddress != -1) : true,
+      'sessionAddress should be valid',
+    );
 
     final stopwatch = Stopwatch()..start();
 
@@ -94,18 +103,6 @@ class FaceDetectionService {
       requiredHeight: kInputHeight,
       maintainAspectRatio: true,
     );
-
-    final inputShape = [
-      1,
-      3,
-      kInputHeight,
-      kInputWidth,
-    ];
-    final inputOrt = OrtValueTensor.createTensorWithDataList(
-      inputImageList,
-      inputShape,
-    );
-    final inputs = {'input': inputOrt};
     stopwatchPreprocessing.stop();
     dev.log(
       'Face detection image preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
@@ -117,39 +114,90 @@ class FaceDetectionService {
 
     // Run inference
     final stopwatchInterpreter = Stopwatch()..start();
-    List<OrtValue?>? outputs;
+
+    List<List<List<double>>>? nestedResults = [];
     try {
-      final runOptions = OrtRunOptions();
-      final session = OrtSession.fromAddress(sessionAddress);
-      outputs = session.run(runOptions, inputs);
-      // inputOrt.release();
-      // runOptions.release();
+      if (useCustomPlugin) {
+        nestedResults = await _runCustomPlugin(inputImageList);
+      } else {
+        nestedResults = _runJNIBasedPlugin(
+          sessionAddress,
+          inputImageList,
+        ); // [1, 25200, 16]
+      }
     } catch (e, s) {
-      _logger.severe('Error while running inference: $e \n $s');
+      dev.log('Error while running inference', error: e, stackTrace: s);
       throw YOLOFaceInterpreterRunException();
     }
     stopwatchInterpreter.stop();
-    _logger.info(
-      'interpreter.run is finished, in ${stopwatchInterpreter.elapsedMilliseconds} ms',
+    try {
+      _logger.info(
+        'interpreter.run is finished, in ${stopwatchInterpreter.elapsedMilliseconds} ms',
+      );
+
+      final relativeDetections =
+          _yoloPostProcessOutputs(nestedResults!, newSize);
+      stopwatch.stop();
+      _logger.info(
+        'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',
+      );
+
+      return (relativeDetections, originalSize);
+    } catch (e, s) {
+      _logger.severe('Error while post processing', e, s);
+      rethrow;
+    }
+  }
+
+  static List<List<List<double>>>? _runJNIBasedPlugin(
+    int sessionAddress,
+    Float32List inputImageList,
+  ) {
+    final inputShape = [
+      1,
+      3,
+      kInputHeight,
+      kInputWidth,
+    ];
+    final inputOrt = OrtValueTensor.createTensorWithDataList(
+      inputImageList,
+      inputShape,
     );
+    final inputs = {'input': inputOrt};
 
-    final relativeDetections = _yoloPostProcessOutputs(outputs, newSize);
+    final runOptions = OrtRunOptions();
+    final session = OrtSession.fromAddress(sessionAddress);
+    final List<OrtValue?>? outputs = session.run(runOptions, inputs);
+    // inputOrt.release();
+    // runOptions.release();
+    return outputs?[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+  }
 
-    stopwatch.stop();
-    _logger.info(
-      'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',
+  static Future<List<List<List<double>>>> _runCustomPlugin(
+    Float32List inputImageList,
+  ) async {
+    final OnnxDart plugin = OnnxDart();
+    final result = await plugin.predict(
+      inputImageList,
+      "YOLO_FACE",
     );
-
-    return (relativeDetections, originalSize);
+    final List<List<List<double>>> reconstructedTensor = [];
+    for (int i = 0; i < result.length; i += 25200 * 16) {
+      final List<List<double>> outerArray = [];
+      for (int j = 0; j < 25200; j++) {
+        final List<double> innerArray =
+            result.sublist(i + j * 16, i + (j + 1) * 16).cast<double>();
+        outerArray.add(innerArray);
+      }
+      reconstructedTensor.add(outerArray);
+    }
+    return reconstructedTensor;
   }
 
   static List<FaceDetectionRelative> _yoloPostProcessOutputs(
-    List<OrtValue?>? outputs,
+    List<List<List<double>>> nestedResults,
     Dimensions newSize,
   ) {
-    // // Get output tensors
-    final nestedResults =
-        outputs?[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
     final firstResults = nestedResults[0]; // [25200, 16]
 
     // Filter output
@@ -159,11 +207,6 @@ class FaceDetectionService {
       kInputHeight,
       results: firstResults,
     );
-
-    // Release outputs
-    // outputs?.forEach((element) {
-    //   element?.release();
-    // });
 
     // Account for the fact that the aspect ratio was maintained
     for (final faceDetection in relativeDetections) {

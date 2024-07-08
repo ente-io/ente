@@ -744,6 +744,7 @@ class FaceMlService {
       final sendPort = message[2] as SendPort;
 
       try {
+        await FaceDetectionService.instance.init();
         switch (function) {
           case FaceMlOperation.analyzeImage:
             final time = DateTime.now();
@@ -838,7 +839,6 @@ class FaceMlService {
 
     final String? filePath =
         await _getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
-
     if (filePath == null) {
       _logger.warning(
         "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null",
