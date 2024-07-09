@@ -3,6 +3,7 @@ package io.ente.photos.onnx_dart
 import android.content.Context
 import androidx.annotation.NonNull
 import ai.onnxruntime.*
+import java.util.EnumMap
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -30,6 +31,9 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   private val sessionMap = ConcurrentHashMap<ModelType, ModelState>()
   private lateinit var context: Context
 
+  enum class ModelType {
+    CLIP_TEXT, CLIP_VISUAL, YOLO_FACE, MOBILENET_FACE
+  }
   companion object {
     const val DEFAULT_SESSION_COUNT = 1
     const val K_INPUT_WIDTH = 640
@@ -37,9 +41,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
     const val K_NUM_CHANNELS = 3
   }
 
-  enum class ModelType {
-    CLIP_TEXT, CLIP_VISUAL, YOLO_FACE, MOBILENET_FACE
-  }
+
 
   data class ModelState(
     var isInitialized: Boolean = false,
@@ -170,30 +172,15 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val inputs = mapOf("input" to inputTensor)
         val outputs = session.run(inputs)
         Log.d("OnnxFlutterPlugin", "Output shape: ${outputs.size()}")
-
         inputTensor.close()
-        val totalSize = 1 * 25200 * 16
-        val flatArray = FloatArray(totalSize) { index -> index + 1.0f }
-
-        val outputTensor2 = Array(1) { outerIndex ->
-          Array(25200) { innerIndex ->
-            val startIndex = (outerIndex * 25200 + innerIndex) * 16
-            flatArray.sliceArray(startIndex until startIndex + 16)
-          }
-        }
         val outputTensor = outputs[0].value as Array<Array<FloatArray>>
         Log.d("OnnxFlutterPlugin", "Output2 shape: ${outputTensor.size}")
-
         outputs.close()
         // Send the result back to the Dart layer
         val flatList = outputTensor.flatten().flatMap { it.toList() }
-        val flatList2 = outputTensor2.flatten().flatMap { it.toList() }
-
 
         withContext(Dispatchers.Main) {
           result.success(flatList)
-//          result.success(flatList2)
-
         }
       } catch (e: OrtException) {
         withContext(Dispatchers.Main) {
