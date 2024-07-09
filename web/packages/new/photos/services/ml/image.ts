@@ -3,12 +3,7 @@
 
 import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
-
-/**
- * Clamp {@link value} to between {@link min} and {@link max}, inclusive.
- */
-export const clamp = (value: number, min: number, max: number) =>
-    Math.min(max, Math.max(min, value));
+import { clamp } from "./math";
 
 /**
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},

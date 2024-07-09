@@ -1,4 +1,10 @@
 /**
+ * Clamp {@link value} to between {@link min} and {@link max}, inclusive.
+ */
+export const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+/**
  * Return the dot-product of two vectors.
  *
  * Dot product is the component-wise product of the corresponding elements of

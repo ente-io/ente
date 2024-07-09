@@ -21,12 +21,12 @@ import {
 import type { ImageBitmapAndData } from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
-    clamp,
     grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
 import type { MLWorkerElectron } from "./worker-electron";
+import { clamp } from "./math";
 
 /**
  * The version of the face indexing pipeline implemented by the current client.
