@@ -18,7 +18,11 @@ import {
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
+import {
+    pullCLIPEmbeddings,
+    pullFaceEmbeddings,
+    putFaceIndex,
+} from "./embedding";
 import { type FaceIndex, indexFaces } from "./face";
 import type { MLWorkerElectron } from "./worker-electron";
 
@@ -239,7 +243,24 @@ expose(MLWorker);
  * Return true atleast one embedding was pulled.
  */
 const pull = async () => {
-    return pullFaceEmbeddings();
+    const res = await Promise.allSettled([
+        pullFaceEmbeddings(),
+        // TODO-ML: clip-test
+        pullCLIPEmbeddings(),
+    ]);
+    for (const r of res) {
+        switch (r.status) {
+            case "fulfilled":
+                // Return true if any pulled something.
+                if (r.value) return true;
+                break;
+            case "rejected":
+                // Throw if any failed.
+                throw r.reason;
+        }
+    }
+    // Return false if neither pulled anything.
+    return false;
 };
 
 /**
