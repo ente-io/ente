@@ -24,7 +24,7 @@ Future<bool> requestAuthentication(
       context,
       savedPin,
       savedPassword,
-      isOnOpeningApp: isOpeningApp,
+      isAuthenticatingOnAppLaunch: isOpeningApp,
       isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
     );
   } else {

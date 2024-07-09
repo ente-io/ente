@@ -18,15 +18,23 @@ import 'package:pinput/pinput.dart';
 class LockScreenPin extends StatefulWidget {
   const LockScreenPin({
     super.key,
-    this.isAuthenticating = false,
-    this.isOnOpeningApp = false,
+    this.isChangingLockScreenSettings = false,
+    this.isAuthenticatingOnAppLaunch = false,
     this.isAuthenticatingForInAppChange = false,
     this.authPin,
   });
 
-  //Is false when setting a new password
-  final bool isAuthenticating;
-  final bool isOnOpeningApp;
+  /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
+  /// Set to true when the app requires the user to authenticate before allowing
+  /// changes to the lock screen settings.
+  final bool isChangingLockScreenSettings;
+
+  /// [isAuthenticatingOnAppLaunch] Authentication required on app launch.
+  /// Set to true when the app requires the user to authenticate immediately upon opening.
+  final bool isAuthenticatingOnAppLaunch;
+
+  /// [isAuthenticatingForInAppChange] Authentication required for in-app changes (e.g., email, password).
+  /// Set to true when the app requires the to authenticate for sensitive actions like email, password changes.
   final bool isAuthenticatingForInAppChange;
   final String? authPin;
   @override
@@ -64,7 +72,8 @@ class _LockScreenPinState extends State<LockScreenPin> {
     if (widget.authPin == base64Encode(hash)) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      widget.isOnOpeningApp || widget.isAuthenticatingForInAppChange
+      widget.isAuthenticatingOnAppLaunch ||
+              widget.isAuthenticatingForInAppChange
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -83,7 +92,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
         isPinValid = false;
       });
 
-      if (widget.isOnOpeningApp) {
+      if (widget.isAuthenticatingOnAppLaunch) {
         invalidAttemptsCount++;
         if (invalidAttemptsCount > 4) {
           await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
@@ -95,7 +104,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
   }
 
   Future<void> _confirmPin(String code) async {
-    if (widget.isAuthenticating) {
+    if (widget.isChangingLockScreenSettings) {
       await confirmPinAuth(code);
       return;
     } else {
@@ -222,7 +231,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
             ),
           ),
           Text(
-            widget.isAuthenticating
+            widget.isChangingLockScreenSettings
                 ? S.of(context).enterPin
                 : S.of(context).setNewPin,
             style: textTheme.bodyBold,

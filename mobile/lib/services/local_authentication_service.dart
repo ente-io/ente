@@ -43,7 +43,7 @@ class LocalAuthenticationService {
     BuildContext context,
     String? savedPin,
     String? savedPassword, {
-    bool isOnOpeningApp = false,
+    bool isAuthenticatingOnAppLaunch = false,
     bool isAuthenticatingForInAppChange = false,
   }) async {
     if (savedPassword != null) {
@@ -51,9 +51,9 @@ class LocalAuthenticationService {
         MaterialPageRoute(
           builder: (BuildContext context) {
             return LockScreenPassword(
-              isAuthenticating: true,
+              isChangingLockScreenSettings: true,
               isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
-              isOnOpeningApp: isOnOpeningApp,
+              isAuthenticatingOnAppLaunch: isAuthenticatingOnAppLaunch,
               authPass: savedPassword,
             );
           },
@@ -68,9 +68,9 @@ class LocalAuthenticationService {
         MaterialPageRoute(
           builder: (BuildContext context) {
             return LockScreenPin(
-              isAuthenticating: true,
+              isChangingLockScreenSettings: true,
               isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
-              isOnOpeningApp: isOnOpeningApp,
+              isAuthenticatingOnAppLaunch: isAuthenticatingOnAppLaunch,
               authPin: savedPin,
             );
           },
