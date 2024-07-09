@@ -17,11 +17,20 @@
          * implies "ESNext.*"), "DOM.Iterable" (the ability to iterate over DOM
          * elements) is not a subset of "DOM" and needs to be listed out
          * explicitly.
-         *
-         * Note that we don't need to specify the `target` compilerOption, since
-         * tsc isn't actually generating (emitting) the JavaScript.
          */
         "lib": ["ESnext", "DOM", "DOM.Iterable", "WebWorker"],
+
+        /**
+         * We don't potentially need to specify the `target` compilerOption,
+         * since tsc isn't actually generating (emitting) the JavaScript.
+         * However, without a target TypeScript becomes very conservative, and
+         * complains about things like
+         *
+         * > Type 'Float32Array' can only be iterated through when using the
+         * > '--downlevelIteration' flag or with a '--target' of 'es2015' or
+         * > higher.
+         */
+         "target": "ES2015",
 
         /*
          * The module system to assume the generated JavaScript will use.
