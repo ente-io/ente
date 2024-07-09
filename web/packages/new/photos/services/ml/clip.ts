@@ -202,29 +202,17 @@ export const clipMatches = async (
         .then((e) => (e ? normalizedEmbedding(e) : e));
     if (!textEmbedding) return undefined;
 
-    const imageEmbeddings = await clipIndexes();
-
-    return new Map<number, number>(
-        (
-            await Promise.all(
-                imageEmbeddings.map(
-                    async ({
-                        fileID,
-                        embedding,
-                    }): Promise<[number, number]> => [
-                        fileID,
-                        await clipMatchScore(embedding, textEmbedding),
-                    ],
-                ),
+    return new Map(
+        (await clipIndexes())
+            .map(
+                ({ fileID, embedding }) =>
+                    [fileID, clipMatchScore(embedding, textEmbedding)] as const,
             )
-        ).filter(([, score]) => score >= 0.23),
+            .filter(([, score]) => score >= 0.23),
     );
 };
 
-const clipMatchScore = async (
-    imageEmbedding: number[],
-    textEmbedding: number[],
-) => {
+const clipMatchScore = (imageEmbedding: number[], textEmbedding: number[]) => {
     if (imageEmbedding.length != textEmbedding.length)
         throw Error(
             `CLIP image embeddings (${imageEmbedding.length}) and text embeddings (${textEmbedding.length}) length mismatch`,
