@@ -16,12 +16,21 @@ class LockScreenSettings {
   static const saltKey = "ls_salt";
   static const keyInvalidAttempts = "ls_invalid_attempts";
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
+  static const autoLockTime = "ls_auto_lock_time";
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
 
   void init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
+  }
+
+  Future<void> setAutoLockTime(Duration duration) async {
+    await _preferences.setInt(autoLockTime, duration.inMilliseconds);
+  }
+
+  int getAutoLockTime() {
+    return _preferences.getInt(autoLockTime) ?? 0;
   }
 
   Future<void> setLastInvalidAttemptTime(int time) async {

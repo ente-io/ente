@@ -8,10 +8,12 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
 import "package:photos/utils/lock_screen_settings.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -26,10 +28,11 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
-
+  late int autoLockTimeInMilliseconds;
   @override
   void initState() {
     super.initState();
+    autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
     _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
@@ -86,6 +89,17 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     });
   }
 
+  Future<void> _onAutolock() async {
+    await routeToPage(
+      context,
+      const LockScreenAutoLock(),
+    ).then((value) {
+      setState(() {
+        autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
+      });
+    });
+  }
+
   Future<void> _onToggleSwitch() async {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
@@ -94,6 +108,18 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       _initializeSettings();
       appLock = !appLock;
     });
+  }
+
+  String _formatTime(Duration duration) {
+    if (duration.inHours != 0) {
+      return "${duration.inHours}hr";
+    } else if (duration.inMinutes != 0) {
+      return "${duration.inMinutes}m";
+    } else if (duration.inSeconds != 0) {
+      return "${duration.inSeconds}s";
+    } else {
+      return "Disable";
+    }
   }
 
   @override
@@ -203,6 +229,25 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         isPasswordEnabled ? Icons.check : null,
                                     trailingIconColor: colorTheme.tabIcon,
                                     onTap: () => _passwordLock(),
+                                  ),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: "Auto lock",
+                                      subTitle: _formatTime(
+                                        Duration(
+                                          milliseconds: _lockscreenSetting
+                                              .getAutoLockTime(),
+                                        ),
+                                      ),
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    singleBorderRadius: 8,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    trailingIconColor: colorTheme.tabIcon,
+                                    onTap: () => _onAutolock(),
                                   ),
                                 ],
                               )
