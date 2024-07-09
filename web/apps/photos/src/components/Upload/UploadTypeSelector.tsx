@@ -162,8 +162,8 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                 {intent == "collect"
                     ? t("select_photos")
                     : intent == "import"
-                      ? t("IMPORT")
-                      : t("UPLOAD")}
+                      ? t("import")
+                      : t("upload")}
             </DialogTitleWithCloseButton>
 
             <Box p={1.5} pt={0.5}>
@@ -192,7 +192,7 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                     )}
                 </Stack>
                 <Typography p={1.5} pt={4} color="text.muted">
-                    {t("DRAG_AND_DROP_HINT")}
+                    {t("drag_and_drop_hint")}
                 </Typography>
             </Box>
         </>
