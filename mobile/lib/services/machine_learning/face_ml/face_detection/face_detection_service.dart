@@ -78,9 +78,9 @@ class FaceDetectionService extends MlModel {
     List<List<List<double>>>? nestedResults = [];
     try {
       if (useEntePlugin) {
-        nestedResults = await _runCustomPlugin(inputImageList);
+        nestedResults = await _runEntePlugin(inputImageList);
       } else {
-        nestedResults = _runJNIBasedPlugin(
+        nestedResults = _runFFIBasedPlugin(
           sessionAddress,
           inputImageList,
         ); // [1, 25200, 16]
@@ -109,7 +109,7 @@ class FaceDetectionService extends MlModel {
     }
   }
 
-  static List<List<List<double>>>? _runJNIBasedPlugin(
+  static List<List<List<double>>>? _runFFIBasedPlugin(
     int sessionAddress,
     Float32List inputImageList,
   ) {
@@ -133,13 +133,13 @@ class FaceDetectionService extends MlModel {
     return outputs?[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
   }
 
-  static Future<List<List<List<double>>>> _runCustomPlugin(
+  static Future<List<List<List<double>>>> _runEntePlugin(
     Float32List inputImageList,
   ) async {
     final OnnxDart plugin = OnnxDart();
     final result = await plugin.predict(
       inputImageList,
-      "YOLO_FACE",
+      _modelName,
     );
     final List<List<List<double>>> reconstructedTensor = [];
     for (int i = 0; i < result!.length; i += 25200 * 16) {

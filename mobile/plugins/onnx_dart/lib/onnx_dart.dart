@@ -21,7 +21,8 @@ class OnnxDart {
     String modelType, {
     int sessionAddress = 0,
   }) async {
-    return OnnxDartPlatform.instance
+    final result = await OnnxDartPlatform.instance
         .predict(inputData, modelType, sessionAddress: sessionAddress);
+    return result;
   }
 }

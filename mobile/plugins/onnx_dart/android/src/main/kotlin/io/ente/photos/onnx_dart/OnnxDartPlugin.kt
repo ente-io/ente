@@ -175,13 +175,11 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val inputs = mapOf("input" to inputTensor)
         val outputs = session.run(inputs)
         Log.d(TAG, "Output shape: ${outputs.size()}")
-
         val outputTensor = outputs[0].value as Array<Array<FloatArray>>
         val flatList = outputTensor.flatMapToFloatArray()
         withContext(Dispatchers.Main) {
           result.success(flatList)
         }
-        Log.d(TAG, "Closing output tensor and input tensor")
         outputs.close()
         inputTensor.close()
       } catch (e: OrtException) {

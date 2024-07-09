@@ -40,7 +40,7 @@ import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum FaceMlOperation { analyzeImage }
+enum FaceMlOperation { analyzeImage, loadModels }
 
 /// This class is responsible for running the full face ml pipeline on images.
 ///
@@ -69,6 +69,7 @@ class MLService {
 
   bool _isInitialized = false;
   bool _isModelsInitialized = false;
+  bool _isModelsInitUsingEntePlugin = false;
   bool _isIsolateSpawned = false;
 
   late String client;
@@ -546,6 +547,30 @@ class MLService {
     });
   }
 
+  Future<void> _initModelUsingEntePlugin() async {
+    return _initModelLock.synchronized(() async {
+      if (_isModelsInitUsingEntePlugin) return;
+      _logger.info('initModelUsingEntePlugin called');
+
+      // Get client name
+      final packageInfo = await PackageInfo.fromPlatform();
+      client = "${packageInfo.packageName}/${packageInfo.version}";
+      _logger.info("client: $client");
+
+      // Initialize models
+      try {
+        await _runInIsolate(
+          (FaceMlOperation.loadModels, {}),
+        );
+        _isModelsInitUsingEntePlugin = true;
+      } catch (e, s) {
+        _logger.severe("Could not initialize clip image", e, s);
+      }
+      _logger.info('initModelUsingEntePlugin done');
+      _logStatus();
+    });
+  }
+
   Future<void> _releaseModels() async {
     return _initModelLock.synchronized(() async {
       _logger.info("dispose called");
@@ -596,8 +621,9 @@ class MLService {
   }
 
   Future<void> _ensureReadyForInference() async {
-    await _initModels();
     await _initIsolate();
+    await _initModels();
+    await _initModelUsingEntePlugin();
   }
 
   /// The main execution function of the isolate.
@@ -621,6 +647,12 @@ class MLService {
               "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
             );
             sendPort.send(result.toJsonString());
+            break;
+          case FaceMlOperation.loadModels:
+            await FaceDetectionService.instance.loadModel(useEntePlugin: true);
+            await FaceEmbeddingService.instance.loadModel(useEntePlugin: true);
+            await ClipImageEncoder.instance.loadModel(useEntePlugin: true);
+            sendPort.send(true);
             break;
         }
       } catch (e, stackTrace) {
