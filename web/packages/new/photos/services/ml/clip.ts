@@ -3,6 +3,7 @@ import type { Electron } from "@/next/types/ipc";
 import type { ImageBitmapAndData } from "./bitmap";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
+import { cosineSimilarity, norm } from "./math";
 import type { MLWorkerElectron } from "./worker-electron";
 
 /**
@@ -121,9 +122,7 @@ const computeEmbedding = async (
     electron: MLWorkerElectron,
 ): Promise<number[]> => {
     const clipInput = convertToCLIPInput(imageData);
-    return normalizedEmbedding(
-        await electron.computeCLIPImageEmbedding(clipInput),
-    );
+    return normalized(await electron.computeCLIPImageEmbedding(clipInput));
 };
 
 /**
@@ -170,10 +169,10 @@ const convertToCLIPInput = (imageData: ImageData) => {
     return clipInput;
 };
 
-const normalizedEmbedding = (embedding: Float32Array) => {
-    const norm = embedding.reduce((a, v) => a + v * v, 0);
-    const sqrtNorm = Math.sqrt(norm);
-    return Array.from(embedding).map((v) => v / sqrtNorm);
+const normalized = (embedding: Float32Array) => {
+    const nums = Array.from(embedding);
+    const n = norm(nums);
+    return nums.map((v) => v / n);
 };
 
 /**
@@ -200,29 +199,10 @@ export const clipMatches = async (
     const t = await electron.computeCLIPTextEmbeddingIfAvailable(searchPhrase);
     if (!t) return undefined;
 
-    const textEmbedding = normalizedEmbedding(t);
-
-    return new Map(
-        (await clipIndexes())
-            .map(
-                ({ fileID, embedding }) =>
-                    [fileID, clipMatchScore(embedding, textEmbedding)] as const,
-            )
-            .filter(([, score]) => score >= 0.23),
+    const textEmbedding = normalized(t);
+    const items = (await clipIndexes()).map(
+        ({ fileID, embedding }) =>
+            [fileID, cosineSimilarity(embedding, textEmbedding)] as const,
     );
-};
-
-const clipMatchScore = (imageEmbedding: number[], textEmbedding: number[]) => {
-    if (imageEmbedding.length != textEmbedding.length)
-        throw Error(
-            `CLIP image embedding (${imageEmbedding.length}) and text embedding (${textEmbedding.length}) length mismatch`,
-        );
-
-    let score = 0;
-    for (let i = 0; i < imageEmbedding.length; i++) {
-        // We checked the length above.
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        score += imageEmbedding[i]! * textEmbedding[i]!;
-    }
-    return score;
+    return new Map(items.filter(([, score]) => score >= 0.23));
 };
