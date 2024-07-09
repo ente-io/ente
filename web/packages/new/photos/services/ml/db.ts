@@ -272,11 +272,11 @@ export const faceIndex = async (fileID: number) => {
 };
 
 /**
- * Return all CLIP embeddings present locally.
+ * Return all CLIP indexes present locally.
  */
-export const clipEmbeddings = async () => {
+export const clipIndexes = async () => {
     const db = await mlDB();
-    return (await db.getAll("clip-index")).map((index) => index.embedding);
+    return await db.getAll("clip-index");
 };
 
 /**

@@ -24,8 +24,6 @@ import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
-// const CLIP_SCORE_THRESHOLD = 0.23;
-
 export const getDefaultOptions = async () => {
     return [
         // TODO-ML(MR): Skip this for now if indexing is disabled (eventually
