@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Lägg till fler bilder",
     "add_photos_one": "Lägg till ett (1) objekt",
     "add_photos_other": "Lägg till {{count, number}} objekt",
-    "SELECT_PHOTOS": "Välj bilder",
+    "select_photos": "Välj bilder",
     "FILE_UPLOAD": "Ladda upp",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Förbereder att ladda upp",

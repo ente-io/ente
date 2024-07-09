@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Mehr Fotos hinzufügen",
     "add_photos_one": "Eine Datei hinzufügen",
     "add_photos_other": "{{count, number}} Dateien hinzufügen",
-    "SELECT_PHOTOS": "Foto auswählen",
+    "select_photos": "Foto auswählen",
     "FILE_UPLOAD": "Datei hochladen",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Hochladen wird vorbereitet",

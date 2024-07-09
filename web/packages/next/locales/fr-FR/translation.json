@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Ajouter plus de photos",
     "add_photos_one": "Ajouter une photo",
     "add_photos_other": "Ajouter {{count}} photos",
-    "SELECT_PHOTOS": "Sélectionner des photos",
+    "select_photos": "Sélectionner des photos",
     "FILE_UPLOAD": "Fichier chargé",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Préparation du chargement",

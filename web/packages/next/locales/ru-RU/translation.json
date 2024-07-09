@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Добавить больше фото",
     "add_photos_one": "Добавить 1 элемент",
     "add_photos_other": "Добавить {{count, number}} элементов",
-    "SELECT_PHOTOS": "Выбрать фотографии",
+    "select_photos": "Выбрать фотографии",
     "FILE_UPLOAD": "Загрузка файла",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Подготовка к загрузке",

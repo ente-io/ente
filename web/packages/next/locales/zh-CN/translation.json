@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "添加更多的照片",
     "add_photos_one": "添加1个项目",
     "add_photos_other": "添加 {{count, number}} 个项目",
-    "SELECT_PHOTOS": "选择照片",
+    "select_photos": "选择照片",
     "FILE_UPLOAD": "上传文件",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "正在准备上传",

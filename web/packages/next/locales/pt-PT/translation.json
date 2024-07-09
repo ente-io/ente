@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Adicionar mais fotos",
     "add_photos_one": "Adicionar item",
     "add_photos_other": "Adicionar {{count, number}} itens",
-    "SELECT_PHOTOS": "Selecionar fotos",
+    "select_photos": "Selecionar fotos",
     "FILE_UPLOAD": "Enviar Ficheiro",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "",

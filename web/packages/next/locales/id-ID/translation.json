@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Tambahkan lebih banyak foto",
     "add_photos_one": "Tambahkan item",
     "add_photos_other": "Tambahkan {{count, number}} item",
-    "SELECT_PHOTOS": "Pilih foto",
+    "select_photos": "Pilih foto",
     "FILE_UPLOAD": "Unggah File",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Bersiap untuk mengunggah",

@@ -160,7 +160,7 @@ const DefaultOptions: React.FC<OptionsProps> = ({
         <>
             <DialogTitleWithCloseButton onClose={onClose}>
                 {intent == "collect"
-                    ? t("SELECT_PHOTOS")
+                    ? t("select_photos")
                     : intent == "import"
                       ? t("IMPORT")
                       : t("UPLOAD")}

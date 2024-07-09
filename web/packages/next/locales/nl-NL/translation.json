@@ -54,7 +54,7 @@
     "ADD_MORE_PHOTOS": "Meer foto's toevoegen",
     "add_photos_one": "1 foto toevoegen",
     "add_photos_other": "{{count, number}} foto's toevoegen",
-    "SELECT_PHOTOS": "Selecteer foto's",
+    "select_photos": "Selecteer foto's",
     "FILE_UPLOAD": "Bestand uploaden",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Upload wordt voorbereid",
