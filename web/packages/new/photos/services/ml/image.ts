@@ -80,7 +80,7 @@ const pixelRGBA = (
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},
  * {@link fy}) using bicubic interpolation.
  */
-const pixelRGBBicubic = (
+export const pixelRGBBicubic = (
     fx: number,
     fy: number,
     imageData: Uint8ClampedArray,

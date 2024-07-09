@@ -337,9 +337,10 @@ export interface Electron {
     /**
      * Return a CLIP embedding of the given image.
      *
-     * See: [Note: CLIP based magic search]
+     * See: [Note: Natural language search using CLIP]
      *
-     * @param jpegImageData The raw bytes of the image encoded as an JPEG.
+     * The input is a opaque binary data whose internal structure is specific to
+     * our implementation and the ML model (CLIP) we use.
      *
      * @returns A CLIP embedding.
      */
@@ -361,7 +362,7 @@ export interface Electron {
      * embeddings are used as part of deducing user initiated search results,
      * and we don't want to block that interaction on a large network request.
      *
-     * See: [Note: CLIP based magic search]
+     * See: [Note: Natural language search using CLIP]
      *
      * @param text The string whose embedding we want to compute.
      *

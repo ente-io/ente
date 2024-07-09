@@ -1,5 +1,10 @@
+// See: [Note: Allowing non-null assertions selectively]
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { EnteFile } from "@/new/photos/types/file";
+import { ensure } from "@/utils/ensure";
 import type { ImageBitmapAndData } from "./bitmap";
+import { pixelRGBBicubic } from "./image";
 import type { MLWorkerElectron } from "./worker-electron";
 
 /**
@@ -12,6 +17,47 @@ export const clipIndexingVersion = 1;
  *
  * See {@link FaceIndex} for a similar structure with more comprehensive
  * documentation.
+ *
+ * ---
+ *
+ * [Note: Natural language search using CLIP]
+ *
+ * CLIP (Contrastive Language-Image Pretraining) is a neural network trained on
+ * (image, text) pairs. It can be thought of as two separate (but jointly
+ * trained) encoders - one for images, and one for text - that both map to the
+ * same embedding space.
+ *
+ * We use this for natural language search within the app:
+ *
+ * 1. Pre-compute an embedding for each image.
+ *
+ * 2. When the user searches, compute an embedding for the search term.
+ *
+ * 3. Use cosine similarity to find the find the image (embedding) closest to
+ *    the text (embedding).
+ *
+ * More details are in our [blog
+ * post](https://ente.io/blog/image-search-with-clip-ggml/) that describes the
+ * initial launch of this feature using the GGML runtime.
+ *
+ * Since the initial launch, we've switched over to another runtime,
+ * [ONNX](https://onnxruntime.ai) and have made other implementation changes,
+ * but the overall gist remains the same.
+ *
+ * Note that we don't train the neural network - we only use one of the publicly
+ * available pre-trained neural networks for inference. These neural networks
+ * are wholly defined by their connectivity and weights. ONNX, our ML runtimes,
+ * loads these weights and instantiates a running network that we can use to
+ * compute the embeddings.
+ *
+ * Theoretically, the same CLIP model can be loaded by different frameworks /
+ * runtimes, but in practice each runtime has its own preferred format, and
+ * there are also quantization tradeoffs. So there is a specific model (a binary
+ * encoding of weights) tied to our current runtime that we use.
+ *
+ * To ensure that the embeddings, for the most part, can be shared, whenever
+ * possible we try to ensure that all the preprocessing steps, and the model
+ * itself, is the same across clients - web and mobile.
  */
 export interface CLIPIndex {
     /** The ID of the {@link EnteFile} whose index this is. */
@@ -68,10 +114,67 @@ export const indexCLIP = async (
 
 const indexCLIP_ = async (
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _imageData: ImageData,
+    imageData: ImageData,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _electron: MLWorkerElectron,
+    electron: MLWorkerElectron,
     // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<number[]> => {
-    throw new Error("TODO");
+    const clipInput = convertToCLIPInput(imageData);
+    const embedding = await electron.computeCLIPImageEmbedding(clipInput);
+    return Array.from(normalizeEmbedding(embedding));
+};
+
+/**
+ * Convert {@link imageData} into the format that the CLIP model expects.
+ */
+const convertToCLIPInput = (imageData: ImageData) => {
+    const requiredWidth = 224;
+    const requiredHeight = 224;
+
+    const mean: number[] = [0.48145466, 0.4578275, 0.40821073];
+    const std: number[] = [0.26862954, 0.26130258, 0.27577711];
+
+    const { width, height, data: pixelData } = imageData;
+
+    // Maintain aspect ratio.
+    const scale = Math.max(requiredWidth / width, requiredHeight / height);
+
+    const scaledWidth = Math.round(width * scale);
+    const scaledHeight = Math.round(height * scale);
+    const widthOffset = Math.max(0, scaledWidth - requiredWidth) / 2;
+    const heightOffset = Math.max(0, scaledHeight - requiredHeight) / 2;
+
+    const clipInput = new Float32Array(3 * requiredWidth * requiredHeight);
+
+    // Populate the Float32Array with normalized pixel values.
+    let pi = 0;
+    const cOffsetG = requiredHeight * requiredWidth; // ChannelOffsetGreen
+    const cOffsetB = 2 * requiredHeight * requiredWidth; // ChannelOffsetBlue
+    for (let h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
+        for (let w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
+            const { r, g, b } = pixelRGBBicubic(
+                w / scale,
+                h / scale,
+                pixelData,
+                width,
+                height,
+            );
+            clipInput[pi] = (r / 255.0 - mean[0]!) / std[0]!;
+            clipInput[pi + cOffsetG] = (g / 255.0 - mean[1]!) / std[1]!;
+            clipInput[pi + cOffsetB] = (b / 255.0 - mean[2]!) / std[2]!;
+            pi++;
+        }
+    }
+    return clipInput;
+};
+
+const normalizeEmbedding = (embedding: Float32Array) => {
+    let normalization = 0;
+    for (const v of embedding) normalization += v * v;
+
+    const sqrtNormalization = Math.sqrt(normalization);
+    for (let index = 0; index < embedding.length; index++)
+        embedding[index] = ensure(embedding[index]) / sqrtNormalization;
+
+    return embedding;
 };

@@ -47,6 +47,7 @@ const createComlinkWorker = async () => {
         appVersion: electron.appVersion,
         detectFaces: electron.detectFaces,
         computeFaceEmbeddings: electron.computeFaceEmbeddings,
+        computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
     };
 
     const cw = new ComlinkWorker<typeof MLWorker>(
