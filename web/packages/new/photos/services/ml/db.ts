@@ -133,7 +133,8 @@ const openMLDB = async () => {
 };
 
 const deleteLegacyDB = () => {
-    // Delete the legacy face DB.
+    // Delete the legacy face DB v1.
+    //
     // This code was added June 2024 (v1.7.1-rc) and can be removed once clients
     // have migrated over.
     void deleteDB("mldata");
