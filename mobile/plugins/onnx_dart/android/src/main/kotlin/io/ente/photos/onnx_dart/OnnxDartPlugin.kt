@@ -26,13 +26,16 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
 
+  private val TAG = OnnxDartPlugin::class.java.name
+
+
   private var faceOrtEnv: OrtEnvironment = OrtEnvironment.getEnvironment()
   private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
   private val sessionMap = ConcurrentHashMap<ModelType, ModelState>()
   private lateinit var context: Context
 
   enum class ModelType {
-    CLIP_TEXT, CLIP_VISUAL, YOLO_FACE, MOBILENET_FACE
+    CLIP_TEXT, ClipImageEncoder, YOLOv5Face, MobileFaceNet
   }
   companion object {
     const val DEFAULT_SESSION_COUNT = 1
@@ -108,7 +111,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun init(modelType: ModelType, modelPath: String, sessionsCount: Int, result: Result) {
-    Log.d("OnnxFlutterPlugin", " v: $modelType, path: $modelPath, sessionsCount: $sessionsCount")
+    Log.d(TAG, " v: $modelType, path: $modelPath, sessionsCount: $sessionsCount")
     scope.launch {
       val modelState: ModelState
       if (sessionMap.containsKey(modelType)) {
@@ -171,17 +174,16 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val inputTensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(inputData), inputTensorShape)
         val inputs = mapOf("input" to inputTensor)
         val outputs = session.run(inputs)
-        Log.d("OnnxFlutterPlugin", "Output shape: ${outputs.size()}")
-        inputTensor.close()
-        val outputTensor = outputs[0].value as Array<Array<FloatArray>>
-        Log.d("OnnxFlutterPlugin", "Output2 shape: ${outputTensor.size}")
-        outputs.close()
-        // Send the result back to the Dart layer
-        val flatList = outputTensor.flatten().flatMap { it.toList() }
+        Log.d(TAG, "Output shape: ${outputs.size()}")
 
+        val outputTensor = outputs[0].value as Array<Array<FloatArray>>
+        val flatList = outputTensor.flatMapToFloatArray()
         withContext(Dispatchers.Main) {
           result.success(flatList)
         }
+        Log.d(TAG, "Closing output tensor and input tensor")
+        outputs.close()
+        inputTensor.close()
       } catch (e: OrtException) {
         withContext(Dispatchers.Main) {
           result.error("PREDICTION_ERROR", "Error during prediction: ${e.message}", null)
@@ -202,5 +204,19 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
       modelState.sessionAddresses.clear()
     }
     sessionMap.clear()
+  }
+
+  fun Array<Array<FloatArray>>.flatMapToFloatArray(): FloatArray {
+    val outputSize = this.sumOf { it.sumOf { it.size } }
+    val result = FloatArray(outputSize)
+    var index = 0
+    for (outer in this) {
+      for (inner in outer) {
+        for (value in inner) {
+          result[index++] = value
+        }
+      }
+    }
+    return result
   }
 }
