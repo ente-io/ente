@@ -28,7 +28,6 @@
         "memoize-one": "^6.0.0",
         "ml-matrix": "^6.11",
         "p-debounce": "^4.0.0",
-        "p-queue": "^7.1.0",
         "photoswipe": "file:./thirdparty/photoswipe",
         "piexifjs": "^1.0.6",
         "pure-react-carousel": "^1.30.1",
