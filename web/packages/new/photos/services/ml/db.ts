@@ -356,8 +356,9 @@ export const updateAssumingLocalFiles = async (
 /**
  * Return the count of files that can be, and that have been, indexed.
  *
- * These counts are mutually exclusive. The total number of files that fall
- * within the purview of the indexer is thus indexable + indexed.
+ * These counts are mutually exclusive. Thus the total number of files that are
+ * fall within the purview of the indexer will be indexable + indexed (if we are
+ * ignoring the "failed" ones).
  */
 export const indexableAndIndexedCounts = async () => {
     const db = await mlDB();
@@ -375,7 +376,7 @@ export const indexableAndIndexedCounts = async () => {
  * Return a list of fileIDs that need to be indexed.
  *
  * This list is from the universe of the file IDs that the face DB knows about
- * (can use {@link addFileEntry} to inform it about new files). From this
+ * (we can use {@link addFileEntry} to inform it about new files). From this
  * universe, we filter out fileIDs the files corresponding to which have already
  * been indexed, or which should be ignored.
  *
@@ -397,6 +398,9 @@ export const indexableFileIDs = async (count?: number) => {
  * If an entry does not exist yet for the given file, then a new one is created
  * and its failure count is set to 1. Otherwise the failure count of the
  * existing entry is incremented.
+ *
+ * This count is across all different types of indexing (face, CLIP) that happen
+ * on the file.
  */
 export const markIndexingFailed = async (fileID: number) => {
     const db = await mlDB();
