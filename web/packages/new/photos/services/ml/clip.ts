@@ -1,6 +1,3 @@
-// See: [Note: Allowing non-null assertions selectively]
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import type { ImageBitmapAndData } from "./bitmap";
@@ -108,16 +105,13 @@ export const indexCLIP = async (
         fileID,
         version: clipIndexingVersion,
         client: userAgent,
-        embedding: await indexCLIP_(imageData, electron),
+        embedding: await computeEmbedding(imageData, electron),
     };
 };
 
-const indexCLIP_ = async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const computeEmbedding = async (
     imageData: ImageData,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     electron: MLWorkerElectron,
-    // eslint-disable-next-line @typescript-eslint/require-await
 ): Promise<number[]> => {
     const clipInput = convertToCLIPInput(imageData);
     const embedding = await electron.computeCLIPImageEmbedding(clipInput);
@@ -131,8 +125,8 @@ const convertToCLIPInput = (imageData: ImageData) => {
     const requiredWidth = 224;
     const requiredHeight = 224;
 
-    const mean: number[] = [0.48145466, 0.4578275, 0.40821073];
-    const std: number[] = [0.26862954, 0.26130258, 0.27577711];
+    const mean = [0.48145466, 0.4578275, 0.40821073] as const;
+    const std = [0.26862954, 0.26130258, 0.27577711] as const;
 
     const { width, height, data: pixelData } = imageData;
 
@@ -159,9 +153,9 @@ const convertToCLIPInput = (imageData: ImageData) => {
                 width,
                 height,
             );
-            clipInput[pi] = (r / 255.0 - mean[0]!) / std[0]!;
-            clipInput[pi + cOffsetG] = (g / 255.0 - mean[1]!) / std[1]!;
-            clipInput[pi + cOffsetB] = (b / 255.0 - mean[2]!) / std[2]!;
+            clipInput[pi] = (r / 255.0 - mean[0]) / std[0];
+            clipInput[pi + cOffsetG] = (g / 255.0 - mean[1]) / std[1];
+            clipInput[pi + cOffsetB] = (b / 255.0 - mean[2]) / std[2];
             pi++;
         }
     }
