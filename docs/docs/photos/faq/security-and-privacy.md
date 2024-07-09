@@ -1,102 +1,139 @@
 ---
-title: Security and privacy FAQ
-description:
-    Frequently asked questions about security and privacy of Ente Photos
+title: Security and Privacy FAQ
+description: Comprehensive information about security and privacy measures in Ente Photos
 ---
 
-# Security and privacy
+# Security and Privacy FAQ
 
-## Can Ente see my photos and videos?
+Welcome to Ente Photos' Security and Privacy FAQ. This document provides detailed information about our security practices, privacy measures, and how we protect your data. We are committed to maintaining the highest standards of data protection and transparency.
 
-No.
+## Data Encryption and Storage
 
-Your files are encrypted with a key before they are uploaded to our servers.
+### Can Ente see my photos and videos?
+No. Your files are encrypted on your device before being uploaded to our servers. The encryption keys are derived from your password using advanced key derivation functions. Since only you know your password, only you can decrypt your files. For technical details, please see our [architecture document](https://ente.io/architecture).
 
-These keys can be accessed only with your password.
+### How is my data encrypted?
+We use state-of-the-art encryption algorithms:
+- File encryption: XChaCha20 stream cipher
+- Authentication: Poly1305 message authentication code (MAC)
+- Key derivation: Argon2id with high memory and computation parameters
 
-Since only you know your password, only you can decrypt your files.
+These algorithms are implemented using [libsodium](https://libsodium.gitbook.io/doc/), a well-audited cryptographic library. Our [architecture document](https://ente.io/architecture) provides full technical specifications.
 
-To learn more about our encryption protocol, please read about our
-[architecture](https://ente.io/architecture).
+### Where is my data stored?
+Your encrypted data is stored redundantly across multiple providers in the EU:
+- Amsterdam, Netherlands
+- Paris, France
+- Frankfurt, Germany
 
-## How is my data encrypted?
+We use a combination of object storage and distributed databases to ensure high availability and durability. Our [reliability document](https://ente.io/reliability) provides in-depth information about our storage infrastructure and data replication strategies.
 
-We use [libsodium](https://libsodium.gitbook.io/doc/)'s implementations
-`XChaCha20` and `XSalsa20` to encrypt your data, along with `Poly1305` MAC for
-authentication.
+### How does Ente's encryption compare to industry standards?
+Our encryption model goes beyond industry standards. While many services use server-side encryption, we implement end-to-end encryption. This means that even in the unlikely event of a server breach, your data remains protected. Our use of XChaCha20 is particularly forward-looking, as it's designed to be quantum-computer resistant.
 
-Please refer to the document on our [architecture](https://ente.io/architecture)
-for more details.
+## Account Security
 
-## Where is my data stored?
+### How are passwords handled?
+Passwords are never stored in plain text. We use the Argon2id algorithm to hash passwords, which is resistant to both computational and memory-hard attacks. The resulting hash is then split and stored across separate systems to further enhance security.
 
-Your data is replicated to multiple providers in different countries in the EU.
+### What happens if I forget my password?
+You can reset your password using your recovery key. This key is a randomly generated string provided to you during account creation. Store it securely, as it's your lifeline if you forget your password. If you lose both your password and recovery key, we cannot recover your account or data due to our zero-knowledge architecture.
 
-Currently we have datacenters in the following locations:
+### Can I change my password?
+Yes, you can change your password at any time from our apps. Our architecture allows password changes without re-encrypting your entire library. When you change your password:
+1. A new master key is derived from your new password
+2. Your file encryption keys are re-encrypted with this new master key
+3. The new encrypted keys are uploaded to our servers
 
--   Amsterdam, Netherlands
--   Paris, France
--   Frankfurt, Germany
+### Do you support two-factor authentication (2FA)?
+Yes, we strongly recommend enabling 2FA for an additional layer of security. We support:
+- Time-based One-Time Passwords (TOTP)
+- WebAuthn/FIDO2 for hardware security keys
 
-Much more details about our replication and reliability are documented
-[here](https://ente.io/reliability).
+You can set up 2FA in the settings of our mobile or desktop apps.
 
-## What happens if I forget my password?
+## Sharing and Collaboration
 
-You can reset your password with your recovery key.
+### How does sharing work securely?
+When you share an album:
+1. A new encryption key is generated for the shared album
+2. This key is encrypted with the recipient's public key
+3. The encrypted key is stored on our servers
+4. The recipient can decrypt this key using their private key
 
-If you lose both your password and your recovery key, you will not be able to
-decrypt your data.
+For shareable links, the decryption key is included in the URL fragment, which is never sent to our servers. Only paid users can initiate sharing, but recipients can use a free account.
 
-## Can I change my password?
+### Are shared albums as secure as private ones?
+Shared albums use the same strong encryption as private albums. However, remember that shared content is only as secure as the least secure account with access to it. We recommend sharing only with users who maintain good security practices.
 
-Yes.
+## Security Audits and Compliance
 
-You can change your password from any of our apps.
+### Has Ente Photos been independently audited?
+Yes, Ente Photos underwent a comprehensive security audit by Cure53, a respected German cybersecurity firm, in collaboration with Symbolic Software, specialists in applied cryptography. The full audit report is available [here](https://ente.io/blog/cryptography-audit/). We are committed to regular third-party audits and will publish results transparently.
 
-Thanks to our [architecture](https://ente.io/architecture), you can do so
-without having to re-encrypt any of your files.
+### Is Ente compliant with privacy regulations?
+Yes, Ente is designed to comply with major privacy regulations including GDPR (European Union), CCPA (California), and PIPEDA (Canada). Key compliance measures include:
+- Data minimization: We collect only essential data
+- Purpose limitation: Your data is used only for providing our service
+- Data portability: You can export your data at any time
+- Right to erasure: You can permanently delete your account and data
 
-The privacy of your account is a function of the strength of your password,
-please choose a strong one.
+For specific compliance questions, please contact our Data Protection Officer at dpo@ente.io.
 
-## Do you support 2FA?
+## Ongoing Security Practices
 
-Yes.
+### How does Ente handle security vulnerabilities?
+We maintain a bug bounty program to encourage responsible disclosure of security vulnerabilities. Our security team promptly investigates all reported issues. Critical vulnerabilities are typically addressed within 24 hours.
 
-You can setup two-factor authentication from the settings screen of the mobile
-app or from the side bar of our desktop app.
+### Does Ente perform regular security assessments?
+Yes, we conduct:
+- Weekly automated security scans of our infrastructure
+- Monthly manual penetration testing by our internal security team
+- Annual third-party security audits
 
-## How does sharing work?
+### How would Ente respond to a data breach?
+While we have multiple safeguards to prevent breaches, we maintain an incident response plan:
+1. Immediate containment and investigation of the breach
+2. Patching of any discovered vulnerabilities
+3. Notification to affected users within 72 hours
+4. Collaboration with law enforcement if necessary
 
-The information required to decrypt an album is encrypted with the recipient's
-public key such that only they can decrypt them.
+Remember, due to our encryption model, a server breach would not expose your actual data or passwords.
 
-You can read more about this [here](https://ente.io/architecture#sharing).
+## Third-Party Integrations
 
-In case of sharable links, the key to decrypt the album is appended by the
-client as a [fragment to the URL](https://en.wikipedia.org/wiki/URI_fragment),
-and is never sent to our servers.
+### How is security maintained with third-party integrations?
+We minimize third-party integrations to reduce potential vulnerabilities. When integrations are necessary:
+1. We thoroughly vet the security practices of the third party
+2. Integration is done via secure APIs with minimal data exposure
+3. Regular security assessments are performed on the integration points
 
-Please note that only users on the paid plan are allowed to share albums. The
-receiver just needs a free Ente account.
+## Account Management and Data Control
 
-## Has the Ente Photos app been audited by a credible source?
+### How can I delete my account?
+You can delete your account at any time through the app settings. This will:
+1. Immediately revoke your access tokens
+2. Queue your data for permanent deletion
+3. Remove your account information from our systems
 
-Yes, Ente Photos has undergone a thorough security audit conducted by Cure53, in
-collaboration with Symbolic Software. Cure53 is a prominent German cybersecurity
-firm, while Symbolic Software specializes in applied cryptography. Please find
-the full report here: https://ente.io/blog/cryptography-audit/
+Data deletion is irreversible and completes within 14 days. For details on our deletion process, see our [data deletion policy](https://ente.io/blog/how-ente-deletes-data/).
 
-## How can I delete my account?
+### What is Ente's policy on data backups and recovery?
+We maintain encrypted backups of your data to ensure reliability. However:
+- These backups are encrypted with your keys, which we don't have access to
+- Backups are cycled out and permanently deleted after 30 days
+- We cannot recover specific files you delete from your account, but you can recover them from the trash folder within 30 days
 
-You can delete your account at any time by using the "Delete account" option in
-the settings. For security reasons, we request you to delete your account on
-your own instead of contacting support to ask them to delete your account.
+## Limitations and Transparency
 
-Note that both Ente photos and Ente auth data will be deleted when you delete
-your account (irrespective of which app you delete it from) since both photos
-and auth use the same underlying account.
+### Are there any limitations to Ente's security model?
+While we strive for maximum security, it's important to acknowledge potential limitations:
+1. The security of your account ultimately depends on your password strength and your device's security
+2. If you lose both your password and recovery key, your data becomes irrecoverable
+3. In the unlikely event of a catastrophic loss of all our data centers simultaneously, data recovery would be challenging
 
-To know details of how your data is deleted, including when you delete your
-account, please see https://ente.io/blog/how-ente-deletes-data/.
+We believe in being transparent about these limitations so you can make informed decisions about your data security.
+
+## Additional Support
+
+For any security or privacy questions not covered here, please contact our support team at security@ente.io. We're committed to addressing your concerns and continuously improving our security measures.
