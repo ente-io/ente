@@ -202,8 +202,8 @@ export const faceIndex = async (fileID: number) => {
 };
 
 /**
- * Record the existence of a file so that entities in the face indexing universe
- * know about it (e.g. can index it if it is new and it needs indexing).
+ * Record the existence of a file so that entities in the ML universe know about
+ * it (e.g. can index it if it is new and it needs indexing).
  *
  * @param fileID The ID of an {@link EnteFile}.
  *
@@ -276,11 +276,7 @@ export const updateAssumingLocalFiles = async (
     await Promise.all(
         [
             newFileIDs.map((id) =>
-                tx.objectStore("file-status").put({
-                    fileID: id,
-                    status: "indexable",
-                    failureCount: 0,
-                }),
+                tx.objectStore("file-status").put(newFileStatus(id)),
             ),
             removedFileIDs.map((id) =>
                 tx.objectStore("file-status").delete(id),
@@ -339,11 +335,8 @@ export const indexableFileIDs = async (count?: number) => {
 export const markIndexingFailed = async (fileID: number) => {
     const db = await faceDB();
     const tx = db.transaction("file-status", "readwrite");
-    const failureCount = ((await tx.store.get(fileID))?.failureCount ?? 0) + 1;
-    await tx.store.put({
-        fileID,
-        status: "failed",
-        failureCount,
-    });
-    return tx.done;
+    const fileStatus = (await tx.store.get(fileID)) ?? newFileStatus(fileID);
+    fileStatus.status = "failed";
+    fileStatus.failureCount = fileStatus.failureCount + 1;
+    await Promise.all([tx.store.put(fileStatus), tx.done]);
 };
