@@ -1,5 +1,4 @@
 import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
-import { pt } from "@/next/i18n";
 import DialogTitleWithCloseButton, {
     DialogTitleWithCloseButtonSm,
     dialogCloseHandler,
@@ -218,7 +217,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("folders")}
                         >
-                            {pt("Select folder")}
+                            {t("select_folder")}
                         </FocusVisibleButton>
                         <FocusVisibleButton
                             color="secondary"
@@ -226,7 +225,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("zips")}
                         >
-                            {pt("Select zips")}
+                            {t("Select zips")}
                         </FocusVisibleButton>
                         <Link
                             href="https://help.ente.io/photos/migration/from-google-photos/"
@@ -238,15 +237,13 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                                 fullWidth
                                 disableRipple
                             >
-                                {pt("FAQ")}
+                                {t("faq")}
                             </FocusVisibleButton>
                         </Link>
                     </Stack>
 
                     <Typography variant="small" color="text.muted" pb={1}>
-                        {pt(
-                            "Unzip all zips into the same folder and upload that. Or upload the zips directly. See FAQ for details.",
-                        )}
+                        {t("takeout_hint")}
                     </Typography>
                 </Stack>
             </Box>
