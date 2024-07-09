@@ -71,7 +71,6 @@ export const CustomError = {
     CLIENT_ERROR: "client error",
     ServerError: "server error",
     FILE_NOT_FOUND: "file not found",
-    UNSUPPORTED_PLATFORM: "Unsupported platform",
     UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
     URL_ALREADY_SET: "url already set",
     FILE_CONVERSION_FAILED: "file conversion failed",

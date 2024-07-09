@@ -359,32 +359,7 @@ const getNonClipEmbeddingExtractedFiles = async (
     });
 };
 
-export const computeClipMatchScore = async (
-    imageEmbedding: Float32Array,
-    textEmbedding: Float32Array,
-) => {
-    if (imageEmbedding.length !== textEmbedding.length) {
-        throw Error("imageEmbedding and textEmbedding length mismatch");
-    }
-    let score = 0;
-    let imageNormalization = 0;
-    let textNormalization = 0;
 
-    for (let index = 0; index < imageEmbedding.length; index++) {
-        imageNormalization += imageEmbedding[index] * imageEmbedding[index];
-        textNormalization += textEmbedding[index] * textEmbedding[index];
-    }
-    for (let index = 0; index < imageEmbedding.length; index++) {
-        imageEmbedding[index] =
-            imageEmbedding[index] / Math.sqrt(imageNormalization);
-        textEmbedding[index] =
-            textEmbedding[index] / Math.sqrt(textNormalization);
-    }
-    for (let index = 0; index < imageEmbedding.length; index++) {
-        score += imageEmbedding[index] * textEmbedding[index];
-    }
-    return score;
-};
 
 const initialIndexingStatus = async (): Promise<CLIPIndexingStatus> => {
     const user = getData(LS_KEYS.USER);

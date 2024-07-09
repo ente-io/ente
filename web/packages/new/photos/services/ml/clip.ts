@@ -63,7 +63,13 @@ export interface CLIPIndex {
     version: number;
     /** The UA for the client which generated this embedding. */
     client: string;
-    /** The CLIP embedding itself. */
+    /**
+     * The CLIP embedding itself.
+     *
+     * This is an array of 512 floating point values that represent the
+     * embedding of the image in the same space where we'll embed the text so
+     * that both of them can be compared using a cosine distance.
+     */
     embedding: number[];
 }
 
