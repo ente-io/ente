@@ -81,7 +81,6 @@ import {
     useState,
 } from "react";
 import { useDropzone } from "react-dropzone";
-import { clipService } from "services/clip-service";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -390,7 +389,6 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
                 if (await shouldShowWhatsNew()) setOpenWhatsNew(true);
             }
@@ -398,10 +396,7 @@ export default function Gallery() {
         main();
         return () => {
             clearInterval(syncInterval.current);
-            if (electron) {
-                electron.onMainWindowFocus(undefined);
-                clipService.removeOnFileUploadListener();
-            }
+            if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
 
