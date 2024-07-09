@@ -415,6 +415,4 @@ const index = async (
         const ms = Date.now() - startTime;
         return `Indexed ${nf} faces in ${f} (${ms} ms)`;
     });
-
-    return faceIndex;
 };
