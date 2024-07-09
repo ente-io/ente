@@ -1,8 +1,10 @@
 import { FILE_TYPE } from "@/media/file-type";
 import { faceIndexingStatus, isMLEnabled } from "@/new/photos/services/ml";
+import { clipMatches } from "@/new/photos/services/ml/clip";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -369,66 +371,12 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
 }
 
 const searchClip = async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _searchPhrase: string,
+    searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
     // TODO-ML:
-    return undefined;
+    //return undefined;
+    return clipMatches(searchPhrase, ensureElectron());
 };
-//     const textEmbedding =
-//         await clipService.getTextEmbeddingIfAvailable(searchPhrase);
-//     if (!textEmbedding) return undefined;
-
-//     const imageEmbeddings = await localCLIPEmbeddings();
-//     const clipSearchResult = new Map<number, number>(
-//         (
-//             await Promise.all(
-//                 imageEmbeddings.map(
-//                     async (imageEmbedding): Promise<[number, number]> => [
-//                         imageEmbedding.fileID,
-//                         await computeClipMatchScore(
-//                             imageEmbedding.embedding,
-//                             textEmbedding,
-//                         ),
-//                     ],
-//                 ),
-//             )
-//         ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD),
-//     );
-
-//     return clipSearchResult;
-// };
-
-// getTextEmbeddingIfAvailable = async (text: string) => {
-//    return normalizeEmbedding(ensureElectron().computeCLIPTextEmbeddingIfAvailable(text));
-// };
-
-// export const computeClipMatchScore = async (
-//     imageEmbedding: Float32Array,
-//     textEmbedding: Float32Array,
-// ) => {
-//     if (imageEmbedding.length !== textEmbedding.length) {
-//         throw Error("imageEmbedding and textEmbedding length mismatch");
-//     }
-//     let score = 0;
-//     let imageNormalization = 0;
-//     let textNormalization = 0;
-
-//     for (let index = 0; index < imageEmbedding.length; index++) {
-//         imageNormalization += imageEmbedding[index] * imageEmbedding[index];
-//         textNormalization += textEmbedding[index] * textEmbedding[index];
-//     }
-//     for (let index = 0; index < imageEmbedding.length; index++) {
-//         imageEmbedding[index] =
-//             imageEmbedding[index] / Math.sqrt(imageNormalization);
-//         textEmbedding[index] =
-//             textEmbedding[index] / Math.sqrt(textNormalization);
-//     }
-//     for (let index = 0; index < imageEmbedding.length; index++) {
-//         score += imageEmbedding[index] * textEmbedding[index];
-//     }
-//     return score;
-// };
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
     switch (option.type) {
