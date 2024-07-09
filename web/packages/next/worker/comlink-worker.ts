@@ -1,7 +1,6 @@
 import { ensureElectron } from "@/next/electron";
 import log, { logToDisk } from "@/next/log";
 import { expose, wrap, type Remote } from "comlink";
-import { ensureLocalUser } from "../local-user";
 
 /**
  * A minimal wrapper for a web {@link Worker}, proxying a class of type T.
@@ -62,13 +61,12 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
  *
  * Not all workers need access to all these functions, and this can indeed be
  * done in a more fine-grained, per-worker, manner if needed. For now, since it
- * is a motley bunch, we just inject them all to all workers.
+ * is just a couple, we just inject them all to all workers.
  */
 const workerBridge = {
-    // Needed by all workers (likely, not necessarily).
+    // Needed by all workers (likely, but not necessarily).
     logToDisk,
-    // Needed by MLWorker.
-    getAuthToken: () => ensureLocalUser().token,
+    // Needed by ML worker.
     convertToJPEG: (imageData: Uint8Array) =>
         ensureElectron().convertToJPEG(imageData),
 };

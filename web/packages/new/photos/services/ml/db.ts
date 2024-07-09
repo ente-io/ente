@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { CLIPIndex } from "./clip";
 import type { EmbeddingModel } from "./embedding";
@@ -136,6 +137,19 @@ const deleteLegacyDB = () => {
     // This code was added June 2024 (v1.7.1-rc) and can be removed once clients
     // have migrated over.
     void deleteDB("mldata");
+
+    // Delete the legacy CLIP (mostly) related keys from LocalForage.
+    //
+    // This code was added July 2024 (v1.7.2-rc) and can be removed once
+    // sufficient clients have migrated over (tag: Migration).
+    void Promise.all([
+        localForage.removeItem("embeddings"),
+        localForage.removeItem("embedding_sync_time"),
+        localForage.removeItem("embeddings_v2"),
+        localForage.removeItem("file_embeddings"),
+        localForage.removeItem("onnx-clip-embedding_sync_time"),
+        localForage.removeItem("file-ml-clip-face-embedding_sync_time"),
+    ]);
 };
 
 /**

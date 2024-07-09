@@ -49,7 +49,7 @@ import { faceIndexingVersion, type FaceIndex } from "./face";
  * "model" (i.e "type") field to create a new universe of embeddings.
  */
 export type EmbeddingModel =
-    | "onnx-clip" /* CLIP (text) embeddings */
+    | "onnx-clip" /* CLIP embeddings */
     | "file-ml-clip-face" /* Face embeddings */;
 
 const RemoteEmbedding = z.object({

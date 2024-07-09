@@ -38,8 +38,8 @@ export const apiURL = async (path: string) => (await apiOrigin()) + path;
 export const customAPIOrigin = async () => {
     let origin = await getKV("apiOrigin");
     if (!origin && !inWorker()) {
-        // TODO: Migration of apiOrigin from local storage to indexed DB
-        // Remove me after a bit (27 June 2024).
+        // TODO: Migration of apiOrigin from local storage to indexed DB. Added
+        // 27 June 2024, 1.7.2-rc. Remove me after a bit (tag: Migration).
         const legacyOrigin = localStorage.getItem("apiOrigin");
         if (legacyOrigin !== null) {
             origin = legacyOrigin;

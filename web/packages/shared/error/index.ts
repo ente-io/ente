@@ -70,7 +70,6 @@ export const CustomError = {
     TWO_FACTOR_ENABLED: "two factor enabled",
     CLIENT_ERROR: "client error",
     ServerError: "server error",
-    FILE_NOT_FOUND: "file not found",
     UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
     URL_ALREADY_SET: "url already set",
     FILE_CONVERSION_FAILED: "file conversion failed",
