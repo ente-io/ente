@@ -401,7 +401,7 @@
     "DOWNLOAD_UPLOAD_LOGS": "Debug-Logs",
     "file": "Datei",
     "folder": "Ordner",
-    "google_takeout": "Google Takeout",
+    "google_takeout": "Google takeout",
     "DEDUPLICATE_FILES": "Duplikate bereinigen",
     "NO_DUPLICATES_FOUND": "Du hast keine Duplikate, die gelöscht werden können",
     "FILES": "dateien",
