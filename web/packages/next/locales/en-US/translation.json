@@ -287,7 +287,7 @@
     "LIVE_PHOTOS_DETECTED": "The photo and video files from your Live Photos have been merged into a single file",
     "RETRY_FAILED": "Retry failed uploads",
     "FAILED_UPLOADS": "Failed uploads ",
-    "failed_uploads_hint": "There will be an option to retry these when the upload finishes.",
+    "failed_uploads_hint": "There will be an option to retry these when the upload finishes",
     "SKIPPED_FILES": "Ignored uploads",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Thumbnail generation failed",
     "UNSUPPORTED_FILES": "Unsupported files",

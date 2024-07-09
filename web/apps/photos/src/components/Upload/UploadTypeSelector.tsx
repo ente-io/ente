@@ -190,7 +190,12 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                         />
                     )}
                 </Stack>
-                <Typography p={1.5} pt={4} color="text.muted">
+                <Typography
+                    p={1.5}
+                    pt={4}
+                    color="text.muted"
+                    sx={{ textAlign: "center" }}
+                >
                     {t("drag_and_drop_hint")}
                 </Typography>
             </Box>
