@@ -146,7 +146,7 @@ const mlDB = () => (_mlDB ??= openMLDB());
 /**
  * Clear any data stored in the ML DB.
  *
- * This is meant to be called during logout in the main thread.
+ * This is meant to be called during logout on the main thread.
  */
 export const clearMLDB = async () => {
     deleteLegacyDB();
@@ -175,17 +175,17 @@ export const clearMLDB = async () => {
  *
  * This function adds a new entry for the face index, overwriting any existing
  * ones (No merging is performed, the existing entry is unconditionally
- * overwritten). The file status is updated to remove the entry for face from
- * the pending embeddings. If there are no other pending embeddings, the
- * status changes to "indexed".
+ * overwritten). The file status is also updated to remove face from the pending
+ * embeddings. If there are no other pending embeddings, the status changes to
+ * "indexed".
  */
 export const saveFaceIndex = async (faceIndex: FaceIndex) => {
     const { fileID } = faceIndex;
 
     const db = await mlDB();
-    const tx = db.transaction(["face-index", "file-status"], "readwrite");
-    const indexStore = tx.objectStore("face-index");
+    const tx = db.transaction(["file-status", "face-index"], "readwrite");
     const statusStore = tx.objectStore("file-status");
+    const indexStore = tx.objectStore("face-index");
 
     const fileStatus =
         (await statusStore.get(IDBKeyRange.only(fileID))) ??
@@ -196,8 +196,8 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
     if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
 
     await Promise.all([
-        indexStore.put(faceIndex),
         statusStore.put(fileStatus),
+        indexStore.put(faceIndex),
         tx.done,
     ]);
 };
@@ -216,11 +216,52 @@ const newFileStatus = (fileID: number): FileStatus => ({
 });
 
 /**
+ * Save the given {@link clipIndex} locally.
+ *
+ * @param clipIndex A {@link CLIPIndex} containing the CLIP embedding for a
+ * particular file.
+ *
+ * This function adds a new entry for the CLIP index, overwriting any existing
+ * ones (No merging is performed, the existing entry is unconditionally
+ * overwritten). The file status is also updated to remove CLIP from the pending
+ * embeddings. If there are no other pending embeddings, the status changes to
+ * "indexed".
+ */
+export const saveCLIPIndex = async (clipIndex: CLIPIndex) => {
+    const { fileID } = clipIndex;
+
+    const db = await mlDB();
+    const tx = db.transaction(["file-status", "clip-index"], "readwrite");
+    const statusStore = tx.objectStore("file-status");
+    const indexStore = tx.objectStore("clip-index");
+
+    const fileStatus =
+        (await statusStore.get(IDBKeyRange.only(fileID))) ??
+        newFileStatus(fileID);
+    fileStatus.pending = fileStatus.pending.filter((v) => v != "onnx-clip");
+    if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
+
+    await Promise.all([
+        statusStore.put(fileStatus),
+        indexStore.put(clipIndex),
+        tx.done,
+    ]);
+};
+
+/**
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
  */
 export const faceIndex = async (fileID: number) => {
     const db = await mlDB();
     return db.get("face-index", fileID);
+};
+
+/**
+ * Return all CLIP embeddings present locally.
+ */
+export const clipEmbeddings = async () => {
+    const db = await mlDB();
+    return (await db.getAll("clip-index")).map((index) => index.embedding);
 };
 
 /**
@@ -243,35 +284,37 @@ export const addFileEntry = async (fileID: number) => {
 };
 
 /**
- * Update entries in the face DB to align with the state of local files outside
- * face DB.
+ * Update entries in ML DB to align with the state of local files outside ML DB.
  *
- * @param localFileIDs IDs of all the files that the client is aware of filtered
- * to only keep the files that the user owns and the formats that can be indexed
- * by our current face indexing pipeline.
+ * @param localFileIDs IDs of all the files that the client is aware of,
+ * filtered to only keep the files that the user owns and the formats that can
+ * be indexed by our current indexing pipelines.
  *
  * @param localTrashFilesIDs IDs of all the files in trash.
  *
- * This function then updates the state of file entries in face DB to the be in
- * sync with these provided local file IDS.
+ * This function then updates the state of file entries in ML DB to the be in
+ * sync with these provided local file IDs.
  *
- * - Files that are present locally but are not yet in face DB get a fresh entry
+ * - Files that are present locally but are not yet in ML DB get a fresh entry
  *   in face DB (and are marked as indexable).
  *
- * - Files that are not present locally (nor are in trash) but still exist in
- *   face DB are removed from face DB (including their face index, if any).
+ * - Files that are not present locally (nor are in trash) but still exist in ML
+ *   DB are removed from ML DB (including any indexes).
  *
- * - Files that are not present locally but are in the trash are retained in
- *   face DB if their status is "indexed" (otherwise they too are removed). This
- *   is prevent churn (re-indexing) if the user moves some files to trash but
- *   then later restores them before they get permanently deleted.
+ * - Files that are not present locally but are in the trash are retained in ML
+ *   DB if their status is "indexed"; otherwise they too are removed. This
+ *   special case is to prevent churn (re-indexing) if the user moves some files
+ *   to trash but then later restores them before they get permanently deleted.
  */
 export const updateAssumingLocalFiles = async (
     localFileIDs: number[],
     localTrashFilesIDs: number[],
 ) => {
     const db = await mlDB();
-    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    const tx = db.transaction(
+        ["file-status", "face-index", "clip-index"],
+        "readwrite",
+    );
     const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
     const fdbIndexedFileIDs = await tx
         .objectStore("file-status")
@@ -304,6 +347,7 @@ export const updateAssumingLocalFiles = async (
                 tx.objectStore("file-status").delete(id),
             ),
             removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
+            removedFileIDs.map((id) => tx.objectStore("clip-index").delete(id)),
             tx.done,
         ].flat(),
     );

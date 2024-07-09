@@ -85,7 +85,7 @@ export const logoutML = async () => {
     // `terminateMLWorker` is conceptually also part of this, but for the
     // reasons mentioned in [Note: Caching IDB instances in separate execution
     // contexts], it gets called first in the logout sequence, and then this
-    // `logoutML` gets called at a later point in time.
+    // function (`logoutML`) gets called at a later point in time.
     _isMLEnabled = false;
     await clearMLDB();
 };
