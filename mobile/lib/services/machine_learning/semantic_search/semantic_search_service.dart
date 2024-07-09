@@ -261,7 +261,7 @@ class SemanticSearchService {
   Future<void> _loadTextModel() async {
     _logger.info("Initializing ML framework");
     try {
-      await ClipTextEncoder.instance.init();
+      await ClipTextEncoder.instance.loadModel();
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);

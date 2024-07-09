@@ -237,6 +237,7 @@ class FaceRecognitionService {
         image,
         imageByteData,
         interpreterAddress,
+        useEntePlugin: true,
       );
 
       // Add detected faces to the faceResults

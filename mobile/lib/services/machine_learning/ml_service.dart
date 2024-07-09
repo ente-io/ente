@@ -526,17 +526,17 @@ class MLService {
 
       // Initialize models
       try {
-        await FaceDetectionService.instance.init();
+        await FaceDetectionService.instance.loadModel();
       } catch (e, s) {
         _logger.severe("Could not initialize yolo onnx", e, s);
       }
       try {
-        await FaceEmbeddingService.instance.init();
+        await FaceEmbeddingService.instance.loadModel();
       } catch (e, s) {
         _logger.severe("Could not initialize mobilefacenet", e, s);
       }
       try {
-        await ClipImageEncoder.instance.init();
+        await ClipImageEncoder.instance.loadModel();
       } catch (e, s) {
         _logger.severe("Could not initialize clip image", e, s);
       }

@@ -17,6 +17,7 @@ class YOLOFaceInterpreterRunException implements Exception {}
 /// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
 class FaceDetectionService extends MlModel {
   static const kRemoteBucketModelPath = "yolov5s_face_640_640_dynamic.onnx";
+  static const _modelName = "YOLOv5Face";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
@@ -26,7 +27,7 @@ class FaceDetectionService extends MlModel {
   static final _logger = Logger('FaceDetectionService');
 
   @override
-  String get modelName => "YOLOv5Face";
+  String get modelName => _modelName;
 
   static const int kInputWidth = 640;
   static const int kInputHeight = 640;
@@ -43,12 +44,11 @@ class FaceDetectionService extends MlModel {
   static Future<List<FaceDetectionRelative>> predict(
     ui.Image image,
     ByteData imageByteData,
-    int sessionAddress,
-  ) async {
+    int sessionAddress, {
+    bool useEntePlugin = false,
+  }) async {
     assert(
-      !MlModel.useCustomPlugin
-          ? (sessionAddress != 0 && sessionAddress != -1)
-          : true,
+      !useEntePlugin ? (sessionAddress != 0 && sessionAddress != -1) : true,
       'sessionAddress should be valid',
     );
 
@@ -77,7 +77,7 @@ class FaceDetectionService extends MlModel {
 
     List<List<List<double>>>? nestedResults = [];
     try {
-      if (MlModel.useCustomPlugin) {
+      if (useEntePlugin) {
         nestedResults = await _runCustomPlugin(inputImageList);
       } else {
         nestedResults = _runJNIBasedPlugin(
