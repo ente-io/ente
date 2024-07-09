@@ -1,5 +1,6 @@
 import log from "@/next/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
+import type { CLIPIndex } from "./clip";
 import type { EmbeddingModel } from "./embedding";
 import type { FaceIndex } from "./face";
 
@@ -27,7 +28,7 @@ import type { FaceIndex } from "./face";
  * In tandem, these serve as the underlying storage for the functions exposed by
  * this file.
  */
-interface FaceDBSchema extends DBSchema {
+interface MLDBSchema extends DBSchema {
     "file-status": {
         key: number;
         value: FileStatus;
@@ -87,40 +88,44 @@ interface FileStatus {
 }
 
 /**
- * A lazily-created, cached promise for face DB.
+ * A lazily-created, cached promise for ML DB.
  *
  * See: [Note: Caching IDB instances in separate execution contexts].
  */
-let _faceDB: ReturnType<typeof openFaceDB> | undefined;
+let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
-const openFaceDB = async () => {
+const openMLDB = async () => {
     deleteLegacyDB();
 
-    const db = await openDB<FaceDBSchema>("face", 1, {
+    // TODO-ML: "face" => "ml", v2 => v1
+    const db = await openDB<MLDBSchema>("face", 2, {
         upgrade(db, oldVersion, newVersion) {
-            log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
+            log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
-                db.createObjectStore("face-index", { keyPath: "fileID" });
                 db.createObjectStore("file-status", {
                     keyPath: "fileID",
                 }).createIndex("status", "status");
+                db.createObjectStore("face-index", { keyPath: "fileID" });
+            }
+            if (oldVersion < 2) {
+                db.createObjectStore("clip-index", { keyPath: "fileID" });
             }
         },
         blocking() {
             log.info(
-                "Another client is attempting to open a new version of face DB",
+                "Another client is attempting to open a new version of ML DB",
             );
             db.close();
-            _faceDB = undefined;
+            _mlDB = undefined;
         },
         blocked() {
             log.warn(
-                "Waiting for an existing client to close their connection so that we can update the face DB version",
+                "Waiting for an existing client to close their connection so that we can update the ML DB version",
             );
         },
         terminated() {
-            log.warn("Our connection to face DB was unexpectedly terminated");
-            _faceDB = undefined;
+            log.warn("Our connection to ML DB was unexpectedly terminated");
+            _mlDB = undefined;
         },
     });
     return db;
@@ -134,29 +139,29 @@ const deleteLegacyDB = () => {
 };
 
 /**
- * @returns a lazily created, cached connection to the face DB.
+ * @returns a lazily created, cached connection to the ML DB.
  */
-const faceDB = () => (_faceDB ??= openFaceDB());
+const mlDB = () => (_mlDB ??= openMLDB());
 
 /**
- * Clear any data stored in the face DB.
+ * Clear any data stored in the ML DB.
  *
  * This is meant to be called during logout in the main thread.
  */
-export const clearFaceDB = async () => {
+export const clearMLDB = async () => {
     deleteLegacyDB();
 
     try {
-        if (_faceDB) (await _faceDB).close();
+        if (_mlDB) (await _mlDB).close();
     } catch (e) {
-        log.warn("Ignoring error when trying to close face DB", e);
+        log.warn("Ignoring error when trying to close ML DB", e);
     }
-    _faceDB = undefined;
+    _mlDB = undefined;
 
     return deleteDB("face", {
         blocked() {
             log.warn(
-                "Waiting for an existing client to close their connection so that we can delete the face DB",
+                "Waiting for an existing client to close their connection so that we can delete the ML DB",
             );
         },
     });
@@ -177,7 +182,7 @@ export const clearFaceDB = async () => {
 export const saveFaceIndex = async (faceIndex: FaceIndex) => {
     const { fileID } = faceIndex;
 
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const indexStore = tx.objectStore("face-index");
     const statusStore = tx.objectStore("file-status");
@@ -214,7 +219,7 @@ const newFileStatus = (fileID: number): FileStatus => ({
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
  */
 export const faceIndex = async (fileID: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     return db.get("face-index", fileID);
 };
 
@@ -230,7 +235,7 @@ export const faceIndex = async (fileID: number) => {
  * unperturbed.
  */
 export const addFileEntry = async (fileID: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readwrite");
     if ((await tx.store.getKey(fileID)) === undefined)
         await tx.store.put(newFileStatus(fileID));
@@ -265,7 +270,7 @@ export const updateAssumingLocalFiles = async (
     localFileIDs: number[],
     localTrashFilesIDs: number[],
 ) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction(["face-index", "file-status"], "readwrite");
     const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
     const fdbIndexedFileIDs = await tx
@@ -311,7 +316,7 @@ export const updateAssumingLocalFiles = async (
  * within the purview of the indexer is thus indexable + indexed.
  */
 export const indexableAndIndexedCounts = async () => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readwrite");
     const indexableCount = await tx.store
         .index("status")
@@ -333,7 +338,7 @@ export const indexableAndIndexedCounts = async () => {
  * @param count Limit the result to up to {@link count} items.
  */
 export const indexableFileIDs = async (count?: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     return tx.store
         .index("status")
@@ -350,7 +355,7 @@ export const indexableFileIDs = async (count?: number) => {
  * existing entry is incremented.
  */
 export const markIndexingFailed = async (fileID: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readwrite");
     const fileStatus = (await tx.store.get(fileID)) ?? newFileStatus(fileID);
     fileStatus.status = "failed";

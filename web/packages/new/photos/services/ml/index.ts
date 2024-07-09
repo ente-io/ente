@@ -16,7 +16,7 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { proxy } from "comlink";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
-import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
@@ -87,7 +87,7 @@ export const logoutML = async () => {
     // contexts], it gets called first in the logout sequence, and then this
     // `logoutML` gets called at a later point in time.
     _isMLEnabled = false;
-    await clearFaceDB();
+    await clearMLDB();
 };
 
 /**
