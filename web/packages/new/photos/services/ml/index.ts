@@ -16,7 +16,7 @@ import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { proxy } from "comlink";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
-import { clearFaceDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
@@ -47,6 +47,7 @@ const createComlinkWorker = async () => {
         appVersion: electron.appVersion,
         detectFaces: electron.detectFaces,
         computeFaceEmbeddings: electron.computeFaceEmbeddings,
+        computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
     };
 
     const cw = new ComlinkWorker<typeof MLWorker>(
@@ -85,9 +86,9 @@ export const logoutML = async () => {
     // `terminateMLWorker` is conceptually also part of this, but for the
     // reasons mentioned in [Note: Caching IDB instances in separate execution
     // contexts], it gets called first in the logout sequence, and then this
-    // `logoutML` gets called at a later point in time.
+    // function (`logoutML`) gets called at a later point in time.
     _isMLEnabled = false;
-    await clearFaceDB();
+    await clearMLDB();
 };
 
 /**

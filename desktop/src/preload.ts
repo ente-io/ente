@@ -163,8 +163,8 @@ const ffmpegExec = (
 
 // - ML
 
-const computeCLIPImageEmbedding = (jpegImageData: Uint8Array) =>
-    ipcRenderer.invoke("computeCLIPImageEmbedding", jpegImageData);
+const computeCLIPImageEmbedding = (input: Float32Array) =>
+    ipcRenderer.invoke("computeCLIPImageEmbedding", input);
 
 const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
     ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);
