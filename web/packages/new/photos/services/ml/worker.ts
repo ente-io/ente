@@ -20,12 +20,7 @@ import {
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import {
-    pullCLIPEmbeddings,
-    pullFaceEmbeddings,
-    putCLIPIndex,
-    putFaceIndex,
-} from "./embedding";
+import { pullFaceEmbeddings, putCLIPIndex, putFaceIndex } from "./embedding";
 import { indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerElectron } from "./worker-electron";
 
@@ -249,7 +244,7 @@ const pull = async () => {
     const res = await Promise.allSettled([
         pullFaceEmbeddings(),
         // TODO-ML: clip-test
-        pullCLIPEmbeddings(),
+        // pullCLIPEmbeddings(),
     ]);
     for (const r of res) {
         switch (r.status) {
@@ -366,7 +361,7 @@ const index = async (
     const res = await Promise.allSettled([
         _indexFace(f, enteFile, image, electron, userAgent),
         // TODO-ML: clip-test
-        _indexCLIP(f, enteFile, image, electron, userAgent),
+        // _indexCLIP(f, enteFile, image, electron, userAgent),
     ]);
     image.bitmap.close();
 
@@ -441,7 +436,8 @@ const _indexFace = async (
     return `${faceIndex.faceEmbedding.faces.length} faces`;
 };
 
-const _indexCLIP = async (
+// TODO-ML: clip-test export
+export const _indexCLIP = async (
     f: string,
     enteFile: EnteFile,
     image: ImageBitmapAndData,

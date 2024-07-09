@@ -224,7 +224,7 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
 const newFileStatus = (fileID: number): FileStatus => ({
     fileID,
     status: "indexable",
-    // TODO-ML:
+    // TODO-ML: clip-test
     // pending: ["file-ml-clip-face", "onnx-clip"],
     pending: ["file-ml-clip-face"],
     failureCount: 0,
