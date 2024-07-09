@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/models/embedding.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class EmbeddingsDB {
@@ -16,7 +17,6 @@ class EmbeddingsDB {
   static const databaseName = "ente.embeddings.db";
   static const tableName = "embeddings";
   static const columnFileID = "file_id";
-  static const columnModel = "model";
   static const columnEmbedding = "embedding";
   static const columnUpdationTime = "updation_time";
 
@@ -42,7 +42,7 @@ class EmbeddingsDB {
           1,
           (tx) async {
             await tx.execute(
-              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnModel INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID, $columnModel))',
+              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID))',
             );
           },
         ),
@@ -57,29 +57,37 @@ class EmbeddingsDB {
     await db.execute('DELETE FROM $tableName');
   }
 
-  Future<List<Embedding>> getAll(Model model) async {
+  Future<List<Embedding>> getAll() async {
     final db = await _database;
     final results = await db.getAll('SELECT * FROM $tableName');
     return _convertToEmbeddings(results);
   }
 
-  // Get FileIDs for a specific model
-  Future<Set<int>> getFileIDs(Model model) async {
+  // Get indexed FileIDs
+  Future<Map<int, int>> getIndexedFileIds() async {
     final db = await _database;
-    final results = await db.getAll(
-      'SELECT $columnFileID FROM $tableName WHERE $columnModel = ?',
-      [modelToInt(model)!],
-    );
-    if (results.isEmpty) {
-      return <int>{};
+    final maps = await db.getAll('SELECT $columnFileID FROM $tableName');
+    final Map<int, int> result = {};
+    for (final map in maps) {
+      result[map[columnFileID] as int] =
+          clipMlVersion; // TODO: Add an actual column for version
     }
-    return results.map((e) => e[columnFileID] as int).toSet();
+    return result;
+  }
+
+  // TODO: Add actual colomn for version and use here, similar to faces
+  Future<int> getIndexedFileCount() async {
+    final db = await _database;
+    const String query =
+        'SELECT COUNT(DISTINCT $columnFileID) as count FROM $tableName';
+    final List<Map<String, dynamic>> maps = await db.getAll(query);
+    return maps.first['count'] as int;
   }
 
   Future<void> put(Embedding embedding) async {
     final db = await _database;
     await db.execute(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding, $columnUpdationTime) VALUES (?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnEmbedding, $columnUpdationTime) VALUES (?, ?, ?, ?)',
       _getRowFromEmbedding(embedding),
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -89,7 +97,7 @@ class EmbeddingsDB {
     final db = await _database;
     final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
     await db.executeBatch(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnModel, $columnEmbedding, $columnUpdationTime) values(?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnEmbedding, $columnUpdationTime) values(?, ?, ?, ?)',
       inputs,
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -111,12 +119,9 @@ class EmbeddingsDB {
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
-  Future<void> deleteAllForModel(Model model) async {
+  Future<void> deleteAll() async {
     final db = await _database;
-    await db.execute(
-      'DELETE FROM $tableName WHERE $columnModel = ?',
-      [modelToInt(model)!],
-    );
+    await db.execute('DELETE FROM $tableName');
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
@@ -132,16 +137,14 @@ class EmbeddingsDB {
 
   Embedding _getEmbeddingFromRow(Map<String, dynamic> row) {
     final fileID = row[columnFileID];
-    final model = intToModel(row[columnModel])!;
     final bytes = row[columnEmbedding] as Uint8List;
     final list = Float32List.view(bytes.buffer);
-    return Embedding(fileID: fileID, model: model, embedding: list);
+    return Embedding(fileID: fileID, embedding: list);
   }
 
   List<Object?> _getRowFromEmbedding(Embedding embedding) {
     return [
       embedding.fileID,
-      modelToInt(embedding.model)!,
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),
       embedding.updationTime,
     ];
@@ -155,28 +158,6 @@ class EmbeddingsDB {
     final deprecatedIsar = File(dir.path + "/default.isar");
     if (await deprecatedIsar.exists()) {
       await deprecatedIsar.delete();
-    }
-  }
-
-  int? modelToInt(Model model) {
-    switch (model) {
-      case Model.onnxClip:
-        return 1;
-      case Model.ggmlClip:
-        return 2;
-      default:
-        return null;
-    }
-  }
-
-  Model? intToModel(int model) {
-    switch (model) {
-      case 1:
-        return Model.onnxClip;
-      case 2:
-        return Model.ggmlClip;
-      default:
-        return null;
     }
   }
 }

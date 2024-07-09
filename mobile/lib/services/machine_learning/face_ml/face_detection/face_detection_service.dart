@@ -1,100 +1,61 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import "dart:io" show File, Platform;
 import 'dart:typed_data' show ByteBuffer, ByteData, Float32List, Uint8List;
 import 'dart:ui' as ui show Image;
 
-import "package:computer/computer.dart";
 import 'package:logging/logging.dart';
 import "package:onnx_dart/onnx_dart.dart";
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/face/model/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
-import "package:photos/services/remote_assets_service.dart";
+import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
 
 class YOLOFaceInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
-class FaceDetectionService {
+class FaceDetectionService extends MlModel {
+  static const kRemoteBucketModelPath = "yolov5s_face_640_640_dynamic.onnx";
+
+  @override
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  @override
+  Logger get logger => _logger;
   static final _logger = Logger('FaceDetectionService');
 
-  final _computer = Computer.shared();
-
-  int sessionAddress = 0;
-
-  static const String kModelBucketEndpoint = "https://models.ente.io/";
-  static const String kRemoteBucketModelPath =
-      "yolov5s_face_640_640_dynamic.onnx";
-  static const String modelRemotePath =
-      kModelBucketEndpoint + kRemoteBucketModelPath;
+  @override
+  String get modelName => "YOLOv5Face";
 
   static const int kInputWidth = 640;
   static const int kInputHeight = 640;
   static const double kIouThreshold = 0.4;
   static const double kMinScoreSigmoidThreshold = 0.7;
   static const int kNumKeypoints = 5;
-  static bool useCustomPlugin = Platform.isAndroid;
-
-  bool isInitialized = false;
 
   // Singleton pattern
   FaceDetectionService._privateConstructor();
   static final instance = FaceDetectionService._privateConstructor();
   factory FaceDetectionService() => instance;
 
-  /// Check if the interpreter is initialized, if not initialize it with `loadModel()`
-  Future<void> init() async {
-    if (!isInitialized) {
-      _logger.info('init is called');
-      final model =
-          await RemoteAssetsService.instance.getAsset(modelRemotePath);
-      final startTime = DateTime.now();
-      if (useCustomPlugin) {
-        final OnnxDart plugin = OnnxDart();
-        final bool? initResult = await plugin.init("YOLO_FACE", model.path);
-        isInitialized = initResult ?? false;
-      } else {
-        sessionAddress = await _computer.compute(
-          _loadModel,
-          param: {
-            "modelPath": model.path,
-          },
-        );
-        isInitialized = sessionAddress != -1;
-      }
-      final endTime = DateTime.now();
-      _logger.info(
-        "Face detection model loaded, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
-      );
-    }
-  }
-
-  Future<void> release() async {
-    if (isInitialized) {
-      await _computer
-          .compute(_releaseModel, param: {'address': sessionAddress});
-      isInitialized = false;
-      sessionAddress = 0;
-    }
-  }
-
   /// Detects faces in the given image data.
-  static Future<(List<FaceDetectionRelative>, Dimensions)> predict(
+  static Future<List<FaceDetectionRelative>> predict(
     ui.Image image,
     ByteData imageByteData,
     int sessionAddress,
   ) async {
     assert(
-      !useCustomPlugin ? (sessionAddress != 0 && sessionAddress != -1) : true,
+      !MlModel.useCustomPlugin
+          ? (sessionAddress != 0 && sessionAddress != -1)
+          : true,
       'sessionAddress should be valid',
     );
 
     final stopwatch = Stopwatch()..start();
 
     final stopwatchPreprocessing = Stopwatch()..start();
-    final (inputImageList, originalSize, newSize) =
+    final (inputImageList, newSize) =
         await preprocessImageToFloat32ChannelsFirst(
       image,
       imageByteData,
@@ -110,14 +71,13 @@ class FaceDetectionService {
     _logger.info(
       'Image decoding and preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
     );
-    _logger.info('original size: $originalSize \n new size: $newSize');
 
     // Run inference
     final stopwatchInterpreter = Stopwatch()..start();
 
     List<List<List<double>>>? nestedResults = [];
     try {
-      if (useCustomPlugin) {
+      if (MlModel.useCustomPlugin) {
         nestedResults = await _runCustomPlugin(inputImageList);
       } else {
         nestedResults = _runJNIBasedPlugin(
@@ -142,7 +102,7 @@ class FaceDetectionService {
         'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',
       );
 
-      return (relativeDetections, originalSize);
+      return relativeDetections;
     } catch (e, s) {
       _logger.severe('Error while post processing', e, s);
       rethrow;
@@ -226,31 +186,5 @@ class FaceDetectionService {
     );
 
     return relativeDetections;
-  }
-
-  /// Initialize the interpreter by loading the model file.
-  static Future<int> _loadModel(Map args) async {
-    final sessionOptions = OrtSessionOptions()
-      ..setInterOpNumThreads(1)
-      ..setIntraOpNumThreads(1)
-      ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    try {
-      final session =
-          OrtSession.fromFile(File(args["modelPath"]), sessionOptions);
-      return session.address;
-    } catch (e, s) {
-      _logger.severe('Face detection model not loaded', e, s);
-    }
-    return -1;
-  }
-
-  static Future<void> _releaseModel(Map args) async {
-    final address = args['address'] as int;
-    if (address == 0) {
-      return;
-    }
-    final session = OrtSession.fromAddress(address);
-    session.release();
-    return;
   }
 }

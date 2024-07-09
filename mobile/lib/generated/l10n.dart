@@ -9104,6 +9104,16 @@ class S {
       args: [],
     );
   }
+
+  /// `ML functions`
+  String get mlFunctions {
+    return Intl.message(
+      'ML functions',
+      name: 'mlFunctions',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

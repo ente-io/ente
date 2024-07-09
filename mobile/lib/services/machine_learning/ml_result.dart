@@ -7,10 +7,11 @@ import 'package:photos/services/machine_learning/face_ml/face_alignment/alignmen
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
-class FaceMlResult {
+class MLResult {
   int fileId;
 
-  List<FaceResult> faces = <FaceResult>[];
+  List<FaceResult>? faces = <FaceResult>[];
+  ClipResult? clip;
 
   Dimensions decodedImageSize;
 
@@ -18,68 +19,29 @@ class FaceMlResult {
   bool errorOccured;
   bool onlyThumbnailUsed;
 
-  bool get hasFaces => faces.isNotEmpty;
+  bool get facesRan => faces != null;
+  bool get clipRan => clip != null;
 
-  FaceMlResult({
+  bool get foundFaces => facesRan && faces!.isNotEmpty;
+  bool get foundNoFaces => facesRan && faces!.isEmpty;
+
+  MLResult({
     this.fileId = -1,
     this.faces = const <FaceResult>[],
+    this.clip,
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
-  FaceMlResult.fromEnteFileID(
+  MLResult.fromEnteFileID(
     fileID, {
     this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
-
-  void addNewlyDetectedFaces(
-    List<FaceDetectionRelative> faceDetections,
-    Dimensions originalSize,
-  ) {
-    decodedImageSize = originalSize;
-    for (var i = 0; i < faceDetections.length; i++) {
-      faces.add(
-        FaceResult.fromFaceDetection(
-          faceDetections[i],
-          resultBuilder: this,
-        ),
-      );
-    }
-  }
-
-  void addAlignmentResults(
-    List<AlignmentResult> alignmentResults,
-    List<double> blurValues,
-  ) {
-    if (alignmentResults.length != faces.length) {
-      throw Exception(
-        "The amount of alignment results (${alignmentResults.length}) does not match the number of faces (${faces.length})",
-      );
-    }
-
-    for (var i = 0; i < alignmentResults.length; i++) {
-      faces[i].alignment = alignmentResults[i];
-      faces[i].blurValue = blurValues[i];
-    }
-  }
-
-  void addEmbeddingsToExistingFaces(
-    List<Embedding> embeddings,
-  ) {
-    if (embeddings.length != faces.length) {
-      throw Exception(
-        "The amount of embeddings (${embeddings.length}) does not match the number of faces (${faces.length})",
-      );
-    }
-    for (var faceIndex = 0; faceIndex < faces.length; faceIndex++) {
-      faces[faceIndex].embedding = embeddings[faceIndex];
-    }
-  }
 
   void noFaceDetected() {
     faces = <FaceResult>[];
@@ -92,7 +54,8 @@ class FaceMlResult {
 
   Map<String, dynamic> _toJson() => {
         'fileId': fileId,
-        'faces': faces.map((face) => face.toJson()).toList(),
+        'faces': faces?.map((face) => face.toJson()).toList(),
+        'clip': clip?.toJson(),
         'mlVersion': mlVersion,
         'errorOccured': errorOccured,
         'onlyThumbnailUsed': onlyThumbnailUsed,
@@ -104,12 +67,17 @@ class FaceMlResult {
 
   String toJsonString() => jsonEncode(_toJson());
 
-  static FaceMlResult _fromJson(Map<String, dynamic> json) {
-    return FaceMlResult(
+  static MLResult _fromJson(Map<String, dynamic> json) {
+    return MLResult(
       fileId: json['fileId'],
-      faces: (json['faces'] as List)
-          .map((item) => FaceResult.fromJson(item as Map<String, dynamic>))
-          .toList(),
+      faces: json['faces'] != null
+          ? (json['faces'] as List)
+              .map((item) => FaceResult.fromJson(item as Map<String, dynamic>))
+              .toList()
+          : null,
+      clip: json['clip'] != null
+          ? ClipResult.fromJson(json['clip'] as Map<String, dynamic>)
+          : null,
       mlVersion: json['mlVersion'],
       errorOccured: json['errorOccured'] ?? false,
       onlyThumbnailUsed: json['onlyThumbnailUsed'] ?? false,
@@ -129,8 +97,30 @@ class FaceMlResult {
     );
   }
 
-  static FaceMlResult fromJsonString(String jsonString) {
+  static MLResult fromJsonString(String jsonString) {
     return _fromJson(jsonDecode(jsonString));
+  }
+}
+
+class ClipResult {
+  final int fileID;
+  final Embedding embedding;
+
+  ClipResult({
+    required this.fileID,
+    required this.embedding,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'fileID': fileID,
+        'embedding': embedding,
+      };
+
+  static ClipResult fromJson(Map<String, dynamic> json) {
+    return ClipResult(
+      fileID: json['fileID'],
+      embedding: Embedding.from(json['embedding']),
+    );
   }
 }
 
@@ -154,11 +144,11 @@ class FaceResult {
   });
 
   FaceResult.fromFaceDetection(
-    FaceDetectionRelative faceDetection, {
-    required FaceMlResult resultBuilder,
-  }) {
-    fileId = resultBuilder.fileId;
-    faceId = faceDetection.toFaceID(fileID: resultBuilder.fileId);
+    FaceDetectionRelative faceDetection,
+    int fileID,
+  ) {
+    fileId = fileID;
+    faceId = faceDetection.toFaceID(fileID: fileID);
     detection = faceDetection;
   }
 

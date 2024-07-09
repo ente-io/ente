@@ -12,7 +12,7 @@ import "package:ml_linalg/vector.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
-import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:synchronized/synchronized.dart";
 
 class FaceInfo {
