@@ -20,12 +20,14 @@ class LockScreenPin extends StatefulWidget {
     super.key,
     this.isAuthenticating = false,
     this.isOnOpeningApp = false,
+    this.isAuthenticatingForInAppChange = false,
     this.authPin,
   });
 
   //Is false when setting a new password
   final bool isAuthenticating;
   final bool isOnOpeningApp;
+  final bool isAuthenticatingForInAppChange;
   final String? authPin;
   @override
   State<LockScreenPin> createState() => _LockScreenPinState();
@@ -62,7 +64,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
     if (widget.authPin == base64Encode(hash)) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      widget.isOnOpeningApp
+      widget.isOnOpeningApp || widget.isAuthenticatingForInAppChange
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
