@@ -30,7 +30,7 @@
          * > '--downlevelIteration' flag or with a '--target' of 'es2015' or
          * > higher.
          */
-         "target": "ES2015",
+        "target": "ES2015",
 
         /*
          * The module system to assume the generated JavaScript will use.
