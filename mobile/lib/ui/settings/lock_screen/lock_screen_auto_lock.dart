@@ -67,23 +67,15 @@ class AutoLockItems extends StatefulWidget {
 }
 
 class _AutoLockItemsState extends State<AutoLockItems> {
-  final List<Duration> autoLockDurations = const [
-    Duration(seconds: 0),
-    Duration(seconds: 30),
-    Duration(minutes: 1),
-    Duration(minutes: 5),
-    Duration(minutes: 15),
-    Duration(minutes: 30),
-    Duration(hours: 1),
-  ];
+  final autoLockDurations = LockScreenSettings.instance.autoLockDurations;
   List<Widget> items = [];
   late Duration currentAutoLockTime;
   @override
   void initState() {
-    for (int i = 0; i < autoLockDurations.length; i++) {
-      if (autoLockDurations[i].inMilliseconds ==
+    for (Duration autoLockDuration in autoLockDurations) {
+      if (autoLockDuration.inMilliseconds ==
           LockScreenSettings.instance.getAutoLockTime()) {
-        currentAutoLockTime = autoLockDurations[i];
+        currentAutoLockTime = autoLockDuration;
         break;
       }
     }

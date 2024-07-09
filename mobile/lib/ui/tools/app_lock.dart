@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 
 /// A widget which handles app lifecycle events for showing and hiding a lock screen.
 /// This should wrap around a `MyApp` widget (or equivalent).
@@ -84,8 +85,10 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.paused &&
         (!this._isLocked && this._didUnlockForAppLaunch)) {
-      this._backgroundLockLatencyTimer =
-          Timer(this.widget.backgroundLockLatency, () => this.showLockScreen());
+      this._backgroundLockLatencyTimer = Timer(
+        Duration(milliseconds: LockScreenSettings.instance.getAutoLockTime()),
+        () => this.showLockScreen(),
+      );
     }
 
     if (state == AppLifecycleState.resumed) {
