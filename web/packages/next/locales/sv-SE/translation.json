@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "",
     "TWO_FACTOR_DISABLE_FAILED": "",
     "EXPORT_DATA": "Exportera data",
-    "SELECT_FOLDER": "",
+    "select_folder": "",
     "DESTINATION": "",
     "START": "",
     "LAST_EXPORT_TIME": "",

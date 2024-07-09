@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "Are you sure you want to disable your two-factor authentication",
     "TWO_FACTOR_DISABLE_FAILED": "Failed to disable two factor, please try again",
     "EXPORT_DATA": "Export data",
-    "SELECT_FOLDER": "Select folder",
+    "select_folder": "Select folder",
     "DESTINATION": "Destination",
     "START": "Start",
     "LAST_EXPORT_TIME": "Last export time",

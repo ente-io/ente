@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "Você tem certeza de que deseja desativar a autenticação de dois fatores",
     "TWO_FACTOR_DISABLE_FAILED": "Não foi possível desativar dois fatores, por favor tente novamente",
     "EXPORT_DATA": "Exportar dados",
-    "SELECT_FOLDER": "Selecione a pasta",
+    "select_folder": "Selecione a pasta",
     "DESTINATION": "Destino",
     "START": "Iniciar",
     "LAST_EXPORT_TIME": "Data da última exportação",

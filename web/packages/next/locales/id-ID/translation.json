@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "",
     "TWO_FACTOR_DISABLE_FAILED": "Gagal menonaktifkan autentikasi dua langkah, silakan coba lagi",
     "EXPORT_DATA": "Ekspor data",
-    "SELECT_FOLDER": "Pilih folder",
+    "select_folder": "Pilih folder",
     "DESTINATION": "",
     "START": "Mulai",
     "LAST_EXPORT_TIME": "",

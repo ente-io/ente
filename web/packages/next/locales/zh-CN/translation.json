@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "您确定要禁用您的双重认证吗？",
     "TWO_FACTOR_DISABLE_FAILED": "禁用双重认证失败，请再试一次",
     "EXPORT_DATA": "导出数据",
-    "SELECT_FOLDER": "选择文件夹",
+    "select_folder": "选择文件夹",
     "DESTINATION": "目标位置",
     "START": "开始",
     "LAST_EXPORT_TIME": "最后一次导出时间",

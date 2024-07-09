@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "Weet u zeker dat u tweestapsverificatie wilt uitschakelen",
     "TWO_FACTOR_DISABLE_FAILED": "Uitschakelen van tweestapsverificatie is mislukt, probeer het opnieuw",
     "EXPORT_DATA": "Gegevens exporteren",
-    "SELECT_FOLDER": "Map selecteren",
+    "select_folder": "Map selecteren",
     "DESTINATION": "Bestemming",
     "START": "Start",
     "LAST_EXPORT_TIME": "Tijd laatste export",

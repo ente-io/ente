@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "Bist du sicher, dass du die Zwei-Faktor-Authentifizierung deaktivieren willst",
     "TWO_FACTOR_DISABLE_FAILED": "Fehler beim Deaktivieren des zweiten Faktors, bitte versuchen Sie es erneut",
     "EXPORT_DATA": "Daten exportieren",
-    "SELECT_FOLDER": "Ordner auswählen",
+    "select_folder": "Ordner auswählen",
     "DESTINATION": "Zielort",
     "START": "Start",
     "LAST_EXPORT_TIME": "Letztes Exportdatum",

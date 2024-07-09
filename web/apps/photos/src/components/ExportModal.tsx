@@ -195,7 +195,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
             <>
                 {!exportFolder ? (
                     <Button color={"accent"} onClick={changeExportDirectory}>
-                        {t("SELECT_FOLDER")}
+                        {t("select_folder")}
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>

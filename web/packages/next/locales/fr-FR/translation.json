@@ -271,7 +271,7 @@
     "DISABLE_TWO_FACTOR_MESSAGE": "Êtes-vous certains de vouloir désactiver la double-authentification",
     "TWO_FACTOR_DISABLE_FAILED": "Échec de désactivation de la double-authentification, veuillez réessayer",
     "EXPORT_DATA": "Exporter les données",
-    "SELECT_FOLDER": "Sélectionner un dossier",
+    "select_folder": "Sélectionner un dossier",
     "DESTINATION": "Destination",
     "START": "Démarrer",
     "LAST_EXPORT_TIME": "Horaire du dernier export",
