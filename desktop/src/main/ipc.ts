@@ -186,10 +186,8 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle(
-        "computeCLIPImageEmbedding",
-        (_, jpegImageData: Uint8Array) =>
-            computeCLIPImageEmbedding(jpegImageData),
+    ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
+        computeCLIPImageEmbedding(input),
     );
 
     ipcMain.handle("computeCLIPTextEmbeddingIfAvailable", (_, text: string) =>

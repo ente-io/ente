@@ -339,14 +339,13 @@ export interface Electron {
      *
      * See: [Note: Natural language search using CLIP]
      *
-     * The input is a opaque binary data whose internal structure is specific to
-     * our implementation and the ML model (CLIP) we use.
+     * The input is a opaque float32 array representing the image. The layout
+     * and exact encoding of the input is specific to our implementation and the
+     * ML model (CLIP) we use.
      *
-     * @returns A CLIP embedding.
+     * @returns A CLIP embedding (an array of 512 floating point values).
      */
-    computeCLIPImageEmbedding: (
-        jpegImageData: Uint8Array,
-    ) => Promise<Float32Array>;
+    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
 
     /**
      * Return a CLIP embedding of the given image if we already have the model

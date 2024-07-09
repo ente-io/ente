@@ -402,7 +402,7 @@ const searchClip = async (
 // };
 
 // getTextEmbeddingIfAvailable = async (text: string) => {
-//     return ensureElectron().computeCLIPTextEmbeddingIfAvailable(text);
+//    return normalizeEmbedding(ensureElectron().computeCLIPTextEmbeddingIfAvailable(text));
 // };
 
 // export const computeClipMatchScore = async (
