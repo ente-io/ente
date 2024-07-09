@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:ente_auth/core/configuration.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/components/captioned_text_widget.dart";
@@ -6,10 +8,12 @@ import "package:ente_auth/ui/components/menu_item_widget.dart";
 import "package:ente_auth/ui/components/title_bar_title_widget.dart";
 import "package:ente_auth/ui/components/title_bar_widget.dart";
 import "package:ente_auth/ui/components/toggle_switch_widget.dart";
+import "package:ente_auth/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:ente_auth/ui/tools/app_lock.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
+import "package:ente_auth/utils/navigation_util.dart";
 import "package:flutter/material.dart";
 
 class LockScreenOptions extends StatefulWidget {
@@ -93,6 +97,22 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       _initializeSettings();
       appLock = !appLock;
     });
+  }
+
+  Future<void> _onAutoLock() async {
+    routeToPage(context, LockScreenAutoLock());
+  }
+
+  String _formatTime(Duration duration) {
+    if (duration.inHours != 0) {
+      return "${duration.inHours}hr";
+    } else if (duration.inMinutes != 0) {
+      return "${duration.inMinutes}m";
+    } else if (duration.inSeconds != 0) {
+      return "${duration.inSeconds}s";
+    } else {
+      return "Disable";
+    }
   }
 
   @override
