@@ -34,7 +34,6 @@
         "electron-updater": "^6.2",
         "ffmpeg-static": "^5.2",
         "html-entities": "^2.5",
-        "jpeg-js": "^0.4",
         "lru-cache": "^10.2",
         "next-electron-server": "^1",
         "node-stream-zip": "^1.15",
