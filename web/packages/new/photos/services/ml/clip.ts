@@ -197,10 +197,10 @@ export const clipMatches = async (
     searchPhrase: string,
     electron: Electron,
 ): Promise<Map<number, number> | undefined> => {
-    const textEmbedding = await electron
-        .computeCLIPTextEmbeddingIfAvailable(searchPhrase)
-        .then((e) => (e ? normalizedEmbedding(e) : e));
-    if (!textEmbedding) return undefined;
+    const t = await electron.computeCLIPTextEmbeddingIfAvailable(searchPhrase);
+    if (!t) return undefined;
+
+    const textEmbedding = normalizedEmbedding(t);
 
     return new Map(
         (await clipIndexes())
@@ -215,11 +215,12 @@ export const clipMatches = async (
 const clipMatchScore = (imageEmbedding: number[], textEmbedding: number[]) => {
     if (imageEmbedding.length != textEmbedding.length)
         throw Error(
-            `CLIP image embeddings (${imageEmbedding.length}) and text embeddings (${textEmbedding.length}) length mismatch`,
+            `CLIP image embedding (${imageEmbedding.length}) and text embedding (${textEmbedding.length}) length mismatch`,
         );
 
     let score = 0;
     for (let i = 0; i < imageEmbedding.length; i++) {
+        // We checked the length above.
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         score += imageEmbedding[i]! * textEmbedding[i]!;
     }
