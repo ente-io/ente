@@ -16,7 +16,7 @@ class OnnxDart {
         .init(modelType, modelPath, sessionsCount: sessionsCount);
   }
 
-  Future<dynamic?> predict(
+  Future<Float32List?> predict(
     Float32List inputData,
     String modelType, {
     int sessionAddress = 0,

@@ -37,31 +37,13 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
     return result;
   }
 
-  // @override
-  // Future<List<double>?> predict(
-  //   List<double> inputData,
-  //   String modelType, {
-  //   int sessionAddress = 0,
-  // }) async {
-  //   final List<dynamic>? result =
-  //       await methodChannel.invokeMethod<List<double>?>(
-  //     'predict',
-  //     {
-  //       'sessionAddress': sessionAddress,
-  //       'inputData': inputData,
-  //       'modelType': modelType,
-  //     },
-  //   );
-  //   return result!.cast<double>();
-  // }
-
   @override
-  Future<dynamic?> predict(
+  Future<Float32List?> predict(
     Float32List inputData,
     String modelType, {
     int sessionAddress = 0,
   }) {
-    return methodChannel.invokeMethod<dynamic?>(
+    return methodChannel.invokeMethod<Float32List?>(
       'predict',
       {
         'sessionAddress': sessionAddress,

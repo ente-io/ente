@@ -142,7 +142,7 @@ class FaceDetectionService extends MlModel {
       "YOLO_FACE",
     );
     final List<List<List<double>>> reconstructedTensor = [];
-    for (int i = 0; i < result.length; i += 25200 * 16) {
+    for (int i = 0; i < result!.length; i += 25200 * 16) {
       final List<List<double>> outerArray = [];
       for (int j = 0; j < 25200; j++) {
         final List<double> innerArray =
