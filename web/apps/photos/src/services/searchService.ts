@@ -375,7 +375,9 @@ const searchClip = async (
 ): Promise<ClipSearchScores | undefined> => {
     // TODO-ML:
     //return undefined;
-    return clipMatches(searchPhrase, ensureElectron());
+    const matches = await clipMatches(searchPhrase, ensureElectron());
+    log.debug(() => ({ t: "clip-scores", matches }));
+    return matches;
 };
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
