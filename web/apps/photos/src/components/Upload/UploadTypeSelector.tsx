@@ -173,21 +173,21 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                             onClick={() => onSelect("files")}
                             startIcon={<FileUploadIcon />}
                             endIcon={<ChevronRight />}
-                            label={t("UPLOAD_FILES")}
+                            label={t("file")}
                         />
                     )}
                     <EnteMenuItem
                         onClick={() => onSelect("folders")}
                         startIcon={<FolderUploadIcon />}
                         endIcon={<ChevronRight />}
-                        label={t("UPLOAD_DIRS")}
+                        label={t("folder")}
                     />
                     {intent !== "collect" && (
                         <EnteMenuItem
                             onClick={() => onSelect("zips")}
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRight />}
-                            label={t("UPLOAD_GOOGLE_TAKEOUT")}
+                            label={t("google_takeout")}
                         />
                     )}
                 </Stack>
@@ -206,7 +206,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
     return (
         <>
             <DialogTitleWithCloseButtonSm onClose={onClose}>
-                {t("UPLOAD_GOOGLE_TAKEOUT")}
+                {t("google_takeout")}
             </DialogTitleWithCloseButtonSm>
 
             <Box p={1.5}>
