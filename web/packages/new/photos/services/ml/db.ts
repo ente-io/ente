@@ -4,34 +4,42 @@ import type { EmbeddingModel } from "./embedding";
 import type { FaceIndex } from "./face";
 
 /**
- * Face DB schema.
+ * ML DB schema.
  *
- * There "face" database is made of two object stores:
+ * The "ML" database is made of three object stores:
+ *
+ * - "file-status": Contains {@link FileStatus} objects, one for each
+ *   {@link EnteFile} that the ML subsystem knows about. Periodically (and when
+ *   required), this is synced with the list of files that the current client
+ *   knows about locally.
  *
  * - "face-index": Contains {@link FaceIndex} objects, either indexed locally or
  *   fetched from remote storage.
  *
- * - "file-status": Contains {@link FileStatus} objects, one for each
- *   {@link EnteFile} that the current client knows about.
+ * - "clip-index": Contains {@link CLIPIndex} objects, either indexed locally or
+ *   fetched from remote storage.
  *
- * Both the stores are keyed by {@link fileID}, and are expected to contain the
- * exact same set of {@link fileID}s. The face-index can be thought of as the
- * "original" indexing result, whilst file-status bookkeeps information about
- * the indexing process (whether or not a file needs indexing, or if there were
- * errors doing so).
+ * All the stores are keyed by {@link fileID}. The "file-status" contains
+ * book-keeping about the indexing process (whether or not a file needs
+ * indexing, or if there were errors doing so), while the other stores contain
+ * the actual indexing results.
  *
  * In tandem, these serve as the underlying storage for the functions exposed by
  * this file.
  */
 interface FaceDBSchema extends DBSchema {
-    "face-index": {
-        key: number;
-        value: FaceIndex;
-    };
     "file-status": {
         key: number;
         value: FileStatus;
         indexes: { status: FileStatus["status"] };
+    };
+    "face-index": {
+        key: number;
+        value: FaceIndex;
+    };
+    "clip-index": {
+        key: number;
+        value: CLIPIndex;
     };
 }
 
@@ -45,13 +53,20 @@ interface FileStatus {
      *   to be indexed.
      *
      * - "indexed" - We have a corresponding entry for this file in the
-     *   "face-index" object (either indexed locally or fetched from remote).
+     *   "face-index" _and_ "clip-index" object stores (either indexed locally
+     *   or fetched from remote).
      *
      * - "failed" - Indexing was attempted but failed.
      *
-     * We also have a (IndexedDB) "index" on this field to allow us to
-     * efficiently select or count {@link fileIDs} that fall into various
-     * buckets.
+     * There can arise situations in which a file has one, but not all, indexes.
+     * e.g. it may have a "face-index" but "clip-index" might've not yet
+     * happened (or failed). In such cases, the status of the file will be
+     * "indexable": it transitions to "indexed" only after all indexes have been
+     * computed or fetched.
+     *
+     * If you have't heard the word "index" to the point of zoning out, we also
+     * have a (IndexedDB) "index" on the status field to allow us to efficiently
+     * select or count {@link fileIDs} that fall into various buckets.
      */
     status: "indexable" | "indexed" | "failed";
     /**
@@ -63,6 +78,8 @@ interface FileStatus {
     pending: EmbeddingModel[];
     /**
      * The number of times attempts to index this file failed.
+     *
+     * It counts failure across all index types.
      *
      * This is guaranteed to be `0` for files with status "indexed".
      */
