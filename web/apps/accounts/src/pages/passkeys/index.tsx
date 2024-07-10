@@ -1,5 +1,4 @@
-import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import { MenuItemDivider, MenuItemGroup } from "@/new/common/components/Menu";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";

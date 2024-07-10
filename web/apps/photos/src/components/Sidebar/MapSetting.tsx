@@ -1,4 +1,4 @@
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import { MenuItemGroup } from "@/new/common/components/Menu";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {

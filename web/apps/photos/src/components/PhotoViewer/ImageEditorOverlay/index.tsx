@@ -1,6 +1,8 @@
-import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
-import { MenuSectionTitle } from "@/new/common/components/menu/MenuSectionTitle";
+import {
+    MenuItemDivider,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/new/common/components/Menu";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { nameAndExtension } from "@/next/file";

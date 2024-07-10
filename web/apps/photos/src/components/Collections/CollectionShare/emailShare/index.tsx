@@ -1,9 +1,11 @@
 import { useRef, useState } from "react";
 import { COLLECTION_ROLE, Collection } from "types/collection";
 
-import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
-import { MenuSectionTitle } from "@/new/common/components/menu/MenuSectionTitle";
+import {
+    MenuItemDivider,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/new/common/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import ChevronRight from "@mui/icons-material/ChevronRight";

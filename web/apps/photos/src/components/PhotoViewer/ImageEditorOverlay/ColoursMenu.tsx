@@ -1,5 +1,4 @@
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
-import { MenuSectionTitle } from "@/new/common/components/menu/MenuSectionTitle";
+import { MenuItemGroup, MenuSectionTitle } from "@/new/common/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Box, Slider } from "@mui/material";
 import { t } from "i18next";

@@ -1,4 +1,4 @@
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import { MenuItemGroup } from "@/new/common/components/Menu";
 import {
     canEnableFaceIndexing,
     disableML,

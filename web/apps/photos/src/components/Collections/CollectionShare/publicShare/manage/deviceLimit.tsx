@@ -1,5 +1,4 @@
-import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import { MenuItemDivider, MenuItemGroup } from "@/new/common/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { DialogProps, Stack } from "@mui/material";

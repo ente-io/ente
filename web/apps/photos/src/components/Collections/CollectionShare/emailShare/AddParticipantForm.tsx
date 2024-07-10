@@ -1,6 +1,8 @@
-import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
-import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
-import { MenuSectionTitle } from "@/new/common/components/menu/MenuSectionTitle";
+import {
+    MenuItemDivider,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/new/common/components/Menu";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SubmitButton from "@ente/shared/components/SubmitButton";
