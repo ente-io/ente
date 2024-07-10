@@ -516,7 +516,7 @@ class MLService {
     return actuallyRanML;
   }
 
-  Future<void> _initModels() async {
+  Future<void> _initModelsUsingFfiBasedPlugin() async {
     return _initModelLock.synchronized(() async {
       if (_isModelsInitialized) return;
       _logger.info('initModels called');
@@ -623,8 +623,11 @@ class MLService {
 
   Future<void> _ensureReadyForInference() async {
     await _initIsolate();
-    await _initModels();
-    await _initModelUsingEntePlugin();
+    if (Platform.isAndroid) {
+      await _initModelUsingEntePlugin();
+    } else {
+      await _initModelsUsingFfiBasedPlugin();
+    }
   }
 
   /// The main execution function of the isolate.
