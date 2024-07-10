@@ -240,7 +240,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                     "Enable ML (Machine Learning) for face recognition, magic search and other advanced search features",
                 )}
             </Typography>
-            <Stack spacing={"8px"} >
+            <Stack spacing={"8px"}>
                 <Button color={"accent"} size="large" onClick={onEnable}>
                     {t("ENABLE")}
                 </Button>
