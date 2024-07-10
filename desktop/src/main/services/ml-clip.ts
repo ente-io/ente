@@ -3,6 +3,7 @@
  *
  * The embeddings are computed using ONNX runtime, with CLIP as the model.
  */
+
 import Tokenizer from "clip-bpe-js";
 import * as ort from "onnxruntime-node";
 import log from "../log";
