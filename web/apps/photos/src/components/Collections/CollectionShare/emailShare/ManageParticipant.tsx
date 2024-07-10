@@ -1,4 +1,5 @@
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
+import Titlebar from "@/new/shared/components/Titlebar";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import BlockIcon from "@mui/icons-material/Block";
@@ -7,7 +8,6 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import PhotoIcon from "@mui/icons-material/Photo";
 import { DialogProps, Stack, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";

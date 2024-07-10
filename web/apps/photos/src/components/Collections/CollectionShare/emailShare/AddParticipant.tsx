@@ -1,6 +1,6 @@
+import Titlebar from "@/new/shared/components/Titlebar";
 import { DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { COLLECTION_ROLE, Collection } from "types/collection";
 

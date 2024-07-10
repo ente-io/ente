@@ -3,6 +3,7 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/new/shared/components/Menu";
+import Titlebar from "@/new/shared/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -12,7 +13,6 @@ import Photo from "@mui/icons-material/Photo";
 import { DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import Avatar from "components/pages/gallery/Avatar";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";

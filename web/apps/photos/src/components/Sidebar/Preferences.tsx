@@ -1,3 +1,4 @@
+import Titlebar from "@/new/shared/components/Titlebar";
 import {
     getLocaleInUse,
     setLocaleInUse,
@@ -9,7 +10,6 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { EnteDrawer } from "components/EnteDrawer";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { useState } from "react";
 import AdvancedSettings from "./AdvancedSettings";

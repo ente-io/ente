@@ -1,4 +1,5 @@
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
+import Titlebar from "@/new/shared/components/Titlebar";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -9,7 +10,6 @@ import FormPaper from "@ente/shared/components/Form/FormPaper";
 import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
-import Titlebar from "@ente/shared/components/Titlebar";
 import { formatDateTimeFull } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

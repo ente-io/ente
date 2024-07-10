@@ -1,10 +1,10 @@
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
+import Titlebar from "@/new/shared/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import { DialogProps, Stack, Typography } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useState } from "react";
