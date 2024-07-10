@@ -236,9 +236,13 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     //     openLink("https://ente.io/blog/desktop-ml-beta", true);
 
     return (
-        <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-            (
-            <Stack px={"8px"} spacing={"8px"}>
+        <Stack py={"20px"} px={"16px"} spacing={"32px"}>
+            <Typography color="text.muted">
+                {pt(
+                    "Enable ML (Machine Learning) for face recognition, magic search and other advanced search features",
+                )}
+            </Typography>
+            <Stack spacing={"8px"} pb={"16px"}>
                 <Button color={"accent"} size="large" onClick={onEnable}>
                     {t("ENABLE")}
                 </Button>
@@ -252,7 +256,11 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                         </Button>
                         */}
             </Stack>
-            )
+            <Typography color="text.faint" variant="small">
+                {pt(
+                    'Magic search allows to search photos by their contents (e.g. "car", "red car" or even "ferrari")',
+                )}
+            </Typography>
         </Stack>
     );
 };
