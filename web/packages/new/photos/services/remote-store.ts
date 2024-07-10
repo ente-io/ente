@@ -31,6 +31,7 @@ export const getRemoteFlag = async (key: string) =>
 export const updateRemoteValue = async (key: string, value: string) =>
     ensureOk(
         await fetch(await apiURL("/remote-store/update"), {
+            method: "POST",
             headers: await authenticatedRequestHeaders(),
             body: JSON.stringify({ key, value }),
         }),
