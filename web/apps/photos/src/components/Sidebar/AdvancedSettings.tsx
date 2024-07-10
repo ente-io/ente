@@ -1,8 +1,7 @@
-import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
-import { Box, DialogProps, Stack, Typography } from "@mui/material";
+import { Box, DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import MenuSectionTitle from "components/Menu/MenuSectionTitle";
@@ -11,9 +10,7 @@ import { MLSearchSettings } from "components/ml/MLSearchSettings";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
-import { CLIPIndexingStatus, clipService } from "services/clip-service";
-import { formatNumber } from "utils/number/format";
+import { useContext, useState } from "react";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const appContext = useContext(AppContext);
@@ -39,16 +36,17 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
         appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
     };
 
-    const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
-        indexed: 0,
-        pending: 0,
-    });
+    // TODO-ML:
+    // const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
+    //     indexed: 0,
+    //     pending: 0,
+    // });
 
-    useEffect(() => {
-        clipService.setOnUpdateHandler(setIndexingStatus);
-        clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
-        return () => clipService.setOnUpdateHandler(undefined);
-    }, []);
+    // useEffect(() => {
+    //     clipService.setOnUpdateHandler(setIndexingStatus);
+    //     clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
+    //     return () => clipService.setOnUpdateHandler(undefined);
+    // }, []);
 
     return (
         <EnteDrawer
@@ -97,7 +95,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                             />
                         </Box>
 
-                        {isElectron() && (
+                        {/* TODO-ML: isElectron() && (
                             <Box>
                                 <MenuSectionTitle
                                     title={t("MAGIC_SEARCH_STATUS")}
@@ -131,7 +129,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                     </VerticallyCenteredFlex>
                                 </Stack>
                             </Box>
-                        )}
+                        )*/}
                     </Stack>
                 </Box>
             </Stack>

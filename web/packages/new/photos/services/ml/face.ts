@@ -21,11 +21,11 @@ import {
 import type { ImageBitmapAndData } from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
-    clamp,
     grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
+import { clamp } from "./math";
 import type { MLWorkerElectron } from "./worker-electron";
 
 /**
@@ -196,24 +196,26 @@ export interface Box {
 /**
  * Index faces in the given file.
  *
- * This function is the entry point to the indexing pipeline. The file goes
+ * This function is the entry point to the face indexing pipeline. The file goes
  * through various stages:
  *
  * 1. Downloading the original if needed.
  * 2. Detect faces using ONNX/YOLO
  * 3. Align the face rectangles, compute blur.
- * 4. Compute embeddings for the detected face (crops).
+ * 4. Compute embeddings using ONNX/MFNT for the detected face (crop).
  *
  * Once all of it is done, it returns the face rectangles and embeddings so that
- * they can be saved locally for offline use, and encrypts and uploads them to
- * the user's remote storage so that their other devices can download them
- * instead of needing to reindex.
+ * they can be saved locally (for offline use), and also uploaded to the user's
+ * remote storage so that their other devices can download them instead of
+ * needing to reindex.
+ *
+ * As an optimization, it also saves the face crops of the detected faces to the
+ * local cache (they can be regenerated independently too by using
+ * {@link regenerateFaceCrops}).
  *
  * @param enteFile The {@link EnteFile} to index.
  *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
+ * @param image The file's contents.
  *
  * @param electron The {@link MLWorkerElectron} instance that allows us to call
  * our Node.js layer for various functionality.

@@ -1,5 +1,4 @@
 import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
-import { pt } from "@/next/i18n";
 import DialogTitleWithCloseButton, {
     DialogTitleWithCloseButtonSm,
     dialogCloseHandler,
@@ -160,10 +159,10 @@ const DefaultOptions: React.FC<OptionsProps> = ({
         <>
             <DialogTitleWithCloseButton onClose={onClose}>
                 {intent == "collect"
-                    ? t("SELECT_PHOTOS")
+                    ? t("select_photos")
                     : intent == "import"
-                      ? t("IMPORT")
-                      : t("UPLOAD")}
+                      ? t("import")
+                      : t("upload")}
             </DialogTitleWithCloseButton>
 
             <Box p={1.5} pt={0.5}>
@@ -173,26 +172,31 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                             onClick={() => onSelect("files")}
                             startIcon={<FileUploadIcon />}
                             endIcon={<ChevronRight />}
-                            label={t("UPLOAD_FILES")}
+                            label={t("file")}
                         />
                     )}
                     <EnteMenuItem
                         onClick={() => onSelect("folders")}
                         startIcon={<FolderUploadIcon />}
                         endIcon={<ChevronRight />}
-                        label={t("UPLOAD_DIRS")}
+                        label={t("folder")}
                     />
                     {intent !== "collect" && (
                         <EnteMenuItem
                             onClick={() => onSelect("zips")}
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRight />}
-                            label={t("UPLOAD_GOOGLE_TAKEOUT")}
+                            label={t("google_takeout")}
                         />
                     )}
                 </Stack>
-                <Typography p={1.5} pt={4} color="text.muted">
-                    {t("DRAG_AND_DROP_HINT")}
+                <Typography
+                    p={1.5}
+                    pt={4}
+                    color="text.muted"
+                    sx={{ textAlign: "center" }}
+                >
+                    {t("drag_and_drop_hint")}
                 </Typography>
             </Box>
         </>
@@ -206,7 +210,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
     return (
         <>
             <DialogTitleWithCloseButtonSm onClose={onClose}>
-                {t("UPLOAD_GOOGLE_TAKEOUT")}
+                {t("google_takeout")}
             </DialogTitleWithCloseButtonSm>
 
             <Box p={1.5}>
@@ -218,7 +222,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("folders")}
                         >
-                            {pt("Select folder")}
+                            {t("select_folder")}
                         </FocusVisibleButton>
                         <FocusVisibleButton
                             color="secondary"
@@ -226,7 +230,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             disableRipple
                             onClick={() => onSelect("zips")}
                         >
-                            {pt("Select zips")}
+                            {t("Select zips")}
                         </FocusVisibleButton>
                         <Link
                             href="https://help.ente.io/photos/migration/from-google-photos/"
@@ -238,15 +242,13 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                                 fullWidth
                                 disableRipple
                             >
-                                {pt("FAQ")}
+                                {t("faq")}
                             </FocusVisibleButton>
                         </Link>
                     </Stack>
 
                     <Typography variant="small" color="text.muted" pb={1}>
-                        {pt(
-                            "Unzip all zips into the same folder and upload that. Or upload the zips directly. See FAQ for details.",
-                        )}
+                        {t("takeout_hint")}
                     </Typography>
                 </Stack>
             </Box>

@@ -8975,6 +8975,16 @@ class S {
     );
   }
 
+  /// `ML functions`
+  String get mlFunctions {
+    return Intl.message(
+      'ML functions',
+      name: 'mlFunctions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Re-enter password`
   String get reenterPassword {
     return Intl.message(
@@ -9100,16 +9110,6 @@ class S {
     return Intl.message(
       'Too many incorrect attempts',
       name: 'tooManyIncorrectAttempts',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `ML functions`
-  String get mlFunctions {
-    return Intl.message(
-      'ML functions',
-      name: 'mlFunctions',
       desc: '',
       args: [],
     );

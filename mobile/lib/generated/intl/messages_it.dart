@@ -118,89 +118,89 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(albumName) => "Spostato con successo su ${albumName}";
 
-  static String m37(passwordStrengthValue) =>
+  static String m38(passwordStrengthValue) =>
       "Sicurezza password: ${passwordStrengthValue}";
 
-  static String m38(providerName) =>
+  static String m39(providerName) =>
       "Si prega di parlare con il supporto di ${providerName} se ti è stato addebitato qualcosa";
 
-  static String m39(endDate) =>
+  static String m40(endDate) =>
       "Prova gratuita valida fino al ${endDate}.\nPuoi scegliere un piano a pagamento in seguito.";
 
-  static String m40(toEmail) => "Per favore invia un\'email a ${toEmail}";
+  static String m41(toEmail) => "Per favore invia un\'email a ${toEmail}";
 
-  static String m41(toEmail) => "Invia i log a \n${toEmail}";
+  static String m42(toEmail) => "Invia i log a \n${toEmail}";
 
-  static String m42(storeName) => "Valutaci su ${storeName}";
+  static String m43(storeName) => "Valutaci su ${storeName}";
 
-  static String m43(storageInGB) =>
+  static String m44(storageInGB) =>
       "3. Ottenete entrambi ${storageInGB} GB* gratis";
 
-  static String m44(userEmail) =>
+  static String m45(userEmail) =>
       "${userEmail} verrà rimosso da questo album condiviso\n\nQualsiasi foto aggiunta dall\'utente verrà rimossa dall\'album";
 
-  static String m45(endDate) => "Si rinnova il ${endDate}";
+  static String m46(endDate) => "Si rinnova il ${endDate}";
 
-  static String m47(count) => "${count} selezionati";
+  static String m48(count) => "${count} selezionati";
 
-  static String m48(count, yourCount) =>
+  static String m49(count, yourCount) =>
       "${count} selezionato (${yourCount} tuoi)";
 
-  static String m49(verificationID) =>
+  static String m50(verificationID) =>
       "Ecco il mio ID di verifica: ${verificationID} per ente.io.";
 
-  static String m50(verificationID) =>
+  static String m51(verificationID) =>
       "Hey, puoi confermare che questo è il tuo ID di verifica: ${verificationID} su ente.io";
 
-  static String m51(referralCode, referralStorageInGB) =>
+  static String m52(referralCode, referralStorageInGB) =>
       "ente referral code: ${referralCode} \n\nApplicalo in Impostazioni → Generale → Referral per ottenere ${referralStorageInGB} GB gratis dopo la registrazione di un piano a pagamento\n\nhttps://ente.io";
 
-  static String m52(numberOfPeople) =>
+  static String m53(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Condividi con persone specifiche', one: 'Condividi con una persona', other: 'Condividi con ${numberOfPeople} persone')}";
 
-  static String m53(emailIDs) => "Condiviso con ${emailIDs}";
-
-  static String m54(fileType) =>
-      "Questo ${fileType} verrà eliminato dal tuo dispositivo.";
+  static String m54(emailIDs) => "Condiviso con ${emailIDs}";
 
   static String m55(fileType) =>
+      "Questo ${fileType} verrà eliminato dal tuo dispositivo.";
+
+  static String m56(fileType) =>
       "Questo ${fileType} è sia su ente che sul tuo dispositivo.";
 
-  static String m56(fileType) => "Questo ${fileType} verrà eliminato su ente.";
+  static String m57(fileType) => "Questo ${fileType} verrà eliminato su ente.";
 
-  static String m57(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m58(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m58(
+  static String m59(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} di ${totalAmount} ${totalStorageUnit} utilizzati";
 
-  static String m59(id) =>
+  static String m60(id) =>
       "Il tuo ${id} è già collegato ad un altro account ente.\nSe desideri utilizzare il tuo ${id} con questo account, contatta il nostro supporto\'\'";
 
-  static String m60(endDate) => "L\'abbonamento verrà cancellato il ${endDate}";
+  static String m61(endDate) => "L\'abbonamento verrà cancellato il ${endDate}";
 
-  static String m61(completed, total) =>
+  static String m62(completed, total) =>
       "${completed}/${total} ricordi conservati";
 
-  static String m62(storageAmountInGB) =>
+  static String m63(storageAmountInGB) =>
       "Anche loro riceveranno ${storageAmountInGB} GB";
 
-  static String m63(email) => "Questo è l\'ID di verifica di ${email}";
+  static String m64(email) => "Questo è l\'ID di verifica di ${email}";
 
-  static String m64(count) =>
+  static String m65(count) =>
       "${Intl.plural(count, zero: '', one: '1 giorno', other: '${count} giorni')}";
 
-  static String m65(endDate) => "Valido fino al ${endDate}";
+  static String m66(endDate) => "Valido fino al ${endDate}";
 
-  static String m66(email) => "Verifica ${email}";
+  static String m67(email) => "Verifica ${email}";
 
-  static String m67(email) =>
+  static String m68(email) =>
       "Abbiamo inviato una mail a <green>${email}</green>";
 
-  static String m68(count) =>
+  static String m69(count) =>
       "${Intl.plural(count, one: '${count} anno fa', other: '${count} anni fa')}";
 
-  static String m69(storageSaved) =>
+  static String m70(storageSaved) =>
       "Hai liberato con successo ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -972,14 +972,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password modificata con successo"),
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Blocco con password"),
-        "passwordStrength": m37,
+        "passwordStrength": m38,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Noi non memorizziamo la tua password, quindi se te la dimentichi, <underline>non possiamo decriptare i tuoi dati</underline>"),
         "paymentDetails":
             MessageLookupByLibrary.simpleMessage("Dettagli di Pagamento"),
         "paymentFailed":
             MessageLookupByLibrary.simpleMessage("Pagamento non riuscito"),
-        "paymentFailedTalkToProvider": m38,
+        "paymentFailedTalkToProvider": m39,
         "pendingSync":
             MessageLookupByLibrary.simpleMessage("Sincronizzazione in sospeso"),
         "peopleUsingYourCode": MessageLookupByLibrary.simpleMessage(
@@ -1000,7 +1000,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Selezionare il punto centrale"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Fissa l\'album"),
         "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
-        "playStoreFreeTrialValidTill": m39,
+        "playStoreFreeTrialValidTill": m40,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Abbonamento su PlayStore"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
@@ -1009,12 +1009,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage(
                 "Riprova. Se il problema persiste, ti invitiamo a contattare l\'assistenza"),
-        "pleaseEmailUsAt": m40,
+        "pleaseEmailUsAt": m41,
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("Concedi i permessi"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage(
             "Effettua nuovamente l\'accesso"),
-        "pleaseSendTheLogsTo": m41,
+        "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage("Riprova"),
         "pleaseVerifyTheCodeYouHaveEntered":
             MessageLookupByLibrary.simpleMessage(
@@ -1048,7 +1048,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Invia ticket"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Valuta l\'app"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Lascia una recensione"),
-        "rateUsOnStore": m42,
+        "rateUsOnStore": m43,
         "recover": MessageLookupByLibrary.simpleMessage("Recupera"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recupera account"),
@@ -1083,7 +1083,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "1. Condividi questo codice con i tuoi amici"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. Si iscrivono per un piano a pagamento"),
-        "referralStep3": m43,
+        "referralStep3": m44,
         "referrals": MessageLookupByLibrary.simpleMessage("Invita un Amico"),
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "I referral code sono attualmente in pausa"),
@@ -1107,7 +1107,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeLink": MessageLookupByLibrary.simpleMessage("Elimina link"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Rimuovi partecipante"),
-        "removeParticipantBody": m44,
+        "removeParticipantBody": m45,
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
@@ -1123,7 +1123,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "renameFile": MessageLookupByLibrary.simpleMessage("Rinomina file"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("Rinnova abbonamento"),
-        "renewsOn": m45,
+        "renewsOn": m46,
         "reportABug": MessageLookupByLibrary.simpleMessage("Segnala un bug"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Segnala un bug"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Rinvia email"),
@@ -1189,8 +1189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Gli elementi selezionati verranno eliminati da tutti gli album e spostati nel cestino."),
-        "selectedPhotos": m47,
-        "selectedPhotosWithYours": m48,
+        "selectedPhotos": m48,
+        "selectedPhotosWithYours": m49,
         "send": MessageLookupByLibrary.simpleMessage("Invia"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Invia email"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Invita"),
@@ -1217,16 +1217,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("Condividi un album"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Condividi link"),
-        "shareMyVerificationID": m49,
+        "shareMyVerificationID": m50,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Condividi solo con le persone che vuoi"),
-        "shareTextConfirmOthersVerificationID": m50,
+        "shareTextConfirmOthersVerificationID": m51,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Scarica ente in modo da poter facilmente condividere foto e video senza perdita di qualità\n\nhttps://ente.io"),
-        "shareTextReferralCode": m51,
+        "shareTextReferralCode": m52,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Condividi con utenti che non hanno un account ente"),
-        "shareWithPeopleSectionTitle": m52,
+        "shareWithPeopleSectionTitle": m53,
         "shareYourFirstAlbum": MessageLookupByLibrary.simpleMessage(
             "Condividi il tuo primo album"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1237,7 +1237,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nuove foto condivise"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Ricevi notifiche quando qualcuno aggiunge una foto a un album condiviso, di cui fai parte"),
-        "sharedWith": m53,
+        "sharedWith": m54,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Condivisi con me"),
         "sharedWithYou":
@@ -1247,11 +1247,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "showMemories": MessageLookupByLibrary.simpleMessage("Mostra ricordi"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Accetto i <u-terms>termini di servizio</u-terms> e la <u-policy>politica sulla privacy</u-policy>"),
-        "singleFileDeleteFromDevice": m54,
+        "singleFileDeleteFromDevice": m55,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "Verrà eliminato da tutti gli album."),
-        "singleFileInBothLocalAndRemote": m55,
-        "singleFileInRemoteOnly": m56,
+        "singleFileInBothLocalAndRemote": m56,
+        "singleFileInRemoteOnly": m57,
         "skip": MessageLookupByLibrary.simpleMessage("Salta"),
         "social": MessageLookupByLibrary.simpleMessage("Social"),
         "someItemsAreInBothEnteAndYourDevice":
@@ -1292,13 +1292,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("Famiglia"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Tu"),
-        "storageInGB": m57,
+        "storageInGB": m58,
         "storageLimitExceeded": MessageLookupByLibrary.simpleMessage(
             "Limite d\'archiviazione superato"),
-        "storageUsageInfo": m58,
+        "storageUsageInfo": m59,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Forte"),
-        "subAlreadyLinkedErrMessage": m59,
-        "subWillBeCancelledOn": m60,
+        "subAlreadyLinkedErrMessage": m60,
+        "subWillBeCancelledOn": m61,
         "subscribe": MessageLookupByLibrary.simpleMessage("Iscriviti"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Sembra che il tuo abbonamento sia scaduto. Iscriviti per abilitare la condivisione."),
@@ -1315,7 +1315,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Suggerisci una funzionalità"),
         "support": MessageLookupByLibrary.simpleMessage("Assistenza"),
-        "syncProgress": m61,
+        "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Sincronizzazione interrotta"),
         "syncing": MessageLookupByLibrary.simpleMessage(
@@ -1345,7 +1345,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theseItemsWillBeDeletedFromYourDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Questi file verranno eliminati dal tuo dispositivo."),
-        "theyAlsoGetXGb": m62,
+        "theyAlsoGetXGb": m63,
         "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
             "Verranno eliminati da tutti gli album."),
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
@@ -1362,7 +1362,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Questo indirizzo email è già registrato"),
         "thisImageHasNoExifData": MessageLookupByLibrary.simpleMessage(
             "Questa immagine non ha dati EXIF"),
-        "thisIsPersonVerificationId": m63,
+        "thisIsPersonVerificationId": m64,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Questo è il tuo ID di verifica"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -1383,7 +1383,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("totale"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Dimensioni totali"),
         "trash": MessageLookupByLibrary.simpleMessage("Cestino"),
-        "trashDaysLeft": m64,
+        "trashDaysLeft": m65,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Riprova"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Attiva il backup per caricare automaticamente i file aggiunti in questa cartella del dispositivo su ente."),
@@ -1440,7 +1440,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Usa la foto selezionata"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Spazio utilizzato"),
-        "validTill": m65,
+        "validTill": m66,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verifica fallita, per favore prova di nuovo"),
@@ -1448,7 +1448,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ID di verifica"),
         "verify": MessageLookupByLibrary.simpleMessage("Verifica"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verifica email"),
-        "verifyEmailID": m66,
+        "verifyEmailID": m67,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verifica"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verifica password"),
@@ -1475,11 +1475,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Non puoi modificare foto e album che non possiedi"),
-        "weHaveSendEmailTo": m67,
+        "weHaveSendEmailTo": m68,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Debole"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Bentornato/a!"),
         "yearly": MessageLookupByLibrary.simpleMessage("Annuale"),
-        "yearsAgo": m68,
+        "yearsAgo": m69,
         "yes": MessageLookupByLibrary.simpleMessage("Si"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Sì, cancella"),
         "yesConvertToViewer": MessageLookupByLibrary.simpleMessage(
@@ -1509,7 +1509,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Non puoi condividere con te stesso"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Non hai nulla di archiviato."),
-        "youHaveSuccessfullyFreedUp": m69,
+        "youHaveSuccessfullyFreedUp": m70,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Il tuo account è stato eliminato"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),

@@ -19,7 +19,6 @@ import { wait } from "@/utils/promise";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
 import { Canceler } from "axios";
 import type { Remote } from "comlink";
 import isElectron from "is-electron";
@@ -617,27 +616,6 @@ class UploadManager {
                 const uploadItem =
                     uploadableItem.uploadItem ??
                     uploadableItem.livePhotoAssets.image;
-                try {
-                    let file: File | undefined;
-                    if (uploadItem) {
-                        if (uploadItem instanceof File) {
-                            file = uploadItem;
-                        } else if (
-                            typeof uploadItem == "string" ||
-                            Array.isArray(uploadItem)
-                        ) {
-                            // path from desktop, no file object
-                        } else {
-                            file = uploadItem.file;
-                        }
-                    }
-                    eventBus.emit(Events.FILE_UPLOADED, {
-                        enteFile: decryptedFile,
-                        localFile: file,
-                    });
-                } catch (e) {
-                    log.warn("Ignoring error in fileUploaded handlers", e);
-                }
                 if (
                     uploadItem &&
                     (uploadResult == UPLOAD_RESULT.UPLOADED ||

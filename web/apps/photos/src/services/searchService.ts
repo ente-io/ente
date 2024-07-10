@@ -19,14 +19,10 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
-import { clipService, computeClipMatchScore } from "./clip-service";
-import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
-
-const CLIP_SCORE_THRESHOLD = 0.23;
 
 export const getDefaultOptions = async () => {
     return [
@@ -373,30 +369,14 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
 }
 
 const searchClip = async (
-    searchPhrase: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
-    const textEmbedding =
-        await clipService.getTextEmbeddingIfAvailable(searchPhrase);
-    if (!textEmbedding) return undefined;
-
-    const imageEmbeddings = await localCLIPEmbeddings();
-    const clipSearchResult = new Map<number, number>(
-        (
-            await Promise.all(
-                imageEmbeddings.map(
-                    async (imageEmbedding): Promise<[number, number]> => [
-                        imageEmbedding.fileID,
-                        await computeClipMatchScore(
-                            imageEmbedding.embedding,
-                            textEmbedding,
-                        ),
-                    ],
-                ),
-            )
-        ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD),
-    );
-
-    return clipSearchResult;
+    // TODO-ML: clip-test
+    return undefined;
+    // const matches = await clipMatches(searchPhrase, ensureElectron());
+    // log.debug(() => ["clip/scores", matches]);
+    // return matches;
 };
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
