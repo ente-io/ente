@@ -232,29 +232,22 @@ interface EnableMLProps {
 }
 
 const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
-    // const showDetails = () =>
-    //     openLink("https://ente.io/blog/desktop-ml-beta", true);
-
-    return (
+    const showDetails = () => 3;
+    /*openLink("https://ente.io/blog/desktop-ml-beta", true)*/ return (
         <Stack py={"20px"} px={"16px"} spacing={"32px"}>
             <Typography color="text.muted">
                 {pt(
                     "Enable ML (Machine Learning) for face recognition, magic search and other advanced search features",
                 )}
             </Typography>
-            <Stack spacing={"8px"} pb={"16px"}>
+            <Stack spacing={"8px"} >
                 <Button color={"accent"} size="large" onClick={onEnable}>
                     {t("ENABLE")}
                 </Button>
-                {/*
-                        <Button
-                        color="secondary"
-                        size="large"
-                        onClick={showDetails}
-                        >
-                            {t("ML_MORE_DETAILS")}
-                        </Button>
-                        */}
+
+                <Button color="secondary" size="large" onClick={showDetails}>
+                    {t("ML_MORE_DETAILS")}
+                </Button>
             </Stack>
             <Typography color="text.faint" variant="small">
                 {pt(
