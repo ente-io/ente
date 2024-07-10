@@ -2,7 +2,7 @@ import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/common/components/Menu";
+} from "@/new/shared/components/Menu";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SubmitButton from "@ente/shared/components/SubmitButton";

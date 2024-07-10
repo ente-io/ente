@@ -1,4 +1,4 @@
-import { MenuItemDivider, MenuItemGroup } from "@/new/common/components/Menu";
+import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { formatDateTime } from "@ente/shared/time/format";
 import ChevronRight from "@mui/icons-material/ChevronRight";

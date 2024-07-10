@@ -1,4 +1,4 @@
-import { MenuItemGroup, MenuSectionTitle } from "@/new/common/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import CropIcon from "@mui/icons-material/Crop";
 import { t } from "i18next";

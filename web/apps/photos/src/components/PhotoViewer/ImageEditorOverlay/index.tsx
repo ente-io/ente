@@ -1,10 +1,10 @@
+import downloadManager from "@/new/photos/services/download";
+import { EnteFile } from "@/new/photos/types/file";
 import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/common/components/Menu";
-import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
+} from "@/new/shared/components/Menu";
 import { nameAndExtension } from "@/next/file";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";

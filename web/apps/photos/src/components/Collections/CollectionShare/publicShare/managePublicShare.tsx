@@ -1,4 +1,4 @@
-import { MenuItemDivider, MenuItemGroup } from "@/new/common/components/Menu";
+import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";

@@ -1,12 +1,12 @@
 import {
-    decryptFileMetadata,
-    encryptFileMetadata,
-} from "@/new/common/crypto/ente";
-import {
     getAllLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
+import {
+    decryptFileMetadata,
+    encryptFileMetadata,
+} from "@/new/shared/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";

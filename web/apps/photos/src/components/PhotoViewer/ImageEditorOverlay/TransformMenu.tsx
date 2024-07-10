@@ -2,7 +2,7 @@ import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/common/components/Menu";
+} from "@/new/shared/components/Menu";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Crop169Icon from "@mui/icons-material/Crop169";

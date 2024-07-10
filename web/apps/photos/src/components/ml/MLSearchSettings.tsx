@@ -1,10 +1,10 @@
-import { MenuItemGroup } from "@/new/common/components/Menu";
 import {
     canEnableFaceIndexing,
     disableML,
     enableML,
     isMLEnabled,
 } from "@/new/photos/services/ml";
+import { MenuItemGroup } from "@/new/shared/components/Menu";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
