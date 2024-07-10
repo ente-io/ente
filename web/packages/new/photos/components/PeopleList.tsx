@@ -152,6 +152,9 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
+        // TODO: The linter warning is actually correct, objectURL should be a
+        // dependency, but adding that require reworking this code first.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [faceID]);
 
     return objectURL ? (
