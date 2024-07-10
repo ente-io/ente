@@ -1,4 +1,4 @@
-import Titlebar from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import {
     getLocaleInUse,
     setLocaleInUse,

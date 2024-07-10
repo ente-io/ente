@@ -1,5 +1,5 @@
 import { MenuItemGroup } from "@/new/shared/components/Menu";
-import Titlebar from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import log from "@/next/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {

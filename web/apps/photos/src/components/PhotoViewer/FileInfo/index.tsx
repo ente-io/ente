@@ -1,7 +1,7 @@
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
-import Titlebar from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";

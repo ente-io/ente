@@ -1,5 +1,5 @@
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
-import Titlebar from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";

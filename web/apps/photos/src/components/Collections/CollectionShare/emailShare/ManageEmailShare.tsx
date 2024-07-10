@@ -3,7 +3,7 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/new/shared/components/Menu";
-import Titlebar from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";

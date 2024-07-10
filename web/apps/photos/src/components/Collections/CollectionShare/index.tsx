@@ -1,4 +1,4 @@
-import Titlebar from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import { DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
 import { CollectionSummaryType } from "constants/collection";
