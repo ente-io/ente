@@ -1,5 +1,5 @@
 import {
-    canEnableFaceIndexing,
+    canEnableML,
     disableML,
     enableML,
     isMLEnabled,
@@ -264,7 +264,7 @@ function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
     const [canEnable, setCanEnable] = useState(false);
 
     useEffect(() => {
-        canEnableFaceIndexing().then((v) => setCanEnable(v));
+        canEnableML().then((v) => setCanEnable(v));
     }, []);
 
     return (

@@ -22,13 +22,13 @@ import { MLWorker } from "./worker";
 /**
  * In-memory flag that tracks if ML is enabled.
  *
- * -   On app start, this is read from local storage in the `initML` function.
+ * -   On app start, this is read from local storage during {@link initML}.
  *
  * -   If the user updates their preference, then `setMLEnabled` will get called
  *     with the updated preference where this value will be updated (in addition
  *     to updating local storage).
  *
- * -   It is cleared in `logoutML`.
+ * -   It is cleared in {@link logoutML}.
  */
 let _isMLEnabled = false;
 
@@ -79,7 +79,7 @@ export const initML = () => {
     // ML currently only works when we're running in our desktop app.
     if (!isDesktop) return;
     // TODO-ML: Rename the isFace* flag since it now drives ML as a whole.
-    _isMLEnabled = isFaceIndexingEnabled();
+    _isMLEnabled = isMLEnabledLocally();
 };
 
 export const logoutML = async () => {
@@ -92,30 +92,40 @@ export const logoutML = async () => {
 };
 
 /**
- * Return true if we should show an option to the user to allow them to enable
- * face search in the UI.
+ * Return true if we should show an UI option to the user to allow them to
+ * enable ML.
  */
-export const canEnableFaceIndexing = async () =>
+export const canEnableML = async () =>
     (await isInternalUser()) || (await isBetaUser());
 
 /**
  * Return true if the user has enabled machine learning in their preferences.
  *
- * TODO-ML: The UI for this needs rework. We might retain the older remote (and
- * local) storage key, but otherwise this setting now reflects the state of ML
- * overall and not just face search.
+ * [Note: ML preferences]
+ *
+ * The user may enable ML. This enables in both locally by persisting a local
+ * storage flag, and sets a flag on remote so that the user's other devices can
+ * also enable it.
+ *
+ * The user may pause ML locally. This does not modify the remote flag, but it
+ * unsets the local flag. Subsequently resuming ML (locally) will set the local
+ * flag again.
+ *
+ * ML related operations are driven by the {@link isMLEnabled} property. This is
+ * true if ML is enabled locally (which implies it is also enabled on remote).
  */
 export const isMLEnabled = () =>
-    // Impl note: Keep it fast, the UI directly calls this multiple times.
+    // Implementation note: Keep it fast, the UI directly calls this many times.
     _isMLEnabled;
 
 /**
  * Enable ML.
  *
- * Persist the user's preference and trigger a sync.
+ * Persist the user's preference both locally and on remote, and trigger a sync.
  */
 export const enableML = () => {
-    setIsFaceIndexingEnabled(true);
+    // TODO-ML: API call.
+    setIsMLEnabledLocally(true);
     _isMLEnabled = true;
     triggerMLSync();
 };
@@ -123,30 +133,54 @@ export const enableML = () => {
 /**
  * Disable ML.
  *
- * Stop any in-progress ML tasks and persist the user's preference.
+ * Stop any in-progress ML tasks, and persist the user's preference both locally
+ * and on remote.
  */
 export const disableML = () => {
     terminateMLWorker();
-    setIsFaceIndexingEnabled(false);
+    setIsMLEnabledLocally(false);
+    // TODO-ML: API call.
     _isMLEnabled = false;
 };
 
 /**
- * Return true if the user has enabled face indexing in the app's settings.
+ * Pause ML on this device.
  *
- * This setting is persisted locally (in local storage) and is not synced with
- * remote. There is a separate setting, "faceSearchEnabled" that is synced with
- * remote, but that tracks whether or not the user has enabled face search once
- * on any client. This {@link isFaceIndexingEnabled} property, on the other
- * hand, denotes whether or not indexing is enabled on the current client.
+ * Stop any in-progress ML tasks, and persist the user's local preference.
  */
-const isFaceIndexingEnabled = () =>
+export const pauseML = () => {
+    terminateMLWorker();
+    setIsMLEnabledLocally(false);
+    _isMLEnabled = false;
+};
+
+/**
+ * Resume ML on this device.
+ *
+ * Persist the user's preference locally, and trigger a sync.
+ */
+export const resumeML = () => {
+    setIsMLEnabledLocally(true);
+    _isMLEnabled = true;
+    triggerMLSync();
+};
+
+/**
+ * Return true if ML is enabled locally.
+ *
+ * This setting is persisted locally (in local storage). It is not synced with
+ * remote and only tracks if ML is enabled locally.
+ *
+ * The remote status is tracked with a separate {@link isMLEnabledRemote} flag
+ * that is synced with remote.
+ */
+const isMLEnabledLocally = () =>
     localStorage.getItem("faceIndexingEnabled") == "1";
 
 /**
- * Update the (locally stored) value of {@link isFaceIndexingEnabled}.
+ * Update the (locally stored) value of {@link isMLEnabledLocally}.
  */
-const setIsFaceIndexingEnabled = (enabled: boolean) =>
+const setIsMLEnabledLocally = (enabled: boolean) =>
     enabled
         ? localStorage.setItem("faceIndexingEnabled", "1")
         : localStorage.removeItem("faceIndexingEnabled");
