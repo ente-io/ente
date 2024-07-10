@@ -1,3 +1,6 @@
+import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { nameAndExtension } from "@/next/file";
@@ -27,9 +30,6 @@ import {
     Typography,
 } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import MenuItemDivider from "components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from "constants/photoEditor";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";

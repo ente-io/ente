@@ -1,7 +1,7 @@
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import CropIcon from "@mui/icons-material/Crop";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { t } from "i18next";
 import type { MutableRefObject } from "react";
 import { useContext } from "react";

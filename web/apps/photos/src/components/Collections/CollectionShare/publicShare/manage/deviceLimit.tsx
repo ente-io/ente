@@ -1,9 +1,9 @@
+import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import MenuItemDivider from "components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { useMemo, useState } from "react";

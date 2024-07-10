@@ -1,10 +1,10 @@
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import Titlebar from "components/Titlebar";
 import { MLSearchSettings } from "components/ml/MLSearchSettings";
 import { t } from "i18next";

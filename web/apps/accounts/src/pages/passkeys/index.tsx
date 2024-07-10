@@ -1,3 +1,5 @@
+import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -7,8 +9,6 @@ import { EnteDrawer } from "@ente/shared/components/EnteDrawer";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import MenuItemDivider from "@ente/shared/components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "@ente/shared/components/Menu/MenuItemGroup";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import Titlebar from "@ente/shared/components/Titlebar";
 import { formatDateTimeFull } from "@ente/shared/time/format";

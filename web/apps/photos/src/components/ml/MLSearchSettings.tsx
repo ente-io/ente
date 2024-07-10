@@ -1,3 +1,4 @@
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
 import {
     canEnableFaceIndexing,
     disableML,
@@ -18,7 +19,6 @@ import {
     Typography,
 } from "@mui/material";
 import { EnteDrawer } from "components/EnteDrawer";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";

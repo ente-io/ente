@@ -1,12 +1,12 @@
+import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
+import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SubmitButton from "@ente/shared/components/SubmitButton";
 import DoneIcon from "@mui/icons-material/Done";
 import { Button, FormHelperText, Stack } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import MenuItemDivider from "components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import Avatar from "components/pages/gallery/Avatar";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
