@@ -76,7 +76,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
       val sessionsCount = call.argument<Int>("sessionsCount") ?: DEFAULT_SESSION_COUNT
       init(ModelType.valueOf(modelType), modelPath, sessionsCount, result)
     }
-     else if  (call.method ==  "release" ) {
+    else if  (call.method ==  "release" ) {
       val modelType = call.argument<String>("modelType") ?: run {
         result.error("INVALID_ARGUMENT", "Model type is missing", null)
         return
@@ -90,22 +90,16 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         return
       }
       val inputDataArray = call.argument<FloatArray>("inputData")
-
       if (sessionAddress == null || inputDataArray == null) {
         result.error("INVALID_ARGUMENT", "Session address or input data is missing", null)
         return
       }
-//      val inputDataArray = inputData.map { it.toFloat() }.toFloatArray()
       predict(ModelType.valueOf(modelType), sessionAddress, inputDataArray, result)
     } else {
       result.notImplemented()
     }
   }
 
-
-  private fun readModelFile(modelPath: String): ByteArray {
-    return File(modelPath).readBytes()
-  }
 
   private fun init(modelType: ModelType, modelPath: String, sessionsCount: Int, result: Result) {
     Log.d(TAG, " v: $modelType, path: $modelPath, sessionsCount: $sessionsCount")
@@ -201,20 +195,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
     sessionMap.clear()
   }
 
-  fun Array<Array<FloatArray>>.flatMapToFloatArray(): FloatArray {
-    val outputSize = this.sumOf { it.sumOf { it.size } }
-    val result = FloatArray(outputSize)
-    var index = 0
-    for (outer in this) {
-      for (inner in outer) {
-        for (value in inner) {
-          result[index++] = value
-        }
-      }
-    }
-    return result
-  }
-  fun Array<FloatArray>.flattenToFloatArray(): FloatArray {
+  private fun Array<FloatArray>.flattenToFloatArray(): FloatArray {
     val outputSize = this.sumOf { it.size }
     val result = FloatArray(outputSize)
     var index = 0
