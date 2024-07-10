@@ -2,6 +2,7 @@ import { MLSettings } from "@/new/photos/components/MLSettings";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
+import { pt } from "@/next/i18n";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -75,9 +76,14 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                     <EnteMenuItem
                                         endIcon={<ChevronRight />}
                                         onClick={openMlSearchSettings}
-                                        label={t("ML_SEARCH")}
+                                        label={pt("ML search")}
                                     />
                                 </MenuItemGroup>
+                                <MenuSectionTitle
+                                    title={pt(
+                                        "Face recognition, magic search and more",
+                                    )}
+                                />
                             </Box>
                         )}
                         <Box>
