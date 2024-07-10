@@ -375,7 +375,7 @@ const searchClip = async (
     // TODO-ML: clip-test
     return undefined;
     // const matches = await clipMatches(searchPhrase, ensureElectron());
-    // log.debug(() => ({ t: "clip-scores", matches }));
+    // log.debug(() => ["clip/scores", matches]);
     // return matches;
 };
 
