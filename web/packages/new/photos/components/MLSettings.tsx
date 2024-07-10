@@ -111,8 +111,12 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     //
     const handleEnableOrResumeML = async () => {
         try {
-            if (await getIsMLEnabledRemote()) await enableML();
-            else setOpenFaceConsent(true);
+            if (!(await getIsMLEnabledRemote())) {
+                setOpenFaceConsent(true);
+            } else {
+                await enableML();
+                setStatus("enabled");
+            }
         } catch (e) {
             log.error("Failed to enable or resume ML", e);
             somethingWentWrong();
@@ -239,43 +243,23 @@ const ComingSoon: React.FC = () => {
     );
 };
 
-type EnableMLProps = Omit<MLSettingsProps, "open" | "appContext"> & {
+interface EnableMLProps {
     /** Called when the user enables ML. */
     onEnable: () => void;
-};
+}
 
-const EnableML: React.FC<EnableMLProps> = ({
-    onClose,
-    enableMlSearch,
-    onRootClose,
-}) => {
+const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     // const showDetails = () =>
     //     openLink("https://ente.io/blog/desktop-ml-beta", true);
 
-    const [canEnable, setCanEnable] = useState(false);
-
-    useEffect(() => {
-        canEnableML().then((v) => setCanEnable(v));
-    }, []);
-
     return (
-        <Stack spacing={"4px"} py={"12px"}>
-            <Titlebar
-                onClose={onClose}
-                title={pt("ML search")}
-                onRootClose={onRootClose}
-            />
-            <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                {canEnable ? (
-                    <Stack px={"8px"} spacing={"8px"}>
-                        <Button
-                            color={"accent"}
-                            size="large"
-                            onClick={enableMlSearch}
-                        >
-                            {t("ENABLE")}
-                        </Button>
-                        {/*
+        <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+            (
+            <Stack px={"8px"} spacing={"8px"}>
+                <Button color={"accent"} size="large" onClick={onEnable}>
+                    {t("ENABLE")}
+                </Button>
+                {/*
                         <Button
                         color="secondary"
                         size="large"
@@ -284,11 +268,8 @@ const EnableML: React.FC<EnableMLProps> = ({
                             {t("ML_MORE_DETAILS")}
                         </Button>
                         */}
-                    </Stack>
-                ) : (
-                    <div />
-                )}
             </Stack>
+            )
         </Stack>
     );
 };
