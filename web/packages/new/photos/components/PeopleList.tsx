@@ -10,34 +10,30 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
 export interface PeopleListProps {
-    people: Array<Person>;
-    maxRows?: number;
+    people: Person[];
+    maxRows: number;
     onSelect?: (person: Person, index: number) => void;
 }
 
-export const PeopleList = React.memo((props: PeopleListProps) => {
+export const PeopleList: React.FC<PeopleListProps> = ({
+    people,
+    maxRows,
+    onSelect,
+}) => {
     return (
-        <FaceChipContainer
-            style={
-                props.maxRows && {
-                    maxHeight: props.maxRows * 122 + 28,
-                }
-            }
-        >
-            {props.people.map((person, index) => (
+        <FaceChipContainer style={{ maxHeight: maxRows * 122 + 28 }}>
+            {people.map((person, index) => (
                 <FaceChip
                     key={person.id}
-                    clickable={!!props.onSelect}
-                    onClick={() =>
-                        props.onSelect && props.onSelect(person, index)
-                    }
+                    clickable={!!onSelect}
+                    onClick={() => onSelect && onSelect(person, index)}
                 >
                     <FaceCropImageView faceID={person.displayFaceId} />
                 </FaceChip>
             ))}
         </FaceChipContainer>
     );
-});
+};
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -89,7 +85,7 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
     useEffect(() => {
         let didCancel = false;
 
-        (async () => {
+        const go = async () => {
             const faceIDs = await unidentifiedFaceIDs(enteFile);
             !didCancel && setFaceIDs(faceIDs);
             // Don't block for the regeneration to happen. If anything got
@@ -99,7 +95,9 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             void regenerateFaceCropsIfNeeded(enteFile).then((r) =>
                 setDidRegen(r),
             );
-        })();
+        };
+
+        void go();
 
         return () => {
             didCancel = true;
@@ -110,7 +108,7 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
 
     return (
         <>
-            <Typography variant="large" p={1}>
+            <Typography fontSize="large" p={1}>
                 {t("UNIDENTIFIED_FACES")}
             </Typography>
             <FaceChipContainer key={didRegen ? 1 : 0}>
@@ -140,7 +138,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     useEffect(() => {
         let didCancel = false;
         if (faceID) {
-            blobCache("face-crops")
+            void blobCache("face-crops")
                 .then((cache) => cache.get(faceID))
                 .then((data) => {
                     if (data) {
