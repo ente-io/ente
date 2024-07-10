@@ -84,7 +84,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         void refreshStatus();
     }, []);
 
-    const [enableFaceSearchView, setEnableFaceSearchView] = useState(false);
+    const [openFaceConsent, setOpenFaceConsent] = useState(false);
 
     const handleRootClose = () => {
         onClose();
@@ -92,11 +92,8 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     };
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
+        if (reason == "backdropClick") handleRootClose();
+        else onClose();
     };
 
     const openEnableFaceSearch = () => {
@@ -106,16 +103,18 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         setEnableFaceSearchView(false);
     };
 
-    const enableMlSearch = async () => {
+    // The user may've changed the remote flag on a different device, so in both
+    // cases (enable or resume), do the same flow:
+    //
+    // -   If remote flag is not set, then show the consent dialog
+    // -   Otherwise enable ML (both locally and on remote).
+    //
+    const handleEnableOrResumeML = async () => {
         try {
-            const isEnabledRemote = await getIsMLEnabledRemote();
-            if (!isEnabledRemote) {
-                openEnableFaceSearch();
-            } else {
-                await enableML();
-            }
+            if (await getIsMLEnabledRemote()) await enableML();
+            else setOpenFaceConsent(true);
         } catch (e) {
-            log.error("Enable ML search failed", e);
+            log.error("Failed to enable or resume ML", e);
             somethingWentWrong();
         }
     };
@@ -224,7 +223,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         disabled: (
             <EnableML
                 onClose={onClose}
-                onEnable={enableMlSearch}
+                onEnable={handleEnableOrResumeML}
                 onRootClose={handleRootClose}
             />
         ),
@@ -288,7 +287,7 @@ const ComingSoon: React.FC = () => {
 };
 
 type EnableMLProps = Omit<MLSettingsProps, "open" | "appContext"> & {
-    /** Called when the user enables ML */
+    /** Called when the user enables ML. */
     onEnable: () => void;
 };
 
