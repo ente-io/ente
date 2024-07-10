@@ -67,6 +67,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         | "paused"; /* ML is disabled locally, but is otherwise enabled */
 
     const [status, setStatus] = useState<Status>("loading");
+    const [openFaceConsent, setOpenFaceConsent] = useState(false);
 
     const refreshStatus = async () => {
         if (isMLEnabled()) {
@@ -84,8 +85,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         void refreshStatus();
     }, []);
 
-    const [openFaceConsent, setOpenFaceConsent] = useState(false);
-
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -96,13 +95,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         else onClose();
     };
 
-    const openEnableFaceSearch = () => {
-        setEnableFaceSearchView(true);
-    };
-    const closeEnableFaceSearch = () => {
-        setEnableFaceSearchView(false);
-    };
-
     // The user may've changed the remote flag on a different device, so in both
     // cases (enable or resume), do the same flow:
     //
@@ -110,6 +102,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     // -   Otherwise enable ML (both locally and on remote).
     //
     const handleEnableOrResumeML = async () => {
+        startLoading();
         try {
             if (!(await getIsMLEnabledRemote())) {
                 setOpenFaceConsent(true);
@@ -120,7 +113,69 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         } catch (e) {
             log.error("Failed to enable or resume ML", e);
             somethingWentWrong();
+        } finally {
+            finishLoading();
         }
+    };
+
+    const handleConsent = async () => {
+        startLoading();
+        try {
+            await enableML();
+            setStatus("enabled");
+        } catch (e) {
+            log.error("Failed to enable ML", e);
+            somethingWentWrong();
+        } finally {
+            finishLoading();
+        }
+    };
+
+    const handlePauseML = () => {
+        try {
+            pauseML();
+            setStatus("paused");
+        } catch (e) {
+            log.error("Failed to enable ML", e);
+            somethingWentWrong();
+        }
+    };
+
+    const confirmDisableML = () => {
+        setDialogMessage({
+            title: t("DISABLE_FACE_SEARCH_TITLE"),
+            content: (
+                <Typography>
+                    <Trans i18nKey={"DISABLE_FACE_SEARCH_DESCRIPTION"} />
+                </Typography>
+            ),
+            close: { text: t("CANCEL") },
+            proceed: {
+                variant: "primary",
+                text: t("DISABLE_FACE_SEARCH"),
+                action: () => void didConfirmDisableML(),
+            },
+        });
+    };
+
+    const didConfirmDisableML = async () => {
+        startLoading();
+        try {
+            await disableML();
+            setStatus("disabled");
+        } catch (e) {
+            log.error("Failed to disable ML", e);
+            somethingWentWrong();
+        } finally {
+            finishLoading();
+        }
+    };
+
+    const openEnableFaceSearch = () => {
+        setEnableFaceSearchView(true);
+    };
+    const closeEnableFaceSearch = () => {
+        setEnableFaceSearchView(false);
     };
 
     const enableFaceSearch = async () => {
@@ -155,23 +210,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
             log.error("Disable face search failed", e);
             somethingWentWrong();
         }
-    };
-
-    const confirmDisableFaceSearch = () => {
-        setDialogMessage({
-            title: t("DISABLE_FACE_SEARCH_TITLE"),
-            content: (
-                <Typography>
-                    <Trans i18nKey={"DISABLE_FACE_SEARCH_DESCRIPTION"} />
-                </Typography>
-            ),
-            close: { text: t("CANCEL") },
-            proceed: {
-                variant: "primary",
-                text: t("DISABLE_FACE_SEARCH"),
-                action: disableFaceSearch,
-            },
-        });
     };
 
     const components: Record<Status, React.ReactNode> = {
