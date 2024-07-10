@@ -1,5 +1,9 @@
 {
   "icons": [
+     { "title": "1xBet", 
+       "altNames": ["1x", "1x bet", "1x-bet"
+       ]
+     },
     {
       "title": "3Commas"
     },
@@ -19,6 +23,12 @@
     },
     {
       "title": "Bitfinex"
+    },
+    {
+      "title": "bitget"
+    },
+    {
+      "title": "Bitmart"
     },
     {
       "title": "BitMEX"
@@ -91,6 +101,10 @@
     },
     {
       "title": "Crowdpear"
+    },
+    {
+      "title": "crypto.com",
+      "altNames": ["crypto"]
     },
     {
       "title": "DCS",
@@ -170,6 +184,9 @@
     },
     {
       "title": "Hivelocity"
+    },
+    {
+      "title": "HTX"
     },
     {
       "title": "IceDrive",
@@ -317,6 +334,8 @@
     {
       "title": "Odido"
     },
+     { "title": "okx", 
+       "hex": "858585" },
     {
       "title": "Parsec"
     },
@@ -534,6 +553,8 @@
       ],
       "slug": "Yandex"
     },
+     { "title": "yahoo" },
+    {
     {
       "title": "YNAB",
       "altNames": [

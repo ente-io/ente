@@ -1,8 +1,7 @@
-import { clientPackageHeaderIfPresent } from "@/next/http";
+import { clientPackageName, isDesktop } from "@/next/app";
+import { clientPackageHeader, HTTPError } from "@/next/http";
 import log from "@/next/log";
 import { accountsAppOrigin, apiURL } from "@/next/origins";
-import type { AppName } from "@/next/types/app";
-import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -14,7 +13,12 @@ import {
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    getData,
+    LS_KEYS,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 /**
@@ -24,22 +28,17 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
  * On successful verification, the accounts app will redirect back to our
  * `/passkeys/finish` page.
  *
- * @param appName The {@link AppName} of the app which is calling this function.
- *
  * @param passkeySessionID An identifier provided by museum for this passkey
  * verification session.
  */
-export const passkeyVerificationRedirectURL = (
-    appName: AppName,
-    passkeySessionID: string,
-) => {
-    const clientPackage = clientPackageName(appName);
+export const passkeyVerificationRedirectURL = (passkeySessionID: string) => {
+    const clientPackage = clientPackageName;
     // Using `window.location.origin` will work both when we're running in a web
     // browser, and in our desktop app. See: [Note: Using deeplinks to navigate
     // in desktop app]
     const redirect = `${window.location.origin}/passkeys/finish`;
     // See: [Note: Conditional passkey recover option on accounts]
-    const recoverOption: Record<string, string> = globalThis.electron
+    const recoverOption: Record<string, string> = isDesktop
         ? {}
         : { recover: `${window.location.origin}/passkeys/recover` };
     const params = new URLSearchParams({
@@ -100,8 +99,6 @@ export const openPasskeyVerificationURL = ({
 /**
  * Open a new window showing a page on the Ente accounts app where the user can
  * see and their manage their passkeys.
- *
- * @param appName The {@link AppName} of the app which is calling this function.
  */
 export const openAccountsManagePasskeysPage = async () => {
     // Check if the user has passkey recovery enabled
@@ -237,13 +234,13 @@ export const checkPasskeyVerificationStatus = async (
     const url = await apiURL("/users/two-factor/passkeys/get-token");
     const params = new URLSearchParams({ sessionID });
     const res = await fetch(`${url}?${params.toString()}`, {
-        headers: clientPackageHeaderIfPresent(),
+        headers: clientPackageHeader(),
     });
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)
             throw new Error(passkeySessionExpiredErrorMessage);
         if (res.status == 400) return undefined; /* verification pending */
-        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        throw new HTTPError(res);
     }
     return TwoFactorAuthorizationResponse.parse(await res.json());
 };
@@ -258,14 +255,14 @@ export const checkPasskeyVerificationStatus = async (
  *
  * @returns the slug that we should navigate to now.
  */
-export const saveCredentialsAndNavigateTo = (
+export const saveCredentialsAndNavigateTo = async (
     response: TwoFactorAuthorizationResponse,
 ) => {
     // This method somewhat duplicates `saveCredentialsAndNavigateTo` in the
     // /passkeys/finish page.
     const { id, encryptedToken, keyAttributes } = response;
 
-    setData(LS_KEYS.USER, {
+    await setLSUser({
         ...getData(LS_KEYS.USER),
         encryptedToken,
         id,

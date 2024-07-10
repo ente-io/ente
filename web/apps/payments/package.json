@@ -17,7 +17,7 @@
         "@/build-config": "*",
         "@types/react": "^18",
         "@types/react-dom": "^18",
-        "@vitejs/plugin-react": "^4.2",
-        "vite": "^5.2"
+        "@vitejs/plugin-react": "^4.3",
+        "vite": "^5.3"
     }
 }

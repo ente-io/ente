@@ -10,7 +10,7 @@ import { PAGES } from "../constants/pages";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, showNavBar } = appContext;
+    const { showNavBar } = appContext;
 
     const [loading, setLoading] = useState(true);
     const [host, setHost] = useState<string | undefined>();
@@ -38,7 +38,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     ) : (
         <VerticallyCentered>
             <FormPaper>
-                <Login {...{ appName, signUp, host }} />
+                <Login {...{ signUp, host }} />
             </FormPaper>
         </VerticallyCentered>
     );

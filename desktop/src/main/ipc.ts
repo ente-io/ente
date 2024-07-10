@@ -31,6 +31,7 @@ import {
 import { ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
+    fsFindFiles,
     fsIsDir,
     fsMkdirIfNeeded,
     fsReadTextFile,
@@ -63,7 +64,6 @@ import {
 } from "./services/upload";
 import {
     watchAdd,
-    watchFindFiles,
     watchGet,
     watchRemove,
     watchUpdateIgnoredFiles,
@@ -154,6 +154,10 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
 
+    ipcMain.handle("fsFindFiles", (_, folderPath: string) =>
+        fsFindFiles(folderPath),
+    );
+
     // - Conversion
 
     ipcMain.handle("convertToJPEG", (_, imageData: Uint8Array) =>
@@ -182,10 +186,8 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle(
-        "computeCLIPImageEmbedding",
-        (_, jpegImageData: Uint8Array) =>
-            computeCLIPImageEmbedding(jpegImageData),
+    ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
+        computeCLIPImageEmbedding(input),
     );
 
     ipcMain.handle("computeCLIPTextEmbeddingIfAvailable", (_, text: string) =>
@@ -261,10 +263,6 @@ export const attachFSWatchIPCHandlers = (watcher: FSWatcher) => {
         "watchUpdateIgnoredFiles",
         (_, ignoredFiles: FolderWatch["ignoredFiles"], folderPath: string) =>
             watchUpdateIgnoredFiles(ignoredFiles, folderPath),
-    );
-
-    ipcMain.handle("watchFindFiles", (_, folderPath: string) =>
-        watchFindFiles(folderPath),
     );
 };
 

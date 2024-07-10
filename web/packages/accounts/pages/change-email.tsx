@@ -1,15 +1,14 @@
-import type { AppName } from "@/next/types/app";
+import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
+import { PAGES } from "@/accounts/constants/pages";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
-import { PAGES } from "@ente/accounts/constants/pages";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SubmitButton from "@ente/shared/components/SubmitButton";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -20,9 +19,7 @@ import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const router = useRouter();
 
     useEffect(() => {
@@ -36,7 +33,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
-                <ChangeEmailForm {...{ appName }} />
+                <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>
     );
@@ -49,11 +46,7 @@ interface formValues {
     ott?: string;
 }
 
-interface ChangeEmailFormProps {
-    appName: AppName;
-}
-
-const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({ appName }) => {
+const ChangeEmailForm: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
@@ -90,7 +83,7 @@ const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({ appName }) => {
         try {
             setLoading(true);
             await changeEmail(email, ensure(ott));
-            setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email });
+            await setLSUser({ ...getData(LS_KEYS.USER), email });
             setLoading(false);
             setSuccess(true);
             await wait(1000);
@@ -101,7 +94,7 @@ const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({ appName }) => {
         }
     };
 
-    const goToApp = () => router.push(appHomeRoute(appName));
+    const goToApp = () => router.push(appHomeRoute);
 
     return (
         <Formik<formValues>

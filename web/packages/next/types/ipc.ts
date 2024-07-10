@@ -234,6 +234,18 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
+
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     // - Conversion
@@ -325,15 +337,15 @@ export interface Electron {
     /**
      * Return a CLIP embedding of the given image.
      *
-     * See: [Note: CLIP based magic search]
+     * See: [Note: Natural language search using CLIP]
      *
-     * @param jpegImageData The raw bytes of the image encoded as an JPEG.
+     * The input is a opaque float32 array representing the image. The layout
+     * and exact encoding of the input is specific to our implementation and the
+     * ML model (CLIP) we use.
      *
-     * @returns A CLIP embedding.
+     * @returns A CLIP embedding (an array of 512 floating point values).
      */
-    computeCLIPImageEmbedding: (
-        jpegImageData: Uint8Array,
-    ) => Promise<Float32Array>;
+    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
 
     /**
      * Return a CLIP embedding of the given image if we already have the model
@@ -349,7 +361,7 @@ export interface Electron {
      * embeddings are used as part of deducing user initiated search results,
      * and we don't want to block that interaction on a large network request.
      *
-     * See: [Note: CLIP based magic search]
+     * See: [Note: Natural language search using CLIP]
      *
      * @param text The string whose embedding we want to compute.
      *
@@ -479,18 +491,6 @@ export interface Electron {
          * The path is guaranteed to use POSIX separators ('/').
          */
         onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
-
-        /**
-         * Return the paths of all the files under the given folder.
-         *
-         * This function walks the directory tree starting at {@link folderPath}
-         * and returns a list of the absolute paths of all the files that exist
-         * therein. It will recursively traverse into nested directories, and
-         * return the absolute paths of the files there too.
-         *
-         * The returned paths are guaranteed to use POSIX separators ('/').
-         */
-        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     // - Upload

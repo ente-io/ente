@@ -47,7 +47,16 @@ const messageWithError = (message: string, e?: unknown) => {
     if (e instanceof Error) {
         // In practice, we expect ourselves to be called with Error objects, so
         // this is the happy path so to say.
-        es = [`${e.name}: ${e.message}`, e.stack].filter((x) => x).join("\n");
+        es = `${e.name}: ${e.message}`;
+        const st = e.stack;
+        if (st) {
+            // On V8 (as of 2024), the stack trace begins by repeating the error's
+            // name and message, trim that off.
+            // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/stack
+            es = st.startsWith(es)
+                ? es.concat(st.slice(es.length)) /* retain the '\n' */
+                : [es, st].join("\n");
+        }
     } else {
         // For the rest rare cases, use the default string serialization of e.
         es = String(e);
@@ -78,7 +87,24 @@ const logInfo = (...params: unknown[]) => {
 };
 
 const logDebug = (param: () => unknown) => {
-    if (isDevBuild) console.log("[debug]", param());
+    if (isDevBuild) {
+        const p = param();
+        // Transform
+        //     log.debug(() => ["tag", {x: y}])
+        //     =>
+        //     console.log("[debug] tag", {x: y})
+        if (Array.isArray(p)) {
+            // tseslint is not happy with us for destructuring any, but this is
+            // non-production dev build only code, so silence it and go ahead.
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const [tag, ...rest] = p;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            console.log(`[debug] ${tag}`, ...rest);
+        } else {
+            /* Let console.log serialize it */
+            console.log("[debug]", p);
+        }
+    }
 };
 
 /**
@@ -130,7 +156,9 @@ export default {
      * message. The provided function will only be called in development builds.
      *
      * The function can return an arbitrary value which is serialized before
-     * being logged.
+     * being logged. As a special case, arrays are spread, which allows one to
+     * write `log.debug(() => ["tag", {x: y}])` and have that be printed as if
+     * it were `console.log("[debug] tag", {x: y})`.
      *
      * This log is NOT written to disk. It is printed to the browser console,
      * but only in development builds.

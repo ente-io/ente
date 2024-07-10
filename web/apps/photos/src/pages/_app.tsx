@@ -1,17 +1,14 @@
+import type { AccountsContextT } from "@/accounts/types/context";
+import DownloadManager from "@/new/photos/services/download";
+import { initML } from "@/new/photos/services/ml";
+import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
-import { setAppNameForAuthenticatedRequests } from "@/next/http";
 import { setupI18n } from "@/next/i18n";
 import log from "@/next/log";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/next/log-web";
-import {
-    appTitle,
-    clientPackageName,
-    type AppName,
-    type BaseAppContextT,
-} from "@/next/types/app";
 import { AppUpdate } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
@@ -28,7 +25,11 @@ import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    migrateKVToken,
+} from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
     getToken,
@@ -49,13 +50,7 @@ import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
-import DownloadManager from "services/download";
 import { resumeExportsIfNeeded } from "services/export";
-import {
-    isFaceIndexingEnabled,
-    setIsFaceIndexingEnabled,
-} from "services/face/indexer";
-import mlWorkManager from "services/face/mlWorkManager";
 import { photosLogout } from "services/logout";
 import {
     getFamilyPortalRedirectURL,
@@ -78,13 +73,10 @@ const redirectMap = new Map([
 ]);
 
 /**
- * Properties available via the {@link AppContext} to the Photos app's React
- * tree.
+ * Properties available via {@link AppContext} to the Photos app's React tree.
  */
-type AppContextT = BaseAppContextT & {
-    mlSearchEnabled: boolean;
+type AppContextT = AccountsContextT & {
     mapEnabled: boolean;
-    updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
     updateMapEnabled: (enabled: boolean) => Promise<void>;
     startLoading: () => void;
     finishLoading: () => void;
@@ -109,8 +101,6 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
 export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
-    const appName: AppName = "photos";
-
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -119,7 +109,6 @@ export default function App({ Component, pageProps }: AppProps) {
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const [redirectName, setRedirectName] = useState<string>(null);
-    const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const [mapEnabled, setMapEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
@@ -148,13 +137,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
-        const userId = (getData(LS_KEYS.USER) as User)?.id;
-        logStartupBanner(appName, userId);
+        const user = getData(LS_KEYS.USER) as User | undefined | null;
+        migrateKVToken(user);
+        logStartupBanner(user?.id);
+        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
-        setAppNameForAuthenticatedRequests(appName);
-        HTTPService.setHeaders({
-            "X-Client-Package": clientPackageName(appName),
-        });
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
@@ -187,6 +174,8 @@ export default function App({ Component, pageProps }: AppProps) {
             }
         };
 
+        initML();
+
         electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
 
@@ -194,22 +183,6 @@ export default function App({ Component, pageProps }: AppProps) {
             electron.onOpenURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
-
-    useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-        const loadMlSearchState = async () => {
-            try {
-                const enabled = await isFaceIndexingEnabled();
-                setMlSearchEnabled(enabled);
-                mlWorkManager.setMlSearchEnabled(enabled);
-            } catch (e) {
-                log.error("Error while loading mlSearchEnabled", e);
-            }
-        };
-        loadMlSearchState();
     }, []);
 
     useEffect(() => {
@@ -300,15 +273,6 @@ export default function App({ Component, pageProps }: AppProps) {
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
-    const updateMlSearchEnabled = async (enabled: boolean) => {
-        try {
-            await setIsFaceIndexingEnabled(enabled);
-            setMlSearchEnabled(enabled);
-            mlWorkManager.setMlSearchEnabled(enabled);
-        } catch (e) {
-            log.error("Error while updating mlSearchEnabled", e);
-        }
-    };
 
     const updateMapEnabled = async (enabled: boolean) => {
         try {
@@ -342,15 +306,11 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
     const logout = () => {
-        setMlSearchEnabled(false);
         void photosLogout().then(() => router.push(PAGES.ROOT));
     };
 
     const appContext = {
-        appName,
         showNavBar,
-        mlSearchEnabled,
-        updateMlSearchEnabled,
         startLoading,
         finishLoading,
         closeMessageDialog,
@@ -374,7 +334,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const title = isI18nReady
         ? t("title", { context: "photos" })
-        : appTitle[appName];
+        : staticAppTitle;
 
     return (
         <>

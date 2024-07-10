@@ -1,9 +1,8 @@
+import { isMLEnabled } from "@/new/photos/services/ml";
 import { Row } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 import { PeopleList } from "components/ml/PeopleList";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { useContext } from "react";
 import { components } from "react-select";
 import { Suggestion, SuggestionType } from "types/search";
 
@@ -23,7 +22,6 @@ const Caption = styled("span")`
 `;
 
 const MenuWithPeople = (props) => {
-    const appContext = useContext(AppContext);
     // log.info("props.selectProps.options: ", selectRef);
     const peopleSuggestions = props.selectProps.options.filter(
         (o) => o.type === SuggestionType.PERSON,
@@ -38,13 +36,13 @@ const MenuWithPeople = (props) => {
     return (
         <Menu {...props}>
             <Box my={1}>
-                {((appContext.mlSearchEnabled && indexStatus) ||
+                {((isMLEnabled() && indexStatus) ||
                     (people && people.length > 0)) && (
                     <Box>
                         <Legend>{t("PEOPLE")}</Legend>
                     </Box>
                 )}
-                {appContext.mlSearchEnabled && indexStatus && (
+                {isMLEnabled() && indexStatus && (
                     <Box>
                         <Caption>{indexStatusSuggestion.label}</Caption>
                     </Box>

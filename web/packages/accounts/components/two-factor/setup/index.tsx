@@ -1,7 +1,7 @@
-import SetupManualMode from "@ente/accounts/components/two-factor/setup/ManualMode";
-import SetupQRMode from "@ente/accounts/components/two-factor/setup/QRMode";
-import { SetupMode } from "@ente/accounts/pages/two-factor/setup";
-import type { TwoFactorSecret } from "@ente/accounts/types/user";
+import SetupManualMode from "@/accounts/components/two-factor/setup/ManualMode";
+import SetupQRMode from "@/accounts/components/two-factor/setup/QRMode";
+import { SetupMode } from "@/accounts/pages/two-factor/setup";
+import type { TwoFactorSecret } from "@/accounts/types/user";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { useState } from "react";
 

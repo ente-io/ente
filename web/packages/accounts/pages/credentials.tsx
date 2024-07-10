@@ -20,7 +20,7 @@ import {
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
@@ -28,6 +28,7 @@ import {
     clearData,
     getData,
     setData,
+    setLSUser,
 } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -62,7 +63,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout, setDialogBoxAttributesV2 } = appContext;
+    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -138,7 +139,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const token = getToken();
             if (key && token) {
-                router.push(appHomeRoute(appName));
+                router.push(appHomeRoute);
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -191,7 +192,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         main();
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
     // TODO: ^ validateSession is a dependency, but add that only after we've
     // wrapped items from the callback (like logout) in useCallback too.
@@ -224,17 +225,15 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         passkeySessionID,
                         isTwoFactorEnabled: true,
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    const url = passkeyVerificationRedirectURL(
-                        appName,
-                        passkeySessionID,
-                    );
+                    const url =
+                        passkeyVerificationRedirectURL(passkeySessionID);
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
@@ -246,7 +245,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
@@ -255,7 +254,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
                     const user = getData(LS_KEYS.USER);
-                    setData(LS_KEYS.USER, {
+                    await setLSUser({
                         ...user,
                         token,
                         encryptedToken,
@@ -315,7 +314,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? appHomeRoute(appName));
+            router.push(redirectURL ?? appHomeRoute);
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }
@@ -354,7 +353,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                appContext={appContext}
+                {...{ logout, setDialogBoxAttributesV2 }}
             />
         );
     }

@@ -1,8 +1,11 @@
 import { Dialog, DialogContent, Link } from "@mui/material";
 import { t } from "i18next";
 
+import {
+    UPLOAD_RESULT,
+    UPLOAD_STAGES,
+} from "@/new/photos/services/upload/types";
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 import UploadProgressContext from "contexts/uploadProgress";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -93,10 +96,9 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={t("FAILED_UPLOADS")}
                                 sectionInfo={
-                                    /* TODO(MR): Move these to localized strings when finalized. */
                                     uploadStage === UPLOAD_STAGES.FINISH
                                         ? undefined
-                                        : "There will be an option to retry these when the upload finishes."
+                                        : t("failed_uploads_hint")
                                 }
                             />
                             <ResultSection

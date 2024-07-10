@@ -1,20 +1,20 @@
-import { apiURL } from "@/next/origins";
-import type { AppName } from "@/next/types/app";
 import type {
     RecoveryKey,
     TwoFactorRecoveryResponse,
     TwoFactorSecret,
     TwoFactorVerificationResponse,
     UserVerificationResponse,
-} from "@ente/accounts/types/user";
-import type { B64EncryptionResult } from "@ente/shared/crypto/types";
+} from "@/accounts/types/user";
+import { appName } from "@/next/app";
+import { apiURL } from "@/next/origins";
+import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
 
-export const sendOtt = async (appName: AppName, email: string) => {
+export const sendOtt = async (email: string) => {
     return HTTPService.post(await apiURL("/users/ott"), {
         email,
         client: appName == "auth" ? "totp" : "web",

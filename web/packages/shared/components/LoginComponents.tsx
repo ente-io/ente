@@ -1,11 +1,10 @@
-import log from "@/next/log";
-import { customAPIHost } from "@/next/origins";
-import type { BaseAppContextT } from "@/next/types/app";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
-} from "@ente/accounts/services/passkey";
+} from "@/accounts/services/passkey";
+import log from "@/next/log";
+import { customAPIHost } from "@/next/origins";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
@@ -74,23 +73,18 @@ interface VerifyingPasskeyProps {
     email: string | undefined;
     /** Called when the user wants to redirect again. */
     onRetry: () => void;
-    /**
-     * The appContext.
-     *
-     * Needs to be explicitly passed since this component is used in a package
-     * where the pages are not wrapped in the provider.
-     */
-    appContext: BaseAppContextT;
+    /** Perform the (possibly app specific) logout sequence. */
+    logout: () => void;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     passkeySessionID,
     email,
     onRetry,
-    appContext,
+    logout,
+    setDialogBoxAttributesV2,
 }) => {
-    const { logout, setDialogBoxAttributesV2 } = appContext;
-
     type VerificationStatus = "waiting" | "checking" | "pending";
     const [verificationStatus, setVerificationStatus] =
         useState<VerificationStatus>("waiting");
@@ -108,7 +102,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
             if (!response) setVerificationStatus("pending");
-            else router.push(saveCredentialsAndNavigateTo(response));
+            else router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             setDialogBoxAttributesV2(

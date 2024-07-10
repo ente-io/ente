@@ -295,9 +295,8 @@ const createMainWindow = () => {
         // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window otherwise.
-        //
-        // If we did not give it an explicit size, maximize it
+        // Show our window otherwise, maximizing it if we're not asked to set it
+        // to a specific size.
         bounds ? window.show() : window.maximize();
     }
 

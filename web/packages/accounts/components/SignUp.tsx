@@ -1,11 +1,10 @@
+import { sendOtt } from "@/accounts/api/user";
+import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
+import { PAGES } from "@/accounts/constants/pages";
+import { isWeakPassword } from "@/accounts/utils";
+import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
 import log from "@/next/log";
-import type { AppName } from "@/next/types/app";
-import { sendOtt } from "@ente/accounts/api/user";
-import { PasswordStrengthHint } from "@ente/accounts/components/PasswordStrength";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { isWeakPassword } from "@ente/accounts/utils";
-import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
-import { LS_KEYS } from "@ente/shared//storage/localStorage";
+import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -53,12 +52,11 @@ interface FormValues {
 interface SignUpProps {
     router: NextRouter;
     login: () => void;
-    appName: AppName;
     /** Reactive value of {@link customAPIHost}. */
     host: string | undefined;
 }
 
-export function SignUp({ router, appName, login, host }: SignUpProps) {
+export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -84,9 +82,9 @@ export function SignUp({ router, appName, login, host }: SignUpProps) {
             }
             setLoading(true);
             try {
-                setData(LS_KEYS.USER, { email });
+                await setLSUser({ email });
                 setLocalReferralSource(referral);
-                await sendOtt(appName, email);
+                await sendOtt(email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
                 setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
@@ -329,4 +327,4 @@ export function SignUp({ router, appName, login, host }: SignUpProps) {
             </FormPaperFooter>
         </>
     );
-}
+};

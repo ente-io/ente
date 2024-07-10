@@ -26,7 +26,7 @@ export interface EncryptedEnteFile {
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
     metadata: MetadataFileAttributes;
-    info: FileInfo;
+    info: FileInfo | undefined;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     encryptedKey: string;
@@ -63,8 +63,8 @@ export interface EnteFile
 }
 
 export interface LivePhotoSourceURL {
-    image: () => Promise<string>;
-    video: () => Promise<string>;
+    image: () => Promise<string | undefined>;
+    video: () => Promise<string | undefined>;
 }
 
 export interface LoadedLivePhotoSourceURL {
@@ -126,3 +126,18 @@ export interface FilePublicMagicMetadataProps {
 
 export type FilePublicMagicMetadata =
     MagicMetadataCore<FilePublicMagicMetadataProps>;
+
+export interface TrashItem extends Omit<EncryptedTrashItem, "file"> {
+    file: EnteFile;
+}
+
+export interface EncryptedTrashItem {
+    file: EncryptedEnteFile;
+    isDeleted: boolean;
+    isRestored: boolean;
+    deleteBy: number;
+    createdAt: number;
+    updatedAt: number;
+}
+
+export type Trash = TrashItem[];

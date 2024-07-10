@@ -4,6 +4,7 @@
  */
 
 import { getLocalFiles } from "@/new/photos/services/files";
+import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { EncryptedEnteFile } from "@/new/photos/types/file";
 import { ensureElectron } from "@/next/electron";
 import { basename, dirname } from "@/next/file";
@@ -14,7 +15,6 @@ import type {
     FolderWatchSyncedFile,
 } from "@/next/types/ipc";
 import { ensureString } from "@/utils/ensure";
-import { UPLOAD_RESULT } from "constants/upload";
 import debounce from "debounce";
 import uploadManager, {
     type UploadItemWithCollection,
@@ -381,14 +381,14 @@ class FolderWatcher {
         const electron = ensureElectron();
         const watch = this.activeWatch;
 
-        log.debug(() =>
+        log.debug(() => [
+            "watch/allFileUploadsDone",
             JSON.stringify({
-                f: "watch/allFileUploadsDone",
                 uploadItemsWithCollection,
                 collections,
                 watch,
             }),
-        );
+        ]);
 
         const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
             uploadItemsWithCollection,
@@ -561,7 +561,7 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
     for (const watch of watches) {
         const folderPath = watch.folderPath;
 
-        const filePaths = await electron.watch.findFiles(folderPath);
+        const filePaths = await electron.fs.findFiles(folderPath);
 
         // Files that are on disk but not yet synced.
         for (const filePath of pathsToUpload(filePaths, watch))

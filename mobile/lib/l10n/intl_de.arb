@@ -1047,7 +1047,7 @@
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "availableStorageSpace": "{freeAmount} {storageUnit} kostenlos",
+  "availableStorageSpace": "{freeAmount} {storageUnit} frei",
   "appVersion": "Version: {versionValue}",
   "verifyIDLabel": "Überprüfen",
   "fileInfoAddDescHint": "Beschreibung hinzufügen …",
@@ -1252,5 +1252,30 @@
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
   "reviewSuggestions": "Vorschläge überprüfen",
-  "mlFunctions": "ML functions"
+  "mlFunctions": "ML functions",
+"useAsCover": "Als Titelbild festlegen",
+  "notPersonLabel": "Nicht {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  },
+  "reenterPassword": "Passwort erneut eingeben",
+  "reenterPin": "PIN erneut eingeben",
+  "deviceLock": "Gerätsperre",
+  "pinLock": "PIN-Sperre",
+  "next": "Weiter",
+  "setNewPassword": "Neues Passwort festlegen",
+  "enterPin": "PIN eingeben",
+  "setNewPin": "Neue PIN festlegen",
+  "appLock": "App-Sperre",
+  "noSystemLockFound": "Keine Systemsperre gefunden",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen.",
+  "tapToUnlock": "Zum Entsperren antippen",
+  "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche"
+
 }

@@ -1,8 +1,12 @@
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
-import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
-import { getLocalFiles } from "@/new/photos/services/files";
+import downloadManager from "@/new/photos/services/download";
+import {
+    getLocalFiles,
+    getLocalTrashedFiles,
+} from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -77,7 +81,6 @@ import {
     useState,
 } from "react";
 import { useDropzone } from "react-dropzone";
-import { clipService } from "services/clip-service";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -89,14 +92,12 @@ import {
     getHiddenItemsSummary,
     getSectionSummaries,
 } from "services/collectionService";
-import downloadManager from "services/download";
-import { syncCLIPEmbeddings } from "services/embeddingService";
-import { syncEntities } from "services/entityService";
 import { syncFiles } from "services/fileService";
 import locationSearchService from "services/locationSearchService";
-import { getLocalTrashedFiles, syncTrash } from "services/trashService";
+import { sync } from "services/sync";
+import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
-import { isTokenValid, syncMapEnabled } from "services/userService";
+import { isTokenValid } from "services/userService";
 import { Collection, CollectionSummaries } from "types/collection";
 import {
     GalleryContextType,
@@ -125,7 +126,6 @@ import {
     getSelectedFiles,
     getUniqueFiles,
     handleFileOps,
-    mergeMetadata,
     sortFiles,
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
@@ -389,7 +389,6 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
                 if (await shouldShowWhatsNew()) setOpenWhatsNew(true);
             }
@@ -397,10 +396,7 @@ export default function Gallery() {
         main();
         return () => {
             clearInterval(syncInterval.current);
-            if (electron) {
-                electron.onMainWindowFocus(undefined);
-                clipService.removeOnFileUploadListener();
-            }
+            if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
 
@@ -717,19 +713,7 @@ export default function Gallery() {
             await syncFiles("normal", normalCollections, setFiles);
             await syncFiles("hidden", hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
-            await syncEntities();
-            await syncMapEnabled();
-            fetchAndSaveFeatureFlagsIfNeeded();
-            const electron = globalThis.electron;
-            if (electron) {
-                await syncCLIPEmbeddings();
-                // TODO-ML(MR): Disable fetch until we start storing it in the
-                // same place as the local ones.
-                // if (isFaceIndexingEnabled()) await syncFaceEmbeddings();
-            }
-            if (clipService.isPlatformSupported()) {
-                void clipService.scheduleImageEmbeddingExtraction();
-            }
+            await sync();
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:

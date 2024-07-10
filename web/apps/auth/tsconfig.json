@@ -1,14 +1,9 @@
 {
     "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
-        /* Set the base directory from which to resolve bare module names */
+        /* Set the base directory from which to resolve bare module names. */
         "baseUrl": "./src",
-
-        /* This is hard to enforce in certain cases where we do a lot of array
-           indexing, e.g. image/ML ops, and TS doesn't currently have a way to
-           disable this for blocks of code. */
-        "noUncheckedIndexedAccess": false,
-        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
         "exactOptionalPropertyTypes": false
     },
     "include": [

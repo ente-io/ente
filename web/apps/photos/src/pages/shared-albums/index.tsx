@@ -1,4 +1,6 @@
+import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata } from "@/new/photos/utils/file";
 import log from "@/next/log";
 import {
     CenteredFlex,
@@ -44,7 +46,6 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import downloadManager from "services/download";
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
@@ -65,12 +66,7 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
-import {
-    downloadSelectedFiles,
-    getSelectedFiles,
-    mergeMetadata,
-    sortFiles,
-} from "utils/file";
+import { downloadSelectedFiles, getSelectedFiles, sortFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {

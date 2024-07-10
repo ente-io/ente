@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { FILE_TYPE } from "@/media/file-type";
-import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type {
@@ -243,12 +243,14 @@ const decryptEnteFile = async (
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
     // @ts-expect-error TODO: The core types need to be updated to allow the
-    // possibility of missing metadata fiels.
+    // possibility of missing metadata fields.
     return file;
 };
 
 const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
+    // @ts-expect-error TODO: The core types need to be updated to allow the
+    // possibility of missing info fields (or do they?)
     if (file.info.fileSize > 100 * 1024 * 1024) return false;
 
     // This check is fast but potentially incorrect because in practice we do
@@ -256,8 +258,8 @@ const isFileEligible = (file: EnteFile) => {
     // extension. To detect the actual type, we need to sniff the MIME type, but
     // that requires downloading and decrypting the file first.
     const [, extension] = nameAndExtension(file.metadata.title);
-    if (extension && isNonWebImageFileExtension(extension)) {
-        // Of the known non-web types, we support HEIC.
+    if (extension && needsJPEGConversion(extension)) {
+        // On the web, we only support HEIC conversion.
         return isHEICExtension(extension);
     }
 

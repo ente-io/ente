@@ -1,6 +1,7 @@
+import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
+import { clientPackageHeader, ensureOk, HTTPError } from "@/next/http";
 import { apiURL } from "@/next/origins";
-import { clientPackageName } from "@/next/types/app";
 import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -22,12 +23,10 @@ export const isWebAuthnSupported = () => !!navigator.credentials;
  */
 const accountsAuthenticatedRequestHeaders = (
     token: string,
-): Record<string, string> => {
-    return {
-        "X-Auth-Token": token,
-        "X-Client-Package": clientPackageName("accounts"),
-    };
-};
+): Record<string, string> => ({
+    "X-Auth-Token": token,
+    "X-Client-Package": clientPackageName,
+});
 
 const Passkey = z.object({
     /** A unique ID for the passkey */
@@ -58,11 +57,10 @@ const GetPasskeysResponse = z.object({
  * has no passkeys.
  */
 export const getPasskeys = async (token: string) => {
-    const url = await apiURL("/passkeys");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/passkeys"), {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
     return passkeys ?? [];
 };
@@ -87,7 +85,7 @@ export const renamePasskey = async (
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -98,12 +96,11 @@ export const renamePasskey = async (
  * @param id The `id` of the existing passkey to delete.
  */
 export const deletePasskey = async (token: string, id: string) => {
-    const url = await apiURL(`/passkeys/${id}`);
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL(`/passkeys/${id}`), {
         method: "DELETE",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -149,12 +146,11 @@ interface BeginPasskeyRegistrationResponse {
 }
 
 const beginPasskeyRegistration = async (token: string) => {
-    const url = await apiURL("/passkeys/registration/begin");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/passkeys/registration/begin"), {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     // [Note: Converting binary data in WebAuthn API payloads]
     //
@@ -311,7 +307,7 @@ const finishPasskeyRegistration = async ({
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -417,12 +413,13 @@ export const beginPasskeyAuthentication = async (
     const url = await apiURL("/users/two-factor/passkeys/begin");
     const res = await fetch(url, {
         method: "POST",
+        headers: clientPackageHeader(),
         body: JSON.stringify({ sessionID: passkeySessionID }),
     });
     if (!res.ok) {
         if (res.status == 409)
             throw new Error(passkeySessionAlreadyClaimedErrorMessage);
-        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        throw new HTTPError(res);
     }
 
     // See: [Note: Converting binary data in WebAuthn API payloads]
@@ -508,6 +505,8 @@ export const finishPasskeyAuthentication = async ({
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
         headers: {
+            // Note: Unlike the other requests, this is the clientPackage of the
+            // _requesting_ app, not the accounts app.
             "X-Client-Package": clientPackage,
         },
         body: JSON.stringify({
@@ -525,7 +524,7 @@ export const finishPasskeyAuthentication = async ({
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     return TwoFactorAuthorizationResponse.parse(await res.json());
 };

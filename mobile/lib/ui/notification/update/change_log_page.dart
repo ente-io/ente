@@ -19,11 +19,6 @@ class ChangeLogPage extends StatefulWidget {
 
 class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
@@ -119,20 +114,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Send links ✨",
-        'Introducing a beautiful way to share photos in original quality, end-to-end encrypted. Select your photos and click on "Send link" to see the magic!',
+        "Custom App Lock ✨",
+        'Now choose from PIN, password or the default system lock to lock the app. You can set this up in Settings > Security > App lock.',
       ),
       ChangeLogEntry(
-        "Video editor",
-        "Crop, clip and flip your videos, with Ente's in-built video editor. The editor works fully offline and will help with all your basic editing tasks.",
+        "Select All ✨",
+        "Selecting all files from gallery made easy with just one click! Select any item from gallery to see the option.",
       ),
       ChangeLogEntry(
-        "Passkeys",
-        "Now secure your Ente account with passkeys or hardware keys. You can add your keys within Settings > Security > Passkeys.",
-      ),
-      ChangeLogEntry(
-        "View large files",
-        "Find those items that take up the most amount of storage, and easily declutter your library. Open Settings > Backup > Free up space to learn more.",
+        "Bug Fixes",
+        "Many a bugs were squashed in this release. If you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏",
       ),
     ]);
 

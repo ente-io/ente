@@ -1,12 +1,12 @@
-import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
-import { putAttributes } from "@ente/accounts/api/user";
+import { putAttributes } from "@/accounts/api/user";
 import SetPasswordForm, {
     type SetPasswordFormProps,
-} from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
-import { configureSRP } from "@ente/accounts/services/srp";
-import { generateKeyAndSRPAttributes } from "@ente/accounts/utils/srp";
+} from "@/accounts/components/SetPasswordForm";
+import { PAGES } from "@/accounts/constants/pages";
+import { configureSRP } from "@/accounts/services/srp";
+import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -32,7 +32,7 @@ import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName, logout } = appContext;
+    const { logout } = appContext;
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
@@ -56,7 +56,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push(appHomeRoute(appName));
+                    router.push(appHomeRoute);
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -106,7 +106,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push(appHomeRoute(appName));
+                        router.push(appHomeRoute);
                     }}
                     /* TODO: Why is this error being ignored */
                     somethingWentWrong={() => {}}
