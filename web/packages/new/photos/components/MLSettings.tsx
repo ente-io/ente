@@ -64,20 +64,16 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         | "loading" /* fetching the data we need from the lower layers */
         | "notEligible" /* user is not in the beta program */
         | "disabled" /* eligible, but ML is currently disabled */
-        | "enabledOrPaused"; /* ML is enabled, but may be paused (See isPaused) */
+        | "enabled"; /* ML is enabled, but may be paused locally */
 
     const [status, setStatus] = useState<Status>("loading");
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
-    /** Only valid when status is "enabledOrPaused" */
-    const [isPaused, setIsPaused] = useState(false);
+    const [isEnabledLocal, setIsEnabledLocal] = useState(false);
 
     const refreshStatus = async () => {
-        if (isMLEnabled()) {
-            setStatus("enabledOrPaused");
-            setIsPaused(false);
-        } else if (await getIsMLEnabledRemote()) {
-            setStatus("enabledOrPaused");
-            setIsPaused(true);
+        if (isMLEnabled() || (await getIsMLEnabledRemote())) {
+            setStatus("enabled");
+            setIsEnabledLocal(isMLEnabled());
         } else if (await canEnableML()) {
             setStatus("disabled");
         } else {
@@ -112,8 +108,8 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 setOpenFaceConsent(true);
             } else {
                 await enableML();
-                setStatus("enabledOrPaused");
-                setIsPaused(false);
+                setStatus("enabled");
+                setIsEnabledLocal(isMLEnabled());
             }
         } catch (e) {
             log.error("Failed to enable or resume ML", e);
@@ -127,8 +123,8 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         startLoading();
         try {
             await enableML();
-            setStatus("enabledOrPaused");
-            setIsPaused(false);
+            setStatus("enabled");
+            setIsEnabledLocal(isMLEnabled());
             // Close the FaceConsent drawer, come back to ourselves.
             setOpenFaceConsent(false);
         } catch (e) {
@@ -139,13 +135,12 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         }
     };
 
-    const handlePauseML = () => {
+    const handleToggleLocal = async () => {
         try {
-            pauseML();
-            setStatus("enabledOrPaused");
-            setIsPaused(true);
+            isMLEnabled() ? pauseML() : await handleEnableOrResumeML();
+            setIsEnabledLocal(isMLEnabled());
         } catch (e) {
-            log.error("Failed to enable ML", e);
+            log.error("Failed to toggle local state of ML", e);
             somethingWentWrong();
         }
     };
@@ -167,11 +162,10 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         loading: <Loading />,
         notEligible: <ComingSoon />,
         disabled: <EnableML onEnable={handleEnableOrResumeML} />,
-        enabledOrPaused: (
+        enabled: (
             <ManageML
-                {...{ isPaused, setDialogBoxAttributesV2 }}
-                onPauseML={handlePauseML}
-                onResumeML={handleEnableOrResumeML}
+                {...{ isEnabledLocal, setDialogBoxAttributesV2 }}
+                onToggleLocal={handleToggleLocal}
                 onDisableML={handleDisableML}
             />
         ),
@@ -364,12 +358,10 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
 };
 
 interface ManageMLProps {
-    /** `true` if ML is locally paused. */
-    isPaused: boolean;
-    /** Called when the user wants to pause ML. */
-    onPauseML: () => void;
-    /** Called when the user wants to resume ML. */
-    onResumeML: () => void;
+    /** `true` if ML is enabled locally (in addition to remote). */
+    isEnabledLocal: boolean;
+    /** Called when the user wants to toggle the ML status locally. */
+    onToggleLocal: () => void;
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
     /** Subset of appContext. */
@@ -377,9 +369,8 @@ interface ManageMLProps {
 }
 
 const ManageML: React.FC<ManageMLProps> = ({
-    isPaused,
-    onPauseML,
-    onResumeML,
+    isEnabledLocal,
+    onToggleLocal,
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
@@ -399,7 +390,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                 text: pt("Disable"),
                 action: onDisableML,
             },
-            buttonDirection: "row"
+            buttonDirection: "row",
         });
     };
 
@@ -450,28 +441,31 @@ const ManageML: React.FC<ManageMLProps> = ({
         </Box>
     )*/
 
+    console.log("rendering", isEnabledLocal, isMLEnabled());
     return (
         <Box px={"16px"}>
             <Stack py={"20px"} spacing={"24px"}>
                 <MenuItemGroup>
-                    {isPaused ? (
-                        <EnteMenuItem
-                            onClick={onResumeML}
-                            label={pt("Resume on this device")}
-                        />
-                    ) : (
-                        <EnteMenuItem
-                            onClick={onPauseML}
-                            label={pt("Pause on this device")}
-                        />
-                    )}
-                </MenuItemGroup>
-                <MenuItemGroup>
                     <EnteMenuItem
-                        onClick={confirmDisableML}
-                        label={t("Disable everywhere")}
+                        label={pt("On this device")}
+                        variant="toggle"
+                        checked={isEnabledLocal}
+                        onClick={onToggleLocal}
                     />
                 </MenuItemGroup>
+                <Button
+                    color="critical"
+                    size="large"
+                    onClick={confirmDisableML}
+                >
+                    {pt("Disable ML search")}
+                </Button>
+                {/* <MenuItemGroup>
+                    <EnteMenuItem
+                        onClick={confirmDisableML}
+                        label={pt("Disable ML search")}
+                    />
+                </MenuItemGroup> */}
             </Stack>
         </Box>
     );
