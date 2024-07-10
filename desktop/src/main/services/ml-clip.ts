@@ -54,17 +54,14 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     }
 
     const session = sessionOrSkip;
-    const t1 = Date.now();
+    const t = Date.now();
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
     const feeds = {
         input: new ort.Tensor("int32", tokenizedText, [1, 77]),
     };
-    const t2 = Date.now();
+
     const results = await session.run(feeds);
-    log.debug(
-        () =>
-            `ONNX/CLIP text embedding took ${Date.now() - t1} ms (prep: ${t2 - t1} ms, inference: ${Date.now() - t2} ms)`,
-    );
+    log.debug(() => `ONNX/CLIP text embedding took ${Date.now() - t} ms`);
     return ensure(results.output).data as Float32Array;
 };

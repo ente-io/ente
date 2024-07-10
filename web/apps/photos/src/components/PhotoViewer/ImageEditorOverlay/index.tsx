@@ -775,7 +775,7 @@ const canvasToFile = async (
     const [originalName] = nameAndExtension(originalFileName);
     const fileName = `${originalName}-edited.${extension}`;
 
-    log.debug(() => ({ a: "canvas => file", blob, type: blob.type, mimeType }));
+    log.debug(() => ["canvas => file", { blob, type: blob.type, mimeType }]);
 
     return new File([blob], fileName);
 };

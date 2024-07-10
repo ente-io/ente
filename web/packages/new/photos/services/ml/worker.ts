@@ -145,13 +145,15 @@ export class MLWorker {
     }
 
     private async tick() {
-        log.debug(() => ({
-            t: "ml/tick",
-            state: this.state,
-            shouldSync: this.shouldPull,
-            liveQ: this.liveQ,
-            idleDuration: this.idleDuration,
-        }));
+        log.debug(() => [
+            "ml/tick",
+            {
+                state: this.state,
+                shouldSync: this.shouldPull,
+                liveQ: this.liveQ,
+                idleDuration: this.idleDuration,
+            },
+        ]);
 
         const scheduleTick = () => void setTimeout(() => this.tick(), 0);
 

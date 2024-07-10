@@ -267,7 +267,7 @@ export const putEmbedding = async (
     model: EmbeddingModel,
     embedding: string,
 ) => {
-    log.debug(() => ({ t: `Uploading embedding`, model, embedding }));
+    log.debug(() => ["Uploading embedding", { model, embedding }]);
 
     const { encryptedMetadataB64, decryptionHeaderB64 } =
         await encryptFileMetadata(embedding, enteFile.key);
