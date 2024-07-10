@@ -43,23 +43,27 @@ abstract class MlModel {
     String modelPath,
   ) async {
     if (!isNativePluginInitialized) {
-      logger.info('Initializing model with Ente Plugin');
+      final startTime = DateTime.now();
+      logger.info('Initializing $modelName with EntePlugin');
       final OnnxDart plugin = OnnxDart();
       final bool? initResult = await plugin.init(modelName, modelPath);
       isNativePluginInitialized = initResult ?? false;
       if (isNativePluginInitialized) {
-        logger.info("Model initialized successfully with Ente Plugin.");
+        final endTime = DateTime.now();
+        logger.info(
+          "$modelName loaded via EntePlugin ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
+        );
       } else {
-        logger.severe("Failed to initialize model with Ente Plugin.");
+        logger.severe("Failed to initialize $modelName with EntePlugin.");
       }
     } else {
-      logger.info("Model already initialized with Ente Plugin.");
+      logger.info("$modelName already initialized with Ente Plugin.");
     }
   }
 
   Future<void> _loadModelWithFFI(String modelName, String modelPath) async {
     if (!isInitialized) {
-      logger.info('Initializing model with FFI');
+      logger.info('Initializing $modelName with FFI');
       final startTime = DateTime.now();
       sessionAddress = await computer.compute(
         _loadModel,
@@ -70,10 +74,10 @@ abstract class MlModel {
       isInitialized = true;
       final endTime = DateTime.now();
       logger.info(
-        "Model loaded with FFI, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
+        "$modelName loaded with FFI, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
       );
     } else {
-      logger.info("Model already initialized with FFI.");
+      logger.info("$modelName already initialized with FFI.");
     }
   }
 
