@@ -304,7 +304,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                     onRootClose={handleRootClose}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                    <Typography color="text.muted" px={"8px"}>
+                    <Typography component="div" color="text.muted" px={"8px"}>
                         <Trans
                             i18nKey={"ENABLE_FACE_SEARCH_DESCRIPTION"}
                             components={{
