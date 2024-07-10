@@ -460,14 +460,14 @@ const ManageML: React.FC<ManageMLProps> = ({
                     ) : (
                         <EnteMenuItem
                             onClick={onPauseML}
-                            label={t("DISABLE_BETA")}
+                            label={pt("Pause on this device")}
                         />
                     )}
                 </MenuItemGroup>
                 <MenuItemGroup>
                     <EnteMenuItem
                         onClick={confirmDisableML}
-                        label={t("DISABLE_FACE_SEARCH")}
+                        label={t("Disable everywhere")}
                     />
                 </MenuItemGroup>
             </Stack>
