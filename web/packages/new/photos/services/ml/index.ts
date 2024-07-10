@@ -20,13 +20,12 @@ import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
- * In-memory flag that tracks if ML is enabled.
+ * In-memory flag that tracks if ML is enabled locally.
  *
  * -   On app start, this is read from local storage during {@link initML}.
  *
- * -   If the user updates their preference, then `setMLEnabled` will get called
- *     with the updated preference where this value will be updated (in addition
- *     to updating local storage).
+ * -   It gets updated if the user enables/disables ML (remote) or if they
+ *     pause/resume ML (local).
  *
  * -   It is cleared in {@link logoutML}.
  */
@@ -64,6 +63,8 @@ const createComlinkWorker = async () => {
  * This is useful during logout to immediately stop any background ML operations
  * that are in-flight for the current user. After the user logs in again, a new
  * {@link worker} will be created on demand for subsequent usage.
+ *
+ * It is also called when the user pauses or disables ML.
  */
 export const terminateMLWorker = () => {
     if (_comlinkWorker) {
@@ -78,7 +79,6 @@ export const terminateMLWorker = () => {
 export const initML = () => {
     // ML currently only works when we're running in our desktop app.
     if (!isDesktop) return;
-    // TODO-ML: Rename the isFace* flag since it now drives ML as a whole.
     _isMLEnabled = isMLEnabledLocally();
 };
 
@@ -137,9 +137,9 @@ export const enableML = () => {
  * and on remote.
  */
 export const disableML = () => {
+    // TODO-ML: API call.
     terminateMLWorker();
     setIsMLEnabledLocally(false);
-    // TODO-ML: API call.
     _isMLEnabled = false;
 };
 
