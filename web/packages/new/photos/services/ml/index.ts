@@ -184,7 +184,7 @@ export const triggerMLSync = () => {
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
-    log.debug(() => ["ml/liveq", {enteFile, uploadItem }]);
+    log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 

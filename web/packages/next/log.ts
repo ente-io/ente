@@ -100,7 +100,8 @@ const logDebug = (param: () => unknown) => {
             const [tag, ...rest] = p;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             console.log(`[debug] ${tag}`, ...rest);
-        } else { /* Let console.log serialize it */
+        } else {
+            /* Let console.log serialize it */
             console.log("[debug]", p);
         }
     }
