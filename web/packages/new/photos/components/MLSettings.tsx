@@ -15,7 +15,7 @@ import {
     Box,
     Button,
     Checkbox,
-    DialogProps,
+    type DialogProps,
     FormControlLabel,
     FormGroup,
     Link,
@@ -23,17 +23,33 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import type { NewAppContextPhotos } from "../types/context";
 
-export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
+interface MLSettingsProps {
+    /** If `true`, then the drawer page is shown. */
+    open: boolean;
+    /** Called when the user wants to go back from this drawer page. */
+    onClose: () => void;
+    /** Called when the user wants to close the containing drawer. */
+    onRootClose: () => void;
+    /** See: [Note: Migrating components that need the app context]. */
+    appContext: NewAppContextPhotos;
+}
+
+export const MLSettings: React.FC<MLSettingsProps> = ({
+    open,
+    onClose,
+    onRootClose,
+    appContext,
+}) => {
     const {
         setDialogMessage,
         somethingWentWrong,
         startLoading,
         finishLoading,
-    } = useContext(AppContext);
+    } = appContext;
 
     const [enableFaceSearchView, setEnableFaceSearchView] = useState(false);
 

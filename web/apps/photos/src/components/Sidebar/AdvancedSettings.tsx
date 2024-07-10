@@ -1,4 +1,4 @@
-import { MLSearchSettings } from "@/new/photos/components/MLSettings";
+import { MLSettings } from "@/new/photos/components/MLSettings";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
@@ -132,10 +132,11 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                     </Stack>
                 </Box>
             </Stack>
-            <MLSearchSettings
+            <MLSettings
                 open={mlSearchSettingsView}
                 onClose={closeMlSearchSettings}
                 onRootClose={handleRootClose}
+                appContext={appContext}
             />
         </EnteDrawer>
     );
