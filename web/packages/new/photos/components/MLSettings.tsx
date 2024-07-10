@@ -3,13 +3,14 @@ import {
     disableML,
     enableML,
     getIsMLEnabledRemote,
-    isMLEnabled,
     pauseML,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
+import { pt } from "@/next/i18n";
 import log from "@/next/log";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -50,6 +51,21 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         startLoading,
         finishLoading,
     } = appContext;
+
+    /**
+     * The state of our component.
+     *
+     * To avoid confusion with useState, we call it status instead. */
+    // TODO: This Status is not automatically synced with the lower layers that
+    // hold the actual state.
+    type Status =
+        | "loading" /* fetching the data we need from the lower layers */
+        | "notEligible" /* user is not in the beta program */
+        | "disabled" /* eligible, but ML is currently disabled */
+        | "enabled" /* ML is enabled */
+        | "paused"; /* ML is disabled locally, but is otherwise enabled */
+
+    const [status, setStatus] = useState<Status>("loading");
 
     const [enableFaceSearchView, setEnableFaceSearchView] = useState(false);
 
@@ -185,6 +201,25 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         </Box>
     )*/
 
+    const components: Record<Status, React.ReactNode> = {
+        loading: <Loading />,
+        disabled: (
+            <EnableML
+                onClose={onClose}
+                onEnable={enableMlSearch}
+                onRootClose={handleRootClose}
+            />
+        ),
+        enabled: (
+            <ManageMLSearch
+                onClose={onClose}
+                disableMlSearch={disableMlSearch}
+                handleDisableFaceSearch={confirmDisableFaceSearch}
+                onRootClose={handleRootClose}
+            />
+        ),
+    };
+
     return (
         <Box>
             <EnteDrawer
@@ -196,20 +231,14 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                     sx: { "&&&": { backgroundColor: "transparent" } },
                 }}
             >
-                {isMLEnabled() ? (
-                    <ManageMLSearch
+                <Stack spacing={"4px"} py={"12px"}>
+                    <Titlebar
                         onClose={onClose}
-                        disableMlSearch={disableMlSearch}
-                        handleDisableFaceSearch={confirmDisableFaceSearch}
-                        onRootClose={handleRootClose}
+                        title={pt("ML search")}
+                        onRootClose={onRootClose}
                     />
-                ) : (
-                    <EnableMLSearch
-                        onClose={onClose}
-                        enableMlSearch={enableMlSearch}
-                        onRootClose={handleRootClose}
-                    />
-                )}
+                    {components[status] ?? <Loading />}
+                </Stack>
             </EnteDrawer>
 
             <EnableFaceSearch
@@ -219,6 +248,73 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 onRootClose={handleRootClose}
             />
         </Box>
+    );
+};
+
+const Loading: React.FC = () => {
+    return (
+        <Box textAlign="center" pt={4}>
+            <EnteSpinner />
+        </Box>
+    );
+};
+type EnableMLProps = Omit<MLSettingsProps, "open" | "appContext"> & {
+    /** Called when the user enables ML */
+    onEnable: () => void;
+};
+
+const EnableML: React.FC<EnableMLProps> = ({
+    onClose,
+    enableMlSearch,
+    onRootClose,
+}) => {
+    // const showDetails = () =>
+    //     openLink("https://ente.io/blog/desktop-ml-beta", true);
+
+    const [canEnable, setCanEnable] = useState(false);
+
+    useEffect(() => {
+        canEnableML().then((v) => setCanEnable(v));
+    }, []);
+
+    return (
+        <Stack spacing={"4px"} py={"12px"}>
+            <Titlebar
+                onClose={onClose}
+                title={pt("ML search")}
+                onRootClose={onRootClose}
+            />
+            <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                {canEnable ? (
+                    <Stack px={"8px"} spacing={"8px"}>
+                        <Button
+                            color={"accent"}
+                            size="large"
+                            onClick={enableMlSearch}
+                        >
+                            {t("ENABLE")}
+                        </Button>
+                        {/*
+                        <Button
+                        color="secondary"
+                        size="large"
+                        onClick={showDetails}
+                        >
+                            {t("ML_MORE_DETAILS")}
+                        </Button>
+                        */}
+                    </Stack>
+                ) : (
+                    <Box px={"8px"}>
+                        {" "}
+                        <Typography color="text.muted">
+                            {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
+                            We're putting finishing touches, coming back soon!
+                        </Typography>
+                    </Box>
+                )}
+            </Stack>
+        </Stack>
     );
 };
 
@@ -314,57 +410,6 @@ function EnableFaceSearch({ open, onClose, enableFaceSearch, onRootClose }) {
                 </Stack>
             </Stack>
         </EnteDrawer>
-    );
-}
-
-function EnableMLSearch({ onClose, enableMlSearch, onRootClose }) {
-    // const showDetails = () =>
-    //     openLink("https://ente.io/blog/desktop-ml-beta", true);
-
-    const [canEnable, setCanEnable] = useState(false);
-
-    useEffect(() => {
-        canEnableML().then((v) => setCanEnable(v));
-    }, []);
-
-    return (
-        <Stack spacing={"4px"} py={"12px"}>
-            <Titlebar
-                onClose={onClose}
-                title={t("ML_SEARCH")}
-                onRootClose={onRootClose}
-            />
-            <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                {canEnable ? (
-                    <Stack px={"8px"} spacing={"8px"}>
-                        <Button
-                            color={"accent"}
-                            size="large"
-                            onClick={enableMlSearch}
-                        >
-                            {t("ENABLE")}
-                        </Button>
-                        {/*
-                        <Button
-                        color="secondary"
-                        size="large"
-                        onClick={showDetails}
-                        >
-                            {t("ML_MORE_DETAILS")}
-                        </Button>
-                        */}
-                    </Stack>
-                ) : (
-                    <Box px={"8px"}>
-                        {" "}
-                        <Typography color="text.muted">
-                            {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                            We're putting finishing touches, coming back soon!
-                        </Typography>
-                    </Box>
-                )}
-            </Stack>
-        </Stack>
     );
 }
 
