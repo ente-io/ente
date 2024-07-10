@@ -197,6 +197,11 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         withContext(Dispatchers.Main) {
           result.error("PREDICTION_ERROR", "Error during prediction: ${e.message}", null)
         }
+      } catch (e: Exception) {
+        Log.e(TAG, "Error during prediction: ${e.message}", e)
+        withContext(Dispatchers.Main) {
+          result.error("UNHANDLED_ERROR", "Error during prediction: ${e.message}", null)
+        }
       }
     }
   }
