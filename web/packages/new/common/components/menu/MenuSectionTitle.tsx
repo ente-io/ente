@@ -1,12 +1,16 @@
 import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
+import React from "react";
 
-interface Iprops {
+interface MenuSectionTitleProps {
     title: string;
     icon?: JSX.Element;
 }
 
-export default function MenuSectionTitle({ title, icon }: Iprops) {
+export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({
+    title,
+    icon,
+}) => {
     return (
         <VerticallyCenteredFlex
             px="8px"
@@ -25,4 +29,4 @@ export default function MenuSectionTitle({ title, icon }: Iprops) {
             </Typography>
         </VerticallyCenteredFlex>
     );
-}
+};

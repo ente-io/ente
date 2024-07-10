@@ -1,6 +1,6 @@
 import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
 import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
-import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
+import { MenuSectionTitle } from "@/new/common/components/menu/MenuSectionTitle";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import DownloadSharp from "@mui/icons-material/DownloadSharp";
 import LinkIcon from "@mui/icons-material/Link";

@@ -1,5 +1,5 @@
 import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
-import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
+import { MenuSectionTitle } from "@/new/common/components/menu/MenuSectionTitle";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
