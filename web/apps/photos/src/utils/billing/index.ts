@@ -1,3 +1,4 @@
+import { openURL } from "@/new/photos/utils/web";
 import log from "@/next/log";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -8,7 +9,6 @@ import billingService from "services/billingService";
 import { Plan, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
-import { openLink } from "utils/common";
 import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 
@@ -220,7 +220,7 @@ export async function manageFamilyMethod(
     try {
         setLoading(true);
         const familyPortalRedirectURL = getRedirectURL(REDIRECTS.FAMILIES);
-        openLink(familyPortalRedirectURL, true);
+        openURL(familyPortalRedirectURL);
     } catch (e) {
         log.error("failed to redirect to family portal", e);
         setDialogMessage({

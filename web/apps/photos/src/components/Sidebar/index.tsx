@@ -1,4 +1,5 @@
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
+import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
@@ -73,7 +74,6 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
-import { openLink } from "utils/common";
 import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
@@ -594,10 +594,10 @@ const HelpSection: React.FC = () => {
     const { setDialogMessage } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
-    const openRoadmap = () =>
-        openLink("https://github.com/ente-io/ente/discussions", true);
+    const requestFeature = () =>
+        openURL("https://github.com/ente-io/ente/discussions");
 
-    const contactSupport = () => openLink("mailto:support@ente.io", true);
+    const contactSupport = () => initiateEmail("support@ente.io");
 
     function openExport() {
         if (isElectron()) {
@@ -610,7 +610,7 @@ const HelpSection: React.FC = () => {
     return (
         <>
             <EnteMenuItem
-                onClick={openRoadmap}
+                onClick={requestFeature}
                 label={t("REQUEST_FEATURE")}
                 variant="secondary"
             />

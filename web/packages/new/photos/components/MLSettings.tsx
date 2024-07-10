@@ -28,6 +28,7 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
+import { openURL } from "../utils/web";
 
 interface MLSettingsProps {
     /** If `true`, then this drawer page is shown. */
@@ -232,8 +233,10 @@ interface EnableMLProps {
 }
 
 const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
-    const showDetails = () => 3;
-    /*openLink("https://ente.io/blog/desktop-ml-beta", true)*/ return (
+    // TODO-ML: Update link.
+    const moreDetails = () => openURL("https://ente.io/blog/desktop-ml-beta");
+
+    return (
         <Stack py={"20px"} px={"16px"} spacing={"32px"}>
             <Typography color="text.muted">
                 {pt(
@@ -245,7 +248,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                     {t("ENABLE")}
                 </Button>
 
-                <Button color="secondary" size="large" onClick={showDetails}>
+                <Button color="secondary" size="large" onClick={moreDetails}>
                     {t("ML_MORE_DETAILS")}
                 </Button>
             </Stack>
