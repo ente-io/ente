@@ -98,11 +98,6 @@ class SemanticSearchService {
         _cachedImageEmbeddings.isNotEmpty;
   }
 
-  bool bothClipModelsLoaded() {
-    return ClipImageEncoder.instance.isInitialized &&
-        ClipTextEncoder.instance.isInitialized;
-  }
-
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
