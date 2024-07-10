@@ -6,9 +6,10 @@ import "dart:math" show min;
 import "dart:typed_data" show Uint8List, ByteData;
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
-import "package:flutter/foundation.dart" show debugPrint;
+import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:logging/logging.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
@@ -629,9 +630,12 @@ class MLService {
   /// The main execution function of the isolate.
   @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
+    Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+    Logger.root.onRecord.listen((LogRecord rec) {
+      debugPrint('[MLIsolate] ${rec.toPrettyString()}');
+    });
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
-
     receivePort.listen((message) async {
       final functionIndex = message[0] as int;
       final function = FaceMlOperation.values[functionIndex];
