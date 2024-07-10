@@ -2,7 +2,9 @@ import {
     canEnableML,
     disableML,
     enableML,
+    getIsMLEnabledRemote,
     isMLEnabled,
+    pauseML,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup } from "@/new/shared/components/Menu";
@@ -24,10 +26,6 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import {
-    getFaceSearchEnabledStatus,
-    updateFaceSearchEnabledStatus,
-} from "services/userService";
 
 export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -48,11 +46,11 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
 
     const enableMlSearch = async () => {
         try {
-            const hasEnabledFaceSearch = await getFaceSearchEnabledStatus();
-            if (!hasEnabledFaceSearch) {
+            const isEnabledRemote = await getIsMLEnabledRemote();
+            if (!isEnabledRemote) {
                 openEnableFaceSearch();
             } else {
-                enableML();
+                await enableML();
             }
         } catch (e) {
             log.error("Enable ML search failed", e);
@@ -63,9 +61,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const enableFaceSearch = async () => {
         try {
             startLoading();
-            // Update the consent flag.
-            await updateFaceSearchEnabledStatus(true);
-            enableML();
+            await enableML();
             closeEnableFaceSearch();
             finishLoading();
         } catch (e) {
@@ -76,7 +72,7 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
 
     const disableMlSearch = async () => {
         try {
-            disableML();
+            pauseML();
             onClose();
         } catch (e) {
             log.error("Disable ML search failed", e);
@@ -87,7 +83,8 @@ export const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const disableFaceSearch = async () => {
         try {
             startLoading();
-            await disableMlSearch();
+            await disableML();
+            onClose();
             finishLoading();
         } catch (e) {
             log.error("Disable face search failed", e);

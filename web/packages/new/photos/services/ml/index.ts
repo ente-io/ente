@@ -106,7 +106,7 @@ export const canEnableML = async () =>
  *
  * The user may enable ML. This enables in both locally by persisting a local
  * storage flag, and sets a flag on remote so that the user's other devices can
- * also enable it.
+ * also enable it if they wish.
  *
  * The user may pause ML locally. This does not modify the remote flag, but it
  * unsets the local flag. Subsequently resuming ML (locally) will set the local
@@ -124,8 +124,8 @@ export const isMLEnabled = () =>
  *
  * Persist the user's preference both locally and on remote, and trigger a sync.
  */
-export const enableML = () => {
-    // TODO-ML: API call.
+export const enableML = async () => {
+    await updateIsMLEnabledRemote(true);
     setIsMLEnabledLocally(true);
     _isMLEnabled = true;
     triggerMLSync();
@@ -137,8 +137,8 @@ export const enableML = () => {
  * Stop any in-progress ML tasks, and persist the user's preference both locally
  * and on remote.
  */
-export const disableML = () => {
-    // TODO-ML: API call.
+export const disableML = async () => {
+    await updateIsMLEnabledRemote(false);
     terminateMLWorker();
     setIsMLEnabledLocally(false);
     _isMLEnabled = false;
@@ -193,7 +193,7 @@ const setIsMLEnabledLocally = (enabled: boolean) =>
  * Now it tracks the status of ML in general (which includes faces + consent).
  */
 const mlRemoteKey = "faceSearchEnabled";
-const getIsMLEnabledRemote = () => getRemoteFlag(mlRemoteKey);
+export const getIsMLEnabledRemote = () => getRemoteFlag(mlRemoteKey);
 const updateIsMLEnabledRemote = (enabled: boolean) =>
     updateRemoteFlag(mlRemoteKey, enabled);
 
