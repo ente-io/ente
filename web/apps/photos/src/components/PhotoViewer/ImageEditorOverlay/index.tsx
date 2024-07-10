@@ -1,4 +1,4 @@
-import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
 import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
 import MenuSectionTitle from "@/new/common/components/menu/MenuSectionTitle";
 import downloadManager from "@/new/photos/services/download";

@@ -1,8 +1,13 @@
 import { Divider } from "@mui/material";
-interface Iprops {
+import React from "react";
+
+interface MenuItemDividerProps {
     hasIcon?: boolean;
 }
-export default function MenuItemDivider({ hasIcon = false }: Iprops) {
+
+export const MenuItemDivider: React.FC<MenuItemDividerProps> = ({
+    hasIcon,
+}) => {
     return (
         <Divider
             sx={{
@@ -13,4 +18,4 @@ export default function MenuItemDivider({ hasIcon = false }: Iprops) {
             }}
         />
     );
-}
+};

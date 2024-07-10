@@ -1,4 +1,4 @@
-import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
 import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
 import log from "@/next/log";
 import { ensure } from "@/utils/ensure";

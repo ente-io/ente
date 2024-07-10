@@ -1,4 +1,4 @@
-import MenuItemDivider from "@/new/common/components/menu/MenuItemDivider";
+import { MenuItemDivider } from "@/new/common/components/menu/MenuItemDivider";
 import { MenuItemGroup } from "@/new/common/components/menu/MenuItemGroup";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { formatDateTime } from "@ente/shared/time/format";
