@@ -48,10 +48,10 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     appContext,
 }) => {
     const {
-        setDialogMessage,
-        somethingWentWrong,
         startLoading,
         finishLoading,
+        setDialogBoxAttributesV2,
+        somethingWentWrong,
     } = appContext;
 
     /**
@@ -169,11 +169,10 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         disabled: <EnableML onEnable={handleEnableOrResumeML} />,
         enabledOrPaused: (
             <ManageML
-                isPaused={isPaused}
+                {...{ isPaused, setDialogBoxAttributesV2 }}
                 onPauseML={handlePauseML}
                 onResumeML={handleEnableOrResumeML}
                 onDisableML={handleDisableML}
-                setDialogMessage={setDialogMessage}
             />
         ),
     };
@@ -374,7 +373,7 @@ interface ManageMLProps {
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
     /** Subset of appContext. */
-    setDialogMessage: NewAppContextPhotos["setDialogMessage"];
+    setDialogBoxAttributesV2: NewAppContextPhotos["setDialogBoxAttributesV2"];
 }
 
 const ManageML: React.FC<ManageMLProps> = ({
@@ -382,22 +381,25 @@ const ManageML: React.FC<ManageMLProps> = ({
     onPauseML,
     onResumeML,
     onDisableML,
-    setDialogMessage,
+    setDialogBoxAttributesV2,
 }) => {
     const confirmDisableML = () => {
-        setDialogMessage({
-            title: t("DISABLE_FACE_SEARCH_TITLE"),
+        setDialogBoxAttributesV2({
+            title: pt("Disable ML search"),
             content: (
                 <Typography>
-                    <Trans i18nKey={"DISABLE_FACE_SEARCH_DESCRIPTION"} />
+                    {pt(
+                        "Do you want to disable ML search on all your devices?",
+                    )}
                 </Typography>
             ),
             close: { text: t("CANCEL") },
             proceed: {
-                variant: "primary",
-                text: t("DISABLE_FACE_SEARCH"),
+                variant: "critical",
+                text: pt("Disable"),
                 action: onDisableML,
             },
+            buttonDirection: "row"
         });
     };
 

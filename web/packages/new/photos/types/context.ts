@@ -1,4 +1,4 @@
-import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 
 /**
  * A subset of the AppContext type used by the photos app.
@@ -13,7 +13,6 @@ import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/t
 export interface NewAppContextPhotos {
     startLoading: () => void;
     finishLoading: () => void;
-    closeMessageDialog: () => void;
-    setDialogMessage: SetDialogBoxAttributes;
+    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     somethingWentWrong: () => void;
 }
