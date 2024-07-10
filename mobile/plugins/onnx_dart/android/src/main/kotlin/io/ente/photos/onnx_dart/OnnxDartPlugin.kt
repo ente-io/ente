@@ -39,6 +39,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   }
   companion object {
     const val DEFAULT_SESSION_COUNT = 1
+    const val FACENET_SINGLE_INPUT_SIZE = 112*112*3
   }
 
 
@@ -162,14 +163,33 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
       try {
         val env = OrtEnvironment.getEnvironment()
         val inputTensorShape = longArrayOf(1, 3, 640, 640)
+        if (modelType == ModelType.MobileFaceNet) {
+          inputTensorShape[0] = inputData.size.toLong()/ FACENET_SINGLE_INPUT_SIZE
+          inputTensorShape[1] = 112
+          inputTensorShape[2] = 112
+          inputTensorShape[3] = 3
+        }
         val inputTensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(inputData), inputTensorShape)
-        val inputs = mapOf("input" to inputTensor)
+        val inputs = mutableMapOf<String, OnnxTensor>()
+        if (modelType == ModelType.MobileFaceNet) {
+         inputs["img_inputs"] = inputTensor
+        } else {
+            inputs["input"] = inputTensor
+        }
         val outputs = session.run(inputs)
         Log.d(TAG, "Output shape: ${outputs.size()}")
-        val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
-        val flatList = outputTensor.flattenToFloatArray()
-        withContext(Dispatchers.Main) {
-          result.success(flatList)
+        if (modelType == ModelType.MobileFaceNet) {
+          val outputTensor = (outputs[0].value as Array<FloatArray>)
+          val flatList = outputTensor.flattenToFloatArray()
+          withContext(Dispatchers.Main) {
+            result.success(flatList)
+          }
+        } else {
+          val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
+          val flatList = outputTensor.flattenToFloatArray()
+          withContext(Dispatchers.Main) {
+            result.success(flatList)
+          }
         }
         outputs.close()
         inputTensor.close()
