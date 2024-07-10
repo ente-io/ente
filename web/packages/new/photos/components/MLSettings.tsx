@@ -3,12 +3,13 @@ import {
     disableML,
     enableML,
     getIsMLEnabledRemote,
+    isMLEnabled,
     pauseML,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import { pt } from "@/next/i18n";
+import { pt, ut } from "@/next/i18n";
 import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -66,6 +67,22 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         | "paused"; /* ML is disabled locally, but is otherwise enabled */
 
     const [status, setStatus] = useState<Status>("loading");
+
+    const refreshStatus = async () => {
+        if (isMLEnabled()) {
+            setStatus("enabled");
+        } else if (await getIsMLEnabledRemote()) {
+            setStatus("paused");
+        } else if (await canEnableML()) {
+            setStatus("disabled");
+        } else {
+            setStatus("notEligible");
+        }
+    };
+
+    useEffect(() => {
+        void refreshStatus();
+    }, []);
 
     const [enableFaceSearchView, setEnableFaceSearchView] = useState(false);
 
@@ -203,6 +220,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
 
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
+        notEligible: <ComingSoon />,
         disabled: (
             <EnableML
                 onClose={onClose}
@@ -258,6 +276,17 @@ const Loading: React.FC = () => {
         </Box>
     );
 };
+
+const ComingSoon: React.FC = () => {
+    return (
+        <Box px="8px">
+            <Typography color="text.muted">
+                {ut("We're putting finishing touches, coming back soon!")}
+            </Typography>
+        </Box>
+    );
+};
+
 type EnableMLProps = Omit<MLSettingsProps, "open" | "appContext"> & {
     /** Called when the user enables ML */
     onEnable: () => void;
@@ -305,13 +334,7 @@ const EnableML: React.FC<EnableMLProps> = ({
                         */}
                     </Stack>
                 ) : (
-                    <Box px={"8px"}>
-                        {" "}
-                        <Typography color="text.muted">
-                            {/* <Trans i18nKey={"ENABLE_ML_SEARCH_DESCRIPTION"} /> */}
-                            We're putting finishing touches, coming back soon!
-                        </Typography>
-                    </Box>
+                    <div />
                 )}
             </Stack>
         </Stack>
