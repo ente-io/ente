@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:isolate";
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List, ByteData;
@@ -838,6 +838,7 @@ class MLService {
           image,
           imageByteData,
           clipImageAddress,
+          useEntePlugin: Platform.isAndroid,
         );
         result.clip = clipResult;
       }

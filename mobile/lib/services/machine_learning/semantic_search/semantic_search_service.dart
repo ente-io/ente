@@ -334,10 +334,15 @@ class SemanticSearchService {
     int enteFileID,
     Image image,
     ByteData imageByteData,
-    int clipImageAddress,
-  ) async {
-    final embedding =
-        await ClipImageEncoder.predict(image, imageByteData, clipImageAddress);
+    int clipImageAddress, {
+    bool useEntePlugin = false,
+  }) async {
+    final embedding = await ClipImageEncoder.predict(
+      image,
+      imageByteData,
+      clipImageAddress,
+      useEntePlugin: useEntePlugin,
+    );
     final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);
 
     return clipResult;

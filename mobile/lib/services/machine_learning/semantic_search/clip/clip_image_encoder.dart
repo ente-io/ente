@@ -1,14 +1,17 @@
-import "dart:typed_data" show ByteData;
+import "dart:typed_data";
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
+import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
   static const kRemoteBucketModelPath = "clip-image-vit-32-float32.onnx";
+  static const _modelName = "ClipImageEncoder";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
@@ -18,7 +21,7 @@ class ClipImageEncoder extends MlModel {
   static final _logger = Logger('ClipImageEncoder');
 
   @override
-  String get modelName => "ClipImageEncoder";
+  String get modelName => _modelName;
 
   // Singleton pattern
   ClipImageEncoder._privateConstructor();
@@ -28,10 +31,27 @@ class ClipImageEncoder extends MlModel {
   static Future<List<double>> predict(
     Image image,
     ByteData imageByteData,
-    int sessionAddress,
-  ) async {
+    int sessionAddress, {
+    bool useEntePlugin = false,
+  }) async {
+    final w = EnteWatch("ClipImageEncoder.predict")..start();
     final inputList = await preprocessImageClip(image, imageByteData);
+    w.log("preprocessImageClip");
+    if (useEntePlugin) {
+      final result = await _runEntePlugin(inputList);
+      w.stopWithLog("done");
+      return result;
+    }
+    final result = _runFFIBasedPredict(inputList, sessionAddress);
+    w.stopWithLog("done");
+    return result;
+  }
 
+  static List<double> _runFFIBasedPredict(
+    Float32List inputList,
+    int sessionAddress,
+  ) {
+    final w = EnteWatch("ClipImageEncoder._runFFIBasedPredict")..start();
     final inputOrt =
         OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 224, 224]);
     final inputs = {'input': inputOrt};
@@ -39,9 +59,23 @@ class ClipImageEncoder extends MlModel {
     final runOptions = OrtRunOptions();
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
-
     normalizeEmbedding(embedding);
+    w.stopWithLog("done");
+    return embedding;
+  }
 
+  static Future<List<double>> _runEntePlugin(
+    Float32List inputImageList,
+  ) async {
+    final w = EnteWatch("ClipImageEncoder._runEntePlugin")..start();
+    final OnnxDart plugin = OnnxDart();
+    final result = await plugin.predict(
+      inputImageList,
+      _modelName,
+    );
+    final List<double> embedding = result!.sublist(0, 512);
+    normalizeEmbedding(embedding);
+    w.stopWithLog("done");
     return embedding;
   }
 }

@@ -168,6 +168,11 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
           inputTensorShape[1] = 112
           inputTensorShape[2] = 112
           inputTensorShape[3] = 3
+        } else if(modelType == ModelType.ClipImageEncoder) {
+            inputTensorShape[0] = 1
+            inputTensorShape[1] = 3
+            inputTensorShape[2] = 224
+            inputTensorShape[3] = 224
         }
         val inputTensor = OnnxTensor.createTensor(env, FloatBuffer.wrap(inputData), inputTensorShape)
         val inputs = mutableMapOf<String, OnnxTensor>()
@@ -178,14 +183,14 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         }
         val outputs = session.run(inputs)
         Log.d(TAG, "Output shape: ${outputs.size()}")
-        if (modelType == ModelType.MobileFaceNet) {
-          val outputTensor = (outputs[0].value as Array<FloatArray>)
+        if (modelType == ModelType.YOLOv5Face) {
+          val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
           val flatList = outputTensor.flattenToFloatArray()
           withContext(Dispatchers.Main) {
             result.success(flatList)
           }
         } else {
-          val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
+          val outputTensor = (outputs[0].value as Array<FloatArray>)
           val flatList = outputTensor.flattenToFloatArray()
           withContext(Dispatchers.Main) {
             result.success(flatList)
