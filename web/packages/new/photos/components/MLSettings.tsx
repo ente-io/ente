@@ -441,10 +441,17 @@ const ManageML: React.FC<ManageMLProps> = ({
         </Box>
     )*/
 
-    console.log("rendering", isEnabledLocal, isMLEnabled());
     return (
         <Box px={"16px"}>
             <Stack py={"20px"} spacing={"24px"}>
+                <MenuItemGroup>
+                    <EnteMenuItem
+                        label={pt("Enabled")}
+                        variant="toggle"
+                        checked={true}
+                        onClick={confirmDisableML}
+                    />
+                </MenuItemGroup>
                 <MenuItemGroup>
                     <EnteMenuItem
                         label={pt("On this device")}
@@ -453,19 +460,6 @@ const ManageML: React.FC<ManageMLProps> = ({
                         onClick={onToggleLocal}
                     />
                 </MenuItemGroup>
-                <Button
-                    color="critical"
-                    size="large"
-                    onClick={confirmDisableML}
-                >
-                    {pt("Disable ML search")}
-                </Button>
-                {/* <MenuItemGroup>
-                    <EnteMenuItem
-                        onClick={confirmDisableML}
-                        label={pt("Disable ML search")}
-                    />
-                </MenuItemGroup> */}
             </Stack>
         </Box>
     );
