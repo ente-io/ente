@@ -175,8 +175,8 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val inputs = mapOf("input" to inputTensor)
         val outputs = session.run(inputs)
         Log.d(TAG, "Output shape: ${outputs.size()}")
-        val outputTensor = outputs[0].value as Array<Array<FloatArray>>
-        val flatList = outputTensor.flatMapToFloatArray()
+        val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
+        val flatList = outputTensor.flattenToFloatArray()
         withContext(Dispatchers.Main) {
           result.success(flatList)
         }
@@ -213,6 +213,17 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         for (value in inner) {
           result[index++] = value
         }
+      }
+    }
+    return result
+  }
+  fun Array<FloatArray>.flattenToFloatArray(): FloatArray {
+    val outputSize = this.sumOf { it.size }
+    val result = FloatArray(outputSize)
+    var index = 0
+    for (inner in this) {
+      for (value in inner) {
+        result[index++] = value
       }
     }
     return result

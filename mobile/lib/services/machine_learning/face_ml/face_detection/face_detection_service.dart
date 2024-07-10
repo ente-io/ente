@@ -37,7 +37,9 @@ class FaceDetectionService extends MlModel {
 
   // Singleton pattern
   FaceDetectionService._privateConstructor();
+
   static final instance = FaceDetectionService._privateConstructor();
+
   factory FaceDetectionService() => instance;
 
   /// Detects faces in the given image data.
@@ -141,17 +143,19 @@ class FaceDetectionService extends MlModel {
       inputImageList,
       _modelName,
     );
-    final List<List<List<double>>> reconstructedTensor = [];
-    for (int i = 0; i < result!.length; i += 25200 * 16) {
-      final List<List<double>> outerArray = [];
-      for (int j = 0; j < 25200; j++) {
-        final List<double> innerArray =
-            result.sublist(i + j * 16, i + (j + 1) * 16).cast<double>();
-        outerArray.add(innerArray);
-      }
-      reconstructedTensor.add(outerArray);
-    }
-    return reconstructedTensor;
+
+    final int resultLength = result!.length;
+    assert(resultLength % 25200 * 16 == 0);
+    const int outerLength = 1;
+    const int middleLength = 25200;
+    const int innerLength = 16;
+    return List.generate(
+      outerLength,
+      (_) => List.generate(
+        middleLength,
+        (j) => result.sublist(j * innerLength, (j + 1) * innerLength).toList(),
+      ),
+    );
   }
 
   static List<FaceDetectionRelative> _yoloPostProcessOutputs(
