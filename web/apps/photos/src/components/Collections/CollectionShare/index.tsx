@@ -1,6 +1,6 @@
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import { DialogProps, Stack } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
 import { CollectionSummaryType } from "constants/collection";
 import { t } from "i18next";
 import { Collection, CollectionSummary } from "types/collection";

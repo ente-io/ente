@@ -1,4 +1,5 @@
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
 import { customAPIHost } from "@/next/origins";
@@ -34,7 +35,6 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
-import { EnteDrawer } from "components/EnteDrawer";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";

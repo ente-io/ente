@@ -1,3 +1,4 @@
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import log from "@/next/log";
@@ -7,7 +8,6 @@ import DoneIcon from "@mui/icons-material/Done";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import PhotoIcon from "@mui/icons-material/Photo";
 import { DialogProps, Stack, Typography } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";

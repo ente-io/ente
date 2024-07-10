@@ -1,3 +1,4 @@
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import {
     MenuItemDivider,
     MenuItemGroup,
@@ -11,7 +12,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import Photo from "@mui/icons-material/Photo";
 import { DialogProps, Stack } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
 import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";

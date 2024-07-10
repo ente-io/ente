@@ -4,6 +4,7 @@ import {
     enableML,
     isMLEnabled,
 } from "@/new/photos/services/ml";
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import log from "@/next/log";
@@ -19,7 +20,6 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";

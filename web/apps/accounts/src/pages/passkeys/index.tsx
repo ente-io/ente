@@ -1,3 +1,4 @@
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import log from "@/next/log";
@@ -5,7 +6,6 @@ import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { EnteDrawer } from "@ente/shared/components/EnteDrawer";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";

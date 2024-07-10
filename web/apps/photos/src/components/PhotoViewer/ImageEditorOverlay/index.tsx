@@ -1,5 +1,6 @@
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import {
     MenuItemDivider,
     MenuItemGroup,
@@ -31,7 +32,6 @@ import {
     Tabs,
     Typography,
 } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
 import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from "constants/photoEditor";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";

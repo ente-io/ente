@@ -1,3 +1,4 @@
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import {
     getLocaleInUse,
@@ -9,7 +10,6 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
-import { EnteDrawer } from "components/EnteDrawer";
 import { t } from "i18next";
 import { useState } from "react";
 import AdvancedSettings from "./AdvancedSettings";

@@ -1,6 +1,7 @@
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -13,7 +14,6 @@ import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
 import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
 import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
 import { Chip } from "components/Chip";
-import { EnteDrawer } from "components/EnteDrawer";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
