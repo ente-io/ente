@@ -34,7 +34,7 @@ interface MLSettingsProps {
     open: boolean;
     /** Called when the user wants to go back from this drawer page. */
     onClose: () => void;
-    /** Called when the user wants to close the containing drawer. */
+    /** Called when the user wants to close the entire stack of drawers. */
     onRootClose: () => void;
     /** See: [Note: Migrating components that need the app context]. */
     appContext: NewAppContextPhotos;
@@ -63,17 +63,20 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         | "loading" /* fetching the data we need from the lower layers */
         | "notEligible" /* user is not in the beta program */
         | "disabled" /* eligible, but ML is currently disabled */
-        | "enabled" /* ML is enabled */
-        | "paused"; /* ML is disabled locally, but is otherwise enabled */
+        | "enabledOrPaused"; /* ML is enabled, but may be paused (See isPaused) */
 
     const [status, setStatus] = useState<Status>("loading");
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
+    /** Only valid when status is "enabledOrPaused" */
+    const [isPaused, setIsPaused] = useState(false);
 
     const refreshStatus = async () => {
         if (isMLEnabled()) {
-            setStatus("enabled");
+            setStatus("enabledOrPaused");
+            setIsPaused(false);
         } else if (await getIsMLEnabledRemote()) {
-            setStatus("paused");
+            setStatus("enabledOrPaused");
+            setIsPaused(true);
         } else if (await canEnableML()) {
             setStatus("disabled");
         } else {
@@ -108,7 +111,8 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 setOpenFaceConsent(true);
             } else {
                 await enableML();
-                setStatus("enabled");
+                setStatus("enabledOrPaused");
+                setIsPaused(false);
             }
         } catch (e) {
             log.error("Failed to enable or resume ML", e);
@@ -122,7 +126,10 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         startLoading();
         try {
             await enableML();
-            setStatus("enabled");
+            setStatus("enabledOrPaused");
+            setIsPaused(false);
+            // Close the FaceConsent drawer, come back to ourselves.
+            setOpenFaceConsent(false);
         } catch (e) {
             log.error("Failed to enable ML", e);
             somethingWentWrong();
@@ -134,31 +141,15 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     const handlePauseML = () => {
         try {
             pauseML();
-            setStatus("paused");
+            setStatus("enabledOrPaused");
+            setIsPaused(true);
         } catch (e) {
             log.error("Failed to enable ML", e);
             somethingWentWrong();
         }
     };
 
-    const confirmDisableML = () => {
-        setDialogMessage({
-            title: t("DISABLE_FACE_SEARCH_TITLE"),
-            content: (
-                <Typography>
-                    <Trans i18nKey={"DISABLE_FACE_SEARCH_DESCRIPTION"} />
-                </Typography>
-            ),
-            close: { text: t("CANCEL") },
-            proceed: {
-                variant: "primary",
-                text: t("DISABLE_FACE_SEARCH"),
-                action: () => void didConfirmDisableML(),
-            },
-        });
-    };
-
-    const didConfirmDisableML = async () => {
+    const handleDisableML = async () => {
         startLoading();
         try {
             await disableML();
@@ -171,63 +162,17 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         }
     };
 
-    const openEnableFaceSearch = () => {
-        setEnableFaceSearchView(true);
-    };
-    const closeEnableFaceSearch = () => {
-        setEnableFaceSearchView(false);
-    };
-
-    const enableFaceSearch = async () => {
-        try {
-            startLoading();
-            await enableML();
-            closeEnableFaceSearch();
-            finishLoading();
-        } catch (e) {
-            log.error("Enable face search failed", e);
-            somethingWentWrong();
-        }
-    };
-
-    const disableMlSearch = async () => {
-        try {
-            pauseML();
-            onClose();
-        } catch (e) {
-            log.error("Disable ML search failed", e);
-            somethingWentWrong();
-        }
-    };
-
-    const disableFaceSearch = async () => {
-        try {
-            startLoading();
-            await disableML();
-            onClose();
-            finishLoading();
-        } catch (e) {
-            log.error("Disable face search failed", e);
-            somethingWentWrong();
-        }
-    };
-
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,
         notEligible: <ComingSoon />,
-        disabled: (
-            <EnableML
-                onClose={onClose}
-                onEnable={handleEnableOrResumeML}
-                onRootClose={handleRootClose}
-            />
-        ),
-        enabled: (
-            <ManageMLSearch
-                onClose={onClose}
-                disableMlSearch={disableMlSearch}
-                handleDisableFaceSearch={confirmDisableFaceSearch}
-                onRootClose={handleRootClose}
+        disabled: <EnableML onEnable={handleEnableOrResumeML} />,
+        enabledOrPaused: (
+            <ManageML
+                isPaused={isPaused}
+                onPauseML={handlePauseML}
+                onResumeML={handleEnableOrResumeML}
+                onDisableML={handleDisableML}
+                setDialogMessage={setDialogMessage}
             />
         ),
     };
@@ -249,15 +194,15 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                         title={pt("ML search")}
                         onRootClose={onRootClose}
                     />
-                    {components[status] ?? <Loading />}
+                    {components[status]}
                 </Stack>
             </EnteDrawer>
 
-            <EnableFaceSearch
-                open={enableFaceSearchView}
-                onClose={closeEnableFaceSearch}
-                enableFaceSearch={enableFaceSearch}
+            <FaceConsent
+                open={openFaceConsent}
+                onClose={() => setOpenFaceConsent(false)}
                 onRootClose={handleRootClose}
+                onConsent={handleConsent}
             />
         </Box>
     );
@@ -312,7 +257,17 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     );
 };
 
-function EnableFaceSearch({ open, onClose, enableFaceSearch, onRootClose }) {
+type FaceConsentProps = Omit<MLSettingsProps, "appContext"> & {
+    /** Called when the user provides their consent. */
+    onConsent: () => void;
+};
+
+const FaceConsent: React.FC<FaceConsentProps> = ({
+    open,
+    onClose,
+    onRootClose,
+    onConsent,
+}) => {
     const [acceptTerms, setAcceptTerms] = useState(false);
 
     useEffect(() => {
@@ -325,12 +280,10 @@ function EnableFaceSearch({ open, onClose, enableFaceSearch, onRootClose }) {
     };
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
+        if (reason == "backdropClick") handleRootClose();
+        else onClose();
     };
+
     return (
         <EnteDrawer
             transitionDuration={0}
@@ -389,7 +342,7 @@ function EnableFaceSearch({ open, onClose, enableFaceSearch, onRootClose }) {
                             color={"accent"}
                             size="large"
                             disabled={!acceptTerms}
-                            onClick={enableFaceSearch}
+                            onClick={onConsent}
                         >
                             {t("ENABLE_FACE_SEARCH")}
                         </Button>
@@ -405,14 +358,45 @@ function EnableFaceSearch({ open, onClose, enableFaceSearch, onRootClose }) {
             </Stack>
         </EnteDrawer>
     );
+};
+
+interface ManageMLProps {
+    /** `true` if ML is locally paused. */
+    isPaused: boolean;
+    /** Called when the user wants to pause ML. */
+    onPauseML: () => void;
+    /** Called when the user wants to resume ML. */
+    onResumeML: () => void;
+    /** Called when the user wants to disable ML. */
+    onDisableML: () => void;
+    /** Subset of appContext. */
+    setDialogMessage: NewAppContextPhotos["setDialogMessage"];
 }
 
-function ManageMLSearch({
-    onClose,
-    disableMlSearch,
-    handleDisableFaceSearch,
-    onRootClose,
-}) {
+const ManageML: React.FC<ManageMLProps> = ({
+    isPaused,
+    onPauseML,
+    onResumeML,
+    onDisableML,
+    setDialogMessage,
+}) => {
+    const confirmDisableML = () => {
+        setDialogMessage({
+            title: t("DISABLE_FACE_SEARCH_TITLE"),
+            content: (
+                <Typography>
+                    <Trans i18nKey={"DISABLE_FACE_SEARCH_DESCRIPTION"} />
+                </Typography>
+            ),
+            close: { text: t("CANCEL") },
+            proceed: {
+                variant: "primary",
+                text: t("DISABLE_FACE_SEARCH"),
+                action: onDisableML,
+            },
+        });
+    };
+
     // TODO-ML:
     // const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
     //     indexed: 0,
@@ -461,28 +445,28 @@ function ManageMLSearch({
     )*/
 
     return (
-        <Stack spacing={"4px"} py={"12px"}>
-            <Titlebar
-                onClose={onClose}
-                title={t("ML_SEARCH")}
-                onRootClose={onRootClose}
-            />
-            <Box px={"16px"}>
-                <Stack py={"20px"} spacing={"24px"}>
-                    <MenuItemGroup>
+        <Box px={"16px"}>
+            <Stack py={"20px"} spacing={"24px"}>
+                <MenuItemGroup>
+                    {isPaused ? (
                         <EnteMenuItem
-                            onClick={disableMlSearch}
+                            onClick={onResumeML}
+                            label={pt("Resume on this device")}
+                        />
+                    ) : (
+                        <EnteMenuItem
+                            onClick={onPauseML}
                             label={t("DISABLE_BETA")}
                         />
-                    </MenuItemGroup>
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            onClick={handleDisableFaceSearch}
-                            label={t("DISABLE_FACE_SEARCH")}
-                        />
-                    </MenuItemGroup>
-                </Stack>
-            </Box>
-        </Stack>
+                    )}
+                </MenuItemGroup>
+                <MenuItemGroup>
+                    <EnteMenuItem
+                        onClick={confirmDisableML}
+                        label={t("DISABLE_FACE_SEARCH")}
+                    />
+                </MenuItemGroup>
+            </Stack>
+        </Box>
     );
-}
+};
