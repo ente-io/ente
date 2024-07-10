@@ -3,7 +3,9 @@ import { apiURL } from "@/next/origins";
 import { z } from "zod";
 
 /**
- * Fetch the value of a remote value for the given {@link key}.
+ * Fetch the value for the given {@link key} from remote store.
+ *
+ * If the key is not present in the remote store, return `undefined`.
  */
 export const getRemoteValue = async (key: string) => {
     const url = await apiURL("/remote-store");
@@ -12,8 +14,30 @@ export const getRemoteValue = async (key: string) => {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    const data = GetRemoteStoreResponse.parse(await res.json());
-    return data?.value;
+    return GetRemoteStoreResponse.parse(await res.json())?.value;
 };
 
 const GetRemoteStoreResponse = z.object({ value: z.string() }).nullable();
+
+/**
+ * Convenience wrapper over {@link getRemoteValue} that returns booleans.
+ */
+export const getRemoteFlag = async (key: string) =>
+    (await getRemoteValue(key)) == "true";
+
+/**
+ * Update or insert {@link value} for the given {@link key} into remote store.
+ */
+export const updateRemoteValue = async (key: string, value: string) =>
+    ensureOk(
+        await fetch(await apiURL("/remote-store/update"), {
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ key, value }),
+        }),
+    );
+
+/**
+ * Convenience wrapper over {@link updateRemoteValue} that sets booleans.
+ */
+export const updateRemoteFlag = (key: string, value: boolean) =>
+    updateRemoteValue(key, JSON.stringify(value));

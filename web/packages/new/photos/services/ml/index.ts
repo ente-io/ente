@@ -14,6 +14,7 @@ import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { proxy } from "comlink";
+import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
@@ -184,6 +185,17 @@ const setIsMLEnabledLocally = (enabled: boolean) =>
     enabled
         ? localStorage.setItem("faceIndexingEnabled", "1")
         : localStorage.removeItem("faceIndexingEnabled");
+
+/**
+ * For historical reasons, this is called "faceSearchEnabled" (it started off as
+ * a flag to ensure we have taken the face recognition consent from the user).
+ *
+ * Now it tracks the status of ML in general (which includes faces + consent).
+ */
+const mlRemoteKey = "faceSearchEnabled";
+const getIsMLEnabledRemote = () => getRemoteFlag(mlRemoteKey);
+const updateIsMLEnabledRemote = (enabled: boolean) =>
+    updateRemoteFlag(mlRemoteKey, enabled);
 
 /**
  * Trigger a "sync", whatever that means for the ML subsystem.
