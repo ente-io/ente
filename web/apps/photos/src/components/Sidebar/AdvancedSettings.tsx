@@ -1,3 +1,4 @@
+import { MLSearchSettings } from "@/new/photos/components/MLSettings";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
@@ -5,7 +6,6 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
-import { MLSearchSettings } from "components/ml/MLSearchSettings";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
