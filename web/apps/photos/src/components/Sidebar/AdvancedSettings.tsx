@@ -1,23 +1,14 @@
-import { MLSettings } from "@/new/photos/components/MLSettings";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import { pt } from "@/next/i18n";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import ChevronRight from "@mui/icons-material/ChevronRight";
-import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const appContext = useContext(AppContext);
-    const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
-
-    const openMlSearchSettings = () => setMlSearchSettingsView(true);
-    const closeMlSearchSettings = () => setMlSearchSettingsView(false);
 
     const handleRootClose = () => {
         onClose();
@@ -35,18 +26,6 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const toggleCFProxy = () => {
         appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
     };
-
-    // TODO-ML:
-    // const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
-    //     indexed: 0,
-    //     pending: 0,
-    // });
-
-    // useEffect(() => {
-    //     clipService.setOnUpdateHandler(setIndexingStatus);
-    //     clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
-    //     return () => clipService.setOnUpdateHandler(undefined);
-    // }, []);
 
     return (
         <EnteDrawer
@@ -66,26 +45,6 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                 <Box px={"8px"}>
                     <Stack py="20px" spacing="24px">
-                        {isElectron() && (
-                            <Box>
-                                <MenuSectionTitle
-                                    title={t("LABS")}
-                                    icon={<ScienceIcon />}
-                                />
-                                <MenuItemGroup>
-                                    <EnteMenuItem
-                                        endIcon={<ChevronRight />}
-                                        onClick={openMlSearchSettings}
-                                        label={pt("ML search")}
-                                    />
-                                </MenuItemGroup>
-                                <MenuSectionTitle
-                                    title={pt(
-                                        "Face recognition, magic search and more",
-                                    )}
-                                />
-                            </Box>
-                        )}
                         <Box>
                             <MenuItemGroup>
                                 <EnteMenuItem
@@ -99,51 +58,9 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                 title={t("FASTER_UPLOAD_DESCRIPTION")}
                             />
                         </Box>
-
-                        {/* TODO-ML: isElectron() && (
-                            <Box>
-                                <MenuSectionTitle
-                                    title={t("MAGIC_SEARCH_STATUS")}
-                                />
-                                <Stack py={"12px"} px={"12px"} spacing={"24px"}>
-                                    <VerticallyCenteredFlex
-                                        justifyContent="space-between"
-                                        alignItems={"center"}
-                                    >
-                                        <Typography>
-                                            {t("INDEXED_ITEMS")}
-                                        </Typography>
-                                        <Typography>
-                                            {formatNumber(
-                                                indexingStatus.indexed,
-                                            )}
-                                        </Typography>
-                                    </VerticallyCenteredFlex>
-                                    <VerticallyCenteredFlex
-                                        justifyContent="space-between"
-                                        alignItems={"center"}
-                                    >
-                                        <Typography>
-                                            {t("PENDING_ITEMS")}
-                                        </Typography>
-                                        <Typography>
-                                            {formatNumber(
-                                                indexingStatus.pending,
-                                            )}
-                                        </Typography>
-                                    </VerticallyCenteredFlex>
-                                </Stack>
-                            </Box>
-                        )*/}
                     </Stack>
                 </Box>
             </Stack>
-            <MLSettings
-                open={mlSearchSettingsView}
-                onClose={closeMlSearchSettings}
-                onRootClose={handleRootClose}
-                appContext={appContext}
-            />
         </EnteDrawer>
     );
 }

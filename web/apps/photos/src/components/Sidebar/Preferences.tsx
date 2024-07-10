@@ -1,23 +1,35 @@
+import { MLSettings } from "@/new/photos/components/MLSettings";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
+import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     type SupportedLocale,
 } from "@/next/i18n";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
+import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import { useState } from "react";
+import isElectron from "is-electron";
+import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
 import AdvancedSettings from "./AdvancedSettings";
 import MapSettings from "./MapSetting";
 
 export default function Preferences({ open, onClose, onRootClose }) {
+    const appContext = useContext(AppContext);
+
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
     const [mapSettingsView, setMapSettingsView] = useState(false);
+    const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
+
+    const openMlSearchSettings = () => setMlSearchSettingsView(true);
+    const closeMlSearchSettings = () => setMlSearchSettingsView(false);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
@@ -66,17 +78,43 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             endIcon={<ChevronRight />}
                             label={t("ADVANCED")}
                         />
+                        {isElectron() && (
+                            <Box>
+                                <MenuSectionTitle
+                                    title={t("LABS")}
+                                    icon={<ScienceIcon />}
+                                />
+                                <MenuItemGroup>
+                                    <EnteMenuItem
+                                        endIcon={<ChevronRight />}
+                                        onClick={openMlSearchSettings}
+                                        label={pt("ML search")}
+                                    />
+                                </MenuItemGroup>
+                                <MenuSectionTitle
+                                    title={pt(
+                                        "Face recognition, magic search and more",
+                                    )}
+                                />
+                            </Box>
+                        )}
                     </Stack>
                 </Box>
             </Stack>
-            <AdvancedSettings
-                open={advancedSettingsView}
-                onClose={closeAdvancedSettings}
-                onRootClose={onRootClose}
+            <MLSettings
+                open={mlSearchSettingsView}
+                onClose={closeMlSearchSettings}
+                onRootClose={handleRootClose}
+                appContext={appContext}
             />
             <MapSettings
                 open={mapSettingsView}
                 onClose={closeMapSettings}
+                onRootClose={onRootClose}
+            />
+            <AdvancedSettings
+                open={advancedSettingsView}
+                onClose={closeAdvancedSettings}
                 onRootClose={onRootClose}
             />
         </EnteDrawer>

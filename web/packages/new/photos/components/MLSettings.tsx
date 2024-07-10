@@ -138,6 +138,53 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         }
     };
 
+    // TODO-ML:
+    // const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
+    //     indexed: 0,
+    //     pending: 0,
+    // });
+
+    // useEffect(() => {
+    //     clipService.setOnUpdateHandler(setIndexingStatus);
+    //     clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
+    //     return () => clipService.setOnUpdateHandler(undefined);
+    // }, []);
+    /* TODO-ML: isElectron() && (
+        <Box>
+            <MenuSectionTitle
+                title={t("MAGIC_SEARCH_STATUS")}
+            />
+            <Stack py={"12px"} px={"12px"} spacing={"24px"}>
+                <VerticallyCenteredFlex
+                    justifyContent="space-between"
+                    alignItems={"center"}
+                >
+                    <Typography>
+                        {t("INDEXED_ITEMS")}
+                    </Typography>
+                    <Typography>
+                        {formatNumber(
+                            indexingStatus.indexed,
+                        )}
+                    </Typography>
+                </VerticallyCenteredFlex>
+                <VerticallyCenteredFlex
+                    justifyContent="space-between"
+                    alignItems={"center"}
+                >
+                    <Typography>
+                        {t("PENDING_ITEMS")}
+                    </Typography>
+                    <Typography>
+                        {formatNumber(
+                            indexingStatus.pending,
+                        )}
+                    </Typography>
+                </VerticallyCenteredFlex>
+            </Stack>
+        </Box>
+    )*/
+
     return (
         <Box>
             <EnteDrawer
