@@ -26,10 +26,7 @@ export default function Preferences({ open, onClose, onRootClose }) {
 
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
     const [mapSettingsView, setMapSettingsView] = useState(false);
-    const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
-
-    const openMlSearchSettings = () => setMlSearchSettingsView(true);
-    const closeMlSearchSettings = () => setMlSearchSettingsView(false);
+    const [openMLSettings, setOpenMLSettings] = useState(false);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
@@ -87,7 +84,7 @@ export default function Preferences({ open, onClose, onRootClose }) {
                                 <MenuItemGroup>
                                     <EnteMenuItem
                                         endIcon={<ChevronRight />}
-                                        onClick={openMlSearchSettings}
+                                        onClick={() => setOpenMLSettings(true)}
                                         label={pt("ML search")}
                                     />
                                 </MenuItemGroup>
@@ -102,8 +99,8 @@ export default function Preferences({ open, onClose, onRootClose }) {
                 </Box>
             </Stack>
             <MLSettings
-                open={mlSearchSettingsView}
-                onClose={closeMlSearchSettings}
+                open={openMLSettings}
+                onClose={() => setOpenMLSettings(false)}
                 onRootClose={handleRootClose}
                 appContext={appContext}
             />

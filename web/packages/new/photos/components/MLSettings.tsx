@@ -28,7 +28,7 @@ import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
 
 interface MLSettingsProps {
-    /** If `true`, then the drawer page is shown. */
+    /** If `true`, then this drawer page is shown. */
     open: boolean;
     /** Called when the user wants to go back from this drawer page. */
     onClose: () => void;
@@ -52,6 +52,19 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     } = appContext;
 
     const [enableFaceSearchView, setEnableFaceSearchView] = useState(false);
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
+            handleRootClose();
+        } else {
+            onClose();
+        }
+    };
 
     const openEnableFaceSearch = () => {
         setEnableFaceSearchView(true);
@@ -123,19 +136,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 action: disableFaceSearch,
             },
         });
-    };
-
-    const handleRootClose = () => {
-        onClose();
-        onRootClose();
-    };
-
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
     };
 
     // TODO-ML:
