@@ -29,10 +29,15 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
-
+  late String autoLockTime;
   @override
   void initState() {
     super.initState();
+    autoLockTime = _formatTime(
+      Duration(
+        milliseconds: _lockscreenSetting.getAutoLockTime(),
+      ),
+    );
     _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
@@ -100,7 +105,20 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   }
 
   Future<void> _onAutoLock() async {
-    routeToPage(context, LockScreenAutoLock());
+    await routeToPage(
+      context,
+      const LockScreenAutoLock(),
+    ).then(
+      (value) {
+        setState(() {
+          autoLockTime = _formatTime(
+            Duration(
+              milliseconds: _lockscreenSetting.getAutoLockTime(),
+            ),
+          );
+        });
+      },
+    );
   }
 
   String _formatTime(Duration duration) {
@@ -225,6 +243,19 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         isPasswordEnabled ? Icons.check : null,
                                     trailingIconColor: colorTheme.textBase,
                                     onTap: () => _passwordLock(),
+                                  ),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: "Auto-lock",
+                                      subTitle: autoLockTime,
+                                    ),
+                                    singleBorderRadius: 8,
+                                    alignCaptionedTextToLeft: true,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    onTap: () => _onAutoLock(),
                                   ),
                                 ],
                               )
