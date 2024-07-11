@@ -26,17 +26,20 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/magic_cache_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
@@ -172,6 +175,15 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getMagicSectionResutls() async {
+    if (LocalSettings.instance.hasEnabledMagicSearch() &&
+        flagService.internalUser) {
+      return MagicCacheService.instance.getMagicGenericSearchResult();
+    } else {
+      return <GenericSearchResult>[];
+    }
   }
 
   Future<List<GenericSearchResult>> getRandomMomentsSearchResults(

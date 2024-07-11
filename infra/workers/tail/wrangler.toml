@@ -1,0 +1,11 @@
+name = "tail"
+main = "src/index.ts"
+compatibility_date = "2024-06-14"
+
+# Disable the default route, this worker does not handle fetch.
+workers_dev = false
+
+[vars]
+# Added as a secret via the Cloudflare dashboard
+# LOKI_PUSH_URL = "https://${loki_base_url}>/loki/api/v1/push"
+# LOKI_AUTH = "${btoa(user:pass)}"

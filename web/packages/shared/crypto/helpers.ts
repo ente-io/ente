@@ -1,6 +1,11 @@
+import { setRecoveryKey } from "@/accounts/api/user";
 import log from "@/next/log";
-import { setRecoveryKey } from "@ente/accounts/api/user";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
@@ -35,7 +40,7 @@ export async function decryptAndStoreToken(
             urlUnsafeB64DecryptedToken,
         );
         decryptedToken = await cryptoWorker.toB64URLSafe(decryptedTokenBytes);
-        setData(LS_KEYS.USER, {
+        await setLSUser({
             ...user,
             token: decryptedToken,
             encryptedToken: null,

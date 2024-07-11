@@ -346,7 +346,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
       width: dimensions?['width'],
     );
   } catch (e, s) {
-    _logger.severe("failed to generate thumbnail", e, s);
+    _logger.warning("failed to generate thumbnail", e, s);
     throw InvalidFileError(
       "thumbnail failed for appCache fileType: ${file.fileType.toString()}",
       InvalidReason.thumbnailMissing,

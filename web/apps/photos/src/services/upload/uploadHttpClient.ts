@@ -1,14 +1,11 @@
+import { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
+import { apiURL, uploaderOrigin } from "@/next/origins";
 import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { EnteFile } from "types/file";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
-
-const ENDPOINT = getEndpoint();
-const UPLOAD_ENDPOINT = getUploadEndpoint();
 
 const MAX_URL_REQUESTS = 50;
 
@@ -21,9 +18,10 @@ class UploadHttpClient {
             if (!token) {
                 return;
             }
+            const url = await apiURL("/files");
             const response = await retryHTTPCall(
                 () =>
-                    HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
+                    HTTPService.post(url, uploadFile, null, {
                         "X-Auth-Token": token,
                     }),
                 handleUploadError,
@@ -44,7 +42,7 @@ class UploadHttpClient {
                         return;
                     }
                     this.uploadURLFetchInProgress = HTTPService.get(
-                        `${ENDPOINT}/files/upload-urls`,
+                        await apiURL("/files/upload-urls"),
                         {
                             count: Math.min(MAX_URL_REQUESTS, count * 2),
                         },
@@ -74,7 +72,7 @@ class UploadHttpClient {
                 return;
             }
             const response = await HTTPService.get(
-                `${ENDPOINT}/files/multipart-upload-urls`,
+                await apiURL("/files/multipart-upload-urls"),
                 {
                     count,
                 },
@@ -120,9 +118,10 @@ class UploadHttpClient {
         progressTracker,
     ): Promise<string> {
         try {
+            const origin = await uploaderOrigin();
             await retryHTTPCall(() =>
                 HTTPService.put(
-                    `${UPLOAD_ENDPOINT}/file-upload`,
+                    `${origin}/file-upload`,
                     file,
                     null,
                     {
@@ -176,9 +175,10 @@ class UploadHttpClient {
         progressTracker,
     ) {
         try {
+            const origin = await uploaderOrigin();
             const response = await retryHTTPCall(async () => {
                 const resp = await HTTPService.put(
-                    `${UPLOAD_ENDPOINT}/multipart-upload`,
+                    `${origin}/multipart-upload`,
                     filePart,
                     null,
                     {
@@ -217,9 +217,10 @@ class UploadHttpClient {
 
     async completeMultipartUploadV2(completeURL: string, reqBody: any) {
         try {
+            const origin = await uploaderOrigin();
             await retryHTTPCall(() =>
                 HTTPService.post(
-                    `${UPLOAD_ENDPOINT}/multipart-complete`,
+                    `${origin}/multipart-complete`,
                     reqBody,
                     null,
                     {

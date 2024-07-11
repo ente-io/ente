@@ -34,6 +34,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,7 +60,7 @@ class Configuration {
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
   // should be kept on while the app is in foreground.
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
-  static const keyShouldShowLockScreen = "should_show_lock_screen";
+  static const keyShowSystemLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
@@ -72,7 +73,6 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
-
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -83,7 +83,6 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
-
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
   // on appSupport directory which OS won't clean up automatically
@@ -216,8 +215,9 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
-    FileUploader.instance.clearCachedUploadURLs();
     if (!autoLogout) {
+      // Following services won't be initialized if it's the case of autoLogout
+      FileUploader.instance.clearCachedUploadURLs();
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
       MemoriesService.instance.clearCache();
@@ -620,16 +620,22 @@ class Configuration {
     }
   }
 
-  bool shouldShowLockScreen() {
-    if (_preferences.containsKey(keyShouldShowLockScreen)) {
-      return _preferences.getBool(keyShouldShowLockScreen)!;
+  Future<bool> shouldShowLockScreen() async {
+    final bool isPin = await LockScreenSettings.instance.isPinSet();
+    final bool isPass = await LockScreenSettings.instance.isPasswordSet();
+    return isPin || isPass || shouldShowSystemLockScreen();
+  }
+
+  bool shouldShowSystemLockScreen() {
+    if (_preferences.containsKey(keyShowSystemLockScreen)) {
+      return _preferences.getBool(keyShowSystemLockScreen)!;
     } else {
       return false;
     }
   }
 
-  Future<void> setShouldShowLockScreen(bool value) {
-    return _preferences.setBool(keyShouldShowLockScreen, value);
+  Future<void> setSystemLockScreen(bool value) {
+    return _preferences.setBool(keyShowSystemLockScreen, value);
   }
 
   void setVolatilePassword(String volatilePassword) {

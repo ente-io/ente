@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:io";
 
 import 'package:fast_base58/fast_base58.dart';
 import "package:flutter/cupertino.dart";
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
-import "package:path_provider/path_provider.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -78,7 +76,7 @@ class _FileSelectionActionsWidgetState
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
   final ScreenshotController screenshotController = ScreenshotController();
-  late String? placeholderPath;
+  late Uint8List placeholderBytes;
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -139,24 +137,7 @@ class _FileSelectionActionsWidgetState
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-    if (widget.type == GalleryType.peopleTag && widget.person != null) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.remove_circle_outline,
-          labelText: 'Not ${widget.person!.data.name}?',
-          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
-        ),
-      );
-      if (ownedFilesCount == 1) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.image_outlined,
-            labelText: 'Use as cover',
-            onTap: anyUploadedFiles ? _setPersonCover : null,
-          ),
-        );
-      }
-    }
+
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
         items.add(
@@ -174,6 +155,24 @@ class _FileSelectionActionsWidgetState
             onTap: anyUploadedFiles ? _onSendLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
             key: sendLinkButtonKey,
+          ),
+        );
+      }
+    }
+    if (widget.type == GalleryType.peopleTag && widget.person != null) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.remove_circle_outline,
+          labelText: S.of(context).notPersonLabel(widget.person!.data.name),
+          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
+        ),
+      );
+      if (ownedFilesCount == 1) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.image_outlined,
+            labelText: S.of(context).useAsCover,
+            onTap: anyUploadedFiles ? _setPersonCover : null,
           ),
         );
       }
@@ -610,40 +609,20 @@ class _FileSelectionActionsWidgetState
     }
   }
 
-  Future<String> saveImage(Uint8List bytes) async {
-    String path = "";
-    try {
-      final Directory root = await getTemporaryDirectory();
-      final String directoryPath = '${root.path}/enteTempFiles';
-      final DateTime timeStamp = DateTime.now();
-      await Directory(directoryPath).create(recursive: true);
-      final String filePath = '$directoryPath/$timeStamp.jpg';
-      final file = await File(filePath).writeAsBytes(bytes);
-      path = file.path;
-    } catch (e) {
-      _logger.severe("Failed to save placeholder image", e);
-    }
-    return path;
-  }
-
-  Future<String?> _createPlaceholder(
+  Future<Uint8List> _createPlaceholder(
     List<EnteFile> ownedSelectedFiles,
   ) async {
     final Widget imageWidget = LinkPlaceholder(
       files: ownedSelectedFiles,
     );
-    await Future.delayed(const Duration(milliseconds: 100));
-    final double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
     final bytesOfImageToWidget = await screenshotController.captureFromWidget(
       imageWidget,
       pixelRatio: pixelRatio,
       targetSize: MediaQuery.sizeOf(context),
-      delay: const Duration(milliseconds: 100),
+      delay: const Duration(milliseconds: 300),
     );
-
-    final String onCreatedPlaceholderPath =
-        await saveImage(bytesOfImageToWidget);
-    return onCreatedPlaceholderPath;
+    return bytesOfImageToWidget;
   }
 
   Future<void> _onSendLinkTapped() async {
@@ -664,7 +643,7 @@ class _FileSelectionActionsWidgetState
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
-    placeholderPath = await _createPlaceholder(ownedSelectedFiles);
+    placeholderBytes = await _createPlaceholder(ownedSelectedFiles);
     await dialog.hide();
     await _sendLink();
     widget.selectedFiles.clearAll();
@@ -717,7 +696,6 @@ class _FileSelectionActionsWidgetState
           widget.person!,
         );
       }
-      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {
@@ -760,7 +738,6 @@ class _FileSelectionActionsWidgetState
           widget.clusterID!,
         );
       }
-      Bus.instance.fire(PeopleChangedEvent());
     }
     widget.selectedFiles.clearAll();
     if (mounted) {
@@ -778,23 +755,11 @@ class _FileSelectionActionsWidgetState
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       unawaited(Clipboard.setData(ClipboardData(text: url)));
       await shareImageAndUrl(
-        placeholderPath!,
+        placeholderBytes,
         url,
         context: context,
         key: sendLinkButtonKey,
       );
-      if (placeholderPath != null) {
-        final file = File(placeholderPath!);
-        try {
-          if (file.existsSync()) {
-            file.deleteSync();
-          }
-        } catch (e) {
-          _logger.warning("Failed to delete the file: $e");
-        } finally {
-          placeholderPath = null;
-        }
-      }
     }
   }
 

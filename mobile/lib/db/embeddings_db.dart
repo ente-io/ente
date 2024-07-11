@@ -123,7 +123,9 @@ class EmbeddingsDB {
   List<Embedding> _convertToEmbeddings(List<Map<String, dynamic>> results) {
     final List<Embedding> embeddings = [];
     for (final result in results) {
-      embeddings.add(_getEmbeddingFromRow(result));
+      final embedding = _getEmbeddingFromRow(result);
+      if (embedding.isEmpty) continue;
+      embeddings.add(embedding);
     }
     return embeddings;
   }

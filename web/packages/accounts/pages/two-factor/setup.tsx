@@ -1,15 +1,15 @@
-import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
-import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
+import { enableTwoFactor, setupTwoFactor } from "@/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
-} from "@ente/accounts/components/two-factor/VerifyForm";
-import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
-import type { TwoFactorSecret } from "@ente/accounts/types/user";
+} from "@/accounts/components/two-factor/VerifyForm";
+import { TwoFactorSetup } from "@/accounts/components/two-factor/setup";
+import type { TwoFactorSecret } from "@/accounts/types/user";
+import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Box, CardContent, Typography } from "@mui/material";
 import Card from "@mui/material/Card";
 import { t } from "i18next";
@@ -23,9 +23,7 @@ export enum SetupMode {
     MANUAL_CODE,
 }
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
         TwoFactorSecret | undefined
     >();
@@ -56,11 +54,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         await markSuccessful();
-        setData(LS_KEYS.USER, {
+        await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(appHomeRoute(appName));
+        router.push(appHomeRoute);
     };
 
     return (

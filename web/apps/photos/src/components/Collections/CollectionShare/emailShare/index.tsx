@@ -64,7 +64,7 @@ export default function EmailShare({
                                 onClick={openManageEmailShare}
                                 label={
                                     collection.sharees.length === 1
-                                        ? t(collection.sharees[0]?.email)
+                                        ? collection.sharees[0]?.email
                                         : null
                                 }
                                 endIcon={<ChevronRight />}

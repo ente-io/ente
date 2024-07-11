@@ -72,15 +72,26 @@ const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
 const saveEncryptionKey = (encryptionKey: string) =>
     ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
 
-const onMainWindowFocus = (cb?: () => void) => {
+const lastShownChangelogVersion = () =>
+    ipcRenderer.invoke("lastShownChangelogVersion");
+
+const setLastShownChangelogVersion = (version: number) =>
+    ipcRenderer.invoke("setLastShownChangelogVersion", version);
+
+const onMainWindowFocus = (cb: (() => void) | undefined) => {
     ipcRenderer.removeAllListeners("mainWindowFocus");
     if (cb) ipcRenderer.on("mainWindowFocus", cb);
+};
+
+const onOpenURL = (cb: ((url: string) => void) | undefined) => {
+    ipcRenderer.removeAllListeners("openURL");
+    if (cb) ipcRenderer.on("openURL", (_, url: string) => cb(url));
 };
 
 // - App update
 
 const onAppUpdateAvailable = (
-    cb?: ((update: AppUpdate) => void) | undefined,
+    cb: ((update: AppUpdate) => void) | undefined,
 ) => {
     ipcRenderer.removeAllListeners("appUpdateAvailable");
     if (cb) {
@@ -152,8 +163,8 @@ const ffmpegExec = (
 
 // - ML
 
-const computeCLIPImageEmbedding = (jpegImageData: Uint8Array) =>
-    ipcRenderer.invoke("computeCLIPImageEmbedding", jpegImageData);
+const computeCLIPImageEmbedding = (input: Float32Array) =>
+    ipcRenderer.invoke("computeCLIPImageEmbedding", input);
 
 const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
     ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);
@@ -205,8 +216,8 @@ const watchOnRemoveDir = (f: (path: string, watch: FolderWatch) => void) => {
     );
 };
 
-const watchFindFiles = (folderPath: string) =>
-    ipcRenderer.invoke("watchFindFiles", folderPath);
+const fsFindFiles = (folderPath: string) =>
+    ipcRenderer.invoke("fsFindFiles", folderPath);
 
 const watchRemoveListeners = () => {
     ipcRenderer.removeAllListeners("watchAddFile");
@@ -306,7 +317,10 @@ contextBridge.exposeInMainWorld("electron", {
     logout,
     encryptionKey,
     saveEncryptionKey,
+    lastShownChangelogVersion,
+    setLastShownChangelogVersion,
     onMainWindowFocus,
+    onOpenURL,
 
     // - App update
 
@@ -326,6 +340,7 @@ contextBridge.exposeInMainWorld("electron", {
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
         isDir: fsIsDir,
+        findFiles: fsFindFiles,
     },
 
     // - Conversion
@@ -352,7 +367,6 @@ contextBridge.exposeInMainWorld("electron", {
         onAddFile: watchOnAddFile,
         onRemoveFile: watchOnRemoveFile,
         onRemoveDir: watchOnRemoveDir,
-        findFiles: watchFindFiles,
     },
 
     // - Upload

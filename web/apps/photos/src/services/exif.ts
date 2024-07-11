@@ -1,10 +1,13 @@
 import { type FileTypeInfo } from "@/media/file-type";
+import { NULL_LOCATION } from "@/new/photos/services/upload/types";
+import type {
+    Location,
+    ParsedExtractedMetadata,
+} from "@/new/photos/types/metadata";
 import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
-import { NULL_LOCATION } from "constants/upload";
 import exifr from "exifr";
 import piexif from "piexifjs";
-import type { Location, ParsedExtractedMetadata } from "types/metadata";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{

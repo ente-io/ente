@@ -1,6 +1,11 @@
 // TODO: This file belongs to the accounts package
-import { z } from "zod";
 
+import { ensure } from "@/utils/ensure";
+import { z } from "zod";
+import { getKV } from "./kv";
+
+// TODO: During login the only field present is email. Which makes this
+// optionality indicated by these types incorrect.
 const LocalUser = z.object({
     /** The user's ID. */
     id: z.number(),
@@ -9,7 +14,8 @@ const LocalUser = z.object({
     /**
      * The user's (plaintext) auth token.
      *
-     * It is used for making API calls on their behalf.
+     * It is used for making API calls on their behalf, by passing this token as
+     * the value of the X-Auth-Token header in the HTTP request.
      */
     token: z.string(),
 });
@@ -42,10 +48,13 @@ export const ensureLocalUser = (): LocalUser => {
 /**
  * Return the user's auth token, or throw an error.
  *
- * The user's auth token is stored in local storage after they have successfully
- * logged in. This function returns that saved auth token.
+ * The user's auth token is stored in KV DB after they have successfully logged
+ * in. This function returns that saved auth token.
  *
  * If no such token is found (which should only happen if the user is not logged
  * in), then it throws an error.
+ *
+ * The underlying data is stored in IndexedDB, and can be accessed from web
+ * workers.
  */
-export const ensureAuthToken = (): string => ensureLocalUser().token;
+export const ensureAuthToken = async () => ensure(await getKV("token"));

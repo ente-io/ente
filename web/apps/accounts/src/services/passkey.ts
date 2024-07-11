@@ -1,36 +1,32 @@
+import { clientPackageName } from "@/next/app";
 import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
+import { clientPackageHeader, ensureOk, HTTPError } from "@/next/http";
+import { apiURL } from "@/next/origins";
+import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
+    toB64URLSafeNoPaddingString,
 } from "@ente/shared/crypto/internal/libsodium";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { apiOrigin, getEndpoint } from "@ente/shared/network/api";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
 
-const ENDPOINT = getEndpoint();
+/** Return true if the user's browser supports WebAuthn (Passkeys). */
+export const isWebAuthnSupported = () => !!navigator.credentials;
 
 /**
  * Variant of {@link authenticatedRequestHeaders} but for authenticated requests
  * made by the accounts app.
  *
- * We cannot use {@link authenticatedRequestHeaders} directly because the
- * accounts app does not save a full user and instead only saves the user's
- * token (and that token too is scoped to the accounts APIs).
+ * @param token The accounts specific auth token to use for making API requests.
  */
-const accountsAuthenticatedRequestHeaders = (): Record<string, string> => {
-    const token = getToken();
-    if (!token) throw new Error("Missing accounts token");
-    const headers: Record<string, string> = { "X-Auth-Token": token };
-    const clientPackage = nullToUndefined(
-        localStorage.getItem("clientPackage"),
-    );
-    if (clientPackage) headers["X-Client-Package"] = clientPackage;
-    return headers;
-};
+const accountsAuthenticatedRequestHeaders = (
+    token: string,
+): Record<string, string> => ({
+    "X-Auth-Token": token,
+    "X-Client-Package": clientPackageName,
+});
 
 const Passkey = z.object({
     /** A unique ID for the passkey */
@@ -49,72 +45,87 @@ const Passkey = z.object({
 export type Passkey = z.infer<typeof Passkey>;
 
 const GetPasskeysResponse = z.object({
-    passkeys: z.array(Passkey),
+    passkeys: z.array(Passkey).nullish().transform(nullToUndefined),
 });
 
 /**
  * Fetch the existing passkeys for the user.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @returns An array of {@link Passkey}s. The array will be empty if the user
  * has no passkeys.
  */
-export const getPasskeys = async () => {
-    const url = `${apiOrigin()}/passkeys`;
-    const res = await fetch(url, {
-        headers: accountsAuthenticatedRequestHeaders(),
+export const getPasskeys = async (token: string) => {
+    const res = await fetch(await apiURL("/passkeys"), {
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
-    return passkeys;
+    return passkeys ?? [];
 };
 
 /**
  * Rename one of the user's existing passkey with the given {@link id}.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @param id The `id` of the existing passkey to rename.
  *
  * @param name The new name (a.k.a. "friendly name").
  */
-export const renamePasskey = async (id: string, name: string) => {
+export const renamePasskey = async (
+    token: string,
+    id: string,
+    name: string,
+) => {
     const params = new URLSearchParams({ friendlyName: name });
-    const url = `${apiOrigin()}/passkeys/${id}`;
+    const url = await apiURL(`/passkeys/${id}`);
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "PATCH",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
  * Delete one of the user's existing passkeys.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @param id The `id` of the existing passkey to delete.
  */
-export const deletePasskey = async (id: string) => {
-    const url = `${apiOrigin()}/passkeys/${id}`;
-    const res = await fetch(url, {
+export const deletePasskey = async (token: string, id: string) => {
+    const res = await fetch(await apiURL(`/passkeys/${id}`), {
         method: "DELETE",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
  * Add a new passkey as the second factor to the user's account.
  *
+ * @param token The accounts specific auth token to use for making API requests.
+ *
  * @param name An arbitrary name that the user wishes to label this passkey with
  * (a.k.a. "friendly name").
  */
-export const registerPasskey = async (name: string) => {
+export const registerPasskey = async (token: string, name: string) => {
     // Get options (and sessionID) from the backend.
-    const { sessionID, options } = await beginPasskeyRegistration();
+    const { sessionID, options } = await beginPasskeyRegistration(token);
 
     // Ask the browser to new (public key) credentials using these options.
     const credential = ensure(await navigator.credentials.create(options));
 
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.
-    await finishPasskeyRegistration(name, sessionID, credential);
+    await finishPasskeyRegistration({
+        token,
+        friendlyName: name,
+        sessionID,
+        credential,
+    });
 };
 
 interface BeginPasskeyRegistrationResponse {
@@ -134,12 +145,12 @@ interface BeginPasskeyRegistrationResponse {
     };
 }
 
-const beginPasskeyRegistration = async () => {
-    const url = `${apiOrigin()}/passkeys/registration/begin`;
-    const res = await fetch(url, {
-        headers: accountsAuthenticatedRequestHeaders(),
+const beginPasskeyRegistration = async (token: string) => {
+    const res = await fetch(await apiURL("/passkeys/registration/begin"), {
+        method: "POST",
+        headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     // [Note: Converting binary data in WebAuthn API payloads]
     //
@@ -254,11 +265,19 @@ const binaryToServerB64 = async (b: ArrayBuffer) => {
     return b64String as unknown as BufferSource;
 };
 
-const finishPasskeyRegistration = async (
-    sessionID: string,
-    friendlyName: string,
-    credential: Credential,
-) => {
+interface FinishPasskeyRegistrationOptions {
+    token: string;
+    sessionID: string;
+    friendlyName: string;
+    credential: Credential;
+}
+
+const finishPasskeyRegistration = async ({
+    token,
+    sessionID,
+    friendlyName,
+    credential,
+}: FinishPasskeyRegistrationOptions) => {
     const attestationResponse = authenticatorAttestationResponse(credential);
 
     const attestationObject = await binaryToServerB64(
@@ -267,12 +286,13 @@ const finishPasskeyRegistration = async (
     const clientDataJSON = await binaryToServerB64(
         attestationResponse.clientDataJSON,
     );
+    const transports = attestationResponse.getTransports();
 
     const params = new URLSearchParams({ friendlyName, sessionID });
-    const url = `${apiOrigin()}/passkeys/registration/finish`;
+    const url = await apiURL("/passkeys/registration/finish");
     const res = await fetch(`${url}?${params.toString()}`, {
         method: "POST",
-        headers: accountsAuthenticatedRequestHeaders(),
+        headers: accountsAuthenticatedRequestHeaders(token),
         body: JSON.stringify({
             id: credential.id,
             // This is meant to be the ArrayBuffer version of the (base64
@@ -283,10 +303,11 @@ const finishPasskeyRegistration = async (
             response: {
                 attestationObject,
                 clientDataJSON,
+                transports,
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -313,89 +334,266 @@ const authenticatorAttestationResponse = (credential: Credential) => {
 
     return attestationResponse;
 };
+
 /**
  * Return `true` if the given {@link redirectURL} (obtained from the redirect
  * query parameter passed around during the passkey verification flow) is one of
  * the whitelisted URLs that we allow redirecting to on success.
+ *
+ * This check is likely not necessary but we've only kept it just to be on the
+ * safer side. However, this gets in the way of people who are self hosting
+ * Ente. So only do this check if we're running on our production servers (or
+ * localhost).
  */
 export const isWhitelistedRedirect = (redirectURL: URL) =>
+    shouldRestrictToWhitelistedRedirect()
+        ? _isWhitelistedRedirect(redirectURL)
+        : true;
+
+export const shouldRestrictToWhitelistedRedirect = () => {
+    // host includes port, hostname is sans port
+    const hostname = new URL(window.location.origin).hostname;
+    return (
+        hostname.endsWith("localhost") ||
+        hostname.endsWith(".ente.io") ||
+        hostname.endsWith(".ente.sh")
+    );
+};
+
+const _isWhitelistedRedirect = (redirectURL: URL) =>
     (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
     redirectURL.host.endsWith(".ente.io") ||
     redirectURL.host.endsWith(".ente.sh") ||
     redirectURL.protocol == "ente:" ||
-    redirectURL.protocol == "enteauth:";
+    redirectURL.protocol == "enteauth:" ||
+    redirectURL.protocol == "ente-cli:";
 
 export interface BeginPasskeyAuthenticationResponse {
+    /**
+     * An identifier for this authentication ceremony / session.
+     *
+     * This `ceremonySessionID` is subsequently passed to the API when finish
+     * credential creation to tie things together.
+     */
     ceremonySessionID: string;
-    options: Options;
+    /**
+     * Options that should be passed to `navigator.credential.get` to obtain the
+     * attested {@link Credential}.
+     */
+    options: {
+        publicKey: PublicKeyCredentialRequestOptions;
+    };
 }
 
-interface Options {
-    publicKey: PublicKeyCredentialRequestOptions;
-}
+/**
+ * The passkey session which we are trying to start an authentication ceremony
+ * for has already finished elsewhere.
+ */
+export const passkeySessionAlreadyClaimedErrorMessage =
+    "Passkey session already claimed";
 
+/**
+ * Create a authentication ceremony session and return a challenge and a list of
+ * public key credentials that can be used to attest that challenge.
+ *
+ * [Note: WebAuthn authentication flow]
+ *
+ * This is step 1 of passkey authentication flow as described in
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API#authenticating_a_user
+ *
+ * @param passkeySessionID A session created by the requesting app that can be
+ * used to initiate a passkey authentication ceremony on the accounts app.
+ *
+ * @throws In addition to arbitrary errors, it throws errors with the message
+ * {@link passkeySessionAlreadyClaimedErrorMessage}.
+ */
 export const beginPasskeyAuthentication = async (
-    sessionId: string,
+    passkeySessionID: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
-    try {
-        const data = await HTTPService.post(
-            `${ENDPOINT}/users/two-factor/passkeys/begin`,
-            {
-                sessionID: sessionId,
-            },
-        );
-
-        return data.data;
-    } catch (e) {
-        log.error("begin passkey authentication failed", e);
-        throw e;
+    const url = await apiURL("/users/two-factor/passkeys/begin");
+    const res = await fetch(url, {
+        method: "POST",
+        headers: clientPackageHeader(),
+        body: JSON.stringify({ sessionID: passkeySessionID }),
+    });
+    if (!res.ok) {
+        if (res.status == 409)
+            throw new Error(passkeySessionAlreadyClaimedErrorMessage);
+        throw new HTTPError(res);
     }
+
+    // See: [Note: Converting binary data in WebAuthn API payloads]
+
+    const { ceremonySessionID, options } =
+        (await res.json()) as BeginPasskeyAuthenticationResponse;
+
+    options.publicKey.challenge = await serverB64ToBinary(
+        options.publicKey.challenge,
+    );
+
+    for (const credential of options.publicKey.allowCredentials ?? []) {
+        credential.id = await serverB64ToBinary(credential.id);
+    }
+
+    return { ceremonySessionID, options };
 };
 
-export const finishPasskeyAuthentication = async (
-    credential: Credential,
-    sessionId: string,
-    ceremonySessionId: string,
-) => {
-    try {
-        const data = await HTTPService.post(
-            `${ENDPOINT}/users/two-factor/passkeys/finish`,
-            {
-                id: credential.id,
-                rawId: credential.id,
-                type: credential.type,
-                response: {
-                    authenticatorData: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.authenticatorData),
-                    ),
-                    clientDataJSON: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.clientDataJSON),
-                    ),
-                    signature: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.signature),
-                    ),
-                    userHandle: await toB64URLSafeNoPadding(
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        // @ts-ignore
-                        new Uint8Array(credential.response.userHandle),
-                    ),
-                },
-            },
-            {
-                sessionID: sessionId,
-                ceremonySessionID: ceremonySessionId,
-            },
-        );
+/**
+ * Authenticate the user by asking them to use a passkey that the they had
+ * previously created for the current domain to sign a challenge.
+ *
+ * This function implements steps 2 and 3 of the passkey authentication flow.
+ * See [Note: WebAuthn authentication flow].
+ *
+ * @param publicKey A challenge and a list of public key credentials
+ * ("passkeys") that can be used to attest that challenge.
+ *
+ * @returns A {@link PublicKeyCredential} that contains the signed
+ * {@link AuthenticatorAssertionResponse}. Note that the type does not reflect
+ * this specialization, and the result is a base {@link Credential}.
+ */
+export const signChallenge = async (
+    publicKey: PublicKeyCredentialRequestOptions,
+) => nullToUndefined(await navigator.credentials.get({ publicKey }));
 
-        return data.data;
-    } catch (e) {
-        log.error("finish passkey authentication failed", e);
-        throw e;
-    }
+interface FinishPasskeyAuthenticationOptions {
+    passkeySessionID: string;
+    ceremonySessionID: string;
+    /**
+     * The package name of the client on whose behalf we're authenticating with
+     * the user's passkey.
+     *
+     * This is used by the backend to generate an appropriately scoped auth
+     * token for used by (and only by) the authenticating app.
+     */
+    clientPackage: string;
+    credential: Credential;
+}
+
+/**
+ * Finish the authentication by providing the signed assertion to the backend.
+ *
+ * This function implements steps 4 and 5 of the passkey authentication flow.
+ * See [Note: WebAuthn authentication flow].
+ *
+ * @returns The result of successful authentication, a
+ * {@link TwoFactorAuthorizationResponse}.
+ */
+export const finishPasskeyAuthentication = async ({
+    passkeySessionID,
+    ceremonySessionID,
+    clientPackage,
+    credential,
+}: FinishPasskeyAuthenticationOptions) => {
+    const response = authenticatorAssertionResponse(credential);
+
+    const authenticatorData = await binaryToServerB64(
+        response.authenticatorData,
+    );
+    const clientDataJSON = await binaryToServerB64(response.clientDataJSON);
+    const signature = await binaryToServerB64(response.signature);
+    const userHandle = response.userHandle
+        ? await binaryToServerB64(response.userHandle)
+        : null;
+
+    const params = new URLSearchParams({
+        sessionID: passkeySessionID,
+        ceremonySessionID,
+        clientPackage,
+    });
+    const url = await apiURL("/users/two-factor/passkeys/finish");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        method: "POST",
+        headers: {
+            // Note: Unlike the other requests, this is the clientPackage of the
+            // _requesting_ app, not the accounts app.
+            "X-Client-Package": clientPackage,
+        },
+        body: JSON.stringify({
+            id: credential.id,
+            // This is meant to be the ArrayBuffer version of the (base64
+            // encoded) `id`, but since we then would need to base64 encode it
+            // anyways for transmission, we can just reuse the same string.
+            rawId: credential.id,
+            type: credential.type,
+            response: {
+                authenticatorData,
+                clientDataJSON,
+                signature,
+                userHandle,
+            },
+        }),
+    });
+    ensureOk(res);
+
+    return TwoFactorAuthorizationResponse.parse(await res.json());
+};
+
+/**
+ * A function to hide the type casts necessary to extract a
+ * {@link AuthenticatorAssertionResponse} from the {@link Credential} we obtain
+ * during a passkey attestation.
+ */
+const authenticatorAssertionResponse = (credential: Credential) => {
+    // We passed `options: { publicKey }` to `navigator.credentials.get`, and so
+    // we will get back an `PublicKeyCredential`:
+    // https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/get#web_authentication_api
+    //
+    // However, the return type of `get` is the base `Credential`, so we need to
+    // cast.
+    const pkCredential = credential as PublicKeyCredential;
+
+    // Further, since this was a `get` and not a `create`, the
+    // PublicKeyCredential.response will be an `AuthenticatorAssertionResponse`
+    // (See same MDN reference).
+    //
+    // We need to cast again.
+    const assertionResponse =
+        pkCredential.response as AuthenticatorAssertionResponse;
+
+    return assertionResponse;
+};
+
+/**
+ * Create a redirection URL to get back to the calling app that initiated the
+ * passkey authentication flow with the result of the authentication.
+ *
+ * @param redirectURL The base URL to redirect to. Provided by the calling app
+ * that initiated the passkey authentication.
+ *
+ * @param passkeySessionID The passkeySessionID that was provided by the calling
+ * app that initiated the passkey authentication. It is returned back in the
+ * response so that the calling app has a way to ensure that this is indeed a
+ * redirect for the session that they initiated and are waiting for.
+ *
+ * @param twoFactorAuthorizationResponse The result of
+ * {@link finishPasskeyAuthentication} returned by the backend.
+ */
+export const passkeyAuthenticationSuccessRedirectURL = async (
+    redirectURL: URL,
+    passkeySessionID: string,
+    twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
+) => {
+    const encodedResponse = await toB64URLSafeNoPaddingString(
+        JSON.stringify(twoFactorAuthorizationResponse),
+    );
+    redirectURL.searchParams.set("passkeySessionID", passkeySessionID);
+    redirectURL.searchParams.set("response", encodedResponse);
+    return redirectURL;
+};
+
+/**
+ * Redirect back to the app that initiated the passkey authentication,
+ * navigating the user to a place where they can reset their second factor using
+ * their recovery key (e.g. if they have lost access to their passkey).
+ *
+ * The same considerations mentioned in [Note: Finish passkey flow in the
+ * requesting app] apply to recovery too, which is why we need to redirect back
+ * to the app on whose behalf we're authenticating.
+ *
+ * @param recoverURL The recovery URL provided as a query parameter by the app
+ * that called us.
+ */
+export const redirectToPasskeyRecoverPage = (recoverURL: URL) => {
+    window.location.href = recoverURL.href;
 };

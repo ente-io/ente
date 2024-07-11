@@ -48,6 +48,11 @@ func NDaysFromNow(n int) int64 {
 	return time.Now().AddDate(0, 0, n).UnixNano() / 1000
 }
 
+// NMinFromNow returns the time n min from now in micro seconds
+func NMinFromNow(n int64) int64 {
+	return time.Now().Add(time.Minute*time.Duration(n)).UnixNano() / 1000
+}
+
 // MicrosecondsBeforeMinutes returns the unix time n minutes before now in micro seconds
 func MicrosecondsBeforeMinutes(noOfMinutes int64) int64 {
 	return Microseconds() - (MicroSecondsInOneMinute * noOfMinutes)

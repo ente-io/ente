@@ -11,7 +11,6 @@ import DropdownInput from "components/DropdownInput";
 import { EnteDrawer } from "components/EnteDrawer";
 import Titlebar from "components/Titlebar";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import AdvancedSettings from "./AdvancedSettings";
 import MapSettings from "./MapSetting";
@@ -86,12 +85,14 @@ export default function Preferences({ open, onClose, onRootClose }) {
 
 const LanguageSelector = () => {
     const locale = getLocaleInUse();
-    // Enhancement: Is this full reload needed?
-    const router = useRouter();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
         setLocaleInUse(newLocale);
-        router.reload();
+        // Enhancement: Is this full reload needed?
+        //
+        // Likely yes, because we use the global `t` instance instead of the
+        // useTranslation hook.
+        window.location.reload();
     };
 
     const options = supportedLocales.map((locale) => ({

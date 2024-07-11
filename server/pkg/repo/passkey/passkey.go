@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -17,6 +18,13 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/byteMarshaller"
 	"github.com/go-webauthn/webauthn/webauthn"
+)
+
+const (
+	// MaxSessionTokenFetchLimit specifies the maximum number of requests a client can make to retrieve token data for a given session ID.
+	MaxSessionTokenFetchLimit = 2
+	// TokenFetchAllowedDurationInMin is the duration in minutes for which the token fetch is allowed after the session is verified.
+	TokenFetchAllowedDurationInMin = 2
 )
 
 type Repository struct {
@@ -60,9 +68,6 @@ func NewRepository(
 	db *sql.DB,
 ) (repo *Repository, err error) {
 	rpId := viper.GetString("webauthn.rpid")
-	if rpId == "" {
-		rpId = "accounts.ente.io"
-	}
 	rpOrigins := viper.GetStringSlice("webauthn.rporigins")
 
 	wconfig := &webauthn.Config{
@@ -72,7 +77,7 @@ func NewRepository(
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
 				Enforce: true,
-				Timeout: time.Duration(5) * time.Minute,
+				Timeout: time.Duration(2) * time.Minute,
 			},
 			Registration: webauthn.TimeoutConfig{
 				Enforce: true,
@@ -170,6 +175,87 @@ func (r *Repository) GetUserIDWithPasskeyTwoFactorSession(sessionID string) (use
 	return
 }
 
+// IsSessionAlreadyClaimed checks if the both token_data and verified_at are not null for a given session ID
+func (r *Repository) IsSessionAlreadyClaimed(sessionID string) (bool, error) {
+	var verifiedAt sql.NullInt64
+	err := r.DB.QueryRow(`SELECT verified_at FROM passkey_login_sessions WHERE session_id = $1`, sessionID).Scan(&verifiedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, stacktrace.Propagate(err, "")
+	}
+	return verifiedAt.Valid, nil
+}
+
+// StoreTokenData takes a sessionID, and tokenData, and updates the tokenData in the database
+func (r *Repository) StoreTokenData(sessionID string, tokenData ente.TwoFactorAuthorizationResponse) error {
+	tokenDataJson, err := json.Marshal(tokenData)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	_, err = r.DB.Exec(`UPDATE passkey_login_sessions SET token_data = $1, verified_at = now_utc_micro_seconds() WHERE session_id = $2`, tokenDataJson, sessionID)
+	return stacktrace.Propagate(err, "")
+}
+
+// GetTokenData retrieves the token data associated with a given session ID.
+// The function will return the token data if the following conditions are met:
+// - The token data is not null.
+// - The session was verified less than 5 minutes ago.
+// - The token fetch count is less than 2.
+// If these conditions are met, the function will also increment the token fetch count by 1.
+//
+// Parameters:
+// - sessionID: The ID of the session for which to retrieve the token data.
+//
+// Returns:
+// - A pointer to a TwoFactorAuthorizationResponse object containing the token data, if the conditions are met.
+// - An error, if an error occurred while retrieving the token data or if the conditions are not met.
+func (r *Repository) GetTokenData(sessionID string) (*ente.TwoFactorAuthorizationResponse, error) {
+	var tokenDataJson []byte
+	var verifiedAt sql.NullInt64
+	var fetchCount int
+	err := r.DB.QueryRow(`SELECT token_data, verified_at, token_fetch_cnt FROM passkey_login_sessions WHERE session_id = $1`, sessionID).Scan(&tokenDataJson, &verifiedAt, &fetchCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ente.ErrNotFound
+		}
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if !verifiedAt.Valid {
+		return nil, &ente.ApiError{
+			Code:           "SESSION_NOT_VERIFIED",
+			Message:        "Session is not verified yet",
+			HttpStatusCode: http.StatusBadRequest,
+		}
+	}
+	if verifiedAt.Int64 < ente_time.MicrosecondsBeforeMinutes(TokenFetchAllowedDurationInMin) {
+		return nil, &ente.ApiError{
+			Code:           "INVALID_SESSION",
+			Message:        "Session verified but expired now",
+			HttpStatusCode: http.StatusGone,
+		}
+	}
+	if fetchCount >= MaxSessionTokenFetchLimit {
+		return nil, &ente.ApiError{
+			Code:           "INVALID_SESSION",
+			Message:        "Token fetch limit reached",
+			HttpStatusCode: http.StatusGone,
+		}
+	}
+	var tokenData ente.TwoFactorAuthorizationResponse
+	err = json.Unmarshal(tokenDataJson, &tokenData)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	// update the token_fetch_count
+	_, err = r.DB.Exec(`UPDATE passkey_login_sessions SET token_fetch_cnt = token_fetch_cnt + 1 WHERE session_id = $1`, sessionID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &tokenData, nil
+}
+
 func (r *Repository) CreateBeginAuthenticationData(user *ente.User) (options *protocol.CredentialAssertion, session *webauthn.SessionData, id uuid.UUID, err error) {
 	passkeyUser := &PasskeyUser{
 		User: user,
@@ -178,6 +264,16 @@ func (r *Repository) CreateBeginAuthenticationData(user *ente.User) (options *pr
 
 	options, session, err = r.webAuthnInstance.BeginLogin(passkeyUser)
 	if err != nil {
+		if _, ok := err.(*protocol.Error); ok {
+			protocolErr := err.(*protocol.Error)
+			if protocolErr.Type == "invalid_request" && protocolErr.Details == "Found no credentials for user" {
+				err = stacktrace.Propagate(ente.NewBadRequestWithMessage("No passkey found for user"), "")
+				return
+			} else {
+				err = stacktrace.Propagate(err, fmt.Sprintf("error while beginning login: type %s, msg %s", protocolErr.Type, protocolErr.Details))
+				return
+			}
+		}
 		err = stacktrace.Propagate(err, "")
 		return
 	}

@@ -46,10 +46,6 @@ class Detection {
     );
   }
 
-  int getFaceArea(int imageWidth, int imageHeight) {
-    return (box.width * imageWidth * box.height * imageHeight).toInt();
-  }
-
   FaceDirection getFaceDirection() {
     if (isEmpty) {
       return FaceDirection.straight;

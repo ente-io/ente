@@ -1,6 +1,6 @@
 name = "github-discord-notifier"
 main = "src/index.ts"
-compatibility_date = "2024-03-14"
+compatibility_date = "2024-06-14"
 
 [vars]
 # Added as a secret via the Cloudflare dashboard

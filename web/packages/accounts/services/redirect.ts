@@ -1,4 +1,4 @@
-import type { AppName } from "@/next/types/app";
+import { appName } from "@/next/app";
 import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
 
 /**
@@ -6,13 +6,9 @@ import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
  *
  * This is where we redirect to after successful authentication.
  */
-export const appHomeRoute = (appName: AppName): string => {
-    switch (appName) {
-        case "accounts":
-            return "/passkeys";
-        case "auth":
-            return AUTH_PAGES.AUTH;
-        case "photos":
-            return PHOTOS_PAGES.GALLERY;
-    }
-};
+export const appHomeRoute: string = {
+    accounts: "/passkeys",
+    auth: AUTH_PAGES.AUTH,
+    cast: "/" /* The cast app doesn't use this, this is an arbitrary value. */,
+    photos: PHOTOS_PAGES.GALLERY,
+}[appName];

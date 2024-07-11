@@ -8,9 +8,11 @@ interface ImportMetaEnv {
     /**
      * Override the origin (scheme://host:port) of Ente's API to connect to.
      *
-     * This is useful when testing or connecting to alternative installations.
-     */
-    readonly VITE_ENTE_ENDPOINT: string | undefined;
+     * Default is "https://api.ente.io".
+    
+*/
+
+    readonly VITE_ENTE_API_ORIGIN: string | undefined;
 }
 
 interface ImportMeta {

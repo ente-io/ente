@@ -213,6 +213,8 @@ ENTE_INTERNAL_HARDCODED-OTT_LOCAL-DOMAIN-VALUE=123456
 # it can be changed later
 ENDPOINT=http://localhost:8080
 ALBUMS_ENDPOINT=http://localhost:8082
+# This is used to generate sharable URLs
+ENTE_APPS_PUBLIC-ALBUMS=http://localhost:8082
 ```
 
 ## 3. Run `docker-compose up`

@@ -17,7 +17,7 @@ RUN \
 # Install SCW CLI
 # Latest release: https://github.com/scaleway/scaleway-cli/releases/latest
 RUN \
-    export VERSION="2.26.0" && \
+    export VERSION="2.32.1" && \
     curl -o /usr/local/bin/scw -L "https://github.com/scaleway/scaleway-cli/releases/download/v${VERSION}/scaleway-cli_${VERSION}_linux_amd64" && \
     chmod +x /usr/local/bin/scw
 

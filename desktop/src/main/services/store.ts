@@ -1,12 +1,16 @@
 import { safeStorage } from "electron/main";
 import { safeStorageStore } from "../stores/safe-storage";
 import { uploadStatusStore } from "../stores/upload-status";
+import { userPreferences } from "../stores/user-preferences";
 import { watchStore } from "../stores/watch";
 
 /**
  * Clear all stores except user preferences.
  *
- * This is useful to reset state when the user logs out.
+ * This function is useful to reset state when the user logs out. User
+ * preferences are preserved since they contain things tied to the person using
+ * the app or other machine specific state not tied to the account they were
+ * using inside the app.
  */
 export const clearStores = () => {
     safeStorageStore.clear();
@@ -32,3 +36,9 @@ export const encryptionKey = (): string | undefined => {
     const keyBuffer = Buffer.from(b64EncryptedKey, "base64");
     return safeStorage.decryptString(keyBuffer);
 };
+
+export const lastShownChangelogVersion = (): number | undefined =>
+    userPreferences.get("lastShownChangelogVersion");
+
+export const setLastShownChangelogVersion = (version: number) =>
+    userPreferences.set("lastShownChangelogVersion", version);

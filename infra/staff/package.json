@@ -6,16 +6,20 @@
     "scripts": {
         "build": "tsc && vite build",
         "dev": "vite",
-        "lint": "yarn prettier --check --log-level warn . && yarn eslint && yarn tsc",
-        "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint --fix && yarn tsc",
+        "lint": "yarn prettier --check --log-level warn . && yarn eslint . && yarn tsc",
+        "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint --fix . && yarn tsc",
         "preview": "vite preview"
     },
     "dependencies": {
+        "date-fns": "^3.6.0",
         "react": "^18",
+        "react-datepicker": "^7.1.0",
         "react-dom": "^18",
+        "react-toastify": "^10.0.5",
         "zod": "^3"
     },
     "devDependencies": {
+        "@rollup/plugin-node-resolve": "^15.2.3",
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "@typescript-eslint/eslint-plugin": "^7",
@@ -31,5 +35,5 @@
         "typescript": "^5",
         "vite": "^5.2"
     },
-    "packageManager": "yarn@1.22.21"
+    "packageManager": "yarn@1.22.22"
 }

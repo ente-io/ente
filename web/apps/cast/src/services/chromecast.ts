@@ -127,10 +127,10 @@ const advertiseCode = (cast: Cast) => {
     // cast running on their big screen.
     options.disableIdleTimeout = true;
 
-    type ListenerProps = {
+    interface ListenerProps {
         senderId: string;
         data: unknown;
-    };
+    }
 
     // Reply with the code that we have if anyone asks over Chromecast.
     const incomingMessageListener = ({ senderId, data }: ListenerProps) => {
@@ -141,8 +141,9 @@ const advertiseCode = (cast: Cast) => {
         const collectionID =
             data &&
             typeof data == "object" &&
-            typeof data["collectionID"] == "string"
-                ? data["collectionID"]
+            "collectionID" in data &&
+            typeof data.collectionID == "string"
+                ? data.collectionID
                 : undefined;
 
         // If the request does not have a collectionID (or if we're not showing

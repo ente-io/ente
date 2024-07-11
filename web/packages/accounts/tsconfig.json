@@ -1,9 +1,7 @@
 {
     "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
-        /* TODO(MR): Enable this */
-        "noUncheckedIndexedAccess": false,
-        /* MUI doesn't play great with exactOptionalPropertyTypes currently. */
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
         "exactOptionalPropertyTypes": false
     },
     "include": [

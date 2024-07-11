@@ -3,6 +3,7 @@ import "dart:collection";
 import "dart:math" show min;
 
 import "package:computer/computer.dart";
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/configuration.dart";
@@ -131,11 +132,15 @@ class SemanticSearchService {
     _isSyncing = false;
   }
 
+  bool isMagicSearchEnabledAndReady() {
+    return LocalSettings.instance.hasEnabledMagicSearch() &&
+        _frameworkInitialization.isCompleted;
+  }
+
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !_frameworkInitialization.isCompleted) {
+    if (!isMagicSearchEnabledAndReady()) {
       return (query, <EnteFile>[]);
     }
     // If there's an ongoing request, just update the last query and return its future.
@@ -144,7 +149,7 @@ class SemanticSearchService {
       return _searchScreenRequest!;
     } else {
       // No ongoing request, start a new search.
-      _searchScreenRequest = _getMatchingFiles(query).then((result) {
+      _searchScreenRequest = getMatchingFiles(query).then((result) {
         // Search completed, reset the ongoing request.
         _searchScreenRequest = null;
         // If there was a new query during the last search, start a new search with the last query.
@@ -200,25 +205,14 @@ class SemanticSearchService {
     await _frameworkInitialization.future;
     _logger.info("Attempting backfill for image embeddings");
     final fileIDs = await _getFileIDsToBeIndexed();
+    if (fileIDs.isEmpty) {
+      return;
+    }
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
     // await _cacheThumbnails(files);
     _queue.addAll(files);
     unawaited(_pollQueue());
-  }
-
-  Future<void> _cacheThumbnails(List<EnteFile> files) async {
-    int counter = 0;
-    const batchSize = 100;
-    for (var i = 0; i < files.length;) {
-      final futures = <Future>[];
-      for (var j = 0; j < batchSize && i < files.length; j++, i++) {
-        futures.add(getThumbnail(files[i]));
-      }
-      await Future.wait(futures);
-      counter += futures.length;
-      _logger.info("$counter/${files.length} thumbnails cached");
-    }
   }
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
@@ -236,13 +230,57 @@ class SemanticSearchService {
     _queue.clear();
   }
 
-  Future<List<EnteFile>> _getMatchingFiles(String query) async {
+  Future<List<EnteFile>> getMatchingFiles(
+    String query, {
+    double? scoreThreshold,
+  }) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults = await _getScores(textEmbedding);
+    final queryResults =
+        await _getScores(textEmbedding, scoreThreshold: scoreThreshold);
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
+
+    final ignoredCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
+
+    final deletedEntries = <int>[];
+    final results = <EnteFile>[];
+
+    for (final result in queryResults) {
+      final file = filesMap[result.id];
+      if (file != null && !ignoredCollections.contains(file.collectionID)) {
+        results.add(file);
+      }
+      if (file == null) {
+        deletedEntries.add(result.id);
+      }
+    }
+
+    _logger.info(results.length.toString() + " results");
+
+    if (deletedEntries.isNotEmpty) {
+      unawaited(EmbeddingsDB.instance.deleteEmbeddings(deletedEntries));
+    }
+
+    return results;
+  }
+
+  Future<List<int>> getMatchingFileIDs(String query, double minScore) async {
+    final textEmbedding = await _getTextEmbedding(query);
+
+    final queryResults =
+        await _getScores(textEmbedding, scoreThreshold: minScore);
+
+    final queryResultIds = <int>[];
+    for (QueryResult result in queryResults) {
+      queryResultIds.add(result.id);
+    }
+
+    final filesMap = await FilesDB.instance.getFilesFromIDs(
+      queryResultIds,
+    );
     final results = <EnteFile>[];
 
     final ignoredCollections =
@@ -264,7 +302,12 @@ class SemanticSearchService {
       unawaited(EmbeddingsDB.instance.deleteEmbeddings(deletedEntries));
     }
 
-    return results;
+    final matchingFileIDs = <int>[];
+    for (EnteFile file in results) {
+      matchingFileIDs.add(file.uploadedFileID!);
+    }
+
+    return matchingFileIDs;
   }
 
   void _addToQueue(EnteFile file) {
@@ -334,6 +377,21 @@ class SemanticSearchService {
         file,
         embedding,
       );
+    } on FormatException catch (e, _) {
+      _logger.severe(
+        "Could not get embedding for $file because FormatException occured, storing empty result locally",
+        e,
+      );
+      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      await EmbeddingsDB.instance.put(embedding);
+    } on PlatformException catch (e, s) {
+      _logger.severe(
+        "Could not get thumbnail for $file due to PlatformException related to thumbnails, storing empty result locally",
+        e,
+        s,
+      );
+      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
+      await EmbeddingsDB.instance.put(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
@@ -355,13 +413,17 @@ class SemanticSearchService {
     }
   }
 
-  Future<List<QueryResult>> _getScores(List<double> textEmbedding) async {
+  Future<List<QueryResult>> _getScores(
+    List<double> textEmbedding, {
+    double? scoreThreshold,
+  }) async {
     final startTime = DateTime.now();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkScore,
       param: {
         "imageEmbeddings": _cachedEmbeddings,
         "textEmbedding": textEmbedding,
+        "scoreThreshold": scoreThreshold,
       },
       taskName: "computeBulkScore",
     );
@@ -402,12 +464,14 @@ List<QueryResult> computeBulkScore(Map args) {
   final queryResults = <QueryResult>[];
   final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
+  final scoreThreshold =
+      args["scoreThreshold"] ?? SemanticSearchService.kScoreThreshold;
   for (final imageEmbedding in imageEmbeddings) {
     final score = computeScore(
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (score >= SemanticSearchService.kScoreThreshold) {
+    if (score >= scoreThreshold) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
   }
@@ -422,7 +486,8 @@ double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
     "The two embeddings should have the same length",
   );
   double score = 0;
-  for (int index = 0; index < imageEmbedding.length; index++) {
+  final length = imageEmbedding.length;
+  for (int index = 0; index < length; index++) {
     score += imageEmbedding[index] * textEmbedding[index];
   }
   return score;

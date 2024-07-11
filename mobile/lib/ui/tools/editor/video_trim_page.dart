@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import 'package:video_editor/video_editor.dart';
@@ -21,7 +23,10 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
     final maxTrim = widget.controller.maxTrim;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -39,7 +44,8 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             ..._trimSlider(),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
-              secondaryText: "Done",
+              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
+              secondaryText: S.of(context).done,
               onPrimaryPressed: () {
                 // reset trim
                 widget.controller.updateTrim(minTrim, maxTrim);

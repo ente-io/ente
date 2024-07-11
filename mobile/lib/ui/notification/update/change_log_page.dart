@@ -19,11 +19,6 @@ class ChangeLogPage extends StatefulWidget {
 
 class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
@@ -38,10 +33,10 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             ),
             Container(
               alignment: Alignment.centerLeft,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
-                  title: "What's new",
+                  title: S.of(context).whatsNew,
                 ),
               ),
             ),
@@ -119,20 +114,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Cast albums to TV ✨",
-        "View a slideshow of your albums on any big screen! Open an album and click on the Cast button to get started.",
+        "Custom App Lock ✨",
+        'Now choose from PIN, password or the default system lock to lock the app. You can set this up in Settings > Security > App lock.',
       ),
       ChangeLogEntry(
-        "Organize shared photos",
-        "You can now add shared items to your favorites or to any of your personal albums. Ente will create a copy that is fully owned by you and can be organized to your liking.",
+        "Select All ✨",
+        "Selecting all files from gallery made easy with just one click! Select any item from gallery to see the option.",
       ),
       ChangeLogEntry(
-        "Download multiple items",
-        "You can now download multiple items to your gallery at once. Select the items you want to download and click on the download button.",
-      ),
-      ChangeLogEntry(
-        "Performance improvements",
-        "This release also brings in major changes that should improve responsiveness. If you discover room for improvement, please let us know!",
+        "Bug Fixes",
+        "Many a bugs were squashed in this release. If you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏",
       ),
     ]);
 

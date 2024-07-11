@@ -1,6 +1,7 @@
+import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import log from "@/next/log";
 import { savedLogs } from "@/next/log-web";
-import { openAccountsManagePasskeysPage } from "@ente/accounts/services/passkey";
+import { customAPIHost } from "@/next/origins";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -9,7 +10,12 @@ import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    setData,
+    setLSUser,
+} from "@ente/shared/storage/localStorage";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { downloadAsFile } from "@ente/shared/utils";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
@@ -163,7 +169,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
             setUserDetails(userDetails);
             setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
             setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
-            setData(LS_KEYS.USER, {
+            await setLSUser({
                 ...getData(LS_KEYS.USER),
                 email: userDetails.email,
             });
@@ -428,7 +434,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
     const appContext = useContext(AppContext);
     const {
-        appName,
         setDialogMessage,
         startLoading,
         watchFolderView,
@@ -473,7 +478,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         closeSidebar();
 
         try {
-            await openAccountsManagePasskeysPage(appName);
+            await openAccountsManagePasskeysPage();
         } catch (e) {
             log.error("failed to redirect to accounts page", e);
         }
@@ -529,13 +534,11 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 label={t("TWO_FACTOR")}
             />
 
-            {isInternalUserViaEmailCheck() && (
-                <EnteMenuItem
-                    variant="secondary"
-                    onClick={redirectToAccountsPage}
-                    label={t("PASSKEYS")}
-                />
-            )}
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToAccountsPage}
+                label={t("passkeys")}
+            />
 
             <EnteMenuItem
                 variant="secondary"
@@ -668,7 +671,7 @@ const ExitSection: React.FC = () => {
                 onClick={openDeleteAccountModal}
                 color="critical"
                 variant="secondary"
-                label={t("DELETE_ACCOUNT")}
+                label={t("delete_account")}
             />
             <DeleteAccountModal
                 open={deleteAccountModalView}
@@ -681,11 +684,13 @@ const ExitSection: React.FC = () => {
 const DebugSection: React.FC = () => {
     const appContext = useContext(AppContext);
     const [appVersion, setAppVersion] = useState<string | undefined>();
+    const [host, setHost] = useState<string | undefined>();
 
     const electron = globalThis.electron;
 
     useEffect(() => {
-        electron?.appVersion().then((v) => setAppVersion(v));
+        void electron?.appVersion().then(setAppVersion);
+        void customAPIHost().then(setHost);
     });
 
     const confirmLogDownload = () =>
@@ -710,21 +715,6 @@ const DebugSection: React.FC = () => {
 
     return (
         <>
-            <EnteMenuItem
-                onClick={confirmLogDownload}
-                variant="mini"
-                label={t("DOWNLOAD_UPLOAD_LOGS")}
-            />
-            {appVersion && (
-                <Typography
-                    py={"14px"}
-                    px={"16px"}
-                    color="text.muted"
-                    variant="mini"
-                >
-                    {appVersion}
-                </Typography>
-            )}
             {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
                     variant="secondary"
@@ -732,6 +722,17 @@ const DebugSection: React.FC = () => {
                     label={"Test Upload"}
                 />
             )}
+            <EnteMenuItem
+                onClick={confirmLogDownload}
+                variant="mini"
+                label={t("DOWNLOAD_UPLOAD_LOGS")}
+            />
+            <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
+                {appVersion && (
+                    <Typography variant="mini">{appVersion}</Typography>
+                )}
+                {host && <Typography variant="mini">{host}</Typography>}
+            </Stack>
         </>
     );
 };

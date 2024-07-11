@@ -82,7 +82,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     };
 
     const selectCollectionMappingAndAddWatch = async (path: string) => {
-        const filePaths = await ensureElectron().watch.findFiles(path);
+        const filePaths = await ensureElectron().fs.findFiles(path);
         if (areAllInSameDirectory(filePaths)) {
             addWatch(path, "root");
         } else {
@@ -149,7 +149,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 };
 
 const Title_ = styled("div")`
-    padding: 32px 16px 16px 24px;
+    padding: 16px 12px 16px 16px;
 `;
 
 interface WatchList {

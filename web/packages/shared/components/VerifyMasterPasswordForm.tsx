@@ -1,5 +1,5 @@
+import type { SRPAttributes } from "@/accounts/types/srp";
 import log from "@/next/log";
-import type { SRPAttributes } from "@ente/accounts/types/srp";
 import { Input, type ButtonProps } from "@mui/material";
 import { t } from "i18next";
 import SingleInputForm, {

@@ -21,9 +21,9 @@ some operating system restrictions.
 
 ## Getting to the passkeys manager
 
-As of Feb 2024, Ente clients have a button to navigate to a WebView of Ente
+As of Jun 2024, Ente clients have a button to navigate to a WebView of Ente
 Accounts. Ente Accounts allows users to add and manage their registered
-passkeys.
+passkeys, and later authenticate with them as a second factor.
 
 > [!NOTE]
 >
@@ -46,7 +46,7 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 | ------------ | ------ | ------------------------------------------------ |
 | X-Auth-Token | string | The user session token. It is encoded in base64. |
 
-##### Response Body (JSON)
+##### Response body (JSON)
 
 | Key           | Type   | Value                                                             |
 | ------------- | ------ | ----------------------------------------------------------------- |
@@ -55,13 +55,10 @@ used.** This restriction is a byproduct of the enablement for automatic login.
 ### Automatically logging into Ente Accounts
 
 Clients open a WebView with the URL
-`https://accounts.ente.io/passkeys/handoff?client=<clientPackageName>&token=<accountsToken>`.
-This page will parse the token and client package name for usage in subsequent
-Accounts-related API calls.
+`https://accounts.ente.io/passkeys?token=<accountsToken>`.
 
-If the token is valid, the user will be automatically redirected to the passkeys
-management page. Otherwise, they will be required to login with their Ente
-credentials.
+If the token is valid, the user will be show a list of their passkeys, and they
+can edit / delete them, or add new ones.
 
 ## Registering a WebAuthn credential
 
@@ -71,10 +68,7 @@ The registration ceremony starts in the browser. When the user clicks the "Add
 new passkey" button, a request is sent to the server for "public key" creation
 options. Although named "public key" options, they actually define customizable
 parameters for the entire credential creation process. They're like an
-instructional sheet that defines exactly what we want. As of the creation of
-this document, the plan is to restrict user authenticators to cross-platform
-ones, like hardware keys. Platform authenticators, such as TPM, are not portable
-and are prone to loss.
+instructional sheet that defines exactly what we want.
 
 On the server side, the WebAuthn library generates this information based on
 data provided from a `webauthn.User` interface. As a result, we satisfy this
@@ -111,7 +105,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
 }
 ```
 
-#### GET /passkeys/registration/begin
+#### POST /passkeys/registration/begin
 
 ##### Headers
 
@@ -119,7 +113,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
 | ------------ | ------ | ------------------------------------------------ |
 | X-Auth-Token | string | The user session token. It is encoded in base64. |
 
-##### Response Body (JSON)
+##### Response body (JSON)
 
 | Key       | Type            | Value                                                                                                                                         |
 | --------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -132,7 +126,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
         "publicKey": {
             "rp": {
                 "name": "Ente",
-                "id": "accounts.ente.io"
+                "id": "ente.io"
             },
             "user": {
                 "name": "james@example.org",
@@ -205,8 +199,8 @@ We just have to decode the base64 fields back into `Uint8Array`.
 ```ts
 const options = response.options;
 
-options.publicKey.challenge = _sodium.from_base64(options.publicKey.challenge);
-options.publicKey.user.id = _sodium.from_base64(options.publicKey.user.id);
+options.publicKey.challenge = sodium.from_base64(options.publicKey.challenge);
+options.publicKey.user.id = sodium.from_base64(options.publicKey.user.id);
 ```
 
 ### Creating the credential
@@ -226,13 +220,13 @@ The browser returns the newly created credential with a bunch of binary fields,
 so we have to encode them into base64 for transport to the server.
 
 ```ts
-const attestationObjectB64 = _sodium.to_base64(
+const attestationObjectB64 = sodium.to_base64(
 	new Uint8Array(credential.response.attestationObject),
-	_sodium.base64_variants.URLSAFE_NO_PADDING
+	sodium.base64_variants.URLSAFE_NO_PADDING
 );
-const clientDataJSONB64 = _sodium.to_base64(
+const clientDataJSONB64 = sodium.to_base64(
 	new Uint8Array(credential.response.clientDataJSON),
-	_sodium.base64_variants.URLSAFE_NO_PADDING
+	sodium.base64_variants.URLSAFE_NO_PADDING
 ```
 
 Attestation object contains information about the nature of the credential, like
@@ -283,7 +277,7 @@ credID := base64.StdEncoding.EncodeToString(cred.ID)
 
 On retrieval, this process is effectively the opposite.
 
-#### Query Parameters
+#### Query parameters
 
 | Key          | Value                                                                                                   |
 | ------------ | ------------------------------------------------------------------------------------------------------- |
@@ -296,7 +290,7 @@ On retrieval, this process is effectively the opposite.
 | ------------ | ------ | ------------------------------------------------ |
 | X-Auth-Token | string | The user session token. It is encoded in base64. |
 
-##### Request Body (JSON)
+##### Request body (JSON)
 
 | Key      | Type   | Value                                                                                                                                             |
 | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -307,7 +301,7 @@ On retrieval, this process is effectively the opposite.
 
 **Example**
 
-```json
+```js
 {
 	id: credential.id,
 	rawId: credential.id,
@@ -339,27 +333,29 @@ if (passkeySessionID) {
 }
 ```
 
-The client should redirect the user to Accounts with this session ID to prompt
-credential authentication. We use Accounts as the central WebAuthn hub because
-credentials are locked to an FQDN.
+The client should redirect the user to the Ente Accounts web app with this
+session ID to prompt credential authentication.
 
-```tsx
-window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${passkeySessionID}&redirect=${
-    window.location.origin
-}/passkeys/finish`;
 ```
+https://accounts.ente.io/passkeys?
+    passkeySessionID=<sid>&clientPackage=<pkg>&
+    redirect=<redirect>&recover=<recover-redirect>
+```
+
+We use Ente Accounts as the central WebAuthn hub since it allows us to handle
+mobile and desktop clients too.
 
 ### Requesting publicKey options (begin)
 
-#### GET /users/two-factor/passkeys/begin
+#### POST /users/two-factor/passkeys/begin
 
-##### Query Parameters
+##### Query parameters
 
 | Key       | Value                                                                     |
 | --------- | ------------------------------------------------------------------------- |
 | sessionID | The `passkeySessionID` returned from SRP login or email OTT verification. |
 
-##### Response Body (JSON)
+##### Response body (JSON)
 
 **Example**
 
@@ -370,7 +366,7 @@ window.location.href = `${accountsAppURL()}/passkeys/verify?passkeySessionID=${p
         "publicKey": {
             "challenge": "dF-mmdZSBxP6Z7OhZrmQ4h-k-BkuuX6ERnW_ckYdkvc",
             "timeout": 300000,
-            "rpId": "accounts.ente.io",
+            "rpId": "ente.io",
             "allowCredentials": [
                 {
                     "type": "public-key",
@@ -395,14 +391,14 @@ The browser requires `Uint8Array` versions of the `options` challenge and
 credential IDs.
 
 ```ts
-publicKey.challenge = _sodium.from_base64(
+publicKey.challenge = sodium.from_base64(
     publicKey.challenge,
-    _sodium.base64_variants.URLSAFE_NO_PADDING,
+    sodium.base64_variants.URLSAFE_NO_PADDING,
 );
 publicKey.allowCredentials?.forEach(function (listItem: any) {
-    listItem.id = _sodium.from_base64(
+    listItem.id = sodium.from_base64(
         listItem.id,
-        _sodium.base64_variants.URLSAFE_NO_PADDING,
+        sodium.base64_variants.URLSAFE_NO_PADDING,
     );
 });
 ```
@@ -421,21 +417,21 @@ Before sending the public key and signature to the server, their outputs must be
 encoded into Base64.
 
 ```ts
-authenticatorData: _sodium.to_base64(
+authenticatorData: sodium.to_base64(
     new Uint8Array(credential.response.authenticatorData),
-    _sodium.base64_variants.URLSAFE_NO_PADDING
+    sodium.base64_variants.URLSAFE_NO_PADDING
 ),
-clientDataJSON: _sodium.to_base64(
+clientDataJSON: sodium.to_base64(
     new Uint8Array(credential.response.clientDataJSON),
-    _sodium.base64_variants.URLSAFE_NO_PADDING
+    sodium.base64_variants.URLSAFE_NO_PADDING
 ),
-signature: _sodium.to_base64(
+signature: sodium.to_base64(
     new Uint8Array(credential.response.signature),
-    _sodium.base64_variants.URLSAFE_NO_PADDING
+    sodium.base64_variants.URLSAFE_NO_PADDING
 ),
-userHandle: _sodium.to_base64(
+userHandle: sodium.to_base64(
     new Uint8Array(credential.response.userHandle),
-    _sodium.base64_variants.URLSAFE_NO_PADDING
+    sodium.base64_variants.URLSAFE_NO_PADDING
 ),
 ```
 
@@ -443,14 +439,14 @@ userHandle: _sodium.to_base64(
 
 #### POST /users/two-factor/passkeys/finish
 
-##### Query Parameters
+##### Query parameters
 
 | Key               | Value                                                                                    |
 | ----------------- | ---------------------------------------------------------------------------------------- |
 | ceremonySessionID | The `ceremonySessionID` identifier from the begin step.                                  |
 | sessionID         | The `passkeySessionID` identifier from the SRP login or email OTT verification response. |
 
-##### Request Body (JSON)
+##### Request body (JSON)
 
 | Key      | Type   | Value                                                                                                                                             |
 | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -459,7 +455,7 @@ userHandle: _sodium.to_base64(
 | type     | string | The type of credential.                                                                                                                           |
 | response | object | Contains authenticatorData, clientDataJSON, signature and userHandle fields that were encoded prior to request.                                   |
 
-##### Response Body (JSON)
+##### Response body (JSON)
 
 | Key            | Type   | Value                                       |
 | -------------- | ------ | ------------------------------------------- |

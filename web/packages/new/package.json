@@ -6,6 +6,8 @@
         "@/next": "*",
         "@/utils": "*",
         "@ente/shared": "*",
+        "formik": "^2.4",
+        "idb": "^8",
         "zod": "^3"
     },
     "devDependencies": {}

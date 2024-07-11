@@ -56,7 +56,8 @@ class _HomePageState extends State<HomePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
-  final FocusNode searchInputFocusNode = FocusNode();
+  final bool _autoFocusSearch =
+      PreferenceService.instance.shouldAutoFocusOnSearchBar();
   bool _showSearchBox = false;
   String _searchText = "";
   List<Code>? _allCodes;
@@ -87,18 +88,7 @@ class _HomePageState extends State<HomePage> {
     _iconsChangedEvent = Bus.instance.on<IconsChangedEvent>().listen((event) {
       setState(() {});
     });
-    _showSearchBox = PreferenceService.instance.shouldAutoFocusOnSearchBar();
-    if (_showSearchBox) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          // https://github.com/flutter/flutter/issues/20706#issuecomment-646328652
-          FocusScope.of(context).unfocus();
-          Timer(const Duration(milliseconds: 1), () {
-            FocusScope.of(context).requestFocus(searchInputFocusNode);
-          });
-        },
-      );
-    }
+    _showSearchBox = _autoFocusSearch;
   }
 
   void _loadCodes() {
@@ -238,8 +228,9 @@ class _HomePageState extends State<HomePage> {
           title: !_showSearchBox
               ? const Text('Ente Auth')
               : TextField(
-                  focusNode: searchInputFocusNode,
-                  autofocus: _searchText.isEmpty,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  autofocus: _autoFocusSearch,
                   controller: _textController,
                   onChanged: (val) {
                     _searchText = val;
@@ -458,7 +449,10 @@ class _HomePageState extends State<HomePage> {
         CodeStore.instance.addCode(newCode);
         _focusNewCode(newCode);
       } catch (e, s) {
-        showGenericErrorDialog(context: context);
+        showGenericErrorDialog(
+          context: context,
+          error: e,
+        );
         _logger.severe("error while handling deeplink", e, s);
       }
     }

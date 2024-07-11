@@ -3,7 +3,7 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { readCastData, storeCastData } from "services/cast-data";
 import { getCastData, register } from "services/pair";
 import { advertiseOnChromecast } from "../services/chromecast";
@@ -17,7 +17,7 @@ export default function Index() {
 
     useEffect(() => {
         if (!pairingCode) {
-            register().then((r) => {
+            void register().then((r) => {
                 setPublicKeyB64(r.publicKeyB64);
                 setPrivateKeyB64(r.privateKeyB64);
                 setPairingCode(r.pairingCode);
@@ -33,30 +33,32 @@ export default function Index() {
     useEffect(() => {
         if (!publicKeyB64 || !privateKeyB64 || !pairingCode) return;
 
+        const pollTick = async () => {
+            const registration = { publicKeyB64, privateKeyB64, pairingCode };
+            try {
+                // TODO:
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                const data = await getCastData(registration);
+                if (!data) {
+                    // No one has connected yet.
+                    return;
+                }
+
+                storeCastData(data);
+                await router.push("/slideshow");
+            } catch (e) {
+                // The pairing code becomes invalid after an hour, which will cause
+                // `getCastData` to fail. There might be other reasons this might
+                // fail too, but in all such cases, it is a reasonable idea to start
+                // again from the beginning.
+                log.warn("Failed to get cast data", e);
+                setPairingCode(undefined);
+            }
+        };
+
         const interval = setInterval(pollTick, 2000);
         return () => clearInterval(interval);
-    }, [publicKeyB64, privateKeyB64, pairingCode]);
-
-    const pollTick = async () => {
-        const registration = { publicKeyB64, privateKeyB64, pairingCode };
-        try {
-            const data = await getCastData(registration);
-            if (!data) {
-                // No one has connected yet.
-                return;
-            }
-
-            storeCastData(data);
-            await router.push("/slideshow");
-        } catch (e) {
-            // The pairing code becomes invalid after an hour, which will cause
-            // `getCastData` to fail. There might be other reasons this might
-            // fail too, but in all such cases, it is a reasonable idea to start
-            // again from the beginning.
-            log.warn("Failed to get cast data", e);
-            setPairingCode(undefined);
-        }
-    };
+    }, [publicKeyB64, privateKeyB64, pairingCode, router]);
 
     return (
         <Container>
@@ -67,7 +69,7 @@ export default function Index() {
             {pairingCode ? <PairingCode code={pairingCode} /> : <Spinner />}
             <p>
                 Visit{" "}
-                <a href="https://ente.io/cast" target="_blank">
+                <a href="https://ente.io/cast" target="_blank" rel="noopener">
                     ente.io/cast
                 </a>{" "}
                 for help

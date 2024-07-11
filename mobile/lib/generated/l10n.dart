@@ -3162,6 +3162,16 @@ class S {
     );
   }
 
+  /// `Check status`
+  String get checkStatus {
+    return Intl.message(
+      'Check status',
+      name: 'checkStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Checking...`
   String get checking {
     return Intl.message(
@@ -8408,6 +8418,36 @@ class S {
     );
   }
 
+  /// `Verification is still pending`
+  String get passKeyPendingVerification {
+    return Intl.message(
+      'Verification is still pending',
+      name: 'passKeyPendingVerification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session expired`
+  String get loginSessionExpired {
+    return Intl.message(
+      'Session expired',
+      name: 'loginSessionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your session has expired. Please login again.`
+  String get loginSessionExpiredDetails {
+    return Intl.message(
+      'Your session has expired. Please login again.',
+      name: 'loginSessionExpiredDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Verify passkey`
   String get verifyPasskey {
     return Intl.message(
@@ -8774,10 +8814,10 @@ class S {
     );
   }
 
-  /// `Saving Edits!`
+  /// `Saving edits...`
   String get savingEdits {
     return Intl.message(
-      'Saving Edits!',
+      'Saving edits...',
       name: 'savingEdits',
       desc: '',
       args: [],
@@ -8843,6 +8883,227 @@ class S {
       args: [],
     );
   }
+
+  /// `Trim`
+  String get trim {
+    return Intl.message(
+      'Trim',
+      name: 'trim',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crop`
+  String get crop {
+    return Intl.message(
+      'Crop',
+      name: 'crop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotate`
+  String get rotate {
+    return Intl.message(
+      'Rotate',
+      name: 'rotate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Left`
+  String get left {
+    return Intl.message(
+      'Left',
+      name: 'left',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Right`
+  String get right {
+    return Intl.message(
+      'Right',
+      name: 'right',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What's new`
+  String get whatsNew {
+    return Intl.message(
+      'What\'s new',
+      name: 'whatsNew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review suggestions`
+  String get reviewSuggestions {
+    return Intl.message(
+      'Review suggestions',
+      name: 'reviewSuggestions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use as cover`
+  String get useAsCover {
+    return Intl.message(
+      'Use as cover',
+      name: 'useAsCover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not {name}?`
+  String notPersonLabel(String name) {
+    return Intl.message(
+      'Not $name?',
+      name: 'notPersonLabel',
+      desc:
+          'Label to indicate that the person in the photo is not the person whose name is mentioned',
+      args: [name],
+    );
+  }
+
+  /// `Re-enter password`
+  String get reenterPassword {
+    return Intl.message(
+      'Re-enter password',
+      name: 'reenterPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Re-enter PIN`
+  String get reenterPin {
+    return Intl.message(
+      'Re-enter PIN',
+      name: 'reenterPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device lock`
+  String get deviceLock {
+    return Intl.message(
+      'Device lock',
+      name: 'deviceLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PIN lock`
+  String get pinLock {
+    return Intl.message(
+      'PIN lock',
+      name: 'pinLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Next`
+  String get next {
+    return Intl.message(
+      'Next',
+      name: 'next',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set new password`
+  String get setNewPassword {
+    return Intl.message(
+      'Set new password',
+      name: 'setNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter PIN`
+  String get enterPin {
+    return Intl.message(
+      'Enter PIN',
+      name: 'enterPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set new PIN`
+  String get setNewPin {
+    return Intl.message(
+      'Set new PIN',
+      name: 'setNewPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App lock`
+  String get appLock {
+    return Intl.message(
+      'App lock',
+      name: 'appLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No system lock found`
+  String get noSystemLockFound {
+    return Intl.message(
+      'No system lock found',
+      name: 'noSystemLockFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
+    return Intl.message(
+      'To enable app lock, please setup device passcode or screen lock in your system settings.',
+      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to unlock`
+  String get tapToUnlock {
+    return Intl.message(
+      'Tap to unlock',
+      name: 'tapToUnlock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Too many incorrect attempts`
+  String get tooManyIncorrectAttempts {
+    return Intl.message(
+      'Too many incorrect attempts',
+      name: 'tooManyIncorrectAttempts',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -8861,6 +9122,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
+      Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }

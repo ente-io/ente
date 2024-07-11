@@ -1,9 +1,23 @@
 # CHANGELOG
 
-## v1.7.1 (Unreleased)
+## v1.7.2 (Unreleased)
 
+-   Significantly improve the speed of the metadata parsing step during imports
+    of Google takeouts.
+-   Add a option to set and use a custom endpoint.
+-   Fix an issue preventing subscription purchases and renewals.
+-   Clear cached password after changing it on a different device.
+-   Reconcile exported files with disk on app start and resync.
+-   .
+
+## v1.7.1
+
+-   Support for passkeys as a second factor authentication mechanism.
 -   Remember the window size across app restarts.
 -   Revert changes to the Linux icon.
+-   Fix an issue causing deleted items in watched folders to not move to
+    uncategorized.
+-   Fix duplicate file uploads when initializing a folder watch (sometimes).
 
 ## v1.7.0
 

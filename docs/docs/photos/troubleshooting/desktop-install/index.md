@@ -9,6 +9,9 @@ The latest version of the Ente Photos desktop app can be downloaded from
 [ente.io/download](https://ente.io/download). If you're having trouble, please
 see if any of the following cases apply.
 
+-   [Windows](#windows)
+-   [Linux](#linux)
+
 ## Windows
 
 If the app stops with an "A JavaScript error occurred in the main process - The
@@ -17,12 +20,35 @@ start it, then you might need to install the VC++ runtime from Microsoft.
 
 This is what the error looks like:
 
+<div style="border: 1px solid black">
+
 ![Error when VC++ runtime is not installed](windows-vc.png){width=500px}
+
+</div>
 
 You can install the Microsoft VC++ redistributable runtime from here:<br/>
 https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-microsoft-visual-c-redistributable-version
 
-## AppImages on ARM64 Linux
+## Linux
+
+### AppImage desktop integration
+
+AppImages are not fully standalone, and they require additional steps to enable
+full "desktop integration":
+
+-   Showing the app icon,
+-   Surfacing the app in the list of installed apps,
+-   Handling redirection after passkey verification.
+
+All the ways of enabling AppImage desktop integration are mentioned in
+[AppImage documentation](https://docs.appimage.org/user-guide/run-appimages.html#integrating-appimages-into-the-desktop).
+
+For example, you can download the
+[appimaged](https://github.com/probonopd/go-appimage/releases) AppImage, run it,
+and then download the Ente Photos AppImage into your `~/Downloads` folder.
+_appimaged_ will then pick it up automatically.
+
+### AppImages on ARM64
 
 If you're on an ARM64 machine running Linux, and the AppImages doesn't do
 anything when you run it, you will need to run the following command on your
@@ -42,7 +68,7 @@ details, see the following upstream issues:
 -   libz.so: cannot open shared object file with Ubuntu arm64 -
     [electron-userland/electron-builder/issues/7835](https://github.com/electron-userland/electron-builder/issues/7835)
 
-## AppImage says it requires FUSE
+### AppImage says it requires FUSE
 
 See
 [docs.appimage.org](https://docs.appimage.org/user-guide/troubleshooting/fuse.html#the-appimage-tells-me-it-needs-fuse-to-run).
@@ -53,7 +79,7 @@ tl;dr; for example, on Ubuntu,
 sudo apt install libfuse2
 ```
 
-## Linux SUID error
+### Linux SUID error
 
 On some Linux distributions, if you run the AppImage from the CLI, it might fail
 with the following error:

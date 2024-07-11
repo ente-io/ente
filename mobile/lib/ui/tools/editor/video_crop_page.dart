@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import "package:flutter_svg/flutter_svg.dart";
+import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/ui/tools/editor/video_editor/crop_value.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
@@ -20,7 +21,10 @@ class _VideoCropPageState extends State<VideoCropPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -83,7 +87,8 @@ class _VideoCropPageState extends State<VideoCropPage> {
             ),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
-              secondaryText: "Done",
+              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
+              secondaryText: S.of(context).done,
               onSecondaryPressed: () {
                 // WAY 1: validate crop parameters set in the crop view
                 widget.controller.applyCacheCrop();
@@ -114,9 +119,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
           widget.controller.preferredCropAspectRatio = f?.toDouble();
         }
       },
-      child: SvgPicture.asset(
-        "assets/video-editor/video-crop-${value.name}-action.svg",
-      ),
+      svgPath: "assets/video-editor/video-crop-${value.name}-action.svg",
     );
   }
 }

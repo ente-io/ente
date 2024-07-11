@@ -59,8 +59,10 @@ export const fileNameFromComponents = (components: FileNameComponents) =>
  */
 export const basename = (path: string) => {
     const pathComponents = path.split("/");
-    for (let i = pathComponents.length - 1; i >= 0; i--)
-        if (pathComponents[i] !== "") return pathComponents[i];
+    for (let i = pathComponents.length - 1; i >= 0; i--) {
+        const component = pathComponents[i];
+        if (component && component.length > 0) return component;
+    }
     return path;
 };
 

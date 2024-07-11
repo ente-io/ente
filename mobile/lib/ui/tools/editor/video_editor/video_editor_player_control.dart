@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/ente_theme_data.dart";
 import "package:video_editor/video_editor.dart";
 
 class VideoEditorPlayerControl extends StatelessWidget {
@@ -42,7 +43,7 @@ class VideoEditorPlayerControl extends StatelessWidget {
                 vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFF252525),
+                color: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
                 borderRadius: BorderRadius.circular(56),
               ),
               child: Row(

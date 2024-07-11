@@ -29,7 +29,7 @@ on:
             - "auth-v*"
 
 env:
-    FLUTTER_VERSION: "3.19.3"
+    FLUTTER_VERSION: "3.22.2"
 
 jobs:
     build-ubuntu:
@@ -145,7 +145,7 @@ jobs:
         - name: Install dependencies for desktop build
           run: |
             sudo apt-get update -y
-            sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5
+            sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5 xz-utils libarchive-tools
             sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
         - name: Install appimagetool
@@ -157,10 +157,16 @@ jobs:
         - name: Build desktop app
           run: |
             flutter config --enable-linux-desktop
-            dart pub global activate flutter_distributor
+            # dart pub global activate flutter_distributor
+            dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref pacman --git-path packages/flutter_distributor
+            # Run below command if it is a beta or nightly
+            if [[ ${{ github.ref }} =~ beta|nightly ]]; then
+              flutter_distributor package --platform=linux --targets=pacman --skip-clean
+              mv dist/**/*-*-linux.pacman artifacts/ente-${{ github.ref_name }}-x86_64.pacman
+            fi
             flutter_distributor package --platform=linux --targets=rpm --skip-clean
-            flutter_distributor package --platform=linux --targets=appimage --skip-clean
             mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
+            flutter_distributor package --platform=linux --targets=appimage --skip-clean
             mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
 
         - name: Generate checksums

@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var AppVersion = "0.1.14"
+var AppVersion = "0.1.17"
 
 func main() {
 	cliDBPath, err := GetCLIConfigPath()
@@ -75,6 +75,10 @@ func main() {
 		}
 		return
 	}
+	if len(os.Args) == 1 {
+		// If no arguments are passed, show help
+		os.Args = append(os.Args, "help")
+	}
 	cmd.Execute(&ctrl, AppVersion)
 }
 
@@ -85,6 +89,7 @@ func initConfig(cliConfigPath string) {
 	viper.AddConfigPath(".")                 // optionally look for config in the working directory
 
 	viper.SetDefault("endpoint.api", constants.EnteApiUrl)
+	viper.SetDefault("endpoint.accounts", constants.EnteAccountUrl)
 	viper.SetDefault("log.http", false)
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

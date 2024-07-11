@@ -1,4 +1,5 @@
 import log from "@/next/log";
+import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -10,18 +11,22 @@ import MenuItemDivider from "@ente/shared/components/Menu/MenuItemDivider";
 import { MenuItemGroup } from "@ente/shared/components/Menu/MenuItemGroup";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import Titlebar from "@ente/shared/components/Titlebar";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { formatDateTimeFull } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import { Box, Button, Stack, Typography, useMediaQuery } from "@mui/material";
+import {
+    Box,
+    Button,
+    Stack,
+    Typography,
+    styled,
+    useMediaQuery,
+} from "@mui/material";
 import { t } from "i18next";
-import { useRouter } from "next/router";
-import { useAppContext } from "pages/_app";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     deletePasskey,
     getPasskeys,
@@ -29,35 +34,54 @@ import {
     renamePasskey,
     type Passkey,
 } from "services/passkey";
+import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar } = useAppContext();
+    const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();
 
+    const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
     const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
     const [selectedPasskey, setSelectedPasskey] = useState<
         Passkey | undefined
     >();
 
-    const router = useRouter();
-
-    const refreshPasskeys = async () => {
-        try {
-            setPasskeys(await getPasskeys());
-        } catch (e) {
-            log.error("Failed to fetch passkeys", e);
-        }
-    };
+    const showPasskeyFetchFailedErrorDialog = useCallback(() => {
+        setDialogBoxAttributesV2({
+            title: t("ERROR"),
+            content: t("passkey_fetch_failed"),
+            close: {},
+        });
+    }, [setDialogBoxAttributesV2]);
 
     useEffect(() => {
-        if (!getToken()) {
-            router.push("/login");
-            return;
-        }
-
         showNavBar(true);
-        void refreshPasskeys();
-    }, []);
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const token = urlParams.get("token");
+        if (token) {
+            setToken(token);
+        } else {
+            log.error("Missing accounts token");
+            showPasskeyFetchFailedErrorDialog();
+        }
+    }, [showNavBar, showPasskeyFetchFailedErrorDialog]);
+
+    const refreshPasskeys = useCallback(async () => {
+        try {
+            setPasskeys(await getPasskeys(ensure(token)));
+        } catch (e) {
+            log.error("Failed to fetch passkeys", e);
+            showPasskeyFetchFailedErrorDialog();
+        }
+    }, [token, showPasskeyFetchFailedErrorDialog]);
+
+    useEffect(() => {
+        if (token) {
+            void refreshPasskeys();
+        }
+    }, [token, refreshPasskeys]);
 
     const handleSelectPasskey = (passkey: Passkey) => {
         setSelectedPasskey(passkey);
@@ -85,18 +109,17 @@ const Page: React.FC = () => {
         resetForm: () => void,
     ) => {
         try {
-            await registerPasskey(inputValue);
+            await registerPasskey(ensure(token), inputValue);
         } catch (e) {
             log.error("Failed to register a new passkey", e);
             // If the user cancels the operation, then an error with name
             // "NotAllowedError" is thrown.
             //
-            // Ignore this, but in other cases add an error indicator to the add
-            // passkey text field. The browser is expected to already have shown
-            // an error dialog to the user.
+            // Ignore these, but in other cases add an error indicator to the
+            // add passkey text field. The browser is expected to already have
+            // shown an error dialog to the user.
             if (!(e instanceof Error && e.name == "NotAllowedError")) {
-                // TODO-PK: localize
-                setFieldError("Could not add passkey");
+                setFieldError(t("passkey_add_failed"));
             }
             return;
         }
@@ -109,13 +132,13 @@ const Page: React.FC = () => {
             <CenteredFlex>
                 <Box maxWidth="20rem">
                     <Box marginBottom="1rem">
-                        <Typography>{t("PASSKEYS_DESCRIPTION")}</Typography>
+                        <Typography>{t("passkeys_description")}</Typography>
                     </Box>
                     <FormPaper style={{ padding: "1rem" }}>
                         <SingleInputForm
                             fieldType="text"
-                            placeholder={t("ENTER_PASSKEY_NAME")}
-                            buttonText={t("ADD_PASSKEY")}
+                            placeholder={t("enter_passkey_name")}
+                            buttonText={t("add_passkey")}
                             initialValue={""}
                             callback={handleSubmit}
                             submitButtonProps={{ sx: { marginBottom: 1 } }}
@@ -129,10 +152,12 @@ const Page: React.FC = () => {
                     </Box>
                 </Box>
             </CenteredFlex>
+
             <ManagePasskeyDrawer
                 open={showPasskeyDrawer}
                 onClose={handleDrawerClose}
                 passkey={selectedPasskey}
+                token={token}
                 onUpdateOrDeletePasskey={handleUpdateOrDeletePasskey}
             />
         </>
@@ -186,21 +211,39 @@ const PasskeyListItem: React.FC<PasskeyListItemProps> = ({
     passkey,
     onClick,
 }) => {
+    const labelComponent = (
+        <PasskeyLabel>
+            <Typography fontWeight="bold">{passkey.friendlyName}</Typography>
+        </PasskeyLabel>
+    );
     return (
         <EnteMenuItem
             onClick={() => onClick(passkey)}
             startIcon={<KeyIcon />}
             endIcon={<ChevronRightIcon />}
-            label={passkey.friendlyName}
+            labelComponent={labelComponent}
         />
     );
 };
+
+const PasskeyLabel = styled("div")`
+    /* If the name of the passkey does not fit in one line, break the text into
+       multiple lines as necessary */
+    white-space: normal;
+`;
 
 interface ManagePasskeyDrawerProps {
     /** If `true`, then the drawer is shown. */
     open: boolean;
     /** Callback to invoke when the drawer wants to be closed. */
     onClose: () => void;
+    /**
+     * The token to use for authenticating with the backend when making requests
+     * for editing or deleting passkeys.
+     *
+     * It is guaranteed that this will be defined when `open` is true.
+     */
+    token: string | undefined;
     /**
      * The {@link Passkey} whose details should be shown in the drawer.
      *
@@ -219,6 +262,7 @@ interface ManagePasskeyDrawerProps {
 const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     open,
     onClose,
+    token,
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
@@ -228,12 +272,11 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     return (
         <>
             <EnteDrawer anchor="right" {...{ open, onClose }}>
-                {passkey && (
+                {token && passkey && (
                     <Stack spacing={"4px"} py={"12px"}>
                         <Titlebar
                             onClose={onClose}
-                            // TODO-PK: Localize (more below too)
-                            title="Manage Passkey"
+                            title={t("manage_passkey")}
                             onRootClose={onClose}
                         />
                         <InfoItem
@@ -251,7 +294,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                                     setShowRenameDialog(true);
                                 }}
                                 startIcon={<EditIcon />}
-                                label={"Rename Passkey"}
+                                label={t("rename_passkey")}
                             />
                             <MenuItemDivider />
                             <EnteMenuItem
@@ -259,7 +302,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                                     setShowDeleteDialog(true);
                                 }}
                                 startIcon={<DeleteIcon />}
-                                label={"Delete Passkey"}
+                                label={t("delete_passkey")}
                                 color="critical"
                             />
                         </MenuItemGroup>
@@ -267,10 +310,11 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                 )}
             </EnteDrawer>
 
-            {passkey && (
+            {token && passkey && (
                 <RenamePasskeyDialog
                     open={showRenameDialog}
                     onClose={() => setShowRenameDialog(false)}
+                    token={token}
                     passkey={passkey}
                     onRenamePasskey={() => {
                         setShowRenameDialog(false);
@@ -279,10 +323,11 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                 />
             )}
 
-            {passkey && (
+            {token && passkey && (
                 <DeletePasskeyDialog
                     open={showDeleteDialog}
                     onClose={() => setShowDeleteDialog(false)}
+                    token={token}
                     passkey={passkey}
                     onDeletePasskey={() => {
                         setShowDeleteDialog(false);
@@ -299,6 +344,8 @@ interface RenamePasskeyDialogProps {
     open: boolean;
     /** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
+    /** Auth token for API requests. */
+    token: string;
     /** The {@link Passkey} to rename. */
     passkey: Passkey;
     /** Callback to invoke when the passkey is renamed. */
@@ -308,6 +355,7 @@ interface RenamePasskeyDialogProps {
 const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     open,
     onClose,
+    token,
     passkey,
     onRenamePasskey,
 }) => {
@@ -315,7 +363,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
 
     const handleSubmit = async (inputValue: string) => {
         try {
-            await renamePasskey(passkey.id, inputValue);
+            await renamePasskey(token, passkey.id, inputValue);
             onRenamePasskey();
         } catch (e) {
             log.error("Failed to rename passkey", e);
@@ -326,12 +374,12 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
         <DialogBoxV2
             fullWidth
             {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("RENAME_PASSKEY") }}
+            attributes={{ title: t("rename_passkey") }}
         >
             <SingleInputForm
                 initialValue={passkey.friendlyName}
                 callback={handleSubmit}
-                placeholder={t("ENTER_PASSKEY_NAME")}
+                placeholder={t("enter_passkey_name")}
                 buttonText={t("RENAME")}
                 fieldType="text"
                 secondaryButtonAction={onClose}
@@ -346,6 +394,8 @@ interface DeletePasskeyDialogProps {
     open: boolean;
     /** Callback to invoke when the dialog wants to be closed. */
     onClose: () => void;
+    /** Auth token for API requests. */
+    token: string;
     /** The {@link Passkey} to delete. */
     passkey: Passkey;
     /** Callback to invoke when the passkey is deleted. */
@@ -355,6 +405,7 @@ interface DeletePasskeyDialogProps {
 const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
     open,
     onClose,
+    token,
     passkey,
     onDeletePasskey,
 }) => {
@@ -364,7 +415,7 @@ const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
     const handleConfirm = async () => {
         setIsDeleting(true);
         try {
-            await deletePasskey(passkey.id);
+            await deletePasskey(token, passkey.id);
             onDeletePasskey();
         } catch (e) {
             log.error("Failed to delete passkey", e);
@@ -377,10 +428,10 @@ const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
         <DialogBoxV2
             fullWidth
             {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("DELETE_PASSKEY") }}
+            attributes={{ title: t("delete_passkey") }}
         >
             <Stack spacing={"8px"}>
-                <Typography>{t("DELETE_PASSKEY_CONFIRMATION")}</Typography>
+                <Typography>{t("delete_passkey_confirmation")}</Typography>
                 <EnteButton
                     type="submit"
                     size="large"

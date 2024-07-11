@@ -1,18 +1,19 @@
-import { ensure } from "@/utils/ensure";
-import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
+import {
+    getSRPAttributes,
+    startSRPSetup,
+    updateSRPAndKeys,
+} from "@/accounts/api/srp";
 import SetPasswordForm, {
     type SetPasswordFormProps,
-} from "@ente/accounts/components/SetPasswordForm";
-import { PAGES } from "@ente/accounts/constants/pages";
+} from "@/accounts/components/SetPasswordForm";
+import { PAGES } from "@/accounts/constants/pages";
 import {
     generateSRPClient,
     generateSRPSetupAttributes,
-} from "@ente/accounts/services/srp";
-import type { UpdatedKey } from "@ente/accounts/types/user";
-import {
-    convertBase64ToBuffer,
-    convertBufferToBase64,
-} from "@ente/accounts/utils";
+} from "@/accounts/services/srp";
+import type { UpdatedKey } from "@/accounts/types/user";
+import { convertBase64ToBuffer, convertBufferToBase64 } from "@/accounts/utils";
+import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
@@ -35,9 +36,7 @@ import { useEffect, useState } from "react";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
-
+const Page: React.FC<PageProps> = () => {
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
 
@@ -111,6 +110,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             updatedKeyAttr: updatedKey,
         });
 
+        // Update the SRP attributes that are stored locally.
+        if (user?.email) {
+            const srpAttributes = await getSRPAttributes(user.email);
+            if (srpAttributes) {
+                setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+            }
+        }
+
         const updatedKeyAttributes = Object.assign(keyAttributes, updatedKey);
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
@@ -119,12 +126,13 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         );
 
         await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+
         redirectToAppHome();
     };
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(appHomeRoute(appName));
+        router.push(appHomeRoute);
     };
 
     // TODO: Handle the case where user is not loaded yet.

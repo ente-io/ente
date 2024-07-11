@@ -1,10 +1,3 @@
-export function initiateEmail(email: string) {
-    const a = document.createElement("a");
-    a.href = "mailto:" + email;
-    a.rel = "noreferrer noopener";
-    a.click();
-}
-
 export const preloadImage = (imgBasePath: string) => {
     const srcSet = [];
     for (let i = 1; i <= 3; i++) {

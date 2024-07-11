@@ -15,7 +15,7 @@ export const isDevBuild = process.env.NODE_ENV === "development";
  * `true` if we're running in the default global context (aka the main thread)
  * of a web browser.
  *
- * In particular, this is `false` when we're running in a Web Worker,
+ * In particular, this is `false` when we're running in a web worker,
  * irrespecitve of whether the worker is running in a Node.js context or a web
  * browser context.
  *

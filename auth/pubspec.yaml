@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 3.0.8+308
+version: 3.0.18+318
 publish_to: none
 
 environment:
@@ -20,8 +20,8 @@ dependencies:
   convert: ^3.1.1
   desktop_webview_window:
     git:
-      url: https://github.com/ente-io/flutter-desktopwebview-fork
-      ref: fix-webkit-version
+      url: https://github.com/MixinNetwork/flutter-plugins
+      ref: main
       path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0
@@ -64,7 +64,7 @@ dependencies:
   google_nav_bar: ^5.0.5 #supported
   gradient_borders: ^1.0.0
   http: ^1.1.0
-  intl: ^0.18.0
+  intl: ^0.19.0
   json_annotation: ^4.5.0
   local_auth: ^2.2.0
   local_auth_android: ^1.0.37
@@ -92,8 +92,8 @@ dependencies:
       url: https://github.com/tekartik/sqflite
       path: sqflite
   sqflite_common_ffi: ^2.3.0+4
-  sqlite3: ^2.1.0
-  sqlite3_flutter_libs: ^0.5.19+1
+  sqlite3: ^2.4.3
+  sqlite3_flutter_libs: ^0.5.24
   steam_totp: ^0.0.1
   step_progress_indicator: ^1.0.2
   styled_text: ^8.1.0
@@ -102,13 +102,13 @@ dependencies:
   url_launcher: ^6.1.5
   uuid: ^4.2.2
   win32: ^5.1.1
-  window_manager: ^0.3.8
+  window_manager: ^0.3.9
 
 dependency_overrides:
   flutter_secure_storage_linux:
     git:
-      url: https://github.com/prateekmedia/flutter_secure_storage.git
-      ref: patch-1
+      url: https://github.com/mogol/flutter_secure_storage.git
+      ref: develop
       path: flutter_secure_storage_linux
 dev_dependencies:
   build_runner: ^2.1.11
@@ -132,6 +132,7 @@ flutter:
     - assets/custom-icons/icons/
     - assets/custom-icons/_data/
     - assets/svg/
+    - assets/ca/
 
   fonts:
     - family: Inter

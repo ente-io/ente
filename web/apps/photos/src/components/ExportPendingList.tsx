@@ -1,9 +1,9 @@
+import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import { Box, styled } from "@mui/material";
 import ItemList from "components/ItemList";
 import { t } from "i18next";
-import { EnteFile } from "types/file";
 import CollectionCard from "./Collections/CollectionCard";
 import { ResultPreviewTile } from "./Collections/styledComponents";
 

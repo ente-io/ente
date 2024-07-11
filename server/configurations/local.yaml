@@ -233,11 +233,16 @@ stripe:
         success: ?status=success&session_id={CHECKOUT_SESSION_ID}
         cancel: ?status=fail&reason=canceled
 
-# Passkey support (WIP)
+# Passkey support (optional)
+# Use case: MFA
 webauthn:
-    rpid: "example.com"
+    # Our "Relying Party" ID. This scopes the generated credentials.
+    # See: https://www.w3.org/TR/webauthn-3/#rp-id
+    rpid: localhost
+    # Whitelist of origins from where we will accept WebAuthn requests.
+    # See: https://github.com/go-webauthn/webauthn
     rporigins:
-        - "https://example.com:3005"
+        - "http://localhost:3001"
 
 # Roadmap SSO (optional)
 #
@@ -312,7 +317,7 @@ internal:
 replication:
     enabled: false
     # The Cloudflare worker to use to download files from the primary hot
-    # bucket. Must be specified if replication is enabled.
+    # bucket. If this isn't specified, files will be downloaded directly.
     worker-url:
     # Number of go routines to spawn for replication
     # This is not related to the worker-url above.

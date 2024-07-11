@@ -15,13 +15,9 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
-import "package:photos/ui/viewer/people/cropped_face_image_view.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 import "package:photos/utils/thumbnail_util.dart";
-// import "package:photos/utils/toast_util.dart";
-
-const useGeneratedFaceCrops = true;
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -53,11 +49,7 @@ class _FaceWidgetState extends State<FaceWidget> {
   @override
   Widget build(BuildContext context) {
     final bool givenFaces = widget.faceCrops != null;
-    if (useGeneratedFaceCrops) {
-      return _buildFaceImageGenerated(givenFaces);
-    } else {
-      return _buildFaceImageFlutterZoom();
-    }
+    return _buildFaceImageGenerated(givenFaces);
   }
 
   Widget _buildFaceImageGenerated(bool givenFaces) {
@@ -279,7 +271,7 @@ class _FaceWidgetState extends State<FaceWidget> {
     try {
       if (isJustRemoved) {
         await ClusterFeedbackService.instance
-            .addFilesToCluster([widget.face.faceID], widget.clusterID!);
+            .addFacesToCluster([widget.face.faceID], widget.clusterID!);
       } else {
         await ClusterFeedbackService.instance
             .removeFilesFromCluster([widget.file], widget.clusterID!);
@@ -332,179 +324,5 @@ class _FaceWidgetState extends State<FaceWidget> {
       }
       return null;
     }
-  }
-
-  Widget _buildFaceImageFlutterZoom() {
-    return Builder(
-      builder: (context) {
-        return GestureDetector(
-          onTap: () async {
-            log(
-              "FaceWidget is tapped, with person ${widget.person} and clusterID ${widget.clusterID}",
-              name: "FaceWidget",
-            );
-            if (widget.person == null && widget.clusterID == null) {
-              // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
-              final w = (kDebugMode ? EnteWatch('FaceWidget') : null)?..start();
-              final existingClusterID = await FaceMLDataDB.instance
-                  .getClusterIDForFaceID(widget.face.faceID);
-              w?.log('getting existing clusterID for faceID');
-              if (existingClusterID != null) {
-                final fileIdsToClusterIds =
-                    await FaceMLDataDB.instance.getFileIdToClusterIds();
-                final files = await SearchService.instance.getAllFiles();
-                final clusterFiles = files
-                    .where(
-                      (file) =>
-                          fileIdsToClusterIds[file.uploadedFileID]
-                              ?.contains(existingClusterID) ??
-                          false,
-                    )
-                    .toList();
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ClusterPage(
-                      clusterFiles,
-                      clusterID: existingClusterID,
-                    ),
-                  ),
-                );
-              }
-
-              // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
-              final int newClusterID = DateTime.now().microsecondsSinceEpoch;
-              await FaceMLDataDB.instance.updateFaceIdToClusterId(
-                {widget.face.faceID: newClusterID},
-              );
-
-              // Push page for the new cluster
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ClusterPage(
-                    [widget.file],
-                    clusterID: newClusterID,
-                  ),
-                ),
-              );
-            }
-            if (widget.person != null) {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => PeoplePage(
-                    person: widget.person!,
-                  ),
-                ),
-              );
-            } else if (widget.clusterID != null) {
-              final fileIdsToClusterIds =
-                  await FaceMLDataDB.instance.getFileIdToClusterIds();
-              final files = await SearchService.instance.getAllFiles();
-              final clusterFiles = files
-                  .where(
-                    (file) =>
-                        fileIdsToClusterIds[file.uploadedFileID]
-                            ?.contains(widget.clusterID) ??
-                        false,
-                  )
-                  .toList();
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ClusterPage(
-                    clusterFiles,
-                    clusterID: widget.clusterID!,
-                  ),
-                ),
-              );
-            }
-          },
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  Container(
-                    height: 60,
-                    width: 60,
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: const BorderRadius.all(
-                          Radius.elliptical(16, 12),
-                        ),
-                        side: widget.highlight
-                            ? BorderSide(
-                                color: getEnteColorScheme(context).primary700,
-                                width: 1.0,
-                              )
-                            : BorderSide.none,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius:
-                          const BorderRadius.all(Radius.elliptical(16, 12)),
-                      child: SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: CroppedFaceImageView(
-                          enteFile: widget.file,
-                          face: widget.face,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (widget.editMode)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: GestureDetector(
-                        onTap: _cornerIconPressed,
-                        child: isJustRemoved
-                            ? const Icon(
-                                CupertinoIcons.add_circled_solid,
-                                color: Colors.green,
-                              )
-                            : const Icon(
-                                Icons.cancel,
-                                color: Colors.red,
-                              ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (widget.person != null)
-                Text(
-                  widget.person!.data.name.trim(),
-                  style: Theme.of(context).textTheme.bodySmall,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              if (kDebugMode)
-                Text(
-                  'S: ${widget.face.score.toStringAsFixed(3)}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 1,
-                ),
-              if (kDebugMode)
-                Text(
-                  'B: ${widget.face.blur.toStringAsFixed(0)}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 1,
-                ),
-              if (kDebugMode)
-                Text(
-                  'D: ${widget.face.detection.getFaceDirection().toDirectionString()}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 1,
-                ),
-              if (kDebugMode)
-                Text(
-                  'Sideways: ${widget.face.detection.faceIsSideways().toString()}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 1,
-                ),
-            ],
-          ),
-        );
-      },
-    );
   }
 }

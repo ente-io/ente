@@ -62,6 +62,103 @@ export const allowWindowClose = (): void => {
 };
 
 /**
+ * The app's entry point.
+ *
+ * We call this at the end of this file.
+ */
+const main = () => {
+    const gotTheLock = app.requestSingleInstanceLock();
+    if (!gotTheLock) {
+        app.quit();
+        return;
+    }
+
+    let mainWindow: BrowserWindow | undefined;
+
+    initLogging();
+    logStartupBanner();
+    registerForEnteLinks();
+    // The order of the next two calls is important
+    setupRendererServer();
+    registerPrivilegedSchemes();
+    migrateLegacyWatchStoreIfNeeded();
+
+    /**
+     * Handle an open URL request, but ensuring that we have a mainWindow.
+     */
+    const handleOpenURLEnsuringWindow = (url: string) => {
+        log.info(`Attempting to handle request to open URL: ${url}`);
+        if (mainWindow) handleEnteLinks(mainWindow, url);
+        else setTimeout(() => handleOpenURLEnsuringWindow(url), 1000);
+    };
+
+    app.on("second-instance", (_, argv: string[]) => {
+        // Someone tried to run a second instance, we should focus our window.
+        if (mainWindow) {
+            mainWindow.show();
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+        }
+        // On Windows and Linux, this is how we get deeplinks.
+        // See: registerForEnteLinks
+        const url = argv.pop();
+        if (url) handleOpenURLEnsuringWindow(url);
+    });
+
+    // Emitted once, when Electron has finished initializing.
+    //
+    // Note that some Electron APIs can only be used after this event occurs.
+    void app.whenReady().then(() => {
+        void (async () => {
+            // Create window and prepare for the renderer.
+            mainWindow = createMainWindow();
+
+            // Setup IPC and streams.
+            const watcher = createWatcher(mainWindow);
+            attachIPCHandlers();
+            attachFSWatchIPCHandlers(watcher);
+            attachLogoutIPCHandler(watcher);
+            registerStreamProtocol();
+
+            // Configure the renderer's environment.
+            const webContents = mainWindow.webContents;
+            setDownloadPath(webContents);
+            allowExternalLinks(webContents);
+            allowAllCORSOrigins(webContents);
+
+            // Start loading the renderer.
+            void mainWindow.loadURL(rendererURL);
+
+            // Continue on with the rest of the startup sequence.
+            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
+            setupTrayItem(mainWindow);
+            setupAutoUpdater(mainWindow);
+
+            try {
+                await deleteLegacyDiskCacheDirIfExists();
+                await deleteLegacyKeysStoreIfExists();
+            } catch (e) {
+                // Log but otherwise ignore errors during non-critical startup
+                // actions.
+                log.error("Ignoring startup error", e);
+            }
+        })();
+    });
+
+    // This is a macOS only event. Show our window when the user activates the
+    // app, e.g. by clicking on its dock icon.
+    app.on("activate", () => mainWindow?.show());
+
+    app.on("before-quit", () => {
+        if (mainWindow) saveWindowBounds(mainWindow);
+        allowWindowClose();
+    });
+
+    // On macOS, this is how we get deeplinks. See: registerForEnteLinks
+    app.on("open-url", (_, url) => handleOpenURLEnsuringWindow(url));
+};
+
+/**
  * Log a standard startup banner.
  *
  * This helps us identify app starts and other environment details in the logs.
@@ -138,6 +235,32 @@ const registerPrivilegedSchemes = () => {
 };
 
 /**
+ * Register a handler for deeplinks, for the "ente://" protocol.
+ *
+ * See: [Note: Passkey verification in the desktop app].
+ *
+ * Implementation notes:
+ * -   https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app
+ * -   This works only when the app is packaged.
+ * -   On Windows and Linux, we get the deeplink in the "second-instance" event.
+ * -   On macOS, we get the deeplink in the "open-url" event.
+ */
+const registerForEnteLinks = () => app.setAsDefaultProtocolClient("ente");
+
+/** Sibling of {@link registerForEnteLinks}. */
+const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
+    // [Note: Using deeplinks to navigate in desktop app]
+    //
+    // Both
+    //
+    // - our deeplink protocol, and
+    // - the protocol we're using to serve/ our bundled web app
+    //
+    // use the same scheme ("ente://"), so the URL can directly be forwarded.
+    mainWindow.webContents.send("openURL", url);
+};
+
+/**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
  *
  * This window will show the HTML served from {@link rendererURL}.
@@ -172,9 +295,8 @@ const createMainWindow = () => {
         // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window otherwise.
-        //
-        // If we did not give it an explicit size, maximize it
+        // Show our window otherwise, maximizing it if we're not asked to set it
+        // to a specific size.
         bounds ? window.show() : window.maximize();
     }
 
@@ -332,20 +454,51 @@ const allowExternalLinks = (webContents: WebContents) =>
 /**
  * Allow uploading to arbitrary S3 buckets.
  *
- * The files in the desktop app are served over the ente:// protocol. During
- * testing or self-hosting, we might be using a S3 bucket that does not allow
- * whitelisting a custom URI scheme. To avoid requiring the bucket to set an
- * "Access-Control-Allow-Origin: *" or do a echo-back of `Origin`, we add a
- * workaround here instead, intercepting the ACAO header and allowing `*`.
+ * The files in the desktop app are served over the ente:// protocol. When that
+ * is returned as the CORS allowed origin, "Access-Control-Allow-Origin:
+ * ente://app", CORS requests fail.
+ *
+ * Further, during testing or self-hosting, file uploads involve a redirection
+ * (This doesn't affect our production systems since we upload via a worker,
+ * See: [Note: Passing credentials for self-hosted file fetches]).
+ *
+ * In some cases, we might be using a S3 bucket that does not allow whitelisting
+ * a custom URI scheme. Echoing back the value of `Origin` (even if the bucket
+ * would allow us to) would also not work, since the browser sends `null` as the
+ * `Origin` for the redirected request (this is as per the CORS spec). So the
+ * only way in such cases would be to require the bucket to set an
+ * "Access-Control-Allow-Origin: *".
+ *
+ * To avoid these issues, we intercepting the ACAO header and set it to `*`.
+ *
+ * However, that cause problems with requests that use credentials since "*" is
+ * not a valid value in such cases. One such example is the HCaptcha requests
+ * made by Stripe when we initiate a payment within the desktop app:
+ *
+ * > Access to XMLHttpRequest at 'https://api2.hcaptcha.com/getcaptcha/xxx' from
+ * > origin 'https://newassets.hcaptcha.com' has been blocked by CORS policy:
+ * > The value of the 'Access-Control-Allow-Origin' header in the response must
+ * > not be the wildcard '*' when the request's credentials mode is 'include'.
+ * > The credentials mode of requests initiated by the XMLHttpRequest is
+ * > controlled by the withCredentials attribute.
+ *
+ * So we only do this workaround if there was either no ACAO specified in the
+ * response, or if the ACAO was "ente://app".
  */
 const allowAllCORSOrigins = (webContents: WebContents) =>
     webContents.session.webRequest.onHeadersReceived(
         ({ responseHeaders }, callback) => {
             const headers: NonNullable<typeof responseHeaders> = {};
-            for (const [key, value] of Object.entries(responseHeaders ?? {}))
-                if (key.toLowerCase() != "access-control-allow-origin")
-                    headers[key] = value;
+
             headers["Access-Control-Allow-Origin"] = ["*"];
+            for (const [key, value] of Object.entries(responseHeaders ?? {}))
+                if (key.toLowerCase() == "access-control-allow-origin") {
+                    headers["Access-Control-Allow-Origin"] =
+                        value[0] == rendererURL ? ["*"] : value;
+                } else {
+                    headers[key] = value;
+                }
+
             callback({ responseHeaders: headers });
         },
     );
@@ -440,79 +593,5 @@ const deleteLegacyKeysStoreIfExists = async () => {
     }
 };
 
-const main = () => {
-    const gotTheLock = app.requestSingleInstanceLock();
-    if (!gotTheLock) {
-        app.quit();
-        return;
-    }
-
-    let mainWindow: BrowserWindow | undefined;
-
-    initLogging();
-    logStartupBanner();
-    // The order of the next two calls is important
-    setupRendererServer();
-    registerPrivilegedSchemes();
-    migrateLegacyWatchStoreIfNeeded();
-
-    app.on("second-instance", () => {
-        // Someone tried to run a second instance, we should focus our window.
-        if (mainWindow) {
-            mainWindow.show();
-            if (mainWindow.isMinimized()) mainWindow.restore();
-            mainWindow.focus();
-        }
-    });
-
-    // Emitted once, when Electron has finished initializing.
-    //
-    // Note that some Electron APIs can only be used after this event occurs.
-    void app.whenReady().then(() => {
-        void (async () => {
-            // Create window and prepare for the renderer.
-            mainWindow = createMainWindow();
-
-            // Setup IPC and streams.
-            const watcher = createWatcher(mainWindow);
-            attachIPCHandlers();
-            attachFSWatchIPCHandlers(watcher);
-            attachLogoutIPCHandler(watcher);
-            registerStreamProtocol();
-
-            // Configure the renderer's environment.
-            const webContents = mainWindow.webContents;
-            setDownloadPath(webContents);
-            allowExternalLinks(webContents);
-            allowAllCORSOrigins(webContents);
-
-            // Start loading the renderer.
-            void mainWindow.loadURL(rendererURL);
-
-            // Continue on with the rest of the startup sequence.
-            Menu.setApplicationMenu(await createApplicationMenu(mainWindow));
-            setupTrayItem(mainWindow);
-            setupAutoUpdater(mainWindow);
-
-            try {
-                await deleteLegacyDiskCacheDirIfExists();
-                await deleteLegacyKeysStoreIfExists();
-            } catch (e) {
-                // Log but otherwise ignore errors during non-critical startup
-                // actions.
-                log.error("Ignoring startup error", e);
-            }
-        })();
-    });
-
-    // This is a macOS only event. Show our window when the user activates the
-    // app, e.g. by clicking on its dock icon.
-    app.on("activate", () => mainWindow?.show());
-
-    app.on("before-quit", () => {
-        if (mainWindow) saveWindowBounds(mainWindow);
-        allowWindowClose();
-    });
-};
-
+// Go for it.
 main();

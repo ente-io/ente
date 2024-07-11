@@ -37,6 +37,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -53,6 +54,7 @@ import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
+import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -94,7 +96,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         builder: (args) =>
             EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled: Configuration.instance.shouldShowLockScreen(),
+        enabled: await Configuration.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
@@ -183,18 +185,20 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     bool initComplete = false;
     Future.delayed(const Duration(seconds: 15), () {
       if (!initComplete && !isBackground) {
+        _logger.severe("Stuck on splash screen for >= 15 seconds");
         sendLogsForInit(
           "support@ente.io",
-          "Stuck on splash screen for >= 15 seconds",
+          "Stuck on splash screen for >= 15 seconds on ${Platform.operatingSystem}",
           null,
         );
       }
     });
+    if (!isBackground) _heartBeatOnInit(0);
     _isProcessRunning = true;
     _logger.info("Initializing...  inBG =$isBackground via: $via");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-
     await _logFGHeartBeatInfo();
+    _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
@@ -205,25 +209,65 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
+
+    _logger.info("Lockscreen init");
+    LockScreenSettings.instance.init(preferences);
+
+    _logger.info("Configuration init");
     await Configuration.instance.init();
     _logger.info("Configuration done");
-    await NetworkClient.instance.init();
-    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
-    await UserService.instance.init();
-    await EntityService.instance.init();
-    LocationService.instance.init(preferences);
-    _logger.info("LocationServiceInit done");
 
+    _logger.info("NetworkClient init");
+    await NetworkClient.instance.init();
+    _logger.info("NetworkClient init done");
+
+    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
+
+    _logger.info("UserService init");
+    await UserService.instance.init();
+    _logger.info("UserService init done");
+
+    _logger.info("EntityService init");
+    await EntityService.instance.init();
+    _logger.info("EntityService init done");
+
+    _logger.info("LocationService init");
+    LocationService.instance.init(preferences);
+    _logger.info("LocationService init done");
+
+    _logger.info("UserRemoteFlagService init");
     await UserRemoteFlagService.instance.init();
+    _logger.info("UserRemoteFlagService init done");
+
+    _logger.info("UpdateService init");
     await UpdateService.instance.init();
+    _logger.info("UpdateService init done");
+
+    _logger.info("BillingService init");
     BillingService.instance.init();
+    _logger.info("BillingService init done");
+
+    _logger.info("CollectionsService init");
     await CollectionsService.instance.init(preferences);
+    _logger.info("CollectionsService init done");
+
     FavoritesService.instance.initFav().ignore();
+
+    _logger.info("FileUploader init");
     await FileUploader.instance.init(preferences, isBackground);
+    _logger.info("FileUploader init done");
+
+    _logger.info("LocalSyncService init");
     await LocalSyncService.instance.init(preferences);
+    _logger.info("LocalSyncService init done");
+
     TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
+
+    _logger.info("SyncService init");
     await SyncService.instance.init(preferences);
+    _logger.info("SyncService init done");
+
     MemoriesService.instance.init(preferences);
     LocalSettings.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
@@ -263,11 +307,22 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       preferences,
     );
 
+    MagicCacheService.instance.init(preferences);
+
     initComplete = true;
     _logger.info("Initialization done");
   } catch (e, s) {
     _logger.severe("Error in init", e, s);
     rethrow;
+  }
+}
+
+void _heartBeatOnInit(int i) {
+  if (i <= 15) {
+    Future.delayed(const Duration(seconds: 1), () {
+      _logger.info("init Heartbeat $i");
+      _heartBeatOnInit(i + 1);
+    });
   }
 }
 
@@ -281,7 +336,7 @@ Future<void> _sync(String caller) async {
     await SyncService.instance.sync();
   } catch (e, s) {
     if (!isHandledSyncError(e)) {
-      _logger.severe("Sync error", e, s);
+      _logger.warning("Sync error", e, s);
     }
   }
 }

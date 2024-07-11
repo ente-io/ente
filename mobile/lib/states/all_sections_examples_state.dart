@@ -88,9 +88,6 @@ class _AllSectionsExamplesProviderState
         _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
         for (SectionType sectionType in SectionType.values) {
-          if (sectionType == SectionType.content) {
-            continue;
-          }
           allSectionsExamples.add(
             sectionType.getData(context, limit: kSearchSectionLimit),
           );

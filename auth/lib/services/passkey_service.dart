@@ -42,14 +42,14 @@ class PasskeyService {
   Future<void> openPasskeyPage(BuildContext context) async {
     try {
       final jwtToken = await getJwtToken();
-      final url = "https://accounts.ente.io/account-handoff?token=$jwtToken";
+      final url = "https://accounts.ente.io/passkeys?token=$jwtToken";
       await launchUrlString(
         url,
         mode: LaunchMode.externalApplication,
       );
     } catch (e) {
       Logger('PasskeyService').severe("failed to open passkey page", e);
-      showGenericErrorDialog(context: context).ignore();
+      showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
 }

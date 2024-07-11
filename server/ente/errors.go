@@ -105,8 +105,6 @@ var ErrNotImplemented = errors.New("not implemented")
 
 var ErrInvalidApp = errors.New("invalid app")
 
-var ErrInvalidName = errors.New("invalid name")
-
 var ErrSubscriptionAlreadyClaimed = ApiError{
 	Code:           SubscriptionAlreadyClaimed,
 	HttpStatusCode: http.StatusConflict,
@@ -123,6 +121,12 @@ var ErrFileNotFoundInAlbum = ApiError{
 	Code:           FileNotFoundInAlbum,
 	HttpStatusCode: http.StatusNotFound,
 	Message:        "File is either deleted or moved to different collection",
+}
+
+var ErrSessionAlreadyClaimed = ApiError{
+	Code:           "SESSION_ALREADY_CLAIMED",
+	Message:        "Session is already claimed",
+	HttpStatusCode: http.StatusConflict,
 }
 
 var ErrPublicCollectDisabled = ApiError{

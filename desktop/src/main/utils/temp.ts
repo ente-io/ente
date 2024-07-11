@@ -1,10 +1,10 @@
 import { app } from "electron/main";
-import StreamZip from "node-stream-zip";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
+import { markClosableZip, openZip } from "../services/zip";
 import { ensure } from "./common";
 
 /**
@@ -128,9 +128,12 @@ export const makeFileForDataOrPathOrZipItem = async (
         } else {
             writeToTemporaryFile = async () => {
                 const [zipPath, entryName] = dataOrPathOrZipItem;
-                const zip = new StreamZip.async({ file: zipPath });
-                await zip.extract(entryName, path);
-                await zip.close();
+                const zip = openZip(zipPath);
+                try {
+                    await zip.extract(entryName, path);
+                } finally {
+                    markClosableZip(zipPath);
+                }
             };
         }
     }

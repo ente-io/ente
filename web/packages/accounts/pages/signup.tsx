@@ -1,4 +1,5 @@
-import { PAGES } from "@ente/accounts/constants/pages";
+import { PAGES } from "@/accounts/constants/pages";
+import { customAPIHost } from "@/next/origins";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -9,19 +10,21 @@ import { SignUp } from "../components/SignUp";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { appName } = appContext;
+    const { showNavBar } = appContext;
 
     const [loading, setLoading] = useState(true);
+    const [host, setHost] = useState<string | undefined>();
 
     const router = useRouter();
 
     useEffect(() => {
+        void customAPIHost().then(setHost);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        appContext.showNavBar(true);
+        showNavBar(true);
     }, []);
 
     const login = () => {
@@ -34,7 +37,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 <EnteSpinner />
             ) : (
                 <FormPaper>
-                    <SignUp login={login} router={router} appName={appName} />
+                    <SignUp {...{ login, router, host }} />
                 </FormPaper>
             )}
         </VerticallyCentered>

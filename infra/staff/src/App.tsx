@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from "react";
+import "./App.css";
+import { Sidebar } from "./components/Sidebar";
+import { apiOrigin } from "./services/support";
 import S from "./utils/strings";
 
+type User = Record<
+    string,
+    string | number | boolean | null | undefined | Record<string, unknown>
+>;
+type UserData = Record<string, User>;
+
 export const App: React.FC = () => {
-    const [serverUrl /*, setServerUrl */] = useState(
-        import.meta.env.VITE_ENTE_ENDPOINT || "",
-    );
-    const [token, setToken] = useState("");
-    const [email, setEmail] = useState("");
-    const [userData, setUserData] = useState<any>(null);
+    const [token, setToken] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isDataFetched, setIsDataFetched] = useState<boolean>(false);
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         if (storedToken) {
             setToken(storedToken);
         }
-        console.log(import.meta.env.VITE_ENTE_ENDPOINT);
     }, []);
 
     useEffect(() => {
@@ -28,25 +34,32 @@ export const App: React.FC = () => {
 
     const fetchData = async () => {
         try {
-            const url = `${serverUrl}/admin/user?email=${email}&token=${token}`;
+            const encodedEmail = encodeURIComponent(email);
+            const encodedToken = encodeURIComponent(token);
+            const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
+            console.log(`Fetching data from URL: ${url}`);
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
-            const userData = await response.json();
-            console.log("API Response:", userData);
-            setUserData(userData);
+            const userDataResponse = (await response.json()) as UserData;
+            console.log("API Response:", userDataResponse);
+            setUserData(userDataResponse);
             setError(null);
+            setIsDataFetched(true);
         } catch (error) {
             console.error("Error fetching data:", error);
             setError((error as Error).message);
+            setIsDataFetched(false);
         }
     };
 
-    const renderAttributes = (data: any) => {
+    const renderAttributes = (
+        data: Record<string, unknown> | User | null,
+    ): React.ReactNode => {
         if (!data) return null;
 
-        let nullAttributes: string[] = [];
+        const nullAttributes: string[] = [];
 
         const rows = Object.entries(data).map(([key, value]) => {
             console.log("Processing key:", key, "value:", value);
@@ -70,7 +83,9 @@ export const App: React.FC = () => {
                                 {key.toUpperCase()}
                             </td>
                         </tr>
-                        {renderAttributes(value)}
+                        {renderAttributes(
+                            value as Record<string, unknown> | User,
+                        )}
                     </React.Fragment>
                 );
             } else {
@@ -90,17 +105,26 @@ export const App: React.FC = () => {
                     displayValue = `${(value / 1024 ** 3).toFixed(2)} GB`;
                 } else if (typeof value === "string") {
                     try {
-                        const parsedValue = JSON.parse(value);
+                        const parsedValue = JSON.parse(
+                            value,
+                        ) as React.ReactNode;
                         displayValue = parsedValue;
                     } catch (error) {
                         displayValue = value;
                     }
+                } else if (typeof value === "object" && value !== null) {
+                    displayValue = JSON.stringify(value, null, 2);
                 } else if (value === null) {
                     displayValue = "null";
-                } else if (typeof value !== "undefined") {
+                } else if (
+                    typeof value === "boolean" ||
+                    typeof value === "number"
+                ) {
                     displayValue = value.toString();
-                } else {
+                } else if (typeof value === "undefined") {
                     displayValue = "undefined";
+                } else {
+                    displayValue = value as string;
                 }
 
                 return (
@@ -131,11 +155,19 @@ export const App: React.FC = () => {
         return rows;
     };
 
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLFormElement>) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            fetchData().catch((error: unknown) =>
+                console.error("Fetch data error:", error),
+            );
+        }
+    };
+
     return (
         <div className="container center-table">
             <h1>{S.hello}</h1>
-
-            <form className="input-form">
+            <form className="input-form" onKeyPress={handleKeyPress}>
                 <div className="input-group">
                     <label>
                         Token:
@@ -167,21 +199,19 @@ export const App: React.FC = () => {
                     </label>
                 </div>
             </form>
-            <div className="fetch-button">
-                <button
-                    onClick={fetchData}
-                    style={{
-                        padding: "10px 20px",
-                        fontSize: "16px",
-                        cursor: "pointer",
-                        backgroundColor: "#009879",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                    }}
-                >
-                    FETCH
-                </button>
+            <div className="content-wrapper">
+                {isDataFetched && <Sidebar token={token} email={email} />}
+                <div className="fetch-button-container">
+                    <button
+                        onClick={() => {
+                            fetchData().catch((error: unknown) =>
+                                console.error("Fetch data error:", error),
+                            );
+                        }}
+                    >
+                        FETCH
+                    </button>
+                </div>
             </div>
             <br />
             {error && <p style={{ color: "red" }}>{`Error: ${error}`}</p>}
@@ -211,7 +241,7 @@ export const App: React.FC = () => {
                                         {category.toUpperCase()}
                                     </td>
                                 </tr>
-                                {renderAttributes(userData[category])}
+                                {renderAttributes(userData[category] ?? null)}
                             </React.Fragment>
                         ))}
                     </tbody>
@@ -225,3 +255,5 @@ export const App: React.FC = () => {
         </div>
     );
 };
+
+export default App;

@@ -8,54 +8,29 @@ import 'package:photos/services/machine_learning/face_ml/face_alignment/alignmen
 /// The class estimates the parameters of the similarity transformation via the `estimate` function.
 /// After estimation, the transformation can be applied to an image using the `warpAffine` function.
 class SimilarityTransform {
-  Matrix _params = Matrix.fromList([
-    [1.0, 0.0, 0.0],
-    [0.0, 1.0, 0.0],
-    [0, 0, 1],
-  ]);
-  List<double> _center = <double>[0, 0]; // [x, y]
-  double _size = 1; // 1 / scale
-  double _rotation = 0; // atan2(simRotation[1][0], simRotation[0][0]);
-
-  final arcface4Landmarks = [
+  static const _mobilefacenetIdeal4Landmarks = [
     <double>[38.2946, 51.6963],
     <double>[73.5318, 51.5014],
     <double>[56.0252, 71.7366],
     <double>[56.1396, 92.2848],
   ];
-  final arcface5Landmarks = [
+  static const _mobilefacenetIdeal5Landmarks = [
     <double>[38.2946, 51.6963],
     <double>[73.5318, 51.5014],
     <double>[56.0252, 71.7366],
     <double>[41.5493, 92.3655],
     <double>[70.7299, 92.2041],
   ];
-  get arcfaceNormalized4 => arcface4Landmarks
+  static get mobilefacenetIdealNormalized4 => _mobilefacenetIdeal4Landmarks
       .map((list) => list.map((value) => value / 112.0).toList())
       .toList();
-  get arcfaceNormalized5 => arcface5Landmarks
+  static get mobilefacenetIdealNormalized5 => _mobilefacenetIdeal5Landmarks
       .map((list) => list.map((value) => value / 112.0).toList())
       .toList();
 
-  List<List<double>> get paramsList => _params.to2DList();
+  SimilarityTransform();
 
-  // singleton pattern
-  SimilarityTransform._privateConstructor();
-  static final instance = SimilarityTransform._privateConstructor();
-  factory SimilarityTransform() => instance;
-
-  void _cleanParams() {
-    _params = Matrix.fromList([
-      [1.0, 0.0, 0.0],
-      [0.0, 1.0, 0.0],
-      [0, 0, 1],
-    ]);
-    _center = <double>[0, 0];
-    _size = 1;
-    _rotation = 0;
-  }
-
-  /// Function to estimate the parameters of the affine transformation. These parameters are stored in the class variable params.
+  /// Function to estimate the parameters of the affine transformation.
   ///
   /// Returns a tuple of (AlignmentResult, bool). The bool indicates whether the parameters are valid or not.
   ///
@@ -66,23 +41,18 @@ class SimilarityTransform {
   /// returns false if the parameters cannot be estimated. The function
   /// estimates the parameters by solving a least-squares problem using
   /// the Umeyama algorithm, via [_umeyama].
-  (AlignmentResult, bool) estimate(List<List<double>> src) {
-    _cleanParams();
+  static (AlignmentResult, bool) estimate(List<List<double>> src) {
     final (params, center, size, rotation) =
-        _umeyama(src, arcfaceNormalized5, true);
-    _params = params;
-    _center = center;
-    _size = size;
-    _rotation = rotation;
+        _umeyama(src, mobilefacenetIdealNormalized5, true);
     final alignmentResult = AlignmentResult(
-      affineMatrix: paramsList,
-      center: _center,
-      size: _size,
-      rotation: _rotation,
+      affineMatrix: params.to2DList(),
+      center: center,
+      size: size,
+      rotation: rotation,
     );
     // We check for NaN in the transformation matrix params.
     final isNoNanInParam =
-        !_params.asFlattenedList.any((element) => element.isNaN);
+        !params.asFlattenedList.any((element) => element.isNaN);
     return (alignmentResult, isNoNanInParam);
   }
 

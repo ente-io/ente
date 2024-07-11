@@ -1,6 +1,6 @@
 name: "Release"
 
-# Build the ente-io/ente's desktop/rc branch and create/update a draft release.
+# Build the desktop app with code from ente-io/ente and create/update a release.
 #
 # For more details, see `docs/release.md` in ente-io/ente.
 
@@ -17,9 +17,10 @@ on:
         #
         - cron: "45 2 * * 1-6"
     push:
-        # Run when a tag matching the pattern "v*"" is pushed.
+        # Run when a tag matching the pattern "vd.d.d"" is pushed. Crucially for
+        # us, this excludes the "-rc" tags.
         tags:
-            - "v*"
+            - "v[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
     release:

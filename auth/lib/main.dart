@@ -28,6 +28,7 @@ import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -65,8 +66,9 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  initSystemTray().ignore();
+  if (Platform.isWindows) {
+    await whiteListLetsEncryptRootCA();
+  }
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
@@ -77,12 +79,27 @@ void main() async {
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
+      initSystemTray().ignore();
     });
   }
+
   await _runInForeground();
   await _setupPrivacyScreen();
   if (Platform.isAndroid) {
     FlutterDisplayMode.setHighRefreshRate().ignore();
+  }
+}
+
+Future<void> whiteListLetsEncryptRootCA() async {
+  try {
+    // https://stackoverflow.com/a/71090239
+    // https://github.com/ente-io/ente/issues/2178
+    ByteData data =
+        await PlatformAssetBundle().load('assets/ca/lets-encrypt-r3.pem');
+    SecurityContext.defaultContext
+        .setTrustedCertificatesBytes(data.buffer.asUint8List());
+  } catch (e) {
+    _logger.severe("Failed to whitelist Let's Encrypt Root CA", e);
   }
 }
 
@@ -132,7 +149,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 void _registerWindowsProtocol() {
-  const kWindowsScheme = 'ente';
+  const kWindowsScheme = 'enteauth';
   // Register our protocol only on Windows platform
   if (!kIsWeb && Platform.isWindows) {
     WindowsProtocolHandler()

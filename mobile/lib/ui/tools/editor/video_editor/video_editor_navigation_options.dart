@@ -1,10 +1,12 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 
 class VideoEditorNavigationOptions extends StatelessWidget {
   const VideoEditorNavigationOptions({
     super.key,
     this.primaryText,
     this.onPrimaryPressed,
+    this.color,
     required this.secondaryText,
     required this.onSecondaryPressed,
   });
@@ -13,6 +15,7 @@ class VideoEditorNavigationOptions extends StatelessWidget {
   final VoidCallback? onPrimaryPressed;
   final String secondaryText;
   final VoidCallback? onSecondaryPressed;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +28,18 @@ class VideoEditorNavigationOptions extends StatelessWidget {
             const SizedBox(width: 28),
             TextButton(
               onPressed: onPrimaryPressed?.call ?? Navigator.of(context).pop,
-              child: Text(primaryText ?? "Cancel"),
+              child: Text(primaryText ?? S.of(context).cancel),
             ),
             const Spacer(),
             TextButton(
               onPressed: onSecondaryPressed,
-              child: Text(secondaryText),
+              style: TextButton.styleFrom(
+                foregroundColor: color,
+              ),
+              child: Text(
+                secondaryText,
+                style: TextStyle(color: color),
+              ),
             ),
             const SizedBox(width: 28),
           ],

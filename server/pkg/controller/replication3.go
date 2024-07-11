@@ -87,10 +87,11 @@ func (c *ReplicationController3) StartReplication() error {
 
 	workerURL := viper.GetString("replication.worker-url")
 	if workerURL == "" {
-		return fmt.Errorf("replication.worker-url was not defined")
+		log.Infof("replication.worker-url was not defined, files will downloaded directly during replication")
+	} else {
+		log.Infof("Worker URL to download objects for replication v3 is: %s", workerURL)
 	}
 	c.workerURL = workerURL
-	log.Infof("Worker URL to download objects for replication v3 is: %s", workerURL)
 
 	c.createMetrics()
 	err := c.createTemporaryStorage()
@@ -414,7 +415,7 @@ func (c *ReplicationController3) downloadFromB2ViaWorker(objectKey string, file 
 	q.Add("src", presignedEncodedURL)
 	request.URL.RawQuery = q.Encode()
 
-	if c.S3Config.AreLocalBuckets() {
+	if c.S3Config.AreLocalBuckets() || c.workerURL == "" {
 		originalURL := request.URL
 		request, err = http.NewRequest("GET", presignedURL, nil)
 		if err != nil {

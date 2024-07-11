@@ -1,11 +1,9 @@
-import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
 const Page: React.FC = () => {
-    const router = useRouter();
-
     useEffect(() => {
-        router.push("/login");
+        // There are no user navigable pages currently on accounts.ente.io.
+        window.location.href = "https://web.ente.io";
     }, []);
 
     return <></>;

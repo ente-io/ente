@@ -87,12 +87,29 @@ export interface Electron {
      * into the foreground. More precisely, the callback gets invoked when the
      * main window gets focus.
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      *
      * @param cb The function to call when the main window gets focus. Pass
      * `undefined` to clear the callback.
      */
-    onMainWindowFocus: (cb?: () => void) => void;
+    onMainWindowFocus: (cb: (() => void) | undefined) => void;
+
+    /**
+     * Set or clear the callback {@link cb} to invoke whenever the app gets
+     * asked to open a deeplink. This allows the Node.js layer to ask the
+     * renderer to handle deeplinks and redirect itself to a new location if
+     * needed.
+     *
+     * In particular, this is necessary for handling passkey authentication.
+     * See: [Note: Passkey verification in the desktop app]
+     *
+     * Setting a callback clears any previous callbacks.
+     *
+     * @param cb The function to call when the app gets asked to open a
+     * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
+     * is passed to the function verbatim.
+     */
+    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
 
     // - App update
 
@@ -101,10 +118,10 @@ export interface Electron {
      * (actionable) app update is available. This allows the Node.js layer to
      * ask the renderer to show an "Update available" dialog to the user.
      *
-     * Note: Setting a callback clears any previous callbacks.
+     * Setting a callback clears any previous callbacks.
      */
     onAppUpdateAvailable: (
-        cb?: ((update: AppUpdate) => void) | undefined,
+        cb: ((update: AppUpdate) => void) | undefined,
     ) => void;
 
     /**
@@ -130,6 +147,23 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
+
+    /**
+     * Get the persisted version for the last shown changelog.
+     *
+     * See: [Note: Conditions for showing "What's new"]
+     */
+    lastShownChangelogVersion: () => Promise<number | undefined>;
+
+    /**
+     * Save the given {@link version} to disk as the version of the last shown
+     * changelog.
+     *
+     * The value is saved to a store which is not cleared during logout.
+     *
+     * @see {@link lastShownChangelogVersion}
+     */
+    setLastShownChangelogVersion: (version: number) => Promise<void>;
 
     // - FS
 
@@ -200,6 +234,18 @@ export interface Electron {
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
+
+        /**
+         * Return the paths of all the files under the given folder.
+         *
+         * This function walks the directory tree starting at {@link folderPath}
+         * and returns a list of the absolute paths of all the files that exist
+         * therein. It will recursively traverse into nested directories, and
+         * return the absolute paths of the files there too.
+         *
+         * The returned paths are guaranteed to use POSIX separators ('/').
+         */
+        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     // - Conversion
@@ -291,15 +337,15 @@ export interface Electron {
     /**
      * Return a CLIP embedding of the given image.
      *
-     * See: [Note: CLIP based magic search]
+     * See: [Note: Natural language search using CLIP]
      *
-     * @param jpegImageData The raw bytes of the image encoded as an JPEG.
+     * The input is a opaque float32 array representing the image. The layout
+     * and exact encoding of the input is specific to our implementation and the
+     * ML model (CLIP) we use.
      *
-     * @returns A CLIP embedding.
+     * @returns A CLIP embedding (an array of 512 floating point values).
      */
-    computeCLIPImageEmbedding: (
-        jpegImageData: Uint8Array,
-    ) => Promise<Float32Array>;
+    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
 
     /**
      * Return a CLIP embedding of the given image if we already have the model
@@ -315,7 +361,7 @@ export interface Electron {
      * embeddings are used as part of deducing user initiated search results,
      * and we don't want to block that interaction on a large network request.
      *
-     * See: [Note: CLIP based magic search]
+     * See: [Note: Natural language search using CLIP]
      *
      * @param text The string whose embedding we want to compute.
      *
@@ -445,18 +491,6 @@ export interface Electron {
          * The path is guaranteed to use POSIX separators ('/').
          */
         onRemoveDir: (f: (path: string, watch: FolderWatch) => void) => void;
-
-        /**
-         * Return the paths of all the files under the given folder.
-         *
-         * This function walks the directory tree starting at {@link folderPath}
-         * and returns a list of the absolute paths of all the files that exist
-         * therein. It will recursively traverse into nested directories, and
-         * return the absolute paths of the files there too.
-         *
-         * The returned paths are guaranteed to use POSIX separators ('/').
-         */
-        findFiles: (folderPath: string) => Promise<string[]>;
     };
 
     // - Upload
@@ -533,6 +567,9 @@ export interface Electron {
 
     /**
      * Clear any pending uploads.
+     *
+     * This is also taken by the Node.js layer as a signal to clear any cached
+     * state it has kept around to speed up the upload.
      */
     clearPendingUploads: () => Promise<void>;
 }
