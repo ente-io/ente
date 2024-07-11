@@ -26,7 +26,7 @@ export const clipIndexingVersion = 1;
  * trained) encoders - one for images, and one for text - that both map to the
  * same embedding space.
  *
- * We use this for natural language search within the app:
+ * We use this for natural language search (aka "magic search") within the app:
  *
  * 1. Pre-compute an embedding for each image.
  *

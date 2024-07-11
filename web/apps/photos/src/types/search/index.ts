@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import type { FaceIndexingStatus } from "@/new/photos/services/ml";
+import type { MLStatus } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { City } from "services/locationSearchService";
@@ -31,7 +31,7 @@ export interface Suggestion {
         | DateValue
         | number[]
         | Person
-        | FaceIndexingStatus
+        | MLStatus
         | LocationTagData
         | City
         | FILE_TYPE
