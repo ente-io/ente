@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/app_lock_update_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -51,6 +53,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _deviceLock() async {
     await _lockscreenSetting.removePinAndPassword();
     await _initializeSettings();
+    await _lockscreenSetting.setAppLockType("Device lock");
+    Bus.instance.fire(
+      AppLockUpdateEvent(
+        AppLockUpdateType.device,
+      ),
+    );
   }
 
   Future<void> _pinLock() async {
@@ -64,6 +72,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
+        Bus.instance.fire(
+          AppLockUpdateEvent(
+            AppLockUpdateType.pin,
+          ),
+        );
+        _lockscreenSetting.setAppLockType("Pin");
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -82,6 +96,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
+        Bus.instance.fire(
+          AppLockUpdateEvent(
+            AppLockUpdateType.password,
+          ),
+        );
+        _lockscreenSetting.setAppLockType("Password");
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -104,6 +124,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
+    await _lockscreenSetting.setAppLockType(appLock ? "None" : "Device lock");
+    Bus.instance.fire(
+      AppLockUpdateEvent(
+        appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
+      ),
+    );
     setState(() {
       _initializeSettings();
       appLock = !appLock;
@@ -112,11 +138,11 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
 
   String _formatTime(Duration duration) {
     if (duration.inHours != 0) {
-      return "${duration.inHours}hr";
+      return "in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}";
     } else if (duration.inMinutes != 0) {
-      return "${duration.inMinutes}m";
+      return "in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}";
     } else if (duration.inSeconds != 0) {
-      return "${duration.inSeconds}s";
+      return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
       return "Disable";
     }
@@ -180,6 +206,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                         ),
                         appLock
                             ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   MenuItemWidget(
                                     captionedTextWidget: CaptionedTextWidget(
@@ -238,8 +265,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       title: "Auto lock",
                                       subTitle: _formatTime(
                                         Duration(
-                                          milliseconds: _lockscreenSetting
-                                              .getAutoLockTime(),
+                                          milliseconds:
+                                              autoLockTimeInMilliseconds,
                                         ),
                                       ),
                                     ),
@@ -248,6 +275,18 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     menuItemColor: colorTheme.fillFaint,
                                     trailingIconColor: colorTheme.tabIcon,
                                     onTap: () => _onAutolock(),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      "Require ${_lockscreenSetting.getAppLockType()} if away for some time .",
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
                                 ],
                               )

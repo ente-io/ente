@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/events/app_lock_update_event.dart";
 import 'package:photos/events/two_factor_status_change_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -26,6 +27,7 @@ import "package:photos/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:photos/utils/auth_util.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/lock_screen_settings.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -38,13 +40,22 @@ class SecuritySectionWidget extends StatefulWidget {
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
-
+  late String appLockSubtitle;
   late StreamSubscription<TwoFactorStatusChangeEvent>
       _twoFactorStatusChangeEvent;
+  late StreamSubscription<AppLockUpdateEvent> _appLockUpdateEvent;
   final Logger _logger = Logger('SecuritySectionWidget');
   @override
   void initState() {
     super.initState();
+    appLockSubtitle = LockScreenSettings.instance.getAppLockType();
+    _appLockUpdateEvent = Bus.instance.on<AppLockUpdateEvent>().listen((event) {
+      if (mounted) {
+        setState(() {
+          appLockSubtitle = LockScreenSettings.instance.getAppLockType();
+        });
+      }
+    });
     _twoFactorStatusChangeEvent =
         Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) async {
       if (mounted) {
@@ -55,6 +66,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   @override
   void dispose() {
+    _appLockUpdateEvent.cancel();
     _twoFactorStatusChangeEvent.cancel();
     super.dispose();
   }
@@ -143,6 +155,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).appLock,
+          subTitle: appLockSubtitle,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
