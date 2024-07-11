@@ -20,6 +20,7 @@ import {
     Box,
     Button,
     Checkbox,
+    Divider,
     FormControlLabel,
     FormGroup,
     Link,
@@ -380,21 +381,32 @@ const ManageML: React.FC<ManageMLProps> = ({
                 </MenuItemGroup>
             </Stack>
             <Paper variant="outlined">
-                <Stack gap={"28px"} px={2} py={"20px"}>
+                <Stack>
                     <Stack
                         direction="row"
                         gap={2}
+                        px={2}
+                        pt={1}
+                        pb={2}
                         justifyContent={"space-between"}
                     >
-                        <Typography color="text.muted">Status</Typography>
+                        <Typography color="text.faint">
+                            {pt("Status")}
+                        </Typography>
                         <Typography>{status}</Typography>
                     </Stack>
+                    <Divider sx={{ marginInlineStart: 2 }} />
                     <Stack
                         direction="row"
                         gap={2}
+                        px={2}
+                        pt={2}
+                        pb={1}
                         justifyContent={"space-between"}
                     >
-                        <Typography color="text.muted">Processed</Typography>
+                        <Typography color="text.faint">
+                            {pt("Processed")}
+                        </Typography>
                         <Typography textAlign="right">{processed}</Typography>
                     </Stack>
                 </Stack>
