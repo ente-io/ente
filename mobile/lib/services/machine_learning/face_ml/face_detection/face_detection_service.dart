@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import 'dart:typed_data' show ByteBuffer, ByteData, Float32List, Uint8List;
+import 'dart:typed_data' show ByteData, Float32List;
 import 'dart:ui' as ui show Image;
 
 import 'package:logging/logging.dart';

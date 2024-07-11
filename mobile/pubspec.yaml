@@ -124,12 +124,12 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
+  onnx_dart:
+    path: plugins/onnx_dart
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git
       ref: ente_onnxruntime
-  onnx_dart:
-    path: plugins/onnx_dart
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2

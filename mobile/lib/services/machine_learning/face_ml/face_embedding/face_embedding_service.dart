@@ -49,7 +49,7 @@ class FaceEmbeddingService extends MlModel {
       }
     } catch (e) {
       _logger.info(
-          'MobileFaceNet  (entePlugin: $useEntePlugin)Error while running inference: $e');
+          'MobileFaceNet  (entePlugin: $useEntePlugin)Error while running inference: $e',);
       throw MobileFaceNetInterpreterRunException();
     }
   }

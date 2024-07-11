@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-
-import 'onnx_dart_platform_interface.dart';
+import 'package:onnx_dart/onnx_dart_platform_interface.dart';
 
 /// An implementation of [OnnxDartPlatform] that uses method channels.
 class MethodChannelOnnxDart extends OnnxDartPlatform {

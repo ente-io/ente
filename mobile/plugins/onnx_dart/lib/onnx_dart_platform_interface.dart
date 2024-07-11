@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:onnx_dart/onnx_dart_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-
-import 'onnx_dart_method_channel.dart';
 
 abstract class OnnxDartPlatform extends PlatformInterface {
   /// Constructs a OnnxDartPlatform.
