@@ -464,13 +464,13 @@ const ManageML: React.FC<ManageMLProps> = ({
             </Stack>
             <Paper variant="outlined">
                 <Stack gap={4} px={2} py={2}>
-                    <Stack direction="row" justifyContent={"space-between"}>
+                    <Stack direction="row" gap={2} justifyContent={"space-between"}>
                         <Typography color="text.muted">Status</Typography>
                         <Typography>Indexing</Typography>
                     </Stack>
-                    <Stack direction="row" justifyContent={"space-between"}>
+                    <Stack direction="row" gap={2} justifyContent={"space-between"}>
                         <Typography color="text.muted">Processed</Typography>
-                        <Typography>34 / 133</Typography>
+                        <Typography textAlign="right">33,000,000 / 13,000,000</Typography>
                     </Stack>
                 </Stack>
             </Paper>
