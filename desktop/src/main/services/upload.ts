@@ -58,7 +58,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
     const allZipItems = uploadStatusStore.get("zipItems");
     let zipItems: typeof allZipItems;
 
-    // Migration code - May 2024. Remove after a bit.
+    // Migration code - May 2024. Remove after a bit (tag: Migration).
     //
     // The older store formats will not have zipItems and instead will have
     // zipPaths. If we find such a case, read the zipPaths and enqueue all of

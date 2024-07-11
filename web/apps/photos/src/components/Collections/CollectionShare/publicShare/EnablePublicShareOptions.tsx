@@ -1,11 +1,13 @@
+import {
+    MenuItemDivider,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/new/shared/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import DownloadSharp from "@mui/icons-material/DownloadSharp";
 import LinkIcon from "@mui/icons-material/Link";
 import PublicIcon from "@mui/icons-material/Public";
 import { Stack, Typography } from "@mui/material";
-import MenuItemDivider from "components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useState } from "react";

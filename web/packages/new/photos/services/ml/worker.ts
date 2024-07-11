@@ -22,7 +22,7 @@ import {
 } from "./db";
 import { pullFaceEmbeddings, putCLIPIndex, putFaceIndex } from "./embedding";
 import { indexFaces, type FaceIndex } from "./face";
-import type { MLWorkerElectron } from "./worker-electron";
+import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -56,6 +56,7 @@ interface IndexableItem {
  */
 export class MLWorker {
     private electron: MLWorkerElectron | undefined;
+    private delegate: MLWorkerDelegate | undefined;
     private userAgent: string | undefined;
     private state: "idle" | "pull" | "indexing" = "idle";
     private shouldPull = false;
@@ -73,9 +74,13 @@ export class MLWorker {
      * @param electron The {@link MLWorkerElectron} that allows the worker to
      * use the functionality provided by our Node.js layer when running in the
      * context of our desktop app
+     *
+     * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
+     * the main thread of interesting events.
      */
-    async init(electron: MLWorkerElectron) {
+    async init(electron: MLWorkerElectron, delegate?: MLWorkerDelegate) {
         this.electron = electron;
+        this.delegate = delegate;
         // Set the user agent that'll be set in the generated embeddings.
         this.userAgent = `${clientPackageName}/${await electron.appVersion()}`;
         // Initialize the downloadManager running in the web worker with the
@@ -202,6 +207,7 @@ export class MLWorker {
             items,
             ensure(this.electron),
             ensure(this.userAgent),
+            this.delegate,
         );
         if (allSuccess) {
             // Everything is running smoothly. Reset the idle duration.
@@ -276,6 +282,7 @@ const indexNextBatch = async (
     items: IndexableItem[],
     electron: MLWorkerElectron,
     userAgent: string,
+    delegate: MLWorkerDelegate | undefined,
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
     // liveQ has already been drained, but that's fine, it'll be rare that we
@@ -293,6 +300,7 @@ const indexNextBatch = async (
     for (const { enteFile, uploadItem } of items) {
         try {
             await index(enteFile, uploadItem, electron, userAgent);
+            delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {

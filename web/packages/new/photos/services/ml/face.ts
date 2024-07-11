@@ -26,7 +26,7 @@ import {
     warpAffineFloat32List,
 } from "./image";
 import { clamp } from "./math";
-import type { MLWorkerElectron } from "./worker-electron";
+import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * The version of the face indexing pipeline implemented by the current client.

@@ -135,14 +135,14 @@ const openMLDB = async () => {
 const deleteLegacyDB = () => {
     // Delete the legacy face DB v1.
     //
-    // This code was added June 2024 (v1.7.1-rc) and can be removed once clients
-    // have migrated over.
+    // This code was added June 2024 (v1.7.1-rc) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
     void deleteDB("mldata");
 
     // Delete the legacy CLIP (mostly) related keys from LocalForage.
     //
-    // This code was added July 2024 (v1.7.2-rc) and can be removed once
-    // sufficient clients have migrated over (tag: Migration).
+    // This code was added July 2024 (v1.7.2-rc) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
     void Promise.all([
         localForage.removeItem("embeddings"),
         localForage.removeItem("embedding_sync_time"),
