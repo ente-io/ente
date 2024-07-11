@@ -6,6 +6,7 @@ import {
     mlStatusSnapshot,
     mlStatusSubscribe,
     pauseML,
+    resumeML,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
@@ -70,13 +71,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         else onClose();
     };
 
-    // The user may've changed the remote flag on a different device, so in both
-    // cases (enable or resume), do the same flow:
-    //
-    // -   If remote flag is not set, then show the consent dialog
-    // -   Otherwise enable ML (both locally and on remote).
-    //
-    const handleEnableOrResumeML = async () => {
+    const handleEnableML = async () => {
         startLoading();
         try {
             if (!(await getIsMLEnabledRemote())) {
@@ -106,15 +101,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         }
     };
 
-    const handleToggleLocal = async () => {
-        try {
-            isMLEnabled() ? pauseML() : await handleEnableOrResumeML();
-        } catch (e) {
-            log.error("Failed to toggle local state of ML", e);
-            somethingWentWrong();
-        }
-    };
-
     const handleDisableML = async () => {
         startLoading();
         try {
@@ -131,12 +117,11 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     if (!mlStatus) {
         component = <Loading />;
     } else if (mlStatus.phase == "disabled") {
-        component = <EnableML onEnable={handleEnableOrResumeML} />;
+        component = <EnableML onEnable={handleEnableML} />;
     } else {
         component = (
             <ManageML
                 {...{ mlStatus, setDialogBoxAttributesV2 }}
-                onToggleLocal={handleToggleLocal}
                 onDisableML={handleDisableML}
             />
         );
@@ -321,8 +306,6 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
 interface ManageMLProps {
     /** The {@link MLStatus}; a non-disabled one. */
     mlStatus: Exclude<MLStatus, { phase: "disabled" }>;
-    /** Called when the user wants to toggle the ML status locally. */
-    onToggleLocal: () => void;
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
     /** Subset of appContext. */
@@ -331,11 +314,30 @@ interface ManageMLProps {
 
 const ManageML: React.FC<ManageMLProps> = ({
     mlStatus,
-    onToggleLocal,
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+
+    let status: string;
+    switch (phase) {
+        case "paused":
+            status = pt("Paused");
+            break;
+        case "indexing":
+            status = pt("Indexing");
+            break;
+        case "scheduled":
+            status = pt("Scheduled");
+            break;
+        // TODO: Clustering
+        default:
+            status = pt("Done");
+            break;
+    }
+    const processed = `${nSyncedFiles} / ${nTotalFiles}`;
+
+    const handleToggleLocal = () => (isMLEnabled() ? pauseML() : resumeML());
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
@@ -373,19 +375,19 @@ const ManageML: React.FC<ManageMLProps> = ({
                         label={pt("On this device")}
                         variant="toggle"
                         checked={phase != "paused"}
-                        onClick={onToggleLocal}
+                        onClick={handleToggleLocal}
                     />
                 </MenuItemGroup>
             </Stack>
             <Paper variant="outlined">
-                <Stack gap={4} px={2} py={2}>
+                <Stack gap={"28px"} px={2} py={"20px"}>
                     <Stack
                         direction="row"
                         gap={2}
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.muted">Status</Typography>
-                        <Typography>Indexing</Typography>
+                        <Typography>{status}</Typography>
                     </Stack>
                     <Stack
                         direction="row"
@@ -393,9 +395,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.muted">Processed</Typography>
-                        <Typography textAlign="right">
-                            {`${nSyncedFiles} / ${nTotalFiles}`}
-                        </Typography>
+                        <Typography textAlign="right">{processed}</Typography>
                     </Stack>
                 </Stack>
             </Paper>

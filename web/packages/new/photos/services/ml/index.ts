@@ -149,6 +149,7 @@ export const enableML = async () => {
     setIsMLEnabledLocally(true);
     _isMLEnabledRemote = true;
     _isMLEnabledLocal = true;
+    setInterimScheduledStatus();
     triggerStatusUpdate();
     triggerMLSync();
 };
@@ -188,6 +189,7 @@ export const pauseML = () => {
 export const resumeML = () => {
     setIsMLEnabledLocally(true);
     _isMLEnabledLocal = true;
+    setInterimScheduledStatus();
     triggerStatusUpdate();
     triggerMLSync();
 };
@@ -347,8 +349,11 @@ export const mlStatusSnapshot = (): MLStatus | undefined => {
 const triggerStatusUpdate = () => void updateMLStatusSnapshot();
 
 /** Unconditionally update of the {@link MLStatus} snapshot. */
-const updateMLStatusSnapshot = async () => {
-    _mlStatusSnapshot = await getMLStatus();
+const updateMLStatusSnapshot = async () =>
+    setMLStatusSnapshot(await getMLStatus());
+
+const setMLStatusSnapshot = (snapshot: MLStatus) => {
+    _mlStatusSnapshot = snapshot;
     _mlStatusListeners.forEach((l) => l());
 };
 
@@ -358,7 +363,7 @@ const updateMLStatusSnapshot = async () => {
  * Precondition: ML must be enabled on remote, though it is fine if it is paused
  * locally.
  */
-export const getMLStatus = async (): Promise<MLStatus> => {
+const getMLStatus = async (): Promise<MLStatus> => {
     if (!_isMLEnabledRemote) return { phase: "disabled" };
 
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
@@ -381,6 +386,26 @@ export const getMLStatus = async (): Promise<MLStatus> => {
         nSyncedFiles: indexedCount,
         nTotalFiles: indexableCount + indexedCount,
     };
+};
+
+/**
+ * When the user enables or resumes ML, we wish to give immediate feedback.
+ *
+ * So this is an intermediate state with possibly incorrect counts (but correct
+ * phase) that is set immediately to trigger a UI update. It uses the counts
+ * from the last known status, just updates the phase.
+ *
+ * Once the worker is initialized and the correct counts fetched, this will
+ * update to the correct state (should take less than one second).
+ */
+const setInterimScheduledStatus = () => {
+    let nSyncedFiles = 0,
+        nTotalFiles = 0;
+    if (_mlStatusSnapshot && _mlStatusSnapshot.phase != "disabled") {
+        nSyncedFiles = _mlStatusSnapshot.nSyncedFiles;
+        nTotalFiles = _mlStatusSnapshot.nTotalFiles;
+    }
+    setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
 /**
