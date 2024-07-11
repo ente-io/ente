@@ -1,15 +1,27 @@
+import { MLSettingsBeta } from "@/new/photos/components/MLSettingsBeta";
+import { canEnableML } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
+import { isDesktop } from "@/next/app";
+import { pt } from "@/next/i18n";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const appContext = useContext(AppContext);
 
+    const [showMLSettings, setShowMLSettings] = useState(false);
+    const [openMLSettings, setOpenMLSettings] = useState(false);
+
+    useEffect(() => {
+        if (isDesktop) void canEnableML().then(setShowMLSettings);
+    }, []);
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -59,8 +71,30 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                             />
                         </Box>
                     </Stack>
+
+                    {showMLSettings && (
+                        <Box>
+                            <MenuSectionTitle
+                                title={t("LABS")}
+                                icon={<ScienceIcon />}
+                            />
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    endIcon={<ChevronRight />}
+                                    onClick={() => setOpenMLSettings(true)}
+                                    label={pt("ML search")}
+                                />
+                            </MenuItemGroup>
+                        </Box>
+                    )}
                 </Box>
             </Stack>
+
+            <MLSettingsBeta
+                open={openMLSettings}
+                onClose={() => setOpenMLSettings(false)}
+                onRootClose={handleRootClose}
+            />
         </EnteDrawer>
     );
 }

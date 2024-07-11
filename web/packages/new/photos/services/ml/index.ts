@@ -10,6 +10,7 @@ import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { proxy } from "comlink";
+import { isBetaUser, isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
@@ -103,7 +104,17 @@ export const terminateMLWorker = () => {
  *
  * ML currently only works when we're running in our desktop app.
  */
-export const isMLSupported = isDesktop;
+// TODO-ML:
+export const isMLSupported =
+    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML;
+
+/**
+ * Was this someone who might've enabled the beta ML? If so, show them the
+ * coming back soon banner while we finalize it.
+ * TODO-ML:
+ */
+export const canEnableML = async () =>
+    (await isInternalUser()) || (await isBetaUser());
 
 /**
  * Initialize the ML subsystem if the user has enabled it in preferences.
