@@ -368,7 +368,7 @@ export const getMLStatus = async (): Promise<MLStatus> => {
 
     let phase: MLStatus["phase"];
     if (!_isMLEnabledLocal) {
-        phase = "disabled";
+        phase = "paused";
     } else {
         const isIndexing = await (await worker()).isIndexing();
 

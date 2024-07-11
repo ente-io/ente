@@ -1,5 +1,4 @@
 import {
-    canEnableML,
     disableML,
     enableML,
     getIsMLEnabledRemote,
@@ -7,11 +6,12 @@ import {
     mlStatusSnapshot,
     mlStatusSubscribe,
     pauseML,
+    type MLStatus,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import { pt, ut } from "@/next/i18n";
+import { pt } from "@/next/i18n";
 import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -19,13 +19,13 @@ import {
     Box,
     Button,
     Checkbox,
-    type DialogProps,
     FormControlLabel,
     FormGroup,
     Link,
     Paper,
     Stack,
     Typography,
+    type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
@@ -57,34 +57,8 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         somethingWentWrong,
     } = appContext;
 
-    /**
-     * The state of our component.
-     *
-     * To avoid confusion with useState, we call it status instead. */
-    // TODO: This Status is not automatically synced with the lower layers that
-    // hold the actual state.
-    type Status =
-        | "loading" /* fetching the data we need from the lower layers */
-        | "notEligible" /* user is not in the beta program */
-        | "disabled" /* eligible, but ML is currently disabled */
-        | "enabled"; /* ML is enabled, but may be paused locally */
-
-    const [status, setStatus] = useState<Status>("loading");
+    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
-
-    const refreshStatus = async () => {
-        if (isMLEnabled() || (await getIsMLEnabledRemote())) {
-            setStatus("enabled");
-        } else if (await canEnableML()) {
-            setStatus("disabled");
-        } else {
-            setStatus("notEligible");
-        }
-    };
-
-    useEffect(() => {
-        void refreshStatus();
-    }, []);
 
     const handleRootClose = () => {
         onClose();
@@ -109,7 +83,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 setOpenFaceConsent(true);
             } else {
                 await enableML();
-                setStatus("enabled");
             }
         } catch (e) {
             log.error("Failed to enable or resume ML", e);
@@ -123,7 +96,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         startLoading();
         try {
             await enableML();
-            setStatus("enabled");
             // Close the FaceConsent drawer, come back to ourselves.
             setOpenFaceConsent(false);
         } catch (e) {
@@ -147,7 +119,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         startLoading();
         try {
             await disableML();
-            setStatus("disabled");
         } catch (e) {
             log.error("Failed to disable ML", e);
             somethingWentWrong();
@@ -156,18 +127,20 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         }
     };
 
-    const components: Record<Status, React.ReactNode> = {
-        loading: <Loading />,
-        notEligible: <ComingSoon />,
-        disabled: <EnableML onEnable={handleEnableOrResumeML} />,
-        enabled: (
+    let component: React.ReactNode;
+    if (!mlStatus) {
+        component = <Loading />;
+    } else if (mlStatus.phase == "disabled") {
+        component = <EnableML onEnable={handleEnableOrResumeML} />;
+    } else {
+        component = (
             <ManageML
-                {...{ setDialogBoxAttributesV2 }}
+                {...{ mlStatus, setDialogBoxAttributesV2 }}
                 onToggleLocal={handleToggleLocal}
                 onDisableML={handleDisableML}
             />
-        ),
-    };
+        );
+    }
 
     return (
         <Box>
@@ -186,7 +159,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                         title={pt("ML search")}
                         onRootClose={onRootClose}
                     />
-                    {components[status]}
+                    {component}
                 </Stack>
             </EnteDrawer>
 
@@ -204,16 +177,6 @@ const Loading: React.FC = () => {
     return (
         <Box textAlign="center" pt={4}>
             <EnteSpinner />
-        </Box>
-    );
-};
-
-const ComingSoon: React.FC = () => {
-    return (
-        <Box px="8px">
-            <Typography color="text.muted">
-                {ut("We're putting finishing touches, coming back soon!")}
-            </Typography>
         </Box>
     );
 };
@@ -356,6 +319,8 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
 };
 
 interface ManageMLProps {
+    /** The {@link MLStatus}; a non-disabled one. */
+    mlStatus: Exclude<MLStatus, { phase: "disabled" }>;
     /** Called when the user wants to toggle the ML status locally. */
     onToggleLocal: () => void;
     /** Called when the user wants to disable ML. */
@@ -365,14 +330,12 @@ interface ManageMLProps {
 }
 
 const ManageML: React.FC<ManageMLProps> = ({
+    mlStatus,
     onToggleLocal,
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
-    const { phase, nSyncedFiles, nTotalFiles } = useSyncExternalStore(
-        mlStatusSubscribe,
-        mlStatusSnapshot,
-    );
+    const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
@@ -393,53 +356,6 @@ const ManageML: React.FC<ManageMLProps> = ({
             buttonDirection: "row",
         });
     };
-
-    // TODO-ML:
-    // const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
-    //     indexed: 0,
-    //     pending: 0,
-    // });
-
-    // useEffect(() => {
-    //     clipService.setOnUpdateHandler(setIndexingStatus);
-    //     clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
-    //     return () => clipService.setOnUpdateHandler(undefined);
-    // }, []);
-    /* TODO-ML: isElectron() && (
-        <Box>
-            <MenuSectionTitle
-                title={t("MAGIC_SEARCH_STATUS")}
-            />
-            <Stack py={"12px"} px={"12px"} spacing={"24px"}>
-                <VerticallyCenteredFlex
-                    justifyContent="space-between"
-                    alignItems={"center"}
-                >
-                    <Typography>
-                        {t("INDEXED_ITEMS")}
-                    </Typography>
-                    <Typography>
-                        {formatNumber(
-                            indexingStatus.indexed,
-                        )}
-                    </Typography>
-                </VerticallyCenteredFlex>
-                <VerticallyCenteredFlex
-                    justifyContent="space-between"
-                    alignItems={"center"}
-                >
-                    <Typography>
-                        {t("PENDING_ITEMS")}
-                    </Typography>
-                    <Typography>
-                        {formatNumber(
-                            indexingStatus.pending,
-                        )}
-                    </Typography>
-                </VerticallyCenteredFlex>
-            </Stack>
-        </Box>
-    )*/
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
