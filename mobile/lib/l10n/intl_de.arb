@@ -1266,7 +1266,7 @@
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
   "mlFunctions": "ML functions",
-"useAsCover": "Als Titelbild festlegen",
+  "useAsCover": "Als Titelbild festlegen",
   "notPersonLabel": "Nicht {name}?",
   "@notPersonLabel": {
     "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
@@ -1290,6 +1290,4 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen.",
   "tapToUnlock": "Zum Entsperren antippen",
   "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche"
-
-
 }

@@ -1257,7 +1257,7 @@
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
   "mlFunctions": "ML functions",
-"savingEdits": "Bewerken opslaan...",
+  "savingEdits": "Bewerken opslaan...",
   "autoPair": "Automatisch koppelen",
   "pairWithPin": "Koppelen met PIN",
   "faceRecognition": "Gezichtsherkenning",
@@ -1295,6 +1295,4 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "tapToUnlock": "Tik om te ontgrendelen",
   "tooManyIncorrectAttempts": "Te veel onjuiste pogingen"
-
-
 }

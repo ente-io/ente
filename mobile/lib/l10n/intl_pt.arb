@@ -1266,7 +1266,7 @@
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
   "mlFunctions": "ML functions",
-"useAsCover": "Usar como capa",
+  "useAsCover": "Usar como capa",
   "notPersonLabel": "Não é {name}?",
   "@notPersonLabel": {
     "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
@@ -1290,6 +1290,4 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio de app, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
   "tapToUnlock": "Toque para desbloquear",
   "tooManyIncorrectAttempts": "Muitas tentativas incorretas"
-
-
 }

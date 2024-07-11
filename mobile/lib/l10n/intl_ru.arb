@@ -1253,8 +1253,7 @@
   "whatsNew": "Что нового",
   "reenterPassword": "Re-enter password",
   "mlFunctions": "ML functions",
-"reenterPassword": "Re-enter password",
-
+  "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",
   "deviceLock": "Device lock",
   "pinLock": "PIN lock",
@@ -1267,7 +1266,4 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts"
-
-
-
 }
