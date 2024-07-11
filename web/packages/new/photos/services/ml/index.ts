@@ -10,6 +10,7 @@ import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { proxy } from "comlink";
+import pDebounce from "p-debounce";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
@@ -410,7 +411,7 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFile = () => triggerStatusUpdate();
+const workerDidProcessFile = () => void pDebounce(triggerStatusUpdate, 2000)();
 
 /**
  * Return the IDs of all the faces in the given {@link enteFile} that are not
