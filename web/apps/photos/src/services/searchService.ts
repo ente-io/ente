@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { mlStatusSnapshot } from "@/new/photos/services/ml";
+import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
@@ -26,7 +26,7 @@ const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
 export const getDefaultOptions = async () => {
     return [
-        ...(await getMLStatusSuggestion()),
+        await getMLStatusSuggestion(),
         ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };
@@ -169,38 +169,38 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     }
 }
 
-export async function getMLStatusSuggestion(): Promise<Suggestion[]> {
-    const status = await mlStatusSnapshot();
+export async function getMLStatusSuggestion(): Promise<Suggestion> {
+    if (!isMLSupported) return undefined;
 
-    isMLEnabled();
-    try {
-        let label: string;
-        switch (status.phase) {
-            case "scheduled":
-                label = t("INDEXING_SCHEDULED");
-                break;
-            case "indexing":
-                label = t("ANALYZING_PHOTOS", {
-                    indexStatus: status,
-                });
-                break;
-            case "clustering":
-                label = t("INDEXING_PEOPLE", { indexStatus: status });
-                break;
-            case "done":
-                label = t("INDEXING_DONE", { indexStatus: status });
-                break;
-        }
+    const status = mlStatusSnapshot();
 
-        return {
-            label,
-            type: SuggestionType.INDEX_STATUS,
-            value: status,
-            hide: true,
-        };
-    } catch (e) {
-        log.error("getIndexStatusSuggestion failed", e);
+    if (!status || status.phase == "disabled" || status.phase == "paused")
+        return undefined;
+
+    let label: string;
+    switch (status.phase) {
+        case "scheduled":
+            label = t("INDEXING_SCHEDULED");
+            break;
+        case "indexing":
+            label = t("ANALYZING_PHOTOS", {
+                indexStatus: status,
+            });
+            break;
+        case "clustering":
+            label = t("INDEXING_PEOPLE", { indexStatus: status });
+            break;
+        case "done":
+            label = t("INDEXING_DONE", { indexStatus: status });
+            break;
     }
+
+    return {
+        label,
+        type: SuggestionType.INDEX_STATUS,
+        value: status,
+        hide: true,
+    };
 }
 
 function getDateSuggestion(searchPhrase: string): Suggestion[] {

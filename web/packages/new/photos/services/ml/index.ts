@@ -334,8 +334,8 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
  */
 export const mlStatusSnapshot = (): MLStatus | undefined => {
     const result = _mlStatusSnapshot;
-    // We don't have it yet but we're on a supported client, trigger an update.
-    if (!result && isDesktop) triggerStatusUpdate();
+    // We don't have it yet, trigger an update.
+    if (!result) triggerStatusUpdate();
     return result;
 };
 
