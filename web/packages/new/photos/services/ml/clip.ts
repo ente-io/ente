@@ -3,7 +3,7 @@ import type { Electron } from "@/next/types/ipc";
 import type { ImageBitmapAndData } from "./bitmap";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
-import { cosineSimilarity, norm } from "./math";
+import { dotProduct, norm } from "./math";
 import type { MLWorkerElectron } from "./worker-electron";
 
 /**
@@ -202,7 +202,12 @@ export const clipMatches = async (
     const textEmbedding = normalized(t);
     const items = (await clipIndexes()).map(
         ({ fileID, embedding }) =>
-            [fileID, cosineSimilarity(embedding, textEmbedding)] as const,
+            // What we want to do is `cosineSimilarity`, but since both the
+            // embeddings involved are already normalized, we can save the norm
+            // calculations and directly do their `dotProduct`.
+            //
+            // This code is on the hot path, so these optimizations help.
+            [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
     return new Map(items.filter(([, score]) => score >= 0.23));
 };
