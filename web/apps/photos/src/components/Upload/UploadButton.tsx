@@ -56,7 +56,7 @@ function UploadButton({
                 color={color ?? "secondary"}
                 startIcon={icon ?? <FileUploadOutlinedIcon />}
             >
-                {text ?? t("UPLOAD")}
+                {text ?? t("upload")}
             </Button>
 
             <IconButton

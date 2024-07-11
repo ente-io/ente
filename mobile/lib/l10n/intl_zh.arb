@@ -1252,17 +1252,28 @@
   "right": "向右",
   "whatsNew": "更新日志",
   "reviewSuggestions": "查看建议",
-  "reenterPassword": "Re-enter password",
-  "reenterPin": "Re-enter PIN",
-  "deviceLock": "Device lock",
-  "pinLock": "PIN lock",
-  "next": "Next",
-  "setNewPassword": "Set new password",
-  "enterPin": "Enter PIN",
-  "setNewPin": "Set new PIN",
-  "appLock": "App lock",
-  "noSystemLockFound": "No system lock found",
-  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
-  "tapToUnlock": "Tap to unlock",
-  "tooManyIncorrectAttempts": "Too many incorrect attempts"
+  "useAsCover": "用作封面",
+  "notPersonLabel": "不是 {name}？",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  },
+  "reenterPassword": "再次输入密码",
+  "reenterPin": "再次输入 PIN 码",
+  "deviceLock": "设备锁",
+  "pinLock": "PIN 锁定",
+  "next": "下一步",
+  "setNewPassword": "设置新密码",
+  "enterPin": "输入 PIN 码",
+  "setNewPin": "设置新 PIN 码",
+  "appLock": "应用锁",
+  "noSystemLockFound": "未找到系统锁",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁定。",
+  "tapToUnlock": "点击解锁",
+  "tooManyIncorrectAttempts": "错误尝试次数过多"
 }

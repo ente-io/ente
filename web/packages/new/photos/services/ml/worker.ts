@@ -11,15 +11,17 @@ import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
-import { imageBitmapAndData } from "./bitmap";
+import { imageBitmapAndData, type ImageBitmapAndData } from "./bitmap";
+import { indexCLIP, type CLIPIndex } from "./clip";
 import {
     indexableFileIDs,
     markIndexingFailed,
+    saveCLIPIndex,
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
-import { type FaceIndex, indexFaces } from "./face";
+import { pullFaceEmbeddings, putCLIPIndex, putFaceIndex } from "./embedding";
+import { indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerElectron } from "./worker-electron";
 
 const idleDurationStart = 5; /* 5 seconds */
@@ -143,13 +145,15 @@ export class MLWorker {
     }
 
     private async tick() {
-        log.debug(() => ({
-            t: "ml/tick",
-            state: this.state,
-            shouldSync: this.shouldPull,
-            liveQ: this.liveQ,
-            idleDuration: this.idleDuration,
-        }));
+        log.debug(() => [
+            "ml/tick",
+            {
+                state: this.state,
+                shouldSync: this.shouldPull,
+                liveQ: this.liveQ,
+                idleDuration: this.idleDuration,
+            },
+        ]);
 
         const scheduleTick = () => void setTimeout(() => this.tick(), 0);
 
@@ -239,7 +243,24 @@ expose(MLWorker);
  * Return true atleast one embedding was pulled.
  */
 const pull = async () => {
-    return pullFaceEmbeddings();
+    const res = await Promise.allSettled([
+        pullFaceEmbeddings(),
+        // TODO-ML: clip-test
+        // pullCLIPEmbeddings(),
+    ]);
+    for (const r of res) {
+        switch (r.status) {
+            case "fulfilled":
+                // Return true if any pulled something.
+                if (r.value) return true;
+                break;
+            case "rejected":
+                // Throw if any failed.
+                throw r.reason;
+        }
+    }
+    // Return false if neither pulled anything.
+    return false;
 };
 
 /**
@@ -339,6 +360,32 @@ const index = async (
     const startTime = Date.now();
 
     const image = await imageBitmapAndData(enteFile, uploadItem, electron);
+    const res = await Promise.allSettled([
+        _indexFace(f, enteFile, image, electron, userAgent),
+        // TODO-ML: clip-test
+        // _indexCLIP(f, enteFile, image, electron, userAgent),
+    ]);
+    image.bitmap.close();
+
+    const msg: string[] = [];
+    for (const r of res) {
+        if (r.status == "rejected") throw r.reason;
+        else msg.push(r.value);
+    }
+
+    log.debug(() => {
+        const ms = Date.now() - startTime;
+        return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
+    });
+};
+
+const _indexFace = async (
+    f: string,
+    enteFile: EnteFile,
+    image: ImageBitmapAndData,
+    electron: MLWorkerElectron,
+    userAgent: string,
+) => {
     let faceIndex: FaceIndex;
     try {
         faceIndex = await indexFaces(enteFile, image, electron, userAgent);
@@ -346,8 +393,6 @@ const index = async (
         log.error(`Failed to index faces in ${f}`, e);
         await markIndexingFailed(enteFile.id);
         throw e;
-    } finally {
-        image.bitmap.close();
     }
 
     // [Note: Transient and permanent indexing failures]
@@ -389,11 +434,37 @@ const index = async (
         throw e;
     }
 
-    log.debug(() => {
-        const nf = faceIndex.faceEmbedding.faces.length;
-        const ms = Date.now() - startTime;
-        return `Indexed ${nf} faces in ${f} (${ms} ms)`;
-    });
+    // A message for debug printing.
+    return `${faceIndex.faceEmbedding.faces.length} faces`;
+};
 
-    return faceIndex;
+// TODO-ML: clip-test export
+export const _indexCLIP = async (
+    f: string,
+    enteFile: EnteFile,
+    image: ImageBitmapAndData,
+    electron: MLWorkerElectron,
+    userAgent: string,
+) => {
+    let clipIndex: CLIPIndex;
+    try {
+        clipIndex = await indexCLIP(enteFile, image, electron, userAgent);
+    } catch (e) {
+        log.error(`Failed to index CLIP in ${f}`, e);
+        await markIndexingFailed(enteFile.id);
+        throw e;
+    }
+
+    // See: [Note: Transient and permanent indexing failures]
+    try {
+        await putCLIPIndex(enteFile, clipIndex);
+        await saveCLIPIndex(clipIndex);
+    } catch (e) {
+        log.error(`Failed to put/save CLIP index for ${f}`, e);
+        if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+        throw e;
+    }
+
+    // A message for debug printing.
+    return "clip";
 };

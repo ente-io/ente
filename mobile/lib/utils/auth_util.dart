@@ -11,6 +11,7 @@ Future<bool> requestAuthentication(
   BuildContext context,
   String reason, {
   bool isOpeningApp = false,
+  bool isAuthenticatingForInAppChange = false,
 }) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
@@ -23,7 +24,8 @@ Future<bool> requestAuthentication(
       context,
       savedPin,
       savedPassword,
-      isOnOpeningApp: isOpeningApp,
+      isAuthenticatingOnAppLaunch: isOpeningApp,
+      isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
     );
   } else {
     return await LocalAuthentication().authenticate(

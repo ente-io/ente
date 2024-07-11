@@ -15,6 +15,10 @@
       "title": "Airtable"
     },
     {
+      "title": "airtm"
+      "hex": "000000"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -26,6 +30,9 @@
     },
     {
       "title": "bitget"
+    },
+    {
+      "title": "Bitmart"
     },
     {
       "title": "BitMEX"
@@ -113,6 +120,9 @@
     {
       "title": "DEGIRO"
     },
+     {
+      "title": "deriv"
+    },
     {
       "title": "DirectAdmin"
     },
@@ -181,6 +191,9 @@
     },
     {
       "title": "Hivelocity"
+    },
+    {
+      "title": "HTX"
     },
     {
       "title": "IceDrive",

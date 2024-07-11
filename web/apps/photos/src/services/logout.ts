@@ -3,7 +3,6 @@ import DownloadManager from "@/new/photos/services/download";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import log from "@/next/log";
-import { clipService } from "services/clip-service";
 import exportService from "./export";
 
 /**
@@ -44,12 +43,6 @@ export const photosLogout = async () => {
         DownloadManager.logout();
     } catch (e) {
         ignoreError("download", e);
-    }
-
-    try {
-        await clipService.logout();
-    } catch (e) {
-        ignoreError("CLIP", e);
     }
 
     // - Desktop

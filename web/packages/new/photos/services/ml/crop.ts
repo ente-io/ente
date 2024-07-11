@@ -3,7 +3,7 @@ import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
 import { renderableImageBitmap } from "./bitmap";
 import { type Box, type FaceIndex } from "./face";
-import { clamp } from "./image";
+import { clamp } from "./math";
 
 /**
  * Regenerate and locally save face crops for faces in the given file.

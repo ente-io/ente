@@ -263,6 +263,8 @@
   "exportLogs": "Logs exporteren",
   "enterYourRecoveryKey": "Voer je herstelsleutel in",
   "tempErrorContactSupportIfPersists": "Het lijkt erop dat er iets fout is gegaan. Probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met ons supportteam.",
+  "networkHostLookUpErr": "Kan geen verbinding maken met Ente, controleer uw netwerkinstellingen en neem contact op met ondersteuning als de fout zich blijft voordoen.",
+  "networkConnectionRefusedErr": "Kan geen verbinding maken met Ente, probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met support.",
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Het lijkt erop dat er iets fout is gegaan. Probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met ons supportteam.",
   "about": "Over",
   "weAreOpenSource": "We zijn open source!",
