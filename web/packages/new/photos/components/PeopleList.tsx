@@ -108,7 +108,7 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
 
     return (
         <>
-            <Typography fontSize="large" p={1}>
+            <Typography variant="large" p={1}>
                 {t("UNIDENTIFIED_FACES")}
             </Typography>
             <FaceChipContainer key={didRegen ? 1 : 0}>
