@@ -35,6 +35,13 @@ let _isMLEnabled = false;
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
 let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
 
+/**
+ * Subscriptions to {@link MLStatus}.
+ *
+ * See {@link mlStatusSubscribe}.
+ */
+let _mlStatusListeners: (() => void)[] = [];
+
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = async () => {
     if (!_comlinkWorker) _comlinkWorker = await createComlinkWorker();
@@ -89,6 +96,7 @@ export const logoutML = async () => {
     // contexts], it gets called first in the logout sequence, and then this
     // function (`logoutML`) gets called at a later point in time.
     _isMLEnabled = false;
+    _mlStatusListeners = [];
     await clearMLDB();
 };
 
@@ -193,7 +201,15 @@ const setIsMLEnabledLocally = (enabled: boolean) =>
  * Now it tracks the status of ML in general (which includes faces + consent).
  */
 const mlRemoteKey = "faceSearchEnabled";
+
+/**
+ * Return `true` if the flag to enable ML is set on remote.
+ */
 export const getIsMLEnabledRemote = () => getRemoteFlag(mlRemoteKey);
+
+/**
+ * Update the remote flag that tracks ML status across the user's devices.
+ */
 const updateIsMLEnabledRemote = (enabled: boolean) =>
     updateRemoteFlag(mlRemoteKey, enabled);
 
@@ -234,22 +250,24 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-export interface FaceIndexingStatus {
+export interface MLStatus {
     /**
      * Which phase we are in within the indexing pipeline when viewed across the
      * user's entire library:
      *
+     * - "paused": ML is currently paused on this device.
+     *
      * - "scheduled": There are files we know of that have not been indexed.
      *
-     * - "indexing": The face indexer is currently running.
+     * - "indexing": The indexer is currently running.
      *
-     * - "clustering": All files we know of have been indexed, and we are now
+     * - "clustering": All file we know of have been indexed, and we are now
      *   clustering the faces that were found.
      *
-     * - "done": Face indexing and clustering is complete for the user's
+     * - "done": ML indexing and face clustering is complete for the user's
      *   library.
      */
-    phase: "scheduled" | "indexing" | "clustering" | "done";
+    phase: "paused" | "scheduled" | "indexing" | "clustering" | "done";
     /** The number of files that have already been indexed. */
     nSyncedFiles: number;
     /** The total number of files that are eligible for indexing. */
@@ -257,18 +275,38 @@ export interface FaceIndexingStatus {
 }
 
 /**
+ * A function that can be used to subscribe to updates in the ML status.
+ *
+ * This, along with {@link mlStatusSnapshot}, are meant to be used as arguments
+ * to React's {@link useSyncExternalStore}.
+ *
+ * @param callback A function that will be invoked whenever the result of
+ * {@link mlStatusSnapshot} changes.
+ *
+ * @returns A function that can be used to clear the subscription.
+ */
+export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
+    _mlStatusListeners.push(onChange);
+    return () => {
+        _mlStatusListeners = _mlStatusListeners.filter((v) => v != onChange);
+    };
+};
+
+
+
+/**
  * Return the current state of the face indexing pipeline.
  *
  * Precondition: ML must be enabled.
  */
-export const faceIndexingStatus = async (): Promise<FaceIndexingStatus> => {
+export const faceIndexingStatus = async (): Promise<MLStatus> => {
     if (!isMLEnabled())
         throw new Error("Cannot get indexing status when ML is not enabled");
 
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
     const isIndexing = await (await worker()).isIndexing();
 
-    let phase: FaceIndexingStatus["phase"];
+    let phase: MLStatus["phase"];
     if (indexableCount > 0) {
         phase = !isIndexing ? "scheduled" : "indexing";
     } else {

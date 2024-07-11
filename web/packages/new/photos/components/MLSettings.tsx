@@ -26,7 +26,7 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
 import { openURL } from "../utils/web";
@@ -375,6 +375,7 @@ const ManageML: React.FC<ManageMLProps> = ({
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
+    const status = useSyncExternalStore();
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
             title: pt("Disable ML search"),
@@ -464,13 +465,23 @@ const ManageML: React.FC<ManageMLProps> = ({
             </Stack>
             <Paper variant="outlined">
                 <Stack gap={4} px={2} py={2}>
-                    <Stack direction="row" gap={2} justifyContent={"space-between"}>
+                    <Stack
+                        direction="row"
+                        gap={2}
+                        justifyContent={"space-between"}
+                    >
                         <Typography color="text.muted">Status</Typography>
                         <Typography>Indexing</Typography>
                     </Stack>
-                    <Stack direction="row" gap={2} justifyContent={"space-between"}>
+                    <Stack
+                        direction="row"
+                        gap={2}
+                        justifyContent={"space-between"}
+                    >
                         <Typography color="text.muted">Processed</Typography>
-                        <Typography textAlign="right">33,000,000 / 13,000,000</Typography>
+                        <Typography textAlign="right">
+                            33,000,000 / 13,000,000
+                        </Typography>
                     </Stack>
                 </Stack>
             </Paper>
