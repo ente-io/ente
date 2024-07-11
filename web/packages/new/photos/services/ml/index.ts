@@ -42,6 +42,13 @@ let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
  */
 let _mlStatusListeners: (() => void)[] = [];
 
+/**
+ * Snapshot of {@link MLStatus}.
+ *
+ * See {@link mlStatusSnapshot}.
+ */
+let _mlStatusSnapshot: MLStatus | undefined;
+
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = async () => {
     if (!_comlinkWorker) _comlinkWorker = await createComlinkWorker();
@@ -97,6 +104,7 @@ export const logoutML = async () => {
     // function (`logoutML`) gets called at a later point in time.
     _isMLEnabled = false;
     _mlStatusListeners = [];
+    _mlStatusSnapshot = undefined;
     await clearMLDB();
 };
 
@@ -292,7 +300,16 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
     };
 };
 
+export const mlStatusSnapshot = (): MLStatus =>
+    (_mlStatusSnapshot ??= getMLStatus());
 
+const getMLStatus = (): MLStatus => {
+    return {
+        phase: "paused",
+        nSyncedFiles: 0,
+        nTotalFiles: 0,
+    };
+};
 
 /**
  * Return the current state of the face indexing pipeline.
