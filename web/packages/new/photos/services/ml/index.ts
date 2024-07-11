@@ -30,7 +30,16 @@ import { MLWorker } from "./worker";
  *
  * -   It is cleared in {@link logoutML}.
  */
-let _isMLEnabled = false;
+let _isMLEnabledLocal = false;
+
+/**
+ * In-memory flag that tracks if the remote flag for ML is set.
+ *
+ * -   It is updated each time we sync the status with remote.
+ *
+ * -   It is cleared in {@link logoutML}.
+ */
+let _isMLEnabledRemote: boolean | undefined;
 
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
 let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
@@ -43,24 +52,11 @@ let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
 let _mlStatusListeners: (() => void)[] = [];
 
 /**
- * Type-wise, we should''ve used undefined to indicate that we don't yet have a
- * snapshot, but that would make the {@link mlStatusSnapshot} async,
- * complicating its usage with React's {@link useSyncExternalStore}.
- *
- * So instead this value stands in for an `undefined` {@link MLStatus}.
- */
-const placeholderMLStatus: MLStatus = {
-    phase: "paused",
-    nSyncedFiles: 0,
-    nTotalFiles: 0,
-};
-
-/**
  * Snapshot of {@link MLStatus}.
  *
  * See {@link mlStatusSnapshot}.
  */
-let _mlStatusSnapshot: MLStatus = placeholderMLStatus;
+let _mlStatusSnapshot: MLStatus | undefined;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = async () => {
@@ -107,7 +103,7 @@ export const terminateMLWorker = () => {
 export const initML = () => {
     // ML currently only works when we're running in our desktop app.
     if (!isDesktop) return;
-    _isMLEnabled = isMLEnabledLocally();
+    _isMLEnabledLocal = isMLEnabledLocally();
 };
 
 export const logoutML = async () => {
@@ -115,9 +111,10 @@ export const logoutML = async () => {
     // reasons mentioned in [Note: Caching IDB instances in separate execution
     // contexts], it gets called first in the logout sequence, and then this
     // function (`logoutML`) gets called at a later point in time.
-    _isMLEnabled = false;
+    _isMLEnabledLocal = false;
+    _isMLEnabledRemote = undefined;
     _mlStatusListeners = [];
-    _mlStatusSnapshot = placeholderMLStatus;
+    _mlStatusSnapshot = undefined;
     await clearMLDB();
 };
 
@@ -145,8 +142,8 @@ export const canEnableML = async () =>
  * true if ML is enabled locally (which implies it is also enabled on remote).
  */
 export const isMLEnabled = () =>
-    // Implementation note: Keep it fast, the UI directly calls this many times.
-    _isMLEnabled;
+    // Implementation note: Keep it fast, it might be called frequently.
+    _isMLEnabledLocal;
 
 /**
  * Enable ML.
@@ -156,7 +153,9 @@ export const isMLEnabled = () =>
 export const enableML = async () => {
     await updateIsMLEnabledRemote(true);
     setIsMLEnabledLocally(true);
-    _isMLEnabled = true;
+    _isMLEnabledRemote = true;
+    _isMLEnabledLocal = true;
+    triggerStatusUpdate();
     triggerMLSync();
 };
 
@@ -170,7 +169,9 @@ export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
     terminateMLWorker();
     setIsMLEnabledLocally(false);
-    _isMLEnabled = false;
+    _isMLEnabledRemote = false;
+    _isMLEnabledLocal = false;
+    triggerStatusUpdate();
 };
 
 /**
@@ -181,7 +182,8 @@ export const disableML = async () => {
 export const pauseML = () => {
     terminateMLWorker();
     setIsMLEnabledLocally(false);
-    _isMLEnabled = false;
+    _isMLEnabledLocal = false;
+    triggerStatusUpdate();
 };
 
 /**
@@ -191,7 +193,8 @@ export const pauseML = () => {
  */
 export const resumeML = () => {
     setIsMLEnabledLocally(true);
-    _isMLEnabled = true;
+    _isMLEnabledLocal = true;
+    triggerStatusUpdate();
     triggerMLSync();
 };
 
@@ -237,16 +240,25 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
 /**
  * Trigger a "sync", whatever that means for the ML subsystem.
  *
- * This is called during the global sync sequence. If ML is enabled, then we use
- * this as a signal to pull embeddings from remote, and start backfilling if
- * needed.
+ * This is called during the global sync sequence.
+ *
+ * First we check again with remote ML flag is set. If it is not set, then we
+ * disable ML locally too.
+ *
+ * Otherwise, and if ML is enabled locally also, then we use this as a signal to
+ * pull embeddings from remote, and start backfilling if needed.
  *
  * This function does not wait for these processes to run to completion, and
  * returns immediately.
  */
-export const triggerMLSync = () => {
-    if (!_isMLEnabled) return;
-    void worker().then((w) => w.sync());
+export const triggerMLSync = () => void mlSync();
+
+const mlSync = async () => {
+    _isMLEnabledRemote = await getIsMLEnabledRemote();
+    if (!_isMLEnabledRemote) _isMLEnabledLocal = false;
+    triggerStatusUpdate();
+
+    if (_isMLEnabledLocal) void worker().then((w) => w.sync());
 };
 
 /**
@@ -265,7 +277,7 @@ export const triggerMLSync = () => {
  * image part of the live photo that was uploaded.
  */
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
-    if (!_isMLEnabled) return;
+    if (!_isMLEnabledLocal) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
@@ -300,7 +312,7 @@ export type MLStatus =
 /**
  * A function that can be used to subscribe to updates in the ML status.
  *
- * This, along with {@link mlStatusSnapshot}, are meant to be used as arguments
+ * This, along with {@link mlStatusSnapshot}, is meant to be used as arguments
  * to React's {@link useSyncExternalStore}.
  *
  * @param callback A function that will be invoked whenever the result of
@@ -310,18 +322,36 @@ export type MLStatus =
  */
 export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
     _mlStatusListeners.push(onChange);
-    // Unconditionally update the snapshot.
-    void updateMLStatusSnapshot();
     return () => {
         _mlStatusListeners = _mlStatusListeners.filter((l) => l != onChange);
     };
 };
 
-export const mlStatusSnapshot = (): MLStatus => _mlStatusSnapshot;
+/**
+ * Return the last known, cached {@link MLStatus}.
+ *
+ * This, along with {@link mlStatusSnapshot}, is meant to be used as arguments
+ * to React's {@link useSyncExternalStore}.
+ *
+ * A return value of `undefined` indicates that we're still performing the
+ * asynchronous tasks that are needed to get the status.
+ */
+export const mlStatusSnapshot = (): MLStatus | undefined => {
+    const result = _mlStatusSnapshot;
+    // We don't have it yet, so start figuring it out now.
+    if (!result) triggerStatusUpdate();
+    return result;
+};
 
-export const updateMLStatusSnapshot = async () => {
-    const status = await getMLStatus();
-    _mlStatusSnapshot = status;
+/**
+ * Trigger an asynchronous and unconditional update of the {@link MLStatus}
+ * snapshot.
+ */
+const triggerStatusUpdate = () => void updateMLStatusSnapshot();
+
+/** Unconditionally update of the {@link MLStatus} snapshot. */
+const updateMLStatusSnapshot = async () => {
+    _mlStatusSnapshot = await getMLStatus();
     _mlStatusListeners.forEach((l) => l());
 };
 
@@ -332,12 +362,13 @@ export const updateMLStatusSnapshot = async () => {
  * locally.
  */
 export const getMLStatus = async (): Promise<MLStatus> => {
+    if (!_isMLEnabledRemote) return { phase: "disabled" };
+
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
 
     let phase: MLStatus["phase"];
-    if (!isMLEnabled()) {
+    if (!_isMLEnabledLocal) {
         phase = "disabled";
-        return { phase };
     } else {
         const isIndexing = await (await worker()).isIndexing();
 
