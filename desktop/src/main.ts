@@ -537,7 +537,7 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * old cache dir if it exists.
  *
  * Added May 2024, v1.7.0. This migration code can be removed after some time
- * once most people have upgraded to newer versions.
+ * once most people have upgraded to newer versions (tag: Migration).
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
     const removeIfExists = async (dirPath: string) => {
