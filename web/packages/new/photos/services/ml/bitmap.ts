@@ -35,21 +35,13 @@ export const imageBitmapAndData = async (
         ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
         : await renderableImageBitmap(enteFile);
 
-    // Use an OffscreenCanvas to get the bitmap's data.
-
     const { width, height } = imageBitmap;
 
+    // Use an OffscreenCanvas to get the bitmap's data.
     const offscreenCanvas = new OffscreenCanvas(width, height);
     const ctx = ensure(offscreenCanvas.getContext("2d"));
     ctx.drawImage(imageBitmap, 0, 0, width, height);
     const imageData = ctx.getImageData(0, 0, width, height);
-
-    // TODO-ML: This check isn't needed, keeping it around during scaffolding.
-    if (
-        imageBitmap.width != imageData.width ||
-        imageBitmap.height != imageData.height
-    )
-        throw new Error("Dimension mismatch");
 
     return { bitmap: imageBitmap, data: imageData };
 };
