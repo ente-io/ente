@@ -60,7 +60,7 @@ const placeholderMLStatus: MLStatus = {
  *
  * See {@link mlStatusSnapshot}.
  */
-let _mlStatusSnapshot = placeholderMLStatus;
+let _mlStatusSnapshot: MLStatus = placeholderMLStatus;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = async () => {
@@ -271,29 +271,31 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-export interface MLStatus {
-    /**
-     * Which phase we are in within the indexing pipeline when viewed across the
-     * user's entire library:
-     *
-     * - "paused": ML is currently paused on this device.
-     *
-     * - "scheduled": There are files we know of that have not been indexed.
-     *
-     * - "indexing": The indexer is currently running.
-     *
-     * - "clustering": All file we know of have been indexed, and we are now
-     *   clustering the faces that were found.
-     *
-     * - "done": ML indexing and face clustering is complete for the user's
-     *   library.
-     */
-    phase: "paused" | "scheduled" | "indexing" | "clustering" | "done";
-    /** The number of files that have already been indexed. */
-    nSyncedFiles: number;
-    /** The total number of files that are eligible for indexing. */
-    nTotalFiles: number;
-}
+export type MLStatus =
+    | { phase: "disabled" /* The ML remote flag is off */ }
+    | {
+          /**
+           * Which phase we are in within the indexing pipeline when viewed across the
+           * user's entire library:
+           *
+           * - "paused": ML is currently paused on this device.
+           *
+           * - "scheduled": There are files we know of that have not been indexed.
+           *
+           * - "indexing": The indexer is currently running.
+           *
+           * - "clustering": All file we know of have been indexed, and we are now
+           *   clustering the faces that were found.
+           *
+           * - "done": ML indexing and face clustering is complete for the user's
+           *   library.
+           */
+          phase: "paused" | "scheduled" | "indexing" | "clustering" | "done";
+          /** The number of files that have already been indexed. */
+          nSyncedFiles: number;
+          /** The total number of files that are eligible for indexing. */
+          nTotalFiles: number;
+      };
 
 /**
  * A function that can be used to subscribe to updates in the ML status.
@@ -334,7 +336,8 @@ export const getMLStatus = async (): Promise<MLStatus> => {
 
     let phase: MLStatus["phase"];
     if (!isMLEnabled()) {
-        phase = "paused";
+        phase = "disabled";
+        return { phase };
     } else {
         const isIndexing = await (await worker()).isIndexing();
 
