@@ -4,6 +4,8 @@ import {
     enableML,
     getIsMLEnabledRemote,
     isMLEnabled,
+    mlStatusSnapshot,
+    mlStatusSubscribe,
     pauseML,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
@@ -69,12 +71,10 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
 
     const [status, setStatus] = useState<Status>("loading");
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
-    const [isEnabledLocal, setIsEnabledLocal] = useState(false);
 
     const refreshStatus = async () => {
         if (isMLEnabled() || (await getIsMLEnabledRemote())) {
             setStatus("enabled");
-            setIsEnabledLocal(isMLEnabled());
         } else if (await canEnableML()) {
             setStatus("disabled");
         } else {
@@ -110,7 +110,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
             } else {
                 await enableML();
                 setStatus("enabled");
-                setIsEnabledLocal(isMLEnabled());
             }
         } catch (e) {
             log.error("Failed to enable or resume ML", e);
@@ -125,7 +124,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         try {
             await enableML();
             setStatus("enabled");
-            setIsEnabledLocal(isMLEnabled());
             // Close the FaceConsent drawer, come back to ourselves.
             setOpenFaceConsent(false);
         } catch (e) {
@@ -139,7 +137,6 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     const handleToggleLocal = async () => {
         try {
             isMLEnabled() ? pauseML() : await handleEnableOrResumeML();
-            setIsEnabledLocal(isMLEnabled());
         } catch (e) {
             log.error("Failed to toggle local state of ML", e);
             somethingWentWrong();
@@ -165,7 +162,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         disabled: <EnableML onEnable={handleEnableOrResumeML} />,
         enabled: (
             <ManageML
-                {...{ isEnabledLocal, setDialogBoxAttributesV2 }}
+                {...{ setDialogBoxAttributesV2 }}
                 onToggleLocal={handleToggleLocal}
                 onDisableML={handleDisableML}
             />
@@ -359,8 +356,6 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
 };
 
 interface ManageMLProps {
-    /** `true` if ML is enabled locally (in addition to remote). */
-    isEnabledLocal: boolean;
     /** Called when the user wants to toggle the ML status locally. */
     onToggleLocal: () => void;
     /** Called when the user wants to disable ML. */
@@ -370,12 +365,15 @@ interface ManageMLProps {
 }
 
 const ManageML: React.FC<ManageMLProps> = ({
-    isEnabledLocal,
     onToggleLocal,
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
-    const status = useSyncExternalStore();
+    const { phase, nSyncedFiles, nTotalFiles } = useSyncExternalStore(
+        mlStatusSubscribe,
+        mlStatusSnapshot,
+    );
+
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
             title: pt("Disable ML search"),
@@ -458,7 +456,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                     <EnteMenuItem
                         label={pt("On this device")}
                         variant="toggle"
-                        checked={isEnabledLocal}
+                        checked={phase != "paused"}
                         onClick={onToggleLocal}
                     />
                 </MenuItemGroup>
@@ -480,7 +478,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                     >
                         <Typography color="text.muted">Processed</Typography>
                         <Typography textAlign="right">
-                            33,000,000 / 13,000,000
+                            {`${nSyncedFiles} / ${nTotalFiles}`}
                         </Typography>
                     </Stack>
                 </Stack>

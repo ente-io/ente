@@ -43,11 +43,24 @@ let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
 let _mlStatusListeners: (() => void)[] = [];
 
 /**
+ * Type-wise, we should''ve used undefined to indicate that we don't yet have a
+ * snapshot, but that would make the {@link mlStatusSnapshot} async,
+ * complicating its usage with React's {@link useSyncExternalStore}.
+ *
+ * So instead this value stands in for an `undefined` {@link MLStatus}.
+ */
+const placeholderMLStatus: MLStatus = {
+    phase: "paused",
+    nSyncedFiles: 0,
+    nTotalFiles: 0,
+};
+
+/**
  * Snapshot of {@link MLStatus}.
  *
  * See {@link mlStatusSnapshot}.
  */
-let _mlStatusSnapshot: MLStatus | undefined;
+let _mlStatusSnapshot = placeholderMLStatus;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = async () => {
@@ -104,7 +117,7 @@ export const logoutML = async () => {
     // function (`logoutML`) gets called at a later point in time.
     _isMLEnabled = false;
     _mlStatusListeners = [];
-    _mlStatusSnapshot = undefined;
+    _mlStatusSnapshot = placeholderMLStatus;
     await clearMLDB();
 };
 
@@ -295,39 +308,41 @@ export interface MLStatus {
  */
 export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
     _mlStatusListeners.push(onChange);
+    // Unconditionally update the snapshot.
+    void updateMLStatusSnapshot();
     return () => {
-        _mlStatusListeners = _mlStatusListeners.filter((v) => v != onChange);
+        _mlStatusListeners = _mlStatusListeners.filter((l) => l != onChange);
     };
 };
 
-export const mlStatusSnapshot = (): MLStatus =>
-    (_mlStatusSnapshot ??= getMLStatus());
+export const mlStatusSnapshot = (): MLStatus => _mlStatusSnapshot;
 
-const getMLStatus = (): MLStatus => {
-    return {
-        phase: "paused",
-        nSyncedFiles: 0,
-        nTotalFiles: 0,
-    };
+export const updateMLStatusSnapshot = async () => {
+    const status = await getMLStatus();
+    _mlStatusSnapshot = status;
+    _mlStatusListeners.forEach((l) => l());
 };
 
 /**
- * Return the current state of the face indexing pipeline.
+ * Return the current state of the ML subsystem.
  *
- * Precondition: ML must be enabled.
+ * Precondition: ML must be enabled on remote, though it is fine if it is paused
+ * locally.
  */
-export const faceIndexingStatus = async (): Promise<MLStatus> => {
-    if (!isMLEnabled())
-        throw new Error("Cannot get indexing status when ML is not enabled");
-
+export const getMLStatus = async (): Promise<MLStatus> => {
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
-    const isIndexing = await (await worker()).isIndexing();
 
     let phase: MLStatus["phase"];
-    if (indexableCount > 0) {
-        phase = !isIndexing ? "scheduled" : "indexing";
+    if (!isMLEnabled()) {
+        phase = "paused";
     } else {
-        phase = "done";
+        const isIndexing = await (await worker()).isIndexing();
+
+        if (indexableCount > 0) {
+            phase = !isIndexing ? "scheduled" : "indexing";
+        } else {
+            phase = "done";
+        }
     }
 
     return {
