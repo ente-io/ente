@@ -1,9 +1,9 @@
 {
   "icons": [
-     { "title": "1xBet", 
-       "altNames": ["1x", "1x bet", "1x-bet"
-       ]
-     },
+    { "title": "1xBet",
+      "altNames": ["1x", "1x bet", "1x-bet"
+      ]
+    },
     {
       "title": "3Commas"
     },
@@ -13,6 +13,10 @@
     },
     {
       "title": "Airtable"
+    },
+    {
+      "title": "airtm",
+      "hex": "000000"
     },
     {
       "title": "Anycoin Direct",
@@ -115,6 +119,9 @@
     },
     {
       "title": "DEGIRO"
+    },
+    {
+      "title": "deriv"
     },
     {
       "title": "DirectAdmin"
@@ -334,8 +341,8 @@
     {
       "title": "Odido"
     },
-     { "title": "okx", 
-       "hex": "858585" },
+    { "title": "okx",
+      "hex": "858585" },
     {
       "title": "Parsec"
     },
@@ -553,8 +560,8 @@
       ],
       "slug": "Yandex"
     },
-     { "title": "yahoo" },
-    {
+    { "title": "yahoo" },
+
     {
       "title": "YNAB",
       "altNames": [
