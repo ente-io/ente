@@ -21,6 +21,7 @@ import {
     FormControlLabel,
     FormGroup,
     Link,
+    Paper,
     Stack,
     Typography,
 } from "@mui/material";
@@ -442,8 +443,8 @@ const ManageML: React.FC<ManageMLProps> = ({
     )*/
 
     return (
-        <Box px={"16px"}>
-            <Stack py={"20px"} spacing={"24px"}>
+        <Stack px={"16px"} py={"20px"} gap={4}>
+            <Stack gap={3}>
                 <MenuItemGroup>
                     <EnteMenuItem
                         label={pt("Enabled")}
@@ -461,6 +462,18 @@ const ManageML: React.FC<ManageMLProps> = ({
                     />
                 </MenuItemGroup>
             </Stack>
-        </Box>
+            <Paper variant="outlined">
+                <Stack gap={4} px={2} py={2}>
+                    <Stack direction="row" justifyContent={"space-between"}>
+                        <Typography color="text.muted">Status</Typography>
+                        <Typography>Indexing</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent={"space-between"}>
+                        <Typography color="text.muted">Processed</Typography>
+                        <Typography>34 / 133</Typography>
+                    </Stack>
+                </Stack>
+            </Paper>
+        </Stack>
     );
 };
