@@ -4,7 +4,7 @@ import type { ImageBitmapAndData } from "./bitmap";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
 import { dotProduct, norm } from "./math";
-import type { MLWorkerElectron } from "./worker-electron";
+import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * The version of the CLIP indexing pipeline implemented by the current client.

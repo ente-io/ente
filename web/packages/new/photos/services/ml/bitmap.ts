@@ -7,7 +7,7 @@ import { renderableImageBlob } from "../../utils/file";
 import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
-import type { MLWorkerElectron } from "./worker-electron";
+import type { MLWorkerElectron } from "./worker-types";
 
 export interface ImageBitmapAndData {
     bitmap: ImageBitmap;

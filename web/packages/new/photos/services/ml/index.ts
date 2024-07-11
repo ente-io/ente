@@ -68,12 +68,17 @@ const createComlinkWorker = async () => {
         computeFaceEmbeddings: electron.computeFaceEmbeddings,
         computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
     };
+    const delegate = {
+        workerDidProcessFile,
+    };
 
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ML",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-    await cw.remote.then((w) => w.init(proxy(mlWorkerElectron)));
+    await cw.remote.then((w) =>
+        w.init(proxy(mlWorkerElectron), proxy(delegate)),
+    );
     return cw;
 };
 
@@ -404,6 +409,8 @@ const setInterimScheduledStatus = () => {
     }
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
+
+const workerDidProcessFile = () => triggerStatusUpdate();
 
 /**
  * Return the IDs of all the faces in the given {@link enteFile} that are not
