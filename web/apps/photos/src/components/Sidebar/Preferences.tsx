@@ -1,4 +1,5 @@
 import { MLSettings } from "@/new/photos/components/MLSettings";
+import { isMLSupported } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
@@ -15,7 +16,6 @@ import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { useContext, useState } from "react";
 import AdvancedSettings from "./AdvancedSettings";
@@ -75,7 +75,7 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             endIcon={<ChevronRight />}
                             label={t("ADVANCED")}
                         />
-                        {isElectron() && (
+                        {isMLSupported && (
                             <Box>
                                 <MenuSectionTitle
                                     title={t("LABS")}

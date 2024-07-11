@@ -93,17 +93,17 @@ export const terminateMLWorker = () => {
     }
 };
 
-/** Gatekeep some common entry points to catch accidental invocations. */
-const ensureDesktop = () => {
-    // ML currently only works when we're running in our desktop app.
-    if (!isDesktop) throw new Error("ML subsystem can only be used on desktop");
-};
+/**
+ * Return true if the current client supports ML.
+ *
+ * ML currently only works when we're running in our desktop app.
+ */
+export const isMLSupported = isDesktop;
 
 /**
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
-    ensureDesktop();
     _isMLEnabledLocal = isMLEnabledLocally();
 };
 
@@ -247,10 +247,7 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
  * This function does not wait for these processes to run to completion, and
  * returns immediately.
  */
-export const triggerMLSync = () => {
-    ensureDesktop();
-    void mlSync();
-};
+export const triggerMLSync = () => void mlSync();
 
 const mlSync = async () => {
     _isMLEnabledRemote = await getIsMLEnabledRemote();
@@ -337,8 +334,8 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
  */
 export const mlStatusSnapshot = (): MLStatus | undefined => {
     const result = _mlStatusSnapshot;
-    // We don't have it yet, so start figuring it out now.
-    if (!result) triggerStatusUpdate();
+    // We don't have it yet but we're on a supported client, trigger an update.
+    if (!result && isDesktop) triggerStatusUpdate();
     return result;
 };
 

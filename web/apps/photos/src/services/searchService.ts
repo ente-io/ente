@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { faceIndexingStatus, isMLEnabled } from "@/new/photos/services/ml";
+import { mlStatusSnapshot } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
@@ -26,9 +26,7 @@ const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
 export const getDefaultOptions = async () => {
     return [
-        // TODO-ML(MR): Skip this for now if indexing is disabled (eventually
-        // the indexing status should not be tied to results).
-        ...(isMLEnabled() ? [await getIndexStatusSuggestion()] : []),
+        ...(await getMLStatusSuggestion()),
         ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };
@@ -171,32 +169,33 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     }
 }
 
-export async function getIndexStatusSuggestion(): Promise<Suggestion> {
-    try {
-        const indexStatus = await faceIndexingStatus();
+export async function getMLStatusSuggestion(): Promise<Suggestion[]> {
+    const status = await mlStatusSnapshot();
 
+    isMLEnabled();
+    try {
         let label: string;
-        switch (indexStatus.phase) {
+        switch (status.phase) {
             case "scheduled":
                 label = t("INDEXING_SCHEDULED");
                 break;
             case "indexing":
                 label = t("ANALYZING_PHOTOS", {
-                    indexStatus,
+                    indexStatus: status,
                 });
                 break;
             case "clustering":
-                label = t("INDEXING_PEOPLE", { indexStatus });
+                label = t("INDEXING_PEOPLE", { indexStatus: status });
                 break;
             case "done":
-                label = t("INDEXING_DONE", { indexStatus });
+                label = t("INDEXING_DONE", { indexStatus: status });
                 break;
         }
 
         return {
             label,
             type: SuggestionType.INDEX_STATUS,
-            value: indexStatus,
+            value: status,
             hide: true,
         };
     } catch (e) {
