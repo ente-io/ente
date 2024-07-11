@@ -3,10 +3,6 @@
  */
 
 import { FILE_TYPE } from "@/media/file-type";
-import {
-    isBetaUser,
-    isInternalUser,
-} from "@/new/photos/services/feature-flags";
 import type { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
 import { blobCache } from "@/next/blob-cache";
@@ -97,12 +93,17 @@ export const terminateMLWorker = () => {
     }
 };
 
+/** Gatekeep some common entry points to catch accidental invocations. */
+const ensureDesktop = () => {
+    // ML currently only works when we're running in our desktop app.
+    if (!isDesktop) throw new Error("ML subsystem can only be used on desktop");
+};
+
 /**
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
-    // ML currently only works when we're running in our desktop app.
-    if (!isDesktop) return;
+    ensureDesktop();
     _isMLEnabledLocal = isMLEnabledLocally();
 };
 
@@ -117,13 +118,6 @@ export const logoutML = async () => {
     _mlStatusSnapshot = undefined;
     await clearMLDB();
 };
-
-/**
- * Return true if we should show an UI option to the user to allow them to
- * enable ML.
- */
-export const canEnableML = async () =>
-    (await isInternalUser()) || (await isBetaUser());
 
 /**
  * Return true if the user has enabled machine learning in their preferences.
@@ -251,7 +245,10 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
  * This function does not wait for these processes to run to completion, and
  * returns immediately.
  */
-export const triggerMLSync = () => void mlSync();
+export const triggerMLSync = () => {
+    ensureDesktop();
+    void mlSync();
+};
 
 const mlSync = async () => {
     _isMLEnabledRemote = await getIsMLEnabledRemote();
