@@ -5,7 +5,6 @@ import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
-
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -22,13 +21,13 @@ import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/map/map_view.dart";
 import "package:photos/ui/map/tile/layers.dart";
-
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class LocationTagsWidget extends StatefulWidget {
   final EnteFile file;
+
   const LocationTagsWidget(this.file, {super.key});
 
   @override
