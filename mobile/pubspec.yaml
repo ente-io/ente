@@ -198,13 +198,13 @@ flutter_intl:
 
 dev_dependencies:
   build_runner: ^2.4.7
-  intl_utils: ^2.8.7
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
   freezed: ^2.5.2
   integration_test:
     sdk: flutter
+  intl_utils: ^2.8.7
   json_serializable: ^6.6.1
   test: ^1.22.0
 
