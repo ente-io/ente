@@ -1,5 +1,7 @@
 // Adapted from: https://github.com/deckerst/aves
 
+import "dart:developer";
+
 import "package:collection/collection.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";
@@ -127,6 +129,12 @@ class FFProbeProps {
     required this.width,
     required this.xiaomiSlowMoment,
   });
+
+  // toString() method
+  @override
+  String toString() {
+    return 'FFProbeProps(captureFps: $captureFps, androidManufacturer: $androidManufacturer, androidModel: $androidModel, androidVersion: $androidVersion, bitRate: $bitRate, bitsPerRawSample: $bitsPerRawSample, byteCount: $byteCount, channelLayout: $channelLayout, chromaLocation: $chromaLocation, codecName: $codecName, codecPixelFormat: $codecPixelFormat, codedHeight: $codedHeight, codedWidth: $codedWidth, colorPrimaries: $colorPrimaries, colorRange: $colorRange, colorSpace: $colorSpace, colorTransfer: $colorTransfer, colorProfile: $colorProfile, compatibleBrands: $compatibleBrands, creationTime: $creationTime, displayAspectRatio: $displayAspectRatio, date: $date, duration: $duration, durationMicros: $durationMicros, extraDataSize: $extraDataSize, fieldOrder: $fieldOrder, fpsDen: $fpsDen, frameCount: $frameCount, handlerName: $handlerName, hasBFrames: $hasBFrames, height: $height, language: $language, location: $location, majorBrand: $majorBrand, mediaFormat: $mediaFormat, mediaType: $mediaType, minorVersion: $minorVersion, nalLengthSize: $nalLengthSize, quicktimeLocationAccuracyHorizontal: $quicktimeLocationAccuracyHorizontal, rFrameRate: $rFrameRate, rotate: $rotate, sampleFormat: $sampleFormat, sampleRate: $sampleRate, sampleAspectRatio: $sampleAspectRatio, sarDen: $sarDen, segmentCount: $segmentCount, sourceOshash: $sourceOshash, startMicros: $startMicros, startPts: $startPts, startTime: $startTime, statisticsWritingApp: $statisticsWritingApp, statisticsWritingDateUtc: $statisticsWritingDateUtc, timeBase: $timeBase, track: $track, vendorId: $vendorId, width: $width, xiaomiSlowMoment: $xiaomiSlowMoment)';
+  }
 
   factory FFProbeProps.fromJson(Map<dynamic, dynamic>? json) {
     return FFProbeProps(

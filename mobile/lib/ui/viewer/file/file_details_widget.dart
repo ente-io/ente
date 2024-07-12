@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:developer";
 import "dart:io";
 
 import "package:exif/exif.dart";
@@ -110,6 +111,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     final File? originFile = await getFile(widget.file, isOrigin: true);
     if (originFile == null) return;
     final session = await FFprobeKit.getMediaInformation(originFile.path);
+
     final mediaInfo = session.getMediaInformation();
 
     if (mediaInfo == null) {
@@ -120,8 +122,13 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       );
       return;
     }
-    //todo:(neeraj) Use probe data for back filling location
-    final _ = await FFProbeUtil.getProperties(mediaInfo);
+    final properties = await FFProbeUtil.getProperties(mediaInfo);
+    final parsedMetadata = await FFProbeUtil.getMetadata(mediaInfo);
+
+    // print all the properties
+    log("videoCustomProps ${properties.toString()}");
+    log("videoMetadata ${parsedMetadata.toString()}");
+
     setState(() {});
   }
 
