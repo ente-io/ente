@@ -6,16 +6,6 @@ export const preloadImage = (imgBasePath: string) => {
     new Image().srcset = srcSet.join(",");
 };
 
-export function openLink(href: string, newTab?: boolean) {
-    const a = document.createElement("a");
-    a.href = href;
-    if (newTab) {
-        a.target = "_blank";
-    }
-    a.rel = "noreferrer noopener";
-    a.click();
-}
-
 export function isClipboardItemPresent() {
     return typeof ClipboardItem !== "undefined";
 }

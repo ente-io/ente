@@ -71,8 +71,11 @@ const Contents: React.FC<ContentsProps> = (props) => {
         () =>
             void getKV("apiOrigin").then((o) =>
                 setInitialAPIOrigin(
-                    // TODO: Migration of apiOrigin from local storage to indexed DB
-                    // Remove me after a bit (27 June 2024).
+                    // Migrate apiOrigin from local storage to indexed DB.
+                    //
+                    // This code was added 27 June 2024. Note that the legacy
+                    // value was never in production builds, only nightlies, so
+                    // this code can be removed soon (tag: Migration).
                     o ?? localStorage.getItem("apiOrigin") ?? "",
                 ),
             ),
@@ -215,8 +218,11 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
 const updateAPIOrigin = async (origin: string) => {
     if (!origin) {
         await removeKV("apiOrigin");
-        // TODO: Migration of apiOrigin from local storage to indexed DB
-        // Remove me after a bit (27 June 2024).
+        // Migrate apiOrigin from local storage to indexed DB.
+        //
+        // This code was added 27 June 2024. Note that the legacy value was
+        // never in production builds, only nightlies, so this code can be
+        // removed at some point soon (tag: Migration).
         localStorage.removeItem("apiOrigin");
         return;
     }

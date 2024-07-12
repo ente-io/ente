@@ -3,41 +3,37 @@ import {
     unidentifiedFaceIDs,
 } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import { blobCache } from "@/next/blob-cache";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
 export interface PeopleListProps {
-    people: Array<Person>;
-    maxRows?: number;
+    people: Person[];
+    maxRows: number;
     onSelect?: (person: Person, index: number) => void;
 }
 
-export const PeopleList = React.memo((props: PeopleListProps) => {
+export const PeopleList: React.FC<PeopleListProps> = ({
+    people,
+    maxRows,
+    onSelect,
+}) => {
     return (
-        <FaceChipContainer
-            style={
-                props.maxRows && {
-                    maxHeight: props.maxRows * 122 + 28,
-                }
-            }
-        >
-            {props.people.map((person, index) => (
+        <FaceChipContainer style={{ maxHeight: maxRows * 122 + 28 }}>
+            {people.map((person, index) => (
                 <FaceChip
                     key={person.id}
-                    clickable={!!props.onSelect}
-                    onClick={() =>
-                        props.onSelect && props.onSelect(person, index)
-                    }
+                    clickable={!!onSelect}
+                    onClick={() => onSelect && onSelect(person, index)}
                 >
                     <FaceCropImageView faceID={person.displayFaceId} />
                 </FaceChip>
             ))}
         </FaceChipContainer>
     );
-});
+};
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -89,7 +85,7 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
     useEffect(() => {
         let didCancel = false;
 
-        (async () => {
+        const go = async () => {
             const faceIDs = await unidentifiedFaceIDs(enteFile);
             !didCancel && setFaceIDs(faceIDs);
             // Don't block for the regeneration to happen. If anything got
@@ -99,7 +95,9 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             void regenerateFaceCropsIfNeeded(enteFile).then((r) =>
                 setDidRegen(r),
             );
-        })();
+        };
+
+        void go();
 
         return () => {
             didCancel = true;
@@ -140,7 +138,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
     useEffect(() => {
         let didCancel = false;
         if (faceID) {
-            blobCache("face-crops")
+            void blobCache("face-crops")
                 .then((cache) => cache.get(faceID))
                 .then((data) => {
                     if (data) {
@@ -154,6 +152,9 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
             didCancel = true;
             if (objectURL) URL.revokeObjectURL(objectURL);
         };
+        // TODO: The linter warning is actually correct, objectURL should be a
+        // dependency, but adding that require reworking this code first.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [faceID]);
 
     return objectURL ? (

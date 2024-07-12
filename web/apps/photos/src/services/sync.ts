@@ -1,6 +1,5 @@
 import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
-import { triggerMLSync } from "@/new/photos/services/ml";
-import { isDesktop } from "@/next/app";
+import { isMLSupported, triggerMLSync } from "@/new/photos/services/ml";
 import { syncEntities } from "services/entityService";
 import { syncMapEnabled } from "services/userService";
 
@@ -17,7 +16,5 @@ export const sync = async () => {
     await syncEntities();
     await syncMapEnabled();
     fetchAndSaveFeatureFlagsIfNeeded();
-    if (isDesktop) {
-        triggerMLSync();
-    }
+    if (isMLSupported) triggerMLSync();
 };

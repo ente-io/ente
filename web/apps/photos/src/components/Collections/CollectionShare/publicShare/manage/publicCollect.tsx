@@ -1,7 +1,6 @@
+import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Stack } from "@mui/material";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { t } from "i18next";
 import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 

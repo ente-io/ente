@@ -72,6 +72,7 @@ export function EnteMenuItem({
         <MenuItem
             disabled={disabled}
             onClick={handleButtonClick}
+            disableRipple={variant == "toggle"}
             sx={{
                 width: "100%",
                 color: (theme) =>
