@@ -120,8 +120,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       );
       return;
     }
-    final properties = await FFProbeUtil.getProperties(mediaInfo);
-
+    //todo:(neeraj) Use probe data for back filling location
+    final _ = await FFProbeUtil.getProperties(mediaInfo);
     setState(() {});
   }
 
