@@ -1,19 +1,14 @@
 import "dart:io";
 
-import "package:photos/utils/exif_util.dart";
-import "package:xmp/xmp.dart";
+import "package:flutter/painting.dart";
 
 Future<bool> checkIfPanorama(File file) async {
-  try {
-    final result = XMP.extract(file.readAsBytesSync());
+  final image = await decodeImageFromList(await file.readAsBytes());
+  final width = image.width.toDouble();
+  final height = image.height.toDouble();
 
-    if (result["Rdf Projectiontype"] == "cylindrical") {
-      return true;
-    }
-  } catch (_) {}
-
-  final result = await readExifAsync(file);
-
-  final element = result["EXIF CustomRendered"];
-  return element?.printable == "6";
+  if (height > width) {
+    return height / width >= 2.0;
+  }
+  return width / height >= 2.0;
 }
