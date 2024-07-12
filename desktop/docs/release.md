@@ -62,15 +62,16 @@ subsequent nightly builds.
 2.  In the release repo, delete the existing _nightly_ pre-release, then:
 
     ```sh
-    git tag 1.x.x-beta
-    git push origin 1.x.x-beta
+    git tag v1.x.x-beta
+    git push origin v1.x.x-beta
     ```
 
 3.  Start a new run of the workflow (`gh workflow run desktop-release.yml`).
 
-Once the workflow finishes and the 1.x.x-beta pre-release is created, edit its
-description to "Nightly beta builds". Subsequent scheduled nightly workflows
-will keep updating this pre-release.
+4.  Once the workflow creates the new 1.x.x-beta pre-release, edit its
+    description to "Nightly builds".
+
+Subsequent scheduled nightly workflows will keep updating this pre-release.
 
 ## Ad-hoc builds
 
