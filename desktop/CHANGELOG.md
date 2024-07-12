@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.3 (Unreleased)
+
+-   .
+
 ## v1.7.2
 
 -   Significantly improve the speed of the metadata parsing step during imports
