@@ -47,7 +47,9 @@ func (u *PasskeyUser) WebAuthnName() string {
 }
 
 func (u *PasskeyUser) WebAuthnDisplayName() string {
-	return u.Name
+	// Safari requires a display name to be set, otherwise it does not recognize
+	// security keys.
+	return u.Email
 }
 
 func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
