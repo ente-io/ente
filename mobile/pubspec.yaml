@@ -204,6 +204,7 @@ dev_dependencies:
   freezed: ^2.5.2
   integration_test:
     sdk: flutter
+  intl_utils: ^2.8.7
   json_serializable: ^6.6.1
   test: ^1.22.0
 
