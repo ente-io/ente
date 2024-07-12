@@ -198,6 +198,7 @@ flutter_intl:
 
 dev_dependencies:
   build_runner: ^2.4.7
+  intl_utils: ^2.8.7
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
