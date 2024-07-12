@@ -201,7 +201,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     final hash = cryptoPwHash(
       utf8.encode(inputtedPassword),
       salt!,
-      sodium.crypto.pwhash.memLimitSensitive,
+      sodium.crypto.pwhash.memLimitInteractive,
       sodium.crypto.pwhash.opsLimitSensitive,
       sodium,
     );

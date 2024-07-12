@@ -72,14 +72,12 @@ class LockScreenSettings {
 
   Future<void> setPin(String userPin) async {
     await _secureStorage.delete(key: saltKey);
-    await _preferences.setString(pin, userPin);
-    await _preferences.remove(password);
     final salt = _generateSalt();
 
     final hash = cryptoPwHash(
       utf8.encode(userPin),
       salt,
-      sodium.crypto.pwhash.memLimitSensitive,
+      sodium.crypto.pwhash.memLimitInteractive,
       sodium.crypto.pwhash.opsLimitSensitive,
       sodium,
     );
@@ -104,16 +102,13 @@ class LockScreenSettings {
   }
 
   Future<void> setPassword(String pass) async {
-    await _preferences.setString(password, pass);
-    await _preferences.remove(pin);
     await _secureStorage.delete(key: saltKey);
-
     final salt = _generateSalt();
 
     final hash = cryptoPwHash(
       utf8.encode(pass),
       salt,
-      sodium.crypto.pwhash.memLimitSensitive,
+      sodium.crypto.pwhash.memLimitInteractive,
       sodium.crypto.pwhash.opsLimitSensitive,
       sodium,
     );
@@ -133,8 +128,6 @@ class LockScreenSettings {
   }
 
   Future<void> removePinAndPassword() async {
-    await _preferences.remove(pin);
-    await _preferences.remove(password);
     await _secureStorage.delete(key: saltKey);
     await _secureStorage.delete(key: pin);
     await _secureStorage.delete(key: password);

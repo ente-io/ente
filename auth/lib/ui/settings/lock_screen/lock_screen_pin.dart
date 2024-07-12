@@ -63,7 +63,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
     final hash = cryptoPwHash(
       utf8.encode(inputtedPin),
       salt!,
-      sodium.crypto.pwhash.memLimitSensitive,
+      sodium.crypto.pwhash.memLimitInteractive,
       sodium.crypto.pwhash.opsLimitSensitive,
       sodium,
     );
