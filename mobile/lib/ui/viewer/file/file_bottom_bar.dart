@@ -43,11 +43,15 @@ class FileBottomBar extends StatefulWidget {
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   bool isPanorama = false;
+  int? lastFile;
 
   Future<void> _checkPanoroma() async {
-    if (widget.file.fileType != FileType.image) {
+    if (widget.file.fileType != FileType.image ||
+        lastFile == widget.file.generatedID) {
       return;
     }
+
+    lastFile = widget.file.generatedID;
 
     final file = await getFile(widget.file);
     if (file == null) {
@@ -64,6 +68,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   @override
   Widget build(BuildContext context) {
+    _checkPanoroma();
     return _getBottomBar();
   }
 

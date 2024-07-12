@@ -15,5 +15,5 @@ Future<bool> checkIfPanorama(File file) async {
   final result = await readExifAsync(file);
 
   final element = result["EXIF CustomRendered"];
-  return (element?.printable == "6");
+  return element?.printable == "6";
 }
