@@ -25,7 +25,11 @@ class LocalAuthenticationService {
   ) async {
     if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.setEnabled(false);
-      final result = await requestAuthentication(context, infoMessage);
+      final result = await requestAuthentication(
+        context,
+        infoMessage,
+        isAuthenticatingForInAppChange: true,
+      );
       AppLock.of(context)!.setEnabled(
         await Configuration.instance.shouldShowLockScreen(),
       );
@@ -43,15 +47,17 @@ class LocalAuthenticationService {
     BuildContext context,
     String? savedPin,
     String? savedPassword, {
-    bool isOnOpeningApp = false,
+    bool isAuthenticatingOnAppLaunch = false,
+    bool isAuthenticatingForInAppChange = false,
   }) async {
     if (savedPassword != null) {
       final result = await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return LockScreenPassword(
-              isAuthenticating: true,
-              isOnOpeningApp: isOnOpeningApp,
+              isChangingLockScreenSettings: true,
+              isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
+              isAuthenticatingOnAppLaunch: isAuthenticatingOnAppLaunch,
               authPass: savedPassword,
             );
           },
@@ -66,8 +72,9 @@ class LocalAuthenticationService {
         MaterialPageRoute(
           builder: (BuildContext context) {
             return LockScreenPin(
-              isAuthenticating: true,
-              isOnOpeningApp: isOnOpeningApp,
+              isChangingLockScreenSettings: true,
+              isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
+              isAuthenticatingOnAppLaunch: isAuthenticatingOnAppLaunch,
               authPin: savedPin,
             );
           },

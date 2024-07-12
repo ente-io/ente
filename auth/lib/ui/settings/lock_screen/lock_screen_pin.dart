@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:ente_auth/theme/colors.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/theme/text_style.dart";
@@ -5,21 +7,33 @@ import "package:ente_auth/ui/settings/lock_screen/custom_pin_keypad.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_confirm_pin.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import 'package:pinput/pinput.dart';
 
+/// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
+/// Set to true when the app requires the user to authenticate before allowing
+/// changes to the lock screen settings.
+
+/// [isAuthenticatingOnAppLaunch] Authentication required on app launch.
+/// Set to true when the app requires the user to authenticate immediately upon opening.
+
+/// [isAuthenticatingForInAppChange] Authentication required for in-app changes (e.g., email, password).
+/// Set to true when the app requires the to authenticate for sensitive actions like email, password changes.
+
 class LockScreenPin extends StatefulWidget {
   const LockScreenPin({
     super.key,
-    this.isAuthenticating = false,
-    this.isOnOpeningApp = false,
+    this.isChangingLockScreenSettings = false,
+    this.isAuthenticatingOnAppLaunch = false,
+    this.isAuthenticatingForInAppChange = false,
     this.authPin,
   });
 
-  //Is false when setting a new password
-  final bool isAuthenticating;
-  final bool isOnOpeningApp;
+  final bool isAuthenticatingOnAppLaunch;
+  final bool isChangingLockScreenSettings;
+  final bool isAuthenticatingForInAppChange;
   final String? authPin;
   @override
   State<LockScreenPin> createState() => _LockScreenPinState();
@@ -45,18 +59,19 @@ class _LockScreenPinState extends State<LockScreenPin> {
   }
 
   Future<bool> confirmPinAuth(String inputtedPin) async {
-    // final Uint8List? salt = await _lockscreenSetting.getSalt();
-    // final hash = cryptoPwHash({
-    //   "password": utf8.encode(code),
-    //   "salt": salt,
-    //   "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
-    //   "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
-    // });
-    // final String hashedPin = base64Encode(hash);
-    if (widget.authPin == inputtedPin) {
+    final Uint8List? salt = await _lockscreenSetting.getSalt();
+    final hash = cryptoPwHash(
+      utf8.encode(inputtedPin),
+      salt!,
+      sodium.crypto.pwhash.memLimitSensitive,
+      sodium.crypto.pwhash.opsLimitSensitive,
+      sodium,
+    );
+    if (widget.authPin == base64Encode(hash)) {
       invalidAttemptsCount = 0;
       await _lockscreenSetting.setInvalidAttemptCount(0);
-      widget.isOnOpeningApp
+      widget.isAuthenticatingOnAppLaunch ||
+              widget.isAuthenticatingForInAppChange
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -75,7 +90,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
         isPinValid = false;
       });
 
-      if (widget.isOnOpeningApp) {
+      if (widget.isAuthenticatingOnAppLaunch) {
         invalidAttemptsCount++;
         await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
         if (invalidAttemptsCount > 4) {
@@ -87,7 +102,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
   }
 
   Future<void> _confirmPin(String inputtedPin) async {
-    if (widget.isAuthenticating) {
+    if (widget.isChangingLockScreenSettings) {
       await confirmPinAuth(inputtedPin);
       return;
     } else {
@@ -130,26 +145,16 @@ class _LockScreenPinState extends State<LockScreenPin> {
       ),
       floatingActionButton: CustomPinKeypad(controller: _pinController),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // body: OrientationBuilder(
-      //   builder: (context, orientation) {
-      //     return orientation == Orientation.portrait
-      //         ? _getBody(colorTheme, textTheme, isPortrait: true)
-      //         : SingleChildScrollView(
-      //             child: _getBody(colorTheme, textTheme, isPortrait: false),
-      //           );
-      //   },
-      // ),
       body: SingleChildScrollView(
-        child: _getBody(colorTheme, textTheme, isPortrait: true),
+        child: _getBody(colorTheme, textTheme),
       ),
     );
   }
 
   Widget _getBody(
     EnteColorScheme colorTheme,
-    EnteTextTheme textTheme, {
-    required bool isPortrait,
-  }) {
+    EnteTextTheme textTheme,
+  ) {
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -219,7 +224,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
             ),
           ),
           Text(
-            widget.isAuthenticating ? "Enter PIN" : "Set new PIN",
+            widget.isChangingLockScreenSettings ? "Enter PIN" : "Set new PIN",
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),
@@ -263,10 +268,6 @@ class _LockScreenPinState extends State<LockScreenPin> {
               await _confirmPin(_pinController.text);
             },
           ),
-          // isPortrait
-          //     ? const Spacer()
-          //     : const Padding(padding: EdgeInsets.all(12)),
-          // CustomPinKeypad(controller: _pinController),
         ],
       ),
     );

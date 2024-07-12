@@ -10,7 +10,6 @@ class CustomPinKeypad extends StatelessWidget {
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(2),
-        // color: getEnteColorScheme(context).strokeFainter,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

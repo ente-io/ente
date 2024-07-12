@@ -1,6 +1,8 @@
 import "dart:async";
 
 import "package:ente_auth/core/configuration.dart";
+import "package:ente_auth/core/event_bus.dart";
+import "package:ente_auth/events/app_lock_update_event.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/components/captioned_text_widget.dart";
 import "package:ente_auth/ui/components/divider_widget.dart";
@@ -29,15 +31,11 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
-  late String autoLockTime;
+  late int autoLockTimeInMilliseconds;
   @override
   void initState() {
     super.initState();
-    autoLockTime = _formatTime(
-      Duration(
-        milliseconds: _lockscreenSetting.getAutoLockTime(),
-      ),
-    );
+    autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
     _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
@@ -56,6 +54,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _deviceLock() async {
     await _lockscreenSetting.removePinAndPassword();
     await _initializeSettings();
+    await _lockscreenSetting.setAppLockType("Device lock");
+    Bus.instance.fire(
+      AppLockUpdateEvent(
+        AppLockUpdateType.device,
+      ),
+    );
   }
 
   Future<void> _pinLock() async {
@@ -69,6 +73,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
+        Bus.instance.fire(
+          AppLockUpdateEvent(
+            AppLockUpdateType.pin,
+          ),
+        );
+        _lockscreenSetting.setAppLockType("Pin");
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -87,6 +97,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
+        Bus.instance.fire(
+          AppLockUpdateEvent(
+            AppLockUpdateType.password,
+          ),
+        );
+        _lockscreenSetting.setAppLockType("Password");
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -98,6 +114,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
+    await _lockscreenSetting.setAppLockType(appLock ? "None" : "Device lock");
+    Bus.instance.fire(
+      AppLockUpdateEvent(
+        appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
+      ),
+    );
     setState(() {
       _initializeSettings();
       appLock = !appLock;
@@ -111,11 +133,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     ).then(
       (value) {
         setState(() {
-          autoLockTime = _formatTime(
-            Duration(
-              milliseconds: _lockscreenSetting.getAutoLockTime(),
-            ),
-          );
+          autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
         });
       },
     );
@@ -123,11 +141,11 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
 
   String _formatTime(Duration duration) {
     if (duration.inHours != 0) {
-      return "${duration.inHours}hr";
+      return "in ${duration.inHours} hour${duration.inHours > 1 ? 's' : ''}";
     } else if (duration.inMinutes != 0) {
-      return "${duration.inMinutes}m";
+      return "in ${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''}";
     } else if (duration.inSeconds != 0) {
-      return "${duration.inSeconds}s";
+      return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
       return "Disable";
     }
@@ -191,6 +209,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                         ),
                         appLock
                             ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   MenuItemWidget(
                                     captionedTextWidget:
@@ -249,13 +268,31 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                   ),
                                   MenuItemWidget(
                                     captionedTextWidget: CaptionedTextWidget(
-                                      title: "Auto-lock",
-                                      subTitle: autoLockTime,
+                                      title: "Auto lock",
+                                      subTitle: _formatTime(
+                                        Duration(
+                                          milliseconds:
+                                              autoLockTimeInMilliseconds,
+                                        ),
+                                      ),
                                     ),
-                                    singleBorderRadius: 8,
                                     alignCaptionedTextToLeft: true,
+                                    singleBorderRadius: 8,
                                     menuItemColor: colorTheme.fillFaint,
+                                    trailingIconColor: colorTheme.textBase,
                                     onTap: () => _onAutoLock(),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      "Require ${_lockscreenSetting.getAppLockType()} if away for some time .",
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
                                 ],
                               )

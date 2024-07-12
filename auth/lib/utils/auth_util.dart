@@ -14,6 +14,7 @@ Future<bool> requestAuthentication(
   BuildContext context,
   String reason, {
   bool isOpeningApp = false,
+  bool isAuthenticatingForInAppChange = false,
 }) async {
   Logger("AuthUtil").info("Requesting authentication");
 
@@ -25,7 +26,8 @@ Future<bool> requestAuthentication(
       context,
       savedPin,
       savedPassword,
-      isOnOpeningApp: isOpeningApp,
+      isAuthenticatingOnAppLaunch: isOpeningApp,
+      isAuthenticatingForInAppChange: isAuthenticatingForInAppChange,
     );
   }
   if (Platform.isMacOS || Platform.isLinux) {

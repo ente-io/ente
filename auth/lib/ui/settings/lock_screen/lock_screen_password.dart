@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/common/dynamic_fab.dart";
 import "package:ente_auth/ui/components/buttons/icon_button_widget.dart";
@@ -5,20 +7,32 @@ import "package:ente_auth/ui/components/text_input_widget.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_confirm_password.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_options.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+
+/// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
+/// Set to true when the app requires the user to authenticate before allowing
+/// changes to the lock screen settings.
+
+/// [isAuthenticatingOnAppLaunch] Authentication required on app launch.
+/// Set to true when the app requires the user to authenticate immediately upon opening.
+
+/// [isAuthenticatingForInAppChange] Authentication required for in-app changes (e.g., email, password).
+/// Set to true when the app requires the to authenticate for sensitive actions like email, password changes.
 
 class LockScreenPassword extends StatefulWidget {
   const LockScreenPassword({
     super.key,
-    this.isAuthenticating = false,
-    this.isOnOpeningApp = false,
+    this.isChangingLockScreenSettings = false,
+    this.isAuthenticatingOnAppLaunch = false,
+    this.isAuthenticatingForInAppChange = false,
     this.authPass,
   });
 
-  //Is false when setting a new password
-  final bool isAuthenticating;
-  final bool isOnOpeningApp;
+  final bool isChangingLockScreenSettings;
+  final bool isAuthenticatingOnAppLaunch;
+  final bool isAuthenticatingForInAppChange;
   final String? authPass;
   @override
   State<LockScreenPassword> createState() => _LockScreenPasswordState();
@@ -149,7 +163,9 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                 ),
               ),
               Text(
-                widget.isAuthenticating ? "Enter Password" : "Set new Password",
+                widget.isChangingLockScreenSettings
+                    ? "Enter Password"
+                    : "Set new Password",
                 textAlign: TextAlign.center,
                 style: textTheme.bodyBold,
               ),
@@ -181,17 +197,19 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   }
 
   Future<bool> _confirmPasswordAuth(String inputtedPassword) async {
-    // final Uint8List? salt = await _lockscreenSetting.getSalt();
-    // final hash = cryptoPwHash({
-    //   "password": utf8.encode(inputtedPassword),
-    //   "salt": salt,
-    //   "opsLimit": Sodium.cryptoPwhashOpslimitInteractive,
-    //   "memLimit": Sodium.cryptoPwhashMemlimitInteractive,
-    // });
-    if (widget.authPass == inputtedPassword) {
+    final Uint8List? salt = await _lockscreenSetting.getSalt();
+    final hash = cryptoPwHash(
+      utf8.encode(inputtedPassword),
+      salt!,
+      sodium.crypto.pwhash.memLimitSensitive,
+      sodium.crypto.pwhash.opsLimitSensitive,
+      sodium,
+    );
+    if (widget.authPass == base64Encode(hash)) {
       await _lockscreenSetting.setInvalidAttemptCount(0);
 
-      widget.isOnOpeningApp
+      widget.isAuthenticatingOnAppLaunch ||
+              widget.isAuthenticatingForInAppChange
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -200,7 +218,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
             );
       return true;
     } else {
-      if (widget.isOnOpeningApp) {
+      if (widget.isAuthenticatingOnAppLaunch) {
         invalidAttemptsCount++;
         await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
         if (invalidAttemptsCount > 4) {
@@ -214,7 +232,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   }
 
   Future<void> _confirmPassword() async {
-    if (widget.isAuthenticating) {
+    if (widget.isChangingLockScreenSettings) {
       await _confirmPasswordAuth(_passwordController.text);
       return;
     } else {
