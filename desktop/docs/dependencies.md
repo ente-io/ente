@@ -112,21 +112,14 @@ resources (`build`) folder. This is used for thumbnail generation on Linux.
 On macOS, we use the `sips` CLI tool for conversion, but that is already
 available on the host machine, and is not bundled with our app.
 
-### AI/ML
+### ML
 
-[onnxruntime-node](https://github.com/Microsoft/onnxruntime) is used as the
-AI/ML runtime. It powers both natural language searches (using CLIP) and face
+[onnxruntime-node](https://github.com/Microsoft/onnxruntime) is used as the ML
+runtime. It powers both natural language searches (using CLIP) and face
 detection (using YOLO).
 
-[jpeg-js](https://github.com/jpeg-js/jpeg-js#readme) is used for decoding JPEG
-data into raw RGB bytes before passing it to ONNX.
-
-html-entities is used by the bundled clip-bpe-ts tokenizer for CLIP.
-
-### Watch Folders
-
-[chokidar](https://github.com/paulmillr/chokidar) is used as a file system
-watcher for the watch folders functionality.
+[clip-bpe-js](https://github.com/simonwarchol/clip-bpe-js) is used for tokening
+the user's search phrase before computing its CLIP (text) embedding.
 
 ### ZIP
 
@@ -135,3 +128,8 @@ reading of large ZIP files (e.g. during imports of Google Takeout ZIPs).
 
 [lru-cache](https://github.com/isaacs/node-lru-cache) is used to cache file ZIP
 handles to avoid reopening them for every operation.
+
+### Watch folders
+
+[chokidar](https://github.com/paulmillr/chokidar) is used as a file system
+watcher for the watch folders functionality.

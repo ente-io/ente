@@ -1,27 +1,27 @@
-import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
+import { MLSettingsBeta } from "@/new/photos/components/MLSettingsBeta";
+import { canEnableML } from "@/new/photos/services/ml";
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
+import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
+import { Titlebar } from "@/new/shared/components/Titlebar";
+import { isDesktop } from "@/next/app";
+import { pt } from "@/next/i18n";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
-import { Box, DialogProps, Stack, Typography } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
-import Titlebar from "components/Titlebar";
-import { MLSearchSettings } from "components/ml/MLSearchSettings";
+import { Box, DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
-import { CLIPIndexingStatus, clipService } from "services/clip-service";
-import { formatNumber } from "utils/number/format";
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const appContext = useContext(AppContext);
-    const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
 
-    const openMlSearchSettings = () => setMlSearchSettingsView(true);
-    const closeMlSearchSettings = () => setMlSearchSettingsView(false);
+    const [showMLSettings, setShowMLSettings] = useState(false);
+    const [openMLSettings, setOpenMLSettings] = useState(false);
 
+    useEffect(() => {
+        if (isDesktop) void canEnableML().then(setShowMLSettings);
+    }, []);
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -38,17 +38,6 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const toggleCFProxy = () => {
         appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
     };
-
-    const [indexingStatus, setIndexingStatus] = useState<CLIPIndexingStatus>({
-        indexed: 0,
-        pending: 0,
-    });
-
-    useEffect(() => {
-        clipService.setOnUpdateHandler(setIndexingStatus);
-        clipService.getIndexingStatus().then((st) => setIndexingStatus(st));
-        return () => clipService.setOnUpdateHandler(undefined);
-    }, []);
 
     return (
         <EnteDrawer
@@ -68,21 +57,6 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                 <Box px={"8px"}>
                     <Stack py="20px" spacing="24px">
-                        {isElectron() && (
-                            <Box>
-                                <MenuSectionTitle
-                                    title={t("LABS")}
-                                    icon={<ScienceIcon />}
-                                />
-                                <MenuItemGroup>
-                                    <EnteMenuItem
-                                        endIcon={<ChevronRight />}
-                                        onClick={openMlSearchSettings}
-                                        label={t("ML_SEARCH")}
-                                    />
-                                </MenuItemGroup>
-                            </Box>
-                        )}
                         <Box>
                             <MenuItemGroup>
                                 <EnteMenuItem
@@ -96,48 +70,29 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                 title={t("FASTER_UPLOAD_DESCRIPTION")}
                             />
                         </Box>
-
-                        {isElectron() && (
-                            <Box>
-                                <MenuSectionTitle
-                                    title={t("MAGIC_SEARCH_STATUS")}
-                                />
-                                <Stack py={"12px"} px={"12px"} spacing={"24px"}>
-                                    <VerticallyCenteredFlex
-                                        justifyContent="space-between"
-                                        alignItems={"center"}
-                                    >
-                                        <Typography>
-                                            {t("INDEXED_ITEMS")}
-                                        </Typography>
-                                        <Typography>
-                                            {formatNumber(
-                                                indexingStatus.indexed,
-                                            )}
-                                        </Typography>
-                                    </VerticallyCenteredFlex>
-                                    <VerticallyCenteredFlex
-                                        justifyContent="space-between"
-                                        alignItems={"center"}
-                                    >
-                                        <Typography>
-                                            {t("PENDING_ITEMS")}
-                                        </Typography>
-                                        <Typography>
-                                            {formatNumber(
-                                                indexingStatus.pending,
-                                            )}
-                                        </Typography>
-                                    </VerticallyCenteredFlex>
-                                </Stack>
-                            </Box>
-                        )}
                     </Stack>
+
+                    {showMLSettings && (
+                        <Box>
+                            <MenuSectionTitle
+                                title={t("LABS")}
+                                icon={<ScienceIcon />}
+                            />
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    endIcon={<ChevronRight />}
+                                    onClick={() => setOpenMLSettings(true)}
+                                    label={pt("ML search")}
+                                />
+                            </MenuItemGroup>
+                        </Box>
+                    )}
                 </Box>
             </Stack>
-            <MLSearchSettings
-                open={mlSearchSettingsView}
-                onClose={closeMlSearchSettings}
+
+            <MLSettingsBeta
+                open={openMLSettings}
+                onClose={() => setOpenMLSettings(false)}
                 onRootClose={handleRootClose}
             />
         </EnteDrawer>

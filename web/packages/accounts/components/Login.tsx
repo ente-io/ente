@@ -29,7 +29,7 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
         try {
             await setLSUser({ email });
             const srpAttributes = await getSRPAttributes(email);
-            log.debug(() => ` srpAttributes: ${JSON.stringify(srpAttributes)}`);
+            log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(email);
                 router.push(PAGES.VERIFY);

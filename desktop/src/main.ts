@@ -295,9 +295,8 @@ const createMainWindow = () => {
         // On macOS, also hide the dock icon on macOS.
         if (process.platform == "darwin") app.dock.hide();
     } else {
-        // Show our window otherwise.
-        //
-        // If we did not give it an explicit size, maximize it
+        // Show our window otherwise, maximizing it if we're not asked to set it
+        // to a specific size.
         bounds ? window.show() : window.maximize();
     }
 
@@ -538,7 +537,7 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
  * old cache dir if it exists.
  *
  * Added May 2024, v1.7.0. This migration code can be removed after some time
- * once most people have upgraded to newer versions.
+ * once most people have upgraded to newer versions (tag: Migration).
  */
 const deleteLegacyDiskCacheDirIfExists = async () => {
     const removeIfExists = async (dirPath: string) => {

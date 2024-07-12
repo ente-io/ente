@@ -2,8 +2,9 @@ import { FlexWrapper } from "@ente/shared/components/Container";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Close from "@mui/icons-material/Close";
 import { Box, IconButton, Typography } from "@mui/material";
+import React from "react";
 
-interface Iprops {
+interface TitlebarProps {
     title: string;
     caption?: string;
     onClose: () => void;
@@ -12,14 +13,14 @@ interface Iprops {
     actionButton?: JSX.Element;
 }
 
-export default function Titlebar({
+export const Titlebar: React.FC<TitlebarProps> = ({
     title,
     caption,
     onClose,
     backIsClose,
     actionButton,
     onRootClose,
-}: Iprops): JSX.Element {
+}) => {
     return (
         <>
             <FlexWrapper
@@ -56,4 +57,4 @@ export default function Titlebar({
             </Box>
         </>
     );
-}
+};

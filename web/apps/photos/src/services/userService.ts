@@ -206,47 +206,6 @@ export const deleteAccount = async (
     }
 };
 
-export const getFaceSearchEnabledStatus = async () => {
-    try {
-        const token = getToken();
-        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
-            await HTTPService.get(
-                await apiURL("/remote-store"),
-                {
-                    key: "faceSearchEnabled",
-                    defaultValue: false,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        return resp.data.value === "true";
-    } catch (e) {
-        log.error("failed to get face search enabled status", e);
-        throw e;
-    }
-};
-
-export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
-    try {
-        const token = getToken();
-        await HTTPService.post(
-            await apiURL("/remote-store/update"),
-            {
-                key: "faceSearchEnabled",
-                value: newStatus.toString(),
-            },
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-    } catch (e) {
-        log.error("failed to update face search enabled status", e);
-        throw e;
-    }
-};
-
 export const syncMapEnabled = async () => {
     try {
         const status = await getMapEnabledStatus();

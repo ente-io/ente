@@ -16,14 +16,24 @@ import "package:photos/utils/lock_screen_settings.dart";
 class LockScreenPassword extends StatefulWidget {
   const LockScreenPassword({
     super.key,
-    this.isAuthenticating = false,
-    this.isOnOpeningApp = false,
+    this.isChangingLockScreenSettings = false,
+    this.isAuthenticatingOnAppLaunch = false,
+    this.isAuthenticatingForInAppChange = false,
     this.authPass,
   });
 
-  //Is false when setting a new password
-  final bool isAuthenticating;
-  final bool isOnOpeningApp;
+  /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
+  /// Set to true when the app requires the user to authenticate before allowing
+  /// changes to the lock screen settings.
+  final bool isChangingLockScreenSettings;
+
+  /// [isAuthenticatingOnAppLaunch] Authentication required on app launch.
+  /// Set to true when the app requires the user to authenticate immediately upon opening.
+  final bool isAuthenticatingOnAppLaunch;
+
+  /// [isAuthenticatingForInAppChange] Authentication required for in-app changes (e.g., email, password).
+  /// Set to true when the app requires the to authenticate for sensitive actions like email, password changes.
+  final bool isAuthenticatingForInAppChange;
   final String? authPass;
   @override
   State<LockScreenPassword> createState() => _LockScreenPasswordState();
@@ -140,7 +150,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                       height: 75,
                       width: 75,
                       child: CircularProgressIndicator(
-                        backgroundColor: colorTheme.fillFaintPressed,
+                        color: colorTheme.fillFaintPressed,
                         value: 1,
                         strokeWidth: 1.5,
                       ),
@@ -155,7 +165,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                 ),
               ),
               Text(
-                widget.isAuthenticating
+                widget.isChangingLockScreenSettings
                     ? S.of(context).enterPassword
                     : S.of(context).setNewPassword,
                 textAlign: TextAlign.center,
@@ -201,7 +211,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     if (widget.authPass == base64Encode(hash)) {
       await _lockscreenSetting.setInvalidAttemptCount(0);
 
-      widget.isOnOpeningApp
+      widget.isAuthenticatingOnAppLaunch ||
+              widget.isAuthenticatingForInAppChange
           ? Navigator.of(context).pop(true)
           : Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -210,10 +221,10 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
             );
       return true;
     } else {
-      if (widget.isOnOpeningApp) {
+      if (widget.isAuthenticatingOnAppLaunch) {
         invalidAttemptsCount++;
+        await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
         if (invalidAttemptsCount > 4) {
-          await _lockscreenSetting.setInvalidAttemptCount(invalidAttemptsCount);
           Navigator.of(context).pop(false);
         }
       }
@@ -224,7 +235,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   }
 
   Future<void> _confirmPassword() async {
-    if (widget.isAuthenticating) {
+    if (widget.isChangingLockScreenSettings) {
       await _confirmPasswordAuth(_passwordController.text);
       return;
     } else {

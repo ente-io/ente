@@ -1,5 +1,5 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { faceIndexingStatus, isMLEnabled } from "@/new/photos/services/ml";
+import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
@@ -19,20 +19,14 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
-import { clipService, computeClipMatchScore } from "./clip-service";
-import { localCLIPEmbeddings } from "./embeddingService";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
-const CLIP_SCORE_THRESHOLD = 0.23;
-
 export const getDefaultOptions = async () => {
     return [
-        // TODO-ML(MR): Skip this for now if indexing is disabled (eventually
-        // the indexing status should not be tied to results).
-        ...(isMLEnabled() ? [await getIndexStatusSuggestion()] : []),
+        await getMLStatusSuggestion(),
         ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };
@@ -175,37 +169,36 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     }
 }
 
-export async function getIndexStatusSuggestion(): Promise<Suggestion> {
-    try {
-        const indexStatus = await faceIndexingStatus();
+export async function getMLStatusSuggestion(): Promise<Suggestion> {
+    if (!isMLSupported) return undefined;
 
-        let label: string;
-        switch (indexStatus.phase) {
-            case "scheduled":
-                label = t("INDEXING_SCHEDULED");
-                break;
-            case "indexing":
-                label = t("ANALYZING_PHOTOS", {
-                    indexStatus,
-                });
-                break;
-            case "clustering":
-                label = t("INDEXING_PEOPLE", { indexStatus });
-                break;
-            case "done":
-                label = t("INDEXING_DONE", { indexStatus });
-                break;
-        }
+    const status = mlStatusSnapshot();
 
-        return {
-            label,
-            type: SuggestionType.INDEX_STATUS,
-            value: indexStatus,
-            hide: true,
-        };
-    } catch (e) {
-        log.error("getIndexStatusSuggestion failed", e);
+    if (!status || status.phase == "disabled" || status.phase == "paused")
+        return undefined;
+
+    let label: string;
+    switch (status.phase) {
+        case "scheduled":
+            label = t("INDEXING_SCHEDULED");
+            break;
+        case "indexing":
+            label = t("ANALYZING_PHOTOS", { indexStatus: status });
+            break;
+        case "clustering":
+            label = t("INDEXING_PEOPLE", { indexStatus: status });
+            break;
+        case "done":
+            label = t("INDEXING_DONE", { indexStatus: status });
+            break;
     }
+
+    return {
+        label,
+        type: SuggestionType.INDEX_STATUS,
+        value: status,
+        hide: true,
+    };
 }
 
 function getDateSuggestion(searchPhrase: string): Suggestion[] {
@@ -373,30 +366,14 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
 }
 
 const searchClip = async (
-    searchPhrase: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
-    const textEmbedding =
-        await clipService.getTextEmbeddingIfAvailable(searchPhrase);
-    if (!textEmbedding) return undefined;
-
-    const imageEmbeddings = await localCLIPEmbeddings();
-    const clipSearchResult = new Map<number, number>(
-        (
-            await Promise.all(
-                imageEmbeddings.map(
-                    async (imageEmbedding): Promise<[number, number]> => [
-                        imageEmbedding.fileID,
-                        await computeClipMatchScore(
-                            imageEmbedding.embedding,
-                            textEmbedding,
-                        ),
-                    ],
-                ),
-            )
-        ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD),
-    );
-
-    return clipSearchResult;
+    // TODO-ML: clip-test
+    return undefined;
+    // const matches = await clipMatches(searchPhrase, ensureElectron());
+    // log.debug(() => ["clip/scores", matches]);
+    // return matches;
 };
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {

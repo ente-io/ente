@@ -1,36 +1,47 @@
 import log from "@/next/log";
+import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
+import type { CLIPIndex } from "./clip";
+import type { EmbeddingModel } from "./embedding";
 import type { FaceIndex } from "./face";
 
 /**
- * Face DB schema.
+ * ML DB schema.
  *
- * There "face" database is made of two object stores:
+ * The "ML" database is made of three object stores:
+ *
+ * - "file-status": Contains {@link FileStatus} objects, one for each
+ *   {@link EnteFile} that the ML subsystem knows about. Periodically (and when
+ *   required), this is synced with the list of files that the current client
+ *   knows about locally.
  *
  * - "face-index": Contains {@link FaceIndex} objects, either indexed locally or
  *   fetched from remote storage.
  *
- * - "file-status": Contains {@link FileStatus} objects, one for each
- *   {@link EnteFile} that the current client knows about.
+ * - "clip-index": Contains {@link CLIPIndex} objects, either indexed locally or
+ *   fetched from remote storage.
  *
- * Both the stores are keyed by {@link fileID}, and are expected to contain the
- * exact same set of {@link fileID}s. The face-index can be thought of as the
- * "original" indexing result, whilst file-status bookkeeps information about
- * the indexing process (whether or not a file needs indexing, or if there were
- * errors doing so).
+ * All the stores are keyed by {@link fileID}. The "file-status" contains
+ * book-keeping about the indexing process (whether or not a file needs
+ * indexing, or if there were errors doing so), while the other stores contain
+ * the actual indexing results.
  *
  * In tandem, these serve as the underlying storage for the functions exposed by
  * this file.
  */
-interface FaceDBSchema extends DBSchema {
-    "face-index": {
-        key: number;
-        value: FaceIndex;
-    };
+interface MLDBSchema extends DBSchema {
     "file-status": {
         key: number;
         value: FileStatus;
         indexes: { status: FileStatus["status"] };
+    };
+    "face-index": {
+        key: number;
+        value: FaceIndex;
+    };
+    "clip-index": {
+        key: number;
+        value: CLIPIndex;
     };
 }
 
@@ -44,17 +55,33 @@ interface FileStatus {
      *   to be indexed.
      *
      * - "indexed" - We have a corresponding entry for this file in the
-     *   "face-index" object (either indexed locally or fetched from remote).
+     *   "face-index" _and_ "clip-index" object stores (either indexed locally
+     *   or fetched from remote).
      *
      * - "failed" - Indexing was attempted but failed.
      *
-     * We also have a (IndexedDB) "index" on this field to allow us to
-     * efficiently select or count {@link fileIDs} that fall into various
-     * buckets.
+     * There can arise situations in which a file has one, but not all, indexes.
+     * e.g. it may have a "face-index" but "clip-index" might've not yet
+     * happened (or failed). In such cases, the status of the file will be
+     * "indexable": it transitions to "indexed" only after all indexes have been
+     * computed or fetched.
+     *
+     * If you have't heard the word "index" to the point of zoning out, we also
+     * have a (IndexedDB) "index" on the status field to allow us to efficiently
+     * select or count {@link fileIDs} that fall into various buckets.
      */
     status: "indexable" | "indexed" | "failed";
     /**
+     * A list of embeddings that we still need to compute for the file.
+     *
+     * This is guaranteed to be empty if status is "indexed", and will have at
+     * least one entry otherwise.
+     */
+    pending: EmbeddingModel[];
+    /**
      * The number of times attempts to index this file failed.
+     *
+     * It counts failure across all index types.
      *
      * This is guaranteed to be `0` for files with status "indexed".
      */
@@ -62,76 +89,94 @@ interface FileStatus {
 }
 
 /**
- * A lazily-created, cached promise for face DB.
+ * A lazily-created, cached promise for ML DB.
  *
  * See: [Note: Caching IDB instances in separate execution contexts].
  */
-let _faceDB: ReturnType<typeof openFaceDB> | undefined;
+let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
-const openFaceDB = async () => {
+const openMLDB = async () => {
     deleteLegacyDB();
 
-    const db = await openDB<FaceDBSchema>("face", 1, {
+    // TODO-ML: "face" => "ml", v2 => v1
+    const db = await openDB<MLDBSchema>("face", 2, {
         upgrade(db, oldVersion, newVersion) {
-            log.info(`Upgrading face DB ${oldVersion} => ${newVersion}`);
+            log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
-                db.createObjectStore("face-index", { keyPath: "fileID" });
                 db.createObjectStore("file-status", {
                     keyPath: "fileID",
                 }).createIndex("status", "status");
+                db.createObjectStore("face-index", { keyPath: "fileID" });
+            }
+            if (oldVersion < 2) {
+                db.createObjectStore("clip-index", { keyPath: "fileID" });
             }
         },
         blocking() {
             log.info(
-                "Another client is attempting to open a new version of face DB",
+                "Another client is attempting to open a new version of ML DB",
             );
             db.close();
-            _faceDB = undefined;
+            _mlDB = undefined;
         },
         blocked() {
             log.warn(
-                "Waiting for an existing client to close their connection so that we can update the face DB version",
+                "Waiting for an existing client to close their connection so that we can update the ML DB version",
             );
         },
         terminated() {
-            log.warn("Our connection to face DB was unexpectedly terminated");
-            _faceDB = undefined;
+            log.warn("Our connection to ML DB was unexpectedly terminated");
+            _mlDB = undefined;
         },
     });
     return db;
 };
 
 const deleteLegacyDB = () => {
-    // Delete the legacy face DB.
-    // This code was added June 2024 (v1.7.1-rc) and can be removed once clients
-    // have migrated over.
+    // Delete the legacy face DB v1.
+    //
+    // This code was added June 2024 (v1.7.1-rc) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
     void deleteDB("mldata");
+
+    // Delete the legacy CLIP (mostly) related keys from LocalForage.
+    //
+    // This code was added July 2024 (v1.7.2-rc) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
+    void Promise.all([
+        localForage.removeItem("embeddings"),
+        localForage.removeItem("embedding_sync_time"),
+        localForage.removeItem("embeddings_v2"),
+        localForage.removeItem("file_embeddings"),
+        localForage.removeItem("onnx-clip-embedding_sync_time"),
+        localForage.removeItem("file-ml-clip-face-embedding_sync_time"),
+    ]);
 };
 
 /**
- * @returns a lazily created, cached connection to the face DB.
+ * @returns a lazily created, cached connection to the ML DB.
  */
-const faceDB = () => (_faceDB ??= openFaceDB());
+const mlDB = () => (_mlDB ??= openMLDB());
 
 /**
- * Clear any data stored in the face DB.
+ * Clear any data stored in the ML DB.
  *
- * This is meant to be called during logout in the main thread.
+ * This is meant to be called during logout on the main thread.
  */
-export const clearFaceDB = async () => {
+export const clearMLDB = async () => {
     deleteLegacyDB();
 
     try {
-        if (_faceDB) (await _faceDB).close();
+        if (_mlDB) (await _mlDB).close();
     } catch (e) {
-        log.warn("Ignoring error when trying to close face DB", e);
+        log.warn("Ignoring error when trying to close ML DB", e);
     }
-    _faceDB = undefined;
+    _mlDB = undefined;
 
     return deleteDB("face", {
         blocked() {
             log.warn(
-                "Waiting for an existing client to close their connection so that we can delete the face DB",
+                "Waiting for an existing client to close their connection so that we can delete the ML DB",
             );
         },
     });
@@ -141,23 +186,79 @@ export const clearFaceDB = async () => {
  * Save the given {@link faceIndex} locally.
  *
  * @param faceIndex A {@link FaceIndex} representing the faces that we detected
- * (and their corresponding embeddings) in some file.
+ * (and their corresponding embeddings) in a particular file.
  *
- * This function adds a new entry, overwriting any existing ones (No merging is
- * performed, the existing entry is unconditionally overwritten).
+ * This function adds a new entry for the face index, overwriting any existing
+ * ones (No merging is performed, the existing entry is unconditionally
+ * overwritten). The file status is also updated to remove face from the pending
+ * embeddings. If there are no other pending embeddings, the status changes to
+ * "indexed".
  */
 export const saveFaceIndex = async (faceIndex: FaceIndex) => {
-    const db = await faceDB();
-    const tx = db.transaction(["face-index", "file-status"], "readwrite");
-    const indexStore = tx.objectStore("face-index");
+    const { fileID } = faceIndex;
+
+    const db = await mlDB();
+    const tx = db.transaction(["file-status", "face-index"], "readwrite");
     const statusStore = tx.objectStore("file-status");
+    const indexStore = tx.objectStore("face-index");
+
+    const fileStatus =
+        (await statusStore.get(IDBKeyRange.only(fileID))) ??
+        newFileStatus(fileID);
+    fileStatus.pending = fileStatus.pending.filter(
+        (v) => v != "file-ml-clip-face",
+    );
+    if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
+
     await Promise.all([
+        statusStore.put(fileStatus),
         indexStore.put(faceIndex),
-        statusStore.put({
-            fileID: faceIndex.fileID,
-            status: "indexed",
-            failureCount: 0,
-        }),
+        tx.done,
+    ]);
+};
+
+/**
+ * Return a new object suitable for use as the initial value of the entry for a
+ * file in the file status store.
+ */
+const newFileStatus = (fileID: number): FileStatus => ({
+    fileID,
+    status: "indexable",
+    // TODO-ML: clip-test
+    // pending: ["file-ml-clip-face", "onnx-clip"],
+    pending: ["file-ml-clip-face"],
+    failureCount: 0,
+});
+
+/**
+ * Save the given {@link clipIndex} locally.
+ *
+ * @param clipIndex A {@link CLIPIndex} containing the CLIP embedding for a
+ * particular file.
+ *
+ * This function adds a new entry for the CLIP index, overwriting any existing
+ * ones (No merging is performed, the existing entry is unconditionally
+ * overwritten). The file status is also updated to remove CLIP from the pending
+ * embeddings. If there are no other pending embeddings, the status changes to
+ * "indexed".
+ */
+export const saveCLIPIndex = async (clipIndex: CLIPIndex) => {
+    const { fileID } = clipIndex;
+
+    const db = await mlDB();
+    const tx = db.transaction(["file-status", "clip-index"], "readwrite");
+    const statusStore = tx.objectStore("file-status");
+    const indexStore = tx.objectStore("clip-index");
+
+    const fileStatus =
+        (await statusStore.get(IDBKeyRange.only(fileID))) ??
+        newFileStatus(fileID);
+    fileStatus.pending = fileStatus.pending.filter((v) => v != "onnx-clip");
+    if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
+
+    await Promise.all([
+        statusStore.put(fileStatus),
+        indexStore.put(clipIndex),
         tx.done,
     ]);
 };
@@ -166,13 +267,21 @@ export const saveFaceIndex = async (faceIndex: FaceIndex) => {
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
  */
 export const faceIndex = async (fileID: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     return db.get("face-index", fileID);
 };
 
 /**
- * Record the existence of a file so that entities in the face indexing universe
- * know about it (e.g. can index it if it is new and it needs indexing).
+ * Return all CLIP indexes present locally.
+ */
+export const clipIndexes = async () => {
+    const db = await mlDB();
+    return await db.getAll("clip-index");
+};
+
+/**
+ * Record the existence of a file so that entities in the ML universe know about
+ * it (e.g. can index it if it is new and it needs indexing).
  *
  * @param fileID The ID of an {@link EnteFile}.
  *
@@ -182,48 +291,45 @@ export const faceIndex = async (fileID: number) => {
  * unperturbed.
  */
 export const addFileEntry = async (fileID: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readwrite");
-    if ((await tx.store.getKey(fileID)) === undefined) {
-        await tx.store.put({
-            fileID,
-            status: "indexable",
-            failureCount: 0,
-        });
-    }
+    if ((await tx.store.getKey(fileID)) === undefined)
+        await tx.store.put(newFileStatus(fileID));
     return tx.done;
 };
 
 /**
- * Update entries in the face DB to align with the state of local files outside
- * face DB.
+ * Update entries in ML DB to align with the state of local files outside ML DB.
  *
- * @param localFileIDs IDs of all the files that the client is aware of filtered
- * to only keep the files that the user owns and the formats that can be indexed
- * by our current face indexing pipeline.
+ * @param localFileIDs IDs of all the files that the client is aware of,
+ * filtered to only keep the files that the user owns and the formats that can
+ * be indexed by our current indexing pipelines.
  *
  * @param localTrashFilesIDs IDs of all the files in trash.
  *
- * This function then updates the state of file entries in face DB to the be in
- * sync with these provided local file IDS.
+ * This function then updates the state of file entries in ML DB to the be in
+ * sync with these provided local file IDs.
  *
- * - Files that are present locally but are not yet in face DB get a fresh entry
+ * - Files that are present locally but are not yet in ML DB get a fresh entry
  *   in face DB (and are marked as indexable).
  *
- * - Files that are not present locally (nor are in trash) but still exist in
- *   face DB are removed from face DB (including their face index, if any).
+ * - Files that are not present locally (nor are in trash) but still exist in ML
+ *   DB are removed from ML DB (including any indexes).
  *
- * - Files that are not present locally but are in the trash are retained in
- *   face DB if their status is "indexed" (otherwise they too are removed). This
- *   is prevent churn (re-indexing) if the user moves some files to trash but
- *   then later restores them before they get permanently deleted.
+ * - Files that are not present locally but are in the trash are retained in ML
+ *   DB if their status is "indexed"; otherwise they too are removed. This
+ *   special case is to prevent churn (re-indexing) if the user moves some files
+ *   to trash but then later restores them before they get permanently deleted.
  */
 export const updateAssumingLocalFiles = async (
     localFileIDs: number[],
     localTrashFilesIDs: number[],
 ) => {
-    const db = await faceDB();
-    const tx = db.transaction(["face-index", "file-status"], "readwrite");
+    const db = await mlDB();
+    const tx = db.transaction(
+        ["file-status", "face-index", "clip-index"],
+        "readwrite",
+    );
     const fdbFileIDs = await tx.objectStore("file-status").getAllKeys();
     const fdbIndexedFileIDs = await tx
         .objectStore("file-status")
@@ -250,16 +356,13 @@ export const updateAssumingLocalFiles = async (
     await Promise.all(
         [
             newFileIDs.map((id) =>
-                tx.objectStore("file-status").put({
-                    fileID: id,
-                    status: "indexable",
-                    failureCount: 0,
-                }),
+                tx.objectStore("file-status").put(newFileStatus(id)),
             ),
             removedFileIDs.map((id) =>
                 tx.objectStore("file-status").delete(id),
             ),
             removedFileIDs.map((id) => tx.objectStore("face-index").delete(id)),
+            removedFileIDs.map((id) => tx.objectStore("clip-index").delete(id)),
             tx.done,
         ].flat(),
     );
@@ -268,11 +371,12 @@ export const updateAssumingLocalFiles = async (
 /**
  * Return the count of files that can be, and that have been, indexed.
  *
- * These counts are mutually exclusive. The total number of files that fall
- * within the purview of the indexer is thus indexable + indexed.
+ * These counts are mutually exclusive. Thus the total number of files that are
+ * fall within the purview of the indexer will be indexable + indexed (if we are
+ * ignoring the "failed" ones).
  */
 export const indexableAndIndexedCounts = async () => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readwrite");
     const indexableCount = await tx.store
         .index("status")
@@ -287,14 +391,14 @@ export const indexableAndIndexedCounts = async () => {
  * Return a list of fileIDs that need to be indexed.
  *
  * This list is from the universe of the file IDs that the face DB knows about
- * (can use {@link addFileEntry} to inform it about new files). From this
+ * (we can use {@link addFileEntry} to inform it about new files). From this
  * universe, we filter out fileIDs the files corresponding to which have already
  * been indexed, or which should be ignored.
  *
  * @param count Limit the result to up to {@link count} items.
  */
 export const indexableFileIDs = async (count?: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     return tx.store
         .index("status")
@@ -309,15 +413,15 @@ export const indexableFileIDs = async (count?: number) => {
  * If an entry does not exist yet for the given file, then a new one is created
  * and its failure count is set to 1. Otherwise the failure count of the
  * existing entry is incremented.
+ *
+ * This count is across all different types of indexing (face, CLIP) that happen
+ * on the file.
  */
 export const markIndexingFailed = async (fileID: number) => {
-    const db = await faceDB();
+    const db = await mlDB();
     const tx = db.transaction("file-status", "readwrite");
-    const failureCount = ((await tx.store.get(fileID))?.failureCount ?? 0) + 1;
-    await tx.store.put({
-        fileID,
-        status: "failed",
-        failureCount,
-    });
-    return tx.done;
+    const fileStatus = (await tx.store.get(fileID)) ?? newFileStatus(fileID);
+    fileStatus.status = "failed";
+    fileStatus.failureCount = fileStatus.failureCount + 1;
+    await Promise.all([tx.store.put(fileStatus), tx.done]);
 };

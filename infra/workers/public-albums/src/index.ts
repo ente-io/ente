@@ -17,17 +17,13 @@ export default {
 const handleOPTIONS = (request: Request) => {
     const origin = request.headers.get("Origin");
     if (!isAllowedOrigin(origin)) console.warn("Unknown origin", origin);
-    const headers = request.headers.get("Access-Control-Request-Headers");
-    if (!areAllowedHeaders(headers))
-        console.warn("Unknown header in list", headers);
     return new Response("", {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers":
+                "X-Auth-Access-Token, X-Auth-Access-Token-JWT, X-Client-Package",
             "Access-Control-Max-Age": "86400",
-            // "Access-Control-Allow-Headers": "X-Auth-Access-Token, X-Auth-Access-Token-JWT",
-            // "Access-Control-Allow-Headers": "X-Auth-Access-Token, X-Auth-Access-Token-JWT, x-client-package",
-            "Access-Control-Allow-Headers": "*",
         },
     });
 };
@@ -43,21 +39,6 @@ const isAllowedOrigin = (origin: string | null) => {
         // origin is likely an invalid URL
         return false;
     }
-};
-
-const areAllowedHeaders = (headers: string | null) => {
-    // TODO(MR): Stop sending "x-client-package"
-    const allowed = [
-        "x-auth-access-token",
-        "x-auth-access-token-jwt",
-        "x-client-package",
-    ];
-
-    if (!headers) return true;
-    for (const header of headers.split(",")) {
-        if (!allowed.includes(header.trim().toLowerCase())) return false;
-    }
-    return true;
 };
 
 const handleGET = async (request: Request) => {
@@ -90,7 +71,7 @@ const handleGET = async (request: Request) => {
     if (accessTokenJWT) params.set("accessTokenJWT", accessTokenJWT);
 
     let response = await fetch(
-        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`
+        `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`,
     );
 
     if (!response.ok) console.log("Upstream error", response.status);

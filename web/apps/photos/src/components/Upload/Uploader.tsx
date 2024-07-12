@@ -396,9 +396,8 @@ export default function Uploader({
         );
         setImportSuggestion(importSuggestion);
 
-        log.debug(() => "Uploader invoked:");
-        log.debug(() => uploadItemsAndPaths.current);
-        log.debug(() => importSuggestion);
+        log.debug(() => ["Upload request", uploadItemsAndPaths.current]);
+        log.debug(() => ["Import suggestion", importSuggestion]);
 
         const _pickedUploadType = pickedUploadType.current;
         pickedUploadType.current = null;

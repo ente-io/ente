@@ -2,7 +2,7 @@ export interface Person {
     id: number;
     name?: string;
     files: number[];
-    displayFaceId?: string;
+    displayFaceId: string;
 }
 
 // TODO-ML(MR): Forced disable clustering. It doesn't currently work,

@@ -381,14 +381,14 @@ class FolderWatcher {
         const electron = ensureElectron();
         const watch = this.activeWatch;
 
-        log.debug(() =>
+        log.debug(() => [
+            "watch/allFileUploadsDone",
             JSON.stringify({
-                f: "watch/allFileUploadsDone",
                 uploadItemsWithCollection,
                 collections,
                 watch,
             }),
-        );
+        ]);
 
         const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
             uploadItemsWithCollection,

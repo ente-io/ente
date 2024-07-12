@@ -1,3 +1,4 @@
+import { openURL } from "@/new/photos/utils/web";
 import { ensureElectron } from "@/next/electron";
 import { AppUpdate } from "@/next/types/ipc";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
@@ -7,7 +8,6 @@ import { Link } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
-import { openLink } from "utils/common";
 
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
@@ -25,7 +25,7 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
     };
 };
 
-const downloadApp = () => openLink("https://ente.io/download/desktop", true);
+const downloadApp = () => openURL("https://ente.io/download/desktop");
 
 export const getTrashFilesMessage = (
     deleteFileHelper,

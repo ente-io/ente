@@ -146,7 +146,7 @@
   "lostDeviceTitle": "Perdeu um dispositivo?",
   "twoFactorAuthTitle": "Autenticação de dois fatores",
   "passkeyAuthTitle": "Autenticação via Chave de acesso",
-  "verifyPasskey": "Verificar senha-mestra",
+  "verifyPasskey": "Verificar chave de acesso",
   "recoverAccount": "Recuperar conta",
   "enterRecoveryKeyHint": "Digite a chave de recuperação",
   "recover": "Recuperar",
@@ -419,7 +419,7 @@
   "recoveryKeySaved": "Chave de recuperação salva na pasta Downloads!",
   "waitingForBrowserRequest": "Aguardando solicitação do navegador...",
   "waitingForVerification": "Esperando por verificação...",
-  "passkey": "Senha-mestra",
+  "passkey": "Chave de acesso",
   "passKeyPendingVerification": "A verificação ainda está pendente",
   "loginSessionExpired": "Sessão expirada",
   "loginSessionExpiredDetails": "Sua sessão expirou. Por favor, entre novamente.",
@@ -442,5 +442,5 @@
   "deleteTagTitle": "Apagar etiqueta?",
   "deleteTagMessage": "Tem certeza de que deseja excluir esta etiqueta? Essa ação é irreversível.",
   "somethingWentWrongParsingCode": "Não foi possível analisar os códigos {x}.",
-  "updateNotAvailable": "Atualização não está disponível"
+  "updateNotAvailable": "Atualização indisponível"
 }

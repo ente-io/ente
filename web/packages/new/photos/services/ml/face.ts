@@ -9,7 +9,6 @@
 
 import type { EnteFile } from "@/new/photos/types/file";
 import log from "@/next/log";
-import { ensure } from "@/utils/ensure";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
@@ -19,19 +18,15 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import type { UploadItem } from "../upload/types";
-import {
-    renderableImageBitmap,
-    renderableUploadItemImageBitmap,
-} from "./bitmap";
+import type { ImageBitmapAndData } from "./bitmap";
 import { saveFaceCrops } from "./crop";
 import {
-    clamp,
     grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
-import type { MLWorkerElectron } from "./worker-electron";
+import { clamp } from "./math";
+import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * The version of the face indexing pipeline implemented by the current client.
@@ -201,24 +196,26 @@ export interface Box {
 /**
  * Index faces in the given file.
  *
- * This function is the entry point to the indexing pipeline. The file goes
+ * This function is the entry point to the face indexing pipeline. The file goes
  * through various stages:
  *
  * 1. Downloading the original if needed.
  * 2. Detect faces using ONNX/YOLO
  * 3. Align the face rectangles, compute blur.
- * 4. Compute embeddings for the detected face (crops).
+ * 4. Compute embeddings using ONNX/MFNT for the detected face (crop).
  *
  * Once all of it is done, it returns the face rectangles and embeddings so that
- * they can be saved locally for offline use, and encrypts and uploads them to
- * the user's remote storage so that their other devices can download them
- * instead of needing to reindex.
+ * they can be saved locally (for offline use), and also uploaded to the user's
+ * remote storage so that their other devices can download them instead of
+ * needing to reindex.
+ *
+ * As an optimization, it also saves the face crops of the detected faces to the
+ * local cache (they can be regenerated independently too by using
+ * {@link regenerateFaceCrops}).
  *
  * @param enteFile The {@link EnteFile} to index.
  *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
+ * @param image The file's contents.
  *
  * @param electron The {@link MLWorkerElectron} instance that allows us to call
  * our Node.js layer for various functionality.
@@ -227,51 +224,48 @@ export interface Box {
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    uploadItem: UploadItem | undefined,
+    image: ImageBitmapAndData,
     electron: MLWorkerElectron,
     userAgent: string,
 ): Promise<FaceIndex> => {
-    const imageBitmap = uploadItem
-        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
-        : await renderableImageBitmap(enteFile);
+    const { bitmap: imageBitmap, data: imageData } = image;
+
     const { width, height } = imageBitmap;
     const fileID = enteFile.id;
 
+    const faceIndex = {
+        fileID,
+        width,
+        height,
+        faceEmbedding: {
+            version: faceIndexingVersion,
+            client: userAgent,
+            faces: await indexFaces_(fileID, imageData, electron),
+        },
+    };
+
+    // This step, saving face crops, is not part of the indexing pipeline;
+    // we just do it here since we have already have the ImageBitmap at
+    // hand. Ignore errors that happen during this since it does not impact
+    // the generated face index.
     try {
-        const faceIndex = {
-            fileID,
-            width,
-            height,
-            faceEmbedding: {
-                version: faceIndexingVersion,
-                client: userAgent,
-                faces: await indexFacesInBitmap(fileID, imageBitmap, electron),
-            },
-        };
-        // This step, saving face crops, is not part of the indexing pipeline;
-        // we just do it here since we have already have the ImageBitmap at
-        // hand. Ignore errors that happen during this since it does not impact
-        // the generated face index.
-        try {
-            await saveFaceCrops(imageBitmap, faceIndex);
-        } catch (e) {
-            log.error(`Failed to save face crops for file ${fileID}`, e);
-        }
-        return faceIndex;
-    } finally {
-        imageBitmap.close();
+        await saveFaceCrops(imageBitmap, faceIndex);
+    } catch (e) {
+        log.error(`Failed to save face crops for file ${fileID}`, e);
     }
+
+    return faceIndex;
 };
 
-const indexFacesInBitmap = async (
+const indexFaces_ = async (
     fileID: number,
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     electron: MLWorkerElectron,
 ): Promise<Face[]> => {
-    const { width, height } = imageBitmap;
+    const { width, height } = imageData;
     const imageDimensions = { width, height };
 
-    const yoloFaceDetections = await detectFaces(imageBitmap, electron);
+    const yoloFaceDetections = await detectFaces(imageData, electron);
     const partialResult = yoloFaceDetections.map(
         ({ box, landmarks, score }) => {
             const faceID = makeFaceID(fileID, box, imageDimensions);
@@ -280,20 +274,39 @@ const indexFacesInBitmap = async (
         },
     );
 
-    const alignments = partialResult.map(({ detection }) =>
+    const allAlignments = partialResult.map(({ detection }) =>
         computeFaceAlignment(detection),
     );
 
-    const alignedFacesData = convertToMobileFaceNetInput(
-        imageBitmap,
-        alignments,
-    );
+    let embeddings: Float32Array[] = [];
+    let blurs: number[] = [];
 
-    const embeddings = await computeEmbeddings(alignedFacesData, electron);
-    const blurs = detectBlur(
-        alignedFacesData,
-        partialResult.map((f) => f.detection),
-    );
+    // Process the faces in batches of 50 to:
+    //
+    // 1. Avoid memory pressure (as on ONNX 1.80.0, we can reproduce a crash if
+    //    we try to compute MFNet embeddings for a file with ~280 faces).
+    //
+    // 2. Reduce the time the main (Node.js) process is unresponsive (whenever
+    //    the main thread of the Node.js process is CPU bound, the renderer also
+    //    becomes unresponsive since events are routed via the main process).
+    //
+    const batchSize = 50;
+    for (let i = 0; i < yoloFaceDetections.length; i += batchSize) {
+        const alignments = allAlignments.slice(i, i + batchSize);
+        const detections = partialResult
+            .slice(i, i + batchSize)
+            .map((f) => f.detection);
+
+        const alignedFacesData = convertToMobileFaceNetInput(
+            imageData,
+            alignments,
+        );
+
+        embeddings = embeddings.concat(
+            await computeEmbeddings(alignedFacesData, electron),
+        );
+        blurs = blurs.concat(detectBlur(alignedFacesData, detections));
+    }
 
     return partialResult.map(({ faceID, detection, score }, i) => ({
         faceID,
@@ -305,12 +318,12 @@ const indexFacesInBitmap = async (
 };
 
 /**
- * Detect faces in the given {@link imageBitmap}.
+ * Detect faces in the given image.
  *
  * The model used is YOLOv5Face, running in an ONNX runtime.
  */
 const detectFaces = async (
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     electron: MLWorkerElectron,
 ): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }: Dimensions) => ({
@@ -321,34 +334,27 @@ const detectFaces = async (
     });
 
     const { yoloInput, yoloSize } =
-        convertToYOLOInputFloat32ChannelsFirst(imageBitmap);
+        convertToYOLOInputFloat32ChannelsFirst(imageData);
     const yoloOutput = await electron.detectFaces(yoloInput);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
     const faceDetections = transformYOLOFaceDetections(
         faces,
         rect(yoloSize),
-        rect(imageBitmap),
+        rect(imageData),
     );
 
     return naiveNonMaxSuppression(faceDetections, 0.4);
 };
 
 /**
- * Convert {@link imageBitmap} into the format that the YOLO face detection
+ * Convert {@link imageData} into the format that the YOLOv5 face detection
  * model expects.
  */
-const convertToYOLOInputFloat32ChannelsFirst = (imageBitmap: ImageBitmap) => {
+const convertToYOLOInputFloat32ChannelsFirst = (imageData: ImageData) => {
     const requiredWidth = 640;
     const requiredHeight = 640;
 
-    const { width, height } = imageBitmap;
-
-    // Create an OffscreenCanvas and set its size.
-    const offscreenCanvas = new OffscreenCanvas(width, height);
-    const ctx = ensure(offscreenCanvas.getContext("2d"));
-    ctx.drawImage(imageBitmap, 0, 0, width, height);
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const pixelData = imageData.data;
+    const { width, height, data: pixelData } = imageData;
 
     // Maintain aspect ratio.
     const scale = Math.min(requiredWidth / width, requiredHeight / height);
@@ -656,7 +662,7 @@ const computeFaceAlignmentUsingSimilarityTransform = (
 };
 
 const convertToMobileFaceNetInput = (
-    imageBitmap: ImageBitmap,
+    imageData: ImageData,
     faceAlignments: FaceAlignment[],
 ): Float32Array => {
     const faceSize = mobileFaceNetFaceSize;
@@ -667,7 +673,7 @@ const convertToMobileFaceNetInput = (
         const { affineMatrix } = faceAlignments[i]!;
         const faceDataOffset = i * faceSize * faceSize * 3;
         warpAffineFloat32List(
-            imageBitmap,
+            imageData,
             affineMatrix,
             faceSize,
             faceData,
