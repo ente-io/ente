@@ -454,7 +454,61 @@ export const beginPasskeyAuthentication = async (
  */
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
-) => nullToUndefined(await navigator.credentials.get({ publicKey }));
+) => {
+    // Hint all transports to make security keys like Yubikey work across
+    // varying registration/verification scenarios.
+    //
+    // During verification, we need to pass a `transport` property.
+    //
+    // > The `transports` property is hint of the methods that the client could
+    // > use to communicate with the relevant authenticator of the public key
+    // > credential to retrieve. Possible values are ["ble", "hybrid",
+    // > "internal", "nfc", "usb"].
+    // >
+    // > MDN
+    //
+    // When we register a passkey, we save the transport alongwith the
+    // credential. During authentication, we pass that transport back to the
+    // browser. This is the approach recommended by the spec:
+    //
+    // > When registering a new credential, the Relying Party SHOULD store the
+    // > value returned from getTransports(). When creating a
+    // > PublicKeyCredentialDescriptor for that credential, the Relying Party
+    // > SHOULD retrieve that stored value and set it as the value of the
+    // > transports member.
+    // >
+    // > https://www.w3.org/TR/webauthn-3/#dom-publickeycredentialdescriptor-transports
+    //
+    // However, following this recommendation break things currently (2024) in
+    // various ways. For example, if a user registers a Yubikey NFC security key
+    // on Firefox on their laptop, then Firefox returns ["usb"]. This is
+    // incorrect, it should be ["usb", "nfc"] (which is what Chrome does, since
+    // the hardware itself supports both USB and NFC transports).
+    //
+    // Later, if the user tries to verifying with their security key on their
+    // iPhone Safari via NFC, the browser doesn't recognize it (which seems
+    // incorrect too, the transport is meant to be a "hint" not a binding).
+    //
+    // > Note that these hints represent the WebAuthn Relying Party's best
+    // > belief as to how an authenticator may be reached.
+    // >
+    // > https://www.w3.org/TR/webauthn-3/#dom-publickeycredentialdescriptor-transports
+    //
+    // As a workaround, we override transports with known possible values.
+
+    for (const cred of publicKey.allowCredentials ?? []) {
+        cred.transports = [
+            ...(cred.transports ?? []),
+            "usb",
+            "nfc",
+            "ble",
+            "hybrid",
+            "internal",
+        ];
+    }
+
+    return nullToUndefined(await navigator.credentials.get({ publicKey }));
+};
 
 interface FinishPasskeyAuthenticationOptions {
     passkeySessionID: string;
