@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:io";
 
 import "package:ente_auth/theme/colors.dart";
 import "package:ente_auth/theme/ente_theme.dart";
@@ -45,10 +46,12 @@ class _LockScreenPinState extends State<LockScreenPin> {
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   bool isPinValid = false;
   int invalidAttemptsCount = 0;
-
+  bool isPlatformDesktop = false;
   @override
   void initState() {
     super.initState();
+    isPlatformDesktop =
+        Platform.isLinux || Platform.isMacOS || Platform.isWindows;
     invalidAttemptsCount = _lockscreenSetting.getInvalidAttemptCount();
   }
 
@@ -143,7 +146,9 @@ class _LockScreenPinState extends State<LockScreenPin> {
           ),
         ),
       ),
-      floatingActionButton: CustomPinKeypad(controller: _pinController),
+      floatingActionButton: isPlatformDesktop
+          ? null
+          : CustomPinKeypad(controller: _pinController),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
         child: _getBody(colorTheme, textTheme),
@@ -231,8 +236,9 @@ class _LockScreenPinState extends State<LockScreenPin> {
           Pinput(
             length: 4,
             showCursor: false,
-            useNativeKeyboard: false,
+            useNativeKeyboard: isPlatformDesktop,
             controller: _pinController,
+            autofocus: true,
             defaultPinTheme: _pinPutDecoration,
             submittedPinTheme: _pinPutDecoration.copyWith(
               textStyle: textTheme.h3Bold,

@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/settings/lock_screen/custom_pin_keypad.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
@@ -15,7 +17,7 @@ class LockScreenConfirmPin extends StatefulWidget {
 class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
   final _confirmPinController = TextEditingController(text: null);
   bool isConfirmPinValid = false;
-
+  bool isPlatformDesktop = false;
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
   final _pinPutDecoration = PinTheme(
     height: 48,
@@ -26,6 +28,13 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
       borderRadius: BorderRadius.circular(15.0),
     ),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    isPlatformDesktop =
+        Platform.isLinux || Platform.isMacOS || Platform.isWindows;
+  }
 
   @override
   void dispose() {
@@ -69,7 +78,9 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
           ),
         ),
       ),
-      floatingActionButton: CustomPinKeypad(controller: _confirmPinController),
+      floatingActionButton: isPlatformDesktop
+          ? null
+          : CustomPinKeypad(controller: _confirmPinController),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SingleChildScrollView(
         child: _getBody(colorTheme, textTheme),
@@ -154,7 +165,8 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
           Pinput(
             length: 4,
             showCursor: false,
-            useNativeKeyboard: false,
+            useNativeKeyboard: isPlatformDesktop,
+            autofocus: true,
             controller: _confirmPinController,
             defaultPinTheme: _pinPutDecoration,
             submittedPinTheme: _pinPutDecoration.copyWith(
