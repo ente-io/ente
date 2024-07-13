@@ -390,7 +390,7 @@ export default function Gallery() {
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                if (await shouldShowWhatsNew()) setOpenWhatsNew(true);
+                if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
             }
         };
         main();

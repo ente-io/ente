@@ -1,3 +1,4 @@
+import { ensureElectron } from "@/next/electron";
 import { ut } from "@/next/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
@@ -30,7 +31,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
 
     useEffect(() => {
-        if (open) void didShowWhatsNew();
+        if (open) void didShowWhatsNew(ensureElectron());
     }, [open]);
 
     return (
