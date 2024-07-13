@@ -13,6 +13,10 @@ export const typography: TypographyOptions = {
         fontSize: "24px",
         lineHeight: "29px",
     },
+    h4: {
+        fontSize: "22px",
+        lineHeight: "27px",
+    },
     large: {
         fontSize: "18px",
         lineHeight: "22px",

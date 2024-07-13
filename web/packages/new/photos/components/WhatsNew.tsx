@@ -2,6 +2,7 @@ import { ensureElectron } from "@/next/electron";
 import { ut } from "@/next/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
+    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -40,23 +41,29 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             TransitionComponent={SlideTransition}
             maxWidth="xs"
         >
-            <DialogTitle>{ut("What's new")}</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    <ChangelogContent />
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <FocusVisibleButton
-                    onClick={onClose}
-                    color="accent"
-                    fullWidth
-                    disableRipple
-                    endIcon={<ArrowForward />}
-                >
-                    <ButtonContents>{ut("Continue")}</ButtonContents>
-                </FocusVisibleButton>
-            </DialogActions>
+            <Box m={1}>
+                <DialogTitle mt={2}>
+                    <Typography variant="h4" color="text.muted">
+                        {ut("What's new")}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        <ChangelogContent />
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <FocusVisibleButton
+                        onClick={onClose}
+                        color="accent"
+                        fullWidth
+                        disableRipple
+                        endIcon={<ArrowForward />}
+                    >
+                        <ButtonContents>{ut("Continue")}</ButtonContents>
+                    </FocusVisibleButton>
+                </DialogActions>
+            </Box>
         </Dialog>
     );
 };
