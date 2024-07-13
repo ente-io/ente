@@ -30,6 +30,7 @@ import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
+import { wait } from "./main/utils/common";
 import { isDev } from "./main/utils/electron";
 
 /**
@@ -112,6 +113,8 @@ const main = () => {
         attachProcessHandlers();
 
         void (async () => {
+            if (isDev) await waitForRendererDevServer();
+
             // Create window and prepare for the renderer.
             mainWindow = createMainWindow();
 
@@ -278,6 +281,33 @@ const attachProcessHandlers = () => {
     // normal quit sequence), so this is an improvement either ways.
     process.on("SIGINT", () => app.quit());
 };
+
+/**
+ * Wait for the renderer process' dev server to be ready.
+ *
+ * After creating the main window, we load the web app into it using `loadURL`.
+ * In production, these are served directly from the SSR-ed static files bundled
+ * with the app, and so can be served instantly. However, during development, we
+ * start a dev server for serving the HMR-ed files.
+ *
+ * This Next.js HMR server takes time to startup and is sometimes not ready to
+ * handle incoming requests when the main window tries to load it. In such
+ * cases, Electron just hangs with this:
+ *
+ *     [main] Error: net::ERR_CONNECTION_REFUSED
+ *      [main]     at SimpleURLLoaderWrapper.<anonymous> (node:electron/js2c/browser_init:2:114482)
+ *      [main]     at SimpleURLLoaderWrapper.emit (node:events:519:28)
+ *
+ * As a workaround, we wait for 1 second.
+ *
+ * I'd also tried fancier workaround - polling the URL - but waits until the dev
+ * server has the response ready, delaying everything many seconds (we just want
+ * to see if the dev server can accept connections). The 1 second delay seems to
+ * get the job done for now.
+ *
+ * This workaround can likely be removed when we migrate to Vite.
+ */
+const waitForRendererDevServer = () => wait(1000);
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
