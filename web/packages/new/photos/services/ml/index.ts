@@ -9,6 +9,7 @@ import { blobCache } from "@/next/blob-cache";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
 import { isBetaUser, isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
@@ -421,7 +422,7 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFile = triggerStatusUpdate;
+const workerDidProcessFile = throttled(updateMLStatusSnapshot, 2000);
 
 /**
  * Return the IDs of all the faces in the given {@link enteFile} that are not

@@ -46,7 +46,7 @@ The root `package.json` also has a convenience dev dependency:
 -   [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
     parallel tasks when we invoke various yarn scripts.
 
-## Crypto
+## Cryptography
 
 We use [libsodium](https://libsodium.gitbook.io/doc/) for encryption, key
 generation etc. Specifically, we use its WebAssembly and JS wrappers made using
@@ -85,9 +85,8 @@ our apps are regular React SPAs, and are not particularly tied to Next.
 ### Vite
 
 For some of our newer code, we have started to use [Vite](https://vitejs.dev).
-It is more lower level than Next, but the bells and whistles it doesn't have are
-the bells and whistles (and the accompanying complexity) that we don't need in
-some cases.
+It is likely the future (both generally, and for our code) since Next is
+becoming less suitable for SSR and SPAs with their push towards SSG.
 
 ## UI
 
@@ -178,6 +177,11 @@ For more details, see [translations.md](translations.md).
 
 -   [zod](https://github.com/colinhacks/zod) is used for runtime typechecking
     (e.g. verifying that API responses match the expected TypeScript shape).
+
+-   [debounce](https://github.com/sindresorhus/debounce) and its
+    promise-supporting sibling
+    [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
+    debouncing operations (See also: `[Note: Throttle and debounce]`).
 
 ## Media
 
