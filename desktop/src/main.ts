@@ -11,7 +11,7 @@
 
 import { nativeImage, shell } from "electron/common";
 import type { WebContents } from "electron/main";
-import { BrowserWindow, Menu, Tray, app, net, protocol } from "electron/main";
+import { BrowserWindow, Menu, Tray, app, protocol } from "electron/main";
 import serveNextAt from "next-electron-server";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
@@ -294,29 +294,20 @@ const attachProcessHandlers = () => {
  * handle incoming requests when the main window tries to load it. In such
  * cases, Electron just hangs with this:
  *
- * > [main] Error: net::ERR_CONNECTION_REFUSED
- *    [main]     at SimpleURLLoaderWrapper.<anonymous> (node:electron/js2c/browser_init:2:114482)
- *    [main]     at SimpleURLLoaderWrapper.emit (node:events:519:28)
+ *     [main] Error: net::ERR_CONNECTION_REFUSED
+ *      [main]     at SimpleURLLoaderWrapper.<anonymous> (node:electron/js2c/browser_init:2:114482)
+ *      [main]     at SimpleURLLoaderWrapper.emit (node:events:519:28)
  *
- * As a workaround, poll the URL we'll subsequently be loading, and only proceed
- * if it is responsive.
+ * As a workaround, we wait for 1 second.
+ *
+ * I'd also tried fancier workaround - polling the URL - but waits until the dev
+ * server has the response ready, delaying everything many seconds (we just want
+ * to see if the dev server can accept connections). The 1 second delay seems to
+ * get the job done for now.
  *
  * This workaround can likely be removed when we migrate to Vite.
  */
-const waitForRendererDevServer = async () => {
-    // TODO: eslint has fixed this spurious warning, but we're not on the latest
-    // version yet, so add a disable.
-    // https://github.com/eslint/eslint/pull/18286
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-        const res = await net.fetch(rendererURL, {
-            method: "HEAD",
-        });
-        if (res.ok) break;
-        log.info("waiting for renderer to be ready...");
-        await wait(1000);
-    }
-};
+const waitForRendererDevServer = () => wait(1000);
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.
