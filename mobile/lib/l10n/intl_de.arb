@@ -1252,8 +1252,21 @@
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
   "reviewSuggestions": "Vorschläge überprüfen",
+  "reenterPassword": "Re-enter password",
+  "reenterPin": "Re-enter PIN",
+  "deviceLock": "Device lock",
+  "pinLock": "PIN lock",
+  "next": "Next",
+  "setNewPassword": "Set new password",
+  "enterPin": "Enter PIN",
+  "setNewPin": "Set new PIN",
+  "appLock": "App lock",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "tapToUnlock": "Tap to unlock",
+  "tooManyIncorrectAttempts": "Too many incorrect attempts",
   "mlFunctions": "ML functions",
-"useAsCover": "Als Titelbild festlegen",
+  "useAsCover": "Als Titelbild festlegen",
   "notPersonLabel": "Nicht {name}?",
   "@notPersonLabel": {
     "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
@@ -1277,5 +1290,4 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen.",
   "tapToUnlock": "Zum Entsperren antippen",
   "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche"
-
 }

@@ -124,6 +124,8 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
+  onnx_dart:
+    path: plugins/onnx_dart
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git

@@ -98,11 +98,6 @@ class SemanticSearchService {
         _cachedImageEmbeddings.isNotEmpty;
   }
 
-  bool bothClipModelsLoaded() {
-    return ClipImageEncoder.instance.isInitialized &&
-        ClipTextEncoder.instance.isInitialized;
-  }
-
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
@@ -261,7 +256,7 @@ class SemanticSearchService {
   Future<void> _loadTextModel() async {
     _logger.info("Initializing ML framework");
     try {
-      await ClipTextEncoder.instance.init();
+      await ClipTextEncoder.instance.loadModel();
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
@@ -339,10 +334,15 @@ class SemanticSearchService {
     int enteFileID,
     Image image,
     ByteData imageByteData,
-    int clipImageAddress,
-  ) async {
-    final embedding =
-        await ClipImageEncoder.predict(image, imageByteData, clipImageAddress);
+    int clipImageAddress, {
+    bool useEntePlugin = false,
+  }) async {
+    final embedding = await ClipImageEncoder.predict(
+      image,
+      imageByteData,
+      clipImageAddress,
+      useEntePlugin: useEntePlugin,
+    );
     final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);
 
     return clipResult;

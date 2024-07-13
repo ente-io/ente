@@ -1,6 +1,7 @@
 import 'dart:typed_data' show Float32List;
 
 import 'package:logging/logging.dart';
+import "package:onnx_dart/onnx_dart.dart";
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/ml_util.dart";
@@ -10,6 +11,7 @@ class MobileFaceNetInterpreterRunException implements Exception {}
 /// This class is responsible for running the face embedding model (MobileFaceNet) on ONNX runtime, and can be accessed through the singleton instance [FaceEmbeddingService.instance].
 class FaceEmbeddingService extends MlModel {
   static const kRemoteBucketModelPath = "mobilefacenet_opset15.onnx";
+  static const String _modelName = "MobileFaceNet";
 
   @override
   String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
@@ -19,7 +21,7 @@ class FaceEmbeddingService extends MlModel {
   static final _logger = Logger('FaceEmbeddingService');
 
   @override
-  String get modelName => "MobileFaceNet";
+  String get modelName => _modelName;
 
   static const int kInputSize = 112;
   static const int kEmbeddingSize = 192;
@@ -33,35 +35,75 @@ class FaceEmbeddingService extends MlModel {
 
   static Future<List<List<double>>> predict(
     Float32List input,
-    int sessionAddress,
-  ) async {
-    assert(sessionAddress != 0 && sessionAddress != -1);
+    int sessionAddress, {
+    bool useEntePlugin = false,
+  }) async {
+    if (!useEntePlugin) {
+      assert(sessionAddress != 0 && sessionAddress != -1);
+    }
     try {
-      final stopwatch = Stopwatch()..start();
-      _logger.info('MobileFaceNet interpreter.run is called');
-      final runOptions = OrtRunOptions();
-      final int numberOfFaces = input.length ~/ (kInputSize * kInputSize * 3);
-      final inputOrt = OrtValueTensor.createTensorWithDataList(
-        input,
-        [numberOfFaces, kInputSize, kInputSize, kNumChannels],
-      );
-      final inputs = {'img_inputs': inputOrt};
-      final session = OrtSession.fromAddress(sessionAddress);
-      final List<OrtValue?> outputs = session.run(runOptions, inputs);
-      final embeddings = outputs[0]?.value as List<List<double>>;
-
-      for (final embedding in embeddings) {
-        normalizeEmbedding(embedding);
+      if (useEntePlugin) {
+        return await _runEntePlugin(input);
+      } else {
+        return _runFFIBasedPredict(input, sessionAddress);
       }
-      stopwatch.stop();
-      _logger.info(
-        'MobileFaceNet interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
-      );
-
-      return embeddings;
     } catch (e) {
-      _logger.info('MobileFaceNet Error while running inference: $e');
+      _logger.info(
+          'MobileFaceNet  (entePlugin: $useEntePlugin)Error while running inference: $e',);
       throw MobileFaceNetInterpreterRunException();
     }
+  }
+
+  static List<List<double>> _runFFIBasedPredict(
+    Float32List input,
+    int sessionAddress,
+  ) {
+    final stopwatch = Stopwatch()..start();
+    _logger.info('MobileFaceNet interpreter.run is called');
+    final runOptions = OrtRunOptions();
+    final int numberOfFaces = input.length ~/ (kInputSize * kInputSize * 3);
+    final inputOrt = OrtValueTensor.createTensorWithDataList(
+      input,
+      [numberOfFaces, kInputSize, kInputSize, kNumChannels],
+    );
+    final inputs = {'img_inputs': inputOrt};
+    final session = OrtSession.fromAddress(sessionAddress);
+    final List<OrtValue?> outputs = session.run(runOptions, inputs);
+    final embeddings = outputs[0]?.value as List<List<double>>;
+
+    for (final embedding in embeddings) {
+      normalizeEmbedding(embedding);
+    }
+    stopwatch.stop();
+    _logger.info(
+      'MobileFaceNetFFI interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
+    );
+
+    return embeddings;
+  }
+
+  static Future<List<List<double>>> _runEntePlugin(
+    Float32List inputImageList,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    final OnnxDart plugin = OnnxDart();
+    final int numberOfFaces =
+        inputImageList.length ~/ (kInputSize * kInputSize * 3);
+    final result = await plugin.predict(
+      inputImageList,
+      _modelName,
+    );
+    final List<List<double>> embeddings = [];
+    for (int i = 0; i < numberOfFaces; i++) {
+      embeddings
+          .add(result!.sublist(i * kEmbeddingSize, (i + 1) * kEmbeddingSize));
+    }
+    for (final embedding in embeddings) {
+      normalizeEmbedding(embedding);
+    }
+    _logger.info(
+      'MobileFaceNetEntePlugin interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
+    );
+    return embeddings;
   }
 }

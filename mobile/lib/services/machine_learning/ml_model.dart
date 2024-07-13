@@ -2,6 +2,7 @@ import "dart:io" show File;
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
+import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/onnx_env.dart";
 import "package:photos/services/remote_assets_service.dart";
@@ -15,33 +16,68 @@ abstract class MlModel {
 
   String get modelName;
 
+  // isInitialized is used to check if the model is loaded by the ffi based
+  // plugin
   bool isInitialized = false;
+
+  bool isNativePluginInitialized = false;
   int sessionAddress = 0;
 
   final computer = Computer.shared();
 
-  Future<void> init() async {
-    if (!isInitialized) {
-      logger.info('init is called');
-      final model =
-          await RemoteAssetsService.instance.getAsset(modelRemotePath);
+  // Initializes the model.
+  // If `useEntePlugin` is set to true, the custom plugin is used for initialization.
+  // Note: The custom plugin requires a dedicated isolate for loading the model to ensure thread safety and performance isolation.
+  // In contrast, the current FFI-based plugin leverages the session memory address for session management, which does not require a dedicated isolate.
+  Future<void> loadModel({bool useEntePlugin = false}) async {
+    final model = await RemoteAssetsService.instance.getAsset(modelRemotePath);
+    if (useEntePlugin) {
+      await _loadModelWithEntePlugin(modelName, model.path);
+    } else {
+      await _loadModelWithFFI(modelName, model.path);
+    }
+  }
+
+  Future<void> _loadModelWithEntePlugin(
+    String modelName,
+    String modelPath,
+  ) async {
+    if (!isNativePluginInitialized) {
       final startTime = DateTime.now();
-      try {
-        await ONNXEnv.instance.initONNX(modelName);
-        sessionAddress = await computer.compute(
-          _loadModel,
-          param: {
-            "modelPath": model.path,
-          },
-        );
-        isInitialized = true;
+      logger.info('Initializing $modelName with EntePlugin');
+      final OnnxDart plugin = OnnxDart();
+      final bool? initResult = await plugin.init(modelName, modelPath);
+      isNativePluginInitialized = initResult ?? false;
+      if (isNativePluginInitialized) {
         final endTime = DateTime.now();
         logger.info(
-          "model loaded, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
+          "$modelName loaded via EntePlugin ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
         );
-      } catch (e, s) {
-        logger.severe('model not loaded', e, s);
+      } else {
+        logger.severe("Failed to initialize $modelName with EntePlugin.");
       }
+    } else {
+      logger.info("$modelName already initialized with Ente Plugin.");
+    }
+  }
+
+  Future<void> _loadModelWithFFI(String modelName, String modelPath) async {
+    if (!isInitialized) {
+      logger.info('Initializing $modelName with FFI');
+      final startTime = DateTime.now();
+      sessionAddress = await computer.compute(
+        _loadModel,
+        param: {
+          "modelPath": modelPath,
+        },
+      );
+      isInitialized = true;
+      final endTime = DateTime.now();
+      logger.info(
+        "$modelName loaded with FFI, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
+      );
+    } else {
+      logger.info("$modelName already initialized with FFI.");
     }
   }
 

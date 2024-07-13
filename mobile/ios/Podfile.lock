@@ -466,7 +466,7 @@ SPEC CHECKSUMS:
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
+  photo_manager: ff695c7a1dd5bc379974953a2b5c0a293f7c4c8a
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 6837b01768e567fe8562182397bf43d63d8c6437
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625

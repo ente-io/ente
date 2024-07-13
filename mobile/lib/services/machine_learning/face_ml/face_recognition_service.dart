@@ -1,5 +1,6 @@
 import "dart:async" show unawaited;
 import "dart:developer" as dev show log;
+import "dart:io";
 import "dart:typed_data" show ByteData, Float32List;
 import "dart:ui" show Image;
 
@@ -237,6 +238,7 @@ class FaceRecognitionService {
         image,
         imageByteData,
         interpreterAddress,
+        useEntePlugin: Platform.isAndroid,
       );
 
       // Add detected faces to the faceResults
@@ -299,8 +301,11 @@ class FaceRecognitionService {
   ) async {
     try {
       // Get the embedding of the faces
-      final List<List<double>> embeddings =
-          await FaceEmbeddingService.predict(facesList, interpreterAddress);
+      final List<List<double>> embeddings = await FaceEmbeddingService.predict(
+        facesList,
+        interpreterAddress,
+        useEntePlugin: Platform.isAndroid,
+      );
 
       // Store the results
       if (embeddings.length != faceResults.length) {

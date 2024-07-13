@@ -1,14 +1,15 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:isolate";
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List, ByteData;
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
-import "package:flutter/foundation.dart" show debugPrint;
+import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:logging/logging.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
@@ -40,7 +41,7 @@ import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum FaceMlOperation { analyzeImage }
+enum FaceMlOperation { analyzeImage, loadModels }
 
 /// This class is responsible for running the full face ml pipeline on images.
 ///
@@ -69,6 +70,7 @@ class MLService {
 
   bool _isInitialized = false;
   bool _isModelsInitialized = false;
+  bool _isModelsInitUsingEntePlugin = false;
   bool _isIsolateSpawned = false;
 
   late String client;
@@ -514,7 +516,7 @@ class MLService {
     return actuallyRanML;
   }
 
-  Future<void> _initModels() async {
+  Future<void> _initModelsUsingFfiBasedPlugin() async {
     return _initModelLock.synchronized(() async {
       if (_isModelsInitialized) return;
       _logger.info('initModels called');
@@ -526,22 +528,46 @@ class MLService {
 
       // Initialize models
       try {
-        await FaceDetectionService.instance.init();
+        await FaceDetectionService.instance.loadModel();
       } catch (e, s) {
         _logger.severe("Could not initialize yolo onnx", e, s);
       }
       try {
-        await FaceEmbeddingService.instance.init();
+        await FaceEmbeddingService.instance.loadModel();
       } catch (e, s) {
         _logger.severe("Could not initialize mobilefacenet", e, s);
       }
       try {
-        await ClipImageEncoder.instance.init();
+        await ClipImageEncoder.instance.loadModel();
       } catch (e, s) {
         _logger.severe("Could not initialize clip image", e, s);
       }
       _isModelsInitialized = true;
       _logger.info('initModels done');
+      _logStatus();
+    });
+  }
+
+  Future<void> _initModelUsingEntePlugin() async {
+    return _initModelLock.synchronized(() async {
+      if (_isModelsInitUsingEntePlugin) return;
+      _logger.info('initModelUsingEntePlugin called');
+
+      // Get client name
+      final packageInfo = await PackageInfo.fromPlatform();
+      client = "${packageInfo.packageName}/${packageInfo.version}";
+      _logger.info("client: $client");
+
+      // Initialize models
+      try {
+        await _runInIsolate(
+          (FaceMlOperation.loadModels, {}),
+        );
+        _isModelsInitUsingEntePlugin = true;
+      } catch (e, s) {
+        _logger.severe("Could not initialize clip image", e, s);
+      }
+      _logger.info('initModelUsingEntePlugin done');
       _logStatus();
     });
   }
@@ -596,16 +622,23 @@ class MLService {
   }
 
   Future<void> _ensureReadyForInference() async {
-    await _initModels();
     await _initIsolate();
+    if (Platform.isAndroid) {
+      await _initModelUsingEntePlugin();
+    } else {
+      await _initModelsUsingFfiBasedPlugin();
+    }
   }
 
   /// The main execution function of the isolate.
   @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
+    Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+    Logger.root.onRecord.listen((LogRecord rec) {
+      debugPrint('[MLIsolate] ${rec.toPrettyString()}');
+    });
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
-
     receivePort.listen((message) async {
       final functionIndex = message[0] as int;
       final function = FaceMlOperation.values[functionIndex];
@@ -621,6 +654,12 @@ class MLService {
               "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
             );
             sendPort.send(result.toJsonString());
+            break;
+          case FaceMlOperation.loadModels:
+            await FaceDetectionService.instance.loadModel(useEntePlugin: true);
+            await FaceEmbeddingService.instance.loadModel(useEntePlugin: true);
+            await ClipImageEncoder.instance.loadModel(useEntePlugin: true);
+            sendPort.send(true);
             break;
         }
       } catch (e, stackTrace) {
@@ -802,6 +841,7 @@ class MLService {
           image,
           imageByteData,
           clipImageAddress,
+          useEntePlugin: Platform.isAndroid,
         );
         result.clip = clipResult;
       }
