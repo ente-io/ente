@@ -301,12 +301,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
     _logger.info("Auto logout on max invalid attempts");
-    await showErrorDialog(
-      context,
-      "Too many incorrect attempts",
-      "Please login again",
-      isDismissable: false,
-    );
     Navigator.of(context, rootNavigator: true).pop('dialog');
     Navigator.of(context).popUntil((route) => route.isFirst);
     final dialog = createProgressDialog(context, "Logging out ...");

@@ -141,6 +141,7 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
     }
+    await LockScreenSettings.instance.removePinAndPassword();
     await AuthenticatorDB.instance.clearTable();
     _key = null;
     _cachedToken = null;
