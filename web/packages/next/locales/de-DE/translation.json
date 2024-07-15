@@ -479,7 +479,7 @@
     "more_details": "Weitere Details",
     "ENABLE_FACE_SEARCH": "Gesichtserkennung aktivieren",
     "ENABLE_FACE_SEARCH_TITLE": "Gesichtserkennung aktivieren?",
-    "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Wenn du die Gesichtserkennung aktivierst, wird Ente Gesichtsgeometrie aus deinen Fotos extrahieren. Dies wird auf deinem Gerät geschehen, und alle erzeugten biometrischen Daten werden Ende-zu-verschlüsselt.<p/><p><a>Bitte klicke hier für weitere Informationen über diese Funktion in unserer Datenschutzerklärung</a></p>",
+    "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Wenn du die Gesichtserkennung aktivierst, wird Ente Gesichtsgeometrie aus deinen Fotos extrahieren. Dies wird auf deinem Gerät geschehen, und alle erzeugten biometrischen Daten werden Ende-zu-verschlüsselt.</p><p><a>Bitte klicke hier für weitere Informationen über diese Funktion in unserer Datenschutzerklärung</a></p>",
     "ADVANCED": "Erweitert",
     "FACE_SEARCH_CONFIRMATION": "Ich verstehe und möchte Ente erlauben, Gesichtsgeometrie zu verarbeiten",
     "LABS": "Experimente",

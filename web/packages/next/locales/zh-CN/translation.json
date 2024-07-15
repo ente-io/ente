@@ -479,7 +479,7 @@
     "more_details": "更多详情",
     "ENABLE_FACE_SEARCH": "启用面部搜索",
     "ENABLE_FACE_SEARCH_TITLE": "要启用面部搜索吗？",
-    "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>如果您启用面部搜索，Ente 将从照片中提取脸部几何形状。 这将发生在您的设备上，任何生成的生物测定数据都将是端到端加密的。<p/><p><a>请单击此处以在我们的隐私政策中了解有关此功能的更多详细信息</a></p>",
+    "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>如果您启用面部搜索，Ente 将从照片中提取脸部几何形状。 这将发生在您的设备上，任何生成的生物测定数据都将是端到端加密的。</p><p><a>请单击此处以在我们的隐私政策中了解有关此功能的更多详细信息</a></p>",
     "ADVANCED": "高级设置",
     "FACE_SEARCH_CONFIRMATION": "我理解，并希望允许Ente处理面部几何形状",
     "LABS": "实验室",

@@ -479,7 +479,7 @@
     "more_details": "Más detalles",
     "ENABLE_FACE_SEARCH": "Activar búsqueda facial",
     "ENABLE_FACE_SEARCH_TITLE": "Activar búsqueda facial?",
-    "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Si activas la búsqueda facial, ente extraerá la geometría facial de tus fotos. Esto sucederá en su dispositivo y cualquier dato biométrico generado será cifrado de extremo a extremo.<p/><p><a>Haga clic aquí para obtener más detalles sobre esta característica en nuestra política de privacidad</a></p>",
+    "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Si activas la búsqueda facial, ente extraerá la geometría facial de tus fotos. Esto sucederá en su dispositivo y cualquier dato biométrico generado será cifrado de extremo a extremo.</p><p><a>Haga clic aquí para obtener más detalles sobre esta característica en nuestra política de privacidad</a></p>",
     "ADVANCED": "Avanzado",
     "FACE_SEARCH_CONFIRMATION": "Comprendo y deseo permitir que ente procese la geometría de la cara",
     "LABS": "Labs",
