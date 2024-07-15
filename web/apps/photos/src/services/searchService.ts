@@ -8,6 +8,7 @@ import { clipMatches } from "@/new/photos/services/ml/clip";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -26,7 +27,6 @@ import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
-import { ensureElectron } from "@/next/electron";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
@@ -180,8 +180,7 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
 
     const status = mlStatusSnapshot();
 
-    if (!status || status.phase == "disabled" || status.phase == "paused")
-        return undefined;
+    if (!status || status.phase == "disabled") return undefined;
 
     let label: string;
     switch (status.phase) {
@@ -374,7 +373,7 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
 const searchClip = async (
     searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
-    if (!isMLEnabled) return undefined;
+    if (!isMLEnabled()) return undefined;
     const matches = await clipMatches(searchPhrase, ensureElectron());
     log.debug(() => ["clip/scores", matches]);
     return matches;
