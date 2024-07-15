@@ -227,7 +227,7 @@
     "ANALYZING_PHOTOS": "Индексирование фотографий ({{indexStatus.nSyncedFiles,number}} / {{indexStatus.nTotalFiles,number}})",
     "INDEXING_PEOPLE": "Индексирование людей на {{indexStatus.nSyncedFiles,number}} фотографиях...",
     "INDEXING_DONE": "Проиндексировано {{indexStatus.nSyncedFiles,number}} фотографий",
-    "UNIDENTIFIED_FACES": "нераспознанные лица",
+    "UNIDENTIFIED_FACES": "Нераспознанные лица",
     "OBJECTS": "объекты",
     "TEXT": "текст",
     "INFO": "Информация ",

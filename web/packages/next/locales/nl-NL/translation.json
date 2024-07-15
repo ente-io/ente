@@ -227,7 +227,7 @@
     "ANALYZING_PHOTOS": "analyseren van nieuwe foto's {{indexStatus.nSyncedFiles}} van {{indexStatus.nTotalFiles}} gedaan)...",
     "INDEXING_PEOPLE": "mensen indexeren in {{indexStatus.nSyncedFiles}} foto's...",
     "INDEXING_DONE": "{{indexStatus.nSyncedFiles}} geïndexeerde foto's",
-    "UNIDENTIFIED_FACES": "ongeïdentificeerde gezichten",
+    "UNIDENTIFIED_FACES": "Ongeïdentificeerde gezichten",
     "OBJECTS": "objecten",
     "TEXT": "tekst",
     "INFO": "Info ",

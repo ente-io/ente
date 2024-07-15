@@ -227,7 +227,7 @@
     "ANALYZING_PHOTOS": "analyse des nouvelles photos {{indexStatus.nSyncedFiles}} sur {{indexStatus.nTotalFiles}} effectué)...",
     "INDEXING_PEOPLE": "indexation des visages dans {{indexStatus.nSyncedFiles}} photos...",
     "INDEXING_DONE": "{{indexStatus.nSyncedFiles}} photos indexées",
-    "UNIDENTIFIED_FACES": "visages non-identifiés",
+    "UNIDENTIFIED_FACES": "Visages non-identifiés",
     "OBJECTS": "objets",
     "TEXT": "texte",
     "INFO": "Info ",

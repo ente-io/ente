@@ -227,7 +227,7 @@
     "ANALYZING_PHOTOS": "Indexing photos ({{indexStatus.nSyncedFiles,number}} / {{indexStatus.nTotalFiles,number}})",
     "INDEXING_PEOPLE": "Indexing people in {{indexStatus.nSyncedFiles,number}} photos...",
     "INDEXING_DONE": "Indexed {{indexStatus.nSyncedFiles,number}} photos",
-    "UNIDENTIFIED_FACES": "unidentified faces",
+    "UNIDENTIFIED_FACES": "Unidentified faces",
     "OBJECTS": "objects",
     "TEXT": "text",
     "INFO": "Info ",

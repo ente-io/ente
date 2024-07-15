@@ -227,7 +227,7 @@
     "ANALYZING_PHOTOS": "Indiziere Fotos ({{indexStatus.nSyncedFiles,number}} / {{indexStatus.nTotalFiles,number}})",
     "INDEXING_PEOPLE": "Indiziere Personen in {{indexStatus.nSyncedFiles,number}} Fotos...",
     "INDEXING_DONE": "{{indexStatus.nSyncedFiles,number}} Fotos wurden indiziert",
-    "UNIDENTIFIED_FACES": "unidentifizierte Gesichter",
+    "UNIDENTIFIED_FACES": "Unidentifizierte Gesichter",
     "OBJECTS": "Objekte",
     "TEXT": "Text",
     "INFO": "Info ",
