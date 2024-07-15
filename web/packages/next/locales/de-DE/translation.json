@@ -476,7 +476,7 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED": "Alben können nicht aus Datei/Ordnermix erstellt werden",
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "<p>Du hast sowohl Dateien als auch Ordner in das Ente-Fenster gezogen.</p><p>Bitte wähle entweder nur Dateien oder nur Ordner aus, wenn separate Alben erstellt werden sollen</p>",
     "CHOSE_THEME": "Design auswählen",
-    "ML_MORE_DETAILS": "Weitere Details",
+    "more_details": "Weitere Details",
     "ENABLE_FACE_SEARCH": "Gesichtserkennung aktivieren",
     "ENABLE_FACE_SEARCH_TITLE": "Gesichtserkennung aktivieren?",
     "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Wenn du die Gesichtserkennung aktivierst, wird Ente Gesichtsgeometrie aus deinen Fotos extrahieren. Dies wird auf deinem Gerät geschehen, und alle erzeugten biometrischen Daten werden Ende-zu-verschlüsselt.<p/><p><a>Bitte klicke hier für weitere Informationen über diese Funktion in unserer Datenschutzerklärung</a></p>",

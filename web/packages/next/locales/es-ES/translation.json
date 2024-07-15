@@ -476,7 +476,7 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED": "No se puede crear álbumes de mezcla de archivos/carpetas",
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "<p>Has arrastrado y soltado una mezcla de archivos y carpetas.</p><p>Por favor proporcione sólo archivos o carpetas cuando seleccione la opción de crear álbumes separados</p>",
     "CHOSE_THEME": "Elegir tema",
-    "ML_MORE_DETAILS": "Más detalles",
+    "more_details": "Más detalles",
     "ENABLE_FACE_SEARCH": "Activar búsqueda facial",
     "ENABLE_FACE_SEARCH_TITLE": "Activar búsqueda facial?",
     "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Si activas la búsqueda facial, ente extraerá la geometría facial de tus fotos. Esto sucederá en su dispositivo y cualquier dato biométrico generado será cifrado de extremo a extremo.<p/><p><a>Haga clic aquí para obtener más detalles sobre esta característica en nuestra política de privacidad</a></p>",

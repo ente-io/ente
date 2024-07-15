@@ -476,7 +476,7 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED": "Nie można utworzyć albumów z mieszanki plików/folderów",
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "<p>Przeciągnąłeś i upuściłeś mieszankę plików i folderów.</p><p>Prosimy podać tylko pliki lub tylko foldery podczas wybierania opcji tworzenia oddzielnych albumów</p>",
     "CHOSE_THEME": "Wybierz motyw",
-    "ML_MORE_DETAILS": "Więcej szczegółów",
+    "more_details": "Więcej szczegółów",
     "ENABLE_FACE_SEARCH": "Włącz rozpoznawanie twarzy",
     "ENABLE_FACE_SEARCH_TITLE": "Włączyć rozpoznawanie twarzy?",
     "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>Jeśli włączysz rozpoznawanie twarzy, Ente wyodrębni geometrię twarzy ze zdjęć. Będzie to miało miejsce na Twoim urządzeniu, a wszystkie wygenerowane dane biometryczne będą zaszyfrowane metodą end-to-end.<p/><p><a>Kliknij tutaj, aby uzyskać więcej informacji na temat tej funkcji w naszej polityce prywatności</a></p>",

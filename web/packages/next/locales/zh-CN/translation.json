@@ -476,7 +476,7 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED": "无法从文件/文件夹组合中创建相册",
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "<p>你已拖放了文件和文件夹的组合。</p><p>选择创建单独相册的选项时，请只提供文件或只提供文件夹</p>",
     "CHOSE_THEME": "选择主题",
-    "ML_MORE_DETAILS": "更多详情",
+    "more_details": "更多详情",
     "ENABLE_FACE_SEARCH": "启用面部搜索",
     "ENABLE_FACE_SEARCH_TITLE": "要启用面部搜索吗？",
     "ENABLE_FACE_SEARCH_DESCRIPTION": "<p>如果您启用面部搜索，Ente 将从照片中提取脸部几何形状。 这将发生在您的设备上，任何生成的生物测定数据都将是端到端加密的。<p/><p><a>请单击此处以在我们的隐私政策中了解有关此功能的更多详细信息</a></p>",
