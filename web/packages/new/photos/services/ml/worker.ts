@@ -11,7 +11,11 @@ import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
-import { imageBitmapAndData, type ImageBitmapAndData } from "./bitmap";
+import {
+    imageBitmapAndData,
+    renderableBlob,
+    type ImageBitmapAndData,
+} from "./blob";
 import { indexCLIP, type CLIPIndex } from "./clip";
 import {
     indexableFileIDs,
@@ -379,7 +383,20 @@ const index = async (
     const f = fileLogID(enteFile);
     const startTime = Date.now();
 
-    const image = await imageBitmapAndData(enteFile, uploadItem, electron);
+    const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
+
+    let image: ImageBitmapAndData;
+    try {
+        image = await imageBitmapAndData(imageBlob);
+    } catch (e) {
+        // If we cannot get the raw image data for the file, then retrying again
+        // won't help. It'd only make sense to retry later if modify
+        // `renderableBlob` to be do something different for this type of file.
+        log.error(`Failed to get image data for indexing ${f}`, e);
+        await markIndexingFailed(enteFile.id);
+        throw e;
+    }
+
     const res = await Promise.allSettled([
         _indexFace(f, enteFile, image, electron, userAgent),
         // TODO-ML: clip-test

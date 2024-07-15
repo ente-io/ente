@@ -18,7 +18,7 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import type { ImageBitmapAndData } from "./bitmap";
+import type { ImageBitmapAndData } from "./blob";
 import { saveFaceCrops } from "./crop";
 import {
     grayscaleIntMatrixFromNormalized2List,
