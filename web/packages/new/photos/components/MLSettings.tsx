@@ -320,12 +320,8 @@ const ManageML: React.FC<ManageMLProps> = ({
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
             title: pt("Disable ML search"),
-            content: (
-                <Typography>
-                    {pt(
-                        "Do you want to disable ML search on all your devices?",
-                    )}
-                </Typography>
+            content: pt(
+                "Do you want to disable ML search on all your devices?",
             ),
             close: { text: t("CANCEL") },
             proceed: {
