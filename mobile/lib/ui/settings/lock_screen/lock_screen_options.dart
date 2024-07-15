@@ -1,7 +1,5 @@
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/app_lock_update_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -53,12 +51,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _deviceLock() async {
     await _lockscreenSetting.removePinAndPassword();
     await _initializeSettings();
-    await _lockscreenSetting.setAppLockType(AppLockUpdateType.device);
-    Bus.instance.fire(
-      AppLockUpdateEvent(
-        AppLockUpdateType.device,
-      ),
-    );
   }
 
   Future<void> _pinLock() async {
@@ -72,12 +64,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
-        Bus.instance.fire(
-          AppLockUpdateEvent(
-            AppLockUpdateType.pin,
-          ),
-        );
-        _lockscreenSetting.setAppLockType(AppLockUpdateType.pin);
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -96,12 +82,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
-        Bus.instance.fire(
-          AppLockUpdateEvent(
-            AppLockUpdateType.password,
-          ),
-        );
-        _lockscreenSetting.setAppLockType(AppLockUpdateType.password);
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -124,14 +104,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
-    await _lockscreenSetting.setAppLockType(
-      appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
-    );
-    Bus.instance.fire(
-      AppLockUpdateEvent(
-        appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
-      ),
-    );
     setState(() {
       _initializeSettings();
       appLock = !appLock;
@@ -147,6 +119,16 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
       return "Disabled";
+    }
+  }
+
+  String _getAppLockType() {
+    if (isPinEnabled) {
+      return "Pin";
+    } else if (isPasswordEnabled) {
+      return "Password";
+    } else {
+      return "Device lock";
     }
   }
 
@@ -287,7 +269,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      "Require ${_lockscreenSetting.getAppLockType()} if away for some time .",
+                                      "Require ${_getAppLockType()} if away for some time .",
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),
