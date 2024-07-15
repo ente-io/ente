@@ -189,7 +189,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                 </Button>
 
                 <Button color="secondary" size="large" onClick={moreDetails}>
-                    {t("ML_MORE_DETAILS")}
+                    {t("more_details")}
                 </Button>
             </Stack>
             <Typography color="text.faint" variant="small">

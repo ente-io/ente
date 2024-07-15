@@ -180,16 +180,16 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
     let label: string;
     switch (status.phase) {
         case "scheduled":
-            label = t("INDEXING_SCHEDULED");
+            label = t("indexing_scheduled");
             break;
         case "indexing":
-            label = t("ANALYZING_PHOTOS", { indexStatus: status });
+            label = t("indexing_photos", status);
             break;
         case "clustering":
-            label = t("INDEXING_PEOPLE", { indexStatus: status });
+            label = t("indexing_people", status);
             break;
         case "done":
-            label = t("INDEXING_DONE", { indexStatus: status });
+            label = t("indexing_done", status);
             break;
     }
 
