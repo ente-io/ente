@@ -1,7 +1,6 @@
 import {
     disableML,
     enableML,
-    isMLEnabled,
     mlStatusSnapshot,
     mlStatusSubscribe,
     type MLStatus,
@@ -69,21 +68,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         else onClose();
     };
 
-    const handleEnableML = async () => {
-        startLoading();
-        try {
-            if (!(await isMLEnabledRemote())) {
-                setOpenFaceConsent(true);
-            } else {
-                await enableML();
-            }
-        } catch (e) {
-            log.error("Failed to enable or resume ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleEnableML = () => setOpenFaceConsent(true);
 
     const handleConsent = async () => {
         startLoading();
@@ -319,9 +304,6 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     let status: string;
     switch (phase) {
-        case "paused":
-            status = pt("Paused");
-            break;
         case "indexing":
             status = pt("Indexing");
             break;
@@ -334,8 +316,6 @@ const ManageML: React.FC<ManageMLProps> = ({
             break;
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
-
-    const handleToggleLocal = () => (isMLEnabled() ? pauseML() : resumeML());
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
@@ -366,14 +346,6 @@ const ManageML: React.FC<ManageMLProps> = ({
                         variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
-                    />
-                </MenuItemGroup>
-                <MenuItemGroup>
-                    <EnteMenuItem
-                        label={pt("On this device")}
-                        variant="toggle"
-                        checked={phase != "paused"}
-                        onClick={handleToggleLocal}
                     />
                 </MenuItemGroup>
             </Stack>
