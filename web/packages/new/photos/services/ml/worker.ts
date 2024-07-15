@@ -357,6 +357,18 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * downloaded and decrypted from remote.
  *
  * @param userAgent The UA of the client that is doing the indexing (us).
+ *
+ * ---
+ *
+ * [Note: ML indexing does more ML]
+ *
+ * Nominally, and primarily, indexing a file involves computing its various ML
+ * embeddings: faces and CLIP. However, since this is a occasion where we have
+ * the original file in memory, it is a great time to also compute other derived
+ * data related to the file (instead of re-downloading it again).
+ *
+ * So this index function also does things that are not related to ML:
+ * extracting and updating Exif.
  */
 const index = async (
     enteFile: EnteFile,
