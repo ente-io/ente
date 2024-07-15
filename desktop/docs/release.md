@@ -9,7 +9,7 @@ Conceptually, the release is straightforward:
 3.  The download links on our website, and existing apps already check the
     latest GitHub release and update automatically.
 
-The complication comes by the fact that electron-builder's auto updater (the
+The complication comes from the fact that electron-builder's auto updater (the
 mechanism that we use for auto updates) doesn't work with monorepos. So we need
 to keep a separate repository just for holding the releases.
 
