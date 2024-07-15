@@ -67,19 +67,20 @@ class AutoLockItems extends StatefulWidget {
 }
 
 class _AutoLockItemsState extends State<AutoLockItems> {
-  final autoLockDurations = LockScreenSettings.instance.autoLockDurations;
+  final autoLockDurations = LockScreenSettings.autoLockDurations;
+  final autoLockTimeInMilliseconds =
+      LockScreenSettings.instance.getAutoLockTime();
   List<Widget> items = [];
   late Duration currentAutoLockTime;
   @override
   void initState() {
+    super.initState();
     for (Duration autoLockDuration in autoLockDurations) {
-      if (autoLockDuration.inMilliseconds ==
-          LockScreenSettings.instance.getAutoLockTime()) {
+      if (autoLockDuration.inMilliseconds == autoLockTimeInMilliseconds) {
         currentAutoLockTime = autoLockDuration;
         break;
       }
     }
-    super.initState();
   }
 
   @override
@@ -135,7 +136,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
     } else if (duration.inSeconds != 0) {
       return "${duration.inSeconds}s";
     } else {
-      return "Disable";
+      return "Disabled";
     }
   }
 }

@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter/foundation.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
+import "package:photos/events/app_lock_update_event.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -20,7 +21,7 @@ class LockScreenSettings {
   static const appLockType = "ls_app_lock_type";
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
-  final List<Duration> autoLockDurations = const [
+  static const List<Duration> autoLockDurations = [
     Duration(seconds: 0),
     Duration(seconds: 30),
     Duration(minutes: 1),
@@ -34,8 +35,20 @@ class LockScreenSettings {
     _preferences = prefs;
   }
 
-  Future<void> setAppLockType(String lockType) async {
-    await _preferences.setString(appLockType, lockType);
+  Future<void> setAppLockType(AppLockUpdateType lockType) async {
+    switch (lockType) {
+      case AppLockUpdateType.device:
+        await _preferences.setString(appLockType, "Device lock");
+        break;
+      case AppLockUpdateType.pin:
+        await _preferences.setString(appLockType, "Pin");
+        break;
+      case AppLockUpdateType.password:
+        await _preferences.setString(appLockType, "Password");
+      default:
+        await _preferences.setString(appLockType, "None");
+        break;
+    }
   }
 
   String getAppLockType() {

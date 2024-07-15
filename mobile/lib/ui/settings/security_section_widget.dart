@@ -43,13 +43,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   late String appLockSubtitle;
   late StreamSubscription<TwoFactorStatusChangeEvent>
       _twoFactorStatusChangeEvent;
-  late StreamSubscription<AppLockUpdateEvent> _appLockUpdateEvent;
+  late StreamSubscription<AppLockUpdateEvent> _appLockUpdateEventSubscription;
   final Logger _logger = Logger('SecuritySectionWidget');
   @override
   void initState() {
     super.initState();
     appLockSubtitle = LockScreenSettings.instance.getAppLockType();
-    _appLockUpdateEvent = Bus.instance.on<AppLockUpdateEvent>().listen((event) {
+    _appLockUpdateEventSubscription =
+        Bus.instance.on<AppLockUpdateEvent>().listen((event) {
       if (mounted) {
         setState(() {
           appLockSubtitle = LockScreenSettings.instance.getAppLockType();
@@ -66,7 +67,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   @override
   void dispose() {
-    _appLockUpdateEvent.cancel();
+    _appLockUpdateEventSubscription.cancel();
     _twoFactorStatusChangeEvent.cancel();
     super.dispose();
   }
