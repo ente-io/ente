@@ -1,12 +1,9 @@
 import {
     disableML,
     enableML,
-    getIsMLEnabledRemote,
     isMLEnabled,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    pauseML,
-    resumeML,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
@@ -75,7 +72,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
     const handleEnableML = async () => {
         startLoading();
         try {
-            if (!(await getIsMLEnabledRemote())) {
+            if (!(await isMLEnabledRemote())) {
                 setOpenFaceConsent(true);
             } else {
                 await enableML();
