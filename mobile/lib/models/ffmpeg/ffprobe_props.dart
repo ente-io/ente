@@ -183,7 +183,7 @@ class FFProbeProps {
       height: int.tryParse(json?[FFProbeKeys.height] ?? ""),
       language: json?[FFProbeKeys.language],
       location: _formatLocation(json?[FFProbeKeys.location]),
-      majorBrand: json?[FFProbeKeys.majorBrand],
+      majorBrand: _formatBrand(json?[FFProbeKeys.majorBrand]),
       mediaFormat: json?[FFProbeKeys.mediaFormat],
       mediaType: json?[FFProbeKeys.mediaType],
       minorVersion: json?[FFProbeKeys.minorVersion],
