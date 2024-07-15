@@ -2,6 +2,7 @@
 
 ## v1.7.3 (Unreleased)
 
+-   Support Polish translations.
 -   .
 
 ## v1.7.2
