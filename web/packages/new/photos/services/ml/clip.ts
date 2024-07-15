@@ -1,6 +1,6 @@
 import type { EnteFile } from "@/new/photos/types/file";
 import type { Electron } from "@/next/types/ipc";
-import type { ImageBitmapAndData } from "./bitmap";
+import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
 import { dotProduct, norm } from "./math";

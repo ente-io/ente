@@ -1,8 +1,14 @@
 import { FILE_TYPE } from "@/media/file-type";
-import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
+import {
+    isMLEnabled,
+    isMLSupported,
+    mlStatusSnapshot,
+} from "@/new/photos/services/ml";
+import { clipMatches } from "@/new/photos/services/ml/clip";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import { isDesktop } from "@/next/app";
+import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -174,8 +180,7 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
 
     const status = mlStatusSnapshot();
 
-    if (!status || status.phase == "disabled" || status.phase == "paused")
-        return undefined;
+    if (!status || status.phase == "disabled") return undefined;
 
     let label: string;
     switch (status.phase) {
@@ -366,14 +371,12 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
 }
 
 const searchClip = async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _searchPhrase: string,
+    searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
-    // TODO-ML: clip-test
-    return undefined;
-    // const matches = await clipMatches(searchPhrase, ensureElectron());
-    // log.debug(() => ["clip/scores", matches]);
-    // return matches;
+    if (!isMLEnabled()) return undefined;
+    const matches = await clipMatches(searchPhrase, ensureElectron());
+    log.debug(() => ["clip/scores", matches]);
+    return matches;
 };
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
