@@ -63,6 +63,8 @@ class FFProbeProps {
             Duration(microseconds: int.tryParse(json[key] ?? "") ?? 0),
           );
           break;
+        case FFProbeKeys.duration:
+          parsedData[stringKey] = _formatDuration(json[key]);
         case FFProbeKeys.location:
           parsedData[stringKey] = _formatLocation(json[key]);
           break;
@@ -112,11 +114,13 @@ class FFProbeProps {
 
   // input example: '2021-04-12T09:14:37.000000Z'
   static String? _formatDate(String value) {
-    final date = DateTime.tryParse(value);
-    if (date == null) return value;
+    final dateInUtc = DateTime.tryParse(value);
+    if (dateInUtc == null) return value;
     final epoch = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
-    if (date == epoch) return null;
-    return date.toIso8601String();
+    if (dateInUtc == epoch) return null;
+    final newDate =
+        DateTime.fromMicrosecondsSinceEpoch(dateInUtc.microsecondsSinceEpoch);
+    return formatDateTime(newDate, 'en_US', false);
   }
 
   // input example: '00:00:05.408000000' or '5.408000'
@@ -158,7 +162,7 @@ class FFProbeProps {
   static String? _formatDuration(String? value) {
     if (value == null) return null;
     final duration = _parseDuration(value);
-    return duration != null ? formatPreciseDuration(duration) : value;
+    return duration != null ? formatFriendlyDuration(duration) : value;
   }
 
   static String? _formatFilesize(dynamic value) {
