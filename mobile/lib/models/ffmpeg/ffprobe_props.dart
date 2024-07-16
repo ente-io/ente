@@ -1,5 +1,7 @@
 // Adapted from: https://github.com/deckerst/aves
 
+import "dart:developer";
+
 import "package:collection/collection.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";
@@ -10,11 +12,11 @@ import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
 
 class FFProbeProps {
-  final Map<String, dynamic>? prodData;
-
-  FFProbeProps({
-    required this.prodData,
-  });
+  Map<String, dynamic>? prodData;
+  Location? location;
+  DateTime? creationTime;
+  String? bitrate;
+  String? majorBrand;
 
   // toString() method
   @override
@@ -29,15 +31,17 @@ class FFProbeProps {
     return buffer.toString();
   }
 
-  factory FFProbeProps.fromJson(Map<dynamic, dynamic>? json) {
+  static fromJson(Map<dynamic, dynamic>? json) {
     final Map<String, dynamic> parsedData = {};
+    final FFProbeProps result = FFProbeProps();
 
     for (final key in json!.keys) {
       final stringKey = key.toString();
       switch (stringKey) {
         case FFProbeKeys.bitrate:
         case FFProbeKeys.bps:
-          parsedData[stringKey] = _formatMetric(json[key], 'b/s');
+          result.bitrate = _formatMetric(json[key], 'b/s');
+          parsedData[stringKey] = result.bitrate;
           break;
         case FFProbeKeys.byteCount:
           parsedData[stringKey] = _formatFilesize(json[key]);
@@ -66,10 +70,23 @@ class FFProbeProps {
         case FFProbeKeys.duration:
           parsedData[stringKey] = _formatDuration(json[key]);
         case FFProbeKeys.location:
-          parsedData[stringKey] = _formatLocation(json[key]);
+          result.location = _formatLocation(json[key]);
+          if (result.location != null) {
+            parsedData[stringKey] =
+                '${result.location!.latitude}, ${result.location!.longitude}';
+          }
+          break;
+        case FFProbeKeys.quickTimeLocation:
+          result.location =
+              _formatLocation(json[FFProbeKeys.quickTimeLocation]);
+          if (result.location != null) {
+            parsedData[FFProbeKeys.location] =
+                '${result.location!.latitude}, ${result.location!.longitude}';
+          }
           break;
         case FFProbeKeys.majorBrand:
-          parsedData[stringKey] = _formatBrand(json[key]);
+          result.majorBrand = _formatBrand(json[key]);
+          parsedData[stringKey] = result.majorBrand;
           break;
         case FFProbeKeys.startTime:
           parsedData[stringKey] = _formatDuration(json[key]);
@@ -78,8 +95,9 @@ class FFProbeProps {
           parsedData[stringKey] = json[key];
       }
     }
+    result.prodData = parsedData;
 
-    return FFProbeProps(prodData: parsedData);
+    return result;
   }
 
   static String _formatBrand(String value) => Mp4.brands[value] ?? value;
@@ -196,6 +214,7 @@ class FFProbeProps {
           longitude: coordinates[1],
         );
       } catch (e) {
+        log('failed to parse location: $value', error: e);
         return null;
       }
     }

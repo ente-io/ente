@@ -37,13 +37,14 @@ class VideoExifDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow(context, 'Duration', probeData, 'duration'),
-        _buildInfoRow(context, 'Probe Score', probeData, 'probe_score'),
-        _buildInfoRow(context, 'Number of Programs', probeData, 'nb_programs'),
-        _buildInfoRow(context, 'Number of Streams', probeData, 'nb_streams'),
-        _buildInfoRow(context, 'Bitrate', probeData, 'bitrate'),
-        _buildInfoRow(context, 'Format', probeData, 'format'),
         _buildInfoRow(context, 'Creation Time', probeData, 'creation_time'),
+        _buildInfoRow(context, 'Duration', probeData, 'duration'),
+        _buildInfoRow(context, 'Location', probeData, 'location'),
+        _buildInfoRow(context, 'Bitrate', probeData, 'bitrate'),
+        _buildInfoRow(context, 'Model', probeData, 'com.apple.quicktime.model'),
+        _buildInfoRow(context, 'OS', probeData, 'com.apple.quicktime.software'),
+        _buildInfoRow(context, 'Major Brand', probeData, 'major_brand'),
+        _buildInfoRow(context, 'Format', probeData, 'format'),
       ],
     );
   }
