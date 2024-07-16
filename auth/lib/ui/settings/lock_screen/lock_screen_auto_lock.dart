@@ -135,7 +135,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
     } else if (duration.inSeconds != 0) {
       return "${duration.inSeconds}s";
     } else {
-      return "Disable";
+      return "Disabled";
     }
   }
 }

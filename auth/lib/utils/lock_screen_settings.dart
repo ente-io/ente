@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:typed_data";
 
+import "package:ente_auth/events/app_lock_update_event.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -34,8 +35,21 @@ class LockScreenSettings {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> setAppLockType(String lockType) async {
-    await _preferences.setString(appLockType, lockType);
+  Future<void> setAppLockType(AppLockUpdateType lockType) async {
+    switch (lockType) {
+      case AppLockUpdateType.device:
+        await _preferences.setString(appLockType, "Device lock");
+        break;
+      case AppLockUpdateType.pin:
+        await _preferences.setString(appLockType, "Pin");
+        break;
+      case AppLockUpdateType.password:
+        await _preferences.setString(appLockType, "Password");
+        break;
+      default:
+        await _preferences.setString(appLockType, "None");
+        break;
+    }
   }
 
   String getAppLockType() {

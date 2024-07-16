@@ -54,7 +54,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _deviceLock() async {
     await _lockscreenSetting.removePinAndPassword();
     await _initializeSettings();
-    await _lockscreenSetting.setAppLockType("Device lock");
+    await _lockscreenSetting.setAppLockType(AppLockUpdateType.device);
     Bus.instance.fire(
       AppLockUpdateEvent(
         AppLockUpdateType.device,
@@ -78,7 +78,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
             AppLockUpdateType.pin,
           ),
         );
-        _lockscreenSetting.setAppLockType("Pin");
+        _lockscreenSetting.setAppLockType(AppLockUpdateType.pin);
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -102,7 +102,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
             AppLockUpdateType.password,
           ),
         );
-        _lockscreenSetting.setAppLockType("Password");
+        _lockscreenSetting.setAppLockType(AppLockUpdateType.password);
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -114,7 +114,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
-    await _lockscreenSetting.setAppLockType(appLock ? "None" : "Device lock");
+    await _lockscreenSetting.setAppLockType(
+      appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
+    );
     Bus.instance.fire(
       AppLockUpdateEvent(
         appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
@@ -147,7 +149,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else if (duration.inSeconds != 0) {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
-      return "Disable";
+      return "Disabled";
     }
   }
 
