@@ -2,7 +2,7 @@ import { blobCache } from "@/next/blob-cache";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
 import { renderableEnteFileBlob } from "./blob";
-import { type Box, type FaceIndex } from "./face";
+import { type Box, type LocalFaceIndex } from "./face";
 import { clamp } from "./math";
 
 /**
@@ -16,15 +16,15 @@ import { clamp } from "./math";
  *
  * @param enteFile The {@link EnteFile} whose face crops we want to generate.
  *
- * @param faceIndex The {@link FaceIndex} containing information about the faces
- * detected in the given image.
+ * @param faces The {@link LocalFaceIndex} containing information about the
+ * faces detected in the given image.
  *
  * The generated face crops are saved in a local cache and can subsequently be
  * retrieved from the {@link BlobCache} named "face-crops".
  */
 export const regenerateFaceCrops = async (
     enteFile: EnteFile,
-    faceIndex: FaceIndex,
+    faces: Face[],
 ) => {
     const imageBitmap = await createImageBitmap(
         await renderableEnteFileBlob(enteFile),
@@ -51,7 +51,7 @@ export const regenerateFaceCrops = async (
  */
 export const saveFaceCrops = async (
     imageBitmap: ImageBitmap,
-    faceIndex: FaceIndex,
+    faceIndex: LocalFaceIndex,
 ) => {
     const cache = await blobCache("face-crops");
 
