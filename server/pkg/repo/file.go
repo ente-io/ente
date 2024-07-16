@@ -42,7 +42,7 @@ func (repo *FileRepository) Create(
 	dcsForNewEntry := pq.StringArray{hotDC}
 
 	ctx := context.Background()
-	// update the collection update time outside txn, even if the fileUpdate feels,
+	// update the collection update time outside txn, even if the fileUpdate fails,
 	// the redundant collection update is fine.
 	_, err := repo.DB.ExecContext(ctx, `UPDATE collections SET updation_time = $1
 			WHERE collection_id = $2`, file.UpdationTime, file.CollectionID)
