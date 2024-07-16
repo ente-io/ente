@@ -69,7 +69,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
             topControl: const SizedBox.shrink(),
             backgroundColor: getEnteColorScheme(context).backgroundElevated,
             barrierColor: backdropFaintDark,
-            enableDrag: false,
+            enableDrag: true,
           );
     } else {
       label = S.of(context).noExifData;
