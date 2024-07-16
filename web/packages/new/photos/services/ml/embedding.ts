@@ -108,8 +108,6 @@ const RemoteEmbedding = z.object({
      * the crypto layer.
      */
     decryptionHeader: z.string(),
-    /** Last time (epoch ms) this embedding was updated. */
-    updatedAt: z.number(),
 });
 
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
@@ -340,6 +338,23 @@ const putEmbeddingString = async (
 // MARK: - Combined
 
 /**
+ * The decrypted payload of a {@link RemoteEmbedding} for the "combined"
+ * {@link EmbeddingModel}.
+ *
+ * [Note: Preserve unknown derived data fields]
+ *
+ * There is one entry for each of the embedding types that the current client
+ * knows about. However, there might be other fields apart from the known ones
+ * at the top level, and we need to ensure that we preserve them verbatim when
+ * trying use {@link putDerivedData} with an {@link RemoteDerivedData} obtained
+ * from remote as the base, with locally indexed additions.
+ */
+export type RemoteDerivedData = Record<string, unknown> & {
+    face: RemoteFaceIndex;
+    clip: RemoteCLIPIndex;
+};
+
+/**
  * Update the combined derived data stored for given {@link enteFile} on remote.
  * This allows other clients to directly pull the derived data instead of
  * needing to re-index.
@@ -347,24 +362,14 @@ const putEmbeddingString = async (
  * The data on remote will be replaced unconditionally, and it is up to the
  * client (us) to ensure that we preserve the parts of the pre-existing derived
  * data (if any) that we did not understand or touch.
+ *
+ * See: [Note: Preserve unknown derived data fields].
  */
 export const putDerivedData = async (
     enteFile: EnteFile,
-    remoteFaceIndex: RemoteFaceIndex,
-    remoteCLIPIndex: RemoteCLIPIndex,
-) => {
-    const combined = {
-        face: remoteFaceIndex,
-        clip: remoteCLIPIndex,
-    };
-    log.debug(() => ["Uploading derived data", combined]);
-
-    return putEmbedding(
-        enteFile,
-        "combined",
-        await gzip(JSON.stringify(combined)),
-    );
-};
+    derivedData: RemoteDerivedData,
+) =>
+    putEmbedding(enteFile, "combined", await gzip(JSON.stringify(derivedData)));
 
 /**
  * Compress the given {@link string} using "gzip" and return the resultant

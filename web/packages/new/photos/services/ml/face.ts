@@ -56,6 +56,18 @@ export const faceIndexingVersion = 1;
  */
 export interface FaceIndex {
     /**
+     * The width (in px) of the image (file).
+     *
+     * Having the image dimensions here is useful since the coordinates inside
+     * the {@link Face}s are all normalized (0 to 1) to the width and height of
+     * the image.
+     */
+    width: number;
+    /**
+     * The height (in px) of the image (file).
+     */
+    height: number;
+    /**
      * The list of faces (and their embeddings) detected in the file.
      *
      * Each of the items is a {@link Face}, containing the result of a face
@@ -211,6 +223,8 @@ export const indexFaces = async (
     { data: imageData }: ImageBitmapAndData,
     electron: MLWorkerElectron,
 ): Promise<FaceIndex> => ({
+    width: imageData.width,
+    height: imageData.height,
     faces: await indexFaces_(enteFile.id, imageData, electron),
 });
 

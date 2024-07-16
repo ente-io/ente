@@ -25,7 +25,7 @@ import {
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import { pullFaceEmbeddings, putDerivedData } from "./embedding";
+import { putDerivedData } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
@@ -209,32 +209,6 @@ export class MLWorker {
 expose(MLWorker);
 
 /**
- * Pull embeddings from remote.
- *
- * Return true atleast one embedding was pulled.
- */
-const pull = async () => {
-    const res = await Promise.allSettled([
-        pullFaceEmbeddings(),
-        // TODO-ML: clip-test
-        // pullCLIPEmbeddings(),
-    ]);
-    for (const r of res) {
-        switch (r.status) {
-            case "fulfilled":
-                // Return true if any pulled something.
-                if (r.value) return true;
-                break;
-            case "rejected":
-                // Throw if any failed.
-                throw r.reason;
-        }
-    }
-    // Return false if neither pulled anything.
-    return false;
-};
-
-/**
  * Find out files which need to be indexed. Then index the next batch of them.
  *
  * Returns `false` to indicate that either an error occurred, or there are no
@@ -416,20 +390,23 @@ const index = async (
             return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
         });
 
-        const remoteFaceIndex = {
-            ...faceIndex,
-            version: faceIndexingVersion,
-            client: userAgent,
+        const derivedData = {
+            face: {
+                version: faceIndexingVersion,
+                client: userAgent,
+                ...faceIndex,
+            },
+            clip: {
+                version: clipIndexingVersion,
+                client: userAgent,
+                ...clipIndex,
+            },
         };
 
-        const remoteCLIPIndex = {
-            ...clipIndex,
-            version: clipIndexingVersion,
-            client: userAgent,
-        };
+        log.debug(() => ["Uploading derived data", derivedData]);
 
         try {
-            await putDerivedData(enteFile, remoteFaceIndex, remoteCLIPIndex);
+            await putDerivedData(enteFile, derivedData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             log.error(`Failed to put face index for ${f}`, e);
