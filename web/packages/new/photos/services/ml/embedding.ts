@@ -4,8 +4,8 @@ import {
 } from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
 import {
-    decryptFileMetadata,
-    encryptFileMetadata,
+    decryptFileMetadataString,
+    encryptFileMetadataString,
 } from "@/new/shared/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
@@ -173,7 +173,7 @@ const pullEmbeddings = async (
                 const file = localFilesByID.get(remoteEmbedding.fileID);
                 if (!file) continue;
                 await save(
-                    await decryptFileMetadata(
+                    await decryptFileMetadataString(
                         remoteEmbedding.encryptedEmbedding,
                         remoteEmbedding.decryptionHeader,
                         file.key,
@@ -297,7 +297,7 @@ export const putEmbedding = async (
     log.debug(() => ["Uploading embedding", { model, embedding }]);
 
     const { encryptedMetadataB64, decryptionHeaderB64 } =
-        await encryptFileMetadata(embedding, enteFile.key);
+        await encryptFileMetadataString(embedding, enteFile.key);
 
     const res = await fetch(await apiURL("/embeddings"), {
         method: "PUT",
@@ -310,6 +310,29 @@ export const putEmbedding = async (
         }),
     });
     ensureOk(res);
+};
+
+// MARK: - Combined
+
+/**
+ * Update the combined derived data stored for given {@link enteFile} on remote.
+ * This allows other clients to directly pull the derived data instead of
+ * needing to re-index.
+ *
+ * The data on remote will be replaced unconditionally, and it is up to the
+ * client (us) to ensure that we preserve the parts of the pre-existing derived
+ * data (if any) that we did not understand or touch.
+ */
+export const putDerivedData = async (
+    enteFile: EnteFile,
+    faceIndex: FaceIndex,
+    clipIndex: CLIPIndex,
+) => {
+    const combined = {
+        face: faceIndex,
+        clip: clipIndex,
+    };
+    return putEmbedding(enteFile, "combined", JSON.stringify(combined));
 };
 
 // MARK: - Face
