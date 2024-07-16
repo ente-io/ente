@@ -33,7 +33,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
   Widget build(BuildContext context) {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
-      title: S.of(context).exif,
+      title: "Video Info",
       subtitleSection: _exifButton(context, widget.file, widget.exif),
       onTap: _onTap,
     );
@@ -58,7 +58,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
       label = S.of(context).loadingExifData;
       onTap = null;
     } else if (exif.isNotEmpty) {
-      label = S.of(context).viewAllExifData;
+      label = "Tap to view more details";
       onTap = () => showBarModalBottomSheet(
             context: context,
             builder: (BuildContext context) {

@@ -197,25 +197,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ),
     );
 
-    fileDetailsTiles.add(
-      ValueListenableBuilder(
-        valueListenable: _videoMetadataNotifier,
-        builder: (context, value, _) {
-          return value != null &&
-                  value.prodData != null &&
-                  value.prodData!.isNotEmpty
-              ? const Column(
-                  children: [
-                    Text("show video info"),
-                    // VideoProbeInfo(probeData: value.prodData!),
-                    FileDetailsDivider(),
-                  ],
-                )
-              : const SizedBox.shrink();
-        },
-      ),
-    );
-
     fileDetailsTiles.addAll([
       ValueListenableBuilder(
         valueListenable: hasLocationData,
