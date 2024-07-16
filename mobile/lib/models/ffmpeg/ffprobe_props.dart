@@ -115,7 +115,7 @@ class FFProbeProps {
     for (final stream in streams) {
       for (final key in stream.keys) {
         if (key == FFProbeKeys.rFrameRate) {
-          result.fps = stream[key];
+          result.fps = _formatFPS(stream[key]);
           parsedData[key] = result.fps;
         } else if (key == FFProbeKeys.codedWidth) {
           result.codecWidth = stream[key].toString();
@@ -218,6 +218,19 @@ class FFProbeProps {
     final size = value is int ? value : int.tryParse(value);
     const String asciiLocale = 'en_US';
     return size != null ? formatFileSize(asciiLocale, size) : value;
+  }
+
+  static String? _formatFPS(dynamic value) {
+    if (value == null) return null;
+    int? t = int.tryParse(value.split('/')[0]);
+    int? b = int.tryParse(value.split('/')[1]);
+    if (t != null && b != null) {
+      // return the value upto 2 decimal places. ignore even two decimal places
+      // if t is perfectly divisible by b
+      return (t % b == 0)
+          ? (t / b).toStringAsFixed(0)
+          : (t / b).toStringAsFixed(2);
+    }
   }
 
   static String _formatLanguage(String value) {
