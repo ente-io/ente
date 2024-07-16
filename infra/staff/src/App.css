@@ -21,13 +21,13 @@
     position: absolute; /* Use absolute positioning */
     top: 32px; /* 32px below the top of the page */
     left: 32px; /* 32px from the leftmost edge of the page */
-    right:32px;
+    right: 32px;
     display: flex;
     align-items: center; /* Align items vertically centered */
     gap: 20px; /* Adjust the gap between elements as needed */
     background-color: #fafafa;
     height: 104px;
-    width:1375px;
+    width: 1375px;
     border-radius: 10px;
 }
 
@@ -61,9 +61,246 @@
 .text-field-email {
     margin-left: 20px !important; /* Adjust margin for Email field */
 }
-.duckie-container{
+.duckie-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Adjust as necessary */
+    position: relative;
+}
+
+.error-message {
+    color: red;
+    font-size: 1.5em;
+}
+
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container {
+    position: relative; /* Ensure the parent is relatively positioned */
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    display: flex;
+    flex-direction: column; /* Add this */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+}
+
+.input-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1; /* Ensure form is on top */
+}
+
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adjust the gap between elements as needed */
+    background-color: #fafafa;
+    padding: 20px; /* Add padding around content */
+    border-radius: 10px;
+}
+
+.fetch-button-container button {
+    background-color: #00b33c;
+    color: white;
+    border: none;
+    width: 199px;
+    height: 56px;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.link-text {
+    display: flex;
+    align-items: center;
+    padding: 0 16px; /* Add padding for better appearance */
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    font-weight: bold; /* Make the text bold */
+    font-size: 40px;
+}
+
+.text-field-token {
+    margin-left: 70px !important; /* Adjust margin for Token field */
+}
+
+.text-field-email {
+    margin-left: 50px !important; /* Adjust margin for Email field */
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Example CSS to maintain tabs fixed position */
+.tabs-container {
+    position: sticky;
+    top: 20px; /* Adjust as needed */
+    z-index: 1000; /* Ensure tabs are above other content */
+}
+.container {
+    position: relative; /* Ensure the parent is relatively positioned */
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    display: flex;
+    flex-direction: column; /* Ensure children stack vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+}
+
+.input-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1; /* Ensure form is on top */
+    margin-bottom: 20px; /* Add space between form and tabs */
+}
+
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adjust the gap between elements as needed */
+    background-color: #fafafa;
+    padding: 20px; /* Add padding around content */
+    border-radius: 10px;
+}
+
+.fetch-button-container button {
+    background-color: #00b33c;
+    color: white;
+    border: none;
+    width: 199px;
+    height: 56px;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.link-text {
+    display: flex;
+    align-items: center;
+    padding: 0 16px; /* Add padding for better appearance */
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    font-weight: bold; /* Make the text bold */
+    font-size: 40px;
+}
+
+.text-field-token {
+    margin-left: 70px !important; /* Adjust margin for Token field */
+}
+
+.text-field-email {
+    margin-left: 50px !important; /* Adjust margin for Email field */
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tabs-container {
+    position: sticky; /* Make the tabs sticky */
+    top: 0; /* Stick to the top of the viewport */
+    z-index: 1000; /* Ensure tabs are above other content */
+    background-color: #fafafa; /* Optional: Add background color to tabs */
+    padding: 10px 20px; /* Optional: Add padding for better appearance */
+    border-bottom: 1px solid #ccc; /* Optional: Add bottom border */
+}
+.dialog-popup-container {
+    /* Styles for the overlay/background */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-popup {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dialog-popup-header h2 {
+    margin-bottom: 20px; /* Add space between heading and fields */
+}
+
+.dialog-popup-field {
+    margin-bottom: 15px;
+}
+
+.dialog-popup-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.dialog-popup-field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.submit-button {
+    background-color: #4caf50; /* Green */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Specific styles for each field to match the image */
+.name-field input,
+.shortname-field input,
+.code-field input {
+    width: calc(100% - 100px); /* Adjust as needed */
+}
+
+.active-field input {
+    width: 50px;
 }
