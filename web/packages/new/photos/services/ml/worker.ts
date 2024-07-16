@@ -373,6 +373,40 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  *
  * So this index function also does things that are not related to ML:
  * extracting and updating Exif.
+ *
+ * ---
+ *
+ * [Note: Transient and permanent indexing failures]
+ *
+ * We mark indexing for a file as having failed only if there is a good chance
+ * that the indexing failed because of some inherent issue with that particular
+ * file, and not if there were generic failures (like when trying to save the
+ * indexes to remote).
+ *
+ * When we mark it as failed, then a flag is persisted corresponding to this
+ * file in the ML DB so that it won't get reindexed in future runs. This are
+ * thus considered as permanent failures.
+ *
+ * > We might retry these in future versions if we identify reasons for indexing
+ * > to fail (it ideally shouldn't) and rectify them.
+ *
+ * On the other hand, saving the face index to remote might fail for transient
+ * issues (network issues, or remote having hiccups). We don't mark a file as
+ * failed permanently in such cases, so that it gets retried at some point.
+ * These are considered as transient failures.
+ *
+ * However, it is vary hard to pre-emptively enumerate all possible failure
+ * modes, and there is a the possibility of some non-transient failure getting
+ * classified as a transient failure and causing the client to try and index the
+ * same file again and again, when in fact there is a issue specific to that
+ * file which is preventing the index from being saved. What exactly? We don't
+ * know, but the possibility exists.
+ *
+ * To reduce the chances of this happening, we treat HTTP 4xx responses as
+ * permanent failures too - there are no known cases where a client retrying a
+ * 4xx response would work, and there are expected (but rare) cases where a
+ * client might get a non-retriable 4xx (e.g. if the file has over ~700 faces,
+ * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
     enteFile: EnteFile,
@@ -392,116 +426,49 @@ const index = async (
         // If we cannot get the raw image data for the file, then retrying again
         // won't help. It'd only make sense to retry later if modify
         // `renderableBlob` to be do something different for this type of file.
+        //
+        // See: [Note: Transient and permanent indexing failures]
         log.error(`Failed to get image data for indexing ${f}`, e);
         await markIndexingFailed(enteFile.id);
         throw e;
     }
 
-    const res = await Promise.allSettled([
-        _indexFace(f, enteFile, image, electron, userAgent),
-        // TODO-ML: clip-test
-        // _indexCLIP(f, enteFile, image, electron, userAgent),
-    ]);
-    image.bitmap.close();
+    let faceIndex: FaceIndex;
+    let clipIndex: CLIPIndex;
 
-    const msg: string[] = [];
-    for (const r of res) {
-        if (r.status == "rejected") throw r.reason;
-        else msg.push(r.value);
+    try {
+        const res = await Promise.all([
+            indexFaces(enteFile, image, electron, userAgent),
+            indexCLIP(enteFile, image, electron, userAgent),
+        ]);
+        faceIndex = res[0];
+        clipIndex = res[1];
+    } catch (e) {
+        // See: [Note: Transient and permanent indexing failures]
+        log.error(`Failed to index ${f}`, e);
+        await markIndexingFailed(enteFile.id);
+        throw e;
+    } finally {
+        image.bitmap.close();
     }
 
     log.debug(() => {
         const ms = Date.now() - startTime;
-        return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
+        const nf = faceIndex.faceEmbedding.faces.length;
+        return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
     });
-};
-
-const _indexFace = async (
-    f: string,
-    enteFile: EnteFile,
-    image: ImageBitmapAndData,
-    electron: MLWorkerElectron,
-    userAgent: string,
-) => {
-    let faceIndex: FaceIndex;
-    try {
-        faceIndex = await indexFaces(enteFile, image, electron, userAgent);
-    } catch (e) {
-        log.error(`Failed to index faces in ${f}`, e);
-        await markIndexingFailed(enteFile.id);
-        throw e;
-    }
-
-    // [Note: Transient and permanent indexing failures]
-    //
-    // Generally speaking, we mark indexing for a file as having failed only if
-    // the indexing itself failed, not if there were subsequent failures (like
-    // when trying to put the result to remote or save it to the local face DB).
-    //
-    // When we mark it as failed, then a flag is persisted corresponding to this
-    // file in the ML DB so that it won't get reindexed in future runs. This are
-    // thus considered as permanent failures.
-    //
-    // > We might retry in future versions if we identify reasons for indexing
-    // > to fail (it shouldn't) and rectify them.
-    //
-    // On the other hand, saving the face index to remote might fail for
-    // transient issues (network issues, or remote having hiccups). We don't
-    // mark a file as failed permanently in such cases, so that it gets retried
-    // at some point. These are considered as transient failures.
-    //
-    // However, this opens the possibility of some non-transient failure getting
-    // classified as a transient failure and causing the client to try and index
-    // the same file again and again, when in fact there is a issue specific to
-    // that file which is preventing the index from being saved. What exactly?
-    // We don't know, but the possibility exists.
-    //
-    // To reduce the chances of this happening, we treat HTTP 4xx responses as
-    // permanent failures too - there are no known cases where a client retrying
-    // a 4xx response would work, and there are known (but rare) cases where a
-    // client might get a 4xx (e.g. if the file has over ~700 faces, then remote
-    // will return a 413 Request Entity Too Large).
 
     try {
         await putFaceIndex(enteFile, faceIndex);
+        await putCLIPIndex(enteFile, clipIndex);
         await saveFaceIndex(faceIndex);
+        await saveCLIPIndex(clipIndex);
     } catch (e) {
+        // Not sure if DB failures should be considered permanent or transient.
+        // There isn't a known case where writing to the local indexedDB would
+        // fail. See: [Note: Transient and permanent indexing failures].
         log.error(`Failed to put/save face index for ${f}`, e);
         if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
         throw e;
     }
-
-    // A message for debug printing.
-    return `${faceIndex.faceEmbedding.faces.length} faces`;
-};
-
-// TODO-ML: clip-test export
-export const _indexCLIP = async (
-    f: string,
-    enteFile: EnteFile,
-    image: ImageBitmapAndData,
-    electron: MLWorkerElectron,
-    userAgent: string,
-) => {
-    let clipIndex: CLIPIndex;
-    try {
-        clipIndex = await indexCLIP(enteFile, image, electron, userAgent);
-    } catch (e) {
-        log.error(`Failed to index CLIP in ${f}`, e);
-        await markIndexingFailed(enteFile.id);
-        throw e;
-    }
-
-    // See: [Note: Transient and permanent indexing failures]
-    try {
-        await putCLIPIndex(enteFile, clipIndex);
-        await saveCLIPIndex(clipIndex);
-    } catch (e) {
-        log.error(`Failed to put/save CLIP index for ${f}`, e);
-        if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
-        throw e;
-    }
-
-    // A message for debug printing.
-    return "clip";
 };
