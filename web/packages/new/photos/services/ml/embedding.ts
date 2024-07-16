@@ -1,7 +1,3 @@
-import {
-    getAllLocalFiles,
-    getLocalTrashedFiles,
-} from "@/new/photos/services/files";
 import type { EnteFile } from "@/new/photos/types/file";
 import {
     decryptFileMetadataString,
@@ -120,118 +116,56 @@ export type RemoteDerivedData = Record<string, unknown> & {
 };
 
 /**
- * Fetch new or updated embeddings from remote and save them locally.
- *
- * @param model The {@link EmbeddingModel} for which to pull embeddings. For
- * each model, this function maintains the last sync time in local storage so
- * subsequent fetches only pull what's new.
- *
- * @param save A function that is called to save the embedding. The save process
- * can be model specific, so this provides us a hook to reuse the surrounding
- * pull mechanisms while varying the save itself. This function will be passed
- * the decrypted embedding string. If it throws, then we'll log about but
- * otherwise ignore the embedding under consideration.
- *
- * This function should be called only after we have synced files with remote.
- * See: [Note: Ignoring embeddings for unknown files].
- *
- * @returns true if at least one embedding was pulled, false otherwise.
+ * Fetch derived data for the given files from remote.
  */
-export const getDerivedData = async (
-    model: EmbeddingModel,
-    save: (decryptedEmbedding: string) => Promise<void>,
-) => {
-    // Include files from trash, otherwise they'll get unnecessarily reindexed
-    // if the user restores them from trash before permanent deletion.
-    const localFiles = (await getAllLocalFiles()).concat(
-        await getLocalTrashedFiles(),
-    );
-    // [Note: Ignoring embeddings for unknown files]
-    //
-    // We need the file to decrypt the embedding. This is easily ensured by
-    // running the embedding sync after we have synced our local files with
-    // remote.
-    //
-    // Still, it might happen that we come across an embedding for which we
-    // don't have the corresponding file locally. We can put them in two
-    // buckets:
-    //
-    // 1.  Known case: In rare cases we might get a diff entry for an embedding
-    //     corresponding to a file which has been deleted (but whose embedding
-    //     is enqueued for deletion). Client should expect such a scenario, but
-    //     all they have to do is just ignore such embeddings.
-    //
-    // 2.  Other unknown cases: Even if somehow we end up with an embedding for
-    //     a existent file which we don't have locally, it is fine because the
-    //     current client will just regenerate the embedding if the file really
-    //     exists and gets locally found later. There would be a bit of
-    //     duplicate work, but that's fine as long as there isn't a systematic
-    //     scenario where this happens.
-    const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
-
-    let didPull = false;
-    let sinceTime = await embeddingSyncTime(model);
-    // TODO: eslint has fixed this spurious warning, but we're not on the latest
-    // version yet, so add a disable.
-    // https://github.com/eslint/eslint/pull/18286
-    /* eslint-disable no-constant-condition */
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-        const remoteEmbeddings = await getEmbeddingsDiff(model, sinceTime);
-        if (remoteEmbeddings.length == 0) break;
-        let count = 0;
-        for (const remoteEmbedding of remoteEmbeddings) {
-            sinceTime = Math.max(sinceTime, remoteEmbedding.updatedAt);
-            try {
-                const file = localFilesByID.get(remoteEmbedding.fileID);
-                if (!file) continue;
-                await save(
-                    await decryptFileMetadataString(
-                        remoteEmbedding.encryptedEmbedding,
-                        remoteEmbedding.decryptionHeader,
-                        file.key,
-                    ),
-                );
-                didPull = true;
-                count++;
-            } catch (e) {
-                log.warn(`Ignoring unparseable ${model} embedding`, e);
-            }
+export const getDerivedData = async (fileIDs: string[]) => {
+    const remoteEmbeddings = await getEmbeddings("combined", fileIDs);
+    if (remoteEmbeddings.length == 0) break;
+    let count = 0;
+    for (const remoteEmbedding of remoteEmbeddings) {
+        sinceTime = Math.max(sinceTime, remoteEmbedding.updatedAt);
+        try {
+            const file = localFilesByID.get(remoteEmbedding.fileID);
+            if (!file) continue;
+            await save(
+                await decryptFileMetadataString(
+                    remoteEmbedding.encryptedEmbedding,
+                    remoteEmbedding.decryptionHeader,
+                    file.key,
+                ),
+            );
+            didPull = true;
+            count++;
+        } catch (e) {
+            log.warn(`Ignoring unparseable ${model} embedding`, e);
         }
-        await saveEmbeddingSyncTime(sinceTime, model);
-        log.info(`Fetched ${count} ${model} embeddings`);
     }
-    return didPull;
+    log.debug(() => `Fetched ${count} combined embeddings`);
 };
 
 /**
- * GET embeddings for the given model that have been updated {@link sinceTime}.
+ * GET the {@link model} embeddings for the given list of files.
  *
- * This fetches the next {@link diffLimit} embeddings whose {@link updatedAt} is
- * greater than the given {@link sinceTime} (non-inclusive).
+ * @param model The {@link EmbeddingModel} which we want.
  *
- * @param model The {@link EmbeddingModel} whose diff we wish for.
- *
- * @param sinceTime The updatedAt of the last embedding we've synced (epoch ms).
- * Pass 0 to fetch everything from the beginning.
+ * @param fileIDs The ids of the files for which we want the embeddings.
  *
  * @returns an array of {@link RemoteEmbedding}. The returned array is limited
  * to a maximum count of {@link diffLimit}.
  *
  * > See [Note: Limit of returned items in /diff requests].
  */
-const getEmbeddingsDiff = async (
+const getEmbeddings = async (
     model: EmbeddingModel,
-    sinceTime: number,
+    fileIDs: number[],
 ): Promise<RemoteEmbedding[]> => {
-    const params = new URLSearchParams({
-        model,
-        sinceTime: `${sinceTime}`,
-        limit: `${diffLimit}`,
-    });
-    const url = await apiURL("/embeddings/diff");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const res = await fetch(await apiURL("/embeddings/files"), {
+        method: "POST",
         headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({
+            model,
+            fileIDs,
+        }),
     });
     ensureOk(res);
     return z.object({ diff: z.array(RemoteEmbedding) }).parse(await res.json())
