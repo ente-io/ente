@@ -14,7 +14,7 @@ export const clipIndexingVersion = 1;
 /**
  * The CLIP embedding for a file (and some metadata).
  *
- * See {@link RemoteFaceIndex} for a similar structure with more comprehensive
+ * See {@link FaceIndex} for a similar structure with more comprehensive
  * documentation.
  *
  * ---

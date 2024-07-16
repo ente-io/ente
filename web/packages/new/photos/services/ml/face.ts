@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import type { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import {
@@ -19,7 +18,6 @@ import {
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
 import type { ImageBitmapAndData } from "./blob";
-import { saveFaceCrops } from "./crop";
 import {
     grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
@@ -192,63 +190,29 @@ export interface Box {
  * This function is the entry point to the face indexing pipeline. The file goes
  * through various stages:
  *
- * 1. Downloading the original if needed.
- * 2. Detect faces using ONNX/YOLO
- * 3. Align the face rectangles, compute blur.
- * 4. Compute embeddings using ONNX/MFNT for the detected face (crop).
+ * 1. Detect faces using ONNX/YOLO
+ * 2. Align the face rectangles, compute blur.
+ * 3. Compute embeddings using ONNX/MFNT for the detected face (crop).
  *
  * Once all of it is done, it returns the face rectangles and embeddings so that
  * they can be saved locally (for offline use), and also uploaded to the user's
  * remote storage so that their other devices can download them instead of
  * needing to reindex.
  *
- * As an optimization, it also saves the face crops of the detected faces to the
- * local cache (they can be regenerated independently too by using
- * {@link regenerateFaceCrops}).
- *
  * @param enteFile The {@link EnteFile} to index.
  *
  * @param image The file's contents.
  *
  * @param electron The {@link MLWorkerElectron} instance that allows us to call
- * our Node.js layer for various functionality.
- *
- * @param userAgent The UA of the client that is doing the indexing (us).
+ * our Node.js layer to run the ONNX inference.
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    image: ImageBitmapAndData,
+    { data: imageData }: ImageBitmapAndData,
     electron: MLWorkerElectron,
-    userAgent: string,
-): Promise<FaceIndex> => {
-    const { bitmap: imageBitmap, data: imageData } = image;
-
-    const { width, height } = imageBitmap;
-    const fileID = enteFile.id;
-
-    const faceIndex = {
-        fileID,
-        width,
-        height,
-        faceEmbedding: {
-            version: faceIndexingVersion,
-            client: userAgent,
-            faces: await indexFaces_(fileID, imageData, electron),
-        },
-    };
-
-    // This step, saving face crops, is not part of the indexing pipeline;
-    // we just do it here since we have already have the ImageBitmap at
-    // hand. Ignore errors that happen during this since it does not impact
-    // the generated face index.
-    try {
-        await saveFaceCrops(imageBitmap, faceIndex);
-    } catch (e) {
-        log.error(`Failed to save face crops for file ${fileID}`, e);
-    }
-
-    return faceIndex;
-};
+): Promise<FaceIndex> => ({
+    faces: await indexFaces_(enteFile.id, imageData, electron),
+});
 
 const indexFaces_ = async (
     fileID: number,

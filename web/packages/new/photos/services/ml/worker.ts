@@ -17,6 +17,7 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import { indexCLIP, type CLIPIndex } from "./clip";
+import { saveFaceCrops } from "./crop";
 import {
     indexableFileIDs,
     markIndexingFailed,
@@ -433,40 +434,54 @@ const index = async (
         throw e;
     }
 
-    let faceIndex: FaceIndex;
-    let clipIndex: CLIPIndex;
-
     try {
-        [faceIndex, clipIndex] = await Promise.all([
-            indexFaces(enteFile, image, electron, userAgent),
-            indexCLIP(enteFile, image, electron, userAgent),
-        ]);
-    } catch (e) {
-        // See: [Note: Transient and permanent indexing failures]
-        log.error(`Failed to index ${f}`, e);
-        await markIndexingFailed(enteFile.id);
-        throw e;
+        let faceIndex: FaceIndex;
+        let clipIndex: CLIPIndex;
+
+        try {
+            [faceIndex, clipIndex] = await Promise.all([
+                indexFaces(enteFile, image, electron, userAgent),
+                indexCLIP(enteFile, image, electron, userAgent),
+            ]);
+        } catch (e) {
+            // See: [Note: Transient and permanent indexing failures]
+            log.error(`Failed to index ${f}`, e);
+            await markIndexingFailed(enteFile.id);
+            throw e;
+        }
+
+        log.debug(() => {
+            const ms = Date.now() - startTime;
+            const nf = faceIndex.faces.length;
+            return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
+        });
+
+        try {
+            await putFaceIndex(enteFile, faceIndex);
+            await putCLIPIndex(enteFile, clipIndex);
+            await saveFaceIndex(faceIndex);
+            await saveCLIPIndex(clipIndex);
+        } catch (e) {
+            // Not sure if DB failures should be considered permanent or
+            // transient. There isn't a known case where writing to the local
+            // indexedDB would fail.
+            //
+            // See: [Note: Transient and permanent indexing failures]
+            log.error(`Failed to put/save face index for ${f}`, e);
+            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+            throw e;
+        }
+
+        // This step, saving face crops, is conceptually not part of the
+        // indexing pipeline; we just do it here since we have already have the
+        // ImageBitmap at hand. Ignore errors that happen during this since it
+        // does not impact the generated face index.
+        try {
+            await saveFaceCrops(image.bitmap, faceIndex);
+        } catch (e) {
+            log.error(`Failed to save face crops for ${f}`, e);
+        }
     } finally {
         image.bitmap.close();
-    }
-
-    log.debug(() => {
-        const ms = Date.now() - startTime;
-        const nf = faceIndex.faceEmbedding.faces.length;
-        return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
-    });
-
-    try {
-        await putFaceIndex(enteFile, faceIndex);
-        await putCLIPIndex(enteFile, clipIndex);
-        await saveFaceIndex(faceIndex);
-        await saveCLIPIndex(clipIndex);
-    } catch (e) {
-        // Not sure if DB failures should be considered permanent or transient.
-        // There isn't a known case where writing to the local indexedDB would
-        // fail. See: [Note: Transient and permanent indexing failures].
-        log.error(`Failed to put/save face index for ${f}`, e);
-        if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
-        throw e;
     }
 };
