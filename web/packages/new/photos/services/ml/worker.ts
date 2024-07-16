@@ -25,8 +25,8 @@ import {
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import { pullFaceEmbeddings, putCLIPIndex, putFaceIndex } from "./embedding";
-import { indexFaces, type FaceIndex } from "./face";
+import { pullFaceEmbeddings, putDerivedData } from "./embedding";
+import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
@@ -440,7 +440,7 @@ const index = async (
 
         try {
             [faceIndex, clipIndex] = await Promise.all([
-                indexFaces(enteFile, image, electron, userAgent),
+                indexFaces(enteFile, image, electron),
                 indexCLIP(enteFile, image, electron, userAgent),
             ]);
         } catch (e) {
@@ -456,9 +456,14 @@ const index = async (
             return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
         });
 
+        const remoteFaceIndex = {
+            ...faceIndex,
+            version: faceIndexingVersion,
+            client: userAgent,
+        };
+
         try {
-            await putFaceIndex(enteFile, faceIndex);
-            await putCLIPIndex(enteFile, clipIndex);
+            await putDerivedData(enteFile, remoteFaceIndex, clipIndex);
             await saveFaceIndex(faceIndex);
             await saveCLIPIndex(clipIndex);
         } catch (e) {

@@ -14,7 +14,11 @@ import { apiURL } from "@/next/origins";
 import { z } from "zod";
 import { clipIndexingVersion, type CLIPIndex } from "./clip";
 import { saveCLIPIndex, saveFaceIndex } from "./db";
-import { faceIndexingVersion, type FaceIndex } from "./face";
+import {
+    faceIndexingVersion,
+    type FaceIndex,
+    type RemoteFaceIndex,
+} from "./face";
 
 /**
  * The embeddings that we (the current client) knows how to handle.
@@ -342,11 +346,11 @@ const putEmbeddingString = async (
  */
 export const putDerivedData = async (
     enteFile: EnteFile,
-    faceIndex: FaceIndex,
+    remoteFaceIndex: RemoteFaceIndex,
     clipIndex: CLIPIndex,
 ) => {
     const combined = {
-        face: faceIndex,
+        face: remoteFaceIndex,
         clip: clipIndex,
     };
     log.debug(() => ["Uploading derived data", combined]);
@@ -415,20 +419,20 @@ const saveFaceIndexIfNewer = async (index: FaceIndex) => {
 };
 
 /**
- * Zod schemas for the {@link FaceIndex} types.
+ * Zod schemas for the {@link RemoteFaceIndex} type.
  *
- * [Note: Duplicated between Zod schemas and TS type]
+ * [Note: Duplicated Zod schema and TypeScript type]
  *
  * Usually we define a Zod schema, and then infer the corresponding TypeScript
- * type for it using `z.infer`. This works great except now the docstrings don't
- * show up: The doc strings get added to the Zod schema, but usually the code
+ * type for it using `z.infer`. This works great except that the docstrings
+ * don't show up: Docstrings get added to the Zod schema, but usually the code
  * using the parsed data will reference the TypeScript type, and the docstrings
  * added to the fields in the Zod schema won't show up.
  *
- * We usually live with this infelicity, since the alternative is code
- * duplication: Define the TypeScript type (putting the docstrings therein)
- * _and_ also a corresponding Zod schema. The duplication happens because it is
- * not possible to go the other way (TS type => Zod schema).
+ * We usually live with this infelicity since the alternative is code
+ * duplication: Defining a TypeScript type (putting the docstrings therein)
+ * _and_ also a corresponding Zod schema. The duplication is needed because it
+ * is not possible to go the other way (TypeScript type => Zod schema).
  *
  * However, in some cases having when the TypeScript type under consideration is
  * used pervasively in code, having a standalone TypeScript type with attached
@@ -438,50 +442,32 @@ const saveFaceIndexIfNewer = async (index: FaceIndex) => {
  * out of sync in the shape of the types they represent, the TypeScript compiler
  * will flag it for us.
  */
-const FaceIndex = z
-    .object({
-        fileID: z.number(),
-        width: z.number(),
-        height: z.number(),
-        faceEmbedding: z
-            .object({
-                version: z.number(),
-                client: z.string(),
-                faces: z.array(
-                    z
-                        .object({
-                            faceID: z.string(),
-                            detection: z
-                                .object({
-                                    box: z
-                                        .object({
-                                            x: z.number(),
-                                            y: z.number(),
-                                            width: z.number(),
-                                            height: z.number(),
-                                        })
-                                        .passthrough(),
-                                    landmarks: z.array(
-                                        z
-                                            .object({
-                                                x: z.number(),
-                                                y: z.number(),
-                                            })
-                                            .passthrough(),
-                                    ),
-                                })
-                                .passthrough(),
-                            score: z.number(),
-                            blur: z.number(),
-                            embedding: z.array(z.number()),
-                        })
-                        .passthrough(),
+const RemoteFaceIndex = z.object({
+    version: z.number(),
+    client: z.string(),
+    faces: z.array(
+        z.object({
+            faceID: z.string(),
+            detection: z.object({
+                box: z.object({
+                    x: z.number(),
+                    y: z.number(),
+                    width: z.number(),
+                    height: z.number(),
+                }),
+                landmarks: z.array(
+                    z.object({
+                        x: z.number(),
+                        y: z.number(),
+                    }),
                 ),
-            })
-            .passthrough(),
-    })
-    // Retain fields we might not (currently) understand.
-    .passthrough();
+            }),
+            score: z.number(),
+            blur: z.number(),
+            embedding: z.array(z.number()),
+        }),
+    ),
+});
 
 /**
  * Save the face index for the given {@link enteFile} on remote so that other
@@ -533,7 +519,7 @@ const saveCLIPIndexIfNewer = async (index: CLIPIndex) => {
 /**
  * Zod schemas for the {@link CLIPIndex} types.
  *
- * See: [Note: Duplicated between Zod schemas and TS type]
+ * See: [Note: Duplicated Zod schema and TypeScript type]
  */
 const CLIPIndex = z
     .object({
