@@ -17,6 +17,20 @@ class FFProbeProps {
   DateTime? creationTime;
   String? bitrate;
   String? majorBrand;
+  String? fps;
+  String? codecWidth;
+  String? codecHeight;
+
+  // dot separated bitrate, fps, codecWidth, codecHeight. Ignore null value
+  String get videoInfo {
+    final List<String> info = [];
+    if (bitrate != null) info.add('$bitrate');
+    if (fps != null) info.add('ƒ/$fps');
+    if (codecWidth != null && codecHeight != null) {
+      info.add('$codecWidth x $codecHeight');
+    }
+    return info.join(' * ');
+  }
 
   // toString() method
   @override
@@ -37,6 +51,7 @@ class FFProbeProps {
 
     for (final key in json!.keys) {
       final stringKey = key.toString();
+
       switch (stringKey) {
         case FFProbeKeys.bitrate:
         case FFProbeKeys.bps:
@@ -95,8 +110,21 @@ class FFProbeProps {
           parsedData[stringKey] = json[key];
       }
     }
+    // iterate through the streams
+    final List<dynamic> streams = json["streams"];
+    for (final stream in streams) {
+      final Map<String, dynamic> streamData = {};
+      for (final key in stream.keys) {
+        if (key == "r_frame_rate") {
+          result.fps = stream[key];
+        } else if (key == "coded_width") {
+          result.codecWidth = stream[key].toString();
+        } else if (key == "coded_height") {
+          result.codecHeight = stream[key].toString();
+        }
+      }
+    }
     result.prodData = parsedData;
-
     return result;
   }
 

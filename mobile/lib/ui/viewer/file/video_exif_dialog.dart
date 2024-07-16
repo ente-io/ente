@@ -79,7 +79,7 @@ class VideoExifDialog extends StatelessWidget {
   Widget _buildStreamInfo(BuildContext context, Map<String, dynamic> stream) {
     String titleString = stream['type']?.toString().toUpperCase() ?? '';
     final codeName = stream['codec_name']?.toString().toUpperCase() ?? '';
-    if (codeName != 'NULL') {
+    if (codeName != 'NULL' && codeName.isNotEmpty) {
       titleString += ' - $codeName';
     }
     return ExpansionTile(
@@ -87,7 +87,7 @@ class VideoExifDialog extends StatelessWidget {
         titleString,
         style: getEnteTextTheme(context).smallBold,
       ),
-      childrenPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+      childrenPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
       tilePadding: const EdgeInsets.symmetric(vertical: 4),
       children: [
         Column(

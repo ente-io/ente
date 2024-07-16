@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:exif/exif.dart";
 import "package:ffmpeg_kit_flutter_min/ffprobe_kit.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -11,9 +12,11 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -101,7 +104,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             _exifData["exposureTime"] != null ||
             _exifData["ISO"] != null;
       });
-    } else {
+    } else if (flagService.internalUser && widget.file.isVideo) {
       getMediaInfo();
     }
     getExif(widget.file).then((exif) {
@@ -115,9 +118,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     final File? originFile = await getFile(widget.file, isOrigin: true);
     if (originFile == null) return;
     final session = await FFprobeKit.getMediaInformation(originFile.path);
-
     final mediaInfo = session.getMediaInformation();
-
     if (mediaInfo == null) {
       final failStackTrace = await session.getFailStackTrace();
       final output = await session.getOutput();
@@ -128,11 +129,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
     final properties = await FFProbeUtil.getProperties(mediaInfo);
     _videoMetadataNotifier.value = properties;
-
-    // print all the properties
-    log("videoCustomProps ${properties.toString()}");
-    log("PropData ${properties.prodData.toString()}");
-
+    if (kDebugMode) {
+      log("videoCustomProps ${properties.toString()}");
+      log("PropData ${properties.prodData.toString()}");
+    }
     setState(() {});
   }
 
@@ -268,19 +268,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           },
         ),
       ]);
-    } else if (_videoMetadataNotifier.value != null) {
+    } else if (flagService.internalUser && widget.file.isVideo) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
           valueListenable: _videoMetadataNotifier,
           builder: (context, value, _) {
-            return (value != null && value.prodData != null)
-                ? Column(
-                    children: [
-                      VideoExifRowItem(file, value.prodData),
-                      const FileDetailsDivider(),
-                    ],
-                  )
-                : const SizedBox.shrink();
+            return Column(
+              children: [
+                VideoExifRowItem(file, value),
+                const FileDetailsDivider(),
+              ],
+            );
           },
         ),
       ]);
