@@ -10,6 +10,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
@@ -24,6 +25,7 @@ import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
+import "package:photos/ui/viewer/file_details/exif_video.dart";
 import "package:photos/ui/viewer/file_details/faces_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
@@ -45,7 +47,6 @@ class FileDetailsWidget extends StatefulWidget {
 }
 
 class _FileDetailsWidgetState extends State<FileDetailsWidget> {
-  final ValueNotifier<Map<String, IfdTag>?> _exifNotifier = ValueNotifier(null);
   final Map<String, dynamic> _exifData = {
     "focalLength": null,
     "fNumber": null,
@@ -65,8 +66,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
+  final ValueNotifier<Map<String, IfdTag>?> _exifNotifier = ValueNotifier(null);
   final ValueNotifier<bool> hasLocationData = ValueNotifier(false);
   final Logger _logger = Logger("_FileDetailsWidgetState");
+  final ValueNotifier<FFProbeProps?> _videoMetadataNotifier =
+      ValueNotifier(null);
 
   @override
   void initState() {
@@ -123,11 +127,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       return;
     }
     final properties = await FFProbeUtil.getProperties(mediaInfo);
-    final parsedMetadata = await FFProbeUtil.getMetadata(mediaInfo);
+    _videoMetadataNotifier.value = properties;
 
     // print all the properties
     log("videoCustomProps ${properties.toString()}");
-    log("videoMetadata ${parsedMetadata.toString()}");
+    log("PropData ${properties.prodData.toString()}");
 
     setState(() {});
   }
@@ -135,6 +139,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   @override
   void dispose() {
     _exifNotifier.dispose();
+    _videoMetadataNotifier.dispose();
     _peopleChangedEvent.cancel();
     super.dispose();
   }
@@ -185,6 +190,25 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   children: [
                     BasicExifItemWidget(_exifData),
                     const FileDetailsDivider(),
+                  ],
+                )
+              : const SizedBox.shrink();
+        },
+      ),
+    );
+
+    fileDetailsTiles.add(
+      ValueListenableBuilder(
+        valueListenable: _videoMetadataNotifier,
+        builder: (context, value, _) {
+          return value != null &&
+                  value.prodData != null &&
+                  value.prodData!.isNotEmpty
+              ? const Column(
+                  children: [
+                    Text("show video info"),
+                    // VideoProbeInfo(probeData: value.prodData!),
+                    FileDetailsDivider(),
                   ],
                 )
               : const SizedBox.shrink();
@@ -260,6 +284,22 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                 const FileDetailsDivider(),
               ],
             );
+          },
+        ),
+      ]);
+    } else if (_videoMetadataNotifier.value != null) {
+      fileDetailsTiles.addAll([
+        ValueListenableBuilder(
+          valueListenable: _videoMetadataNotifier,
+          builder: (context, value, _) {
+            return (value != null && value.prodData != null)
+                ? Column(
+                    children: [
+                      VideoProbeInfoDetail(file, value.prodData),
+                      const FileDetailsDivider(),
+                    ],
+                  )
+                : const SizedBox.shrink();
           },
         ),
       ]);

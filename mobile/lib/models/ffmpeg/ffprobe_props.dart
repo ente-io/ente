@@ -1,7 +1,5 @@
 // Adapted from: https://github.com/deckerst/aves
 
-import "dart:developer";
-
 import "package:collection/collection.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";
@@ -12,203 +10,74 @@ import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
 
 class FFProbeProps {
-  final double? captureFps;
-  final String? androidManufacturer;
-  final String? androidModel;
-  final String? androidVersion;
-  final String? bitRate;
-  final String? bitsPerRawSample;
-  final String? byteCount;
-  final String? channelLayout;
-  final String? chromaLocation;
-  final String? codecName;
-  final String? codecPixelFormat;
-  final int? codedHeight;
-  final int? codedWidth;
-  final String? colorPrimaries;
-  final String? colorRange;
-  final String? colorSpace;
-  final String? colorTransfer;
-  final String? colorProfile;
-  final String? compatibleBrands;
-  final String? creationTime;
-  final String? displayAspectRatio;
-  final DateTime? date;
-  final String? duration;
-  final String? durationMicros;
-  final String? extraDataSize;
-  final String? fieldOrder;
-  final String? fpsDen;
-  final int? frameCount;
-  final String? handlerName;
-  final bool? hasBFrames;
-  final int? height;
-  final String? language;
-  final Location? location;
-  final String? majorBrand;
-  final String? mediaFormat;
-  final String? mediaType;
-  final String? minorVersion;
-  final String? nalLengthSize;
-  final String? quicktimeLocationAccuracyHorizontal;
-  final int? rFrameRate;
-  final String? rotate;
-  final String? sampleFormat;
-  final String? sampleRate;
-  final String? sampleAspectRatio;
-  final String? sarDen;
-  final int? segmentCount;
-  final String? sourceOshash;
-  final String? startMicros;
-  final String? startPts;
-  final String? startTime;
-  final String? statisticsWritingApp;
-  final String? statisticsWritingDateUtc;
-  final String? timeBase;
-  final String? track;
-  final String? vendorId;
-  final int? width;
-  final String? xiaomiSlowMoment;
+  final Map<String, dynamic>? prodData;
 
   FFProbeProps({
-    required this.captureFps,
-    required this.androidManufacturer,
-    required this.androidModel,
-    required this.androidVersion,
-    required this.bitRate,
-    required this.bitsPerRawSample,
-    required this.byteCount,
-    required this.channelLayout,
-    required this.chromaLocation,
-    required this.codecName,
-    required this.codecPixelFormat,
-    required this.codedHeight,
-    required this.codedWidth,
-    required this.colorPrimaries,
-    required this.colorRange,
-    required this.colorSpace,
-    required this.colorTransfer,
-    required this.colorProfile,
-    required this.compatibleBrands,
-    required this.creationTime,
-    required this.displayAspectRatio,
-    required this.date,
-    required this.duration,
-    required this.durationMicros,
-    required this.extraDataSize,
-    required this.fieldOrder,
-    required this.fpsDen,
-    required this.frameCount,
-    required this.handlerName,
-    required this.hasBFrames,
-    required this.height,
-    required this.language,
-    required this.location,
-    required this.majorBrand,
-    required this.mediaFormat,
-    required this.mediaType,
-    required this.minorVersion,
-    required this.nalLengthSize,
-    required this.quicktimeLocationAccuracyHorizontal,
-    required this.rFrameRate,
-    required this.rotate,
-    required this.sampleFormat,
-    required this.sampleRate,
-    required this.sampleAspectRatio,
-    required this.sarDen,
-    required this.segmentCount,
-    required this.sourceOshash,
-    required this.startMicros,
-    required this.startPts,
-    required this.startTime,
-    required this.statisticsWritingApp,
-    required this.statisticsWritingDateUtc,
-    required this.timeBase,
-    required this.track,
-    required this.vendorId,
-    required this.width,
-    required this.xiaomiSlowMoment,
+    required this.prodData,
   });
 
   // toString() method
   @override
   String toString() {
-    return 'FFProbeProps(captureFps: $captureFps, androidManufacturer: $androidManufacturer, androidModel: $androidModel, androidVersion: $androidVersion, bitRate: $bitRate, bitsPerRawSample: $bitsPerRawSample, byteCount: $byteCount, channelLayout: $channelLayout, chromaLocation: $chromaLocation, codecName: $codecName, codecPixelFormat: $codecPixelFormat, codedHeight: $codedHeight, codedWidth: $codedWidth, colorPrimaries: $colorPrimaries, colorRange: $colorRange, colorSpace: $colorSpace, colorTransfer: $colorTransfer, colorProfile: $colorProfile, compatibleBrands: $compatibleBrands, creationTime: $creationTime, displayAspectRatio: $displayAspectRatio, date: $date, duration: $duration, durationMicros: $durationMicros, extraDataSize: $extraDataSize, fieldOrder: $fieldOrder, fpsDen: $fpsDen, frameCount: $frameCount, handlerName: $handlerName, hasBFrames: $hasBFrames, height: $height, language: $language, location: $location, majorBrand: $majorBrand, mediaFormat: $mediaFormat, mediaType: $mediaType, minorVersion: $minorVersion, nalLengthSize: $nalLengthSize, quicktimeLocationAccuracyHorizontal: $quicktimeLocationAccuracyHorizontal, rFrameRate: $rFrameRate, rotate: $rotate, sampleFormat: $sampleFormat, sampleRate: $sampleRate, sampleAspectRatio: $sampleAspectRatio, sarDen: $sarDen, segmentCount: $segmentCount, sourceOshash: $sourceOshash, startMicros: $startMicros, startPts: $startPts, startTime: $startTime, statisticsWritingApp: $statisticsWritingApp, statisticsWritingDateUtc: $statisticsWritingDateUtc, timeBase: $timeBase, track: $track, vendorId: $vendorId, width: $width, xiaomiSlowMoment: $xiaomiSlowMoment)';
+    final buffer = StringBuffer();
+    for (final key in prodData!.keys) {
+      final value = prodData![key];
+      if (value != null) {
+        buffer.writeln('$key: $value');
+      }
+    }
+    return buffer.toString();
   }
 
   factory FFProbeProps.fromJson(Map<dynamic, dynamic>? json) {
-    return FFProbeProps(
-      captureFps:
-          double.tryParse(json?[FFProbeKeys.androidCaptureFramerate] ?? ""),
-      androidManufacturer: json?[FFProbeKeys.androidManufacturer],
-      androidModel: json?[FFProbeKeys.androidModel],
-      androidVersion: json?[FFProbeKeys.androidVersion],
-      bitRate: _formatMetric(
-        json?[FFProbeKeys.bitrate] ?? json?[FFProbeKeys.bps],
-        'b/s',
-      ),
-      bitsPerRawSample: json?[FFProbeKeys.bitsPerRawSample],
-      byteCount: _formatFilesize(json?[FFProbeKeys.byteCount]),
-      channelLayout: _formatChannelLayout(json?[FFProbeKeys.channelLayout]),
-      chromaLocation: json?[FFProbeKeys.chromaLocation],
-      codecName: _formatCodecName(json?[FFProbeKeys.codecName]),
-      codecPixelFormat:
-          (json?[FFProbeKeys.codecPixelFormat] as String?)?.toUpperCase(),
-      codedHeight: int.tryParse(json?[FFProbeKeys.codedHeight] ?? ""),
-      codedWidth: int.tryParse(json?[FFProbeKeys.codedWidth] ?? ""),
-      colorPrimaries:
-          (json?[FFProbeKeys.colorPrimaries] as String?)?.toUpperCase(),
-      colorRange: (json?[FFProbeKeys.colorRange] as String?)?.toUpperCase(),
-      colorSpace: (json?[FFProbeKeys.colorSpace] as String?)?.toUpperCase(),
-      colorTransfer:
-          (json?[FFProbeKeys.colorTransfer] as String?)?.toUpperCase(),
-      colorProfile: json?[FFProbeKeys.colorTransfer],
-      compatibleBrands: json?[FFProbeKeys.compatibleBrands],
-      creationTime: _formatDate(json?[FFProbeKeys.creationTime] ?? ""),
-      displayAspectRatio: json?[FFProbeKeys.dar],
-      date: DateTime.tryParse(json?[FFProbeKeys.date] ?? ""),
-      duration: _formatDuration(json?[FFProbeKeys.durationMicros]),
-      durationMicros: formatPreciseDuration(
-        Duration(
-          microseconds:
-              int.tryParse(json?[FFProbeKeys.durationMicros] ?? "") ?? 0,
-        ),
-      ),
-      extraDataSize: json?[FFProbeKeys.extraDataSize],
-      fieldOrder: json?[FFProbeKeys.fieldOrder],
-      fpsDen: json?[FFProbeKeys.fpsDen],
-      frameCount: int.tryParse(json?[FFProbeKeys.frameCount] ?? ""),
-      handlerName: json?[FFProbeKeys.handlerName],
-      hasBFrames: json?[FFProbeKeys.hasBFrames],
-      height: int.tryParse(json?[FFProbeKeys.height] ?? ""),
-      language: json?[FFProbeKeys.language],
-      location: _formatLocation(json?[FFProbeKeys.location]),
-      majorBrand: _formatBrand(json?[FFProbeKeys.majorBrand]),
-      mediaFormat: json?[FFProbeKeys.mediaFormat],
-      mediaType: json?[FFProbeKeys.mediaType],
-      minorVersion: json?[FFProbeKeys.minorVersion],
-      nalLengthSize: json?[FFProbeKeys.nalLengthSize],
-      quicktimeLocationAccuracyHorizontal:
-          json?[FFProbeKeys.quicktimeLocationAccuracyHorizontal],
-      rFrameRate: int.tryParse(json?[FFProbeKeys.rFrameRate] ?? ""),
-      rotate: json?[FFProbeKeys.rotate],
-      sampleFormat: json?[FFProbeKeys.sampleFormat],
-      sampleRate: json?[FFProbeKeys.sampleRate],
-      sampleAspectRatio: json?[FFProbeKeys.sar],
-      sarDen: json?[FFProbeKeys.sarDen],
-      segmentCount: int.tryParse(json?[FFProbeKeys.segmentCount] ?? ""),
-      sourceOshash: json?[FFProbeKeys.sourceOshash],
-      startMicros: json?[FFProbeKeys.startMicros],
-      startPts: json?[FFProbeKeys.startPts],
-      startTime: _formatDuration(json?[FFProbeKeys.startTime]),
-      statisticsWritingApp: json?[FFProbeKeys.statisticsWritingApp],
-      statisticsWritingDateUtc: json?[FFProbeKeys.statisticsWritingDateUtc],
-      timeBase: json?[FFProbeKeys.timeBase],
-      track: json?[FFProbeKeys.title],
-      vendorId: json?[FFProbeKeys.vendorId],
-      width: int.tryParse(json?[FFProbeKeys.width] ?? ""),
-      xiaomiSlowMoment: json?[FFProbeKeys.xiaomiSlowMoment],
-    );
+    final Map<String, dynamic> parsedData = {};
+
+    for (final key in json!.keys) {
+      final stringKey = key.toString();
+      switch (stringKey) {
+        case FFProbeKeys.bitrate:
+        case FFProbeKeys.bps:
+          parsedData[stringKey] = _formatMetric(json[key], 'b/s');
+          break;
+        case FFProbeKeys.byteCount:
+          parsedData[stringKey] = _formatFilesize(json[key]);
+          break;
+        case FFProbeKeys.channelLayout:
+          parsedData[stringKey] = _formatChannelLayout(json[key]);
+          break;
+        case FFProbeKeys.codecName:
+          parsedData[stringKey] = _formatCodecName(json[key]);
+          break;
+        case FFProbeKeys.codecPixelFormat:
+        case FFProbeKeys.colorPrimaries:
+        case FFProbeKeys.colorRange:
+        case FFProbeKeys.colorSpace:
+        case FFProbeKeys.colorTransfer:
+          parsedData[stringKey] = (json[key] as String?)?.toUpperCase();
+          break;
+        case FFProbeKeys.creationTime:
+          parsedData[stringKey] = _formatDate(json[key] ?? "");
+          break;
+        case FFProbeKeys.durationMicros:
+          parsedData[stringKey] = formatPreciseDuration(
+            Duration(microseconds: int.tryParse(json[key] ?? "") ?? 0),
+          );
+          break;
+        case FFProbeKeys.location:
+          parsedData[stringKey] = _formatLocation(json[key]);
+          break;
+        case FFProbeKeys.majorBrand:
+          parsedData[stringKey] = _formatBrand(json[key]);
+          break;
+        case FFProbeKeys.startTime:
+          parsedData[stringKey] = _formatDuration(json[key]);
+          break;
+        default:
+          parsedData[stringKey] = json[key];
+      }
+    }
+
+    return FFProbeProps(prodData: parsedData);
   }
 
   static String _formatBrand(String value) => Mp4.brands[value] ?? value;
