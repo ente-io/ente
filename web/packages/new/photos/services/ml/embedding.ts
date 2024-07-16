@@ -150,10 +150,11 @@ export const getDerivedData = async (fileIDs: string[]) => {
  *
  * @param fileIDs The ids of the files for which we want the embeddings.
  *
- * @returns an array of {@link RemoteEmbedding}. The returned array is limited
- * to a maximum count of {@link diffLimit}.
- *
- * > See [Note: Limit of returned items in /diff requests].
+ * @returns a list of {@link RemoteEmbedding} for the files which had embeddings
+ * (and thatt remote was able to successfully retrieve). The order of this list
+ * is arbitrary, and the caller should use the {@link fileID} present within the
+ * {@link RemoteEmbedding} to associate an item in the result back to a file
+ * instead of relying on the order or count of items in the result.
  */
 const getEmbeddings = async (
     model: EmbeddingModel,
@@ -168,8 +169,9 @@ const getEmbeddings = async (
         }),
     });
     ensureOk(res);
-    return z.object({ diff: z.array(RemoteEmbedding) }).parse(await res.json())
-        .diff;
+    return z
+        .object({ embeddings: z.array(RemoteEmbedding) })
+        .parse(await res.json()).embeddings;
 };
 
 /**
