@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/theme/ente_theme.dart";
 
 class VideoExifDialog extends StatelessWidget {
   final Map<String, dynamic> probeData;
@@ -13,39 +14,41 @@ class VideoExifDialog extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSection('General Information', _buildGeneralInfo()),
+            _buildGeneralInfo(context),
             const SizedBox(height: 8),
-            _buildSection('Streams', _buildStreamsList()),
+            _buildSection(context, 'Streams', _buildStreamsList(context)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSection(String title, Widget content) {
+  Widget _buildSection(BuildContext context, String title, Widget content) {
     return ExpansionTile(
       initiallyExpanded: true,
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(title, style: getEnteTextTheme(context).largeFaint),
+      childrenPadding: const EdgeInsets.symmetric(vertical: 2),
+      tilePadding: const EdgeInsets.symmetric(vertical: 4),
       children: [content],
     );
   }
 
-  Widget _buildGeneralInfo() {
+  Widget _buildGeneralInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoRow('Duration', probeData, 'duration'),
-        _buildInfoRow('Probe Score', probeData, 'probe_score'),
-        _buildInfoRow('Number of Programs', probeData, 'nb_programs'),
-        _buildInfoRow('Number of Streams', probeData, 'nb_streams'),
-        _buildInfoRow('Bitrate', probeData, 'bitrate'),
-        _buildInfoRow('Format', probeData, 'format'),
-        _buildInfoRow('Creation Time', probeData, 'creation_time'),
+        _buildInfoRow(context, 'Duration', probeData, 'duration'),
+        _buildInfoRow(context, 'Probe Score', probeData, 'probe_score'),
+        _buildInfoRow(context, 'Number of Programs', probeData, 'nb_programs'),
+        _buildInfoRow(context, 'Number of Streams', probeData, 'nb_streams'),
+        _buildInfoRow(context, 'Bitrate', probeData, 'bitrate'),
+        _buildInfoRow(context, 'Format', probeData, 'format'),
+        _buildInfoRow(context, 'Creation Time', probeData, 'creation_time'),
       ],
     );
   }
 
-  Widget _buildStreamsList() {
+  Widget _buildStreamsList(BuildContext context) {
     final List<dynamic> streams = probeData['streams'];
     final List<Map<String, dynamic>> data = [];
     for (final stream in streams) {
@@ -67,20 +70,31 @@ class VideoExifDialog extends StatelessWidget {
     }
 
     return Column(
-      children: data.map((stream) => _buildStreamInfo(stream)).toList(),
+      children:
+          data.map((stream) => _buildStreamInfo(context, stream)).toList(),
     );
   }
 
-  Widget _buildStreamInfo(Map<String, dynamic> stream) {
+  Widget _buildStreamInfo(BuildContext context, Map<String, dynamic> stream) {
+    String titleString = stream['type']?.toString().toUpperCase() ?? '';
+    final codeName = stream['codec_name']?.toString().toUpperCase() ?? '';
+    if (codeName != 'NULL') {
+      titleString += ' - $codeName';
+    }
     return ExpansionTile(
       title: Text(
-        'Stream ${stream['index']}: ${stream['codec_name']} (${stream['type']})',
+        titleString,
+        style: getEnteTextTheme(context).smallBold,
       ),
+      childrenPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+      tilePadding: const EdgeInsets.symmetric(vertical: 4),
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: stream.entries
-              .map((entry) => _buildInfoRow(entry.key, stream, entry.key))
+              .map(
+                (entry) => _buildInfoRow(context, entry.key, stream, entry.key),
+              )
               .toList(),
         ),
       ],
@@ -88,6 +102,7 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildInfoRow(
+    BuildContext context,
     String rowName,
     Map<String, dynamic> data,
     String dataKey,
@@ -108,7 +123,7 @@ class VideoExifDialog extends StatelessWidget {
               width: 150,
               child: Text(
                 rowName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: getEnteTextTheme(context).smallMuted,
               ),
             ),
             Expanded(child: Text(value.toString())),
