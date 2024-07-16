@@ -16,7 +16,7 @@ import {
     renderableBlob,
     type ImageBitmapAndData,
 } from "./blob";
-import { indexCLIP, type CLIPIndex } from "./clip";
+import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
 import { saveFaceCrops } from "./crop";
 import {
     indexableFileIDs,
@@ -441,7 +441,7 @@ const index = async (
         try {
             [faceIndex, clipIndex] = await Promise.all([
                 indexFaces(enteFile, image, electron),
-                indexCLIP(enteFile, image, electron, userAgent),
+                indexCLIP(image, electron),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -462,18 +462,31 @@ const index = async (
             client: userAgent,
         };
 
+        const remoteCLIPIndex = {
+            ...clipIndex,
+            version: clipIndexingVersion,
+            client: userAgent,
+        };
+
         try {
-            await putDerivedData(enteFile, remoteFaceIndex, clipIndex);
-            await saveFaceIndex(faceIndex);
-            await saveCLIPIndex(clipIndex);
+            await putDerivedData(enteFile, remoteFaceIndex, remoteCLIPIndex);
+        } catch (e) {
+            // See: [Note: Transient and permanent indexing failures]
+            log.error(`Failed to put face index for ${f}`, e);
+            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+            throw e;
+        }
+
+        const fileID = enteFile.id;
+
+        try {
+            await saveFaceIndex({ fileID, ...faceIndex });
+            await saveCLIPIndex({ fileID, ...clipIndex });
         } catch (e) {
             // Not sure if DB failures should be considered permanent or
             // transient. There isn't a known case where writing to the local
             // indexedDB would fail.
-            //
-            // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to put/save face index for ${f}`, e);
-            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+            log.error(`Failed to save face index for ${f}`, e);
             throw e;
         }
 

@@ -12,7 +12,11 @@ import { getKV, setKV } from "@/next/kv";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
 import { z } from "zod";
-import { clipIndexingVersion, type CLIPIndex } from "./clip";
+import {
+    clipIndexingVersion,
+    type CLIPIndex,
+    type RemoteCLIPIndex,
+} from "./clip";
 import { saveCLIPIndex, saveFaceIndex } from "./db";
 import {
     faceIndexingVersion,
@@ -347,11 +351,11 @@ const putEmbeddingString = async (
 export const putDerivedData = async (
     enteFile: EnteFile,
     remoteFaceIndex: RemoteFaceIndex,
-    clipIndex: CLIPIndex,
+    remoteCLIPIndex: RemoteCLIPIndex,
 ) => {
     const combined = {
         face: remoteFaceIndex,
-        clip: clipIndex,
+        clip: remoteCLIPIndex,
     };
     log.debug(() => ["Uploading derived data", combined]);
 

@@ -1,9 +1,9 @@
 import log from "@/next/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
-import type { CLIPIndex } from "./clip";
+import type { LocalCLIPIndex } from "./clip";
 import type { EmbeddingModel } from "./embedding";
-import type { FaceIndex } from "./face";
+import type { LocalFaceIndex } from "./face";
 
 /**
  * ML DB schema.
@@ -15,11 +15,11 @@ import type { FaceIndex } from "./face";
  *   required), this is synced with the list of files that the current client
  *   knows about locally.
  *
- * - "face-index": Contains {@link FaceIndex} objects, either indexed locally or
- *   fetched from remote storage.
+ * - "face-index": Contains {@link LocalFaceIndex} objects, either indexed
+ *   locally or fetched from remote.
  *
- * - "clip-index": Contains {@link CLIPIndex} objects, either indexed locally or
- *   fetched from remote storage.
+ * - "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
+ *   locally or fetched from remote.
  *
  * All the stores are keyed by {@link fileID}. The "file-status" contains
  * book-keeping about the indexing process (whether or not a file needs
@@ -27,7 +27,7 @@ import type { FaceIndex } from "./face";
  * the actual indexing results.
  *
  * In tandem, these serve as the underlying storage for the functions exposed by
- * this file.
+ * the ML database.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -37,11 +37,11 @@ interface MLDBSchema extends DBSchema {
     };
     "face-index": {
         key: number;
-        value: FaceIndex;
+        value: LocalFaceIndex;
     };
     "clip-index": {
         key: number;
-        value: CLIPIndex;
+        value: LocalCLIPIndex;
     };
 }
 
@@ -194,7 +194,7 @@ export const clearMLDB = async () => {
  * embeddings. If there are no other pending embeddings, the status changes to
  * "indexed".
  */
-export const saveFaceIndex = async (faceIndex: FaceIndex) => {
+export const saveFaceIndex = async (faceIndex: LocalFaceIndex) => {
     const { fileID } = faceIndex;
 
     const db = await mlDB();
@@ -242,7 +242,7 @@ const newFileStatus = (fileID: number): FileStatus => ({
  * embeddings. If there are no other pending embeddings, the status changes to
  * "indexed".
  */
-export const saveCLIPIndex = async (clipIndex: CLIPIndex) => {
+export const saveCLIPIndex = async (clipIndex: LocalCLIPIndex) => {
     const { fileID } = clipIndex;
 
     const db = await mlDB();
