@@ -222,8 +222,8 @@ class FFProbeProps {
 
   static String? _formatFPS(dynamic value) {
     if (value == null) return null;
-    int? t = int.tryParse(value.split('/')[0]);
-    int? b = int.tryParse(value.split('/')[1]);
+    final int? t = int.tryParse(value.split('/')[0]);
+    final int? b = int.tryParse(value.split('/')[1]);
     if (t != null && b != null) {
       // return the value upto 2 decimal places. ignore even two decimal places
       // if t is perfectly divisible by b
@@ -231,6 +231,7 @@ class FFProbeProps {
           ? (t / b).toStringAsFixed(0)
           : (t / b).toStringAsFixed(2);
     }
+    return value;
   }
 
   static String _formatLanguage(String value) {
