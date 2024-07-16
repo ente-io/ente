@@ -1,3 +1,4 @@
+import { removeKV } from "@/next/kv";
 import log from "@/next/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
@@ -150,6 +151,17 @@ const deleteLegacyDB = () => {
         localForage.removeItem("file_embeddings"),
         localForage.removeItem("onnx-clip-embedding_sync_time"),
         localForage.removeItem("file-ml-clip-face-embedding_sync_time"),
+    ]);
+
+    // Delete keys for the legacy diff based sync.
+    //
+    // This code was added July 2024 (v1.7.3-beta). These keys were never
+    // enabled outside of the nightly builds, so this cleanup is not a hard
+    // need. Either ways, it can be removed at some point when most clients have
+    // migrated (tag: Migration).
+    void Promise.all([
+        removeKV("embeddingSyncTime:onnx-clip"),
+        removeKV("embeddingSyncTime:file-ml-clip-face"),
     ]);
 };
 
