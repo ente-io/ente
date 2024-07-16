@@ -1,11 +1,12 @@
 import type { EnteFile } from "@/new/photos/types/file";
 import {
-    decryptFileMetadataString,
+    decryptFileMetadata,
     encryptFileMetadata,
 } from "@/new/shared/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import log from "@/next/log";
 import { apiURL } from "@/next/origins";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { type RemoteCLIPIndex } from "./clip";
 import { type RemoteFaceIndex } from "./face";
@@ -116,35 +117,129 @@ export type RemoteDerivedData = Record<string, unknown> & {
 };
 
 /**
- * Fetch derived data for the given files from remote.
+ * Zod schemas for the {@link RemoteFaceIndex} type.
+ *
+ * [Note: Duplicated Zod schema and TypeScript type]
+ *
+ * Usually we define a Zod schema, and then infer the corresponding TypeScript
+ * type for it using `z.infer`. This works great except that the docstrings
+ * don't show up: Docstrings get added to the Zod schema, but usually the code
+ * using the parsed data will reference the TypeScript type, and the docstrings
+ * added to the fields in the Zod schema won't show up.
+ *
+ * We usually live with this infelicity since the alternative is code
+ * duplication: Defining a TypeScript type (putting the docstrings therein)
+ * _and_ also a corresponding Zod schema. The duplication is needed because it
+ * is not possible to go the other way (TypeScript type => Zod schema).
+ *
+ * However, in some cases having when the TypeScript type under consideration is
+ * used pervasively in code, having a standalone TypeScript type with attached
+ * docstrings is worth the code duplication.
+ *
+ * Note that this'll just be syntactic duplication - if the two definitions get
+ * out of sync in the shape of the types they represent, the TypeScript compiler
+ * will flag it for us.
  */
-export const getDerivedData = async (fileIDs: string[]) => {
-    const remoteEmbeddings = await getEmbeddings("combined", fileIDs);
-    if (remoteEmbeddings.length == 0) break;
-    let count = 0;
-    for (const remoteEmbedding of remoteEmbeddings) {
-        sinceTime = Math.max(sinceTime, remoteEmbedding.updatedAt);
-        try {
-            const file = localFilesByID.get(remoteEmbedding.fileID);
-            if (!file) continue;
-            await save(
-                await decryptFileMetadataString(
-                    remoteEmbedding.encryptedEmbedding,
-                    remoteEmbedding.decryptionHeader,
-                    file.key,
+const RemoteFaceIndex = z.object({
+    version: z.number(),
+    client: z.string(),
+    width: z.number(),
+    height: z.number(),
+    faces: z.array(
+        z.object({
+            faceID: z.string(),
+            detection: z.object({
+                box: z.object({
+                    x: z.number(),
+                    y: z.number(),
+                    width: z.number(),
+                    height: z.number(),
+                }),
+                landmarks: z.array(
+                    z.object({
+                        x: z.number(),
+                        y: z.number(),
+                    }),
                 ),
+            }),
+            score: z.number(),
+            blur: z.number(),
+            embedding: z.array(z.number()),
+        }),
+    ),
+});
+
+/**
+ * Zod schemas for the {@link RemoteCLIPIndex} types.
+ *
+ * See: [Note: Duplicated Zod schema and TypeScript type]
+ */
+const RemoteCLIPIndex = z.object({
+    version: z.number(),
+    client: z.string(),
+    embedding: z.array(z.number()),
+});
+
+/**
+ * Zod schemas for a partial {@link RemoteCLIPIndex} type. Note that we need to
+ * preserve any top level fields in the JSON that we don't understand.
+ *
+ * See: [Note: Preserve unknown derived data fields]
+ */
+const RemoteDerivedData = z
+    .object({
+        face: RemoteFaceIndex.nullish().transform(nullToUndefined),
+        clip: RemoteCLIPIndex.nullish().transform(nullToUndefined),
+    })
+    .passthrough();
+
+/**
+ * Fetch derived data for the given files from remote.
+ *
+ * @param filesByID A map containing the files whose derived data we want to
+ * fetch. Each entry is keyed the the file's ID, and the value is the file.
+ *
+ * @returns a map containing the (decrypted) derived data for each file for
+ * which remote returned the corresponding embedding. Each entry in the map is
+ * keyed by file's ID, and each value is a {@link RemoteDerivedData} with all
+ * fields set to optional (since a remote embedding may have a subset of the
+ * fields that we locally generate).
+ */
+export const fetchDerivedData = async (filesByID: Map<number, EnteFile>) => {
+    const remoteEmbeddings = await fetchEmbeddings("combined", [
+        ...filesByID.keys(),
+    ]);
+
+    const result = new Map<number, Partial<RemoteDerivedData>>();
+    for (const remoteEmbedding of remoteEmbeddings) {
+        const { fileID } = remoteEmbedding;
+        const file = filesByID.get(fileID);
+        if (!file) {
+            log.warn(`Ignoring derived data for unknown fileID ${fileID}`);
+            continue;
+        }
+
+        try {
+            const decryptedBytes = await decryptFileMetadata(
+                remoteEmbedding.encryptedEmbedding,
+                remoteEmbedding.decryptionHeader,
+                file.key,
             );
-            didPull = true;
-            count++;
+            const jsonString = await gunzip(decryptedBytes);
+            result.set(fileID, RemoteDerivedData.parse(JSON.parse(jsonString)));
         } catch (e) {
-            log.warn(`Ignoring unparseable ${model} embedding`, e);
+            // This shouldn't happen. Likely some client has uploaded a
+            // corrupted embedding. Ignore it so that it gets reindexed and
+            // uploaded correctly again.
+            log.warn(`Ignoring unparseable embedding for ${fileID}`, e);
         }
     }
-    log.debug(() => `Fetched ${count} combined embeddings`);
+    log.debug(() => `Fetched ${result.size} combined embeddings`);
+    return result;
 };
 
 /**
- * GET the {@link model} embeddings for the given list of files.
+ * Fetch {@link model} embeddings for the given list of files.
  *
  * @param model The {@link EmbeddingModel} which we want.
  *
@@ -156,7 +251,7 @@ export const getDerivedData = async (fileIDs: string[]) => {
  * {@link RemoteEmbedding} to associate an item in the result back to a file
  * instead of relying on the order or count of items in the result.
  */
-const getEmbeddings = async (
+const fetchEmbeddings = async (
     model: EmbeddingModel,
     fileIDs: number[],
 ): Promise<RemoteEmbedding[]> => {
@@ -224,70 +319,6 @@ const putEmbedding = async (
     });
     ensureOk(res);
 };
-
-/**
- * Zod schemas for the {@link RemoteFaceIndex} type.
- *
- * [Note: Duplicated Zod schema and TypeScript type]
- *
- * Usually we define a Zod schema, and then infer the corresponding TypeScript
- * type for it using `z.infer`. This works great except that the docstrings
- * don't show up: Docstrings get added to the Zod schema, but usually the code
- * using the parsed data will reference the TypeScript type, and the docstrings
- * added to the fields in the Zod schema won't show up.
- *
- * We usually live with this infelicity since the alternative is code
- * duplication: Defining a TypeScript type (putting the docstrings therein)
- * _and_ also a corresponding Zod schema. The duplication is needed because it
- * is not possible to go the other way (TypeScript type => Zod schema).
- *
- * However, in some cases having when the TypeScript type under consideration is
- * used pervasively in code, having a standalone TypeScript type with attached
- * docstrings is worth the code duplication.
- *
- * Note that this'll just be syntactic duplication - if the two definitions get
- * out of sync in the shape of the types they represent, the TypeScript compiler
- * will flag it for us.
- */
-const RemoteFaceIndex = z.object({
-    version: z.number(),
-    client: z.string(),
-    width: z.number(),
-    height: z.number(),
-    faces: z.array(
-        z.object({
-            faceID: z.string(),
-            detection: z.object({
-                box: z.object({
-                    x: z.number(),
-                    y: z.number(),
-                    width: z.number(),
-                    height: z.number(),
-                }),
-                landmarks: z.array(
-                    z.object({
-                        x: z.number(),
-                        y: z.number(),
-                    }),
-                ),
-            }),
-            score: z.number(),
-            blur: z.number(),
-            embedding: z.array(z.number()),
-        }),
-    ),
-});
-
-/**
- * Zod schemas for the {@link RemoteCLIPIndex} types.
- *
- * See: [Note: Duplicated Zod schema and TypeScript type]
- */
-const RemoteCLIPIndex = z.object({
-    version: z.number(),
-    client: z.string(),
-    embedding: z.array(z.number()),
-});
 
 // MARK: - GZIP
 

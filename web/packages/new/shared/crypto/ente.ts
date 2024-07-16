@@ -54,21 +54,3 @@ export const decryptFileMetadata = async (
         await libsodium.fromB64(decryptionHeaderB64),
         keyB64,
     );
-
-/**
- * Decrypt arbitrary string metadata associated with a file using the file's
- * key. This is a variant of {@link decryptFileMetadata} returns the decrypted
- * utf-8 string.
- */
-export const decryptFileMetadataString = async (
-    encryptedMetadataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
-    new TextDecoder().decode(
-        await decryptFileMetadata(
-            encryptedMetadataB64,
-            decryptionHeaderB64,
-            keyB64,
-        ),
-    );
