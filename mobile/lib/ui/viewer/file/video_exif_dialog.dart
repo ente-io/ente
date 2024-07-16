@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/models/ffmpeg/ffprobe_keys.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class VideoExifDialog extends StatelessWidget {
@@ -41,6 +42,9 @@ class VideoExifDialog extends StatelessWidget {
         _buildInfoRow(context, 'Duration', probeData, 'duration'),
         _buildInfoRow(context, 'Location', probeData, 'location'),
         _buildInfoRow(context, 'Bitrate', probeData, 'bitrate'),
+        _buildInfoRow(context, 'Frame Rate', probeData, FFProbeKeys.rFrameRate),
+        _buildInfoRow(context, 'Width', probeData, FFProbeKeys.codedWidth),
+        _buildInfoRow(context, 'Height', probeData, FFProbeKeys.codedHeight),
         _buildInfoRow(context, 'Model', probeData, 'com.apple.quicktime.model'),
         _buildInfoRow(context, 'OS', probeData, 'com.apple.quicktime.software'),
         _buildInfoRow(context, 'Major Brand', probeData, 'major_brand'),
@@ -131,8 +135,8 @@ class VideoExifDialog extends StatelessWidget {
           ],
         ),
       );
-    } catch (e, s) {
-      return Container();
+    } catch (e, _) {
+      return const SizedBox.shrink();
     }
   }
 }

@@ -113,14 +113,16 @@ class FFProbeProps {
     // iterate through the streams
     final List<dynamic> streams = json["streams"];
     for (final stream in streams) {
-      final Map<String, dynamic> streamData = {};
       for (final key in stream.keys) {
-        if (key == "r_frame_rate") {
+        if (key == FFProbeKeys.rFrameRate) {
           result.fps = stream[key];
-        } else if (key == "coded_width") {
+          parsedData[key] = result.fps;
+        } else if (key == FFProbeKeys.codedWidth) {
           result.codecWidth = stream[key].toString();
-        } else if (key == "coded_height") {
+          parsedData[key] = result.codecWidth;
+        } else if (key == FFProbeKeys.codedHeight) {
           result.codecHeight = stream[key].toString();
+          parsedData[key] = result.codecHeight;
         }
       }
     }
