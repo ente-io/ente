@@ -31,16 +31,6 @@ export const encryptFileMetadata = async (
 };
 
 /**
- * Encrypt arbitrary string metadata associated with a file using the file's
- * key. This is a variant of encryptFileMetadata that takes a metadata string
- * instead of the metadata bytes.
- */
-export const encryptFileMetadataString = async (
-    metadata: string,
-    keyB64: string,
-) => encryptFileMetadata(new TextEncoder().encode(metadata), keyB64);
-
-/**
  * Decrypt arbitrary metadata associated with a file using the file's key.
  *
  * @param encryptedMetadataB64 Base64 encoded string containing the encrypted

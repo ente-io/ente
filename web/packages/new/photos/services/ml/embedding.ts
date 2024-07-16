@@ -5,7 +5,7 @@ import {
 import type { EnteFile } from "@/new/photos/types/file";
 import {
     decryptFileMetadataString,
-    encryptFileMetadataString,
+    encryptFileMetadata,
 } from "@/new/shared/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
 import { getKV, setKV } from "@/next/kv";
@@ -286,18 +286,16 @@ const getEmbeddingsDiff = async (
  *
  * @param model The {@link EmbeddingModel} which we are uploading.
  *
- * @param embedding String representation of the embedding. The exact contents
- * of the embedding are model specific (usually this is the JSON string).
+ * @param embedding The binary data the embedding. The exact contents of the
+ * embedding are {@link model} specific.
  */
-export const putEmbedding = async (
+const putEmbedding = async (
     enteFile: EnteFile,
     model: EmbeddingModel,
-    embedding: string,
+    embedding: Uint8Array,
 ) => {
-    log.debug(() => ["Uploading embedding", { model, embedding }]);
-
     const { encryptedMetadataB64, decryptionHeaderB64 } =
-        await encryptFileMetadataString(embedding, enteFile.key);
+        await encryptFileMetadata(embedding, enteFile.key);
 
     const res = await fetch(await apiURL("/embeddings"), {
         method: "PUT",
@@ -311,6 +309,24 @@ export const putEmbedding = async (
     });
     ensureOk(res);
 };
+/**
+ * Upload an embedding to remote.
+ *
+ * This function will save or update the given embedding as the latest embedding
+ * associated with the given {@link enteFile} for {@link model}.
+ *
+ * @param enteFile {@link EnteFile} to which this embedding relates to.
+ *
+ * @param model The {@link EmbeddingModel} which we are uploading.
+ *
+ * @param embedding String representation of the embedding. The exact contents
+ * of the embedding are model specific (usually this is the JSON string).
+ */
+const putEmbeddingString = async (
+    enteFile: EnteFile,
+    model: EmbeddingModel,
+    embedding: string,
+) => putEmbedding(enteFile, model, new TextEncoder().encode(embedding));
 
 // MARK: - Combined
 
@@ -332,7 +348,9 @@ export const putDerivedData = async (
         face: faceIndex,
         clip: clipIndex,
     };
-    return putEmbedding(enteFile, "combined", JSON.stringify(combined));
+    log.debug(() => ["Uploading derived data", combined]);
+
+    return putEmbeddingString(enteFile, "combined", JSON.stringify(combined));
 };
 
 // MARK: - Face
@@ -447,7 +465,11 @@ const FaceIndex = z
  * clients can directly pull it instead of needing to reindex.
  */
 export const putFaceIndex = async (enteFile: EnteFile, faceIndex: FaceIndex) =>
-    putEmbedding(enteFile, "file-ml-clip-face", JSON.stringify(faceIndex));
+    putEmbeddingString(
+        enteFile,
+        "file-ml-clip-face",
+        JSON.stringify(faceIndex),
+    );
 
 // MARK: - CLIP
 
@@ -505,4 +527,4 @@ const CLIPIndex = z
  * clients can directly pull it instead of needing to reindex.
  */
 export const putCLIPIndex = async (enteFile: EnteFile, clipIndex: CLIPIndex) =>
-    putEmbedding(enteFile, "onnx-clip", JSON.stringify(clipIndex));
+    putEmbeddingString(enteFile, "onnx-clip", JSON.stringify(clipIndex));
