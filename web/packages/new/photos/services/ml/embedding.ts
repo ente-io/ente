@@ -309,6 +309,7 @@ const putEmbedding = async (
     });
     ensureOk(res);
 };
+
 /**
  * Upload an embedding to remote.
  *
@@ -350,7 +351,29 @@ export const putDerivedData = async (
     };
     log.debug(() => ["Uploading derived data", combined]);
 
-    return putEmbeddingString(enteFile, "combined", JSON.stringify(combined));
+    return putEmbedding(
+        enteFile,
+        "combined",
+        await gzip(JSON.stringify(combined)),
+    );
+};
+
+/**
+ * Compress the given {@link string} using "gzip" and return the resultant
+ * bytes.
+ *
+ * This is syntactic sugar to deal with the string/blob/stream/bytes
+ * conversions, but it should not be taken as an abstraction layer. If your code
+ * can directly use a ReadableStream, then then data -> stream -> data round
+ * trip is unnecessary.
+ */
+const gzip = async (string: string) => {
+    const compressedStream = new Blob([string])
+        .stream()
+        // This code only runs on the desktop app currently, so we can rely on
+        // the existence of the CompressionStream API.
+        .pipeThrough(new CompressionStream("gzip"));
+    return new Uint8Array(await new Response(compressedStream).arrayBuffer());
 };
 
 // MARK: - Face
