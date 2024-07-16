@@ -199,6 +199,8 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - smart_auth (0.0.1):
+    - Flutter
   - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
@@ -277,6 +279,7 @@ DEPENDENCIES:
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
@@ -397,6 +400,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  smart_auth:
+    :path: ".symlinks/plugins/smart_auth/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/darwin"
   sqlite3_flutter_libs:
@@ -466,7 +471,7 @@ SPEC CHECKSUMS:
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
+  photo_manager: ff695c7a1dd5bc379974953a2b5c0a293f7c4c8a
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 6837b01768e567fe8562182397bf43d63d8c6437
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
@@ -477,6 +482,7 @@ SPEC CHECKSUMS:
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
   sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80
