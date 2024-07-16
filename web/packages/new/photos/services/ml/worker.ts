@@ -25,7 +25,7 @@ import {
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import { putDerivedData } from "./embedding";
+import { putDerivedData, type RemoteDerivedData } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
@@ -33,8 +33,12 @@ const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
 interface IndexableItem {
+    /** The {@link EnteFile} to index (potentially). */
     enteFile: EnteFile;
+    /** If the file was uploaded from the current client, then its contents. */
     uploadItem: UploadItem | undefined;
+    /** The existing derived data on remote corresponding to this file. */
+    remoteDerivedData: RemoteDerivedData | undefined;
 }
 
 /**
@@ -135,7 +139,10 @@ export class MLWorker {
         // live queue is just an optimization: if a file doesn't get indexed via
         // the live queue, it'll later get indexed anyway when we backfill.
         if (this.liveQ.length < 200) {
-            this.liveQ.push({ enteFile, uploadItem });
+            // The file is just being uploaded, and it (logical bugs withstanding),
+            // will not exist on remote.
+            const remoteDerivedData = undefined;
+            this.liveQ.push({ enteFile, uploadItem, remoteDerivedData });
             this.wakeUp();
         } else {
             log.debug(() => "Ignoring upload item since liveQ is full");
@@ -236,9 +243,9 @@ const indexNextBatch = async (
 
     // Index, keeping track if any of the items failed.
     let allSuccess = true;
-    for (const { enteFile, uploadItem } of items) {
+    for (const item of items) {
         try {
-            await index(enteFile, uploadItem, electron, userAgent);
+            await index(item, electron, userAgent);
             delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
@@ -287,18 +294,6 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
 /**
  * Index file, save the persist the results locally, and put them on remote.
  *
- * @param enteFile The {@link EnteFile} to index.
- *
- * @param uploadItem If the file is one which is being uploaded from the current
- * client, then we will also have access to the file's content. In such cases,
- * passing a web {@link File} object will directly use that its data when
- * indexing. Otherwise (when this is not provided), the file's contents will be
- * downloaded and decrypted from remote.
- *
- * @param userAgent The UA of the client that is doing the indexing (us).
- *
- * ---
- *
  * [Note: ML indexing does more ML]
  *
  * Nominally, and primarily, indexing a file involves computing its various ML
@@ -306,8 +301,10 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * the original file in memory, it is a great time to also compute other derived
  * data related to the file (instead of re-downloading it again).
  *
- * So this index function also does things that are not related to ML:
- * extracting and updating Exif.
+ * So this function also does things that are not related to ML and/or indexing:
+ *
+ * -   Extracting and updating Exif.
+ * -   Saving face crops.
  *
  * ---
  *
@@ -344,8 +341,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    enteFile: EnteFile,
-    uploadItem: UploadItem | undefined,
+    { enteFile, uploadItem }: IndexableItem,
     electron: MLWorkerElectron,
     userAgent: string,
 ) => {
