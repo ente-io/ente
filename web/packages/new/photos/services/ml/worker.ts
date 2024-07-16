@@ -437,12 +437,10 @@ const index = async (
     let clipIndex: CLIPIndex;
 
     try {
-        const res = await Promise.all([
+        [faceIndex, clipIndex] = await Promise.all([
             indexFaces(enteFile, image, electron, userAgent),
             indexCLIP(enteFile, image, electron, userAgent),
         ]);
-        faceIndex = res[0];
-        clipIndex = res[1];
     } catch (e) {
         // See: [Note: Transient and permanent indexing failures]
         log.error(`Failed to index ${f}`, e);
