@@ -23,10 +23,35 @@ import { faceIndexingVersion, type FaceIndex } from "./face";
  * encrypted embeddings from remote. However, we should be prepared to receive a
  * {@link RemoteEmbedding} with a model value different from these.
  *
- * It is vernacularly called a model, but strictly speaking this is not the
- * model, but the embedding produced by a particular model with a particular set
- * of pre-/post- processing steps and related hyperparameters. It is better
- * thought of as an "type" of embedding produced or consumed by the client.
+ * [Note: Embedding/model vs derived data]
+ *
+ * Historically, this has been called an "embedding" or a "model" in the API
+ * terminology. However, it is more like derived data.
+ *
+ * It started off being called as "model", but strictly speaking it was not just
+ * the model, but the embedding produced by a particular ML model when used with
+ * a particular set of pre-/post- processing steps and related hyperparameters.
+ * It is better thought of as an "type" of embedding produced or consumed by the
+ * client, e.g. the "face" embedding, or the "clip" embedding.
+ *
+ * Even the word embedding is a synedoche, since it might have other data. For
+ * example, for faces, it in not just the face embedding, but also the detection
+ * regions, landmarks etc: What we've come to refer as the "face index" in our
+ * client code terminology.
+ *
+ * Later on, to avoid the proliferation of small files (one per embedding), we
+ * combined all these embeddings into a single "embedding", which is a map of
+ * the form:
+ *
+ *     {
+ *       "face": ... the face indexing result ...
+ *       "clip": ... the CLIP indexing result ...
+ *       "exif": ... the Exif extracted from the file ...
+ *       ... more in the future ...
+ *     }
+ *
+ * Thus, now this is best thought of a tag for a particular format of encoding
+ * all the derived data associated with a file.
  *
  * [Note: Handling versioning of embeddings]
  *
@@ -49,8 +74,10 @@ import { faceIndexingVersion, type FaceIndex } from "./face";
  * "model" (i.e "type") field to create a new universe of embeddings.
  */
 export type EmbeddingModel =
+    // TODO-ML: prune
     | "onnx-clip" /* CLIP embeddings */
-    | "file-ml-clip-face" /* Face embeddings */;
+    | "file-ml-clip-face" /* Face embeddings */
+    | "combined" /* Combined format */;
 
 const RemoteEmbedding = z.object({
     /** The ID of the file whose embedding this is. */
