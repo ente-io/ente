@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class VideoProbeInfo extends StatelessWidget {
+class VideoExifDialog extends StatelessWidget {
   final Map<String, dynamic> probeData;
 
-  const VideoProbeInfo({Key? key, required this.probeData}) : super(key: key);
+  const VideoExifDialog({Key? key, required this.probeData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

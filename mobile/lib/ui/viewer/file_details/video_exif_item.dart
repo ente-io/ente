@@ -5,23 +5,23 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/ui/viewer/file/video_ffmpeg_info.dart";
+import "package:photos/ui/viewer/file/vid_exif_dialog.dart";
 import "package:photos/utils/toast_util.dart";
 
-class VideoProbeInfoDetail extends StatefulWidget {
+class VideoExifRowItem extends StatefulWidget {
   final EnteFile file;
   final Map<String, dynamic>? exif;
-  const VideoProbeInfoDetail(
+  const VideoExifRowItem(
     this.file,
     this.exif, {
     super.key,
   });
 
   @override
-  State<VideoProbeInfoDetail> createState() => _VideoProbeInfoState();
+  State<VideoExifRowItem> createState() => _VideoProbeInfoState();
 }
 
-class _VideoProbeInfoState extends State<VideoProbeInfoDetail> {
+class _VideoProbeInfoState extends State<VideoExifRowItem> {
   VoidCallback? _onTap;
 
   @override
@@ -47,9 +47,11 @@ class _VideoProbeInfoState extends State<VideoProbeInfoDetail> {
     late final String label;
     late final VoidCallback? onTap;
     final Map<String, dynamic> data = {};
-    for (final key in exif!.keys) {
-      if (exif[key] != null) {
-        data[key] = exif[key];
+    if (exif != null) {
+      for (final key in exif.keys) {
+        if (exif[key] != null) {
+          data[key] = exif[key];
+        }
       }
     }
     if (exif == null) {
@@ -60,7 +62,7 @@ class _VideoProbeInfoState extends State<VideoProbeInfoDetail> {
       onTap = () => showBarModalBottomSheet(
             context: context,
             builder: (BuildContext context) {
-              return VideoProbeInfo(
+              return VideoExifDialog(
                 probeData: data,
               );
             },

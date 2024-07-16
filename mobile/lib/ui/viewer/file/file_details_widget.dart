@@ -25,10 +25,10 @@ import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
-import "package:photos/ui/viewer/file_details/exif_video.dart";
 import "package:photos/ui/viewer/file_details/faces_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
+import "package:photos/ui/viewer/file_details/video_exif_item.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/ffprobe_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -295,7 +295,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             return (value != null && value.prodData != null)
                 ? Column(
                     children: [
-                      VideoProbeInfoDetail(file, value.prodData),
+                      VideoExifRowItem(file, value.prodData),
                       const FileDetailsDivider(),
                     ],
                   )
