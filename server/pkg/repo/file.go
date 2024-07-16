@@ -42,6 +42,13 @@ func (repo *FileRepository) Create(
 	dcsForNewEntry := pq.StringArray{hotDC}
 
 	ctx := context.Background()
+	// update the collection update time outside txn, even if the fileUpdate feels,
+	// the redundant collection update is fine.
+	_, err := repo.DB.ExecContext(ctx, `UPDATE collections SET updation_time = $1
+			WHERE collection_id = $2`, file.UpdationTime, file.CollectionID)
+	if err != nil {
+		return file, -1, stacktrace.Propagate(err, "")
+	}
 	tx, err := repo.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return file, -1, stacktrace.Propagate(err, "")
@@ -50,6 +57,7 @@ func (repo *FileRepository) Create(
 		return file, -1, stacktrace.Propagate(errors.New("both file and collection should belong to same owner"), "")
 	}
 	var fileID int64
+
 	err = tx.QueryRowContext(ctx, `INSERT INTO files
 			(owner_id, encrypted_metadata,
 			file_decryption_header, thumbnail_decryption_header, metadata_decryption_header,
@@ -68,12 +76,6 @@ func (repo *FileRepository) Create(
 			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, file.CollectionID, file.ID,
 		file.EncryptedKey, file.KeyDecryptionNonce, false, file.UpdationTime, file.OwnerID, collectionOwnerID)
-	if err != nil {
-		tx.Rollback()
-		return file, -1, stacktrace.Propagate(err, "")
-	}
-	_, err = tx.ExecContext(ctx, `UPDATE collections SET updation_time = $1
-			WHERE collection_id = $2`, file.UpdationTime, file.CollectionID)
 	if err != nil {
 		tx.Rollback()
 		return file, -1, stacktrace.Propagate(err, "")
