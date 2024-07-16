@@ -28,6 +28,7 @@ class FFProbeKeys {
   static const date = 'date';
   static const disposition = 'disposition';
   static const duration = 'duration';
+  static const quickTimeLocation  ="com.apple.quicktime.location.ISO6709";
   static const durationMicros = 'duration_us';
   static const encoder = 'encoder';
   static const extraDataSize = 'extradata_size';

@@ -14,7 +14,7 @@ class FFProbeUtil {
   static Future<FFProbeProps> getProperties(
     MediaInformation mediaInformation,
   ) async {
-    final properties = await _getMetadata(mediaInformation);
+    final properties = await getMetadata(mediaInformation);
 
     try {
       return FFProbeProps.fromJson(properties);
@@ -28,7 +28,7 @@ class FFProbeUtil {
     }
   }
 
-  static Future<Map> _getMetadata(MediaInformation information) async {
+  static Future<Map> getMetadata(MediaInformation information) async {
     final props = information.getAllProperties();
     if (props == null) return {};
 

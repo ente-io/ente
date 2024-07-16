@@ -14,6 +14,8 @@ extension FilePropsExtn on EnteFile {
   bool get isOwner =>
       (ownerID == null) || (ownerID == Configuration.instance.getUserID());
 
+  bool get isVideo => fileType == FileType.video;
+
   bool get canEditMetaInfo => isUploaded && isOwner;
 
   bool get isTrash => this is TrashFile;
