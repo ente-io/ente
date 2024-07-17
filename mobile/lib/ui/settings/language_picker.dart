@@ -130,6 +130,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return 'Italiano';
       case 'nl':
         return 'Nederlands';
+      case 'pl':
+        return 'Polski';
       case 'pt':
         return 'Português';
       case 'ru':
