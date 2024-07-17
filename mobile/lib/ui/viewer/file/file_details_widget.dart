@@ -14,6 +14,7 @@ import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
@@ -87,7 +88,15 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
 
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null && !widget.file.hasLocation) {
-        _updateLocationFromExif(_exifNotifier.value!).ignore();
+        _updateLocationFromExif(locationFromExif(_exifNotifier.value!))
+            .ignore();
+      }
+    });
+    _videoMetadataNotifier.addListener(() {
+      if (_videoMetadataNotifier.value?.location != null &&
+          !widget.file.hasLocation) {
+        _updateLocationFromExif(_videoMetadataNotifier.value?.location)
+            .ignore();
       }
     });
 
@@ -331,14 +340,13 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   //This code is for updating the location of files in which location data is
   //missing and the EXIF has location data. This is only happens for a
   //certain specific minority of devices.
-  Future<void> _updateLocationFromExif(Map<String, IfdTag> exif) async {
+  Future<void> _updateLocationFromExif(Location? locationDataFromExif) async {
     // If the file is not uploaded or the file is not owned by the current user
     // then we don't need to update the location.
     if (!widget.file.isUploaded || widget.file.ownerID! != _currentUserID) {
       return;
     }
     try {
-      final locationDataFromExif = locationFromExif(exif);
       if (locationDataFromExif?.latitude != null &&
           locationDataFromExif?.longitude != null) {
         widget.file.location = locationDataFromExif;
