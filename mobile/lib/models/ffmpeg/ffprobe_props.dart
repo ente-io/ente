@@ -14,7 +14,7 @@ import "package:photos/models/location/location.dart";
 class FFProbeProps {
   Map<String, dynamic>? prodData;
   Location? location;
-  DateTime? creationTime;
+  DateTime? creationTimeUTC;
   String? bitrate;
   String? majorBrand;
   String? fps;
@@ -45,7 +45,7 @@ class FFProbeProps {
     return buffer.toString();
   }
 
-  static fromJson(Map<dynamic, dynamic>? json) {
+  static parseData(Map<dynamic, dynamic>? json) {
     final Map<String, dynamic> parsedData = {};
     final FFProbeProps result = FFProbeProps();
 
@@ -76,6 +76,7 @@ class FFProbeProps {
           break;
         case FFProbeKeys.creationTime:
           parsedData[stringKey] = _formatDate(json[key] ?? "");
+          result.creationTimeUTC = _getUTCDateTime(json[key] ?? "");
           break;
         case FFProbeKeys.durationMicros:
           parsedData[stringKey] = formatPreciseDuration(
@@ -112,7 +113,20 @@ class FFProbeProps {
     }
     // iterate through the streams
     final List<dynamic> streams = json["streams"];
+    final List<dynamic> newStreams = [];
+    final Map<String, dynamic> metadata = {};
     for (final stream in streams) {
+      if (stream['type'] == 'metadata') {
+        for (final key in stream.keys) {
+          if (key == FFProbeKeys.frameCount && stream[key]?.toString() == "1") {
+            continue;
+          }
+          metadata[key] = stream[key];
+        }
+        metadata.remove(FFProbeKeys.index);
+      } else {
+        newStreams.add(stream);
+      }
       for (final key in stream.keys) {
         if (key == FFProbeKeys.rFrameRate) {
           result.fps = _formatFPS(stream[key]);
@@ -126,6 +140,10 @@ class FFProbeProps {
         }
       }
     }
+    if (metadata.isNotEmpty) {
+      newStreams.add(metadata);
+    }
+    parsedData["streams"] = newStreams;
     result.prodData = parsedData;
     return result;
   }
@@ -169,6 +187,16 @@ class FFProbeProps {
     final newDate =
         DateTime.fromMicrosecondsSinceEpoch(dateInUtc.microsecondsSinceEpoch);
     return formatDateTime(newDate, 'en_US', false);
+  }
+
+  static DateTime? _getUTCDateTime(String value) {
+    final dateInUtc = DateTime.tryParse(value);
+    if (dateInUtc == null) return null;
+    final epoch = DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
+    if (dateInUtc == epoch) return null;
+    return DateTime.fromMicrosecondsSinceEpoch(
+      dateInUtc.microsecondsSinceEpoch,
+    );
   }
 
   // input example: '00:00:05.408000000' or '5.408000'

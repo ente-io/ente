@@ -25,12 +25,17 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildSection(BuildContext context, String title, Widget content) {
-    return ExpansionTile(
-      initiallyExpanded: true,
-      title: Text(title, style: getEnteTextTheme(context).largeFaint),
-      childrenPadding: const EdgeInsets.symmetric(vertical: 2),
-      tilePadding: const EdgeInsets.symmetric(vertical: 4),
-      children: [content],
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        initiallyExpanded: false,
+        title: Text(title, style: getEnteTextTheme(context).largeFaint),
+        childrenPadding: EdgeInsets.zero, // Remove padding around children
+        tilePadding: EdgeInsets.zero,
+        collapsedShape: const Border(), // Remove border when collapsed
+        shape: const Border(),
+        children: [content],
+      ),
     );
   }
 
@@ -61,6 +66,9 @@ class VideoExifDialog extends StatelessWidget {
 
       for (final key in stream.keys) {
         final dynamic value = stream[key];
+        if (value is List) {
+          continue;
+        }
         // print type of value
         if (value is int ||
             value is double ||

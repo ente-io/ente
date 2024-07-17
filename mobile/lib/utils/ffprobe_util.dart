@@ -17,7 +17,7 @@ class FFProbeUtil {
     final properties = await getMetadata(mediaInformation);
 
     try {
-      return FFProbeProps.fromJson(properties);
+      return FFProbeProps.parseData(properties);
     } catch (e, stackTrace) {
       _logger.severe(
         "Error parsing FFProbe properties: $properties",
