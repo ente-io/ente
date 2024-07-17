@@ -68,18 +68,7 @@ class ImportCodePage extends StatelessWidget {
                 title: context.l10n.importCodes,
               ),
               flexibleSpaceCaption: "Import source",
-              actionIcons: [
-                IconButtonWidget(
-                  icon: Icons.close_outlined,
-                  iconButtonType: IconButtonType.secondary,
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
+              actionIcons: const [],
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate(
