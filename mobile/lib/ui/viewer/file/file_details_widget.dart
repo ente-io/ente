@@ -3,7 +3,6 @@ import "dart:developer";
 import "dart:io";
 
 import "package:exif/exif.dart";
-import "package:ffmpeg_kit_flutter_min/ffprobe_kit.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
@@ -33,7 +32,6 @@ import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/video_exif_item.dart";
 import "package:photos/utils/exif_util.dart";
-import "package:photos/utils/ffprobe_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/local_settings.dart";
 
@@ -117,21 +115,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   Future<void> getMediaInfo() async {
     final File? originFile = await getFile(widget.file, isOrigin: true);
     if (originFile == null) return;
-    final session = await FFprobeKit.getMediaInformation(originFile.path);
-    final mediaInfo = session.getMediaInformation();
-    if (mediaInfo == null) {
-      final failStackTrace = await session.getFailStackTrace();
-      final output = await session.getOutput();
-      _logger.severe(
-        'failed to get video metadata failStackTrace=$failStackTrace, output=$output',
-      );
-      return;
-    }
-    final properties = await FFProbeUtil.getProperties(mediaInfo);
+    final properties = await getVideoPropsAsync(originFile);
     _videoMetadataNotifier.value = properties;
     if (kDebugMode) {
       log("videoCustomProps ${properties.toString()}");
-      log("PropData ${properties.prodData.toString()}");
+      log("PropData ${properties?.prodData.toString()}");
     }
     setState(() {});
   }
