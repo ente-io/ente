@@ -1,8 +1,12 @@
+import "dart:io";
+
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/ui/viewer/file/video_widget.dart";
+import "package:photos/ui/viewer/file/video_widget_new.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
 class FileWidget extends StatelessWidget {
@@ -38,7 +42,16 @@ class FileWidget extends StatelessWidget {
         key: key ?? ValueKey(fileKey),
       );
     } else if (file.fileType == FileType.video) {
-      return VideoWidget(
+      // use old video widget on iOS simulator as the new one crashes while
+      // playing certain videos on iOS simulator
+      if (kDebugMode && Platform.isIOS) {
+        return VideoWidget(
+          file,
+          tagPrefix: tagPrefix,
+          playbackCallback: playbackCallback,
+        );
+      }
+      return VideoWidgetNew(
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
