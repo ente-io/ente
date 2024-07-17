@@ -34,7 +34,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
   Widget build(BuildContext context) {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
-      title: "Video Info",
+      title: S.of(context).videoInfo,
       subtitleSection:
           _exifButton(context, widget.file, widget.props?.prodData),
       onTap: _onTap,
