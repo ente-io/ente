@@ -132,7 +132,6 @@ flutter:
     - assets/custom-icons/icons/
     - assets/custom-icons/_data/
     - assets/svg/
-    - assets/ca/
 
   fonts:
     - family: Inter
