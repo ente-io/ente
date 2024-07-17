@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/endpoint_updated_event.dart';
@@ -36,6 +37,11 @@ class Network {
       ),
     );
 
+    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
+        HttpClient()
+          ..badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+
     _enteDio = Dio(
       BaseOptions(
         baseUrl: endpoint,
@@ -50,6 +56,11 @@ class Network {
         },
       ),
     );
+    (_enteDio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () =>
+        HttpClient()
+          ..badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+
     _setupInterceptors(endpoint);
 
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
