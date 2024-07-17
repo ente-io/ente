@@ -1563,6 +1563,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifying": MessageLookupByLibrary.simpleMessage("Verifying..."),
         "verifyingRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Verifying recovery key..."),
+        "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":

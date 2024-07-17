@@ -9104,6 +9104,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Video Info`
+  String get videoInfo {
+    return Intl.message(
+      'Video Info',
+      name: 'videoInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
