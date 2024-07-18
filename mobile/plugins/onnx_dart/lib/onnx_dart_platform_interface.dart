@@ -41,10 +41,13 @@ abstract class OnnxDartPlatform extends PlatformInterface {
   }
 
   Future<Float32List?> predict(
-    Float32List inputData,
+    Float32List? inputData,
+      Int32List? inputDataInt,
     String modelType, {
     int sessionAddress = 0,
   }) {
     throw UnimplementedError('predict() has not been implemented.');
   }
+
+
 }

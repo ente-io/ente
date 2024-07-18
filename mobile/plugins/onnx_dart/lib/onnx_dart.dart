@@ -22,7 +22,17 @@ class OnnxDart {
     int sessionAddress = 0,
   }) async {
     final result = await OnnxDartPlatform.instance
-        .predict(inputData, modelType, sessionAddress: sessionAddress);
+        .predict(inputData, null, modelType, sessionAddress: sessionAddress);
+    return result;
+  }
+
+  Future<Float32List?> predictInt(
+    Int32List inputDataInt,
+    String modelType, {
+    int sessionAddress = 0,
+  }) async {
+    final result = await OnnxDartPlatform.instance
+        .predict(null, inputDataInt, modelType, sessionAddress: sessionAddress);
     return result;
   }
 }

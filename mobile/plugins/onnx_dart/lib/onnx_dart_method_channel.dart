@@ -38,7 +38,8 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
 
   @override
   Future<Float32List?> predict(
-    Float32List inputData,
+    Float32List? inputData,
+    Int32List? inputDataInt,
     String modelType, {
     int sessionAddress = 0,
   }) {
@@ -47,6 +48,7 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
       {
         'sessionAddress': sessionAddress,
         'inputData': inputData,
+        'inputDataInt': inputDataInt,
         'modelType': modelType,
       },
     );
