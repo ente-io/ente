@@ -48,8 +48,15 @@ export interface DialogBoxAttributesV2 {
     proceed?: {
         /** The string to use as the label for the primary action. */
         text: string;
-        /** The function to call when the user presses the primary action button. */
-        action: (setLoading?: (value: boolean) => void) => void | Promise<void>;
+        /**
+         * The function to call when the user presses the primary action button.
+         *
+         * It is passed a {@link setLoading} function that can be used to show
+         * or hide loading indicator or the primary action button.
+         */
+        action:
+            | (() => void | Promise<void>)
+            | ((setLoading: (value: boolean) => void) => void | Promise<void>);
         variant?: ButtonProps["color"];
         disabled?: boolean;
     };

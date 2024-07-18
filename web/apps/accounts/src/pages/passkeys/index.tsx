@@ -262,15 +262,15 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     const [showRenameDialog, setShowRenameDialog] = useState(false);
 
     const showDeleteConfirmationDialog = useCallback(() => {
-        const handleDelete = async (setLoading?: (value: boolean) => void) => {
-            setLoading && setLoading(true);
+        const handleDelete = async (setLoading: (value: boolean) => void) => {
+            setLoading(true);
             try {
                 await deletePasskey(ensure(token), ensure(passkey).id);
                 onUpdateOrDeletePasskey();
             } catch (e) {
                 log.error("Failed to delete passkey", e);
             } finally {
-                setLoading && setLoading(false);
+                setLoading(false);
             }
         };
 
@@ -284,7 +284,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             },
             close: { text: t("CANCEL") },
         });
-    }, [token, onUpdateOrDeletePasskey, passkey, setDialogBoxAttributesV2]);
+    }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
 
     return (
         <>
