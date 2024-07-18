@@ -99,25 +99,42 @@ const RemoteEmbedding = z.object({
 
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 
+export type OriginalRemoteDerivedData = Record<string, unknown>;
+
+export type ParsedRemoteDerivedData = Partial<{
+    face: RemoteFaceIndex;
+    clip: RemoteCLIPIndex;
+}>;
+
 /**
  * The decrypted payload of a {@link RemoteEmbedding} for the "combined"
  * {@link EmbeddingModel}.
  *
  * [Note: Preserve unknown derived data fields]
  *
- * There is one entry for each of the embedding types that the current client
- * knows about. However, there might be other fields apart from the known ones
- * at the top level, and we need to ensure that we preserve them verbatim when
- * trying use {@link putDerivedData} with an {@link RemoteDerivedData} obtained
- * from remote as the base, with locally indexed additions.
+ * The remote derived data can contain arbitrary key at the top level apart from
+ * the ones that the current client knows about. We need to preserve these
+ * verbatim when we use {@link putDerivedData}.
+ *
+ * Thus we return two separate results from {@link fetchDerivedData}:
+ *
+ * -   {@link OriginalRemoteDerivedData}: The original, unmodified JSON.
+ *
+ * -   {@link ParsedRemoteDerivedData}: The particular fields that the current
+ *     client knows about, parsed according to their expected structure.
+ *
+ * When integrating this information into our local state, we use the parsed
+ * version. And if we need to update the state on remote (e.g. if the current
+ * client notices an embedding type that was missing), then we use the original
+ * JSON as the base.
  */
-export type RemoteDerivedData = Record<string, unknown> & {
-    face: RemoteFaceIndex;
-    clip: RemoteCLIPIndex;
-};
+export interface RemoteDerivedData {
+    original: OriginalRemoteDerivedData;
+    parsed: ParsedRemoteDerivedData | undefined;
+}
 
 /**
- * Zod schemas for the {@link RemoteFaceIndex} type.
+ * Zod schema for the {@link RemoteFaceIndex} type.
  *
  * [Note: Duplicated Zod schema and TypeScript type]
  *
@@ -170,7 +187,7 @@ const RemoteFaceIndex = z.object({
 });
 
 /**
- * Zod schemas for the {@link RemoteCLIPIndex} types.
+ * Zod schema for the {@link RemoteCLIPIndex} type.
  *
  * See: [Note: Duplicated Zod schema and TypeScript type]
  */
@@ -181,17 +198,17 @@ const RemoteCLIPIndex = z.object({
 });
 
 /**
- * Zod schemas for a partial {@link RemoteCLIPIndex} type. Note that we need to
- * preserve any top level fields in the JSON that we don't understand.
- *
- * See: [Note: Preserve unknown derived data fields]
+ * Zod schema for the {@link ParsedRemoteDerivedData} type.
  */
-const RemoteDerivedData = z
-    .object({
-        face: RemoteFaceIndex.nullish().transform(nullToUndefined),
-        clip: RemoteCLIPIndex.nullish().transform(nullToUndefined),
-    })
-    .passthrough();
+const OriginalRemoteDerivedData = z.object({}).passthrough();
+
+/**
+ * Zod schema for the {@link ParsedRemoteDerivedData} type.
+ */
+const ParsedRemoteDerivedData = z.object({
+    face: RemoteFaceIndex.nullish().transform(nullToUndefined),
+    clip: RemoteCLIPIndex.nullish().transform(nullToUndefined),
+});
 
 /**
  * Fetch derived data for the given files from remote.
@@ -205,12 +222,14 @@ const RemoteDerivedData = z
  * fields set to optional (since a remote embedding may have a subset of the
  * fields that we locally generate).
  */
-export const fetchDerivedData = async (filesByID: Map<number, EnteFile>) => {
+export const fetchDerivedData = async (
+    filesByID: Map<number, EnteFile>,
+): Promise<Map<number, RemoteDerivedData>> => {
     const remoteEmbeddings = await fetchEmbeddings("combined", [
         ...filesByID.keys(),
     ]);
 
-    const result = new Map<number, Partial<RemoteDerivedData>>();
+    const result = new Map<number, RemoteDerivedData>();
     for (const remoteEmbedding of remoteEmbeddings) {
         const { fileID } = remoteEmbedding;
         const file = filesByID.get(fileID);
@@ -226,7 +245,12 @@ export const fetchDerivedData = async (filesByID: Map<number, EnteFile>) => {
                 file.key,
             );
             const jsonString = await gunzip(decryptedBytes);
-            result.set(fileID, RemoteDerivedData.parse(JSON.parse(jsonString)));
+            const original = OriginalRemoteDerivedData.parse(
+                JSON.parse(jsonString),
+            );
+            const parseResult = ParsedRemoteDerivedData.safeParse(original);
+            const parsed = parseResult.success ? parseResult.data : undefined;
+            result.set(fileID, { original, parsed });
         } catch (e) {
             // This shouldn't happen. Likely some client has uploaded a
             // corrupted embedding. Ignore it so that it gets reindexed and

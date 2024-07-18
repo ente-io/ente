@@ -139,8 +139,8 @@ export class MLWorker {
         // live queue is just an optimization: if a file doesn't get indexed via
         // the live queue, it'll later get indexed anyway when we backfill.
         if (this.liveQ.length < 200) {
-            // The file is just being uploaded, and it (logical bugs withstanding),
-            // will not exist on remote.
+            // The file is just being uploaded, and so will not have any
+            // pre-existing derived data on remote.
             const remoteDerivedData = undefined;
             this.liveQ.push({ enteFile, uploadItem, remoteDerivedData });
             this.wakeUp();
