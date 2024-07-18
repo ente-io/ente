@@ -24,6 +24,6 @@ latest image).
 
 ```sh
 sudo systemctl stop metabase
-sudo cp -R /root/metabase.db metbase.db-`date '+%s'`
+sudo cp -R /root/metabase.db metabase.db-backup-`date '+%s'`
 sudo systemctl start metabase
 ```
