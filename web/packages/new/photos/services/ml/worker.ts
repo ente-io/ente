@@ -25,7 +25,11 @@ import {
     saveFaceIndex,
     updateAssumingLocalFiles,
 } from "./db";
-import { putDerivedData, type RemoteDerivedData } from "./embedding";
+import {
+    fetchDerivedData,
+    putDerivedData,
+    type RemoteDerivedData,
+} from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
@@ -207,9 +211,20 @@ export class MLWorker {
     /** Return the next batch of items to backfill (if any). */
     async backfillQ() {
         const userID = ensure(await getKVN("userID"));
-        return syncWithLocalFilesAndGetFilesToIndex(userID, 200).then((fs) =>
-            fs.map((f) => ({ enteFile: f, uploadItem: undefined })),
+        // Find files that our local DB thinks need syncing.
+        const filesByID = await syncWithLocalFilesAndGetFilesToIndex(
+            userID,
+            200,
         );
+        if (!filesByID.size) return [];
+        // Fetch their existing derived data (if any).
+        const derivedDataByID = await fetchDerivedData(filesByID);
+        // Return files after annotating them with their existing derived data.
+        return Array.from(filesByID, ([id, file]) => ({
+            enteFile: file,
+            uploadItem: undefined,
+            remoteDerivedData: derivedDataByID.get(id),
+        }));
     }
 }
 
@@ -272,7 +287,7 @@ const indexNextBatch = async (
 const syncWithLocalFilesAndGetFilesToIndex = async (
     userID: number,
     count: number,
-): Promise<EnteFile[]> => {
+): Promise<Map<number, EnteFile>> => {
     const isIndexable = (f: EnteFile) => f.ownerID == userID;
 
     const localFiles = await getAllLocalFiles();
@@ -288,7 +303,9 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     );
 
     const fileIDsToIndex = await indexableFileIDs(count);
-    return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
+    return new Map(
+        fileIDsToIndex.map((id) => [id, ensure(localFilesByID.get(id))]),
+    );
 };
 
 /**
