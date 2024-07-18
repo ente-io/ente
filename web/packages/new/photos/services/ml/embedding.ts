@@ -236,7 +236,14 @@ export const fetchDerivedData = async (
 const remoteDerivedDataFromJSONString = (jsonString: string) => {
     const raw = RawRemoteDerivedData.parse(JSON.parse(jsonString));
     const parseResult = ParsedRemoteDerivedData.safeParse(raw);
-    const parsed = parseResult.success ? parseResult.data : undefined;
+    // This code is included in apps/photos, which currently does not have the
+    // TypeScript strict mode enabled, which causes a spurious tsc failure.
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
+    const parsed = parseResult.success
+        ? (parseResult.data as ParsedRemoteDerivedData)
+        : undefined;
     return { raw, parsed };
 };
 
