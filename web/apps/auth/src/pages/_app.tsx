@@ -14,7 +14,6 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -92,7 +91,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         router.events.on("routeChangeStart", (url: string) => {
-            const newPathname = url.split("?")[0] as PAGES;
+            const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
             }

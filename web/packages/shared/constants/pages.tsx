@@ -13,7 +13,6 @@ export enum PHOTOS_PAGES {
     VERIFY = "/verify",
     ROOT = "/",
     SHARED_ALBUMS = "/shared-albums",
-    // ML_DEBUG = '/ml-debug',
     DEDUPLICATE = "/deduplicate",
 }
 
@@ -33,4 +32,3 @@ export enum AUTH_PAGES {
     ROOT = "/",
     AUTH = "/auth",
 }
-
