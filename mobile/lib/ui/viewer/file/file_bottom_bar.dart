@@ -44,16 +44,16 @@ class FileBottomBar extends StatefulWidget {
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   late bool isPanorama;
-  bool _isPanoramaCheckInitiated = false;
+  int? lastFileGenID;
 
   @override
   void initState() {
     super.initState();
-    isPanorama = widget.file.isPanorama() ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
+    isPanorama = widget.file.isPanorama() ?? false;
     _checkPanorama();
     return _getBottomBar();
   }
@@ -61,10 +61,10 @@ class FileBottomBarState extends State<FileBottomBar> {
   // _checkPanorama() method is used to check if the file is a panorama image.
   // This handles the case when the the file dims (width and height) are not available.
   Future<void> _checkPanorama() async {
-    if (_isPanoramaCheckInitiated || widget.file.hasDims) {
+    if (lastFileGenID == widget.file.generatedID) {
       return;
     }
-    _isPanoramaCheckInitiated = true;
+    lastFileGenID = widget.file.generatedID;
     final result = await checkIfPanorama(widget.file);
     if (mounted && isPanorama == !result) {
       isPanorama = result;
