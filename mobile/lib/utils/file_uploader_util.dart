@@ -15,12 +15,15 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/models/ffmpeg/ffprobe_props.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -110,7 +113,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     );
   }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  await _decorateEnteFileData(file, asset);
+  await _decorateEnteFileData(file, asset, sourceFile);
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
 
   if (file.fileType == FileType.livePhoto && Platform.isIOS) {
@@ -266,7 +269,11 @@ void _assertFileType(AssetEntity asset, EnteFile file) {
   );
 }
 
-Future<void> _decorateEnteFileData(EnteFile file, AssetEntity asset) async {
+Future<void> _decorateEnteFileData(
+  EnteFile file,
+  AssetEntity asset,
+  File sourceFile,
+) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
@@ -274,7 +281,12 @@ Future<void> _decorateEnteFileData(EnteFile file, AssetEntity asset) async {
     file.location =
         Location(latitude: latLong.latitude, longitude: latLong.longitude);
   }
-
+  if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
+    final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
+    if (props != null && props.location != null) {
+      file.location = props.location;
+    }
+  }
   if (file.title == null || file.title!.isEmpty) {
     _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;

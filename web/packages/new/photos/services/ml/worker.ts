@@ -11,7 +11,11 @@ import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
-import { imageBitmapAndData, type ImageBitmapAndData } from "./bitmap";
+import {
+    imageBitmapAndData,
+    renderableBlob,
+    type ImageBitmapAndData,
+} from "./blob";
 import { indexCLIP, type CLIPIndex } from "./clip";
 import {
     indexableFileIDs,
@@ -22,7 +26,7 @@ import {
 } from "./db";
 import { pullFaceEmbeddings, putCLIPIndex, putFaceIndex } from "./embedding";
 import { indexFaces, type FaceIndex } from "./face";
-import type { MLWorkerElectron } from "./worker-electron";
+import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -56,6 +60,7 @@ interface IndexableItem {
  */
 export class MLWorker {
     private electron: MLWorkerElectron | undefined;
+    private delegate: MLWorkerDelegate | undefined;
     private userAgent: string | undefined;
     private state: "idle" | "pull" | "indexing" = "idle";
     private shouldPull = false;
@@ -73,9 +78,13 @@ export class MLWorker {
      * @param electron The {@link MLWorkerElectron} that allows the worker to
      * use the functionality provided by our Node.js layer when running in the
      * context of our desktop app
+     *
+     * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
+     * the main thread of interesting events.
      */
-    async init(electron: MLWorkerElectron) {
+    async init(electron: MLWorkerElectron, delegate?: MLWorkerDelegate) {
         this.electron = electron;
+        this.delegate = delegate;
         // Set the user agent that'll be set in the generated embeddings.
         this.userAgent = `${clientPackageName}/${await electron.appVersion()}`;
         // Initialize the downloadManager running in the web worker with the
@@ -202,6 +211,7 @@ export class MLWorker {
             items,
             ensure(this.electron),
             ensure(this.userAgent),
+            this.delegate,
         );
         if (allSuccess) {
             // Everything is running smoothly. Reset the idle duration.
@@ -276,6 +286,7 @@ const indexNextBatch = async (
     items: IndexableItem[],
     electron: MLWorkerElectron,
     userAgent: string,
+    delegate: MLWorkerDelegate | undefined,
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
     // liveQ has already been drained, but that's fine, it'll be rare that we
@@ -293,6 +304,7 @@ const indexNextBatch = async (
     for (const { enteFile, uploadItem } of items) {
         try {
             await index(enteFile, uploadItem, electron, userAgent);
+            delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
@@ -349,6 +361,18 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * downloaded and decrypted from remote.
  *
  * @param userAgent The UA of the client that is doing the indexing (us).
+ *
+ * ---
+ *
+ * [Note: ML indexing does more ML]
+ *
+ * Nominally, and primarily, indexing a file involves computing its various ML
+ * embeddings: faces and CLIP. However, since this is a occasion where we have
+ * the original file in memory, it is a great time to also compute other derived
+ * data related to the file (instead of re-downloading it again).
+ *
+ * So this index function also does things that are not related to ML:
+ * extracting and updating Exif.
  */
 const index = async (
     enteFile: EnteFile,
@@ -359,7 +383,20 @@ const index = async (
     const f = fileLogID(enteFile);
     const startTime = Date.now();
 
-    const image = await imageBitmapAndData(enteFile, uploadItem, electron);
+    const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
+
+    let image: ImageBitmapAndData;
+    try {
+        image = await imageBitmapAndData(imageBlob);
+    } catch (e) {
+        // If we cannot get the raw image data for the file, then retrying again
+        // won't help. It'd only make sense to retry later if modify
+        // `renderableBlob` to be do something different for this type of file.
+        log.error(`Failed to get image data for indexing ${f}`, e);
+        await markIndexingFailed(enteFile.id);
+        throw e;
+    }
+
     const res = await Promise.allSettled([
         _indexFace(f, enteFile, image, electron, userAgent),
         // TODO-ML: clip-test

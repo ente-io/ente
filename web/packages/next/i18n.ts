@@ -28,6 +28,7 @@ export const supportedLocales = [
     "es-ES" /* Spanish */,
     "pt-BR" /* Portuguese, Brazilian */,
     "ru-RU" /* Russian */,
+    "pl-PL" /* Polish */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -136,7 +137,7 @@ const savedLocaleStringMigratingIfNeeded = (): SupportedLocale | undefined => {
     // This migration is dated Feb 2024. And it can be removed after a few
     // months, because by then either customers would've opened the app and
     // their setting migrated to the new format, or the browser would've cleared
-    // the older local storage entry anyway.
+    // the older local storage entry anyway (tag: Migration).
 
     if (!ls) {
         // Nothing found
@@ -224,6 +225,8 @@ const closestSupportedLocale = (
             return "pt-BR";
         } else if (ls.startsWith("ru")) {
             return "ru-RU";
+        } else if (ls.startsWith("pl")) {
+            return "pl-PL";
         }
     }
 

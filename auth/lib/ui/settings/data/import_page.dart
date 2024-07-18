@@ -1,6 +1,5 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/divider_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
@@ -68,18 +67,7 @@ class ImportCodePage extends StatelessWidget {
                 title: context.l10n.importCodes,
               ),
               flexibleSpaceCaption: "Import source",
-              actionIcons: [
-                IconButtonWidget(
-                  icon: Icons.close_outlined,
-                  iconButtonType: IconButtonType.secondary,
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (Navigator.canPop(context)) {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
+              actionIcons: const [],
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate(

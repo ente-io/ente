@@ -1,4 +1,5 @@
 {
+  "@@locale ": "en",
   "enterYourEmailAddress": "Enter your email address",
   "accountWelcomeBack": "Welcome back!",
   "email": "Email",
@@ -1264,6 +1265,7 @@
     }
   },
   "mlFunctions": "ML functions",
+  "panorama": "Panorama",
   "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",
   "deviceLock": "Device lock",
@@ -1276,5 +1278,6 @@
   "noSystemLockFound": "No system lock found",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "tapToUnlock": "Tap to unlock",
-  "tooManyIncorrectAttempts": "Too many incorrect attempts"
+  "tooManyIncorrectAttempts": "Too many incorrect attempts",
+  "videoInfo": "Video Info"
 }

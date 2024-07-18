@@ -7,7 +7,7 @@
  */
 
 import type { Electron, ZipItem } from "@/next/types/ipc";
-import type { MLWorkerElectron } from "../services/ml/worker-electron";
+import type { MLWorkerElectron } from "../services/ml/worker-types";
 
 /**
  * Stream the given file or zip entry from the user's local file system.

@@ -6,6 +6,7 @@
  *
  * The runtime used is ONNX.
  */
+
 import * as ort from "onnxruntime-node";
 import log from "../log";
 import { ensure } from "../utils/common";

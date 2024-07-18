@@ -8985,6 +8985,16 @@ class S {
     );
   }
 
+  /// `Panorama`
+  String get panorama {
+    return Intl.message(
+      'Panorama',
+      name: 'panorama',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Re-enter password`
   String get reenterPassword {
     return Intl.message(
@@ -9114,6 +9124,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Video Info`
+  String get videoInfo {
+    return Intl.message(
+      'Video Info',
+      name: 'videoInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -9133,6 +9153,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'tr'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }

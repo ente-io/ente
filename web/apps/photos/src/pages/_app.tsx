@@ -1,6 +1,6 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import DownloadManager from "@/new/photos/services/download";
-import { initML } from "@/new/photos/services/ml";
+import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { clientPackageName, staticAppTitle } from "@/next/app";
 import { CustomHead } from "@/next/components/Head";
 import { setupI18n } from "@/next/i18n";
@@ -174,7 +174,7 @@ export default function App({ Component, pageProps }: AppProps) {
             }
         };
 
-        initML();
+        if (isMLSupported) initML();
 
         electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);

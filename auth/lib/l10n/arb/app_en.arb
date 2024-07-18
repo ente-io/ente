@@ -442,5 +442,8 @@
   "deleteTagTitle": "Delete tag?",
   "deleteTagMessage": "Are you sure you want to delete this tag? This action is irreversible.",
   "somethingWentWrongParsingCode": "We were unable to parse {x} codes.",
-  "updateNotAvailable": "Update not available"
+  "updateNotAvailable": "Update not available",
+  "viewRawCodes": "View raw codes",
+  "rawCodes": "Raw codes",
+  "rawCodeData": "Raw code data"
 }

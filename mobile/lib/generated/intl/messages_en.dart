@@ -1035,6 +1035,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Pairing complete"),
+        "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "passKeyPendingVerification": MessageLookupByLibrary.simpleMessage(
             "Verification is still pending"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
@@ -1564,6 +1565,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifying": MessageLookupByLibrary.simpleMessage("Verifying..."),
         "verifyingRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Verifying recovery key..."),
+        "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":

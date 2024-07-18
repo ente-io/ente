@@ -348,8 +348,8 @@ class _HomePageState extends State<HomePage> {
                     return CodeErrorWidget(
                       errors: _allCodes
                               ?.where((element) => element.hasError)
-                              .length ??
-                          0,
+                              .toList() ??
+                          [],
                     );
                   }
                   final newIndex = index - indexOffset;

@@ -1,10 +1,10 @@
 import type { EnteFile } from "@/new/photos/types/file";
 import type { Electron } from "@/next/types/ipc";
-import type { ImageBitmapAndData } from "./bitmap";
+import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
-import { cosineSimilarity, norm } from "./math";
-import type { MLWorkerElectron } from "./worker-electron";
+import { dotProduct, norm } from "./math";
+import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * The version of the CLIP indexing pipeline implemented by the current client.
@@ -26,7 +26,7 @@ export const clipIndexingVersion = 1;
  * trained) encoders - one for images, and one for text - that both map to the
  * same embedding space.
  *
- * We use this for natural language search within the app:
+ * We use this for natural language search (aka "magic search") within the app:
  *
  * 1. Pre-compute an embedding for each image.
  *
@@ -202,7 +202,12 @@ export const clipMatches = async (
     const textEmbedding = normalized(t);
     const items = (await clipIndexes()).map(
         ({ fileID, embedding }) =>
-            [fileID, cosineSimilarity(embedding, textEmbedding)] as const,
+            // What we want to do is `cosineSimilarity`, but since both the
+            // embeddings involved are already normalized, we can save the norm
+            // calculations and directly do their `dotProduct`.
+            //
+            // This code is on the hot path, so these optimizations help.
+            [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
     return new Map(items.filter(([, score]) => score >= 0.23));
 };

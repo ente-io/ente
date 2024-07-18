@@ -1,4 +1,5 @@
 {
+  "@@locale ": "en",
   "enterYourEmailAddress": "请输入您的电子邮件地址",
   "accountWelcomeBack": "欢迎回来！",
   "email": "电子邮件地址",
