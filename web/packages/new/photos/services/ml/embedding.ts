@@ -297,7 +297,11 @@ export const putDerivedData = async (
     derivedData: RawRemoteDerivedData,
 ) =>
     // TODO-ML: Fix name to "combined" before release
-    putEmbedding(enteFile, "onnx-clip", await gzip(JSON.stringify(derivedData)));
+    putEmbedding(
+        enteFile,
+        "onnx-clip",
+        await gzip(JSON.stringify(derivedData)),
+    );
 
 /**
  * Upload an embedding to remote.

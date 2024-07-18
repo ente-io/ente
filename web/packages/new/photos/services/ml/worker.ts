@@ -448,7 +448,7 @@ const index = async (
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            return `Indexed ${msg.join(" and ")} clip in ${f} (${ms} ms)`;
+            return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
@@ -469,7 +469,7 @@ const index = async (
 
         const existingRawDerivedData = remoteDerivedData?.raw ?? {};
         const rawDerivedData = {
-            ...{ existingRawDerivedData },
+            ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
         };
