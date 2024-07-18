@@ -1,11 +1,11 @@
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import type { EnteFile } from "@/new/photos/types/file";
 import {
     decryptFileMetadata,
     encryptFileMetadata,
 } from "@/new/shared/crypto/ente";
-import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { type RemoteCLIPIndex } from "./clip";

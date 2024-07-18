@@ -1,3 +1,5 @@
+import { pt } from "@/base/i18n";
+import log from "@/base/log";
 import {
     disableML,
     enableML,
@@ -8,8 +10,6 @@ import {
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import { pt } from "@/next/i18n";
-import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {

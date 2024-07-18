@@ -1,12 +1,12 @@
 import { accountLogout } from "@/accounts/services/logout";
 import type { AccountsContextT } from "@/accounts/types/context";
-import { clientPackageName, staticAppTitle } from "@/next/app";
-import { CustomHead } from "@/next/components/Head";
-import { setupI18n } from "@/next/i18n";
+import { clientPackageName, staticAppTitle } from "@/base/app";
+import { CustomHead } from "@/base/components/Head";
+import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
-} from "@/next/log-web";
+} from "@/base/log-web";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";

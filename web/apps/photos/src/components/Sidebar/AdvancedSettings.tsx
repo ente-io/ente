@@ -1,10 +1,10 @@
+import { isDesktop } from "@/base/app";
+import { pt } from "@/base/i18n";
 import { MLSettingsBeta } from "@/new/photos/components/MLSettingsBeta";
 import { canEnableML } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import { isDesktop } from "@/next/app";
-import { pt } from "@/next/i18n";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";

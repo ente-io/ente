@@ -1,6 +1,6 @@
-import { ensureOk } from "@/next/http";
-import { getKV, removeKV, setKV } from "@/next/kv";
-import log from "@/next/log";
+import { ensureOk } from "@/base/http";
+import { getKV, removeKV, setKV } from "@/base/kv";
+import log from "@/base/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,

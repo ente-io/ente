@@ -1,4 +1,4 @@
-import { customAPIHost } from "@/next/origins";
+import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";

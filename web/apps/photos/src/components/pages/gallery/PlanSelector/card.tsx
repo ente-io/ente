@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { bytesInGB } from "@/new/photos/utils/units";
-import log from "@/next/log";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import Close from "@mui/icons-material/Close";

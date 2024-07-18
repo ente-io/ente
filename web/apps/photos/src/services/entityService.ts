@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";

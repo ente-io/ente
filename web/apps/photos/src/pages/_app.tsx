@@ -1,15 +1,15 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import DownloadManager from "@/new/photos/services/download";
-import { initML, isMLSupported } from "@/new/photos/services/ml";
-import { clientPackageName, staticAppTitle } from "@/next/app";
-import { CustomHead } from "@/next/components/Head";
-import { setupI18n } from "@/next/i18n";
-import log from "@/next/log";
+import { clientPackageName, staticAppTitle } from "@/base/app";
+import { CustomHead } from "@/base/components/Head";
+import { setupI18n } from "@/base/i18n";
+import log from "@/base/log";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
-} from "@/next/log-web";
-import { AppUpdate } from "@/next/types/ipc";
+} from "@/base/log-web";
+import { AppUpdate } from "@/base/types/ipc";
+import DownloadManager from "@/new/photos/services/download";
+import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";

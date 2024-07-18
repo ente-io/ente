@@ -1,3 +1,5 @@
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";
 import {
     EncryptedEnteFile,
@@ -8,8 +10,6 @@ import {
 } from "@/new/photos/types/file";
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";

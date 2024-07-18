@@ -1,10 +1,10 @@
+import { clientPackageName } from "@/base/app";
+import { isHTTP4xxError } from "@/base/http";
+import { getKVN } from "@/base/kv";
+import { ensureAuthToken } from "@/base/local-user";
+import log from "@/base/log";
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
-import { clientPackageName } from "@/next/app";
-import { isHTTP4xxError } from "@/next/http";
-import { getKVN } from "@/next/kv";
-import { ensureAuthToken } from "@/next/local-user";
-import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";

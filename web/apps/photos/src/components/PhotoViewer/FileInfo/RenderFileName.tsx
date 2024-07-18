@@ -1,8 +1,8 @@
+import { nameAndExtension } from "@/base/file";
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
-import { nameAndExtension } from "@/next/file";
-import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";

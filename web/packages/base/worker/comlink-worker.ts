@@ -1,5 +1,5 @@
-import { ensureElectron } from "@/next/electron";
-import log, { logToDisk } from "@/next/log";
+import { ensureElectron } from "@/base/electron";
+import log, { logToDisk } from "@/base/log";
 import { expose, wrap, type Remote } from "comlink";
 
 /**

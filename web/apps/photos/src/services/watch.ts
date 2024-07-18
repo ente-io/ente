@@ -3,17 +3,17 @@
  * watch folders functionality.
  */
 
-import { getLocalFiles } from "@/new/photos/services/files";
-import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
-import { EncryptedEnteFile } from "@/new/photos/types/file";
-import { ensureElectron } from "@/next/electron";
-import { basename, dirname } from "@/next/file";
-import log from "@/next/log";
+import { ensureElectron } from "@/base/electron";
+import { basename, dirname } from "@/base/file";
+import log from "@/base/log";
 import type {
     CollectionMapping,
     FolderWatch,
     FolderWatchSyncedFile,
-} from "@/next/types/ipc";
+} from "@/base/types/ipc";
+import { getLocalFiles } from "@/new/photos/services/files";
+import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
+import { EncryptedEnteFile } from "@/new/photos/types/file";
 import { ensureString } from "@/utils/ensure";
 import debounce from "debounce";
 import uploadManager, {

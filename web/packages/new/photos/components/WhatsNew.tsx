@@ -1,5 +1,5 @@
-import { ensureElectron } from "@/next/electron";
-import { ut } from "@/next/i18n";
+import { ensureElectron } from "@/base/electron";
+import { ut } from "@/base/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
     Box,

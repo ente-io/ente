@@ -1,5 +1,5 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
-import log from "@/next/log";
+import log from "@/base/log";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";

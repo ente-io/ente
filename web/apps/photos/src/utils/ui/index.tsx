@@ -1,6 +1,6 @@
+import { ensureElectron } from "@/base/electron";
+import { AppUpdate } from "@/base/types/ipc";
 import { openURL } from "@/new/photos/utils/web";
-import { ensureElectron } from "@/next/electron";
-import { AppUpdate } from "@/next/types/ipc";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";

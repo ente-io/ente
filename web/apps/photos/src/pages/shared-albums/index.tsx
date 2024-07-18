@@ -1,7 +1,7 @@
+import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import log from "@/next/log";
 import {
     CenteredFlex,
     SpaceBetweenFlex,

@@ -1,5 +1,5 @@
-import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
+import { isDevBuild } from "@/base/env";
+import log from "@/base/log";
 import { appName, appNames } from "./app";
 
 /**

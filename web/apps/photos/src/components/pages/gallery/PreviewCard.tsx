@@ -1,7 +1,7 @@
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import DownloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";

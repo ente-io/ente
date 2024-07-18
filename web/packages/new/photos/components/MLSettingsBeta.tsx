@@ -1,6 +1,6 @@
+import { pt, ut } from "@/base/i18n";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import { pt, ut } from "@/next/i18n";
 import { Box, Stack, Typography, type DialogProps } from "@mui/material";
 import React from "react";
 

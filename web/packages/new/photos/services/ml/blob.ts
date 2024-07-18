@@ -1,6 +1,6 @@
+import { basename } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { basename } from "@/next/file";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
 import { renderableImageBlob } from "../../utils/file";

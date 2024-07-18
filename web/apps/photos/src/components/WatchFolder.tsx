@@ -1,6 +1,6 @@
-import { ensureElectron } from "@/next/electron";
-import { basename, dirname } from "@/next/file";
-import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
+import { ensureElectron } from "@/base/electron";
+import { basename, dirname } from "@/base/file";
+import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,

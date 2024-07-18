@@ -6,7 +6,7 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron, ZipItem } from "@/next/types/ipc";
+import type { Electron, ZipItem } from "@/base/types/ipc";
 import type { MLWorkerElectron } from "../services/ml/worker-types";
 
 /**

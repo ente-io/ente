@@ -1,6 +1,10 @@
 // TODO: Remove this override
 /* eslint-disable @typescript-eslint/no-empty-function */
 
+import { isDesktop } from "@/base/app";
+import { blobCache, type BlobCache } from "@/base/blob-cache";
+import log from "@/base/log";
+import { customAPIOrigin } from "@/base/origins";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
@@ -10,10 +14,6 @@ import type {
     SourceURLs,
 } from "@/new/photos/types/file";
 import { renderableImageBlob } from "@/new/photos/utils/file";
-import { isDesktop } from "@/next/app";
-import { blobCache, type BlobCache } from "@/next/blob-cache";
-import log from "@/next/log";
-import { customAPIOrigin } from "@/next/origins";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";

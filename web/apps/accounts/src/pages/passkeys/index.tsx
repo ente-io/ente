@@ -1,7 +1,7 @@
+import log from "@/base/log";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
 import { Titlebar } from "@/new/shared/components/Titlebar";
-import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";

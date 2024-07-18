@@ -1,4 +1,4 @@
-import type { Electron } from "@/next/types/ipc";
+import type { Electron } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";

@@ -1,4 +1,4 @@
-import type { CollectionMapping } from "@/next/types/ipc";
+import type { CollectionMapping } from "@/base/types/ipc";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
