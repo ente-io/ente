@@ -265,7 +265,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           },
         ),
       ]);
-    } else if (flagService.internalUser && widget.file.isVideo) {
+    } else if (widget.file.isVideo) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
           valueListenable: _videoMetadataNotifier,
