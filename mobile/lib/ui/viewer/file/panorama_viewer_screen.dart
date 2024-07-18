@@ -14,6 +14,18 @@ class PanoramaViewerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0, // Remove shadow
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 18,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       body: PanoramaViewer(
         child: Image.file(
           file,
