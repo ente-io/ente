@@ -51,7 +51,6 @@ module.exports = {
         "@typescript-eslint/no-unnecessary-type-assertion": "off",
         "react-hooks/rules-of-hooks": "off",
         "react-hooks/exhaustive-deps": "off",
-        "@next/base/no-img-element": "off",
         "@typescript-eslint/no-unsafe-argument": "off",
         "jsx-a11y/alt-text": "off",
         // Temporarily turn these off to allow existing code.
