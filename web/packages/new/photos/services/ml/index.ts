@@ -58,7 +58,6 @@ const worker = async () => {
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
     const mlWorkerElectron = {
-        appVersion: electron.appVersion,
         detectFaces: electron.detectFaces,
         computeFaceEmbeddings: electron.computeFaceEmbeddings,
         computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
