@@ -50,7 +50,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const user: User = getData(LS_KEYS.USER);
             setUser(user);
             if (!user?.token) {
-                router.push(PAGES.ROOT);
+                router.push("/");
             } else if (key) {
                 if (justSignedUp()) {
                     setRecoveryModalView(true);

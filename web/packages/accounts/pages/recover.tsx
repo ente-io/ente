@@ -43,7 +43,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.email) {
-            router.push(PAGES.ROOT);
+            router.push("/");
             return;
         }
         if (!user?.encryptedToken && !user?.token) {

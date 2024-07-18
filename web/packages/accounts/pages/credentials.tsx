@@ -117,7 +117,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
             if (!user?.email) {
-                router.push(PAGES.ROOT);
+                router.push("/");
                 return;
             }
             setUser(user);
@@ -178,7 +178,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     (keyAttributes && !keyAttributes.memLimit)
                 ) {
                     clearData();
-                    router.push(PAGES.ROOT);
+                    router.push("/");
                     return;
                 }
                 setKeyAttributes(keyAttributes);
@@ -188,7 +188,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
             } else {
-                router.push(PAGES.ROOT);
+                router.push("/");
             }
         };
         main();
@@ -231,7 +231,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorEnabled: true,
                         isTwoFactorPasskeysEnabled: true,
                     });
-                    InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
+                    InMemoryStore.set(MS_KEYS.REDIRECT_URL, "/");
                     const url =
                         passkeyVerificationRedirectURL(passkeySessionID);
                     setPasskeyVerificationData({ passkeySessionID, url });

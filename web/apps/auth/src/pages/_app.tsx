@@ -138,7 +138,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
 
     const logout = () => {
-        void accountLogout().then(() => router.push(PAGES.ROOT));
+        void accountLogout().then(() => router.push("/"));
     };
 
     const appContext = {

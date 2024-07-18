@@ -35,7 +35,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
             if (!user?.email || !user.twoFactorSessionID) {
-                router.push(PAGES.ROOT);
+                router.push("/");
             } else if (
                 !user.isTwoFactorEnabled &&
                 (user.encryptedToken || user.token)

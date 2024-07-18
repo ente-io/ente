@@ -177,14 +177,14 @@ export default function PublicCollectionGallery() {
             nonClosable: true,
             proceed: {
                 text: t("LOGIN"),
-                action: () => router.push(PAGES.ROOT),
+                action: () => router.push("/"),
                 variant: "accent",
             },
         });
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
-        if (currentURL.pathname !== PAGES.ROOT) {
+        if (currentURL.pathname !== "/") {
             router.replace(
                 {
                     pathname: PAGES.SHARED_ALBUMS,
@@ -192,7 +192,7 @@ export default function PublicCollectionGallery() {
                     hash: currentURL.hash,
                 },
                 {
-                    pathname: PAGES.ROOT,
+                    pathname: "/",
                     search: currentURL.search,
                     hash: currentURL.hash,
                 },

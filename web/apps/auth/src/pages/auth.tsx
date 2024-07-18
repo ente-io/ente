@@ -44,7 +44,7 @@ const Page: React.FC = () => {
                     e.message == CustomError.KEY_MISSING
                 ) {
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
-                    router.push(PAGES.ROOT);
+                    router.push("/");
                 } else if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
                     showSessionExpiredDialog();
