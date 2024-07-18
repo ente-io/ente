@@ -43,14 +43,13 @@ class FileBottomBar extends StatefulWidget {
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   bool isPanorama = false;
-  int? lastFile;
+  bool _isPanoramaCheckInitiated = false;
 
   Future<void> _checkPanoroma() async {
-    if (widget.file.fileType != FileType.image ||
-        lastFile == widget.file.generatedID) {
+    if (widget.file.fileType != FileType.image || _isPanoramaCheckInitiated) {
       return;
     }
-    lastFile = widget.file.generatedID;
+    _isPanoramaCheckInitiated = true;
     final result = await checkIfPanorama(widget.file);
     if (mounted && isPanorama == !result) {
       isPanorama = result;
