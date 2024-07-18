@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
@@ -42,11 +43,25 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
-  bool isPanorama = false;
+  late bool isPanorama;
   bool _isPanoramaCheckInitiated = false;
 
+  @override
+  void initState() {
+    super.initState();
+    isPanorama = widget.file.isPanorama() ?? false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _checkPanorama();
+    return _getBottomBar();
+  }
+
+  // _checkPanorama() method is used to check if the file is a panorama image.
+  // This handles the case when the the file dims (width and height) are not available.
   Future<void> _checkPanorama() async {
-    if (_isPanoramaCheckInitiated) {
+    if (_isPanoramaCheckInitiated || widget.file.hasDims) {
       return;
     }
     _isPanoramaCheckInitiated = true;
@@ -55,12 +70,6 @@ class FileBottomBarState extends State<FileBottomBar> {
       isPanorama = result;
       setState(() {});
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _checkPanorama();
-    return _getBottomBar();
   }
 
   void safeRefresh() {
