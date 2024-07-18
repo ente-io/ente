@@ -96,7 +96,7 @@ const StorageBonusTableComponent: React.FC = () => {
             <TableContainer
                 component={Paper}
                 style={{
-                    backgroundColor: "#F1F1F3", 
+                    backgroundColor: "#F1F1F3",
                 }}
             >
                 <Table aria-label="storage-bonus-table">
