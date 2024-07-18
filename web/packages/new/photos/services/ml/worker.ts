@@ -358,7 +358,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { enteFile, uploadItem }: IndexableItem,
+    { enteFile, uploadItem, remoteDerivedData }: IndexableItem,
     electron: MLWorkerElectron,
     userAgent: string,
 ) => {
@@ -403,23 +403,33 @@ const index = async (
             return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
         });
 
-        const derivedData = {
-            face: {
-                version: faceIndexingVersion,
-                client: userAgent,
-                ...faceIndex,
-            },
-            clip: {
-                version: clipIndexingVersion,
-                client: userAgent,
-                ...clipIndex,
-            },
+        const remoteFaceIndex = {
+            version: faceIndexingVersion,
+            client: userAgent,
+            ...faceIndex,
         };
 
-        log.debug(() => ["Uploading derived data", derivedData]);
+        const remoteCLIPIndex = {
+            version: clipIndexingVersion,
+            client: userAgent,
+            ...clipIndex,
+        };
+
+        // Perform an "upsert" by using the existing raw data we got from the
+        // remote as the base, and inserting or overwriting any newly indexed
+        // parts. See: [Note: Preserve unknown derived data fields].
+
+        const existingRawDerivedData = remoteDerivedData?.raw ?? {};
+        const rawDerivedData = {
+            ...{ existingRawDerivedData },
+            face: remoteFaceIndex,
+            clip: remoteCLIPIndex,
+        };
+
+        log.debug(() => ["Uploading derived data", rawDerivedData]);
 
         try {
-            await putDerivedData(enteFile, derivedData);
+            await putDerivedData(enteFile, rawDerivedData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             log.error(`Failed to put face index for ${f}`, e);
