@@ -47,26 +47,6 @@ import { type RemoteFaceIndex } from "./face";
  *
  * Thus, now this is best thought of a tag for a particular format of encoding
  * all the derived data associated with a file.
- *
- * [Note: Handling versioning of embeddings]
- *
- * The embeddings themselves have a version embedded in them, so it is possible
- * for us to make backward compatible updates to the indexing process on newer
- * clients (There is also a top level version field too but that is not used).
- *
- * If we bump the version of same model (say when indexing on a newer client),
- * the assumption will be that older client will be able to consume the
- * response. e.g.  Say if we improve blur detection, older client should just
- * consume embeddings with a newer version and not try to index the file again
- * locally.
- *
- * If we get an embedding with version that is older than the version the client
- * supports, then the client should ignore it. This way, the file will get
- * reindexed locally an embedding with a newer version will get put to remote.
- *
- * In the case where the changes are not backward compatible and can only be
- * consumed by clients with the relevant scaffolding, then we change this
- * "model" (i.e "type") field to create a new universe of embeddings.
  */
 export type EmbeddingModel =
     // TODO-ML: prune

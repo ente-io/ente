@@ -80,9 +80,30 @@ export type RemoteFaceIndex = FaceIndex & {
     /**
      * An integral version number of the indexing algorithm / pipeline.
      *
+     * [Note: Embedding versions]
+     *
+     * Embeddings have an associated version so it is possible for us to make
+     * backward compatible updates to the indexing process on newer clients.
+     *
      * Clients agree out of band what a particular version means, and guarantee
      * that an embedding with a particular version will be the same (to epsilon
      * cosine similarity) irrespective of the client that indexed the file.
+     *
+     * If we bump the version of same model (say when indexing on a newer
+     * client), we will do it in a manner that older client will be able to
+     * consume the response.  The schema should not change in non-additive
+     * manners. For example, say if we improve blur detection, older client
+     * should just consume embeddings with a newer version and not try to index
+     * the file again locally.
+     *
+     * When fetching from remote, if we get an embedding with version that is
+     * older than the version the client supports, then the client should ignore
+     * it. This way, the file will get reindexed locally and an embedding with a
+     * newer version will also get saved to remote.
+     *
+     * In the case where the changes are not backward compatible and can only be
+     * consumed by clients by making code changes, then we will introduce a new
+     * subtype (top level key) in the derived data.
      */
     version: number;
     /**

@@ -368,18 +368,27 @@ const index = async (
 
     // Massage the existing data (if any) that we got from remote to the form
     // that the rest of this function operates on.
+    //
+    // Discard any existing data that is made by an older indexing pipelines.
+    // See: [Note: Embedding versions]
 
     const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
     const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
 
     let existingFaceIndex: FaceIndex | undefined;
-    if (existingRemoteFaceIndex) {
+    if (
+        existingRemoteFaceIndex &&
+        existingRemoteFaceIndex.version >= faceIndexingVersion
+    ) {
         const { width, height, faces } = existingRemoteFaceIndex;
         existingFaceIndex = { width, height, faces };
     }
 
     let existingCLIPIndex: CLIPIndex | undefined;
-    if (existingRemoteCLIPIndex) {
+    if (
+        existingRemoteCLIPIndex &&
+        existingRemoteCLIPIndex.version >= clipIndexingVersion
+    ) {
         const { embedding } = existingRemoteCLIPIndex;
         existingCLIPIndex = { embedding };
     }
