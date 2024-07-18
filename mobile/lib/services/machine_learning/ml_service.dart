@@ -623,6 +623,7 @@ class MLService {
 
   Future<void> _ensureReadyForInference() async {
     await _initIsolate();
+    await _initModelsUsingFfiBasedPlugin();
     if (Platform.isAndroid) {
       await _initModelUsingEntePlugin();
     } else {

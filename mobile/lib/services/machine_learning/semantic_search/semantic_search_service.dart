@@ -69,9 +69,13 @@ class SemanticSearchService {
 
     // ignore: unawaited_futures
     _loadTextModel().then((_) async {
-      _logger.info("Getting text embedding");
-      await _getTextEmbedding("warm up text encoder");
-      _logger.info("Got text embedding");
+      try {
+        _logger.info("Getting text embedding");
+        await _getTextEmbedding("warm up text encoder");
+        _logger.info("Got text embedding");
+      } catch (e) {
+        _logger.severe("Failed to get text embedding", e);
+      }
     });
   }
 
@@ -257,6 +261,7 @@ class SemanticSearchService {
     _logger.info("Initializing ML framework");
     try {
       await ClipTextEncoder.instance.loadModel();
+      await ClipTextEncoder.instance.loadModel(useEntePlugin: true);
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
@@ -291,13 +296,16 @@ class SemanticSearchService {
     }
     try {
       final int clipAddress = ClipTextEncoder.instance.sessionAddress;
-      final textEmbedding = await _computer.compute(
-        ClipTextEncoder.infer,
-        param: {
-          "text": query,
-          "address": clipAddress,
-        },
-      ) as List<double>;
+      // final textEmbedding = await _computer.compute(
+      //   ClipTextEncoder.infer,
+      //   param: {
+      //     "text": query,
+      //     "address": clipAddress,
+      //   },
+      // ) as List<double>;
+      final textEmbedding = await ClipTextEncoder.infer(
+        {"text": query, "address": clipAddress},
+      );
       _queryCache.put(query, textEmbedding);
       return textEmbedding;
     } catch (e) {
@@ -343,6 +351,7 @@ class SemanticSearchService {
       clipImageAddress,
       useEntePlugin: useEntePlugin,
     );
+
     final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);
 
     return clipResult;
