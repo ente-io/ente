@@ -364,7 +364,6 @@ const index = async (
 ) => {
     const f = fileLogID(enteFile);
     const fileID = enteFile.id;
-    const startTime = Date.now();
 
     // Massage the existing data (if any) that we got from remote to the form
     // that the rest of this function operates on.
@@ -429,6 +428,8 @@ const index = async (
         let faceIndex: FaceIndex;
         let clipIndex: CLIPIndex;
 
+        const startTime = Date.now();
+
         try {
             [faceIndex, clipIndex] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
@@ -443,17 +444,19 @@ const index = async (
 
         log.debug(() => {
             const ms = Date.now() - startTime;
-            const nf = faceIndex.faces.length;
-            return `Indexed ${nf} faces and clip in ${f} (${ms} ms)`;
+            const msg = [];
+            if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
+            if (!existingCLIPIndex) msg.push("clip");
+            return `Indexed ${msg.join(" and ")} clip in ${f} (${ms} ms)`;
         });
 
-        const remoteFaceIndex = {
+        const remoteFaceIndex = existingRemoteFaceIndex ?? {
             version: faceIndexingVersion,
             client: userAgent,
             ...faceIndex,
         };
 
-        const remoteCLIPIndex = {
+        const remoteCLIPIndex = existingRemoteCLIPIndex ?? {
             version: clipIndexingVersion,
             client: userAgent,
             ...clipIndex,
