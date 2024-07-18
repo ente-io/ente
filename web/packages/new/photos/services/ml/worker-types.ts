@@ -12,7 +12,6 @@
  * {@link Electron} that are needed by the code running in the ML web worker.
  */
 export interface MLWorkerElectron {
-    appVersion: () => Promise<string>;
     detectFaces: (input: Float32Array) => Promise<Float32Array>;
     computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
     computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;

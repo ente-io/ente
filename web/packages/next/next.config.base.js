@@ -13,6 +13,7 @@
 const cp = require("child_process");
 const os = require("os");
 const path = require("path");
+const fs = require("fs");
 
 /**
  * Return the current commit ID if we're running inside a git repository.
@@ -65,6 +66,17 @@ const appName = path.basename(process.cwd());
 const isDesktop = process.env._ENTE_IS_DESKTOP ? "1" : "";
 
 /**
+ * When we're running within the desktop app, also extract the version of the
+ * desktop app for use in our "X-Client-Package" string.
+ *
+ * > The web app has continuous deployments, and doesn't have versions.
+ */
+const desktopAppVersion = isDesktop
+    ? JSON.parse(fs.readFileSync("../../../desktop/package.json", "utf-8"))
+          .version
+    : undefined;
+
+/**
  * Configuration for the Next.js build
  *
  * @type {import("next").NextConfig}
@@ -84,6 +96,7 @@ const nextConfig = {
         gitSHA,
         appName,
         isDesktop,
+        desktopAppVersion,
     },
 
     // Customize the webpack configuration used by Next.js.

@@ -69,7 +69,6 @@ interface IndexableItem {
 export class MLWorker {
     private electron: MLWorkerElectron | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private userAgent: string | undefined;
     private state: "idle" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -91,8 +90,6 @@ export class MLWorker {
     async init(electron: MLWorkerElectron, delegate?: MLWorkerDelegate) {
         this.electron = electron;
         this.delegate = delegate;
-        // Set the user agent that'll be set in the generated embeddings.
-        this.userAgent = `${clientPackageName}/${await electron.appVersion()}`;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
@@ -181,7 +178,6 @@ export class MLWorker {
         const allSuccess = await indexNextBatch(
             items,
             ensure(this.electron),
-            ensure(this.userAgent),
             this.delegate,
         );
         if (allSuccess) {
@@ -241,7 +237,6 @@ expose(MLWorker);
 const indexNextBatch = async (
     items: IndexableItem[],
     electron: MLWorkerElectron,
-    userAgent: string,
     delegate: MLWorkerDelegate | undefined,
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
@@ -259,7 +254,7 @@ const indexNextBatch = async (
     let allSuccess = true;
     for (const item of items) {
         try {
-            await index(item, electron, userAgent);
+            await index(item, electron);
             delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
@@ -359,7 +354,6 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
 const index = async (
     { enteFile, uploadItem, remoteDerivedData }: IndexableItem,
     electron: MLWorkerElectron,
-    userAgent: string,
 ) => {
     const f = fileLogID(enteFile);
     const fileID = enteFile.id;
@@ -453,13 +447,13 @@ const index = async (
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
             version: faceIndexingVersion,
-            client: userAgent,
+            client: clientPackageName,
             ...faceIndex,
         };
 
         const remoteCLIPIndex = existingRemoteCLIPIndex ?? {
             version: clipIndexingVersion,
-            client: userAgent,
+            client: clientPackageName,
             ...clipIndex,
         };
 
