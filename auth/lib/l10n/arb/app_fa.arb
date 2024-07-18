@@ -230,5 +230,10 @@
   "thisDevice": "این دستگاه",
   "editCodeAuthMessage": "احراز هویت برای ویرایش کد",
   "deleteCodeAuthMessage": "احراز هویت برای حذف کد",
-  "showQRAuthMessage": "احراز هویت برای نمایش کد QR"
+  "showQRAuthMessage": "احراز هویت برای نمایش کد QR",
+  "tags": "برچسب‌ها",
+  "createNewTag": "ایجاد برچسب جدید",
+  "tag": "برچسب",
+  "create": "ایجاد",
+  "editTag": "ویرایش برچسب"
 }

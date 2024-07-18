@@ -167,5 +167,7 @@ const localeName = (locale: SupportedLocale) => {
             return "Brazilian Portuguese";
         case "ru-RU":
             return "Russian";
+        case "pl-PL":
+            return "Polish";
     }
 };

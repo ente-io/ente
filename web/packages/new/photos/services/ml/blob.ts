@@ -15,25 +15,13 @@ export interface ImageBitmapAndData {
 }
 
 /**
- * Return an {@link ImageBitmap} and its {@link ImageData}.
- *
- * @param enteFile The {@link EnteFile} to index.
- *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
- *
- * @param electron The {@link MLWorkerElectron} instance that allows us to call
- * our Node.js layer for various functionality.
+ * Create an {@link ImageBitmap} from the given {@link imageBlob}, and return
+ * both the image bitmap and its {@link ImageData}.
  */
 export const imageBitmapAndData = async (
-    enteFile: EnteFile,
-    uploadItem: UploadItem | undefined,
-    electron: MLWorkerElectron,
+    imageBlob: Blob,
 ): Promise<ImageBitmapAndData> => {
-    const imageBitmap = uploadItem
-        ? await renderableUploadItemImageBitmap(enteFile, uploadItem, electron)
-        : await renderableImageBitmap(enteFile);
+    const imageBitmap = await createImageBitmap(imageBlob);
 
     const { width, height } = imageBitmap;
 
@@ -47,14 +35,34 @@ export const imageBitmapAndData = async (
 };
 
 /**
- * Return a {@link ImageBitmap} that downloads the source image corresponding to
- * {@link enteFile} from remote.
+ * Return a {@link Blob} that can be used to create an {@link ImageBitmap}.
+ *
+ * The blob from the relevant image component is either constructed using the
+ * given {@link uploadItem} if present, otherwise it is downloaded from remote.
  *
  * -   For images the original is used.
  * -   For live photos the original image component is used.
  * -   For videos the thumbnail is used.
+ *
+ * @param enteFile The {@link EnteFile} to index.
+ *
+ * @param uploadItem If we're called during the upload process, then this will
+ * be set to the {@link UploadItem} that was uploaded. This way, we can directly
+ * use the on-disk file instead of needing to download the original from remote.
+ *
+ * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * our Node.js layer for various functionality.
  */
-export const renderableImageBitmap = async (enteFile: EnteFile) => {
+export const renderableBlob = async (
+    enteFile: EnteFile,
+    uploadItem: UploadItem | undefined,
+    electron: MLWorkerElectron,
+): Promise<Blob> =>
+    uploadItem
+        ? await renderableUploadItemBlob(enteFile, uploadItem, electron)
+        : await renderableEnteFileBlob(enteFile);
+
+export const renderableEnteFileBlob = async (enteFile: EnteFile) => {
     const fileType = enteFile.metadata.fileType;
     let blob: Blob | undefined;
     if (fileType == FILE_TYPE.VIDEO) {
@@ -63,17 +71,10 @@ export const renderableImageBitmap = async (enteFile: EnteFile) => {
     } else {
         blob = await fetchRenderableBlob(enteFile);
     }
-    return createImageBitmap(ensure(blob));
+    return ensure(blob);
 };
 
-/**
- * Variant of {@link renderableImageBitmap} that uses the given
- * {@link uploadItem} to construct the image bitmap instead of downloading the
- * original from remote.
- *
- * For videos the thumbnail is still downloaded from remote.
- */
-export const renderableUploadItemImageBitmap = async (
+const renderableUploadItemBlob = async (
     enteFile: EnteFile,
     uploadItem: UploadItem,
     electron: MLWorkerElectron,
@@ -87,7 +88,7 @@ export const renderableUploadItemImageBitmap = async (
         const file = await readNonVideoUploadItem(uploadItem, electron);
         blob = await renderableImageBlob(enteFile.metadata.title, file);
     }
-    return createImageBitmap(ensure(blob));
+    return ensure(blob);
 };
 
 /**

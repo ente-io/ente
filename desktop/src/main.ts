@@ -30,6 +30,7 @@ import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
 import { registerStreamProtocol } from "./main/stream";
+import { wait } from "./main/utils/common";
 import { isDev } from "./main/utils/electron";
 
 /**
@@ -109,7 +110,11 @@ const main = () => {
     //
     // Note that some Electron APIs can only be used after this event occurs.
     void app.whenReady().then(() => {
+        attachProcessHandlers();
+
         void (async () => {
+            if (isDev) await waitForRendererDevServer();
+
             // Create window and prepare for the renderer.
             mainWindow = createMainWindow();
 
@@ -259,6 +264,50 @@ const handleEnteLinks = (mainWindow: BrowserWindow, url: string) => {
     // use the same scheme ("ente://"), so the URL can directly be forwarded.
     mainWindow.webContents.send("openURL", url);
 };
+
+/** Attach handlers to the (node) process. */
+const attachProcessHandlers = () => {
+    // Gracefully quit the app if we get a SIGINT.
+    //
+    // This is meant to allow graceful shutdowns during development, when the
+    // app is launched using `yarn dev`. In such cases, pressing CTRL-C sends a
+    // SIGINT to the process. The default handling of SIGINT is not graceful
+    // enough (apparently), since I can observe that sometimes recent writes to
+    // local storage are lost. This has also been reported by other people:
+    // https://github.com/electron/electron/issues/22048
+    //
+    // Hopefully handling SIGINT prevents that issue. But beyond that, it allows
+    // us to also write out `userPreferences.json` (as would happen during a
+    // normal quit sequence), so this is an improvement either ways.
+    process.on("SIGINT", () => app.quit());
+};
+
+/**
+ * Wait for the renderer process' dev server to be ready.
+ *
+ * After creating the main window, we load the web app into it using `loadURL`.
+ * In production, these are served directly from the SSR-ed static files bundled
+ * with the app, and so can be served instantly. However, during development, we
+ * start a dev server for serving the HMR-ed files.
+ *
+ * This Next.js HMR server takes time to startup and is sometimes not ready to
+ * handle incoming requests when the main window tries to load it. In such
+ * cases, Electron just hangs with this:
+ *
+ *     [main] Error: net::ERR_CONNECTION_REFUSED
+ *      [main]     at SimpleURLLoaderWrapper.<anonymous> (node:electron/js2c/browser_init:2:114482)
+ *      [main]     at SimpleURLLoaderWrapper.emit (node:events:519:28)
+ *
+ * As a workaround, we wait for 1 second.
+ *
+ * I'd also tried fancier workaround - polling the URL - but waits until the dev
+ * server has the response ready, delaying everything many seconds (we just want
+ * to see if the dev server can accept connections). The 1 second delay seems to
+ * get the job done for now.
+ *
+ * This workaround can likely be removed when we migrate to Vite.
+ */
+const waitForRendererDevServer = () => wait(1000);
 
 /**
  * Create an return the {@link BrowserWindow} that will form our app's UI.

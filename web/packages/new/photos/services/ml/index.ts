@@ -9,6 +9,7 @@ import { blobCache } from "@/next/blob-cache";
 import { ensureElectron } from "@/next/electron";
 import log from "@/next/log";
 import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
 import { isBetaUser, isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
@@ -18,25 +19,18 @@ import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 
 /**
- * In-memory flag that tracks if ML is enabled locally.
+ * In-memory flag that tracks if ML is enabled.
  *
  * -   On app start, this is read from local storage during {@link initML}.
  *
- * -   It gets updated if the user enables/disables ML (remote) or if they
- *     pause/resume ML (local).
+ * -   It gets updated when we sync with remote (so if the user enables/disables
+ *     ML on a different device, this local value will also become true/false).
+ *
+ * -   It gets updated when the user enables/disables ML on this device.
  *
  * -   It is cleared in {@link logoutML}.
  */
-let _isMLEnabledLocal = false;
-
-/**
- * In-memory flag that tracks if the remote flag for ML is set.
- *
- * -   It is updated each time we sync the status with remote.
- *
- * -   It is cleared in {@link logoutML}.
- */
-let _isMLEnabledRemote: boolean | undefined;
+let _isMLEnabled = false;
 
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
 let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
@@ -120,16 +114,16 @@ export const canEnableML = async () =>
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
-    _isMLEnabledLocal = isMLEnabledLocally();
+    _isMLEnabled = isMLEnabledLocal();
 };
 
 export const logoutML = async () => {
-    // `terminateMLWorker` is conceptually also part of this, but for the
-    // reasons mentioned in [Note: Caching IDB instances in separate execution
-    // contexts], it gets called first in the logout sequence, and then this
-    // function (`logoutML`) gets called at a later point in time.
-    _isMLEnabledLocal = false;
-    _isMLEnabledRemote = undefined;
+    // `terminateMLWorker` is conceptually also part of this sequence, but for
+    // the reasons mentioned in [Note: Caching IDB instances in separate
+    // execution contexts], it gets called first in the logout sequence, and
+    // then this function (`logoutML`) gets called at a later point in time.
+
+    _isMLEnabled = false;
     _mlStatusListeners = [];
     _mlStatusSnapshot = undefined;
     await clearMLDB();
@@ -138,22 +132,13 @@ export const logoutML = async () => {
 /**
  * Return true if the user has enabled machine learning in their preferences.
  *
- * [Note: ML preferences]
- *
- * The user may enable ML. This enables in both locally by persisting a local
- * storage flag, and sets a flag on remote so that the user's other devices can
- * also enable it if they wish.
- *
- * The user may pause ML locally. This does not modify the remote flag, but it
- * unsets the local flag. Subsequently resuming ML (locally) will set the local
- * flag again.
- *
- * ML related operations are driven by the {@link isMLEnabled} property. This is
- * true if ML is enabled locally (which implies it is also enabled on remote).
+ * Enabling ML enables in both locally by persisting a local storage flag, and
+ * sets a flag on remote so that the user's other devices can also enable it
+ * when they next sync with remote.
  */
 export const isMLEnabled = () =>
     // Implementation note: Keep it fast, it might be called frequently.
-    _isMLEnabledLocal;
+    _isMLEnabled;
 
 /**
  * Enable ML.
@@ -162,9 +147,8 @@ export const isMLEnabled = () =>
  */
 export const enableML = async () => {
     await updateIsMLEnabledRemote(true);
-    setIsMLEnabledLocally(true);
-    _isMLEnabledRemote = true;
-    _isMLEnabledLocal = true;
+    setIsMLEnabledLocal(true);
+    _isMLEnabled = true;
     setInterimScheduledStatus();
     triggerStatusUpdate();
     triggerMLSync();
@@ -178,40 +162,14 @@ export const enableML = async () => {
  */
 export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
+    setIsMLEnabledLocal(false);
+    _isMLEnabled = false;
     terminateMLWorker();
-    setIsMLEnabledLocally(false);
-    _isMLEnabledRemote = false;
-    _isMLEnabledLocal = false;
     triggerStatusUpdate();
 };
 
 /**
- * Pause ML on this device.
- *
- * Stop any in-progress ML tasks, and persist the user's local preference.
- */
-export const pauseML = () => {
-    terminateMLWorker();
-    setIsMLEnabledLocally(false);
-    _isMLEnabledLocal = false;
-    triggerStatusUpdate();
-};
-
-/**
- * Resume ML on this device.
- *
- * Persist the user's preference locally, and trigger a sync.
- */
-export const resumeML = () => {
-    setIsMLEnabledLocally(true);
-    _isMLEnabledLocal = true;
-    setInterimScheduledStatus();
-    triggerStatusUpdate();
-    triggerMLSync();
-};
-
-/**
- * Return true if ML is enabled locally.
+ * Return true if our local persistence thinks that ML is enabled.
  *
  * This setting is persisted locally (in local storage). It is not synced with
  * remote and only tracks if ML is enabled locally.
@@ -219,13 +177,14 @@ export const resumeML = () => {
  * The remote status is tracked with a separate {@link isMLEnabledRemote} flag
  * that is synced with remote.
  */
-const isMLEnabledLocally = () =>
+const isMLEnabledLocal = () =>
+    // TODO-ML: Rename this flag
     localStorage.getItem("faceIndexingEnabled") == "1";
 
 /**
- * Update the (locally stored) value of {@link isMLEnabledLocally}.
+ * Update the (locally stored) value of {@link isMLEnabledLocal}.
  */
-const setIsMLEnabledLocally = (enabled: boolean) =>
+const setIsMLEnabledLocal = (enabled: boolean) =>
     enabled
         ? localStorage.setItem("faceIndexingEnabled", "1")
         : localStorage.removeItem("faceIndexingEnabled");
@@ -241,10 +200,10 @@ const mlRemoteKey = "faceSearchEnabled";
 /**
  * Return `true` if the flag to enable ML is set on remote.
  */
-export const getIsMLEnabledRemote = () => getRemoteFlag(mlRemoteKey);
+const getIsMLEnabledRemote = () => getRemoteFlag(mlRemoteKey);
 
 /**
- * Update the remote flag that tracks ML status across the user's devices.
+ * Update the remote flag that tracks the user's ML preference.
  */
 const updateIsMLEnabledRemote = (enabled: boolean) =>
     updateRemoteFlag(mlRemoteKey, enabled);
@@ -254,23 +213,20 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
  *
  * This is called during the global sync sequence.
  *
- * First we check again with remote ML flag is set. If it is not set, then we
- * disable ML locally too.
+ * * It checks with remote if the ML flag is set, and updates our local flag to
+ *   reflect that value.
  *
- * Otherwise, and if ML is enabled locally also, then we use this as a signal to
- * pull embeddings from remote, and start backfilling if needed.
- *
- * This function does not wait for these processes to run to completion, and
- * returns immediately.
+ * * If ML is enabled, it pulls any missing embeddings from remote and starts
+ *   indexing to backfill any missing values.
  */
 export const triggerMLSync = () => void mlSync();
 
 const mlSync = async () => {
-    _isMLEnabledRemote = await getIsMLEnabledRemote();
-    if (!_isMLEnabledRemote) _isMLEnabledLocal = false;
+    _isMLEnabled = await getIsMLEnabledRemote();
+    setIsMLEnabledLocal(_isMLEnabled);
     triggerStatusUpdate();
 
-    if (_isMLEnabledLocal) void worker().then((w) => w.sync());
+    if (_isMLEnabled) void worker().then((w) => w.sync());
 };
 
 /**
@@ -289,7 +245,7 @@ const mlSync = async () => {
  * image part of the live photo that was uploaded.
  */
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
-    if (!_isMLEnabledLocal) return;
+    if (!_isMLEnabled) return;
     if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
@@ -302,9 +258,9 @@ export type MLStatus =
            * Which phase we are in within the indexing pipeline when viewed across the
            * user's entire library:
            *
-           * - "paused": ML is currently paused on this device.
-           *
-           * - "scheduled": There are files we know of that have not been indexed.
+           * - "scheduled": A ML job is scheduled. Likely there are files we
+           *   know of that have not been indexed, but is also the state before
+           *   the first run of the indexer after app start.
            *
            * - "indexing": The indexer is currently running.
            *
@@ -314,7 +270,7 @@ export type MLStatus =
            * - "done": ML indexing and face clustering is complete for the user's
            *   library.
            */
-          phase: "paused" | "scheduled" | "indexing" | "clustering" | "done";
+          phase: "scheduled" | "indexing" | "clustering" | "done";
           /** The number of files that have already been indexed. */
           nSyncedFiles: number;
           /** The total number of files that are eligible for indexing. */
@@ -371,27 +327,19 @@ const setMLStatusSnapshot = (snapshot: MLStatus) => {
 };
 
 /**
- * Return the current state of the ML subsystem.
- *
- * Precondition: ML must be enabled on remote, though it is fine if it is paused
- * locally.
+ * Compute the current state of the ML subsystem.
  */
 const getMLStatus = async (): Promise<MLStatus> => {
-    if (!_isMLEnabledRemote) return { phase: "disabled" };
+    if (!_isMLEnabled) return { phase: "disabled" };
 
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
 
     let phase: MLStatus["phase"];
-    if (!_isMLEnabledLocal) {
-        phase = "paused";
-    } else {
+    if (indexableCount > 0) {
         const isIndexing = await (await worker()).isIndexing();
-
-        if (indexableCount > 0) {
-            phase = !isIndexing ? "scheduled" : "indexing";
-        } else {
-            phase = "done";
-        }
+        phase = !isIndexing ? "scheduled" : "indexing";
+    } else {
+        phase = "done";
     }
 
     return {
@@ -406,10 +354,10 @@ const getMLStatus = async (): Promise<MLStatus> => {
  *
  * So this is an intermediate state with possibly incorrect counts (but correct
  * phase) that is set immediately to trigger a UI update. It uses the counts
- * from the last known status, just updates the phase.
+ * from the last known status, and just updates the phase.
  *
  * Once the worker is initialized and the correct counts fetched, this will
- * update to the correct state (should take less than one second).
+ * update to the correct state (should take less than a second).
  */
 const setInterimScheduledStatus = () => {
     let nSyncedFiles = 0,
@@ -421,7 +369,7 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFile = triggerStatusUpdate;
+const workerDidProcessFile = throttled(updateMLStatusSnapshot, 2000);
 
 /**
  * Return the IDs of all the faces in the given {@link enteFile} that are not

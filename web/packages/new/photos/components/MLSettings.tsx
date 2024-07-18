@@ -1,12 +1,8 @@
 import {
     disableML,
     enableML,
-    getIsMLEnabledRemote,
-    isMLEnabled,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    pauseML,
-    resumeML,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
@@ -72,21 +68,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         else onClose();
     };
 
-    const handleEnableML = async () => {
-        startLoading();
-        try {
-            if (!(await getIsMLEnabledRemote())) {
-                setOpenFaceConsent(true);
-            } else {
-                await enableML();
-            }
-        } catch (e) {
-            log.error("Failed to enable or resume ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleEnableML = () => setOpenFaceConsent(true);
 
     const handleConsent = async () => {
         startLoading();
@@ -189,7 +171,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                 </Button>
 
                 <Button color="secondary" size="large" onClick={moreDetails}>
-                    {t("ML_MORE_DETAILS")}
+                    {t("more_details")}
                 </Button>
             </Stack>
             <Typography color="text.faint" variant="small">
@@ -322,9 +304,6 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     let status: string;
     switch (phase) {
-        case "paused":
-            status = pt("Paused");
-            break;
         case "indexing":
             status = pt("Indexing");
             break;
@@ -338,17 +317,11 @@ const ManageML: React.FC<ManageMLProps> = ({
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
 
-    const handleToggleLocal = () => (isMLEnabled() ? pauseML() : resumeML());
-
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
             title: pt("Disable ML search"),
-            content: (
-                <Typography>
-                    {pt(
-                        "Do you want to disable ML search on all your devices?",
-                    )}
-                </Typography>
+            content: pt(
+                "Do you want to disable ML search on all your devices?",
             ),
             close: { text: t("CANCEL") },
             proceed: {
@@ -369,14 +342,6 @@ const ManageML: React.FC<ManageMLProps> = ({
                         variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
-                    />
-                </MenuItemGroup>
-                <MenuItemGroup>
-                    <EnteMenuItem
-                        label={pt("On this device")}
-                        variant="toggle"
-                        checked={phase != "paused"}
-                        onClick={handleToggleLocal}
                     />
                 </MenuItemGroup>
             </Stack>

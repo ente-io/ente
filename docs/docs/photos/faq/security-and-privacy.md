@@ -1,6 +1,7 @@
 ---
 title: Security and Privacy FAQ
-description: Comprehensive information about security and privacy measures in Ente Photos
+description:
+    Comprehensive information about security and privacy measures in Ente Photos
 ---
 
 # Security and Privacy FAQ
@@ -13,17 +14,20 @@ protection and transparency.
 ## Data Encryption and Storage
 
 ### Can Ente see my photos and videos?
+
 No. Your files are encrypted on your device before being uploaded to our
 servers. The encryption keys are derived from your password using advanced key
 derivation functions. Since only you know your password, only you can decrypt
-your files. For technical details, please see our [architecture
-document](https://ente.io/architecture).
+your files. For technical details, please see our
+[architecture document](https://ente.io/architecture).
 
 ### How is my data encrypted?
+
 We use the following encryption algorithms:
-- Encryption: `XChaCha20` and `XSalsa20`
-- Authentication: Poly1305 message authentication code (MAC)
-- Key derivation: Argon2id with high memory and computation parameters
+
+-   Encryption: `XChaCha20` and `XSalsa20`
+-   Authentication: Poly1305 message authentication code (MAC)
+-   Key derivation: Argon2id with high memory and computation parameters
 
 These algorithms are implemented using
 [libsodium](https://libsodium.gitbook.io/doc/), a externally audited
@@ -31,17 +35,20 @@ cryptographic library. Our [architecture document](https://ente.io/architecture)
 provides full technical specifications.
 
 ### Where is my data stored?
+
 Your encrypted data is stored redundantly across multiple providers in the EU:
-- Amsterdam, Netherlands
-- Paris, France
-- Frankfurt, Germany
+
+-   Amsterdam, Netherlands
+-   Paris, France
+-   Frankfurt, Germany
 
 We use a combination of object storage and distributed databases to ensure high
-availability and durability. Our [reliability
-document](https://ente.io/reliability) provides in-depth information about our
-storage infrastructure and data replication strategies.
+availability and durability. Our
+[reliability document](https://ente.io/reliability) provides in-depth
+information about our storage infrastructure and data replication strategies.
 
 ### How does Ente's encryption compare to industry standards?
+
 Our encryption model goes beyond industry standards. While many services use
 server-side encryption, we implement end-to-end encryption. This means that even
 in the unlikely event of a server breach, your data remains protected.
@@ -49,6 +56,7 @@ in the unlikely event of a server breach, your data remains protected.
 ## Account Security
 
 ### What happens if I forget my password?
+
 You can reset your password using your recovery key. This key is a randomly
 generated string provided to you during account creation. Store it securely, as
 it's your lifeline if you forget your password. If you lose both your password
@@ -56,6 +64,7 @@ and recovery key, we cannot recover your account or data due to our
 zero-knowledge architecture.
 
 ### Can I change my password?
+
 Yes, you can change your password at any time from our apps. Our architecture
 allows password changes without re-encrypting your entire library.
 
@@ -63,9 +72,11 @@ The privacy of your account is a function of the strength of your password,
 please choose a strong one.
 
 ### Do you support two-factor authentication (2FA)?
+
 Yes, we recommend enabling 2FA for an additional layer of security. We support:
-- Time-based One-Time Passwords (TOTP)
-- WebAuthn/FIDO2 for hardware security keys
+
+-   Time-based One-Time Passwords (TOTP)
+-   WebAuthn/FIDO2 for hardware security keys
 
 You can set up 2FA in the settings of our mobile or desktop apps.
 
@@ -88,6 +99,7 @@ receiver just needs a free Ente account.
 ## Security Audits
 
 ## Has the Ente Photos app been audited by a credible source?
+
 Yes, Ente Photos has undergone a thorough security audit conducted by Cure53, in
 collaboration with Symbolic Software. Cure53 is a prominent German cybersecurity
 firm, while Symbolic Software specializes in applied cryptography. Please find

@@ -203,6 +203,10 @@
       "title": "ING"
     },
     {
+      "title": "Instant Gaming",
+      "slug": "instant_gaming"
+    },
+    {
       "title": "Instagram"
     },
     {
@@ -296,6 +300,13 @@
     },
     {
       "title": "Mintos"
+    },
+    {
+      "title": "Mistral",
+      "altNames": [
+        "Mistral AI",
+        "MistralAI"
+      ]
     },
     {
       "title": "Mozilla"
@@ -470,6 +481,13 @@
       "altNames": [
         "Techlore Courses",
         "Techlore Forums"
+      ]
+    },
+    {
+      "title": "Teleport",
+      "altNames": [
+        "Gravitational Teleport",
+        "GoTeleport"
       ]
     },
     {
