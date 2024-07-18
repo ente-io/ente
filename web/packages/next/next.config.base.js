@@ -72,7 +72,8 @@ const isDesktop = process.env._ENTE_IS_DESKTOP ? "1" : "";
  * > The web app has continuous deployments, and doesn't have versions.
  */
 const desktopAppVersion = isDesktop
-    ? JSON.parse(fs.readFileSync("../../desktop/package.json", "utf-8")).version
+    ? JSON.parse(fs.readFileSync("../../../desktop/package.json", "utf-8"))
+          .version
     : undefined;
 
 /**
