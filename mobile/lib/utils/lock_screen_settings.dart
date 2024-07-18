@@ -22,12 +22,11 @@ class LockScreenSettings {
   late SharedPreferences _preferences;
   static const List<Duration> autoLockDurations = [
     Duration(seconds: 0),
-    Duration(seconds: 30),
+    Duration(seconds: 5),
+    Duration(seconds: 15),
     Duration(minutes: 1),
     Duration(minutes: 5),
-    Duration(minutes: 15),
     Duration(minutes: 30),
-    Duration(hours: 1),
   ];
   void init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();

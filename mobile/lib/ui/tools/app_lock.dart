@@ -22,7 +22,7 @@ import "package:photos/utils/lock_screen_settings.dart";
 /// `AppLock.of(context).disable();` or the convenience method `AppLock.of(context).setEnabled(enabled);`
 /// using a bool argument.
 ///
-/// [backgroundLockLatency] determines how much time is allowed to pass when
+/// [_backgroundLockLatencyTimer] determines how much time is allowed to pass when
 /// the app is in the background state before the [lockScreen] widget should be
 /// shown upon returning. It defaults to instantly.
 ///
@@ -32,7 +32,6 @@ class AppLock extends StatefulWidget {
   final Widget Function(Object?) builder;
   final Widget lockScreen;
   final bool enabled;
-  final Duration backgroundLockLatency;
   final ThemeData? darkTheme;
   final ThemeData? lightTheme;
   final ThemeMode savedThemeMode;
@@ -45,7 +44,6 @@ class AppLock extends StatefulWidget {
     required this.savedThemeMode,
     this.enabled = true,
     this.locale = const Locale("en", "US"),
-    this.backgroundLockLatency = const Duration(seconds: 0),
     this.darkTheme,
     this.lightTheme,
   }) : super(key: key);

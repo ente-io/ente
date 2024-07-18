@@ -118,17 +118,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else if (duration.inSeconds != 0) {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
-      return "Disabled";
-    }
-  }
-
-  String _getAppLockType() {
-    if (isPinEnabled) {
-      return "Pin";
-    } else if (isPasswordEnabled) {
-      return "Password";
-    } else {
-      return "Device lock";
+      return "Immediately";
     }
   }
 
@@ -269,7 +259,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      "Require ${_getAppLockType()} if away for some time .",
+                                      "Time after which the app will be locked after closing",
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),
