@@ -9,9 +9,9 @@
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 
 /**
- * Encrypt arbitrary metadata associated with a file using its key.
+ * Encrypt arbitrary metadata associated with a file using the file's key.
  *
- * @param metadata The metadata (string) to encrypt.
+ * @param metadata The metadata (bytes) to encrypt.
  *
  * @param keyB64 Base64 encoded string containing the encryption key (this'll
  * generally be the file's key).
@@ -20,16 +20,10 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
  * decryption header.
  */
 export const encryptFileMetadata = async (
-    metadata: string,
+    metadata: Uint8Array,
     keyB64: string,
-): Promise<{ encryptedMetadataB64: string; decryptionHeaderB64: string }> => {
-    const encoder = new TextEncoder();
-    const encodedMetadata = encoder.encode(metadata);
-
-    const { file } = await libsodium.encryptChaChaOneShot(
-        encodedMetadata,
-        keyB64,
-    );
+) => {
+    const { file } = await libsodium.encryptChaChaOneShot(metadata, keyB64);
     return {
         encryptedMetadataB64: await libsodium.toB64(file.encryptedData),
         decryptionHeaderB64: file.decryptionHeader,
@@ -37,7 +31,7 @@ export const encryptFileMetadata = async (
 };
 
 /**
- * Decrypt arbitrary metadata associated with a file using the its key.
+ * Decrypt arbitrary metadata associated with a file using the file's key.
  *
  * @param encryptedMetadataB64 Base64 encoded string containing the encrypted
  * data.
@@ -48,18 +42,15 @@ export const encryptFileMetadata = async (
  * @param keyB64 Base64 encoded string containing the encryption key (this'll
  * generally be the file's key).
  *
- * @returns The decrypted utf-8 string.
+ * @returns The decrypted metadata bytes.
  */
 export const decryptFileMetadata = async (
     encryptedMetadataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,
-) => {
-    const metadataBytes = await libsodium.decryptChaChaOneShot(
+) =>
+    libsodium.decryptChaChaOneShot(
         await libsodium.fromB64(encryptedMetadataB64),
         await libsodium.fromB64(decryptionHeaderB64),
         keyB64,
     );
-    const textDecoder = new TextDecoder();
-    return textDecoder.decode(metadataBytes);
-};

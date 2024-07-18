@@ -143,6 +143,13 @@ export const openBlobCache = async (
  * To convert from a Uint8Array/ArrayBuffer/Blob to a ReadableStream
  *
  *     new Response(array).body
+ *        OR
+ *     new Blob([...]).stream()
+ *
+ * To convert from a stream to a string (or JSON)
+ *
+ *     await new Response(stream).text()
+ *     await new Response(stream).json()
  *
  * Refs:
  * - https://github.com/yigitunallar/arraybuffer-vs-blob

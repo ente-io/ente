@@ -1,4 +1,3 @@
-import type { EnteFile } from "@/new/photos/types/file";
 import type { Electron } from "@/next/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
@@ -59,14 +58,8 @@ export const clipIndexingVersion = 1;
  * itself, is the same across clients - web and mobile.
  */
 export interface CLIPIndex {
-    /** The ID of the {@link EnteFile} whose index this is. */
-    fileID: number;
-    /** An integral version number of the indexing algorithm / pipeline. */
-    version: number;
-    /** The UA for the client which generated this embedding. */
-    client: string;
     /**
-     * The CLIP embedding itself.
+     * The CLIP embedding.
      *
      * This is an array of 512 floating point values that represent the
      * embedding of the image in the same space where we'll embed the text so
@@ -74,6 +67,18 @@ export interface CLIPIndex {
      */
     embedding: number[];
 }
+
+export type RemoteCLIPIndex = CLIPIndex & {
+    /** An integral version number of the indexing algorithm / pipeline. */
+    version: number;
+    /** The UA for the client which generated this embedding. */
+    client: string;
+};
+
+export type LocalCLIPIndex = CLIPIndex & {
+    /** The ID of the {@link EnteFile} whose index this is. */
+    fileID: number;
+};
 
 /**
  * Compute the CLIP embedding of a given file.
@@ -89,33 +94,19 @@ export interface CLIPIndex {
  * that it can be saved locally and also uploaded to the user's remote storage
  * for use on their other devices).
  *
- * @param enteFile The {@link EnteFile} to index.
- *
  * @param uploadItem If we're called during the upload process, then this will
  * be set to the {@link UploadItem} that was uploaded. This way, we can directly
  * use the on-disk file instead of needing to download the original from remote.
  *
  * @param electron The {@link MLWorkerElectron} instance that allows us to call
- * our Node.js layer for various functionality.
- *
- * @param userAgent The UA of the client that is doing the indexing (us).
+ * our Node.js layer to run the ONNX inference.
  */
 export const indexCLIP = async (
-    enteFile: EnteFile,
     image: ImageBitmapAndData,
     electron: MLWorkerElectron,
-    userAgent: string,
-): Promise<CLIPIndex> => {
-    const { data: imageData } = image;
-    const fileID = enteFile.id;
-
-    return {
-        fileID,
-        version: clipIndexingVersion,
-        client: userAgent,
-        embedding: await computeEmbedding(imageData, electron),
-    };
-};
+): Promise<CLIPIndex> => ({
+    embedding: await computeEmbedding(image.data, electron),
+});
 
 const computeEmbedding = async (
     imageData: ImageData,
@@ -184,10 +175,10 @@ const normalized = (embedding: Float32Array) => {
  * native code running in our desktop app (the embedding happens in the native
  * layer).
  *
- * It return a list of files that should be shown in the search results. The
- * actual return type is a map from fileIDs to the scores they got (higher is
- * better). This map will only contains entries whose score was above our
- * minimum threshold.
+ * It returns file (IDs) that should be shown in the search results. They're
+ * returned as a map from fileIDs to the scores they got (higher is better).
+ * This map will only contains entries whose score was above our minimum
+ * threshold.
  *
  * The result can also be `undefined`, which indicates that the download for the
  * ML model is still in progress (trying again later should succeed).

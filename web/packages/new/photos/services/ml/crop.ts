@@ -56,7 +56,7 @@ export const saveFaceCrops = async (
     const cache = await blobCache("face-crops");
 
     return Promise.all(
-        faceIndex.faceEmbedding.faces.map(({ faceID, detection }) =>
+        faceIndex.faces.map(({ faceID, detection }) =>
             extractFaceCrop(imageBitmap, detection.box).then((b) =>
                 cache.put(faceID, b),
             ),

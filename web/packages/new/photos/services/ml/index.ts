@@ -363,8 +363,7 @@ const setInterimScheduledStatus = () => {
     let nSyncedFiles = 0,
         nTotalFiles = 0;
     if (_mlStatusSnapshot && _mlStatusSnapshot.phase != "disabled") {
-        nSyncedFiles = _mlStatusSnapshot.nSyncedFiles;
-        nTotalFiles = _mlStatusSnapshot.nTotalFiles;
+        ({ nSyncedFiles, nTotalFiles } = _mlStatusSnapshot);
     }
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
@@ -379,7 +378,7 @@ export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
-    return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
+    return index?.faces.map((f) => f.faceID) ?? [];
 };
 
 /**
@@ -393,7 +392,7 @@ export const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
     const index = await faceIndex(enteFile.id);
     if (!index) return false;
 
-    const faceIDs = index.faceEmbedding.faces.map((f) => f.faceID);
+    const faceIDs = index.faces.map((f) => f.faceID);
     const cache = await blobCache("face-crops");
     for (const id of faceIDs) {
         if (!(await cache.has(id))) {
