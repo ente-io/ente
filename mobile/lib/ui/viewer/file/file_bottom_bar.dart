@@ -50,16 +50,8 @@ class FileBottomBarState extends State<FileBottomBar> {
         lastFile == widget.file.generatedID) {
       return;
     }
-
     lastFile = widget.file.generatedID;
-
-    final file = await getFile(widget.file);
-    if (file == null) {
-      return;
-    }
-
-    final result = await checkIfPanorama(file);
-
+    final result = await checkIfPanorama(widget.file);
     if (mounted && isPanorama == !result) {
       isPanorama = result;
       setState(() {});
