@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { Events, eventBus } from "@ente/shared/events";
 import localForage from "@ente/shared/storage/localForage";
 import { type EnteFile, type Trash } from "../types/file";

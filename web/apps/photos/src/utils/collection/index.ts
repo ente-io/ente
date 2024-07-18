@@ -1,9 +1,9 @@
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { SUB_TYPE, VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";

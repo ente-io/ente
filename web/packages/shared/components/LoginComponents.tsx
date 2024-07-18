@@ -3,8 +3,8 @@ import {
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@/accounts/services/passkey";
-import log from "@/next/log";
-import { customAPIHost } from "@/next/origins";
+import log from "@/base/log";
+import { customAPIHost } from "@/base/origins";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";

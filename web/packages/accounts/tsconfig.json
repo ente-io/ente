@@ -6,7 +6,7 @@
     },
     "include": [
         ".",
-        "../next/global-electron.d.ts",
+        "../base/global-electron.d.ts",
         "../shared/themes/mui-theme.d.ts"
     ]
 }

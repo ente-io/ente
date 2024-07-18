@@ -1,10 +1,10 @@
+import log from "@/base/log";
 import { type FileTypeInfo } from "@/media/file-type";
 import { NULL_LOCATION } from "@/new/photos/services/upload/types";
 import type {
     Location,
     ParsedExtractedMetadata,
 } from "@/new/photos/types/metadata";
-import log from "@/next/log";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import exifr from "exifr";
 import piexif from "piexifjs";

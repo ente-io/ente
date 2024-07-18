@@ -1,6 +1,6 @@
 import { putAttributes } from "@/accounts/api/user";
-import log from "@/next/log";
-import { apiURL, customAPIOrigin, familyAppOrigin } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL, customAPIOrigin, familyAppOrigin } from "@/base/origins";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";

@@ -1,5 +1,5 @@
 import { PAGES } from "@/accounts/constants/pages";
-import { customAPIHost } from "@/next/origins";
+import { customAPIHost } from "@/base/origins";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";

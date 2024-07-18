@@ -1,8 +1,8 @@
-import { staticAppTitle } from "@/next/app";
-import { CustomHead } from "@/next/components/Head";
-import { setupI18n } from "@/next/i18n";
-import { disableDiskLogs } from "@/next/log";
-import { logUnhandledErrorsAndRejections } from "@/next/log-web";
+import { staticAppTitle } from "@/base/app";
+import { CustomHead } from "@/base/components/Head";
+import { setupI18n } from "@/base/i18n";
+import { disableDiskLogs } from "@/base/log";
+import { logUnhandledErrorsAndRejections } from "@/base/log-web";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";

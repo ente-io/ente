@@ -1,4 +1,4 @@
-import { getKV, setKV } from "@/next/kv";
+import { getKV, setKV } from "@/base/kv";
 import { inWorker } from "./env";
 
 /**

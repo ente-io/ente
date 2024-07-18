@@ -1,5 +1,5 @@
-import { isDevBuild } from "@/next/env";
-import log from "@/next/log";
+import { isDevBuild } from "@/base/env";
+import log from "@/base/log";
 import { includes } from "@/utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";

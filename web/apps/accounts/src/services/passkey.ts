@@ -1,8 +1,8 @@
-import { clientPackageName } from "@/next/app";
-import { isDevBuild } from "@/next/env";
-import { clientPackageHeader, ensureOk, HTTPError } from "@/next/http";
-import { apiURL } from "@/next/origins";
-import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { clientPackageName } from "@/base/app";
+import { isDevBuild } from "@/base/env";
+import { clientPackageHeader, ensureOk, HTTPError } from "@/base/http";
+import { apiURL } from "@/base/origins";
+import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import {

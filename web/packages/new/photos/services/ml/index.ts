@@ -2,13 +2,13 @@
  * @file Main thread interface to the ML subsystem.
  */
 
+import { isDesktop } from "@/base/app";
+import { blobCache } from "@/base/blob-cache";
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FILE_TYPE } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
-import { isDesktop } from "@/next/app";
-import { blobCache } from "@/next/blob-cache";
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
 import { isBetaUser, isInternalUser } from "../feature-flags";

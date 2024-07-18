@@ -1,4 +1,4 @@
-import { blobCache } from "@/next/blob-cache";
+import { blobCache } from "@/base/blob-cache";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
 import { renderableEnteFileBlob } from "./blob";

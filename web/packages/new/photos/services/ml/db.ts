@@ -1,5 +1,5 @@
-import { removeKV } from "@/next/kv";
-import log from "@/next/log";
+import { removeKV } from "@/base/kv";
+import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";

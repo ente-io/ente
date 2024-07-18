@@ -4,8 +4,8 @@
     "private": true,
     "dependencies": {
         "@/accounts": "*",
+        "@/base": "*",
         "@/media": "*",
-        "@/next": "*",
         "@ente/eslint-config": "*",
         "@ente/shared": "*"
     },

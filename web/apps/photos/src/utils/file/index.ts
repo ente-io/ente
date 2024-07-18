@@ -1,3 +1,6 @@
+import { lowercaseExtension } from "@/base/file";
+import log from "@/base/log";
+import { type Electron } from "@/base/types/ipc";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
@@ -15,9 +18,6 @@ import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
-import { lowercaseExtension } from "@/next/file";
-import log from "@/next/log";
-import { type Electron } from "@/next/types/ipc";
 import { withTimeout } from "@/utils/promise";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";

@@ -1,15 +1,15 @@
-import { MLSettings } from "@/new/photos/components/MLSettings";
-import { isMLSupported } from "@/new/photos/services/ml";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
 import {
     getLocaleInUse,
     pt,
     setLocaleInUse,
     supportedLocales,
     type SupportedLocale,
-} from "@/next/i18n";
+} from "@/base/i18n";
+import { MLSettings } from "@/new/photos/components/MLSettings";
+import { isMLSupported } from "@/new/photos/services/ml";
+import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
+import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
+import { Titlebar } from "@/new/shared/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";

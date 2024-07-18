@@ -1,3 +1,5 @@
+import log from "@/base/log";
+import { type Electron } from "@/base/types/ipc";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
@@ -6,8 +8,6 @@ import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
 } from "@/new/photos/services/upload/types";
-import log from "@/next/log";
-import { type Electron } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { withTimeout } from "@/utils/promise";
 

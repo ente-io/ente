@@ -1,12 +1,12 @@
+import { basename } from "@/base/file";
+import log from "@/base/log";
+import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
     UploadItem,
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
-import { basename } from "@/next/file";
-import log from "@/next/log";
-import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
 import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";

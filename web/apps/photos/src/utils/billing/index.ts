@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { openURL } from "@/new/photos/utils/web";
-import log from "@/next/log";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { REDIRECTS, getRedirectURL } from "constants/redirects";
