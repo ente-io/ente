@@ -363,7 +363,42 @@ const index = async (
     userAgent: string,
 ) => {
     const f = fileLogID(enteFile);
+    const fileID = enteFile.id;
     const startTime = Date.now();
+
+    // Massage the existing data (if any) that we got from remote to the form
+    // that the rest of this function operates on.
+
+    const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
+    const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
+
+    let existingFaceIndex: FaceIndex | undefined;
+    if (existingRemoteFaceIndex) {
+        const { width, height, faces } = existingRemoteFaceIndex;
+        existingFaceIndex = { width, height, faces };
+    }
+
+    let existingCLIPIndex: CLIPIndex | undefined;
+    if (existingRemoteCLIPIndex) {
+        const { embedding } = existingRemoteCLIPIndex;
+        existingCLIPIndex = { embedding };
+    }
+
+    // See if we already have all the derived data fields that we need. If so,
+    // just update our local db and return.
+
+    if (existingFaceIndex && existingCLIPIndex) {
+        try {
+            await saveFaceIndex({ fileID, ...existingFaceIndex });
+            await saveCLIPIndex({ fileID, ...existingCLIPIndex });
+        } catch (e) {
+            log.error(`Failed to save derived data for ${f}`, e);
+            throw e;
+        }
+        return;
+    }
+
+    // There is at least one derived data type that still needs to be indexed.
 
     const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
 
@@ -387,8 +422,8 @@ const index = async (
 
         try {
             [faceIndex, clipIndex] = await Promise.all([
-                indexFaces(enteFile, image, electron),
-                indexCLIP(image, electron),
+                existingFaceIndex ?? indexFaces(enteFile, image, electron),
+                existingCLIPIndex ?? indexCLIP(image, electron),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -432,12 +467,10 @@ const index = async (
             await putDerivedData(enteFile, rawDerivedData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to put face index for ${f}`, e);
+            log.error(`Failed to put derived data for ${f}`, e);
             if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
             throw e;
         }
-
-        const fileID = enteFile.id;
 
         try {
             await saveFaceIndex({ fileID, ...faceIndex });
@@ -446,7 +479,7 @@ const index = async (
             // Not sure if DB failures should be considered permanent or
             // transient. There isn't a known case where writing to the local
             // indexedDB would fail.
-            log.error(`Failed to save face index for ${f}`, e);
+            log.error(`Failed to save derived data for ${f}`, e);
             throw e;
         }
 
@@ -454,10 +487,12 @@ const index = async (
         // indexing pipeline; we just do it here since we have already have the
         // ImageBitmap at hand. Ignore errors that happen during this since it
         // does not impact the generated face index.
-        try {
-            await saveFaceCrops(image.bitmap, faceIndex);
-        } catch (e) {
-            log.error(`Failed to save face crops for ${f}`, e);
+        if (!existingFaceIndex) {
+            try {
+                await saveFaceCrops(image.bitmap, faceIndex);
+            } catch (e) {
+                log.error(`Failed to save face crops for ${f}`, e);
+            }
         }
     } finally {
         image.bitmap.close();
