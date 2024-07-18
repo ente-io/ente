@@ -9,6 +9,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -43,7 +44,7 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
-  late bool isPanorama;
+  bool isPanorama = false;
   int? lastFileGenID;
 
   @override
@@ -53,8 +54,10 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    isPanorama = widget.file.isPanorama() ?? false;
-    _checkPanorama();
+    if (flagService.internalUser) {
+      isPanorama = widget.file.isPanorama() ?? false;
+      _checkPanorama();
+    }
     return _getBottomBar();
   }
 
