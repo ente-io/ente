@@ -1034,6 +1034,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Pairing complete"),
+        "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "passKeyPendingVerification": MessageLookupByLibrary.simpleMessage(
             "Verification is still pending"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),

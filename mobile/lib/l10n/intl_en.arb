@@ -1264,6 +1264,7 @@
       }
     }
   },
+  "panorama": "Panorama",
   "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",
   "deviceLock": "Device lock",

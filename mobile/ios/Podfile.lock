@@ -8,6 +8,8 @@ PODS:
     - FlutterMacOS
   - dart_ui_isolate (0.0.1):
     - Flutter
+  - dchs_motion_sensors (0.0.1):
+    - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - ffmpeg-kit-ios-min (6.0)
@@ -240,6 +242,7 @@ DEPENDENCIES:
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
+  - dchs_motion_sensors (from `.symlinks/plugins/dchs_motion_sensors/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_min (from `.symlinks/plugins/ffmpeg_kit_flutter_min/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -322,6 +325,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
   dart_ui_isolate:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
+  dchs_motion_sensors:
+    :path: ".symlinks/plugins/dchs_motion_sensors/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   ffmpeg_kit_flutter_min:
@@ -424,6 +429,7 @@ SPEC CHECKSUMS:
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
+  dchs_motion_sensors: 9cef816635a39345cda9f0c4943e061f6429f453
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   ffmpeg-kit-ios-min: 4e9a088f4ee9629435960b9d68e54848975f1931
   ffmpeg_kit_flutter_min: 5eff47f4965bf9d1150e98961eb6129f5ae3f28c

@@ -8975,6 +8975,16 @@ class S {
     );
   }
 
+  /// `Panorama`
+  String get panorama {
+    return Intl.message(
+      'Panorama',
+      name: 'panorama',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Re-enter password`
   String get reenterPassword {
     return Intl.message(
