@@ -1,3 +1,4 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import { ensureOk } from "@/base/http";
 import { getKV, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
@@ -11,7 +12,6 @@ import {
     InputAdornment,
     Link,
     TextField,
-    useMediaQuery,
     type ModalProps,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -33,7 +33,7 @@ interface DevSettingsProps {
  * See: [Note: Configuring custom server].
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useIsMobileWidth();
 
     const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.
