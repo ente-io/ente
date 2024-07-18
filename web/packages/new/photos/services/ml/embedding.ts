@@ -99,7 +99,7 @@ const RemoteEmbedding = z.object({
 
 type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
 
-export type OriginalRemoteDerivedData = Record<string, unknown>;
+export type RawRemoteDerivedData = Record<string, unknown>;
 
 export type ParsedRemoteDerivedData = Partial<{
     face: RemoteFaceIndex;
@@ -118,7 +118,7 @@ export type ParsedRemoteDerivedData = Partial<{
  *
  * Thus we return two separate results from {@link fetchDerivedData}:
  *
- * -   {@link OriginalRemoteDerivedData}: The original, unmodified JSON.
+ * -   {@link RawRemoteDerivedData}: The original, unmodified JSON.
  *
  * -   {@link ParsedRemoteDerivedData}: The particular fields that the current
  *     client knows about, parsed according to their expected structure.
@@ -129,7 +129,7 @@ export type ParsedRemoteDerivedData = Partial<{
  * JSON as the base.
  */
 export interface RemoteDerivedData {
-    original: OriginalRemoteDerivedData;
+    raw: RawRemoteDerivedData;
     parsed: ParsedRemoteDerivedData | undefined;
 }
 
@@ -198,9 +198,9 @@ const RemoteCLIPIndex = z.object({
 });
 
 /**
- * Zod schema for the {@link ParsedRemoteDerivedData} type.
+ * Zod schema for the {@link RawRemoteDerivedData} type.
  */
-const OriginalRemoteDerivedData = z.object({}).passthrough();
+const RawRemoteDerivedData = z.object({}).passthrough();
 
 /**
  * Zod schema for the {@link ParsedRemoteDerivedData} type.
@@ -218,9 +218,9 @@ const ParsedRemoteDerivedData = z.object({
  *
  * @returns a map containing the (decrypted) derived data for each file for
  * which remote returned the corresponding embedding. Each entry in the map is
- * keyed by file's ID, and each value is a {@link RemoteDerivedData} with all
- * fields set to optional (since a remote embedding may have a subset of the
- * fields that we locally generate).
+ * keyed by file's ID, and each value is a {@link RemoteDerivedData} that
+ * contains both the original JSON, and parsed representation of embeddings that
+ * we know about.
  */
 export const fetchDerivedData = async (
     filesByID: Map<number, EnteFile>,
@@ -245,12 +245,7 @@ export const fetchDerivedData = async (
                 file.key,
             );
             const jsonString = await gunzip(decryptedBytes);
-            const original = OriginalRemoteDerivedData.parse(
-                JSON.parse(jsonString),
-            );
-            const parseResult = ParsedRemoteDerivedData.safeParse(original);
-            const parsed = parseResult.success ? parseResult.data : undefined;
-            result.set(fileID, { original, parsed });
+            result.set(fileID, remoteDerivedDataFromJSONString(jsonString));
         } catch (e) {
             // This shouldn't happen. Likely some client has uploaded a
             // corrupted embedding. Ignore it so that it gets reindexed and
@@ -260,6 +255,13 @@ export const fetchDerivedData = async (
     }
     log.debug(() => `Fetched ${result.size} combined embeddings`);
     return result;
+};
+
+const remoteDerivedDataFromJSONString = (jsonString: string) => {
+    const raw = RawRemoteDerivedData.parse(JSON.parse(jsonString));
+    const parseResult = ParsedRemoteDerivedData.safeParse(raw);
+    const parsed = parseResult.success ? parseResult.data : undefined;
+    return { raw, parsed };
 };
 
 /**
@@ -294,7 +296,8 @@ const fetchEmbeddings = async (
 };
 
 /**
- * Update the combined derived data stored for given {@link enteFile} on remote.
+ * Update the derived data stored for given {@link enteFile} on remote.
+ *
  * This allows other clients to directly pull the derived data instead of
  * needing to re-index.
  *
@@ -306,7 +309,7 @@ const fetchEmbeddings = async (
  */
 export const putDerivedData = async (
     enteFile: EnteFile,
-    derivedData: RemoteDerivedData,
+    derivedData: RawRemoteDerivedData,
 ) =>
     putEmbedding(enteFile, "combined", await gzip(JSON.stringify(derivedData)));
 
