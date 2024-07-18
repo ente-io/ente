@@ -13,7 +13,6 @@ export enum PHOTOS_PAGES {
     VERIFY = "/verify",
     ROOT = "/",
     SHARED_ALBUMS = "/shared-albums",
-    // ML_DEBUG = '/ml-debug',
     DEDUPLICATE = "/deduplicate",
 }
 
@@ -32,18 +31,4 @@ export enum AUTH_PAGES {
     VERIFY = "/verify",
     ROOT = "/",
     AUTH = "/auth",
-}
-
-export enum ACCOUNTS_PAGES {
-    CREDENTIALS = "/credentials",
-    LOGIN = "/login",
-    RECOVER = "/recover",
-    SIGNUP = "/signup",
-    TWO_FACTOR_SETUP = "/two-factor/setup",
-    TWO_FACTOR_VERIFY = "/two-factor/verify",
-    TWO_FACTOR_RECOVER = "/two-factor/recover",
-    VERIFY = "/verify",
-    ROOT = "/",
-    PASSKEYS = "/passkeys",
-    GENERATE = "/generate",
 }

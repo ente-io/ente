@@ -2,7 +2,7 @@ import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/shared/components/Menu";
+} from "@/base/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";

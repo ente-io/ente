@@ -306,7 +306,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
     const logout = () => {
-        void photosLogout().then(() => router.push(PAGES.ROOT));
+        void photosLogout().then(() => router.push("/"));
     };
 
     const appContext = {

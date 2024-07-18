@@ -1,7 +1,9 @@
-import { PAGES } from "@/accounts/constants/pages";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
+/**
+ * A reusable 404 page.
+ */
 const Page: React.FC = () => {
     // [Note: 404 back to home]
     //
@@ -21,8 +23,8 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        router.push(PAGES.ROOT);
-    }, []);
+        void router.push("/");
+    }, [router]);
 
     return <></>;
 };

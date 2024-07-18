@@ -5,8 +5,8 @@
     "dependencies": {
         "@/accounts": "*",
         "@/base": "*",
+        "@/build-config": "*",
         "@/media": "*",
-        "@ente/eslint-config": "*",
         "@ente/shared": "*"
     },
     "devDependencies": {

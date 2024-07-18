@@ -341,7 +341,7 @@ export default function Gallery() {
         const token = getToken();
         if (!key || !token) {
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.GALLERY);
-            router.push(PAGES.ROOT);
+            router.push("/");
             return;
         }
         preloadImage("/images/subscription-card-background");

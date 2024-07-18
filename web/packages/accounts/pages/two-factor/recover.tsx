@@ -16,7 +16,6 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError } from "@ente/shared/error";
@@ -57,7 +56,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
         const user = getData(LS_KEYS.USER);
         const sid = user.passkeySessionID || user.twoFactorSessionID;
         if (!user || !user.email || !sid) {
-            router.push(PAGES.ROOT);
+            router.push("/");
         } else if (
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
             (user.encryptedToken || user.token)
@@ -155,10 +154,10 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
             content: (
                 <Trans
                     i18nKey={"NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"}
-                    values={{ emailID: SUPPORT_EMAIL }}
                     components={{
-                        a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
+                        a: <Link href="mailto:support@ente.io" />,
                     }}
+                    values={{ emailID: "support@ente.io" }}
                 />
             ),
         });

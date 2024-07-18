@@ -1,4 +1,3 @@
-import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
 import { Button, styled } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -32,7 +31,7 @@ function GoToEnte() {
         <Button
             color="accent"
             LinkComponent={NoStyleAnchor}
-            href={ENTE_WEBSITE_LINK}
+            href="https://ente.io"
         >
             {getButtonText(os)}
         </Button>

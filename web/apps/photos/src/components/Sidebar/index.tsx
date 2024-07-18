@@ -1,9 +1,9 @@
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
