@@ -20,6 +20,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:secure_app_switcher/secure_app_switcher.dart";
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -109,8 +110,14 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
             darkTheme: dartTheme,
             home: AppLifecycleService.instance.mediaExtensionAction.action ==
                     IntentAction.view
-                ? const FileViewer()
-                : const HomeWidget(),
+                ? const SecureAppSwitcherPage(
+                    style: SecureMaskStyle.blurDark,
+                    child: FileViewer(),
+                  )
+                : const SecureAppSwitcherPage(
+                    style: SecureMaskStyle.blurDark,
+                    child: HomeWidget(),
+                  ),
             debugShowCheckedModeBanner: false,
             builder: EasyLoading.init(),
             locale: locale,
@@ -129,7 +136,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         themeMode: ThemeMode.system,
         theme: lightThemeData,
         darkTheme: darkThemeData,
-        home: const HomeWidget(),
+        home: const SecureAppSwitcherPage(
+          style: SecureMaskStyle.blurDark,
+          child: HomeWidget(),
+        ),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
         locale: locale,

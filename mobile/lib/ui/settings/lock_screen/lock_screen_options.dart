@@ -12,6 +12,7 @@ import "package:photos/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:photos/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:photos/ui/tools/app_lock.dart";
 import "package:photos/utils/lock_screen_settings.dart";
+import "package:secure_app_switcher/secure_app_switcher.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -26,10 +27,11 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
-
+  late bool showAppContent;
   @override
   void initState() {
     super.initState();
+    showAppContent = _lockscreenSetting.getShowAppContent();
     _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
@@ -94,6 +96,16 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       _initializeSettings();
       appLock = !appLock;
     });
+  }
+
+  Future<void> _tapShowContent() async {
+    setState(() {
+      showAppContent = !showAppContent;
+    });
+    showAppContent ? SecureAppSwitcher.off() : SecureAppSwitcher.on();
+    await _lockscreenSetting.shouldShowAppContent(
+      showAppContent,
+    );
   }
 
   @override
@@ -203,6 +215,46 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         isPasswordEnabled ? Icons.check : null,
                                     trailingIconColor: colorTheme.tabIcon,
                                     onTap: () => _passwordLock(),
+                                  ),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: "App content in Task switcher",
+                                      textStyle: textTheme.small.copyWith(
+                                        color: colorTheme.textMuted,
+                                      ),
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    isBottomBorderRadiusRemoved: true,
+                                    menuItemColor: colorTheme.fillFaint,
+                                  ),
+                                  MenuItemWidget(
+                                    captionedTextWidget:
+                                        const CaptionedTextWidget(
+                                      title: "Show content",
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    isTopBorderRadiusRemoved: true,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    trailingWidget: ToggleSwitchWidget(
+                                      value: () => showAppContent,
+                                      onChanged: () => _tapShowContent(),
+                                    ),
+                                    trailingIconColor: colorTheme.tabIcon,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      'If disabled app content will be displayed in the task switcher',
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
                                   ),
                                 ],
                               )

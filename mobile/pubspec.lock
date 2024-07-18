@@ -2047,6 +2047,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.8"
+  secure_app_switcher:
+    dependency: "direct main"
+    description:
+      name: secure_app_switcher
+      sha256: "6f8a1755d15358291e697d212a2a5a28a302cc14798c0849e8630c12b4df4efd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0+1"
   sentry:
     dependency: "direct main"
     description:
