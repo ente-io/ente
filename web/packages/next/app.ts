@@ -35,6 +35,13 @@ export const appName: AppName = process.env.appName as AppName;
 export const isDesktop = process.env.isDesktop == "1";
 
 /**
+ * Version of the desktop app.
+ *
+ * This is only defined when {@link isDesktop} is true.
+ */
+export const desktopAppVersion = process.env.desktopAppVersion;
+
+/**
  * Static (English) title for the app.
  *
  * This is shown until we have the localized version.
@@ -59,7 +66,9 @@ export const clientPackageName = (() => {
     if (isDesktop) {
         if (appName != "photos")
             throw new Error(`Unsupported desktop appName ${appName}`);
-        return "io.ente.photos.desktop";
+        if (!desktopAppVersion)
+            throw new Error(`desktopAppVersion is not defined`);
+        return `io.ente.photos.desktop/${desktopAppVersion}`;
     }
     return {
         accounts: "io.ente.accounts.web",
