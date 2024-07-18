@@ -16,7 +16,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
@@ -213,7 +212,7 @@ export default function PublicCollectionGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = currentURL.hash.slice(1);
                 if (!t && !ck) {
-                    window.location.href = ENTE_WEBSITE_LINK;
+                    window.location.href = "https://ente.io";
                     redirectingToWebsite = true;
                 }
                 if (!t || !ck) {

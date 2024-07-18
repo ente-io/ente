@@ -1,7 +1,6 @@
 import log from "@/base/log";
 import { bytesInGB } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
-import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import Close from "@mui/icons-material/Close";
 import { IconButton, Link, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -166,9 +165,9 @@ function PlanSelectorCard(props: Props) {
                     <Trans
                         i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
                         components={{
-                            a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
+                            a: <Link href="mailto:support@ente.io" />,
                         }}
-                        values={{ emailID: SUPPORT_EMAIL }}
+                        values={{ emailID: "support@ente.io" }}
                     />
                 ),
                 close: { variant: "secondary" },
