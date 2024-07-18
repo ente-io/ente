@@ -45,8 +45,8 @@ class FileBottomBarState extends State<FileBottomBar> {
   bool isPanorama = false;
   bool _isPanoramaCheckInitiated = false;
 
-  Future<void> _checkPanoroma() async {
-    if (widget.file.fileType != FileType.image || _isPanoramaCheckInitiated) {
+  Future<void> _checkPanorama() async {
+    if (_isPanoramaCheckInitiated) {
       return;
     }
     _isPanoramaCheckInitiated = true;
@@ -59,7 +59,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    _checkPanoroma();
+    _checkPanorama();
     return _getBottomBar();
   }
 
