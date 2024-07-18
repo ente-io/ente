@@ -21,8 +21,7 @@ import { saveFaceCrops } from "./crop";
 import {
     indexableFileIDs,
     markIndexingFailed,
-    saveCLIPIndex,
-    saveFaceIndex,
+    saveIndexes,
     updateAssumingLocalFiles,
 } from "./db";
 import {
@@ -397,10 +396,12 @@ const index = async (
 
     if (existingFaceIndex && existingCLIPIndex) {
         try {
-            await saveFaceIndex({ fileID, ...existingFaceIndex });
-            await saveCLIPIndex({ fileID, ...existingCLIPIndex });
+            await saveIndexes(
+                { fileID, ...existingFaceIndex },
+                { fileID, ...existingCLIPIndex },
+            );
         } catch (e) {
-            log.error(`Failed to save derived data for ${f}`, e);
+            log.error(`Failed to save indexes data for ${f}`, e);
             throw e;
         }
         return;
@@ -485,13 +486,15 @@ const index = async (
         }
 
         try {
-            await saveFaceIndex({ fileID, ...faceIndex });
-            await saveCLIPIndex({ fileID, ...clipIndex });
+            await saveIndexes(
+                { fileID, ...faceIndex },
+                { fileID, ...clipIndex },
+            );
         } catch (e) {
             // Not sure if DB failures should be considered permanent or
             // transient. There isn't a known case where writing to the local
             // indexedDB would fail.
-            log.error(`Failed to save derived data for ${f}`, e);
+            log.error(`Failed to save indexes for ${f}`, e);
             throw e;
         }
 

@@ -3,7 +3,6 @@ import log from "@/next/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
-import type { EmbeddingModel } from "./embedding";
 import type { LocalFaceIndex } from "./face";
 
 /**
@@ -61,24 +60,11 @@ interface FileStatus {
      *
      * - "failed" - Indexing was attempted but failed.
      *
-     * There can arise situations in which a file has one, but not all, indexes.
-     * e.g. it may have a "face-index" but "clip-index" might've not yet
-     * happened (or failed). In such cases, the status of the file will be
-     * "indexable": it transitions to "indexed" only after all indexes have been
-     * computed or fetched.
-     *
-     * If you have't heard the word "index" to the point of zoning out, we also
+     * If you haven't heard the word "index" to the point of zoning out, we also
      * have a (IndexedDB) "index" on the status field to allow us to efficiently
      * select or count {@link fileIDs} that fall into various buckets.
      */
     status: "indexable" | "indexed" | "failed";
-    /**
-     * A list of embeddings that we still need to compute for the file.
-     *
-     * This is guaranteed to be empty if status is "indexed", and will have at
-     * least one entry otherwise.
-     */
-    pending: EmbeddingModel[];
     /**
      * The number of times attempts to index this file failed.
      *
@@ -195,36 +181,34 @@ export const clearMLDB = async () => {
 };
 
 /**
- * Save the given {@link faceIndex} locally.
- *
- * @param faceIndex A {@link FaceIndex} representing the faces that we detected
- * (and their corresponding embeddings) in a particular file.
- *
- * This function adds a new entry for the face index, overwriting any existing
- * ones (No merging is performed, the existing entry is unconditionally
- * overwritten). The file status is also updated to remove face from the pending
- * embeddings. If there are no other pending embeddings, the status changes to
+ * Save the given {@link faceIndex} and {@link clipIndex}, and mark the file as
  * "indexed".
+ *
+ * This function adds a new entry for the indexes, overwriting any existing ones
+ * (No merging is performed, the existing entry is unconditionally overwritten).
+ * The file status is also updated to "indexed", and the failure count is reset
+ * to 0.
  */
-export const saveFaceIndex = async (faceIndex: LocalFaceIndex) => {
+export const saveIndexes = async (
+    faceIndex: LocalFaceIndex,
+    clipIndex: LocalCLIPIndex,
+) => {
     const { fileID } = faceIndex;
 
     const db = await mlDB();
-    const tx = db.transaction(["file-status", "face-index"], "readwrite");
-    const statusStore = tx.objectStore("file-status");
-    const indexStore = tx.objectStore("face-index");
-
-    const fileStatus =
-        (await statusStore.get(IDBKeyRange.only(fileID))) ??
-        newFileStatus(fileID);
-    fileStatus.pending = fileStatus.pending.filter(
-        (v) => v != "file-ml-clip-face",
+    const tx = db.transaction(
+        ["file-status", "face-index", "clip-index"],
+        "readwrite",
     );
-    if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
 
     await Promise.all([
-        statusStore.put(fileStatus),
-        indexStore.put(faceIndex),
+        tx.objectStore("file-status").put({
+            fileID,
+            status: "indexed",
+            failureCount: 0,
+        }),
+        tx.objectStore("face-index").put(faceIndex),
+        tx.objectStore("clip-index").put(clipIndex),
         tx.done,
     ]);
 };
@@ -236,44 +220,8 @@ export const saveFaceIndex = async (faceIndex: LocalFaceIndex) => {
 const newFileStatus = (fileID: number): FileStatus => ({
     fileID,
     status: "indexable",
-    // TODO-ML: clip-test
-    // pending: ["file-ml-clip-face", "onnx-clip"],
-    pending: ["file-ml-clip-face"],
     failureCount: 0,
 });
-
-/**
- * Save the given {@link clipIndex} locally.
- *
- * @param clipIndex A {@link CLIPIndex} containing the CLIP embedding for a
- * particular file.
- *
- * This function adds a new entry for the CLIP index, overwriting any existing
- * ones (No merging is performed, the existing entry is unconditionally
- * overwritten). The file status is also updated to remove CLIP from the pending
- * embeddings. If there are no other pending embeddings, the status changes to
- * "indexed".
- */
-export const saveCLIPIndex = async (clipIndex: LocalCLIPIndex) => {
-    const { fileID } = clipIndex;
-
-    const db = await mlDB();
-    const tx = db.transaction(["file-status", "clip-index"], "readwrite");
-    const statusStore = tx.objectStore("file-status");
-    const indexStore = tx.objectStore("clip-index");
-
-    const fileStatus =
-        (await statusStore.get(IDBKeyRange.only(fileID))) ??
-        newFileStatus(fileID);
-    fileStatus.pending = fileStatus.pending.filter((v) => v != "onnx-clip");
-    if (fileStatus.pending.length == 0) fileStatus.status = "indexed";
-
-    await Promise.all([
-        statusStore.put(fileStatus),
-        indexStore.put(clipIndex),
-        tx.done,
-    ]);
-};
 
 /**
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
@@ -329,9 +277,9 @@ export const addFileEntry = async (fileID: number) => {
  *   DB are removed from ML DB (including any indexes).
  *
  * - Files that are not present locally but are in the trash are retained in ML
- *   DB if their status is "indexed"; otherwise they too are removed. This
- *   special case is to prevent churn (re-indexing) if the user moves some files
- *   to trash but then later restores them before they get permanently deleted.
+ *   DB if their status is "indexed"; otherwise they too are removed. This is to
+ *   prevent churn, otherwise they'll get unnecessarily reindexed again if the
+ *   user restores them from trash before permanent deletion.
  */
 export const updateAssumingLocalFiles = async (
     localFileIDs: number[],

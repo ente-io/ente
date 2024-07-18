@@ -48,11 +48,7 @@ import { type RemoteFaceIndex } from "./face";
  * Thus, now this is best thought of a tag for a particular format of encoding
  * all the derived data associated with a file.
  */
-export type EmbeddingModel =
-    // TODO-ML: prune
-    | "onnx-clip" /* CLIP embeddings */
-    | "file-ml-clip-face" /* Face embeddings */
-    | "combined" /* Combined format */;
+type EmbeddingModel = "combined" /* Combined format */;
 
 const RemoteEmbedding = z.object({
     /** The ID of the file whose embedding this is. */
