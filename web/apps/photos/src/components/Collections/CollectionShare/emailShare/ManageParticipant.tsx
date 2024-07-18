@@ -1,7 +1,7 @@
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import BlockIcon from "@mui/icons-material/Block";
 import DoneIcon from "@mui/icons-material/Done";

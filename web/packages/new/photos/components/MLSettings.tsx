@@ -1,3 +1,6 @@
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import {
@@ -7,9 +10,6 @@ import {
     mlStatusSubscribe,
     type MLStatus,
 } from "@/new/photos/services/ml";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemGroup } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {

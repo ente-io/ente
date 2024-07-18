@@ -1,10 +1,10 @@
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
 import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
+} from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";

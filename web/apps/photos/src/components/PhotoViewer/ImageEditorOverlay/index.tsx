@@ -1,13 +1,13 @@
-import { nameAndExtension } from "@/base/file";
-import log from "@/base/log";
-import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
 import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/shared/components/Menu";
+} from "@/base/components/Menu";
+import { nameAndExtension } from "@/base/file";
+import log from "@/base/log";
+import downloadManager from "@/new/photos/services/download";
+import { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
