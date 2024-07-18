@@ -7,12 +7,13 @@ import TextField from "@mui/material/TextField";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import "./App.css";
+import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
+import FamilyTableComponent from "./components/FamilyComponentTable";
 import type { UserData } from "./components/UserComponent";
 import UserComponent from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
 import { apiOrigin } from "./services/support";
 
-// Define and export email and token variables and their setter functions
 export let email = "";
 export let token = "";
 
@@ -43,7 +44,7 @@ interface Subscription {
 interface Security {
     isEmailMFAEnabled: boolean;
     isTwoFactorEnabled: boolean;
-    passkeys: string; // Replace with actual passkey value if available
+    passkeys: string;
 }
 
 interface UserResponse {
@@ -57,8 +58,8 @@ interface UserResponse {
 }
 
 const App: React.FC = () => {
-    const [localEmail, setLocalEmail] = useState<string>(getEmail());
-    const [localToken, setLocalToken] = useState<string>(getToken());
+    const [localEmail, setLocalEmail] = useState<string>("");
+    const [localToken, setLocalToken] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const [fetchSuccess, setFetchSuccess] = useState<boolean>(false);
@@ -91,14 +92,34 @@ const App: React.FC = () => {
         }
     }, [localEmail]);
 
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlEmail = urlParams.get("email");
+        const urlToken = urlParams.get("token");
+
+        if (urlEmail && urlToken) {
+            setLocalEmail(urlEmail);
+            setLocalToken(urlToken);
+            console.log(localEmail);
+            console.log(localToken);
+            setEmail(urlEmail);
+            setToken(urlToken);
+            fetchData().catch((error: unknown) =>
+                console.error("Fetch data error:", error),
+            );
+        }
+        console.log(email);
+        console.log(token);
+    }, []);
+
     const fetchData = async () => {
         setLoading(true);
         setError("");
         setFetchSuccess(false);
         const startTime = Date.now();
         try {
-            const encodedEmail = encodeURIComponent(localEmail);
-            const encodedToken = encodeURIComponent(localToken);
+            const encodedEmail = encodeURIComponent(email);
+            const encodedToken = encodeURIComponent(token);
             const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
             console.log(`Fetching data from URL: ${url}`);
             const response = await fetch(url);
@@ -156,7 +177,7 @@ const App: React.FC = () => {
                         .isTwoFactorEnabled
                         ? "Enabled"
                         : "Disabled",
-                    Passkeys: "None", // Replace with actual passkey value if available
+                    Passkeys: "None",
                 },
             };
 
@@ -195,7 +216,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="container center-table">
+        <div className="container">
             <form className="input-form" onKeyPress={handleKeyPress}>
                 <div className="horizontal-group">
                     <a
@@ -259,7 +280,6 @@ const App: React.FC = () => {
                                 width: "100%",
                                 maxWidth: "600px",
                                 bgcolor: "#FAFAFA",
-                                marginTop: "300px",
                                 borderRadius: "7px",
                                 position: "relative",
                                 zIndex: 1000,
@@ -278,12 +298,6 @@ const App: React.FC = () => {
                                     "& .MuiTab-root": {
                                         textTransform: "none",
                                     },
-                                    "& .Mui-selected": {
-                                        color: "black !important",
-                                    },
-                                    "& .MuiTab-root.Mui-selected": {
-                                        color: "black !important",
-                                    },
                                 }}
                             >
                                 <Tab label="User" />
@@ -294,26 +308,32 @@ const App: React.FC = () => {
                         <Box
                             sx={{
                                 width: "100%",
-                                maxWidth: "600px",
-                                mt: 4,
-                                minHeight: "400px",
+                                maxWidth: "900px",
+                                bgcolor: "#FAFAFA",
+                                borderRadius: "7px",
+                                padding: "20px",
+                                position: "relative",
+                                zIndex: 999,
+                                marginTop: "16px",
                             }}
                         >
-                            {tabValue === 0 && (
+                            {tabValue === 0 && userData && (
                                 <UserComponent userData={userData} />
                             )}
-                            {tabValue === 1 && <div>Family tab content</div>}
-                            {tabValue === 2 && <div>Bonuses tab content</div>}
+                            {tabValue === 1 && userData && (
+                                <div>
+                                    <FamilyTableComponent />
+                                </div>
+                            )}
+                            {tabValue === 2 && userData && (
+                                <div>
+                                    <StorageBonusTableComponent />
+                                </div>
+                            )}
                         </Box>
                     </>
                 ) : (
-                    <div className="duckie-container">
-                        <img
-                            src={duckieimage}
-                            alt="Duckie"
-                            className="duckie-image"
-                        />
-                    </div>
+                    <img src={duckieimage} alt="duckie" />
                 )}
             </div>
         </div>

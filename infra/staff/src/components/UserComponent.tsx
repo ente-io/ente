@@ -1,6 +1,8 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
@@ -15,8 +17,8 @@ import * as React from "react";
 import ChangeEmail from "./ChangeEmail";
 import DeleteAccount from "./DeleteAccont";
 import Disable2FA from "./Disable2FA";
+import DisablePasskeys from "./DisablePasskeys";
 import UpdateSubscription from "./UpdateSubscription";
-
 export interface UserData {
     User: Record<string, string>;
     Storage: Record<string, string>;
@@ -36,6 +38,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [updateSubscriptionOpen, setUpdateSubscriptionOpen] =
         React.useState(false);
     const [changeEmailOpen, setChangeEmailOpen] = React.useState(false); // State for ChangeEmail dialog
+    const [DisablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
 
     React.useEffect(() => {
         if (userData?.Security["Two factor 2FA"] === "Enabled") {
@@ -87,6 +90,20 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
         setUpdateSubscriptionOpen(false);
     };
 
+    const handleOpenDisablePasskeys = () => {
+        setDisablePasskeysOpen(true); // Open the CloseFamily dialog
+    };
+
+    const handleCloseDisablePasskeys = () => {
+        setDisablePasskeysOpen(false); // Close the CloseFamily dialog
+    };
+
+    const handleDisablePasskeys = () => {
+        // Implement your logic to close family here
+        console.log("Close family action");
+        handleOpenDisablePasskeys(); // Open CloseFamily dialog after closing family
+    };
+
     if (!userData) {
         return null;
     }
@@ -99,6 +116,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                         component={Paper}
                         variant="outlined"
                         sx={{
+                            backgroundColor: "#F1F1F3",
                             minHeight: 300,
                             display: "flex",
                             flexDirection: "column",
@@ -214,6 +232,15 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                                         />
                                                     </IconButton>
                                                 </Box>
+                                            ) : label === "Passkeys" ? (
+                                                <Button
+                                                    variant="outlined"
+                                                    onClick={
+                                                        handleDisablePasskeys
+                                                    }
+                                                >
+                                                    Disable Passkeys
+                                                </Button>
                                             ) : typeof value === "string" ? (
                                                 label === "Two factor 2FA" ? (
                                                     is2FADisabled ||
@@ -327,6 +354,13 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
             <ChangeEmail
                 open={changeEmailOpen}
                 onClose={handleCloseChangeEmail}
+            />
+
+            {/* Render Passkeys Dialog */}
+            <DisablePasskeys
+                open={DisablePasskeysOpen}
+                handleClose={handleCloseDisablePasskeys}
+                handleDisablePasskeys={handleCloseDisablePasskeys}
             />
         </Grid>
     );

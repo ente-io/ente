@@ -246,6 +246,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                     <MenuItem value="stripe">Stripe</MenuItem>
                                     <MenuItem value="paypal">PayPal</MenuItem>
                                     <MenuItem value="bitpay">BitPay</MenuItem>
+                                    <MenuItem value="None">None</MenuItem>
                                 </Select>
                             </div>
                         </Grid>

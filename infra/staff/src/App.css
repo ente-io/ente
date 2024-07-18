@@ -304,3 +304,44 @@
 .active-field input {
     width: 50px;
 }
+/* Add to App.css or your CSS file */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+}
+
+.input-form {
+    margin-bottom: 16px;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 300px;
+}
+
+.horizontal-group {
+    display: flex;
+    align-items: center;
+}
+
+.fetch-button-container {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.text-field-token,
+.text-field-email {
+    margin: 0 8px;
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 16px;
+}
