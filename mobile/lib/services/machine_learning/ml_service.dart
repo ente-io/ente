@@ -855,6 +855,9 @@ class MLService {
   }
 
   bool _cannotRunMLFunction({String function = ""}) {
+    if (kDebugMode && Platform.isIOS) {
+      return false;
+    }
     if (_isIndexingOrClusteringRunning) {
       _logger.info(
         "Cannot run $function because indexing or clustering is already running",
