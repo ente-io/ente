@@ -9,6 +9,7 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
+import { indexExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -388,7 +389,11 @@ const index = async (
     // See if we already have all the derived data fields that we need. If so,
     // just update our local db and return.
 
-    if (existingFaceIndex && existingCLIPIndex) {
+    if (
+        existingFaceIndex &&
+        existingCLIPIndex &&
+        !process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML_DONT_USE /* TODO-ML: WIP */
+    ) {
         try {
             await saveIndexes(
                 { fileID, ...existingFaceIndex },
@@ -422,13 +427,15 @@ const index = async (
     try {
         let faceIndex: FaceIndex;
         let clipIndex: CLIPIndex;
+        let exif: unknown;
 
         const startTime = Date.now();
 
         try {
-            [faceIndex, clipIndex] = await Promise.all([
+            [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
+                indexExif(enteFile),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -442,7 +449,9 @@ const index = async (
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
+            if (exif)
+                return JSON.stringify(exif); // TODO: EXIF
+            else return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
