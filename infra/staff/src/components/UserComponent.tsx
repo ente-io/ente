@@ -37,7 +37,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [is2FADisabled, setIs2FADisabled] = React.useState(false);
     const [updateSubscriptionOpen, setUpdateSubscriptionOpen] =
         React.useState(false);
-    const [changeEmailOpen, setChangeEmailOpen] = React.useState(false); // State for ChangeEmail dialog
+    const [changeEmailOpen, setChangeEmailOpen] = React.useState(false);
     const [DisablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
 
     React.useEffect(() => {
@@ -54,7 +54,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     };
 
     const handleCloseChangeEmail = () => {
-        setChangeEmailOpen(false); // Close ChangeEmail dialog
+        setChangeEmailOpen(false);
     };
 
     const handleDeleteAccountClick = () => {
@@ -91,17 +91,16 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     };
 
     const handleOpenDisablePasskeys = () => {
-        setDisablePasskeysOpen(true); // Open the CloseFamily dialog
+        setDisablePasskeysOpen(true);
     };
 
     const handleCloseDisablePasskeys = () => {
-        setDisablePasskeysOpen(false); // Close the CloseFamily dialog
+        setDisablePasskeysOpen(false);
     };
 
     const handleDisablePasskeys = () => {
-        // Implement your logic to close family here
         console.log("Close family action");
-        handleOpenDisablePasskeys(); // Open CloseFamily dialog after closing family
+        handleOpenDisablePasskeys();
     };
 
     if (!userData) {
@@ -124,6 +123,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                             height: "100%",
                             width: "100%",
                             padding: "13px",
+                            overflowX: "hidden", // Prevent horizontal scrolling
                             "&:not(:last-child)": {
                                 marginBottom: "40px",
                             },
@@ -164,7 +164,12 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                     aria-label="edit"
                                     onClick={handleEditSubscription}
                                 >
-                                    <EditIcon style={{ color: "black" }} />
+                                    <EditIcon
+                                        style={{
+                                            color: "black",
+                                            marginRight: "15px",
+                                        }}
+                                    />
                                 </IconButton>
                             )}
                         </Box>
@@ -172,7 +177,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                         <Table
                             sx={{
                                 width: "100%",
-                                tableLayout: "fixed",
+                                tableLayout: "fixed", // Ensure table layout is fixed
                                 height: "100%",
                                 borderBottom: "none",
                             }}
@@ -247,11 +252,9 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                                     value === "Disabled" ? (
                                                         <Typography
                                                             sx={{
-                                                                textAlign:
-                                                                    "center",
                                                                 width: "100%",
                                                                 paddingLeft:
-                                                                    "30px",
+                                                                    "1px",
                                                             }}
                                                         >
                                                             {value}
@@ -263,11 +266,18 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                                                 alignItems:
                                                                     "center",
                                                                 justifyContent:
-                                                                    "center",
+                                                                    "right",
                                                                 width: "100%",
+                                                                paddingRight:
+                                                                    "50px",
                                                             }}
                                                         >
-                                                            <Typography>
+                                                            <Typography
+                                                                sx={{
+                                                                    marginRight:
+                                                                        "1px",
+                                                                }}
+                                                            >
                                                                 {value}
                                                             </Typography>
                                                             {value ===
@@ -331,32 +341,27 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 </Grid>
             ))}
 
-            {/* Render DeleteAccount dialog */}
             <DeleteAccount
                 open={deleteAccountOpen}
                 handleClose={handleCloseDeleteAccount}
             />
 
-            {/* Render Disable2FA dialog */}
             <Disable2FA
                 open={disable2FAOpen}
                 handleClose={handleCancelDisable2FA}
                 handleDisable2FA={handleDisable2FA}
             />
 
-            {/* Render UpdateSubscription dialog */}
             <UpdateSubscription
                 open={updateSubscriptionOpen}
                 onClose={handleCloseUpdateSubscription}
             />
 
-            {/* Render ChangeEmail dialog */}
             <ChangeEmail
                 open={changeEmailOpen}
                 onClose={handleCloseChangeEmail}
             />
 
-            {/* Render Passkeys Dialog */}
             <DisablePasskeys
                 open={DisablePasskeysOpen}
                 handleClose={handleCloseDisablePasskeys}
