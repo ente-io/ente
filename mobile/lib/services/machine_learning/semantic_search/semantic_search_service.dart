@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:developer" as dev show log;
+import "dart:io";
 import "dart:math" show min;
 import "dart:typed_data" show ByteData;
 import "dart:ui" show Image;
@@ -260,8 +261,8 @@ class SemanticSearchService {
   Future<void> _loadTextModel() async {
     _logger.info("Initializing ML framework");
     try {
-      await ClipTextEncoder.instance.loadModel();
-      await ClipTextEncoder.instance.loadModel(useEntePlugin: true);
+      await ClipTextEncoder.instance
+          .loadModel(useEntePlugin: Platform.isAndroid);
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
@@ -296,16 +297,21 @@ class SemanticSearchService {
     }
     try {
       final int clipAddress = ClipTextEncoder.instance.sessionAddress;
-      // final textEmbedding = await _computer.compute(
-      //   ClipTextEncoder.infer,
-      //   param: {
-      //     "text": query,
-      //     "address": clipAddress,
-      //   },
-      // ) as List<double>;
-      final textEmbedding = await ClipTextEncoder.infer(
-        {"text": query, "address": clipAddress},
-      );
+      late final List<double> textEmbedding;
+      if (Platform.isAndroid) {
+        textEmbedding = await ClipTextEncoder.infer(
+          {"text": query, "address": clipAddress},
+        );
+      } else {
+        textEmbedding = await _computer.compute(
+          ClipTextEncoder.infer,
+          param: {
+            "text": query,
+            "address": clipAddress,
+          },
+        ) as List<double>;
+      }
+
       _queryCache.put(query, textEmbedding);
       return textEmbedding;
     } catch (e) {
