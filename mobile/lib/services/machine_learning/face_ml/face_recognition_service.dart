@@ -101,12 +101,12 @@ class FaceRecognitionService {
             .toSet();
         _logger.info('starting remote fetch for ${fileIds.length} files');
         final res =
-            await RemoteFileMLService.instance.getFaceEmbedding(fileIds);
+            await RemoteFileMLService.instance.getFileEmbeddings(fileIds);
         _logger.info('fetched ${res.mlData.length} embeddings');
         fetchedCount += res.mlData.length;
         final List<Face> faces = [];
         final remoteFileIdToVersion = <int, int>{};
-        for (FileMl fileMl in res.mlData.values) {
+        for (RemoteFileML fileMl in res.mlData.values) {
           if (shouldDiscardRemoteEmbedding(fileMl)) continue;
           if (fileMl.faceEmbedding.faces.isEmpty) {
             faces.add(
@@ -117,8 +117,8 @@ class FaceRecognitionService {
           } else {
             for (final f in fileMl.faceEmbedding.faces) {
               f.fileInfo = FileInfo(
-                imageHeight: fileMl.height,
-                imageWidth: fileMl.width,
+                imageHeight: fileMl.faceEmbedding.height,
+                imageWidth: fileMl.faceEmbedding.width,
               );
               faces.add(f);
             }

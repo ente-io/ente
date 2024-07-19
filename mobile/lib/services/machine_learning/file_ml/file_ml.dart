@@ -1,46 +1,54 @@
 import "package:photos/face/model/face.dart";
 
-class FileMl {
+class RemoteFileML {
   final int fileID;
-  final int? height;
-  final int? width;
-  final FaceEmbeddings faceEmbedding;
+  final Map<String, dynamic> remoteRawData;
+  final RemoteFaceEmbedding faceEmbedding;
+  final RemoteClipEmbedding? clipEmbedding;
 
-  FileMl(
+  RemoteFileML(
     this.fileID,
-    this.faceEmbedding, {
-    this.height,
-    this.width,
+    this.remoteRawData, {
+    required this.faceEmbedding,
+    this.clipEmbedding,
   });
 
   // toJson
-  Map<String, dynamic> toJson() => {
-        'fileID': fileID,
-        'height': height,
-        'width': width,
-        'faceEmbedding': faceEmbedding.toJson(),
-      };
-  // fromJson
-  factory FileMl.fromJson(Map<String, dynamic> json) {
-    return FileMl(
-      json['fileID'] as int,
-      FaceEmbeddings.fromJson(json['faceEmbedding'] as Map<String, dynamic>),
-      height: json['height'] as int?,
-      width: json['width'] as int?,
+  Map<String, dynamic> toJson() {
+    throw UnimplementedError();
+  }
+
+  // fromRemote
+  factory RemoteFileML.fromRemote(int fileID, Map<String, dynamic> json) {
+    return RemoteFileML(
+      fileID,
+      json,
+      faceEmbedding: RemoteFaceEmbedding.fromJson(
+        json['face'] as Map<String, dynamic>,
+      ),
+      clipEmbedding: json['clip'] == null
+          ? null
+          : RemoteClipEmbedding.fromJson(
+              json['clip'] as Map<String, dynamic>,
+            ),
     );
   }
 }
 
-class FaceEmbeddings {
+class RemoteFaceEmbedding {
   final List<Face> faces;
   final int version;
-  // pkgname/version
+  // packageName/version
   final String client;
+  final int height;
+  final int width;
 
-  FaceEmbeddings(
+  RemoteFaceEmbedding(
     this.faces,
     this.version, {
     required this.client,
+    required this.height,
+    required this.width,
   });
 
   // toJson
@@ -48,33 +56,48 @@ class FaceEmbeddings {
         'faces': faces.map((x) => x.toJson()).toList(),
         'version': version,
         'client': client,
+        'height': height,
+        'width': width,
       };
+
   // fromJson
-  factory FaceEmbeddings.fromJson(Map<String, dynamic> json) {
-    return FaceEmbeddings(
+  factory RemoteFaceEmbedding.fromJson(Map<String, dynamic> json) {
+    return RemoteFaceEmbedding(
       List<Face>.from(
         json['faces'].map((x) => Face.fromJson(x as Map<String, dynamic>)),
       ),
       json['version'] as int,
-      client: json['client'] ?? 'unknown',
+      client: json['client'] as String,
+      height: json['height'] as int,
+      width: json['width'] as int,
     );
   }
 }
 
-class ClipEmbedding {
-  final int? version;
+class RemoteClipEmbedding {
+  final int version;
+  final String client;
   final List<double> embedding;
-  ClipEmbedding(this.embedding, {this.version});
+
+  RemoteClipEmbedding(
+    this.embedding, {
+    required this.version,
+    required this.client,
+  });
+
   // toJson
   Map<String, dynamic> toJson() => {
-        'version': version,
         'embedding': embedding,
+        'version': version,
+        'client': client,
       };
+
   // fromJson
-  factory ClipEmbedding.fromJson(Map<String, dynamic> json) {
-    return ClipEmbedding(
+  factory RemoteClipEmbedding.fromJson(Map<String, dynamic> json) {
+    return RemoteClipEmbedding(
       List<double>.from(json['embedding'] as List),
-      version: json['version'] as int?,
+      version: json['version'] as int,
+      client: json['client'] as String,
     );
   }
 }

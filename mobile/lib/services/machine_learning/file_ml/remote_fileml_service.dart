@@ -1,8 +1,9 @@
 import "dart:async";
 import "dart:convert";
+import "dart:io";
 
 import "package:computer/computer.dart";
-import "package:flutter/foundation.dart" show debugPrint;
+import "package:flutter/foundation.dart" show Uint8List, debugPrint;
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -29,7 +30,8 @@ class RemoteFileMLService {
 
   void init(SharedPreferences prefs) {}
 
-  Future<void> putFileEmbedding(EnteFile file, FileMl fileML) async {
+  Future<void> putFileEmbedding(EnteFile file, RemoteFileML fileML) async {
+    throw Exception("need to update implementation");
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(fileML.toJson());
     final encryptedEmbedding = await CryptoUtil.encryptChaCha(
@@ -56,7 +58,7 @@ class RemoteFileMLService {
     }
   }
 
-  Future<FilesMLDataResponse> getFaceEmbedding(
+  Future<FilesMLDataResponse> getFileEmbeddings(
     Set<int> fileIds,
   ) async {
     try {
@@ -64,7 +66,7 @@ class RemoteFileMLService {
         "/embeddings/files",
         data: {
           "fileIDs": fileIds.toList(),
-          "model": 'file-ml-clip-face',
+          "model": 'ggml-clip',
         },
       );
       final remoteEmb = res.data['embeddings'] as List;
@@ -93,10 +95,10 @@ class RemoteFileMLService {
     }
   }
 
-  Future<Map<int, FileMl>> decryptFileMLData(
+  Future<Map<int, RemoteFileML>> decryptFileMLData(
     List<RemoteEmbedding> remoteEmbeddings,
   ) async {
-    final result = <int, FileMl>{};
+    final result = <int, RemoteFileML>{};
     if (remoteEmbeddings.isEmpty) {
       return result;
     }
@@ -112,7 +114,7 @@ class RemoteFileMLService {
       final input = EmbeddingsDecoderInput(embedding, fileKey);
       inputs.add(input);
     }
-    return _computer.compute<Map<String, dynamic>, Map<int, FileMl>>(
+    return _computer.compute<Map<String, dynamic>, Map<int, RemoteFileML>>(
       _decryptFileMLComputer,
       param: {
         "inputs": inputs,
@@ -121,10 +123,16 @@ class RemoteFileMLService {
   }
 }
 
-Future<Map<int, FileMl>> _decryptFileMLComputer(
+Uint8List ungzipUint8List(Uint8List compressedData) {
+  final codec = GZipCodec();
+  final List<int> decompressedList = codec.decode(compressedData);
+  return Uint8List.fromList(decompressedList);
+}
+
+Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
   Map<String, dynamic> args,
 ) async {
-  final result = <int, FileMl>{};
+  final result = <int, RemoteFileML>{};
   final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
   for (final input in inputs) {
     final decryptArgs = <String, dynamic>{};
@@ -134,15 +142,19 @@ Future<Map<int, FileMl>> _decryptFileMLComputer(
     decryptArgs["header"] =
         CryptoUtil.base642bin(input.embedding.decryptionHeader);
     final embeddingData = chachaDecryptData(decryptArgs);
-    final decodedJson = jsonDecode(utf8.decode(embeddingData));
-    final FileMl decodedEmbedding =
-        FileMl.fromJson(decodedJson as Map<String, dynamic>);
+    // unzip the gzip data
+    final unzippedData = ungzipUint8List(embeddingData);
+    final decodedJson = jsonDecode(utf8.decode(unzippedData));
+    final RemoteFileML decodedEmbedding = RemoteFileML.fromRemote(
+      input.embedding.fileID,
+      decodedJson as Map<String, dynamic>,
+    );
     result[input.embedding.fileID] = decodedEmbedding;
   }
   return result;
 }
 
-bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
+bool shouldDiscardRemoteEmbedding(RemoteFileML fileMl) {
   if (fileMl.faceEmbedding.version < faceMlVersion) {
     debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
         "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
@@ -175,10 +187,6 @@ bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
     );
     return true;
   }
-  if (fileMl.width == null || fileMl.height == null) {
-    debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-        "because width is null");
-    return true;
-  }
+
   return false;
 }
