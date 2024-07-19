@@ -11,7 +11,6 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
-import "package:photos/services/machine_learning/semantic_search/embedding_store.dart";
 import "package:photos/services/machine_learning/semantic_search/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -152,6 +151,13 @@ Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
     result[input.embedding.fileID] = decodedEmbedding;
   }
   return result;
+}
+
+class EmbeddingsDecoderInput {
+  final RemoteEmbedding embedding;
+  final Uint8List decryptionKey;
+
+  EmbeddingsDecoderInput(this.embedding, this.decryptionKey);
 }
 
 bool shouldDiscardRemoteEmbedding(RemoteFileML fileMl) {

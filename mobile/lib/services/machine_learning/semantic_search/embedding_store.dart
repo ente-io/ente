@@ -1,17 +1,9 @@
 import "dart:async";
-import "dart:convert";
-import "dart:typed_data";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/embeddings_db.dart";
-import "package:photos/db/files_db.dart";
-import "package:photos/models/embedding.dart";
-import "package:photos/models/file/file.dart";
-import 'package:photos/services/machine_learning/semantic_search/remote_embedding.dart';
-import "package:photos/utils/crypto_util.dart";
-import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class EmbeddingStore {
@@ -33,191 +25,10 @@ class EmbeddingStore {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<bool> pullEmbeddings() async {
-    if (_remoteSyncStatus != null) {
-      return _remoteSyncStatus!.future;
-    }
-    _remoteSyncStatus = Completer();
-    try {
-      var remoteEmbeddings = await _getRemoteEmbeddings();
-      await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
-      while (remoteEmbeddings.hasMore) {
-        remoteEmbeddings = await _getRemoteEmbeddings();
-        await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
-      }
-      _remoteSyncStatus!.complete(true);
-      _remoteSyncStatus = null;
-      return true;
-    } catch (e, s) {
-      _logger.severe("failed to fetch & store remote embeddings", e, s);
-      _remoteSyncStatus!.complete(false);
-      _remoteSyncStatus = null;
-      return false;
-    }
-  }
 
-  Future<void> pushEmbeddings() async {
-    final pendingItems = await EmbeddingsDB.instance.getUnsyncedEmbeddings();
-    final fileMap = await FilesDB.instance
-        .getFilesFromIDs(pendingItems.map((e) => e.fileID).toList());
-    _logger.info("Pushing ${pendingItems.length} embeddings");
-    final deletedEntries = <int>[];
-    for (final item in pendingItems) {
-      try {
-        final file = fileMap[item.fileID];
-        if (file != null) {
-          await _pushEmbedding(file, item);
-        } else {
-          deletedEntries.add(item.fileID);
-        }
-      } catch (e, s) {
-        _logger.severe(e, s);
-      }
-    }
-    if (deletedEntries.isNotEmpty) {
-      await EmbeddingsDB.instance.deleteEmbeddings(deletedEntries);
-    }
-  }
-
-  Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
-    await EmbeddingsDB.instance.put(embedding);
-    unawaited(_pushEmbedding(file, embedding));
-  }
 
   Future<void> clearEmbeddings() async {
     await EmbeddingsDB.instance.deleteAll();
     await _preferences.remove(kEmbeddingsSyncTimeKey);
   }
-
-  Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
-    _logger.info("Pushing embedding for $file");
-    final encryptionKey = getFileKey(file);
-    final embeddingJSON = jsonEncode(embedding.embedding);
-    final encryptedEmbedding = await CryptoUtil.encryptChaCha(
-      utf8.encode(embeddingJSON),
-      encryptionKey,
-    );
-    final encryptedData =
-        CryptoUtil.bin2base64(encryptedEmbedding.encryptedData!);
-    final header = CryptoUtil.bin2base64(encryptedEmbedding.header!);
-    try {
-      final response = await _dio.put(
-        "/embeddings",
-        data: {
-          "fileID": embedding.fileID,
-          "encryptedEmbedding": encryptedData,
-          "decryptionHeader": header,
-        },
-      );
-      final updationTime = response.data["updatedAt"];
-      embedding.updationTime = updationTime;
-      await EmbeddingsDB.instance.put(embedding);
-    } catch (e, s) {
-      _logger.severe(e, s);
-    }
-  }
-
-  Future<RemoteEmbeddings> _getRemoteEmbeddings({int limit = 200}) async {
-    final remoteEmbeddings = <RemoteEmbedding>[];
-    try {
-      final sinceTime = _preferences.getInt(kEmbeddingsSyncTimeKey) ?? 0;
-      _logger.info("Fetching embeddings since $sinceTime");
-      final response = await _dio.get(
-        "/embeddings/diff",
-        queryParameters: {
-          "sinceTime": sinceTime,
-          "limit": limit,
-        },
-      );
-      final diff = response.data["diff"] as List;
-      for (var entry in diff) {
-        final embedding = RemoteEmbedding.fromMap(entry);
-        remoteEmbeddings.add(embedding);
-      }
-    } catch (e, s) {
-      _logger.warning("Fetching embeddings failed", e, s);
-      rethrow;
-    }
-
-    _logger.info("${remoteEmbeddings.length} embeddings fetched");
-
-    return RemoteEmbeddings(
-      remoteEmbeddings,
-      // keep fetching until we get all embeddings. Avoid limit check as
-      // some embedding fetch might fail on server
-      remoteEmbeddings.isNotEmpty,
-    );
-  }
-
-  Future<void> _storeRemoteEmbeddings(
-    List<RemoteEmbedding> remoteEmbeddings,
-  ) async {
-    if (remoteEmbeddings.isEmpty) {
-      return;
-    }
-    final inputs = <EmbeddingsDecoderInput>[];
-    final fileMap = await FilesDB.instance
-        .getFilesFromIDs(remoteEmbeddings.map((e) => e.fileID).toList());
-
-    for (final embedding in remoteEmbeddings) {
-      final file = fileMap[embedding.fileID];
-      if (file == null) {
-        continue;
-      }
-      final fileKey = getFileKey(file);
-      final input = EmbeddingsDecoderInput(embedding, fileKey);
-      inputs.add(input);
-    }
-    final embeddings = await _computer.compute(
-      _decodeEmbeddings,
-      param: {
-        "inputs": inputs,
-      },
-    );
-    _logger.info("${embeddings.length} embeddings decoded");
-    await EmbeddingsDB.instance.putMany(embeddings);
-    await _preferences.setInt(
-      kEmbeddingsSyncTimeKey,
-      embeddings.last.updationTime!,
-    );
-    _logger.info("${embeddings.length} embeddings stored");
-  }
-}
-
-Future<List<Embedding>> _decodeEmbeddings(Map<String, dynamic> args) async {
-  final embeddings = <Embedding>[];
-
-  final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
-
-  for (final input in inputs) {
-    final decryptArgs = <String, dynamic>{};
-    decryptArgs["source"] =
-        CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
-    decryptArgs["key"] = input.decryptionKey;
-    decryptArgs["header"] =
-        CryptoUtil.base642bin(input.embedding.decryptionHeader);
-    final embeddingData = chachaDecryptData(decryptArgs);
-
-    final List<double> decodedEmbedding = jsonDecode(utf8.decode(embeddingData))
-        .map((item) => item.toDouble())
-        .cast<double>()
-        .toList();
-
-    embeddings.add(
-      Embedding(
-        fileID: input.embedding.fileID,
-        embedding: decodedEmbedding,
-        updationTime: input.embedding.updatedAt,
-      ),
-    );
-  }
-
-  return embeddings;
-}
-
-class EmbeddingsDecoderInput {
-  final RemoteEmbedding embedding;
-  final Uint8List decryptionKey;
-
-  EmbeddingsDecoderInput(this.embedding, this.decryptionKey);
 }

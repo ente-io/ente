@@ -20,10 +20,10 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
-import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
   SemanticSearchService._privateConstructor();
@@ -58,7 +58,6 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
-    await EmbeddingStore.instance.init();
     await EmbeddingsDB.instance.init();
     await _loadImageEmbeddings();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
@@ -92,8 +91,7 @@ class SemanticSearchService {
       return;
     }
     _isSyncing = true;
-    await EmbeddingStore.instance.pullEmbeddings();
-    unawaited(EmbeddingStore.instance.pushEmbeddings());
+
     _isSyncing = false;
   }
 
@@ -140,7 +138,9 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await EmbeddingStore.instance.clearEmbeddings();
+    await EmbeddingsDB.instance.deleteAll();
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
   }
 
@@ -278,10 +278,7 @@ class SemanticSearchService {
       fileID: clipResult.fileID,
       embedding: clipResult.embedding,
     );
-    await EmbeddingStore.instance.storeEmbedding(
-      entefile,
-      embedding,
-    );
+    await EmbeddingsDB.instance.put(embedding);
   }
 
   static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
