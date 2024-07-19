@@ -26,7 +26,8 @@ export const regenerateFaceCrops = async (
     enteFile: EnteFile,
     faceIndex: FaceIndex,
 ) => {
-    const imageBitmap = await createImageBitmap(await indexableBlobs(enteFile));
+    const { renderableBlob } = await indexableBlobs(enteFile);
+    const imageBitmap = await createImageBitmap(renderableBlob);
 
     try {
         await saveFaceCrops(imageBitmap, faceIndex);

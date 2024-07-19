@@ -48,7 +48,7 @@ export interface IndexableBlobs {
      * -   For live photos it will the (original) image component of the live
      *     photo.
      */
-    original: Blob | undefined;
+    originalBlob: Blob | undefined;
     /**
      * The original (if the browser possibly supports rendering this type of
      * images) or otherwise a converted JPEG blob.
@@ -62,7 +62,7 @@ export interface IndexableBlobs {
      * -   For live photos this is constructed from the image component of the
      *     live photo.
      */
-    renderable: Blob;
+    renderableBlob: Blob;
 }
 
 /**
@@ -176,31 +176,33 @@ export const indexableBlobs = async (
     if (fileType == FILE_TYPE.VIDEO) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         return {
-            original: undefined,
-            renderable: new Blob([ensure(thumbnailData)]),
+            originalBlob: undefined,
+            renderableBlob: new Blob([ensure(thumbnailData)]),
         };
     }
 
     const fileStream = await DownloadManager.getFile(enteFile);
-    const fileBlob = await new Response(fileStream).blob();
-    let blob: Blob | undefined;
+    const originalBlob = await new Response(fileStream).blob();
+
+    let renderableBlob: Blob;
     if (fileType == FILE_TYPE.LIVE_PHOTO) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             enteFile.metadata.title,
-            fileBlob,
+            originalBlob,
         );
-        blob = await renderableImageBlob(imageFileName, new Blob([imageData]));
+        renderableBlob = await renderableImageBlob(
+            imageFileName,
+            new Blob([imageData]),
+        );
     } else if (fileType == FILE_TYPE.IMAGE) {
-        blob = await renderableImageBlob(enteFile.metadata.title, fileBlob);
+        renderableBlob = await renderableImageBlob(
+            enteFile.metadata.title,
+            originalBlob,
+        );
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 
-    if (!blob)
-        throw new 
-
-    }
-
-    return { original: fileBlob, renderable: ensure(blob) };
+    return { originalBlob, renderableBlob };
 };

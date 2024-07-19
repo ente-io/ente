@@ -466,7 +466,7 @@ async function getRenderableFileURL(
             url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
             isRenderable = !!convertedURL;
-            mimeType = convertedBlob?.type;
+            mimeType = convertedBlob.type;
             break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
@@ -511,13 +511,9 @@ async function getRenderableLivePhotoURL(
     const getRenderableLivePhotoImageURL = async () => {
         try {
             const imageBlob = new Blob([livePhoto.imageData]);
-            const convertedImageBlob = await renderableImageBlob(
-                livePhoto.imageFileName,
-                imageBlob,
+            return URL.createObjectURL(
+                await renderableImageBlob(livePhoto.imageFileName, imageBlob),
             );
-            if (!convertedImageBlob) return undefined;
-
-            return URL.createObjectURL(convertedImageBlob);
         } catch (e) {
             //ignore and return null
             return undefined;
