@@ -37,7 +37,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [is2FADisabled, setIs2FADisabled] = React.useState(false);
     const [updateSubscriptionOpen, setUpdateSubscriptionOpen] =
         React.useState(false);
-    const [changeEmailOpen, setChangeEmailOpen] = React.useState(false); // State for ChangeEmail dialog
+    const [changeEmailOpen, setChangeEmailOpen] = React.useState(false); 
     const [DisablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
 
     React.useEffect(() => {
@@ -54,7 +54,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     };
 
     const handleCloseChangeEmail = () => {
-        setChangeEmailOpen(false); // Close ChangeEmail dialog
+        setChangeEmailOpen(false); 
     };
 
     const handleDeleteAccountClick = () => {
@@ -91,17 +91,17 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     };
 
     const handleOpenDisablePasskeys = () => {
-        setDisablePasskeysOpen(true); // Open the CloseFamily dialog
+        setDisablePasskeysOpen(true); 
     };
 
     const handleCloseDisablePasskeys = () => {
-        setDisablePasskeysOpen(false); // Close the CloseFamily dialog
+        setDisablePasskeysOpen(false); 
     };
 
     const handleDisablePasskeys = () => {
-        // Implement your logic to close family here
+        
         console.log("Close family action");
-        handleOpenDisablePasskeys(); // Open CloseFamily dialog after closing family
+        handleOpenDisablePasskeys(); 
     };
 
     if (!userData) {
@@ -112,23 +112,26 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
         <Grid container spacing={6} justifyContent="center">
             {Object.entries(userData).map(([title, data]) => (
                 <Grid item xs={12} sm={10} md={6} key={title}>
-                    <TableContainer
-                        component={Paper}
-                        variant="outlined"
-                        sx={{
-                            backgroundColor: "#F1F1F3",
-                            minHeight: 300,
-                            display: "flex",
-                            flexDirection: "column",
-                            marginBottom: "20px",
-                            height: "100%",
-                            width: "100%",
-                            padding: "13px",
-                            "&:not(:last-child)": {
-                                marginBottom: "40px",
-                            },
-                        }}
-                    >
+                   <TableContainer
+                            component={Paper}
+                            variant="outlined"
+                            sx={{
+                                backgroundColor: "#F1F1F3",
+                                minHeight: 300,
+                                display: "flex",
+                                flexDirection: "column",
+                                marginBottom: "20px",
+                                height: "100%",
+                                width: "100%",
+                                padding: "13px",
+                                overflowX: "hidden", // Prevent horizontal scrolling
+                                "&:not(:last-child)": {
+                                    marginBottom: "40px",
+                                },
+                            }}
+                        >
+
+
                         <Box
                             sx={{
                                 display: "flex",
@@ -164,20 +167,21 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                     aria-label="edit"
                                     onClick={handleEditSubscription}
                                 >
-                                    <EditIcon style={{ color: "black" }} />
+                                    <EditIcon style={{ color: "black", marginRight: "15px", }} />
                                 </IconButton>
                             )}
                         </Box>
 
                         <Table
-                            sx={{
-                                width: "100%",
-                                tableLayout: "fixed",
-                                height: "100%",
-                                borderBottom: "none",
-                            }}
-                            aria-label={title}
-                        >
+                                        sx={{
+                                            width: "100%",
+                                            tableLayout: "fixed", // Ensure table layout is fixed
+                                            height: "100%",
+                                            borderBottom: "none",
+                                        }}
+                                        aria-label={title}
+                                    >
+
                             <TableBody>
                                 {Object.entries(
                                     data as Record<string, string>,
@@ -228,6 +232,7 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                                         <EditIcon
                                                             style={{
                                                                 color: "black",
+                                                              
                                                             }}
                                                         />
                                                     </IconButton>
@@ -247,70 +252,58 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                                                     value === "Disabled" ? (
                                                         <Typography
                                                             sx={{
-                                                                textAlign:
-                                                                    "center",
+                                                                
+                                                                    
                                                                 width: "100%",
                                                                 paddingLeft:
-                                                                    "30px",
+                                                                    "1px",
+                                                                    
                                                             }}
                                                         >
                                                             {value}
                                                         </Typography>
                                                     ) : (
                                                         <Box
-                                                            sx={{
-                                                                display: "flex",
-                                                                alignItems:
-                                                                    "center",
-                                                                justifyContent:
-                                                                    "center",
-                                                                width: "100%",
-                                                            }}
-                                                        >
-                                                            <Typography>
-                                                                {value}
-                                                            </Typography>
-                                                            {value ===
-                                                                "Enabled" && (
-                                                                <Switch
-                                                                    checked={
-                                                                        twoFactorEnabled
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) => {
-                                                                        const isChecked =
-                                                                            e
-                                                                                .target
-                                                                                .checked;
-                                                                        setTwoFactorEnabled(
-                                                                            isChecked,
-                                                                        );
-                                                                        if (
-                                                                            !isChecked
-                                                                        ) {
-                                                                            handleOpenDisable2FA();
-                                                                        }
-                                                                    }}
-                                                                    sx={{
-                                                                        "& .MuiSwitch-switchBase.Mui-checked":
-                                                                            {
-                                                                                color: "#00B33C",
-                                                                                "&:hover":
-                                                                                    {
-                                                                                        backgroundColor:
-                                                                                            "rgba(0, 179, 60, 0.08)",
-                                                                                    },
-                                                                            },
-                                                                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                                                                            {
-                                                                                backgroundColor:
-                                                                                    "#00B33C",
-                                                                            },
-                                                                    }}
-                                                                />
-                                                            )}
-                                                        </Box>
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "right",
+                                                    width: "100%",
+                                                    paddingRight: "50px", 
+                                                }}
+                                            >
+                                                <Typography
+                                                    sx={{
+                                                        marginRight: "1px", 
+                                                    }}
+                                                >
+                                                    {value}
+                                                </Typography>
+                                                {value === "Enabled" && (
+                                                    <Switch
+                                                        checked={twoFactorEnabled}
+                                                        onChange={(e) => {
+                                                            const isChecked = e.target.checked;
+                                                            setTwoFactorEnabled(isChecked);
+                                                            if (!isChecked) {
+                                                                handleOpenDisable2FA();
+                                                            }
+                                                        }}
+                                                        sx={{
+                                                            "& .MuiSwitch-switchBase.Mui-checked": {
+                                                                color: "#00B33C",
+                                                                "&:hover": {
+                                                                    backgroundColor: "rgba(0, 179, 60, 0.08)",
+                                                                },
+                                                            },
+                                                            "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                                                                backgroundColor: "#00B33C",
+                                                            },
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+
                                                     )
                                                 ) : (
                                                     <Typography>
@@ -331,32 +324,32 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
                 </Grid>
             ))}
 
-            {/* Render DeleteAccount dialog */}
+           
             <DeleteAccount
                 open={deleteAccountOpen}
                 handleClose={handleCloseDeleteAccount}
             />
 
-            {/* Render Disable2FA dialog */}
+          
             <Disable2FA
                 open={disable2FAOpen}
                 handleClose={handleCancelDisable2FA}
                 handleDisable2FA={handleDisable2FA}
             />
 
-            {/* Render UpdateSubscription dialog */}
+           
             <UpdateSubscription
                 open={updateSubscriptionOpen}
                 onClose={handleCloseUpdateSubscription}
             />
 
-            {/* Render ChangeEmail dialog */}
+            
             <ChangeEmail
                 open={changeEmailOpen}
                 onClose={handleCloseChangeEmail}
             />
 
-            {/* Render Passkeys Dialog */}
+            
             <DisablePasskeys
                 open={DisablePasskeysOpen}
                 handleClose={handleCloseDisablePasskeys}
