@@ -46,7 +46,7 @@ import { type RemoteFaceIndex } from "./face";
  * all the derived data associated with a file.
  */
 // TODO-ML: Fix name to "combined" before release
-type EmbeddingModel = "onnx-clip" /* Combined format */;
+type EmbeddingModel = "xxxx-xxxx" /* Combined format */;
 
 const RemoteEmbedding = z.object({
     /** The ID of the file whose embedding this is. */
@@ -200,7 +200,7 @@ export const fetchDerivedData = async (
     filesByID: Map<number, EnteFile>,
 ): Promise<Map<number, RemoteDerivedData>> => {
     // TODO-ML: Fix name to "combined" before release
-    const remoteEmbeddings = await fetchEmbeddings("onnx-clip", [
+    const remoteEmbeddings = await fetchEmbeddings("xxxx-xxxx", [
         ...filesByID.keys(),
     ]);
 
@@ -296,7 +296,7 @@ export const putDerivedData = async (
     // TODO-ML: Fix name to "combined" before release
     putEmbedding(
         enteFile,
-        "onnx-clip",
+        "xxxx-xxxx",
         await gzip(JSON.stringify(derivedData)),
     );
 
