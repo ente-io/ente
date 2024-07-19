@@ -37,7 +37,7 @@ export type SupportedLocale = (typeof supportedLocales)[number];
 const defaultLocale: SupportedLocale = "en-US";
 
 /**
- * Load translations.
+ * Load translations and add custom formatters.
  *
  * Localization and related concerns (aka "internationalization", or "i18n") for
  * our apps is handled by i18n framework.
@@ -48,6 +48,16 @@ const defaultLocale: SupportedLocale = "en-US";
  *   at runtime, and
  *
  * - react-i18next, which adds React specific APIs
+ *
+ * This function also adds our custom formatters. They can be used within the
+ * translated strings by using `{{val, formatterName}}`. For more details, see
+ * https://www.i18next.com/translation-function/formatting.
+ *
+ * Our custom formatters:
+ *
+ * -   "date": Formats an epoch microsecond value into a string containing the
+ *     year, month and day of the the date. For example, under "en-US" it'll
+ *     produce a string like "July 19, 2024".
  */
 export const setupI18n = async () => {
     const localeString = savedLocaleStringMigratingIfNeeded();
@@ -117,6 +127,20 @@ export const setupI18n = async () => {
             month: "long",
             day: "numeric",
         });
+    });
+
+    // To use this in a translation, interpolate as `{{val, date}}`.
+    i18n.services.formatter?.addCached("date", (locale) => {
+        // The "long" dateStyle:
+        //
+        // -   Includes: year (y), long-month (MMMM), day (d)
+        // -   English pattern examples: MMMM d, y ("September 14, 1999")
+        //
+        const formatter = Intl.DateTimeFormat(locale, { dateStyle: "long" });
+        // Value is an epoch microsecond so that we can directly pass the
+        // timestamps we get from our API responses. The formatter expects
+        // milliseconds, so divide by 1000.
+        return (val) => formatter.format(val / 1000);
     });
 };
 
