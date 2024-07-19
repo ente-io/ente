@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { HttpStatusCode } from "axios";

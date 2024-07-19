@@ -1,7 +1,7 @@
+import { Titlebar } from "@/base/components/Titlebar";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { formatDateTimeFull } from "@ente/shared/time/format";
 import { Box, Stack, styled, Typography } from "@mui/material";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import React from "react";
 import { FileInfoSidebar } from ".";

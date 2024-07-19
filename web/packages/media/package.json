@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/next": "*",
+        "@/base": "*",
         "file-type": "16.5.4",
         "heic-convert": "^2.1",
         "jszip": "^3.10"

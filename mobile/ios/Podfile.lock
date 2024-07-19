@@ -8,6 +8,8 @@ PODS:
     - FlutterMacOS
   - dart_ui_isolate (0.0.1):
     - Flutter
+  - dchs_motion_sensors (0.0.1):
+    - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - ffmpeg-kit-ios-min (6.0)
@@ -199,6 +201,8 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - smart_auth (0.0.1):
+    - Flutter
   - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
@@ -238,6 +242,7 @@ DEPENDENCIES:
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
+  - dchs_motion_sensors (from `.symlinks/plugins/dchs_motion_sensors/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_min (from `.symlinks/plugins/ffmpeg_kit_flutter_min/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -277,6 +282,7 @@ DEPENDENCIES:
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
@@ -319,6 +325,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
   dart_ui_isolate:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
+  dchs_motion_sensors:
+    :path: ".symlinks/plugins/dchs_motion_sensors/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   ffmpeg_kit_flutter_min:
@@ -397,6 +405,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  smart_auth:
+    :path: ".symlinks/plugins/smart_auth/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/darwin"
   sqlite3_flutter_libs:
@@ -419,6 +429,7 @@ SPEC CHECKSUMS:
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
+  dchs_motion_sensors: 9cef816635a39345cda9f0c4943e061f6429f453
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   ffmpeg-kit-ios-min: 4e9a088f4ee9629435960b9d68e54848975f1931
   ffmpeg_kit_flutter_min: 5eff47f4965bf9d1150e98961eb6129f5ae3f28c
@@ -466,7 +477,7 @@ SPEC CHECKSUMS:
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
+  photo_manager: ff695c7a1dd5bc379974953a2b5c0a293f7c4c8a
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 6837b01768e567fe8562182397bf43d63d8c6437
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
@@ -477,6 +488,7 @@ SPEC CHECKSUMS:
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
   sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80

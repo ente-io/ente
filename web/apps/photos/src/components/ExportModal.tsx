@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
@@ -195,7 +195,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
             <>
                 {!exportFolder ? (
                     <Button color={"accent"} onClick={changeExportDirectory}>
-                        {t("SELECT_FOLDER")}
+                        {t("select_folder")}
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>

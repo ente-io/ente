@@ -1,3 +1,4 @@
+import log from "@/base/log";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import downloadManager from "@/new/photos/services/download";
@@ -7,7 +8,6 @@ import {
 } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import log from "@/next/log";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -81,7 +81,6 @@ import {
     useState,
 } from "react";
 import { useDropzone } from "react-dropzone";
-import { clipService } from "services/clip-service";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -342,7 +341,7 @@ export default function Gallery() {
         const token = getToken();
         if (!key || !token) {
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.GALLERY);
-            router.push(PAGES.ROOT);
+            router.push("/");
             return;
         }
         preloadImage("/images/subscription-card-background");
@@ -390,18 +389,14 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (electron) {
-                // void clipService.setupOnFileUploadListener();
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                if (await shouldShowWhatsNew()) setOpenWhatsNew(true);
+                if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
             }
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
-            if (electron) {
-                electron.onMainWindowFocus(undefined);
-                clipService.removeOnFileUploadListener();
-            }
+            if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
 

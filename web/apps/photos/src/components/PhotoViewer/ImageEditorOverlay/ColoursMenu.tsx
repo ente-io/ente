@@ -1,7 +1,6 @@
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Box, Slider } from "@mui/material";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import { t } from "i18next";
 import type { Dispatch, SetStateAction } from "react";
 

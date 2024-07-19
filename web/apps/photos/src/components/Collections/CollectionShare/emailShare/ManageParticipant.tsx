@@ -1,14 +1,13 @@
-import log from "@/next/log";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
+import log from "@/base/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import BlockIcon from "@mui/icons-material/Block";
 import DoneIcon from "@mui/icons-material/Done";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import PhotoIcon from "@mui/icons-material/Photo";
 import { DialogProps, Stack, Typography } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
-import MenuItemDivider from "components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";

@@ -1,3 +1,7 @@
+import { ensureElectron } from "@/base/electron";
+import { basename } from "@/base/file";
+import log from "@/base/log";
+import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
@@ -21,10 +25,6 @@ import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
-import { ensureElectron } from "@/next/electron";
-import { basename } from "@/next/file";
-import log from "@/next/log";
-import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";

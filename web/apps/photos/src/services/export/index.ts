@@ -1,3 +1,5 @@
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
@@ -11,8 +13,6 @@ import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Events, eventBus } from "@ente/shared/events";

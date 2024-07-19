@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { FamilyData, FamilyMember } from "types/user";

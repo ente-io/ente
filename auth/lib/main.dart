@@ -7,6 +7,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/core/network.dart';
+import 'package:ente_auth/core/win_http_client.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
@@ -67,7 +68,7 @@ Future<void> initSystemTray() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows) {
-    await whiteListLetsEncryptRootCA();
+    HttpOverrides.global = WindowsHttpOverrides();
   }
 
   if (PlatformUtil.isDesktop()) {
@@ -90,18 +91,18 @@ void main() async {
   }
 }
 
-Future<void> whiteListLetsEncryptRootCA() async {
-  try {
-    // https://stackoverflow.com/a/71090239
-    // https://github.com/ente-io/ente/issues/2178
-    ByteData data =
-        await PlatformAssetBundle().load('assets/ca/lets-encrypt-r3.pem');
-    SecurityContext.defaultContext
-        .setTrustedCertificatesBytes(data.buffer.asUint8List());
-  } catch (e) {
-    _logger.severe("Failed to whitelist Let's Encrypt Root CA", e);
-  }
-}
+// Future<void> whiteListLetsEncryptRootCA() async {
+//   try {
+//     // https://stackoverflow.com/a/71090239
+//     // https://github.com/ente-io/ente/issues/2178
+//     ByteData data =
+//         await PlatformAssetBundle().load('assets/ca/lets-encrypt-r3.pem');
+//     SecurityContext.defaultContext
+//         .setTrustedCertificatesBytes(data.buffer.asUint8List());
+//   } catch (e) {
+//     _logger.severe("Failed to whitelist Let's Encrypt Root CA", e);
+//   }
+// }
 
 Future<void> _runInForeground() async {
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());

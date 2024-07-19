@@ -1,12 +1,12 @@
 import { accountLogout } from "@/accounts/services/logout";
 import type { AccountsContextT } from "@/accounts/types/context";
-import { clientPackageName, staticAppTitle } from "@/next/app";
-import { CustomHead } from "@/next/components/Head";
-import { setupI18n } from "@/next/i18n";
+import { clientPackageName, staticAppTitle } from "@/base/app";
+import { CustomHead } from "@/base/components/Head";
+import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
-} from "@/next/log-web";
+} from "@/base/log-web";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
@@ -14,7 +14,6 @@ import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { AppNavbar } from "@ente/shared/components/Navbar/app";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -92,7 +91,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         router.events.on("routeChangeStart", (url: string) => {
-            const newPathname = url.split("?")[0] as PAGES;
+            const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
             }
@@ -138,7 +137,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
 
     const logout = () => {
-        void accountLogout().then(() => router.push(PAGES.ROOT));
+        void accountLogout().then(() => router.push("/"));
     };
 
     const appContext = {

@@ -1,33 +1,47 @@
+import { clientPackageName } from "@/base/app";
+import { isHTTP4xxError } from "@/base/http";
+import { getKVN } from "@/base/kv";
+import { ensureAuthToken } from "@/base/local-user";
+import log from "@/base/log";
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
-import { clientPackageName } from "@/next/app";
-import { isHTTP4xxError } from "@/next/http";
-import { getKVN } from "@/next/kv";
-import { ensureAuthToken } from "@/next/local-user";
-import log from "@/next/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
-import { imageBitmapAndData } from "./bitmap";
+import {
+    imageBitmapAndData,
+    renderableBlob,
+    type ImageBitmapAndData,
+} from "./blob";
+import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
+import { saveFaceCrops } from "./crop";
 import {
     indexableFileIDs,
     markIndexingFailed,
-    saveFaceIndex,
+    saveIndexes,
     updateAssumingLocalFiles,
 } from "./db";
-import { pullFaceEmbeddings, putFaceIndex } from "./embedding";
-import { type FaceIndex, indexFaces } from "./face";
-import type { MLWorkerElectron } from "./worker-electron";
+import {
+    fetchDerivedData,
+    putDerivedData,
+    type RemoteDerivedData,
+} from "./embedding";
+import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
+import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
 interface IndexableItem {
+    /** The {@link EnteFile} to index (potentially). */
     enteFile: EnteFile;
+    /** If the file was uploaded from the current client, then its contents. */
     uploadItem: UploadItem | undefined;
+    /** The existing derived data on remote corresponding to this file. */
+    remoteDerivedData: RemoteDerivedData | undefined;
 }
 
 /**
@@ -41,23 +55,21 @@ interface IndexableItem {
  *
  *     ext. event      state           then state
  *    ------------- --------------- --------------
- *     sync         -> "pull"       -> "idle"
+ *     sync         -> "backfillq"  -> "idle"
  *     upload       -> "liveq"      -> "idle"
  *     idleTimeout  -> "backfillq"  -> "idle"
  *
  * where:
  *
- * -   "pull": pulling embeddings from remote
- * -   "liveq": indexing items that are being uploaded
- * -   "backfillq": indexing unindexed items otherwise
- * -   "idle": in between state transitions
+ * -   "liveq": indexing items that are being uploaded,
+ * -   "backfillq": fetching remote embeddings of unindexed items, and then
+ *     indexing them if needed,
+ * -   "idle": in between state transitions.
  */
 export class MLWorker {
     private electron: MLWorkerElectron | undefined;
-    private userAgent: string | undefined;
-    private state: "idle" | "pull" | "indexing" = "idle";
-    private shouldPull = false;
-    private havePulledAtLeastOnce = false;
+    private delegate: MLWorkerDelegate | undefined;
+    private state: "idle" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -66,33 +78,32 @@ export class MLWorker {
      * Initialize a new {@link MLWorker}.
      *
      * This is conceptually the constructor, however it is easier to have this
-     * as a separate function to avoid confounding the comlink types too much.
+     * as a separate function to avoid complicating the comlink types further.
      *
      * @param electron The {@link MLWorkerElectron} that allows the worker to
      * use the functionality provided by our Node.js layer when running in the
-     * context of our desktop app
+     * context of our desktop app.
+     *
+     * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
+     * the main thread of interesting events.
      */
-    async init(electron: MLWorkerElectron) {
+    async init(electron: MLWorkerElectron, delegate?: MLWorkerDelegate) {
         this.electron = electron;
-        // Set the user agent that'll be set in the generated embeddings.
-        this.userAgent = `${clientPackageName}/${await electron.appVersion()}`;
+        this.delegate = delegate;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
     }
 
     /**
-     * Pull embeddings from remote, and start backfilling if needed.
+     * Start backfilling if needed.
      *
-     * This function enqueues the pull and returns immediately without waiting
-     * for the pull to complete.
-     *
-     * While it only triggers a pull, once the pull is done it also checks for
-     * pending items to backfill. So it implicitly also triggers a backfill
-     * (which is why call it a less-precise sync instead of pull).
+     * This function enqueues a backfill attempt and returns immediately without
+     * waiting for it complete. During a backfill, it will first attempt to
+     * fetch embeddings for files which don't have that data locally. If we
+     * fetch and find what we need, we save it locally. Otherwise we index them.
      */
     sync() {
-        this.shouldPull = true;
         this.wakeUp();
     }
 
@@ -128,7 +139,10 @@ export class MLWorker {
         // live queue is just an optimization: if a file doesn't get indexed via
         // the live queue, it'll later get indexed anyway when we backfill.
         if (this.liveQ.length < 200) {
-            this.liveQ.push({ enteFile, uploadItem });
+            // The file is just being uploaded, and so will not have any
+            // pre-existing derived data on remote.
+            const remoteDerivedData = undefined;
+            this.liveQ.push({ enteFile, uploadItem, remoteDerivedData });
             this.wakeUp();
         } else {
             log.debug(() => "Ignoring upload item since liveQ is full");
@@ -143,61 +157,28 @@ export class MLWorker {
     }
 
     private async tick() {
-        log.debug(() => ({
-            t: "ml/tick",
-            state: this.state,
-            shouldSync: this.shouldPull,
-            liveQ: this.liveQ,
-            idleDuration: this.idleDuration,
-        }));
+        log.debug(() => [
+            "ml/tick",
+            {
+                state: this.state,
+                liveQ: this.liveQ,
+                idleDuration: this.idleDuration,
+            },
+        ]);
 
         const scheduleTick = () => void setTimeout(() => this.tick(), 0);
-
-        // If we've been asked to sync, do that irrespective of anything else.
-        if (this.shouldPull) {
-            // Allow this flag to be reset while we're busy pulling (triggering
-            // another pull when we tick next).
-            this.shouldPull = false;
-            this.state = "pull";
-            try {
-                const didPull = await pull();
-                // Mark that we completed once attempt at pulling successfully
-                // (irrespective of whether or not that got us some data).
-                this.havePulledAtLeastOnce = true;
-                // Reset the idle duration if we did pull something.
-                if (didPull) this.idleDuration = idleDurationStart;
-            } catch (e) {
-                log.error("Failed to pull embeddings", e);
-            }
-            // Tick again, even if we got an error.
-            //
-            // While the backfillQ won't be processed until at least a pull has
-            // happened once (`havePulledAtLeastOnce`), the liveQ can still be
-            // processed since these are new files without remote embeddings.
-            scheduleTick();
-            return;
-        }
 
         const liveQ = this.liveQ;
         this.liveQ = [];
         this.state = "indexing";
 
-        // Use the liveQ if present, otherwise get the next batch to backfill,
-        // but only if we've pulled once from remote successfully (otherwise we
-        // might end up reindexing files that were already indexed on remote but
-        // which we didn't know about since pull failed, say, for transient
-        // network issues).
-        const items =
-            liveQ.length > 0
-                ? liveQ
-                : this.havePulledAtLeastOnce
-                  ? await this.backfillQ()
-                  : [];
+        // Use the liveQ if present, otherwise get the next batch to backfill.
+        const items = liveQ.length > 0 ? liveQ : await this.backfillQ();
 
         const allSuccess = await indexNextBatch(
             items,
             ensure(this.electron),
-            ensure(this.userAgent),
+            this.delegate,
         );
         if (allSuccess) {
             // Everything is running smoothly. Reset the idle duration.
@@ -225,22 +206,24 @@ export class MLWorker {
     /** Return the next batch of items to backfill (if any). */
     async backfillQ() {
         const userID = ensure(await getKVN("userID"));
-        return syncWithLocalFilesAndGetFilesToIndex(userID, 200).then((fs) =>
-            fs.map((f) => ({ enteFile: f, uploadItem: undefined })),
+        // Find files that our local DB thinks need syncing.
+        const filesByID = await syncWithLocalFilesAndGetFilesToIndex(
+            userID,
+            200,
         );
+        if (!filesByID.size) return [];
+        // Fetch their existing derived data (if any).
+        const derivedDataByID = await fetchDerivedData(filesByID);
+        // Return files after annotating them with their existing derived data.
+        return Array.from(filesByID, ([id, file]) => ({
+            enteFile: file,
+            uploadItem: undefined,
+            remoteDerivedData: derivedDataByID.get(id),
+        }));
     }
 }
 
 expose(MLWorker);
-
-/**
- * Pull embeddings from remote.
- *
- * Return true atleast one embedding was pulled.
- */
-const pull = async () => {
-    return pullFaceEmbeddings();
-};
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
@@ -254,7 +237,7 @@ const pull = async () => {
 const indexNextBatch = async (
     items: IndexableItem[],
     electron: MLWorkerElectron,
-    userAgent: string,
+    delegate: MLWorkerDelegate | undefined,
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
     // liveQ has already been drained, but that's fine, it'll be rare that we
@@ -269,9 +252,10 @@ const indexNextBatch = async (
 
     // Index, keeping track if any of the items failed.
     let allSuccess = true;
-    for (const { enteFile, uploadItem } of items) {
+    for (const item of items) {
         try {
-            await index(enteFile, uploadItem, electron, userAgent);
+            await index(item, electron);
+            delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
         } catch {
@@ -297,7 +281,7 @@ const indexNextBatch = async (
 const syncWithLocalFilesAndGetFilesToIndex = async (
     userID: number,
     count: number,
-): Promise<EnteFile[]> => {
+): Promise<Map<number, EnteFile>> => {
     const isIndexable = (f: EnteFile) => f.ownerID == userID;
 
     const localFiles = await getAllLocalFiles();
@@ -313,87 +297,213 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     );
 
     const fileIDsToIndex = await indexableFileIDs(count);
-    return fileIDsToIndex.map((id) => ensure(localFilesByID.get(id)));
+    return new Map(
+        fileIDsToIndex.map((id) => [id, ensure(localFilesByID.get(id))]),
+    );
 };
 
 /**
  * Index file, save the persist the results locally, and put them on remote.
  *
- * @param enteFile The {@link EnteFile} to index.
+ * [Note: ML indexing does more ML]
  *
- * @param uploadItem If the file is one which is being uploaded from the current
- * client, then we will also have access to the file's content. In such cases,
- * passing a web {@link File} object will directly use that its data when
- * indexing. Otherwise (when this is not provided), the file's contents will be
- * downloaded and decrypted from remote.
+ * Nominally, and primarily, indexing a file involves computing its various ML
+ * embeddings: faces and CLIP. However, since this is a occasion where we have
+ * the original file in memory, it is a great time to also compute other derived
+ * data related to the file (instead of re-downloading it again).
  *
- * @param userAgent The UA of the client that is doing the indexing (us).
+ * So this function also does things that are not related to ML and/or indexing:
+ *
+ * -   Extracting and updating Exif.
+ * -   Saving face crops.
+ *
+ * ---
+ *
+ * [Note: Transient and permanent indexing failures]
+ *
+ * We mark indexing for a file as having failed only if there is a good chance
+ * that the indexing failed because of some inherent issue with that particular
+ * file, and not if there were generic failures (like when trying to save the
+ * indexes to remote).
+ *
+ * When we mark it as failed, then a flag is persisted corresponding to this
+ * file in the ML DB so that it won't get reindexed in future runs. This are
+ * thus considered as permanent failures.
+ *
+ * > We might retry these in future versions if we identify reasons for indexing
+ * > to fail (it ideally shouldn't) and rectify them.
+ *
+ * On the other hand, saving the face index to remote might fail for transient
+ * issues (network issues, or remote having hiccups). We don't mark a file as
+ * failed permanently in such cases, so that it gets retried at some point.
+ * These are considered as transient failures.
+ *
+ * However, it is vary hard to pre-emptively enumerate all possible failure
+ * modes, and there is a the possibility of some non-transient failure getting
+ * classified as a transient failure and causing the client to try and index the
+ * same file again and again, when in fact there is a issue specific to that
+ * file which is preventing the index from being saved. What exactly? We don't
+ * know, but the possibility exists.
+ *
+ * To reduce the chances of this happening, we treat HTTP 4xx responses as
+ * permanent failures too - there are no known cases where a client retrying a
+ * 4xx response would work, and there are expected (but rare) cases where a
+ * client might get a non-retriable 4xx (e.g. if the file has over ~700 faces,
+ * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    enteFile: EnteFile,
-    uploadItem: UploadItem | undefined,
+    { enteFile, uploadItem, remoteDerivedData }: IndexableItem,
     electron: MLWorkerElectron,
-    userAgent: string,
 ) => {
     const f = fileLogID(enteFile);
-    const startTime = Date.now();
+    const fileID = enteFile.id;
 
-    const image = await imageBitmapAndData(enteFile, uploadItem, electron);
-    let faceIndex: FaceIndex;
+    // Massage the existing data (if any) that we got from remote to the form
+    // that the rest of this function operates on.
+    //
+    // Discard any existing data that is made by an older indexing pipelines.
+    // See: [Note: Embedding versions]
+
+    const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
+    const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
+
+    let existingFaceIndex: FaceIndex | undefined;
+    if (
+        existingRemoteFaceIndex &&
+        existingRemoteFaceIndex.version >= faceIndexingVersion
+    ) {
+        const { width, height, faces } = existingRemoteFaceIndex;
+        existingFaceIndex = { width, height, faces };
+    }
+
+    let existingCLIPIndex: CLIPIndex | undefined;
+    if (
+        existingRemoteCLIPIndex &&
+        existingRemoteCLIPIndex.version >= clipIndexingVersion
+    ) {
+        const { embedding } = existingRemoteCLIPIndex;
+        existingCLIPIndex = { embedding };
+    }
+
+    // See if we already have all the derived data fields that we need. If so,
+    // just update our local db and return.
+
+    if (existingFaceIndex && existingCLIPIndex) {
+        try {
+            await saveIndexes(
+                { fileID, ...existingFaceIndex },
+                { fileID, ...existingCLIPIndex },
+            );
+        } catch (e) {
+            log.error(`Failed to save indexes data for ${f}`, e);
+            throw e;
+        }
+        return;
+    }
+
+    // There is at least one derived data type that still needs to be indexed.
+
+    const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
+
+    let image: ImageBitmapAndData;
     try {
-        faceIndex = await indexFaces(enteFile, image, electron, userAgent);
+        image = await imageBitmapAndData(imageBlob);
     } catch (e) {
-        log.error(`Failed to index faces in ${f}`, e);
+        // If we cannot get the raw image data for the file, then retrying again
+        // won't help. It'd only make sense to retry later if modify
+        // `renderableBlob` to be do something different for this type of file.
+        //
+        // See: [Note: Transient and permanent indexing failures]
+        log.error(`Failed to get image data for indexing ${f}`, e);
         await markIndexingFailed(enteFile.id);
         throw e;
+    }
+
+    try {
+        let faceIndex: FaceIndex;
+        let clipIndex: CLIPIndex;
+
+        const startTime = Date.now();
+
+        try {
+            [faceIndex, clipIndex] = await Promise.all([
+                existingFaceIndex ?? indexFaces(enteFile, image, electron),
+                existingCLIPIndex ?? indexCLIP(image, electron),
+            ]);
+        } catch (e) {
+            // See: [Note: Transient and permanent indexing failures]
+            log.error(`Failed to index ${f}`, e);
+            await markIndexingFailed(enteFile.id);
+            throw e;
+        }
+
+        log.debug(() => {
+            const ms = Date.now() - startTime;
+            const msg = [];
+            if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
+            if (!existingCLIPIndex) msg.push("clip");
+            return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
+        });
+
+        const remoteFaceIndex = existingRemoteFaceIndex ?? {
+            version: faceIndexingVersion,
+            client: clientPackageName,
+            ...faceIndex,
+        };
+
+        const remoteCLIPIndex = existingRemoteCLIPIndex ?? {
+            version: clipIndexingVersion,
+            client: clientPackageName,
+            ...clipIndex,
+        };
+
+        // Perform an "upsert" by using the existing raw data we got from the
+        // remote as the base, and inserting or overwriting any newly indexed
+        // parts. See: [Note: Preserve unknown derived data fields].
+
+        const existingRawDerivedData = remoteDerivedData?.raw ?? {};
+        const rawDerivedData = {
+            ...existingRawDerivedData,
+            face: remoteFaceIndex,
+            clip: remoteCLIPIndex,
+        };
+
+        log.debug(() => ["Uploading derived data", rawDerivedData]);
+
+        try {
+            await putDerivedData(enteFile, rawDerivedData);
+        } catch (e) {
+            // See: [Note: Transient and permanent indexing failures]
+            log.error(`Failed to put derived data for ${f}`, e);
+            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+            throw e;
+        }
+
+        try {
+            await saveIndexes(
+                { fileID, ...faceIndex },
+                { fileID, ...clipIndex },
+            );
+        } catch (e) {
+            // Not sure if DB failures should be considered permanent or
+            // transient. There isn't a known case where writing to the local
+            // indexedDB would fail.
+            log.error(`Failed to save indexes for ${f}`, e);
+            throw e;
+        }
+
+        // This step, saving face crops, is conceptually not part of the
+        // indexing pipeline; we just do it here since we have already have the
+        // ImageBitmap at hand. Ignore errors that happen during this since it
+        // does not impact the generated face index.
+        if (!existingFaceIndex) {
+            try {
+                await saveFaceCrops(image.bitmap, faceIndex);
+            } catch (e) {
+                log.error(`Failed to save face crops for ${f}`, e);
+            }
+        }
     } finally {
         image.bitmap.close();
     }
-
-    // [Note: Transient and permanent indexing failures]
-    //
-    // Generally speaking, we mark indexing for a file as having failed only if
-    // the indexing itself failed, not if there were subsequent failures (like
-    // when trying to put the result to remote or save it to the local face DB).
-    //
-    // When we mark it as failed, then a flag is persisted corresponding to this
-    // file in the ML DB so that it won't get reindexed in future runs. This are
-    // thus considered as permanent failures.
-    //
-    // > We might retry in future versions if we identify reasons for indexing
-    // > to fail (it shouldn't) and rectify them.
-    //
-    // On the other hand, saving the face index to remote might fail for
-    // transient issues (network issues, or remote having hiccups). We don't
-    // mark a file as failed permanently in such cases, so that it gets retried
-    // at some point. These are considered as transient failures.
-    //
-    // However, this opens the possibility of some non-transient failure getting
-    // classified as a transient failure and causing the client to try and index
-    // the same file again and again, when in fact there is a issue specific to
-    // that file which is preventing the index from being saved. What exactly?
-    // We don't know, but the possibility exists.
-    //
-    // To reduce the chances of this happening, we treat HTTP 4xx responses as
-    // permanent failures too - there are no known cases where a client retrying
-    // a 4xx response would work, and there are known (but rare) cases where a
-    // client might get a 4xx (e.g. if the file has over ~700 faces, then remote
-    // will return a 413 Request Entity Too Large).
-
-    try {
-        await putFaceIndex(enteFile, faceIndex);
-        await saveFaceIndex(faceIndex);
-    } catch (e) {
-        log.error(`Failed to put/save face index for ${f}`, e);
-        if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
-        throw e;
-    }
-
-    log.debug(() => {
-        const nf = faceIndex.faceEmbedding.faces.length;
-        const ms = Date.now() - startTime;
-        return `Indexed ${nf} faces in ${f} (${ms} ms)`;
-    });
-
-    return faceIndex;
 };

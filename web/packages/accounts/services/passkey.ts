@@ -1,8 +1,8 @@
-import { clientPackageName, isDesktop } from "@/next/app";
-import { clientPackageHeader, HTTPError } from "@/next/http";
-import log from "@/next/log";
-import { accountsAppOrigin, apiURL } from "@/next/origins";
-import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { clientPackageName, isDesktop } from "@/base/app";
+import { clientPackageHeader, HTTPError } from "@/base/http";
+import log from "@/base/log";
+import { accountsAppOrigin, apiURL } from "@/base/origins";
+import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";

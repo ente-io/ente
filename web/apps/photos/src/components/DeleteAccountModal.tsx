@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { initiateEmail } from "@/new/photos/utils/web";
-import log from "@/next/log";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
 import { Button, Link, Stack } from "@mui/material";

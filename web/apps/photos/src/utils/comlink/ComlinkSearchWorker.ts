@@ -1,5 +1,5 @@
-import { haveWindow } from "@/next/env";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { haveWindow } from "@/base/env";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { Remote } from "comlink";
 import { type DedicatedSearchWorker } from "worker/search.worker";
 

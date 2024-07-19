@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { wait } from "@/utils/promise";
 import {
     boxSealOpen,

@@ -1,14 +1,16 @@
 import { useRef, useState } from "react";
 import { COLLECTION_ROLE, Collection } from "types/collection";
 
+import {
+    MenuItemDivider,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/base/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Workspaces from "@mui/icons-material/Workspaces";
 import { Stack } from "@mui/material";
-import MenuItemDivider from "components/Menu/MenuItemDivider";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import MenuSectionTitle from "components/Menu/MenuSectionTitle";
 import AvatarGroup from "components/pages/gallery/AvatarGroup";
 import { t } from "i18next";
 import AddParticipant from "./AddParticipant";

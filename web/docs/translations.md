@@ -4,7 +4,7 @@ We use Crowdin for translations, and the `i18next` library to load these at
 runtime.
 
 Within our project we have the _source_ strings - these are the key value pairs
-in the `packages/next/locales/en-US/translation.json` file.
+in the `packages/base/locales/en-US/translation.json` file.
 
 Volunteers can add a new _translation_ in their language corresponding to each
 such source key-value to our
@@ -25,7 +25,7 @@ from Crowdin, but these two should be no-ops.
 
 ## Adding a new string
 
--   Add a new entry in `packages/next/locales/en-US/translation.json` (the
+-   Add a new entry in `packages/base/locales/en-US/translation.json` (the
     **source `translation.json`**).
 -   Use the new key in code with the `t` function
     (`import { t } from "i18next"`).

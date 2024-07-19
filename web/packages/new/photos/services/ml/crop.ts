@@ -1,9 +1,9 @@
-import { blobCache } from "@/next/blob-cache";
+import { blobCache } from "@/base/blob-cache";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
-import { renderableImageBitmap } from "./bitmap";
+import { renderableEnteFileBlob } from "./blob";
 import { type Box, type FaceIndex } from "./face";
-import { clamp } from "./image";
+import { clamp } from "./math";
 
 /**
  * Regenerate and locally save face crops for faces in the given file.
@@ -26,7 +26,9 @@ export const regenerateFaceCrops = async (
     enteFile: EnteFile,
     faceIndex: FaceIndex,
 ) => {
-    const imageBitmap = await renderableImageBitmap(enteFile);
+    const imageBitmap = await createImageBitmap(
+        await renderableEnteFileBlob(enteFile),
+    );
 
     try {
         await saveFaceCrops(imageBitmap, faceIndex);
@@ -54,7 +56,7 @@ export const saveFaceCrops = async (
     const cache = await blobCache("face-crops");
 
     return Promise.all(
-        faceIndex.faceEmbedding.faces.map(({ faceID, detection }) =>
+        faceIndex.faces.map(({ faceID, detection }) =>
             extractFaceCrop(imageBitmap, detection.box).then((b) =>
                 cache.put(faceID, b),
             ),
