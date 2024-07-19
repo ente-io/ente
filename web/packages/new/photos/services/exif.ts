@@ -1,5 +1,5 @@
-import type { EnteFile } from "../types/file";
 import ExifReader from "exifreader";
+import type { EnteFile } from "../types/file";
 
 /**
  * Index Exif in the given file.
@@ -12,22 +12,22 @@ import ExifReader from "exifreader";
  * more readily use it), and also backfill any fields that old clients might've
  * not extracted during their file uploads.
  *
- * @param enteFile The {@link EnteFile} which we're indexing.
+ * @param enteFile The {@link EnteFile} which we're indexing. This is the file
+ * whose metadata we update if needed (for backfilling).
  *
- * @param
+ * @param blob A {@link Blob} containing the {@link enteFile}'s data. This is
+ * where we extract the Exif from.
  *
  * [Note: Exif not EXIF]
  *
  * The standard uses "Exif" (not "EXIF") to refer to itself. We do the same.
- *
- * [Note: Indexing Exif]
- *
- * We don't really index Exif, we
  */
-export const indexExif = async (enteFile: EnteFile) => {
-    const tags = await ExifReader.load(fileBuffer, { async: true })
+export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
+    const tags = await ExifReader.load(await blob.arrayBuffer(), {
+        async: true,
+    });
     return {
         title: enteFile.title ?? "",
-        tags
+        tags,
     };
 };

@@ -10,32 +10,6 @@ import type { UploadItem } from "../upload/types";
 import type { MLWorkerElectron } from "./worker-types";
 
 /**
- * A data structure containing data about an image in all formats that the
- * various indexing steps need. Consolidating all the data here and parsing them
- * in one go obviates the need for each indexing step to roll their own parsing.
- */
-export interface IndexableImage {
-    /**
-     * The original file's data, and a renderable representation of it (both as
-     * {@link Blob}s).
-     */
-    blobs: IndexableBlobs;
-    /**
-     * An {@link ImageBitmap} from the original or converted image.
-     *
-     * This bitmap is constructed from the original file's data if the
-     * browser knows how to handle it; otherwise we first convert it to a JPEG
-     * and then create the bitmap from that.
-     */
-    bitmap: ImageBitmap;
-    /**
-     * The RGBA {@link ImageData} of the {@link bitmap}, obtained by rendering
-     * it to an offscreen canvas.
-     */
-    data: ImageData;
-}
-
-/**
  * A pair of blobs - the original, and a possibly converted "renderable" one -
  * for a file that we're trying to index.
  */
@@ -66,12 +40,35 @@ export interface IndexableBlobs {
 }
 
 /**
+ * Indexable blobs augmented with the image bitmap and RGBA data.
+ *
+ * This is data structure containing data about an image in all formats that the
+ * various indexing steps need. Consolidating all the data here and parsing them
+ * in one go obviates the need for each indexing step to roll their own parsing.
+ */
+export interface ImageBitmapAndData {
+    /**
+     * An {@link ImageBitmap} from the original or converted image.
+     *
+     * This bitmap is constructed from the original file's data if the
+     * browser knows how to handle it; otherwise we first convert it to a JPEG
+     * and then create the bitmap from that.
+     */
+    bitmap: ImageBitmap;
+    /**
+     * The RGBA {@link ImageData} of the {@link bitmap}, obtained by rendering
+     * it to an offscreen canvas.
+     */
+    data: ImageData;
+}
+
+/**
  * Create an {@link ImageBitmap} from the given {@link imageBlob}, and return
  * both the image bitmap and its {@link ImageData}.
  */
 export const imageBitmapAndData = async (
     imageBlob: Blob,
-): Promise<IndexableImage> => {
+): Promise<ImageBitmapAndData> => {
     const imageBitmap = await createImageBitmap(imageBlob);
 
     const { width, height } = imageBitmap;
@@ -86,7 +83,8 @@ export const imageBitmapAndData = async (
 };
 
 /**
- * Return a {@link Blob} that can be used to create an {@link ImageBitmap}.
+ * Return a pair of blobs for the given data - the original, and a renderable
+ * one (possibly involving a JPEG conversion).
  *
  * The blob from the relevant image component is either constructed using the
  * given {@link uploadItem} if present, otherwise it is downloaded from remote.
@@ -94,6 +92,10 @@ export const imageBitmapAndData = async (
  * -   For images the original is used.
  * -   For live photos the original image component is used.
  * -   For videos the thumbnail is used.
+ *
+ * Then, if the image blob we have seems to be something that the browser cannot
+ * handle, we convert it into a JPEG blob so that it can subsequently be used to
+ * create an {@link ImageBitmap}.
  *
  * @param enteFile The {@link EnteFile} to index.
  *
@@ -104,30 +106,34 @@ export const imageBitmapAndData = async (
  * @param electron The {@link MLWorkerElectron} instance that allows us to call
  * our Node.js layer for various functionality.
  */
-export const renderableBlob = async (
+export const indexableBlobs = async (
     enteFile: EnteFile,
     uploadItem: UploadItem | undefined,
     electron: MLWorkerElectron,
-): Promise<Blob> =>
+): Promise<IndexableBlobs> =>
     uploadItem
-        ? await renderableUploadItemBlob(enteFile, uploadItem, electron)
-        : await indexableBlobs(enteFile);
+        ? await indexableUploadItemBlobs(enteFile, uploadItem, electron)
+        : await indexableEnteFileBlobs(enteFile);
 
-const renderableUploadItemBlob = async (
+const indexableUploadItemBlobs = async (
     enteFile: EnteFile,
     uploadItem: UploadItem,
     electron: MLWorkerElectron,
 ) => {
     const fileType = enteFile.metadata.fileType;
-    let blob: Blob | undefined;
+    let originalBlob: Blob | undefined;
+    let renderableBlob: Blob;
     if (fileType == FILE_TYPE.VIDEO) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
-        blob = new Blob([ensure(thumbnailData)]);
+        renderableBlob = new Blob([ensure(thumbnailData)]);
     } else {
-        const file = await readNonVideoUploadItem(uploadItem, electron);
-        blob = await renderableImageBlob(enteFile.metadata.title, file);
+        originalBlob = await readNonVideoUploadItem(uploadItem, electron);
+        renderableBlob = await renderableImageBlob(
+            enteFile.metadata.title,
+            originalBlob,
+        );
     }
-    return ensure(blob);
+    return { originalBlob, renderableBlob };
 };
 
 /**
@@ -168,8 +174,11 @@ const readNonVideoUploadItem = async (
 /**
  * Return a pair of blobs for the given file - the original, and a renderable
  * one (possibly involving a JPEG conversion).
+ *
+ * -  The original will be downloaded if needed
+ * -  The original will be converted to JPEG if needed
  */
-export const indexableBlobs = async (
+export const indexableEnteFileBlobs = async (
     enteFile: EnteFile,
 ): Promise<IndexableBlobs> => {
     const fileType = enteFile.metadata.fileType;

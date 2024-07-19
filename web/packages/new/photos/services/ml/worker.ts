@@ -14,8 +14,8 @@ import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
     imageBitmapAndData,
-    renderableBlob,
-    type IndexableImage,
+    indexableBlobs,
+    type ImageBitmapAndData,
 } from "./blob";
 import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
 import { saveFaceCrops } from "./crop";
@@ -408,11 +408,15 @@ const index = async (
 
     // There is at least one derived data type that still needs to be indexed.
 
-    const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
+    const { originalBlob, renderableBlob } = await indexableBlobs(
+        enteFile,
+        uploadItem,
+        electron,
+    );
 
-    let image: IndexableImage;
+    let image: ImageBitmapAndData;
     try {
-        image = await imageBitmapAndData(imageBlob);
+        image = await imageBitmapAndData(renderableBlob);
     } catch (e) {
         // If we cannot get the raw image data for the file, then retrying again
         // won't help. It'd only make sense to retry later if modify
@@ -435,7 +439,7 @@ const index = async (
             [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
-                indexExif(enteFile),
+                originalBlob ? indexExif(enteFile, originalBlob) : undefined,
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
