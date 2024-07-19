@@ -15,7 +15,7 @@ import type { UploadItem } from "../upload/types";
 import {
     imageBitmapAndData,
     renderableBlob,
-    type ImageBitmapAndData,
+    type IndexableImage,
 } from "./blob";
 import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
 import { saveFaceCrops } from "./crop";
@@ -410,7 +410,7 @@ const index = async (
 
     const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
 
-    let image: ImageBitmapAndData;
+    let image: IndexableImage;
     try {
         image = await imageBitmapAndData(imageBlob);
     } catch (e) {

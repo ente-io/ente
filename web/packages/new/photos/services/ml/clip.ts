@@ -1,5 +1,5 @@
 import type { Electron } from "@/base/types/ipc";
-import type { ImageBitmapAndData } from "./blob";
+import type { IndexableImage } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
 import { dotProduct, norm } from "./math";
@@ -102,7 +102,7 @@ export type LocalCLIPIndex = CLIPIndex & {
  * our Node.js layer to run the ONNX inference.
  */
 export const indexCLIP = async (
-    image: ImageBitmapAndData,
+    image: IndexableImage,
     electron: MLWorkerElectron,
 ): Promise<CLIPIndex> => ({
     embedding: await computeEmbedding(image.data, electron),

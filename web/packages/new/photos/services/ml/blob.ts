@@ -9,7 +9,7 @@ import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
 import type { MLWorkerElectron } from "./worker-types";
 
-export interface ImageBitmapAndData {
+export interface IndexableImage {
     bitmap: ImageBitmap;
     data: ImageData;
 }
@@ -20,7 +20,7 @@ export interface ImageBitmapAndData {
  */
 export const imageBitmapAndData = async (
     imageBlob: Blob,
-): Promise<ImageBitmapAndData> => {
+): Promise<IndexableImage> => {
     const imageBitmap = await createImageBitmap(imageBlob);
 
     const { width, height } = imageBitmap;

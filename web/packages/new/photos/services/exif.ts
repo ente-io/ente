@@ -1,4 +1,5 @@
 import type { EnteFile } from "../types/file";
+import ExifReader from "exifreader";
 
 /**
  * Index Exif in the given file.
@@ -23,8 +24,10 @@ import type { EnteFile } from "../types/file";
  *
  * We don't really index Exif, we
  */
-export const indexExif = (enteFile: EnteFile) => {
+export const indexExif = async (enteFile: EnteFile) => {
+    const tags = await ExifReader.load(fileBuffer, { async: true })
     return {
         title: enteFile.title ?? "",
+        tags
     };
 };

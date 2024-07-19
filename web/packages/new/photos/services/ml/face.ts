@@ -17,7 +17,7 @@ import {
     translate,
     type Matrix as TransformationMatrix,
 } from "transformation-matrix";
-import type { ImageBitmapAndData } from "./blob";
+import type { IndexableImage } from "./blob";
 import {
     grayscaleIntMatrixFromNormalized2List,
     pixelRGBBilinear,
@@ -241,7 +241,7 @@ export interface Box {
  */
 export const indexFaces = async (
     enteFile: EnteFile,
-    { data: imageData }: ImageBitmapAndData,
+    { data: imageData }: IndexableImage,
     electron: MLWorkerElectron,
 ): Promise<FaceIndex> => ({
     width: imageData.width,
