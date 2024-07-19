@@ -270,7 +270,8 @@ const App: React.FC = () => {
             </form>
             <div className="content-container">
                 {loading ? (
-                    <CircularProgress sx={{ color: "black" }} />
+                    <CircularProgress sx={{ color: "black", marginTop: "200px" }} />
+
                 ) : error ? (
                     <div className="error-message">{error}</div>
                 ) : fetchSuccess ? (
@@ -333,7 +334,8 @@ const App: React.FC = () => {
                         </Box>
                     </>
                 ) : (
-                    <img src={duckieimage} alt="duckie" />
+                    <img src={duckieimage} alt="duckie" style={{ marginTop: "150px" }} />
+
                 )}
             </div>
         </div>
