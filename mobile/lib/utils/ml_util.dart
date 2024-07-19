@@ -75,12 +75,14 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> filesWithoutLocalID = [];
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
-    final skip = _skipAnalysisEnteFile(enteFile);
+    if (_skipAnalysisEnteFile(enteFile)) {
+      continue;
+    }
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (skip && !shouldRunFaces && !shouldRunClip) {
+    if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
     final instruction = FileMLInstruction(
