@@ -9,11 +9,12 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
+import { indexExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
     imageBitmapAndData,
-    renderableBlob,
+    indexableBlobs,
     type ImageBitmapAndData,
 } from "./blob";
 import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
@@ -388,7 +389,11 @@ const index = async (
     // See if we already have all the derived data fields that we need. If so,
     // just update our local db and return.
 
-    if (existingFaceIndex && existingCLIPIndex) {
+    if (
+        existingFaceIndex &&
+        existingCLIPIndex &&
+        !process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML_DONT_USE /* TODO-ML: WIP */
+    ) {
         try {
             await saveIndexes(
                 { fileID, ...existingFaceIndex },
@@ -403,11 +408,15 @@ const index = async (
 
     // There is at least one derived data type that still needs to be indexed.
 
-    const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
+    const { originalBlob, renderableBlob } = await indexableBlobs(
+        enteFile,
+        uploadItem,
+        electron,
+    );
 
     let image: ImageBitmapAndData;
     try {
-        image = await imageBitmapAndData(imageBlob);
+        image = await imageBitmapAndData(renderableBlob);
     } catch (e) {
         // If we cannot get the raw image data for the file, then retrying again
         // won't help. It'd only make sense to retry later if modify
@@ -422,13 +431,15 @@ const index = async (
     try {
         let faceIndex: FaceIndex;
         let clipIndex: CLIPIndex;
+        let exif: unknown;
 
         const startTime = Date.now();
 
         try {
-            [faceIndex, clipIndex] = await Promise.all([
+            [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
+                originalBlob ? indexExif(enteFile, originalBlob) : undefined,
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -442,7 +453,9 @@ const index = async (
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
+            if (exif)
+                return ["exif", exif]; // TODO: EXIF
+            else return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {

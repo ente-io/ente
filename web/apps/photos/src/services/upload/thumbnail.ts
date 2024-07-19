@@ -17,6 +17,24 @@ const maxThumbnailDimension = 720;
 const maxThumbnailSize = 100 * 1024; // 100 KB
 
 /**
+ * Timeout (ms) to wait before giving up on canvas thumbnail generation.
+ *
+ * [Note: Rendering arbitrary file types to the canvas needs a timeout]
+ *
+ * When generating thumbnails on the web (or as a fallback on the desktop app),
+ * we use an HTML canvas. We take the file's content, a blob, and load it on the
+ * canvas by creating an image URL for this blob (using `createObjectURL`).
+ *
+ * In case when the browser knows how to render images of this type, this works
+ * great. Later we can read off the thumbnail from the (resized) canvas.
+ *
+ * However, if this in not a file format that the browser can understand, then
+ * this process just hangs. There isn't a trivial way of knowing beforehand
+ * which browser will support which file type, so we need to add a timeout.
+ */
+const canvasThumbnailGenerationTimeout = 30 * 1000;
+
+/**
  * Generate a JPEG thumbnail for the given image or video blob.
  *
  * The thumbnail has a smaller file size so that is quick to load. But more
@@ -76,7 +94,7 @@ const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
                 }
             };
         }),
-        30 * 1000,
+        canvasThumbnailGenerationTimeout,
     );
 
     return await compressedJPEGData(canvas);
@@ -147,7 +165,7 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
                 }
             });
         }),
-        30 * 1000,
+        canvasThumbnailGenerationTimeout,
     );
 
     return await compressedJPEGData(canvas);
