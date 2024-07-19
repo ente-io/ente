@@ -31,8 +31,6 @@ dependencies:
     git:
       url: https://github.com/ente-io/chewie.git
       ref: forked_video_player_plus
-  clip_ggml:
-    path: plugins/clip_ggml
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"

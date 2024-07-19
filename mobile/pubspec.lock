@@ -251,13 +251,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.1"
-  clip_ggml:
-    dependency: "direct main"
-    description:
-      path: "plugins/clip_ggml"
-      relative: true
-    source: path
-    version: "0.0.1"
   clock:
     dependency: transitive
     description:
