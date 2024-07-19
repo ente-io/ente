@@ -1,38 +1,122 @@
-import React, { useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import TextField from "@mui/material/TextField";
+import * as React from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
-import { Sidebar } from "./components/Sidebar";
+import FamilyTableComponent from "./components/FamilyComponentTable";
+import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
+import type { UserData } from "./components/UserComponent";
+import UserComponent from "./components/UserComponent";
+import duckieimage from "./components/duckie.png";
 import { apiOrigin } from "./services/support";
-import S from "./utils/strings";
 
-type User = Record<
-    string,
-    string | number | boolean | null | undefined | Record<string, unknown>
->;
-type UserData = Record<string, User>;
+export let email = "";
+export let token = "";
 
-export const App: React.FC = () => {
-    const [token, setToken] = useState<string>("");
-    const [email, setEmail] = useState<string>("");
+export const setEmail = (newEmail: string) => {
+    email = newEmail;
+};
+
+export const setToken = (newToken: string) => {
+    token = newToken;
+};
+
+export const getEmail = () => email;
+export const getToken = () => token;
+
+interface User {
+    ID: string;
+    email: string;
+    creationTime: number;
+}
+
+interface Subscription {
+    productID: string;
+    paymentProvider: string;
+    expiryTime: number;
+    storage: number;
+}
+
+interface Security {
+    isEmailMFAEnabled: boolean;
+    isTwoFactorEnabled: boolean;
+    passkeys: string;
+}
+
+interface UserResponse {
+    user: User;
+    subscription: Subscription;
+    details?: {
+        usage?: number;
+        storageBonus?: number;
+        profileData: Security;
+    };
+}
+
+const App: React.FC = () => {
+    const [localEmail, setLocalEmail] = useState<string>("");
+    const [localToken, setLocalToken] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
+    const [fetchSuccess, setFetchSuccess] = useState<boolean>(false);
+    const [tabValue, setTabValue] = useState<number>(0);
     const [userData, setUserData] = useState<UserData | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [isDataFetched, setIsDataFetched] = useState<boolean>(false);
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         if (storedToken) {
             setToken(storedToken);
+            setLocalToken(storedToken);
         }
     }, []);
 
     useEffect(() => {
-        if (token) {
-            localStorage.setItem("token", token);
+        if (localToken) {
+            setToken(localToken);
+            localStorage.setItem("token", localToken);
         } else {
             localStorage.removeItem("token");
         }
-    }, [token]);
+    }, [localToken]);
+
+    useEffect(() => {
+        if (localEmail) {
+            setEmail(localEmail);
+            localStorage.setItem("email", localEmail);
+        } else {
+            localStorage.removeItem("email");
+        }
+    }, [localEmail]);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlEmail = urlParams.get("email");
+        const urlToken = urlParams.get("token");
+
+        if (urlEmail && urlToken) {
+            setLocalEmail(urlEmail);
+            setLocalToken(urlToken);
+            console.log(localEmail);
+            console.log(localToken);
+            setEmail(urlEmail);
+            setToken(urlToken);
+            fetchData().catch((error: unknown) =>
+                console.error("Fetch data error:", error),
+            );
+        }
+        console.log(email);
+        console.log(token);
+    }, []);
 
     const fetchData = async () => {
+        setLoading(true);
+        setError("");
+        setFetchSuccess(false);
+        const startTime = Date.now();
         try {
             const encodedEmail = encodeURIComponent(email);
             const encodedToken = encodeURIComponent(token);
@@ -42,117 +126,77 @@ export const App: React.FC = () => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
             }
-            const userDataResponse = (await response.json()) as UserData;
+            const userDataResponse: UserResponse =
+                (await response.json()) as UserResponse;
             console.log("API Response:", userDataResponse);
-            setUserData(userDataResponse);
-            setError(null);
-            setIsDataFetched(true);
+
+            const extractedUserData: UserData = {
+                User: {
+                    "User ID": userDataResponse.user.ID || "None",
+                    Email: userDataResponse.user.email || "None",
+                    "Creation time":
+                        new Date(
+                            userDataResponse.user.creationTime / 1000,
+                        ).toLocaleString() || "None",
+                },
+                Storage: {
+                    Total: userDataResponse.subscription.storage
+                        ? userDataResponse.subscription.storage >= 1024 ** 3
+                            ? `${(userDataResponse.subscription.storage / 1024 ** 3).toFixed(2)} GB`
+                            : `${(userDataResponse.subscription.storage / 1024 ** 2).toFixed(2)} MB`
+                        : "None",
+                    Consumed:
+                        userDataResponse.details?.usage !== undefined
+                            ? userDataResponse.details.usage >= 1024 ** 3
+                                ? `${(userDataResponse.details.usage / 1024 ** 3).toFixed(2)} GB`
+                                : `${(userDataResponse.details.usage / 1024 ** 2).toFixed(2)} MB`
+                            : "None",
+                    Bonus:
+                        userDataResponse.details?.storageBonus !== undefined
+                            ? userDataResponse.details.storageBonus >= 1024 ** 3
+                                ? `${(userDataResponse.details.storageBonus / 1024 ** 3).toFixed(2)} GB`
+                                : `${(userDataResponse.details.storageBonus / 1024 ** 2).toFixed(2)} MB`
+                            : "None",
+                },
+                Subscription: {
+                    "Product ID":
+                        userDataResponse.subscription.productID || "None",
+                    Provider:
+                        userDataResponse.subscription.paymentProvider || "None",
+                    "Expiry time":
+                        new Date(
+                            userDataResponse.subscription.expiryTime / 1000,
+                        ).toLocaleString() || "None",
+                },
+                Security: {
+                    "Email MFA": userDataResponse.details?.profileData
+                        .isEmailMFAEnabled
+                        ? "Enabled"
+                        : "Disabled",
+                    "Two factor 2FA": userDataResponse.details?.profileData
+                        .isTwoFactorEnabled
+                        ? "Enabled"
+                        : "Disabled",
+                    Passkeys: "None",
+                },
+            };
+
+            const elapsedTime = Date.now() - startTime;
+            const delay = Math.max(3000 - elapsedTime, 0);
+            setTimeout(() => {
+                setLoading(false);
+                setFetchSuccess(true);
+                setUserData(extractedUserData);
+            }, delay);
         } catch (error) {
             console.error("Error fetching data:", error);
-            setError((error as Error).message);
-            setIsDataFetched(false);
+            const elapsedTime = Date.now() - startTime;
+            const delay = Math.max(3000 - elapsedTime, 0);
+            setTimeout(() => {
+                setLoading(false);
+                setError("Invalid token or email id");
+            }, delay);
         }
-    };
-
-    const renderAttributes = (
-        data: Record<string, unknown> | User | null,
-    ): React.ReactNode => {
-        if (!data) return null;
-
-        const nullAttributes: string[] = [];
-
-        const rows = Object.entries(data).map(([key, value]) => {
-            console.log("Processing key:", key, "value:", value);
-
-            if (
-                typeof value === "object" &&
-                value !== null &&
-                !Array.isArray(value)
-            ) {
-                return (
-                    <React.Fragment key={key}>
-                        <tr>
-                            <td
-                                colSpan={2}
-                                style={{
-                                    fontWeight: "bold",
-                                    backgroundColor: "#f1f1f1",
-                                    padding: "10px",
-                                }}
-                            >
-                                {key.toUpperCase()}
-                            </td>
-                        </tr>
-                        {renderAttributes(
-                            value as Record<string, unknown> | User,
-                        )}
-                    </React.Fragment>
-                );
-            } else {
-                if (value === null) {
-                    nullAttributes.push(key);
-                }
-
-                let displayValue: React.ReactNode;
-                if (key === "expiryTime" && typeof value === "number") {
-                    displayValue = new Date(value / 1000).toLocaleString();
-                } else if (
-                    key === "creationTime" &&
-                    typeof value === "number"
-                ) {
-                    displayValue = new Date(value / 1000).toLocaleString();
-                } else if (key === "storage" && typeof value === "number") {
-                    displayValue = `${(value / 1024 ** 3).toFixed(2)} GB`;
-                } else if (typeof value === "string") {
-                    try {
-                        const parsedValue = JSON.parse(
-                            value,
-                        ) as React.ReactNode;
-                        displayValue = parsedValue;
-                    } catch (error) {
-                        displayValue = value;
-                    }
-                } else if (typeof value === "object" && value !== null) {
-                    displayValue = JSON.stringify(value, null, 2);
-                } else if (value === null) {
-                    displayValue = "null";
-                } else if (
-                    typeof value === "boolean" ||
-                    typeof value === "number"
-                ) {
-                    displayValue = value.toString();
-                } else if (typeof value === "undefined") {
-                    displayValue = "undefined";
-                } else {
-                    displayValue = value as string;
-                }
-
-                return (
-                    <tr key={key}>
-                        <td
-                            style={{
-                                padding: "10px",
-                                border: "1px solid #ddd",
-                            }}
-                        >
-                            {key}
-                        </td>
-                        <td
-                            style={{
-                                padding: "10px",
-                                border: "1px solid #ddd",
-                            }}
-                        >
-                            {displayValue}
-                        </td>
-                    </tr>
-                );
-            }
-        });
-
-        console.log("Attributes with null values:", nullAttributes);
-
-        return rows;
     };
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLFormElement>) => {
@@ -164,94 +208,134 @@ export const App: React.FC = () => {
         }
     };
 
+    const handleTabChange = (
+        _event: React.SyntheticEvent,
+        newValue: number,
+    ) => {
+        setTabValue(newValue);
+    };
+
     return (
-        <div className="container center-table">
-            <h1>{S.hello}</h1>
+        <div className="container">
             <form className="input-form" onKeyPress={handleKeyPress}>
-                <div className="input-group">
-                    <label>
-                        Token:
-                        <input
-                            type="text"
-                            value={token}
-                            onChange={(e) => setToken(e.target.value)}
-                            style={{
-                                padding: "10px",
-                                margin: "10px",
-                                width: "100%",
+                <div className="horizontal-group">
+                    <a
+                        href="https://staff.ente.sh"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-text"
+                    >
+                        staff.ente.sh
+                    </a>
+
+                    <TextField
+                        label="Token"
+                        value={localToken}
+                        onChange={(e) => {
+                            setLocalToken(e.target.value);
+                            setToken(e.target.value);
+                        }}
+                        size="medium"
+                        className="text-field-token"
+                        style={{ width: "350px" }}
+                    />
+                    <TextField
+                        label="Email"
+                        value={localEmail}
+                        onChange={(e) => {
+                            setLocalEmail(e.target.value);
+                            setEmail(e.target.value);
+                        }}
+                        size="medium"
+                        className="text-field-email"
+                        style={{ width: "350px" }}
+                    />
+                    <div className="fetch-button-container">
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                fetchData().catch((error: unknown) =>
+                                    console.error("Fetch data error:", error),
+                                );
                             }}
-                        />
-                    </label>
-                </div>
-                <div className="input-group">
-                    <label>
-                        Email id:
-                        <input
-                            type="text"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            className="fetch-button"
                             style={{
-                                padding: "10px",
-                                margin: "10px",
-                                width: "100%",
+                                padding: "0 16px",
                             }}
-                        />
-                    </label>
+                        >
+                            FETCH
+                        </Button>
+                    </div>
                 </div>
             </form>
-            <div className="content-wrapper">
-                {isDataFetched && <Sidebar token={token} email={email} />}
-                <div className="fetch-button-container">
-                    <button
-                        onClick={() => {
-                            fetchData().catch((error: unknown) =>
-                                console.error("Fetch data error:", error),
-                            );
-                        }}
-                    >
-                        FETCH
-                    </button>
-                </div>
+            <div className="content-container">
+                {loading ? (
+                    <CircularProgress sx={{ color: "black" }} />
+                ) : error ? (
+                    <div className="error-message">{error}</div>
+                ) : fetchSuccess ? (
+                    <>
+                        <Box
+                            sx={{
+                                width: "100%",
+                                maxWidth: "600px",
+                                bgcolor: "#FAFAFA",
+                                borderRadius: "7px",
+                                position: "relative",
+                                zIndex: 1000,
+                            }}
+                        >
+                            <Tabs
+                                value={tabValue}
+                                onChange={handleTabChange}
+                                centered
+                                sx={{
+                                    "& .MuiTabs-indicator": {
+                                        backgroundColor: "#00B33C",
+                                        height: "5px",
+                                        borderRadius: "20px",
+                                    },
+                                    "& .MuiTab-root": {
+                                        textTransform: "none",
+                                    },
+                                }}
+                            >
+                                <Tab label="User" />
+                                <Tab label="Family" />
+                                <Tab label="Bonuses" />
+                            </Tabs>
+                        </Box>
+                        <Box
+                            sx={{
+                                width: "100%",
+                                maxWidth: "900px",
+                                bgcolor: "#FAFAFA",
+                                borderRadius: "7px",
+                                padding: "20px",
+                                position: "relative",
+                                zIndex: 999,
+                                marginTop: "16px",
+                            }}
+                        >
+                            {tabValue === 0 && userData && (
+                                <UserComponent userData={userData} />
+                            )}
+                            {tabValue === 1 && userData && (
+                                <div>
+                                    <FamilyTableComponent />
+                                </div>
+                            )}
+                            {tabValue === 2 && userData && (
+                                <div>
+                                    <StorageBonusTableComponent />
+                                </div>
+                            )}
+                        </Box>
+                    </>
+                ) : (
+                    <img src={duckieimage} alt="duckie" />
+                )}
             </div>
-            <br />
-            {error && <p style={{ color: "red" }}>{`Error: ${error}`}</p>}
-            {userData && (
-                <table
-                    style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        margin: "20px 0",
-                        fontSize: "1em",
-                        minWidth: "400px",
-                        boxShadow: "0 0 20px rgba(0, 0, 0, 0.15)",
-                    }}
-                >
-                    <tbody>
-                        {Object.keys(userData).map((category) => (
-                            <React.Fragment key={category}>
-                                <tr>
-                                    <td
-                                        colSpan={2}
-                                        style={{
-                                            fontWeight: "bold",
-                                            backgroundColor: "#f1f1f1",
-                                            padding: "10px",
-                                        }}
-                                    >
-                                        {category.toUpperCase()}
-                                    </td>
-                                </tr>
-                                {renderAttributes(userData[category] ?? null)}
-                            </React.Fragment>
-                        ))}
-                    </tbody>
-                </table>
-            )}
-            <footer className="footer">
-                <p>
-                    <a href="https://help.ente.io">help.ente.io</a>
-                </p>
-            </footer>
         </div>
     );
 };

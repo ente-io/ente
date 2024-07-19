@@ -1,456 +1,347 @@
-.fetch-button-container {
-    margin-right: 180px;
-    margin-left: 10px;
+.container {
+    position: relative; /* Ensure the parent is relatively positioned */
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.content-wrapper {
+.center-table {
+    display: table;
+}
+
+.input-form {
     display: flex;
-    align-items: flex-start;
-    margin-left: 175px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.horizontal-group {
+    position: absolute; /* Use absolute positioning */
+    top: 32px; /* 32px below the top of the page */
+    left: 32px; /* 32px from the leftmost edge of the page */
+    right: 32px;
+    display: flex;
+    align-items: center; /* Align items vertically centered */
+    gap: 20px; /* Adjust the gap between elements as needed */
+    background-color: #fafafa;
+    height: 104px;
+    width: 1375px;
+    border-radius: 10px;
 }
 
 .fetch-button-container button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #009879;
+    background-color: #00b33c;
     color: white;
     border: none;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-#submitbtn {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #009879;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-
-#submitbtn:hover {
-    background-color: #007c6c;
+    width: 199px;
+    height: 56px;
+    margin-left: 20px;
 }
 
 .fetch-button-container button:hover {
     background-color: #007c6c;
 }
 
-.sidebar {
-    padding: 20px;
-    flex: 0 0 auto;
-}
-
-.button-container {
+.link-text {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    padding: 0 16px; /* Add padding for better appearance */
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    font-weight: bold; /* Make the text bold */
+    font-size: 40px;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
+.text-field-token {
+    margin-left: 70px !important; /* Adjust margin for Token field */
+}
+
+.text-field-email {
+    margin-left: 20px !important; /* Adjust margin for Email field */
+}
+.duckie-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Adjust as necessary */
+    position: relative;
 }
 
 .error-message {
-    margin-top: 20px;
     color: red;
+    font-size: 1.5em;
 }
 
-.message {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #f0f0f0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container {
+    position: relative; /* Ensure the parent is relatively positioned */
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    display: flex;
+    flex-direction: column; /* Add this */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
 }
 
-.message.error {
-    background-color: #f44336;
-    color: white;
+.input-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1; /* Ensure form is on top */
 }
 
-.message.success {
-    background-color: #4caf50;
-    color: white;
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adjust the gap between elements as needed */
+    background-color: #fafafa;
+    padding: 20px; /* Add padding around content */
+    border-radius: 10px;
 }
 
-.dropdown-container {
-    margin-bottom: 20px;
-    position: relative; /* Ensure relative positioning for dropdown menu */
-}
-
-.more-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #009879;
+.fetch-button-container button {
+    background-color: #00b33c;
     color: white;
     border: none;
-    border-radius: 5px;
-    margin-top: 1px;
+    width: 199px;
+    height: 56px;
 }
 
-.more-button:hover {
+.fetch-button-container button:hover {
     background-color: #007c6c;
 }
 
-.dropdown-menu {
-    position: absolute;
-    top: calc(100% + 5px); /* Position right below the More button */
-    left: 0;
-    z-index: 100;
-    display: block;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    max-height: 150px; /* Example: Set max height for scrollability */
-    overflow-y: auto; /* Enable vertical scroll */
-}
-
-/* Remove bullets from unordered list */
-.dropdown-menu ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.dropdown-menu button {
-    display: block;
-    width: 100%;
-    padding: 8px 16px;
-    font-size: 14px;
-    color: #333;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.dropdown-menu button:hover {
-    background-color: #f0f0f0;
-}
-.modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #ffffff;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    max-width: 80%;
-    max-height: 80%;
-    overflow: auto;
-}
-
-.modal-header {
+.link-text {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ccc;
+    padding: 0 16px; /* Add padding for better appearance */
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    font-weight: bold; /* Make the text bold */
+    font-size: 40px;
 }
 
-.modal-header .close-btn {
-    cursor: pointer;
-    color: #777;
-    font-size: 20px;
+.text-field-token {
+    margin-left: 70px !important; /* Adjust margin for Token field */
 }
 
-.modal-content {
-    margin-top: 10px;
+.text-field-email {
+    margin-left: 50px !important; /* Adjust margin for Email field */
 }
 
-/* Styles for draggable modal */
-.modal.draggable {
-    cursor: move;
-}
-
-.modal.draggable .modal-header {
-    cursor: move;
-}
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: lightgreen;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.popup-content {
+.center-content {
     display: flex;
-    flex-direction: column;
-}
-
-.popup-content div {
-    margin-bottom: 10px;
-}
-:root {
-    --popup-bg-color-light: #fff;
-    --popup-bg-color-dark: #2c2c2c;
-    --popup-border-color-light: #ccc;
-    --popup-border-color-dark: #444;
-    --popup-text-color-light: #000;
-    --popup-text-color-dark: #fff;
-    --popup-shadow-light: rgba(0, 0, 0, 0.1);
-    --popup-shadow-dark: rgba(255, 255, 255, 0.1);
-}
-
-.update-subscription-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 400px;
-    transform: translate(-50%, -50%);
-    background-color: var(--popup-bg-color-light);
-    border: 1px solid var(--popup-border-color-light);
-    padding: 20px;
-    z-index: 1000;
-    box-shadow: 0px 0px 10px var(--popup-shadow-light);
-}
-
-.popup-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.close-button {
-    align-self: flex-end;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--popup-text-color-light);
-}
-
-.popup-content h2 {
-    margin-top: 0;
-}
-
-.popup-content form label {
-    display: block;
-    margin-bottom: 10px;
-}
-
-.popup-content form input,
-.popup-content form select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    background-color: var(--popup-bg-color-light);
-    color: var(--popup-text-color-light);
-    border: 1px solid var(--popup-border-color-light);
-}
-
-.popup-content form button {
-    padding: 10px 15px;
-    margin-top: 10px;
-    cursor: pointer;
-    background-color: var(--popup-bg-color-light);
-    color: var(--popup-text-color-light);
-    border: 1px solid var(--popup-border-color-light);
-}
-
-.custom-select {
-    position: relative;
-    width: 100%;
-}
-
-.custom-select select {
-    width: 100%;
-    padding: 8px;
-    cursor: pointer;
-    background-color: var(--popup-bg-color-light);
-    color: var(--popup-text-color-light);
-    border: 1px solid var(--popup-border-color-light);
-    appearance: none;
-}
-
-.custom-select::after {
-    content: "\25BC";
+    justify-content: center;
+    align-items: center;
     position: absolute;
     top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    pointer-events: none;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
-.message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.message.error {
-    background-color: #f8d7da;
-    color: #721c24;
+/* Example CSS to maintain tabs fixed position */
+.tabs-container {
+    position: sticky;
+    top: 20px; /* Adjust as needed */
+    z-index: 1000; /* Ensure tabs are above other content */
+}
+.container {
+    position: relative; /* Ensure the parent is relatively positioned */
+    height: 100vh; /* Full viewport height */
+    width: 100vw; /* Full viewport width */
+    display: flex;
+    flex-direction: column; /* Ensure children stack vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
 }
 
-.message.success {
-    background-color: #d4edda;
-    color: #155724;
+.input-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1; /* Ensure form is on top */
+    margin-bottom: 20px; /* Add space between form and tabs */
 }
 
-@media (prefers-color-scheme: dark) {
-    .update-subscription-popup {
-        background-color: var(--popup-bg-color-dark);
-        border-color: var(--popup-border-color-dark);
-        color: var(--popup-text-color-dark);
-        box-shadow: 0px 0px 10px var(--popup-shadow-dark);
-    }
-
-    .close-button {
-        color: var(--popup-text-color-dark);
-    }
-
-    .popup-content form input,
-    .popup-content form select {
-        background-color: var(--popup-bg-color-dark);
-        color: var(--popup-text-color-dark);
-        border: 1px solid var(--popup-border-color-dark);
-    }
-
-    .popup-content form button {
-        background-color: var(--popup-bg-color-dark);
-        color: var(--popup-text-color-dark);
-        border: 1px solid var(--popup-border-color-dark);
-    }
-}
-:root {
-    --popup-bg-color-light: #fff;
-    --popup-bg-color-dark: #2c2c2c;
-    --popup-border-color-light: #ccc;
-    --popup-border-color-dark: #444;
-    --popup-text-color-light: #000;
-    --popup-text-color-dark: #fff;
-    --popup-shadow-light: rgba(0, 0, 0, 0.1);
-    --popup-shadow-dark: rgba(255, 255, 255, 0.1);
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adjust the gap between elements as needed */
+    background-color: #fafafa;
+    padding: 20px; /* Add padding around content */
+    border-radius: 10px;
 }
 
-.update-subscription-popup {
-    position: fixed;
+.fetch-button-container button {
+    background-color: #00b33c;
+    color: white;
+    border: none;
+    width: 199px;
+    height: 56px;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.link-text {
+    display: flex;
+    align-items: center;
+    padding: 0 16px; /* Add padding for better appearance */
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    font-weight: bold; /* Make the text bold */
+    font-size: 40px;
+}
+
+.text-field-token {
+    margin-left: 70px !important; /* Adjust margin for Token field */
+}
+
+.text-field-email {
+    margin-left: 50px !important; /* Adjust margin for Email field */
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--popup-bg-color-light);
-    border: 1px solid var(--popup-border-color-light);
-    padding: 20px;
-    z-index: 1000;
-    box-shadow: 0px 0px 10px var(--popup-shadow-light);
 }
 
-.popup-content {
+.duckie-container {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-.close-button {
-    align-self: flex-end;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--popup-text-color-light);
+.tabs-container {
+    position: sticky; /* Make the tabs sticky */
+    top: 0; /* Stick to the top of the viewport */
+    z-index: 1000; /* Ensure tabs are above other content */
+    background-color: #fafafa; /* Optional: Add background color to tabs */
+    padding: 10px 20px; /* Optional: Add padding for better appearance */
+    border-bottom: 1px solid #ccc; /* Optional: Add bottom border */
+}
+.dialog-popup-container {
+    /* Styles for the overlay/background */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.popup-content h2 {
-    margin-top: 0;
+.dialog-popup {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-.form-group {
-    margin-bottom: 20px;
+.dialog-popup-header h2 {
+    margin-bottom: 20px; /* Add space between heading and fields */
 }
 
-.form-group label {
+.dialog-popup-field {
+    margin-bottom: 15px;
+}
+
+.dialog-popup-field label {
     display: block;
     margin-bottom: 5px;
+    font-weight: bold;
 }
 
-.form-group input,
-.form-group select {
+.dialog-popup-field input {
     width: 100%;
     padding: 8px;
-    background-color: var(--popup-bg-color-light);
-    color: var(--popup-text-color-light);
-    border: 1px solid var(--popup-border-color-light);
-    border-radius: 5px;
-    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
 }
 
-.custom-select {
-    position: relative;
-    width: 100%;
-}
-
-.custom-select select {
-    width: 100%;
-    padding: 8px;
+.submit-button {
+    background-color: #4caf50; /* Green */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 3px;
     cursor: pointer;
-    background-color: var(--popup-bg-color-light);
-    color: var(--popup-text-color-light);
-    border: 1px solid var(--popup-border-color-light);
-    appearance: none;
 }
 
-.custom-select::after {
-    content: "\25BC";
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    pointer-events: none;
+/* Specific styles for each field to match the image */
+.name-field input,
+.shortname-field input,
+.code-field input {
+    width: calc(100% - 100px); /* Adjust as needed */
 }
 
-.message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 5px;
+.active-field input {
+    width: 50px;
+}
+/* Add to App.css or your CSS file */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
 }
 
-.message.error {
-    background-color: #f8d7da;
-    color: #721c24;
+.input-form {
+    margin-bottom: 16px;
 }
 
-.message.success {
-    background-color: #d4edda;
-    color: #155724;
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 300px;
 }
 
-@media (prefers-color-scheme: dark) {
-    .update-subscription-popup {
-        background-color: var(--popup-bg-color-dark);
-        border-color: var(--popup-border-color-dark);
-        color: var(--popup-text-color-dark);
-        box-shadow: 0px 0px 10px var(--popup-shadow-dark);
-    }
+.horizontal-group {
+    display: flex;
+    align-items: center;
+}
 
-    .close-button {
-        color: var(--popup-text-color-dark);
-    }
+.fetch-button-container {
+    margin-right: 10px;
+    margin-left: 10px;
+}
 
-    .form-group input,
-    .form-group select {
-        background-color: var(--popup-bg-color-dark);
-        color: var(--popup-text-color-dark);
-        border: 1px solid var(--popup-border-color-dark);
-    }
+.text-field-token,
+.text-field-email {
+    margin: 0 8px;
+}
 
-    .form-group button {
-        background-color: var(--popup-bg-color-dark);
-        color: var(--popup-text-color-dark);
-        border: 1px solid var(--popup-border-color-dark);
-    }
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 16px;
 }
