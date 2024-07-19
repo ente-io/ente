@@ -137,23 +137,28 @@ class MLService {
   }
 
   Future<void> runAllML({bool force = false}) async {
-    if (force) {
-      _mlControllerStatus = true;
-    }
-    if (_cannotRunMLFunction() && !force) return;
+    try {
+      if (force) {
+        _mlControllerStatus = true;
+      }
+      if (_cannotRunMLFunction() && !force) return;
 
-    await sync();
+      await sync();
 
-    final int unclusteredFacesCount =
-        await FaceMLDataDB.instance.getUnclusteredFaceCount();
-    if (unclusteredFacesCount > _kForceClusteringFaceCount) {
-      _logger.info(
-        "There are $unclusteredFacesCount unclustered faces, doing clustering first",
-      );
+      final int unclusteredFacesCount =
+          await FaceMLDataDB.instance.getUnclusteredFaceCount();
+      if (unclusteredFacesCount > _kForceClusteringFaceCount) {
+        _logger.info(
+          "There are $unclusteredFacesCount unclustered faces, doing clustering first",
+        );
+        await clusterAllImages();
+      }
+      await indexAllImages();
       await clusterAllImages();
+    } catch (e, s) {
+      _logger.severe("runAllML failed", e, s);
+      rethrow;
     }
-    await indexAllImages();
-    await clusterAllImages();
   }
 
   void pauseIndexingAndClustering() {
