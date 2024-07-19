@@ -56,7 +56,7 @@ class RemoteFileMLService {
     }
   }
 
-  Future<FilesMLDataResponse> getFilessEmbedding(
+  Future<FilesMLDataResponse> getFaceEmbedding(
     Set<int> fileIds,
   ) async {
     try {
@@ -119,68 +119,66 @@ class RemoteFileMLService {
       },
     );
   }
-
 }
 
 Future<Map<int, FileMl>> _decryptFileMLComputer(
-    Map<String, dynamic> args,
-  ) async {
-    final result = <int, FileMl>{};
-    final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
-    for (final input in inputs) {
-      final decryptArgs = <String, dynamic>{};
-      decryptArgs["source"] =
-          CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
-      decryptArgs["key"] = input.decryptionKey;
-      decryptArgs["header"] =
-          CryptoUtil.base642bin(input.embedding.decryptionHeader);
-      final embeddingData = chachaDecryptData(decryptArgs);
-      final decodedJson = jsonDecode(utf8.decode(embeddingData));
-      final FileMl decodedEmbedding =
-          FileMl.fromJson(decodedJson as Map<String, dynamic>);
-      result[input.embedding.fileID] = decodedEmbedding;
-    }
-    return result;
+  Map<String, dynamic> args,
+) async {
+  final result = <int, FileMl>{};
+  final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
+  for (final input in inputs) {
+    final decryptArgs = <String, dynamic>{};
+    decryptArgs["source"] =
+        CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
+    decryptArgs["key"] = input.decryptionKey;
+    decryptArgs["header"] =
+        CryptoUtil.base642bin(input.embedding.decryptionHeader);
+    final embeddingData = chachaDecryptData(decryptArgs);
+    final decodedJson = jsonDecode(utf8.decode(embeddingData));
+    final FileMl decodedEmbedding =
+        FileMl.fromJson(decodedJson as Map<String, dynamic>);
+    result[input.embedding.fileID] = decodedEmbedding;
   }
+  return result;
+}
 
 bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
-    if (fileMl.faceEmbedding.version < faceMlVersion) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
-      return true;
-    }
-    // are all landmarks equal?
-    bool allLandmarksEqual = true;
-    if (fileMl.faceEmbedding.faces.isEmpty) {
-      debugPrint("No face for ${fileMl.fileID}");
-      allLandmarksEqual = false;
-    }
-    for (final face in fileMl.faceEmbedding.faces) {
-      if (face.detection.landmarks.isEmpty) {
-        allLandmarksEqual = false;
-        break;
-      }
-      if (face.detection.landmarks
-          .any((landmark) => landmark.x != landmark.y)) {
-        allLandmarksEqual = false;
-        break;
-      }
-    }
-    if (allLandmarksEqual) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because landmarks are equal");
-      debugPrint(
-        fileMl.faceEmbedding.faces
-            .map((e) => e.detection.landmarks.toString())
-            .toList()
-            .toString(),
-      );
-      return true;
-    }
-    if (fileMl.width == null || fileMl.height == null) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because width is null");
-      return true;
-    }
-    return false;
+  if (fileMl.faceEmbedding.version < faceMlVersion) {
+    debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+        "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
+    return true;
   }
+  // are all landmarks equal?
+  bool allLandmarksEqual = true;
+  if (fileMl.faceEmbedding.faces.isEmpty) {
+    debugPrint("No face for ${fileMl.fileID}");
+    allLandmarksEqual = false;
+  }
+  for (final face in fileMl.faceEmbedding.faces) {
+    if (face.detection.landmarks.isEmpty) {
+      allLandmarksEqual = false;
+      break;
+    }
+    if (face.detection.landmarks.any((landmark) => landmark.x != landmark.y)) {
+      allLandmarksEqual = false;
+      break;
+    }
+  }
+  if (allLandmarksEqual) {
+    debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+        "because landmarks are equal");
+    debugPrint(
+      fileMl.faceEmbedding.faces
+          .map((e) => e.detection.landmarks.toString())
+          .toList()
+          .toString(),
+    );
+    return true;
+  }
+  if (fileMl.width == null || fileMl.height == null) {
+    debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+        "because width is null");
+    return true;
+  }
+  return false;
+}

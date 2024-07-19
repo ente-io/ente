@@ -101,7 +101,7 @@ class FaceRecognitionService {
             .toSet();
         _logger.info('starting remote fetch for ${fileIds.length} files');
         final res =
-            await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
+            await RemoteFileMLService.instance.getFaceEmbedding(fileIds);
         _logger.info('fetched ${res.mlData.length} embeddings');
         fetchedCount += res.mlData.length;
         final List<Face> faces = [];
