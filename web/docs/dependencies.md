@@ -26,7 +26,7 @@ package:
     [@typescript-eslint/eslint-plugin](https://typescript-eslint.io/packages/eslint-plugin/)
     \- which provides the TypeScript rules and presets).
 
--   [eslint-plugin-react-hooks](https://github.com/jsx-eslint/eslint-plugin-react),
+-   [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react),
     [eslint-plugin-react-hooks](https://reactjs.org/) \- Some React specific
     ESLint rules and configurations that are used by the workspaces that have
     React code.
@@ -87,7 +87,8 @@ particularly tied to Next.js.
 
 For some of our newer code, we have started to use [Vite](https://vitejs.dev).
 It is likely the future (both generally, and for our code) since Next.js is
-becoming less suitable for SSR and SPAs with their push towards RSC/SSG.
+becoming less suitable for SPAs and static SSR with their push towards RSC and
+dynamic SSR.
 
 ## UI
 
@@ -190,8 +191,12 @@ For more details, see [translations.md](translations.md).
 
 ## Media
 
--   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in
-    JavaScript (Live photos are zip files under the hood).
+-   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
+    parsing.
+
+-   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
+    web code (Live photos are zip files under the hood). Note that the desktop
+    app uses also has a ZIP parser (that one supports streaming).
 
 -   [file-type](https://github.com/sindresorhus/file-type) is used for MIME type
     detection. We are at an old version 16.5.4 because v17 onwards the package

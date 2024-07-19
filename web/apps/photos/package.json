@@ -19,6 +19,7 @@
         "debounce": "^2.0.0",
         "eventemitter3": "^4.0.7",
         "exifr": "^7.1.3",
+        "exifreader": "^4",
         "fast-srp-hap": "^2.0.4",
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
         "hdbscan": "0.0.1-alpha.5",
