@@ -454,7 +454,7 @@ const index = async (
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
             if (exif)
-                return JSON.stringify(exif); // TODO: EXIF
+                return ["exif", exif]; // TODO: EXIF
             else return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 

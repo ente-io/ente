@@ -22,23 +22,11 @@ import type { EnteFile } from "../types/file";
  *
  * The standard uses "Exif" (not "EXIF") to refer to itself. We do the same.
  */
-export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
+export const indexExif = async (_enteFile: EnteFile, blob: Blob) => {
     const tags = await ExifReader.load(await blob.arrayBuffer(), {
         async: true,
-    });
-    const tagsExpanded = await ExifReader.load(await blob.arrayBuffer(), {
-        async: true,
-        expanded: true,
-    });
-    const tagsExpandedIU = await ExifReader.load(await blob.arrayBuffer(), {
-        async: true,
-        expanded: true,
         includeUnknown: true,
     });
 
-    console.log({ tags, tagsExpanded, tagsExpandedIU });
-    return {
-        title: enteFile.title ?? "",
-        tags,
-    };
+    return tags;
 };
