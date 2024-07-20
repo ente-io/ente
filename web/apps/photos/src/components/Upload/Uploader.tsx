@@ -659,7 +659,7 @@ export default function Uploader({
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
                     variant: "critical",
-                    subtext: t("STORAGE_QUOTA_EXCEEDED"),
+                    subtext: t("storage_quota_exceeded"),
                     message: t("UPGRADE_NOW"),
                     onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon />,

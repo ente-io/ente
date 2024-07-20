@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "Votre module {{storage, string}} est valable jusqu'au {{date, date}}",
     "SUBSCRIPTION_EXPIRED": "Abonnement expiré",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Votre abonnement a expiré, veuillez <a>le renouveler </a>",
-    "STORAGE_QUOTA_EXCEEDED": "Limite de stockage atteinte",
+    "storage_quota_exceeded": "Limite de stockage atteinte",
     "subscription_info_storage_quota_exceeded": "Vous avez dépassé votre quota de stockage, veuillez <a> mettre à niveau </a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Nous avons reçu votre paiement </p><p>Votre abonnement est valide jusqu'au <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Votre achat est annulé, veuillez réessayer si vous souhaitez vous abonner",

@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "",
     "SUBSCRIPTION_EXPIRED": "",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "",
-    "STORAGE_QUOTA_EXCEEDED": "",
+    "storage_quota_exceeded": "",
     "subscription_info_storage_quota_exceeded": "",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "",

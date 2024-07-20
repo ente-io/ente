@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "Seu complemento {{storage, string}} é válido até o dia {{date, date}}",
     "SUBSCRIPTION_EXPIRED": "Assinatura expirada",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Sua assinatura expirou, por favor <a>renove-a</a>",
-    "STORAGE_QUOTA_EXCEEDED": "Limite de armazenamento excedido",
+    "storage_quota_exceeded": "Limite de armazenamento excedido",
     "subscription_info_storage_quota_exceeded": "Você excedeu sua cota de armazenamento, por favor <a>atualize</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Recebemos o seu pagamento</p><p>Sua assinatura é válida até <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Sua compra foi cancelada, por favor, tente novamente se quiser assinar",

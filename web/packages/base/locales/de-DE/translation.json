@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "Dein {{storage, string}} Add-on ist gültig bis {{date, date}}",
     "SUBSCRIPTION_EXPIRED": "Abonnement abgelaufen",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Dein Abonnement ist abgelaufen, bitte <a>erneuere es</a>",
-    "STORAGE_QUOTA_EXCEEDED": "Speichergrenze überschritten",
+    "storage_quota_exceeded": "Speichergrenze überschritten",
     "subscription_info_storage_quota_exceeded": "Sie haben Ihr Speichervolumen überschritten, bitte <a>upgraden Sie</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Wir haben deine Zahlung erhalten</p><p>Dein Abonnement ist gültig bis <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Dein Kauf wurde abgebrochen. Bitte versuche es erneut, wenn du abonnieren willst",

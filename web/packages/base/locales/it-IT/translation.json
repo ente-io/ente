@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "",
     "SUBSCRIPTION_EXPIRED": "Abbonamento scaduto",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Il tuo abbonamento è scaduto, per favore <a>rinnova</a>",
-    "STORAGE_QUOTA_EXCEEDED": "Limite d'archiviazione superato",
+    "storage_quota_exceeded": "Limite d'archiviazione superato",
     "subscription_info_storage_quota_exceeded": "Hai superato la quota di archiviazione assegnata, si prega di aggiornare <a></a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Abbiamo ricevuto il tuo pagamento</p><p>Il tuo abbonamento è valido fino a <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Il tuo acquisto è stato annullato, riprova se vuoi iscriverti",

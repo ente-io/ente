@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "您的 {{storage, string}} 插件有效期至 {{date, date}}",
     "SUBSCRIPTION_EXPIRED": "订阅已过期",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "您的订阅已过期，请 <a>续期</a>",
-    "STORAGE_QUOTA_EXCEEDED": "已超出存储限制",
+    "storage_quota_exceeded": "已超出存储限制",
     "subscription_info_storage_quota_exceeded": "您已超过您的存储配额，请 <a>升级</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>我们已经收到您的付款</p><p>您的订阅有效期至 <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "您的购买已取消，如果您想订阅，请重试",

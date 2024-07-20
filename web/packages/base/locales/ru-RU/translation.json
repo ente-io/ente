@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "Ваш {{storage, string}} дополнение действует до {{date, date}}",
     "SUBSCRIPTION_EXPIRED": "Подписка закончилась",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Срок действия вашей подписки истек, пожалуйста, <a>продлите</a>",
-    "STORAGE_QUOTA_EXCEEDED": "Превышен лимит хранения",
+    "storage_quota_exceeded": "Превышен лимит хранения",
     "subscription_info_storage_quota_exceeded": "Вы превысили свою квоту на хранение, пожалуйста <a>upgrade</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Мы получили ваш платеж</p><p>Ваша подписка действительна до <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Ваша покупка была отменена, пожалуйста, повторите попытку, если вы хотите подписаться",

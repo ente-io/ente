@@ -159,7 +159,7 @@
     "ADD_ON_AVAILABLE_TILL": "",
     "SUBSCRIPTION_EXPIRED": "Langganan kedaluwarsa",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Langganan kamu telah kedaluwarsa, silakan <a>perpanjang</a>",
-    "STORAGE_QUOTA_EXCEEDED": "Batas penyimpanan terlampaui",
+    "storage_quota_exceeded": "Batas penyimpanan terlampaui",
     "subscription_info_storage_quota_exceeded": "",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Kami telah menerima pembayaran kamu</p><p>Langganan kamu berlaku hingga <strong>{{date, date}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Pembelian kamu telah dibatalkan, silakan coba lagi jika kamu ingin berlangganan",
