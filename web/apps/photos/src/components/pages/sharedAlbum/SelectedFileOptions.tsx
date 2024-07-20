@@ -1,5 +1,5 @@
+import { SelectionBar } from "@/base/components/Navbar";
 import { FluidContainer } from "@ente/shared/components/Container";
-import { SelectionBar } from "@ente/shared/components/Navbar/SelectionBar";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";

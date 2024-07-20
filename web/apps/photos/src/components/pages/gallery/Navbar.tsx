@@ -1,6 +1,6 @@
+import { NavbarBase } from "@/base/components/Navbar";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
-import NavbarBase from "@ente/shared/components/Navbar/base";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Typography } from "@mui/material";

@@ -1,5 +1,5 @@
+import { NavbarBase } from "@/base/components/Navbar";
 import { FluidContainer } from "@ente/shared/components/Container";
-import NavbarBase from "@ente/shared/components/Navbar/base";
 import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
 import { Box } from "@mui/material";
 import UploadButton from "components/Upload/UploadButton";

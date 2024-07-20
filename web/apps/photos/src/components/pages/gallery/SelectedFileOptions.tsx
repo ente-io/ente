@@ -1,5 +1,5 @@
+import { SelectionBar } from "@/base/components/Navbar";
 import { FluidContainer } from "@ente/shared/components/Container";
-import { SelectionBar } from "@ente/shared/components/Navbar/SelectionBar";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
