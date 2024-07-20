@@ -1,7 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -15,7 +14,15 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import { Box, Dialog, Stack, Typography, styled } from "@mui/material";
+import {
+    Box,
+    Dialog,
+    Stack,
+    Typography,
+    styled,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -361,7 +368,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     passkey,
     onRenamePasskey,
 }) => {
-    const fullScreen = useIsMobileWidth();
+    const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
     const handleSubmit = async (inputValue: string) => {
         try {
@@ -374,9 +381,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
 
     return (
         <Dialog
-            open={open}
-            onClose={onClose}
-            fullScreen={fullScreen}
+            {...{ open, onClose, fullScreen }}
             PaperProps={{ sx: { width: { sm: "360px" } } }}
         >
             <Stack gap={3} p={3}>
