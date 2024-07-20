@@ -56,7 +56,7 @@ const exifTagsNeededForParsingImageMetadata = [
 ];
 
 /**
- * Read EXIF data from an image {@link file} and use that to construct and
+ * Read Exif data from an image {@link file} and use that to construct and
  * return an {@link ParsedExtractedMetadata}.
  *
  * This function is tailored for use when we upload files.
@@ -115,7 +115,7 @@ export async function getParsedExifData(
             log.error(`EXIFR does not support ${extension} files`, e);
             return undefined;
         } else {
-            log.error(`Failed to parse EXIF data for a ${extension} file`, e);
+            log.error(`Failed to parse Exif data for a ${extension} file`, e);
             throw e;
         }
     }
@@ -170,7 +170,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageWidth = ImageWidth;
             parsedExif.imageHeight = ImageHeight;
         } else {
-            log.warn("EXIF: Ignoring non-numeric ImageWidth or ImageHeight");
+            log.warn("Exif: Ignoring non-numeric ImageWidth or ImageHeight");
         }
     } else if (ExifImageWidth && ExifImageHeight) {
         if (
@@ -181,7 +181,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageHeight = ExifImageHeight;
         } else {
             log.warn(
-                "EXIF: Ignoring non-numeric ExifImageWidth or ExifImageHeight",
+                "Exif: Ignoring non-numeric ExifImageWidth or ExifImageHeight",
             );
         }
     } else if (PixelXDimension && PixelYDimension) {
@@ -193,7 +193,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             parsedExif.imageHeight = PixelYDimension;
         } else {
             log.warn(
-                "EXIF: Ignoring non-numeric PixelXDimension or PixelYDimension",
+                "Exif: Ignoring non-numeric PixelXDimension or PixelYDimension",
             );
         }
     }
@@ -272,7 +272,7 @@ export function parseEXIFLocation(
             gpsLatitude.length !== 3 ||
             gpsLongitude.length !== 3
         ) {
-            throw new Error("Invalid EXIF location");
+            throw new Error("Invalid Exif location");
         }
         const latitude = convertDMSToDD(
             gpsLatitude[0],
@@ -294,7 +294,7 @@ export function parseEXIFLocation(
             gpsLongitude,
             gpsLongitudeRef,
         };
-        log.error(`Failed to parse EXIF location ${JSON.stringify(p)}`, e);
+        log.error(`Failed to parse Exif location ${JSON.stringify(p)}`, e);
         return { ...NULL_LOCATION };
     }
 }

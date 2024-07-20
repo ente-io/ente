@@ -51,7 +51,7 @@ export function ExifData(props: {
         <FileInfoSidebar open={open} onClose={onClose}>
             <Titlebar
                 onClose={onClose}
-                title={t("EXIF")}
+                title={t("Exif")}
                 caption={filename}
                 onRootClose={handleRootClose}
                 actionButton={
