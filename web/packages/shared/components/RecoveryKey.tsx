@@ -1,3 +1,4 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -22,14 +23,14 @@ bip39.setDefaultWordlist("english");
 const RECOVERY_KEY_FILE_NAME = "ente-recovery-key.txt";
 
 interface Props {
-    isMobile: boolean;
     show: boolean;
     onHide: () => void;
     somethingWentWrong: any;
 }
 
-function RecoveryKey({ somethingWentWrong, isMobile, ...props }: Props) {
+function RecoveryKey({ somethingWentWrong, ...props }: Props) {
     const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
+    const fullScreen = useIsMobileWidth();
 
     useEffect(() => {
         if (!props.show) {
@@ -54,7 +55,7 @@ function RecoveryKey({ somethingWentWrong, isMobile, ...props }: Props) {
 
     return (
         <Dialog
-            fullScreen={isMobile}
+            fullScreen={fullScreen}
             open={props.show}
             onClose={props.onHide}
             // [Note: maxWidth "xs" on MUI dialogs]
@@ -64,6 +65,7 @@ function RecoveryKey({ somethingWentWrong, isMobile, ...props }: Props) {
             // practice MUI has hardcoded its value to a reasonable 444px.
             // https://github.com/mui/material-ui/issues/34646.
             maxWidth="xs"
+            fullWidth
         >
             <DialogTitleWithCloseButton onClose={props.onHide}>
                 {t("RECOVERY_KEY")}
