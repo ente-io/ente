@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "Vous avez dépassé votre quota de stockage, veuillez <a> mettre à niveau </a>",
     "subscription_status_renewal_active": "Renouveler le {{date, date}}",
     "subscription_status_renewal_cancelled": "Pris fin le {{date, date}}",
-    "add_on_valid_till": "Votre module {{storage, string}} est valable jusqu'au {{date, date}}",
+    "add_on_valid_till": "Votre module {{storage}} est valable jusqu'au {{date, date}}",
     "subscription_expired": "Abonnement expiré",
     "storage_quota_exceeded": "Limite de stockage atteinte",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Nous avons reçu votre paiement </p><p>Votre abonnement est valide jusqu'au <strong>{{date, date}}</strong></p>",

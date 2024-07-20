@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "Вы превысили свою квоту на хранение, пожалуйста <a>upgrade</a>",
     "subscription_status_renewal_active": "Продление {{date, date}}",
     "subscription_status_renewal_cancelled": "Заканчивается на {{date, date}}",
-    "add_on_valid_till": "Ваш {{storage, string}} дополнение действует до {{date, date}}",
+    "add_on_valid_till": "Ваш {{storage}} дополнение действует до {{date, date}}",
     "subscription_expired": "Подписка закончилась",
     "storage_quota_exceeded": "Превышен лимит хранения",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Мы получили ваш платеж</p><p>Ваша подписка действительна до <strong>{{date, date}}</strong></p>",
