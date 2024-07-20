@@ -1,6 +1,6 @@
+import { EnteSwitch } from "@/base/components/EnteSwitch";
 import { CaptionedText } from "@ente/shared/components/CaptionedText";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
-import PublicShareSwitch from "@ente/shared/components/Collections/CollectionShare/publicShare/switch";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import React from "react";
 
-interface Iprops {
+interface EnteMenuItemProps {
     onClick: () => void;
     color?: ButtonProps["color"];
     variant?:
@@ -38,7 +38,8 @@ interface Iprops {
     labelComponent?: React.ReactNode;
     disabled?: boolean;
 }
-export function EnteMenuItem({
+
+export const EnteMenuItem: React.FC<EnteMenuItemProps> = ({
     onClick,
     color = "primary",
     startIcon,
@@ -51,7 +52,7 @@ export function EnteMenuItem({
     fontWeight = "bold",
     labelComponent,
     disabled = false,
-}: Iprops) {
+}) => {
     const handleButtonClick = () => {
         if (variant === "path" || variant === "toggle") {
             return;
@@ -120,7 +121,7 @@ export function EnteMenuItem({
                 <VerticallyCenteredFlex gap={"4px"}>
                     {endIcon && endIcon}
                     {variant === "toggle" && (
-                        <PublicShareSwitch
+                        <EnteSwitch
                             checked={checked}
                             onClick={handleIconClick}
                         />
@@ -132,4 +133,4 @@ export function EnteMenuItem({
             </SpaceBetweenFlex>
         </MenuItem>
     );
-}
+};

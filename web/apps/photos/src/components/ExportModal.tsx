@@ -1,7 +1,7 @@
+import { EnteSwitch } from "@/base/components/EnteSwitch";
 import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
-import PublicShareSwitch from "@ente/shared/components/Collections/CollectionShare/publicShare/switch";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -217,10 +217,10 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
-        <SpaceBetweenFlex minHeight={"48px"} pr={1}>
+        <SpaceBetweenFlex minHeight={"48px"}>
             <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
             <Box>
-                <PublicShareSwitch
+                <EnteSwitch
                     color="accent"
                     checked={continuousExport}
                     onChange={toggleContinuousExport}
