@@ -153,7 +153,7 @@
     "CURRENT_USAGE": "Pemakaian saat ini sebesar <strong>{{usage}}</strong>",
     "TWO_MONTHS_FREE": "Dapatkan 2 bulan gratis dengan paket tahunan",
     "POPULAR": "",
-    "FREE_PLAN_OPTION_LABEL": "Lanjut dengan percobaan gratis",
+    "free_plan_option": "Lanjut dengan percobaan gratis",
     "free_plan_description": "",
     "active": "Aktif",
     "subscription_info_free": "Kamu sedang menggunakan paket <strong>gratis</strong> yang akan berakhir pada {{date, date}}",

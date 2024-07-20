@@ -153,7 +153,7 @@
     "CURRENT_USAGE": "Текущее использование составляет <strong>{{usage}}</strong>",
     "TWO_MONTHS_FREE": "Получите 2 месяца бесплатно по годовым планам",
     "POPULAR": "Популярный",
-    "FREE_PLAN_OPTION_LABEL": "Продолжайте пользоваться бесплатной пробной версией",
+    "free_plan_option": "Продолжайте пользоваться бесплатной пробной версией",
     "free_plan_description": "{{storage}} на 1 год",
     "active": "Активный",
     "subscription_info_free": "Вы используете <strong>бесплатный</strong> тарифный план, истекающий {{date, date}}",

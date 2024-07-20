@@ -153,7 +153,7 @@
     "CURRENT_USAGE": "El uso actual es <strong>{{usage}}</strong>",
     "TWO_MONTHS_FREE": "Obtén 2 meses gratis en planes anuales",
     "POPULAR": "Popular",
-    "FREE_PLAN_OPTION_LABEL": "Continuar con el plan gratuito",
+    "free_plan_option": "Continuar con el plan gratuito",
     "free_plan_description": "{{storage}} por 1 año",
     "active": "Activo",
     "subscription_info_free": "Estás en el plan <strong>gratis</strong> que expira el {{date, date}}",

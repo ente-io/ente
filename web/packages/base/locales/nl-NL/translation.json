@@ -153,7 +153,7 @@
     "CURRENT_USAGE": "Huidig gebruik is <strong>{{usage}}</strong>",
     "TWO_MONTHS_FREE": "Krijg 2 maanden gratis op jaarlijkse abonnementen",
     "POPULAR": "Populair",
-    "FREE_PLAN_OPTION_LABEL": "Doorgaan met gratis account",
+    "free_plan_option": "Doorgaan met gratis account",
     "free_plan_description": "{{storage}} voor 1 jaar",
     "active": "Actief",
     "subscription_info_free": "Je hebt het <strong>gratis</strong> abonnement dat verloopt op {{date, date}}",

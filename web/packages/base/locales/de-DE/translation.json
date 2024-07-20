@@ -153,7 +153,7 @@
     "CURRENT_USAGE": "Aktuelle Nutzung ist <strong>{{usage}}</strong>",
     "TWO_MONTHS_FREE": "Erhalte 2 Monate kostenlos bei Jahresabonnements",
     "POPULAR": "Beliebt",
-    "FREE_PLAN_OPTION_LABEL": "Mit kostenloser Testversion fortfahren",
+    "free_plan_option": "Mit kostenloser Testversion fortfahren",
     "free_plan_description": "{{storage}} für 1 Jahr",
     "active": "Aktiv",
     "subscription_info_free": "Du bist auf dem <strong>kostenlosen</strong> Plan, der am {{date, date}} ausläuft",
