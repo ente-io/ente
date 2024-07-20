@@ -377,8 +377,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
             open={open}
             onClose={onClose}
             fullScreen={fullScreen}
-            fullWidth
-            PaperProps={{ sx: { maxWidth: "360px" } }}
+            PaperProps={{ sx: { width: { sm: "360px" } } }}
         >
             <Stack gap={3} p={3}>
                 <Typography variant="large" fontWeight={"bold"}>
