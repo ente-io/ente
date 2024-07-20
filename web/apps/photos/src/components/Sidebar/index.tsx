@@ -304,7 +304,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         } else {
             message = (
                 <Trans
-                    i18nKey={"SUBSCRIPTION_EXPIRED_MESSAGE"}
+                    i18nKey={"subscription_info_expired"}
                     components={{
                         a: <LinkButton onClick={handleClick} />,
                     }}

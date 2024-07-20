@@ -158,7 +158,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Uw abonnement loopt af op {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Jouw {{storage, string}} add-on is geldig tot {{date, date}}",
     "subscription_expired": "Abonnement verlopen",
-    "SUBSCRIPTION_EXPIRED_MESSAGE": "Uw abonnement is verlopen, gelieve <a>vernieuwen</a>",
+    "subscription_info_expired": "Uw abonnement is verlopen, gelieve <a>vernieuwen</a>",
     "storage_quota_exceeded": "Opslaglimiet overschreden",
     "subscription_info_storage_quota_exceeded": "U heeft uw opslaglimiet overschreden, gelieve <a>upgraden</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>We hebben uw betaling ontvangen</p><p>Uw abonnement is geldig tot <strong>{{date, date}}</strong></p>",

@@ -158,7 +158,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Tu suscripción será cancelada el {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Tu {{storage, string}} adicional es válido hasta {{date, date}}",
     "subscription_expired": "Suscripción caducada",
-    "SUBSCRIPTION_EXPIRED_MESSAGE": "Tu suscripción ha caducado, por favor <a>renuévala</a>",
+    "subscription_info_expired": "Tu suscripción ha caducado, por favor <a>renuévala</a>",
     "storage_quota_exceeded": "Límite de datos excedido",
     "subscription_info_storage_quota_exceeded": "Ha excedido su cuota de almacenamiento, por favor <a>actualice</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Hemos recibido tu pago</p><p>¡Tu suscripción es válida hasta <strong>{{date, date}}</strong></p>",
