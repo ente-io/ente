@@ -215,6 +215,15 @@ class ExportService {
         }
     }
 
+    /**
+     * Called when the local database of files changes.
+     */
+    onLocalFilesUpdated() {
+        if (this.continuousExportEventHandler) {
+            this.continuousExportEventHandler();
+        }
+    }
+
     getPendingExports = async (
         exportRecord: ExportRecord,
     ): Promise<EnteFile[]> => {

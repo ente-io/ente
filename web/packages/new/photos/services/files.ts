@@ -1,5 +1,3 @@
-import log from "@/base/log";
-import { Events, eventBus } from "@ente/shared/events";
 import localForage from "@ente/shared/storage/localForage";
 import { type EnteFile, type Trash } from "../types/file";
 import { mergeMetadata } from "../utils/file";
@@ -25,17 +23,17 @@ export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
     return files;
 };
 
+/**
+ * Update the files that we know about locally.
+ *
+ * Sibling of {@link getLocalFiles}.
+ */
 export const setLocalFiles = async (
     type: "normal" | "hidden",
     files: EnteFile[],
 ) => {
     const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     await localForage.setItem(tableName, files);
-    try {
-        eventBus.emit(Events.LOCAL_FILES_UPDATED);
-    } catch (e) {
-        log.error("Failed to save files", e);
-    }
 };
 
 export const TRASH = "file-trash";
