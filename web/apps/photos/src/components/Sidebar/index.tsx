@@ -1,7 +1,10 @@
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
-import log from "@/next/log";
-import { savedLogs } from "@/next/log-web";
-import { customAPIHost } from "@/next/origins";
+import { isDesktop } from "@/base/app";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import log from "@/base/log";
+import { savedLogs } from "@/base/log-web";
+import { customAPIHost } from "@/base/origins";
+import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -34,7 +37,6 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
-import { EnteDrawer } from "components/EnteDrawer";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
@@ -73,7 +75,6 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
-import { openLink } from "utils/common";
 import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
@@ -290,21 +291,21 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             if (isOnFreePlan(userDetails.subscription)) {
                 message = (
                     <Trans
-                        i18nKey={"FREE_SUBSCRIPTION_INFO"}
+                        i18nKey={"subscription_info_free"}
                         values={{
                             date: userDetails.subscription?.expiryTime,
                         }}
                     />
                 );
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
-                message = t("RENEWAL_CANCELLED_SUBSCRIPTION_INFO", {
+                message = t("subscription_info_renewal_cancelled", {
                     date: userDetails.subscription?.expiryTime,
                 });
             }
         } else {
             message = (
                 <Trans
-                    i18nKey={"SUBSCRIPTION_EXPIRED_MESSAGE"}
+                    i18nKey={"subscription_info_expired"}
                     components={{
                         a: <LinkButton onClick={handleClick} />,
                     }}
@@ -316,7 +317,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     if (!message && hasExceededStorageQuota(userDetails)) {
         message = (
             <Trans
-                i18nKey={"STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO"}
+                i18nKey={"subscription_info_storage_quota_exceeded"}
                 components={{
                     a: <LinkButton onClick={handleClick} />,
                 }}
@@ -594,23 +595,20 @@ const HelpSection: React.FC = () => {
     const { setDialogMessage } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
-    const openRoadmap = () =>
-        openLink("https://github.com/ente-io/ente/discussions", true);
+    const requestFeature = () =>
+        openURL("https://github.com/ente-io/ente/discussions");
 
-    const contactSupport = () => openLink("mailto:support@ente.io", true);
+    const contactSupport = () => initiateEmail("support@ente.io");
 
-    function openExport() {
-        if (isElectron()) {
-            openExportModal();
-        } else {
-            setDialogMessage(getDownloadAppMessage());
-        }
-    }
+    const handleExport = () =>
+        isDesktop
+            ? openExportModal()
+            : setDialogMessage(getDownloadAppMessage());
 
     return (
         <>
             <EnteMenuItem
-                onClick={openRoadmap}
+                onClick={requestFeature}
                 label={t("REQUEST_FEATURE")}
                 variant="secondary"
             />
@@ -626,7 +624,7 @@ const HelpSection: React.FC = () => {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={openExport}
+                onClick={handleExport}
                 label={t("EXPORT")}
                 endIcon={
                     exportService.isExportInProgress() && (
@@ -655,7 +653,7 @@ const ExitSection: React.FC = () => {
                 action: logout,
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
     };
 
@@ -703,7 +701,7 @@ const DebugSection: React.FC = () => {
                 action: downloadLogs,
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
 

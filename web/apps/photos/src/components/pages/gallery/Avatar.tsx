@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import { styled } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { GalleryContext } from "pages/gallery";

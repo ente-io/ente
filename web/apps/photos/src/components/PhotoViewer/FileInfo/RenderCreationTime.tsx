@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";

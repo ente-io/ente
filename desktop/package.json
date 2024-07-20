@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.7.2-rc",
+    "version": "1.7.3-beta",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
@@ -33,9 +33,7 @@
         "electron-store": "^8.2",
         "electron-updater": "^6.2",
         "ffmpeg-static": "^5.2",
-        "html-entities": "^2.5",
-        "jpeg-js": "^0.4",
-        "lru-cache": "^10.2",
+        "lru-cache": "^11",
         "next-electron-server": "^1",
         "node-stream-zip": "^1.15",
         "onnxruntime-node": "^1.18"
@@ -52,11 +50,11 @@
         "electron-builder": "25.0.0-alpha.8",
         "eslint": "^9",
         "prettier": "^3",
-        "prettier-plugin-organize-imports": "^3",
+        "prettier-plugin-organize-imports": "^4",
         "prettier-plugin-packagejson": "^2",
         "shx": "^0.3",
         "typescript": "^5",
-        "typescript-eslint": "^8.0.0-alpha.39"
+        "typescript-eslint": "^8.0.0-alpha.41"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"

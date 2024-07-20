@@ -1,0 +1,25 @@
+{
+    "name": "@/base",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@emotion/react": "11.11.3",
+        "@emotion/styled": "^11.11.5",
+        "@mui/icons-material": "^5.16",
+        "@mui/material": "^5.16",
+        "comlink": "^4.4",
+        "get-user-locale": "^2.3",
+        "i18next": "^23.11",
+        "i18next-resources-to-backend": "^1.2",
+        "is-electron": "^2.2",
+        "next": "^14.2",
+        "react": "^18",
+        "react-dom": "^18",
+        "react-i18next": "^14"
+    },
+    "devDependencies": {
+        "@/build-config": "*",
+        "@types/react": "^18",
+        "@types/react-dom": "^18"
+    }
+}

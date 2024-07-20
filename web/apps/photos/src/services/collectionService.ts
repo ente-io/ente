@@ -1,3 +1,5 @@
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
@@ -6,8 +8,6 @@ import {
     UpdateMagicMetadataRequest,
     VISIBILITY_STATE,
 } from "@/new/photos/types/magicMetadata";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

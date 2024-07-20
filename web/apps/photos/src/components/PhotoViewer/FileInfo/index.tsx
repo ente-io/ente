@@ -1,3 +1,6 @@
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { Titlebar } from "@/base/components/Titlebar";
+import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -11,9 +14,6 @@ import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
 import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
 import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
 import { Chip } from "components/Chip";
-import { EnteDrawer } from "components/EnteDrawer";
-import Titlebar from "components/Titlebar";
-import { UnidentifiedFaces } from "components/ml/PeopleList";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -287,10 +287,10 @@ export function FileInfo({
                                     fontWeight: "bold",
                                 }}
                             >
-                                {t("VIEW_EXIF")}
+                                {t("view_exif")}
                             </LinkButton>
                         ) : (
-                            t("NO_EXIF")
+                            t("no_exif")
                         )
                     }
                     hideEditOption

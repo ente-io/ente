@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.6+906
+version: 0.9.14+914
 publish_to: none
 
 environment:
@@ -131,6 +131,7 @@ dependencies:
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
+  panorama_viewer: ^1.0.5
   password_strength: ^0.2.0
   path: #dart
   path_provider: ^2.1.1
@@ -138,7 +139,7 @@ dependencies:
   permission_handler: ^11.0.1
   photo_manager: ^3.2.0
   photo_view: ^0.14.0
-  pinput: ^2.0.2
+  pinput: ^5.0.0
   pointycastle: ^3.7.3
   pool: ^1.5.1
   protobuf: ^3.1.0
@@ -180,6 +181,7 @@ dependencies:
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
   xml: ^6.3.0
+  xmp: ^1.0.3
 
 dependency_overrides:
   # Remove this after removing dependency from flutter_sodium.
@@ -198,12 +200,13 @@ flutter_intl:
 
 dev_dependencies:
   build_runner: ^2.4.7
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
   freezed: ^2.5.2
   integration_test:
     sdk: flutter
+  intl_utils: ^2.8.7
   json_serializable: ^6.6.1
   test: ^1.22.0
 

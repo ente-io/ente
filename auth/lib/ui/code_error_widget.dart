@@ -1,8 +1,10 @@
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/linear_progress_widget.dart';
+import 'package:ente_auth/ui/tools/debug/raw_codes_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +14,7 @@ class CodeErrorWidget extends StatelessWidget {
     required this.errors,
   });
 
-  final int errors;
+  final List<Code> errors;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +72,7 @@ class CodeErrorWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                context.l10n.somethingWentWrongParsingCode(errors),
+                context.l10n.somethingWentWrongParsingCode(errors.length),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -78,29 +80,54 @@ class CodeErrorWidget extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SizedBox(
-                  width: 102,
-                  height: 28,
-                  child: GradientButton(
-                    text: context.l10n.contactSupport,
-                    fontSize: 10,
-                    onTap: () async {
-                      await showErrorDialog(
-                        context,
-                        context.l10n.contactSupport,
-                        context.l10n
-                            .contactSupportViaEmailMessage("support@ente.io"),
-                      );
-                    },
-                    borderWidth: 0.6,
-                    borderRadius: 6,
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                children: [
+                  SizedBox(
+                    width: 102,
+                    height: 28,
+                    child: GradientButton(
+                      text: context.l10n.viewRawCodes,
+                      fontSize: 10,
+                      onTap: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return RawCodesViewer(
+                              errors.map((e) => e.rawData).join('\n'),
+                            );
+                          },
+                          barrierColor: Colors.black87,
+                          barrierDismissible: false,
+                        );
+                      },
+                      borderWidth: 0.6,
+                      borderRadius: 6,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-              ],
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 102,
+                    height: 28,
+                    child: GradientButton(
+                      text: context.l10n.contactSupport,
+                      fontSize: 10,
+                      onTap: () async {
+                        await showErrorDialog(
+                          context,
+                          context.l10n.contactSupport,
+                          context.l10n
+                              .contactSupportViaEmailMessage("support@ente.io"),
+                        );
+                      },
+                      borderWidth: 0.6,
+                      borderRadius: 6,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
           ],

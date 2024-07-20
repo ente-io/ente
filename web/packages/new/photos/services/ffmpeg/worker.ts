@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";

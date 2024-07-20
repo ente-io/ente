@@ -1,7 +1,7 @@
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import { SetSelectedState } from "types/gallery";
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {

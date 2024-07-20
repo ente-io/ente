@@ -32,11 +32,6 @@ apps](web-dev-settings.png){width=400px}
 
 This works on both the desktop app and web app (if you deploy on your own).
 
-> [!CAUTION]
->
-> This setting is currently available in the nightly builds of the desktop app.
-> It'll be available in the regular builds with the upcoming release (1.7.2).
-
 To make it easier to identify when a custom server is being used, app will
 thereafter show the endpoint in use (if not Ente's production server) at the
 bottom of the login prompt:

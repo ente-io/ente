@@ -212,7 +212,7 @@ const Footer = ({ step, startFix, ...props }) => {
                             props.hide();
                         }}
                     >
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 )}
                 {step === "completed" && (

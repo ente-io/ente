@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";

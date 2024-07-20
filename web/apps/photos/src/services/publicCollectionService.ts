@@ -1,7 +1,7 @@
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

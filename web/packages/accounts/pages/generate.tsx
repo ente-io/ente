@@ -5,7 +5,7 @@ import SetPasswordForm, {
 import { PAGES } from "@/accounts/constants/pages";
 import { configureSRP } from "@/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
-import log from "@/next/log";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -50,7 +50,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const user: User = getData(LS_KEYS.USER);
             setUser(user);
             if (!user?.token) {
-                router.push(PAGES.ROOT);
+                router.push("/");
             } else if (key) {
                 if (justSignedUp()) {
                     setRecoveryModalView(true);

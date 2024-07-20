@@ -1,5 +1,5 @@
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { Tooltip, styled } from "@mui/material";
 

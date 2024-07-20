@@ -22,7 +22,7 @@ export function BFAddOnRow({ bonusData, closeModal }) {
                             <Box>
                                 <Typography color="text.muted">
                                     <Trans
-                                        i18nKey={"ADD_ON_AVAILABLE_TILL"}
+                                        i18nKey={"add_on_valid_till"}
                                         values={{
                                             storage: formattedStorageByteSize(
                                                 bonus.storage,

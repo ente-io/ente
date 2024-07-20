@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { styled } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";

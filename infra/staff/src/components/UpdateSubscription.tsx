@@ -1,178 +1,367 @@
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CloseIcon from "@mui/icons-material/Close";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Grid from "@mui/material/Grid";
+import InputAdornment from "@mui/material/InputAdornment";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../App.css";
+import { getEmail, getToken } from "../App";
 import { apiOrigin } from "../services/support";
+interface Subscription {
+    productID: string;
+    paymentProvider: string;
+    storage: number;
+    originalTransactionID: string;
+    expiryTime: number;
+    userID: string;
+}
+
+interface UserDataResponse {
+    subscription: Subscription | null;
+}
+
 interface UpdateSubscriptionProps {
-    token: string;
-    userId: string;
+    open: boolean;
     onClose: () => void;
 }
 
-export const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
-    token,
-    userId,
+interface FormValues {
+    productId: string;
+    provider: string;
+    storage: number;
+    transactionId: string;
+    expiryTime: string | Date | null;
+    userId: string;
+}
+
+const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
+    open,
     onClose,
 }) => {
-    const [expiryTime, setExpiryTime] = useState<Date | null>(null);
-    const [productId, setProductId] = useState<string>("50gb_monthly");
-    const [paymentProvider, setPaymentProvider] = useState<string>("bitpay");
-    const [transactionId, setTransactionId] = useState<string>("");
-    const [message, setMessage] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
-    const [storage, setStorage] = useState<number | "">("");
+    const [values, setValues] = useState<FormValues>({
+        productId: "",
+        provider: "",
+        storage: 0,
+        transactionId: "",
+        expiryTime: "",
+        userId: "",
+    });
+
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
     useEffect(() => {
-        if (productId === "50gb_yearly" || productId === "50gb_monthly") {
-            setStorage(50 * 1024 * 1024 * 1024);
-        } else if (
-            productId === "200gb_yearly" ||
-            productId === "200gb_monthly"
-        ) {
-            setStorage(200 * 1024 * 1024 * 1024);
-        } else if (
-            productId === "500gb_yearly" ||
-            productId === "500gb_monthly"
-        ) {
-            setStorage(500 * 1024 * 1024 * 1024);
-        } else if (
-            productId === "2000gb_yearly" ||
-            productId === "2000gb_monthly"
-        ) {
-            setStorage(2000 * 1024 * 1024 * 1024);
-        } else {
-            setStorage("");
-        }
-    }, [productId]);
+        const fetchData = async () => {
+            try {
+                const email = getEmail();
+                const token = getToken();
+                const encodedEmail = encodeURIComponent(email);
+                const encodedToken = encodeURIComponent(token);
+                const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
 
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                const userDataResponse =
+                    (await response.json()) as UserDataResponse;
 
-        const expiryTimeTimestamp = expiryTime
-            ? expiryTime.getTime() * 1000
-            : "";
+                if (!userDataResponse.subscription) {
+                    throw new Error("Subscription data not found");
+                }
 
-        const url = `${apiOrigin}/admin/user/subscription`;
-        const body = {
-            userId,
-            storage,
-            expiryTime: expiryTimeTimestamp,
-            productId,
-            paymentProvider,
-            transactionId,
+                const expiryTime = new Date(
+                    userDataResponse.subscription.expiryTime / 1000,
+                );
+
+                setValues({
+                    productId: userDataResponse.subscription.productID || "",
+                    provider:
+                        userDataResponse.subscription.paymentProvider || "",
+                    storage:
+                        userDataResponse.subscription.storage /
+                            (1024 * 1024 * 1024) || 0,
+                    transactionId:
+                        userDataResponse.subscription.originalTransactionID ||
+                        "",
+                    expiryTime: expiryTime,
+                    userId: userDataResponse.subscription.userID || "",
+                });
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         };
 
-        try {
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-AUTH-TOKEN": token,
-                },
-                body: JSON.stringify(body),
+        fetchData().catch((error: unknown) => {
+            console.error("Unhandled promise rejection:", error);
+        });
+    }, []);
+
+    const handleCalendarClick = () => {
+        setIsDatePickerOpen(true);
+    };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
+        setValues({
+            ...values,
+            [name]: name === "storage" ? parseInt(value, 10) : value,
+        });
+    };
+
+    const handleChangeProvider = (event: SelectChangeEvent) => {
+        const { name, value } = event.target;
+
+        if (name) {
+            setValues({
+                ...values,
+                [name]: value,
             });
-
-            if (!response.ok) {
-                throw new Error(
-                    `Network response was not ok: ${response.status}`,
-                );
-            }
-
-            setMessage("Subscription updated successfully");
-            setError(null);
-            setTimeout(() => {
-                setMessage(null);
-                onClose();
-            }, 1000);
-        } catch (error) {
-            console.error("Error updating subscription:", error);
-            setError(
-                error instanceof Error && typeof error.message === "string"
-                    ? error.message
-                    : "An unexpected error occurred",
-            );
-            setTimeout(() => {
-                setError(null);
-            }, 1000);
         }
     };
 
-    const handleSubmitWrapper = (event: React.FormEvent) => {
-        handleSubmit(event).catch((error: unknown) => {
-            console.error("Error in handleSubmit:", error);
+    const handleDatePickerChange = (date: Date | null) => {
+        setValues({
+            ...values,
+            expiryTime: date,
+        });
+        setIsDatePickerOpen(false);
+    };
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        (async () => {
+            const token = getToken();
+            const url = `${apiOrigin}/admin/user/subscription`;
+
+            let expiryTime = null;
+            if (values.expiryTime instanceof Date) {
+                const utcExpiryTime = new Date(values.expiryTime);
+                expiryTime = utcExpiryTime.getTime() * 1000;
+            }
+
+            const body = {
+                userId: values.userId,
+                storage: values.storage * (1024 * 1024 * 1024),
+                expiryTime: expiryTime,
+                productId: values.productId,
+                paymentProvider: values.provider,
+                transactionId: values.transactionId,
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-AUTH-TOKEN": token,
+                    },
+                    body: JSON.stringify(body),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                console.log("Subscription updated successfully");
+                onClose();
+            } catch (error) {
+                console.error("Error updating subscription:", error);
+            }
+        })().catch((error: unknown) => {
+            console.error("Unhandled promise rejection:", error);
         });
     };
 
     return (
-        <div className="update-subscription-popup">
-            <div className="popup-content">
-                <button className="close-button" onClick={onClose}>
-                    X
-                </button>
-                <h2>Update Subscription</h2>
-                <form onSubmit={handleSubmitWrapper}>
-                    <div className="form-group">
-                        <label htmlFor="expiry-time">Expiry Time:</label>
-                        <DatePicker
-                            id="expiry-time"
-                            selected={expiryTime}
-                            onChange={(date) => setExpiryTime(date)}
-                            dateFormat="dd/MM/yyyy"
-                            showYearDropdown
-                            scrollableYearDropdown
-                            yearDropdownItemNumber={15}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="product-id">Choose Your Plan:</label>
-                        <select
-                            id="product-id"
-                            value={productId}
-                            onChange={(e) => setProductId(e.target.value)}
+        <Dialog
+            open={open}
+            onClose={onClose}
+            BackdropProps={{
+                style: {
+                    backdropFilter: "blur(5px)",
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                },
+            }}
+        >
+            <DialogTitle style={{ marginBottom: "20px", marginTop: "20px" }}>
+                Update Subscription
+                <Button
+                    onClick={onClose}
+                    style={{ position: "absolute", right: 10, top: 10 }}
+                >
+                    <CloseIcon style={{ color: "black" }} />
+                </Button>
+            </DialogTitle>
+            <DialogContent>
+                <form onSubmit={handleSubmit}>
+                    <Grid container spacing={4}>
+                        <Grid item xs={6}>
+                            <div style={{ marginBottom: "8px" }}>
+                                <label
+                                    htmlFor="productId"
+                                    style={{
+                                        textAlign: "left",
+                                        display: "block",
+                                        marginBottom: "4px",
+                                    }}
+                                >
+                                    Product ID
+                                </label>
+                                <TextField
+                                    id="productId"
+                                    name="productId"
+                                    value={values.productId}
+                                    onChange={handleChange}
+                                    fullWidth
+                                />
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div style={{ marginBottom: "8px" }}>
+                                <label
+                                    htmlFor="provider"
+                                    style={{
+                                        textAlign: "left",
+                                        display: "block",
+                                        marginBottom: "4px",
+                                    }}
+                                >
+                                    Provider
+                                </label>
+                                <Select
+                                    id="provider"
+                                    name="provider"
+                                    value={values.provider}
+                                    onChange={handleChangeProvider}
+                                    fullWidth
+                                    style={{ textAlign: "left" }}
+                                >
+                                    <MenuItem value="stripe">Stripe</MenuItem>
+                                    <MenuItem value="paypal">PayPal</MenuItem>
+                                    <MenuItem value="bitpay">BitPay</MenuItem>
+                                    <MenuItem value="None">None</MenuItem>
+                                </Select>
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div style={{ marginBottom: "8px" }}>
+                                <label
+                                    htmlFor="storage"
+                                    style={{
+                                        textAlign: "left",
+                                        display: "block",
+                                        marginBottom: "4px",
+                                    }}
+                                >
+                                    Storage (GB)
+                                </label>
+                                <TextField
+                                    id="storage"
+                                    name="storage"
+                                    type="number"
+                                    value={values.storage}
+                                    onChange={handleChange}
+                                    fullWidth
+                                />
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div style={{ marginBottom: "8px" }}>
+                                <label
+                                    htmlFor="transactionId"
+                                    style={{
+                                        textAlign: "left",
+                                        display: "block",
+                                        marginBottom: "4px",
+                                    }}
+                                >
+                                    Transaction ID
+                                </label>
+                                <TextField
+                                    id="transactionId"
+                                    name="transactionId"
+                                    value={values.transactionId}
+                                    onChange={handleChange}
+                                    fullWidth
+                                />
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <div style={{ marginBottom: "8px" }}>
+                                <label
+                                    htmlFor="expiryTime"
+                                    style={{
+                                        textAlign: "left",
+                                        display: "block",
+                                        marginBottom: "4px",
+                                    }}
+                                >
+                                    Expiry Time
+                                </label>
+                                <TextField
+                                    id="expiryTime"
+                                    name="expiryTime"
+                                    value={
+                                        values.expiryTime instanceof Date
+                                            ? values.expiryTime.toLocaleDateString(
+                                                  "en-GB",
+                                              )
+                                            : ""
+                                    }
+                                    onClick={handleCalendarClick}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <CalendarTodayIcon />
+                                            </InputAdornment>
+                                        ),
+                                        readOnly: true,
+                                    }}
+                                    fullWidth
+                                />
+                                {isDatePickerOpen && (
+                                    <DatePicker
+                                        showYearDropdown
+                                        scrollableYearDropdown
+                                        yearDropdownItemNumber={15}
+                                        selected={
+                                            values.expiryTime instanceof Date
+                                                ? values.expiryTime
+                                                : null
+                                        }
+                                        onChange={handleDatePickerChange}
+                                        onClickOutside={() =>
+                                            setIsDatePickerOpen(false)
+                                        }
+                                        withPortal
+                                        inline
+                                    />
+                                )}
+                            </div>
+                        </Grid>
+                    </Grid>
+                    <DialogActions style={{ justifyContent: "center" }}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            style={{
+                                backgroundColor: "#00B33C",
+                                color: "white",
+                            }}
                         >
-                            <option value="50gb_monthly">50GB/Month</option>
-                            <option value="50gb_yearly">50GB/Year</option>
-                            <option value="200gb_monthly">200GB/Month</option>
-                            <option value="200gb_yearly">200GB/Year</option>
-                            <option value="500gb_monthly">500GB/Month</option>
-                            <option value="500gb_yearly">500GB/Year</option>
-                            <option value="2000gb_monthly">2000GB/Month</option>
-                            <option value="2000gb_yearly">2000GB/Year</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="payment-provider">
-                            Payment Provider:
-                        </label>
-                        <select
-                            id="payment-provider"
-                            value={paymentProvider}
-                            onChange={(e) => setPaymentProvider(e.target.value)}
-                        >
-                            <option value="bitpay">BitPay</option>
-                            <option value="paypal">PayPal</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label htmlFor="transaction-id">Transaction ID:</label>
-                        <input
-                            id="transaction-id"
-                            type="text"
-                            value={transactionId}
-                            onChange={(e) => setTransactionId(e.target.value)}
-                        />
-                    </div>
-                    <button type="submit" id="submitbtn">
-                        Update
-                    </button>
+                            Update
+                        </Button>
+                    </DialogActions>
                 </form>
-                {(error ?? message) && (
-                    <div className={`message ${error ? "error" : "success"}`}>
-                        {error ? `Error: ${error}` : `Success: ${message}`}
-                    </div>
-                )}
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

@@ -31,9 +31,9 @@
  * and when changing one of them, remember to see if the other two also need
  * changing:
  *
- * -    [renderer]  web/packages/next/types/electron.ts      contains docs
- * -    [preload]   desktop/src/preload.ts                         ↕︎
- * -    [main]      desktop/src/main/ipc.ts                  contains impl
+ * -    [renderer]  web/packages/base/types/ipc.ts      contains docs
+ * -    [preload]   desktop/src/preload.ts                    ↕︎
+ * -    [main]      desktop/src/main/ipc.ts             contains impl
  */
 
 import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
@@ -163,8 +163,8 @@ const ffmpegExec = (
 
 // - ML
 
-const computeCLIPImageEmbedding = (jpegImageData: Uint8Array) =>
-    ipcRenderer.invoke("computeCLIPImageEmbedding", jpegImageData);
+const computeCLIPImageEmbedding = (input: Float32Array) =>
+    ipcRenderer.invoke("computeCLIPImageEmbedding", input);
 
 const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
     ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);

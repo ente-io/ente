@@ -1,5 +1,5 @@
 /**
- * @file AI/ML related functionality, generic layer.
+ * @file ML related functionality, generic layer.
  *
  * @see also `ml-clip.ts`, `ml-face.ts`.
  *
@@ -10,6 +10,7 @@
  * can use the binary ONNX runtime which is 10-20x faster than the WASM based
  * web one.
  */
+
 import { app, net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";

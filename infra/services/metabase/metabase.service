@@ -1,0 +1,13 @@
+[Unit]
+Documentation=https://www.metabase.com/docs/
+Requires=docker.service
+After=docker.service
+
+[Service]
+ExecStartPre=docker pull metabase/metabase
+ExecStartPre=-docker stop metabase
+ExecStartPre=-docker rm metabase
+ExecStart=docker run --name metabase \
+    -p 3000:3000 \
+    -v /root/metabase.db:/metabase.db \
+    metabase/metabase

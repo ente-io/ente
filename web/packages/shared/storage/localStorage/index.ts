@@ -1,5 +1,5 @@
-import { removeKV, setKV } from "@/next/kv";
-import log from "@/next/log";
+import { removeKV, setKV } from "@/base/kv";
+import log from "@/base/log";
 
 export enum LS_KEYS {
     USER = "user",
@@ -15,7 +15,7 @@ export enum LS_KEYS {
     USER_DETAILS = "userDetails",
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
-    // Moved to the new wrapper @/next/local-storage
+    // Moved to the new wrapper @/base/local-storage
     // LOCALE = 'locale',
     MAP_ENABLED = "mapEnabled",
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",

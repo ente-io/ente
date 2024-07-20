@@ -4,7 +4,7 @@ import VerifyTwoFactor, {
 } from "@/accounts/components/two-factor/VerifyForm";
 import { TwoFactorSetup } from "@/accounts/components/two-factor/setup";
 import type { TwoFactorSecret } from "@/accounts/types/user";
-import log from "@/next/log";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";

@@ -1,3 +1,8 @@
+import { ensureElectron } from "@/base/electron";
+import { lowercaseExtension, nameAndExtension } from "@/base/file";
+import log from "@/base/log";
+import type { Electron } from "@/base/types/ipc";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FILE_TYPE } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -9,17 +14,11 @@ import {
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
-import { ensureElectron } from "@/next/electron";
-import { lowercaseExtension, nameAndExtension } from "@/next/file";
-import log from "@/next/log";
-import type { Electron } from "@/next/types/ipc";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
 import { Canceler } from "axios";
 import type { Remote } from "comlink";
 import isElectron from "is-electron";
@@ -617,27 +616,6 @@ class UploadManager {
                 const uploadItem =
                     uploadableItem.uploadItem ??
                     uploadableItem.livePhotoAssets.image;
-                try {
-                    let file: File | undefined;
-                    if (uploadItem) {
-                        if (uploadItem instanceof File) {
-                            file = uploadItem;
-                        } else if (
-                            typeof uploadItem == "string" ||
-                            Array.isArray(uploadItem)
-                        ) {
-                            // path from desktop, no file object
-                        } else {
-                            file = uploadItem.file;
-                        }
-                    }
-                    eventBus.emit(Events.FILE_UPLOADED, {
-                        enteFile: decryptedFile,
-                        localFile: file,
-                    });
-                } catch (e) {
-                    log.warn("Ignoring error in fileUploaded handlers", e);
-                }
                 if (
                     uploadItem &&
                     (uploadResult == UPLOAD_RESULT.UPLOADED ||

@@ -1,4 +1,4 @@
 {
     "extends": "@/build-config/tsconfig-next.json",
-    "include": [".", "../../packages/next/global-electron.d.ts"]
+    "include": [".", "../../packages/base/global-electron.d.ts"]
 }

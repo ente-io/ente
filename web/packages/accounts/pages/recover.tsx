@@ -1,6 +1,6 @@
 import { sendOtt } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
-import log from "@/next/log";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -43,7 +43,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.email) {
-            router.push(PAGES.ROOT);
+            router.push("/");
             return;
         }
         if (!user?.encryptedToken && !user?.token) {

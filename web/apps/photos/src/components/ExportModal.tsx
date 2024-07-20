@@ -1,5 +1,6 @@
+import { EnteSwitch } from "@/base/components/EnteSwitch";
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
@@ -13,7 +14,6 @@ import {
     Dialog,
     DialogContent,
     Divider,
-    Switch,
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
@@ -220,7 +220,7 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
             <Box>
-                <Switch
+                <EnteSwitch
                     color="accent"
                     checked={continuousExport}
                     onChange={toggleContinuousExport}
