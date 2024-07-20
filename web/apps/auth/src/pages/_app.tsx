@@ -2,6 +2,7 @@ import { accountLogout } from "@/accounts/services/logout";
 import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
@@ -13,7 +14,6 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -24,7 +24,7 @@ import {
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
-import { CssBaseline, useMediaQuery } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
@@ -70,7 +70,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         DialogBoxAttributesV2 | undefined
     >();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const isMobile = useMediaQuery("(max-width: 428px)");
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
@@ -143,7 +142,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appContext = {
         logout,
         showNavBar,
-        isMobile,
         setDialogBoxAttributesV2,
         startLoading,
         finishLoading,
@@ -162,7 +160,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "auth")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar isMobile={isMobile} />}
+                {showNavbar && <AppNavbar />}
                 <MessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>

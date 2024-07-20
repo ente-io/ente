@@ -7,7 +7,7 @@ import useComponentScroll, {
 } from "@ente/shared/hooks/useComponentScroll";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography, useMediaQuery } from "@mui/material";
 import CollectionListBarCard from "components/Collections/CollectionListBar/CollectionCard";
 import {
     CollectionListBarWrapper,
@@ -16,8 +16,7 @@ import {
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "constants/collection";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import { AppContext } from "pages/_app";
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     FixedSizeList as List,
@@ -94,9 +93,8 @@ const CollectionListBar = (props: IProps) => {
         isInHiddenSection,
     } = props;
 
-    const appContext = useContext(AppContext);
-
     const windowSize = useWindowSize();
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const {
         componentRef: collectionListWrapperRef,
@@ -136,7 +134,7 @@ const CollectionListBar = (props: IProps) => {
                 <Typography>
                     {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
                 </Typography>
-                {appContext.isMobile && (
+                {isMobile && (
                     <Box display="flex" alignItems={"center"} gap={1}>
                         <CollectionListSortBy
                             setSortBy={props.setCollectionListSortBy}
@@ -182,7 +180,7 @@ const CollectionListBar = (props: IProps) => {
                         />
                     )}
                 </CollectionListWrapper>
-                {!appContext.isMobile && (
+                {!isMobile && (
                     <Box
                         display="flex"
                         alignItems={"center"}

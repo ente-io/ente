@@ -102,7 +102,6 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 </VerticallyCentered>
             ) : recoverModalView ? (
                 <RecoveryKey
-                    isMobile={appContext.isMobile}
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);

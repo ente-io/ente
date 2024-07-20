@@ -1,11 +1,9 @@
-import Divider from "@mui/material/Divider";
+import { Divider, useMediaQuery } from "@mui/material";
 import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
 import { COLLECTION_LIST_SORT_BY } from "constants/collection";
-import { AppContext } from "pages/_app";
-import { useContext } from "react";
 import { CollectionSummary } from "types/collection";
 import AllCollectionContent from "./content";
 import AllCollectionsHeader from "./header";
@@ -32,7 +30,7 @@ export default function AllCollections(props: Iprops) {
         setCollectionListSortBy,
         isInHiddenSection,
     } = props;
-    const { isMobile } = useContext(AppContext);
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const onCollectionClick = (collectionID: number) => {
         setActiveCollectionID(collectionID);

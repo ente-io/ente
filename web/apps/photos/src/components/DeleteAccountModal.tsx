@@ -2,7 +2,7 @@ import log from "@/base/log";
 import { initiateEmail } from "@/new/photos/utils/web";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
-import { Button, Link, Stack } from "@mui/material";
+import { Button, Link, Stack, useMediaQuery } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -28,14 +28,16 @@ interface FormValues {
 }
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { setDialogBoxAttributesV2, isMobile, logout } =
-        useContext(AppContext);
+    const { setDialogBoxAttributesV2, logout } = useContext(AppContext);
     const { authenticateUser } = useContext(GalleryContext);
+
     const [loading, setLoading] = useState(false);
     const deleteAccountChallenge = useRef<string>();
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
+
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     useEffect(() => {
         preloadImage("/images/delete-account");
