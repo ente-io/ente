@@ -1,9 +1,7 @@
 import { styled } from "@mui/material";
 import { FlexWrapper } from "../../components/Container";
 
-const NavbarBase = styled(FlexWrapper, {
-    shouldForwardProp: (propName) => propName != "isMobile",
-})<{ isMobile: boolean }>`
+const NavbarBase = styled(FlexWrapper)`
     min-height: 64px;
     position: sticky;
     top: 0;

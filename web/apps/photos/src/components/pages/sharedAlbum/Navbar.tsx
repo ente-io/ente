@@ -4,14 +4,11 @@ import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutl
 import { Box } from "@mui/material";
 import UploadButton from "components/Upload/UploadButton";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { useContext } from "react";
 import GoToEnte from "./GoToEnte";
 
 export default function SharedAlbumNavbar({ showUploadButton, openUploader }) {
-    const { isMobile } = useContext(AppContext);
     return (
-        <NavbarBase isMobile={isMobile}>
+        <NavbarBase>
             <FluidContainer>
                 <EnteLinkLogo />
             </FluidContainer>

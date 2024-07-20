@@ -141,10 +141,10 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { isMobile, logout } = ensure(useContext(AppContext));
+    const { logout } = ensure(useContext(AppContext));
 
     return (
-        <NavbarBase isMobile={isMobile}>
+        <NavbarBase>
             <HorizontalFlex flex={1} justifyContent={"center"}>
                 <EnteLogo />
             </HorizontalFlex>

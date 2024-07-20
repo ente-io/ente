@@ -342,7 +342,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar isMobile={isMobile} />}
+                {showNavbar && <AppNavbar />}
                 <MessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>

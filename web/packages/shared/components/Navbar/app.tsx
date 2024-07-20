@@ -3,13 +3,9 @@ import { CenteredFlex } from "../../components/Container";
 import { EnteLogo } from "../EnteLogo";
 import NavbarBase from "./base";
 
-interface AppNavbarProps {
-    isMobile: boolean;
-}
-
-export const AppNavbar: React.FC<AppNavbarProps> = ({ isMobile }) => {
+export const AppNavbar: React.FC = () => {
     return (
-        <NavbarBase isMobile={isMobile}>
+        <NavbarBase>
             <CenteredFlex>
                 <EnteLogo />
             </CenteredFlex>

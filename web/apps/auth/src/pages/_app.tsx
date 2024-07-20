@@ -162,7 +162,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(themeColor, "auth")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar isMobile={isMobile} />}
+                {showNavbar && <AppNavbar />}
                 <MessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>

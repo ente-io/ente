@@ -86,7 +86,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                             <EnteSpinner />
                         </Overlay>
                     )}
-                    {showNavbar && <AppNavbar isMobile={isMobile} />}
+                    {showNavbar && <AppNavbar />}
                     {isI18nReady && <Component {...pageProps} />}
                 </AppContext.Provider>
             </ThemeProvider>
