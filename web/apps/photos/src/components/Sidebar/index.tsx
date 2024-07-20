@@ -1,4 +1,5 @@
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
+import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
@@ -599,13 +600,10 @@ const HelpSection: React.FC = () => {
 
     const contactSupport = () => initiateEmail("support@ente.io");
 
-    function openExport() {
-        if (isElectron()) {
-            openExportModal();
-        } else {
-            setDialogMessage(getDownloadAppMessage());
-        }
-    }
+    const handleExport = () =>
+        isDesktop
+            ? openExportModal()
+            : setDialogMessage(getDownloadAppMessage());
 
     return (
         <>
@@ -626,7 +624,7 @@ const HelpSection: React.FC = () => {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={openExport}
+                onClick={handleExport}
                 label={t("EXPORT")}
                 endIcon={
                     exportService.isExportInProgress() && (
