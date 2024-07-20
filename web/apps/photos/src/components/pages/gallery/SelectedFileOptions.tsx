@@ -66,7 +66,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { setDialogMessage, isMobile } = useContext(AppContext);
+    const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
@@ -155,7 +155,7 @@ const SelectedFileOptions = ({
     };
 
     return (
-        <SelectionBar isMobile={isMobile}>
+        <SelectionBar>
             <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
