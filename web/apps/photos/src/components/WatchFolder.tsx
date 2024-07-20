@@ -242,7 +242,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
             title: t("STOP_WATCHING_FOLDER"),
             content: t("STOP_WATCHING_DIALOG_MESSAGE"),
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
                 variant: "secondary",
             },
             proceed: {

@@ -665,7 +665,7 @@ interface ExtractAssetMetadataResult {
 }
 
 /**
- * Compute the hash, extract EXIF or other metadata, and merge in data from the
+ * Compute the hash, extract Exif or other metadata, and merge in data from the
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
@@ -808,7 +808,7 @@ async function tryExtractImageMetadata(
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        // The library we use for extracting EXIF from images, exifr, doesn't
+        // The library we use for extracting Exif from images, exifr, doesn't
         // support streams. But unlike videos, for images it is reasonable to
         // read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);

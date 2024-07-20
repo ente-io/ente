@@ -89,7 +89,7 @@ const SelectedFileOptions = ({
                 text: t("DELETE"),
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
 
     const restoreHandler = () =>
@@ -115,7 +115,7 @@ const SelectedFileOptions = ({
                     text: t("YES_REMOVE"),
                     variant: "primary",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         } else {
             setDialogMessage({
@@ -130,7 +130,7 @@ const SelectedFileOptions = ({
                     text: t("YES_REMOVE"),
                     variant: "critical",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         }
     };
