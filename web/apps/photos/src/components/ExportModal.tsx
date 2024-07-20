@@ -1,6 +1,7 @@
 import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
+import PublicShareSwitch from "@ente/shared/components/Collections/CollectionShare/publicShare/switch";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
@@ -13,7 +14,6 @@ import {
     Dialog,
     DialogContent,
     Divider,
-    Switch,
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
@@ -217,10 +217,10 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
-        <SpaceBetweenFlex minHeight={"48px"}>
+        <SpaceBetweenFlex minHeight={"48px"} pr={1}>
             <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
             <Box>
-                <Switch
+                <PublicShareSwitch
                     color="accent"
                     checked={continuousExport}
                     onChange={toggleContinuousExport}
