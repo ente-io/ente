@@ -39,7 +39,7 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import { CssBaseline, useMediaQuery } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
@@ -121,7 +121,6 @@ export default function App({ Component, pageProps }: AppProps) {
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const isMobile = useMediaQuery("(max-width: 428px)");
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
@@ -319,7 +318,6 @@ export default function App({ Component, pageProps }: AppProps) {
         setWatchFolderView,
         watchFolderFiles,
         setWatchFolderFiles,
-        isMobile,
         setNotificationAttributes,
         themeColor,
         setThemeColor,
