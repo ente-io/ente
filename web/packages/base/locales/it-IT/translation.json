@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Termina il {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Il tuo abbonamento verrà annullato il {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "",
-    "SUBSCRIPTION_EXPIRED": "Abbonamento scaduto",
+    "subscription_expired": "Abbonamento scaduto",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Il tuo abbonamento è scaduto, per favore <a>rinnova</a>",
     "storage_quota_exceeded": "Limite d'archiviazione superato",
     "subscription_info_storage_quota_exceeded": "Hai superato la quota di archiviazione assegnata, si prega di aggiornare <a></a>",

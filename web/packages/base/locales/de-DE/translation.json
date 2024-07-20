@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Endet am {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Ihr Abo endet am {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Dein {{storage, string}} Add-on ist gültig bis {{date, date}}",
-    "SUBSCRIPTION_EXPIRED": "Abonnement abgelaufen",
+    "subscription_expired": "Abonnement abgelaufen",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Dein Abonnement ist abgelaufen, bitte <a>erneuere es</a>",
     "storage_quota_exceeded": "Speichergrenze überschritten",
     "subscription_info_storage_quota_exceeded": "Sie haben Ihr Speichervolumen überschritten, bitte <a>upgraden Sie</a>",

@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Pris fin le {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Votre abonnement sera annulé le {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Votre module {{storage, string}} est valable jusqu'au {{date, date}}",
-    "SUBSCRIPTION_EXPIRED": "Abonnement expiré",
+    "subscription_expired": "Abonnement expiré",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Votre abonnement a expiré, veuillez <a>le renouveler </a>",
     "storage_quota_exceeded": "Limite de stockage atteinte",
     "subscription_info_storage_quota_exceeded": "Vous avez dépassé votre quota de stockage, veuillez <a> mettre à niveau </a>",

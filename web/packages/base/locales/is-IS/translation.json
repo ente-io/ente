@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "",
     "ADD_ON_AVAILABLE_TILL": "",
-    "SUBSCRIPTION_EXPIRED": "",
+    "subscription_expired": "",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "",
     "storage_quota_exceeded": "",
     "subscription_info_storage_quota_exceeded": "Þú hefur farið yfir geymsluplássið þitt, vinsamlegast <a>uppfærðu</a>",

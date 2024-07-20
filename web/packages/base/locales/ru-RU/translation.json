@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Заканчивается на {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Ваша подписка будет отменена в {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Ваш {{storage, string}} дополнение действует до {{date, date}}",
-    "SUBSCRIPTION_EXPIRED": "Подписка закончилась",
+    "subscription_expired": "Подписка закончилась",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Срок действия вашей подписки истек, пожалуйста, <a>продлите</a>",
     "storage_quota_exceeded": "Превышен лимит хранения",
     "subscription_info_storage_quota_exceeded": "Вы превысили свою квоту на хранение, пожалуйста <a>upgrade</a>",

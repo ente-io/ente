@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Termina em {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Sua assinatura será cancelada em {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Seu complemento {{storage, string}} é válido até o dia {{date, date}}",
-    "SUBSCRIPTION_EXPIRED": "Assinatura expirada",
+    "subscription_expired": "Assinatura expirada",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "Sua assinatura expirou, por favor <a>renove-a</a>",
     "storage_quota_exceeded": "Limite de armazenamento excedido",
     "subscription_info_storage_quota_exceeded": "Você excedeu sua cota de armazenamento, por favor <a>atualize</a>",

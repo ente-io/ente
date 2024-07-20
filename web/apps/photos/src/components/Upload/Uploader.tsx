@@ -651,7 +651,7 @@ export default function Uploader({
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: "critical",
-                    subtext: t("SUBSCRIPTION_EXPIRED"),
+                    subtext: t("subscription_expired"),
                     message: t("renew_now"),
                     onClick: () => billingService.redirectToCustomerPortal(),
                 };

@@ -157,7 +157,7 @@
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "",
     "ADD_ON_AVAILABLE_TILL": "",
-    "SUBSCRIPTION_EXPIRED": "구독 만료",
+    "subscription_expired": "구독 만료",
     "SUBSCRIPTION_EXPIRED_MESSAGE": "당신 구독이 만료되었으니, 구독을 <a>갱신</a>해주세요",
     "storage_quota_exceeded": "스토리지 제한이 초과되었습니다",
     "subscription_info_storage_quota_exceeded": "",
