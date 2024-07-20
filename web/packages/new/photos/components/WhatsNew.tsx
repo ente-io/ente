@@ -40,6 +40,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             {...{ open, fullScreen }}
             TransitionComponent={SlideTransition}
             maxWidth="xs"
+            fullWidth
         >
             <Box m={1}>
                 <DialogTitle mt={2}>

@@ -49,10 +49,10 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
 
     return (
         <Dialog
-            fullWidth
             open={open}
             onClose={onClose}
             maxWidth="xs"
+            fullWidth
             fullScreen={isMobile}
         >
             <DialogTitleWithCloseButton onClose={onClose}>

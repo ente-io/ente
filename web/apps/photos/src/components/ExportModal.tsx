@@ -156,7 +156,12 @@ export default function ExportModal(props: Props) {
     };
 
     return (
-        <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
+        <Dialog
+            open={props.show}
+            onClose={props.onHide}
+            maxWidth="xs"
+            fullWidth
+        >
             <DialogTitleWithCloseButton onClose={props.onHide}>
                 {t("EXPORT_DATA")}
             </DialogTitleWithCloseButton>

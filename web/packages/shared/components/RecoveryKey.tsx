@@ -57,6 +57,12 @@ function RecoveryKey({ somethingWentWrong, isMobile, ...props }: Props) {
             fullScreen={isMobile}
             open={props.show}
             onClose={props.onHide}
+            // [Note: maxWidth "xs" on MUI dialogs]
+            //
+            // While logically the "xs" breakpoint doesn't make sense as a
+            // maxWidth value (since as a breakpoint it's value is 0), in
+            // practice MUI has hardcoded its value to a reasonable 444px.
+            // https://github.com/mui/material-ui/issues/34646.
             maxWidth="xs"
         >
             <DialogTitleWithCloseButton onClose={props.onHide}>
