@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "功能建议",
     "SUPPORT": "支持",
     "CONFIRM": "确认",
-    "CANCEL": "取消",
+    "cancel": "取消",
     "LOGOUT": "退出登录",
     "delete_account": "删除账户",
     "delete_account_manually_message": "<p>请从您注册的电子邮件地址发送一封电子邮件到 <a>{{emailID}}</a></p><p>。您的请求将在72小时内处理。</p>",

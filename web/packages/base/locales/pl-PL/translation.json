@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "Zaproponuj Funkcję",
     "SUPPORT": "Wsparcie techniczne",
     "CONFIRM": "Potwierdź",
-    "CANCEL": "Anuluj",
+    "cancel": "Anuluj",
     "LOGOUT": "Wyloguj się",
     "delete_account": "Usuń konto",
     "delete_account_manually_message": "<p>Prosimy wysłać wiadomość e-mail na <a>{{emailID}}</a> z Twojego zarejestrowanego adresu e-mail. </p><p>Twoja prośba zostanie przetworzona w ciągu 72 godzin.</p>",

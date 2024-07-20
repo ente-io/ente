@@ -94,7 +94,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 action: solveChallengeAndDeleteAccount,
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
     };
 
@@ -115,7 +115,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 action: () => initiateEmail(emailID),
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
     };
 
@@ -149,7 +149,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     title: t("delete_account"),
                     secondary: {
                         action: onClose,
-                        text: t("CANCEL"),
+                        text: t("cancel"),
                     },
                 }}
             >
@@ -217,7 +217,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                         color={"secondary"}
                                         onClick={onClose}
                                     >
-                                        {t("CANCEL")}
+                                        {t("cancel")}
                                     </Button>
                                 </Stack>
                             </Stack>

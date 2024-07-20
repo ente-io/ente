@@ -150,7 +150,7 @@ function PlanSelectorCard(props: Props) {
                     ),
                     variant: "accent",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         } else if (hasMobileSubscription(subscription)) {
             appContext.setDialogMessage({

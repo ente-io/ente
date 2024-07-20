@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "",
     "SUPPORT": "",
     "CONFIRM": "",
-    "CANCEL": "",
+    "cancel": "",
     "LOGOUT": "",
     "delete_account": "",
     "delete_account_manually_message": "",

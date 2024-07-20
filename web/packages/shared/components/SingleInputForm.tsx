@@ -184,7 +184,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                 }}
                                 {...restSubmitButtonProps}
                             >
-                                {t("CANCEL")}
+                                {t("cancel")}
                             </Button>
                         )}
                         <SubmitButton

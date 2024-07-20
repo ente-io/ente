@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "Feature anfragen",
     "SUPPORT": "Support",
     "CONFIRM": "Bestätigen",
-    "CANCEL": "Abbrechen",
+    "cancel": "Abbrechen",
     "LOGOUT": "Ausloggen",
     "delete_account": "Konto löschen",
     "delete_account_manually_message": "<p>Bitte sende eine E-Mail an <a>{{emailID}}</a> mit deiner registrierten E-Mail-Adresse.</p><p>Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.</p>",

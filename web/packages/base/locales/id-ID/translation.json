@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "Minta Fitur",
     "SUPPORT": "Dukungan",
     "CONFIRM": "Konfirmasi",
-    "CANCEL": "Batal",
+    "cancel": "Batal",
     "LOGOUT": "Keluar akun",
     "delete_account": "",
     "delete_account_manually_message": "",

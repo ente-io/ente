@@ -39,7 +39,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 variant: "critical",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
 

@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "",
     "SUPPORT": "",
     "CONFIRM": "Staðfesta",
-    "CANCEL": "Hætta við",
+    "cancel": "Hætta við",
     "LOGOUT": "Útskrá",
     "delete_account": "Eyða aðgangi",
     "delete_account_manually_message": "",

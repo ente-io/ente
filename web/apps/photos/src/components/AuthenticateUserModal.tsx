@@ -132,5 +132,5 @@ const passwordChangedElsewhereDialogAttributes = (
         action: onLogin,
         variant: "accent",
     },
-    close: { text: t("CANCEL") },
+    close: { text: t("cancel") },
 });

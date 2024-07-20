@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "Solicitar una función",
     "SUPPORT": "Soporte",
     "CONFIRM": "Confirmar",
-    "CANCEL": "Cancelar",
+    "cancel": "Cancelar",
     "LOGOUT": "Cerrar sesión",
     "delete_account": "Eliminar cuenta",
     "delete_account_manually_message": "<p>Por favor, envíe un email a <a>{{emailID}}</a> desde su dirección de correo electrónico registrada</p><p>Su solicitud será procesada en 72 horas.</p>",

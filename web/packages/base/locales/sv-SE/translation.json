@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "",
     "SUPPORT": "",
     "CONFIRM": "Bekräfta",
-    "CANCEL": "Avbryt",
+    "cancel": "Avbryt",
     "LOGOUT": "Logga ut",
     "delete_account": "Radera konto",
     "delete_account_manually_message": "",

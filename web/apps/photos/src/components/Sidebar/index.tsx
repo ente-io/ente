@@ -655,7 +655,7 @@ const ExitSection: React.FC = () => {
                 action: logout,
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
     };
 
@@ -703,7 +703,7 @@ const DebugSection: React.FC = () => {
                 action: downloadLogs,
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
 

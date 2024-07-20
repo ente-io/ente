@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "Vraag nieuwe functie aan",
     "SUPPORT": "Ondersteuning",
     "CONFIRM": "Bevestigen",
-    "CANCEL": "Annuleren",
+    "cancel": "Annuleren",
     "LOGOUT": "Uitloggen",
     "delete_account": "Account verwijderen",
     "delete_account_manually_message": "<p>Stuur een e-mail naar <a>{{emailID}}</a> vanaf uw geregistreerde e-mailadres.</p><p>Uw aanvraag wordt binnen 72 uur verwerkt.</p>",

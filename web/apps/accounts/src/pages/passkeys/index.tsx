@@ -282,7 +282,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                 action: handleDelete,
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
     }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
 

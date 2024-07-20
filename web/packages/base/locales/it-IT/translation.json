@@ -126,7 +126,7 @@
     "REQUEST_FEATURE": "Richiedi una funzionalità",
     "SUPPORT": "Supporto",
     "CONFIRM": "Conferma",
-    "CANCEL": "Annulla",
+    "cancel": "Annulla",
     "LOGOUT": "Disconnettiti",
     "delete_account": "Elimina account",
     "delete_account_manually_message": "<p>Per favore invia una email a <a>{{emailID}}</a> dal tuo indirizzo email registrato.</p><p>La tua richiesta verrà elaborata entro 72 ore.</p>",

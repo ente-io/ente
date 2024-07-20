@@ -285,7 +285,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 variant: "primary",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
     };
@@ -300,7 +300,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 text: t("EMPTY_TRASH"),
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
 
     const confirmLeaveSharedAlbum = () => {
@@ -315,7 +315,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 variant: "critical",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
     };

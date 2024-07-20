@@ -186,7 +186,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                         {t("ENABLE")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 </Stack>
             </Stack>
@@ -217,7 +217,7 @@ function DisableMap({ onClose, disableMap, onRootClose }) {
                         {t("DISABLE")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 </Stack>
             </Stack>
