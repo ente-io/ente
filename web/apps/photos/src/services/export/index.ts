@@ -15,7 +15,6 @@ import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { formatDateTimeShort } from "@ente/shared/time/format";
 import type { User } from "@ente/shared/user/types";
@@ -177,42 +176,22 @@ class ExportService {
     }
 
     enableContinuousExport() {
-        try {
-            if (this.continuousExportEventHandler) {
-                log.info("continuous export already enabled");
-                return;
-            }
-            log.info("enabling continuous export");
-            this.continuousExportEventHandler = () => {
-                this.scheduleExport({ resync: this.resyncOnce() });
-            };
-            this.continuousExportEventHandler();
-            eventBus.addListener(
-                Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventHandler,
-            );
-        } catch (e) {
-            log.error("failed to enableContinuousExport ", e);
-            throw e;
+        if (this.continuousExportEventHandler) {
+            log.warn("Continuous export already enabled");
+            return;
         }
+        this.continuousExportEventHandler = () => {
+            this.scheduleExport({ resync: this.resyncOnce() });
+        };
+        this.continuousExportEventHandler();
     }
 
     disableContinuousExport() {
-        try {
-            if (!this.continuousExportEventHandler) {
-                log.info("continuous export already disabled");
-                return;
-            }
-            log.info("disabling continuous export");
-            eventBus.removeListener(
-                Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventHandler,
-            );
-            this.continuousExportEventHandler = null;
-        } catch (e) {
-            log.error("failed to disableContinuousExport", e);
-            throw e;
+        if (!this.continuousExportEventHandler) {
+            log.warn("Continuous export already disabled");
+            return;
         }
+        this.continuousExportEventHandler = null;
     }
 
     /**
