@@ -1,8 +1,11 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -39,10 +42,27 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
+  bool _isFileSwipeLocked = false;
+  @override
+  void initState() {
+    super.initState();
+    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        _isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return _getBottomBar();
+    return _isFileSwipeLocked
+        ? IgnorePointer(child: Container())
+        : _getBottomBar();
   }
 
   void safeRefresh() {
@@ -152,7 +172,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       valueListenable: widget.enableFullScreenNotifier,
       builder: (BuildContext context, bool isFullScreen, _) {
         return IgnorePointer(
-          ignoring: isFullScreen,
+          ignoring: isFullScreen || _isFileSwipeLocked,
           child: AnimatedOpacity(
             opacity: isFullScreen ? 0 : 1,
             duration: const Duration(milliseconds: 150),

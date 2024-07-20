@@ -10,6 +10,7 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/file_swipe_lock_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -56,7 +57,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
-
+  bool _isFileSwipeLocked = false;
   @override
   void initState() {
     super.initState();
@@ -71,6 +72,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
+    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        _isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
   }
 
   @override
@@ -150,21 +156,22 @@ class _ZoomableImageState extends State<ZoomableImage> {
       );
     }
 
-    final GestureDragUpdateCallback? verticalDragCallback = _isZooming
-        ? null
-        : (d) => {
-              if (!_isZooming)
-                {
-                  if (d.delta.dy > dragSensitivity)
+    final GestureDragUpdateCallback? verticalDragCallback =
+        _isZooming || _isFileSwipeLocked
+            ? null
+            : (d) => {
+                  if (!_isZooming)
                     {
-                      {Navigator.of(context).pop()},
-                    }
-                  else if (d.delta.dy < (dragSensitivity * -1))
-                    {
-                      showDetailsSheet(context, widget.photo),
+                      if (d.delta.dy > dragSensitivity)
+                        {
+                          {Navigator.of(context).pop()},
+                        }
+                      else if (d.delta.dy < (dragSensitivity * -1))
+                        {
+                          showDetailsSheet(context, widget.photo),
+                        },
                     },
-                },
-            };
+                };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
       child: content,

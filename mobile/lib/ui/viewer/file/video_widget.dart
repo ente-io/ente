@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -46,7 +48,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   final _progressNotifier = ValueNotifier<double?>(null);
   bool _isPlaying = false;
   final EnteWakeLock _wakeLock = EnteWakeLock();
-
+  bool _isFileSwipeLocked = false;
   @override
   void initState() {
     super.initState();
@@ -75,6 +77,11 @@ class _VideoWidgetState extends State<VideoWidget> {
         }
       });
     }
+    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        _isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
   }
 
   void _setFileSizeIfNull() {
@@ -125,7 +132,6 @@ class _VideoWidgetState extends State<VideoWidget> {
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
     _progressNotifier.dispose();
-
     _wakeLock.dispose();
     super.dispose();
   }
@@ -177,17 +183,19 @@ class _VideoWidgetState extends State<VideoWidget> {
         ? _getVideoPlayer()
         : _getLoadingWidget();
     final contentWithDetector = GestureDetector(
+      onVerticalDragUpdate: _isFileSwipeLocked
+          ? null
+          : (d) => {
+                if (d.delta.dy > dragSensitivity)
+                  {
+                    Navigator.of(context).pop(),
+                  }
+                else if (d.delta.dy < (dragSensitivity * -1))
+                  {
+                    showDetailsSheet(context, widget.file),
+                  },
+              },
       child: content,
-      onVerticalDragUpdate: (d) => {
-        if (d.delta.dy > dragSensitivity)
-          {
-            Navigator.of(context).pop(),
-          }
-        else if (d.delta.dy < (dragSensitivity * -1))
-          {
-            showDetailsSheet(context, widget.file),
-          },
-      },
     );
     return VisibilityDetector(
       key: Key(widget.file.tag),
