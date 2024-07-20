@@ -1,6 +1,6 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { DialogContent } from "@mui/material";
+import { DialogContent, useMediaQuery } from "@mui/material";
 import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import {
     COLLECTION_SORT_ORDER,
@@ -8,8 +8,7 @@ import {
     DUMMY_UNCATEGORIZED_COLLECTION,
 } from "constants/collection";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
 import {
     Collection,
@@ -45,7 +44,7 @@ function CollectionSelector({
     collections,
     ...props
 }: Props) {
-    const appContext = useContext(AppContext);
+    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const [collectionsToShow, setCollectionsToShow] = useState<
         CollectionSummary[]
@@ -126,7 +125,7 @@ function CollectionSelector({
             onClose={onUserTriggeredClose}
             open={props.open}
             position="center"
-            fullScreen={appContext.isMobile}
+            fullScreen={isMobile}
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
                 {attributes.intent === CollectionSelectorIntent.upload
