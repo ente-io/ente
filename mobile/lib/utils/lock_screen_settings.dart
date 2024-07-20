@@ -38,7 +38,7 @@ class LockScreenSettings {
   }
 
   int getAutoLockTime() {
-    return _preferences.getInt(autoLockTime) ?? 0;
+    return _preferences.getInt(autoLockTime) ?? 5000;
   }
 
   Future<void> setLastInvalidAttemptTime(int time) async {

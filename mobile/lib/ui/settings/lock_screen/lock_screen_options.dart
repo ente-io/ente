@@ -259,7 +259,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      "Time after which the app will be locked after closing",
+                                      "Time after which the app locks after being put in the background",
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),
