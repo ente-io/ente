@@ -290,7 +290,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             if (isOnFreePlan(userDetails.subscription)) {
                 message = (
                     <Trans
-                        i18nKey={"FREE_SUBSCRIPTION_INFO"}
+                        i18nKey={"subscription_info_free"}
                         values={{
                             date: userDetails.subscription?.expiryTime,
                         }}
@@ -316,7 +316,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     if (!message && hasExceededStorageQuota(userDetails)) {
         message = (
             <Trans
-                i18nKey={"STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO"}
+                i18nKey={"subscription_info_storage_quota_exceeded"}
                 components={{
                     a: <LinkButton onClick={handleClick} />,
                 }}

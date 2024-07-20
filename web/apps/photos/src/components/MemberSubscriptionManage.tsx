@@ -65,7 +65,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <VerticallyCentered>
                     <Box mb={4}>
                         <Typography color="text.muted">
-                            {t("FAMILY_SUBSCRIPTION_INFO")}
+                            {t("subscription_info_family")}
                         </Typography>
                         <Typography>
                             {getFamilyPlanAdmin(userDetails.familyData)?.email}
