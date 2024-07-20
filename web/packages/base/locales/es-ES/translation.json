@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "Ha excedido su cuota de almacenamiento, por favor <a>actualice</a>",
     "subscription_status_renewal_active": "Se renueva en {{date, date}}",
     "subscription_status_renewal_cancelled": "Termina el {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "Tu {{storage, string}} adicional es válido hasta {{date, date}}",
+    "add_on_valid_till": "Tu {{storage, string}} adicional es válido hasta {{date, date}}",
     "subscription_expired": "Suscripción caducada",
     "storage_quota_exceeded": "Límite de datos excedido",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Hemos recibido tu pago</p><p>¡Tu suscripción es válida hasta <strong>{{date, date}}</strong></p>",

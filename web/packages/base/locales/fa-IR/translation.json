@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "",
     "subscription_status_renewal_active": "",
     "subscription_status_renewal_cancelled": "",
-    "ADD_ON_AVAILABLE_TILL": "",
+    "add_on_valid_till": "",
     "subscription_expired": "",
     "storage_quota_exceeded": "",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "",

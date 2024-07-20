@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "U heeft uw opslaglimiet overschreden, gelieve <a>upgraden</a>",
     "subscription_status_renewal_active": "Vernieuwt op {{date, date}}",
     "subscription_status_renewal_cancelled": "Eindigt op {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "Jouw {{storage, string}} add-on is geldig tot {{date, date}}",
+    "add_on_valid_till": "Jouw {{storage, string}} add-on is geldig tot {{date, date}}",
     "subscription_expired": "Abonnement verlopen",
     "storage_quota_exceeded": "Opslaglimiet overschreden",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>We hebben uw betaling ontvangen</p><p>Uw abonnement is geldig tot <strong>{{date, date}}</strong></p>",

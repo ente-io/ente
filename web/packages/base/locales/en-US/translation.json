@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "You have exceeded your storage quota, please <a>upgrade</a>",
     "subscription_status_renewal_active": "Renews on {{date, date}}",
     "subscription_status_renewal_cancelled": "Ends on {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "Your {{storage, string}} add-on is valid till {{date, date}}",
+    "add_on_valid_till": "Your {{storage, string}} add-on is valid till {{date, date}}",
     "subscription_expired": "Subscription expired",
     "storage_quota_exceeded": "Storage limit exceeded",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>We've received your payment</p><p>Your subscription is valid till <strong>{{date, date}}</strong></p>",

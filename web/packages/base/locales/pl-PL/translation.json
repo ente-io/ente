@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "Przekroczono limit pamięci, prosimy <a>ulepszyć</a>",
     "subscription_status_renewal_active": "Odnawia się dnia {{date, date}}",
     "subscription_status_renewal_cancelled": "Kończy się dnia {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "Twój dodatek {{storage, string}} jest ważny do {{date, date}}",
+    "add_on_valid_till": "Twój dodatek {{storage, string}} jest ważny do {{date, date}}",
     "subscription_expired": "Subskrypcja wygasła",
     "storage_quota_exceeded": "Przekroczono limit pamięci",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Otrzymaliśmy Twoją płatność</p><p>Twoja subskrypcja jest ważna do <strong>{{date, date}}</strong></p>",

@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "",
     "subscription_status_renewal_active": "",
     "subscription_status_renewal_cancelled": "Berakhir pada {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "",
+    "add_on_valid_till": "",
     "subscription_expired": "Langganan kedaluwarsa",
     "storage_quota_exceeded": "Batas penyimpanan terlampaui",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Kami telah menerima pembayaran kamu</p><p>Langganan kamu berlaku hingga <strong>{{date, date}}</strong></p>",

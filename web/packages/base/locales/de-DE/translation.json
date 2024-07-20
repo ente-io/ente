@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "Sie haben Ihr Speichervolumen überschritten, bitte <a>upgraden Sie</a>",
     "subscription_status_renewal_active": "Erneuert am {{date, date}}",
     "subscription_status_renewal_cancelled": "Endet am {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "Dein {{storage, string}} Add-on ist gültig bis {{date, date}}",
+    "add_on_valid_till": "Dein {{storage, string}} Add-on ist gültig bis {{date, date}}",
     "subscription_expired": "Abonnement abgelaufen",
     "storage_quota_exceeded": "Speichergrenze überschritten",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Wir haben deine Zahlung erhalten</p><p>Dein Abonnement ist gültig bis <strong>{{date, date}}</strong></p>",

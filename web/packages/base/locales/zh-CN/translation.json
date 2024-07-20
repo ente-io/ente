@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "您已超过您的存储配额，请 <a>升级</a>",
     "subscription_status_renewal_active": "于 {{date, date}} 续费",
     "subscription_status_renewal_cancelled": "结束于 {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "您的 {{storage, string}} 插件有效期至 {{date, date}}",
+    "add_on_valid_till": "您的 {{storage, string}} 插件有效期至 {{date, date}}",
     "subscription_expired": "订阅已过期",
     "storage_quota_exceeded": "已超出存储限制",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>我们已经收到您的付款</p><p>您的订阅有效期至 <strong>{{date, date}}</strong></p>",

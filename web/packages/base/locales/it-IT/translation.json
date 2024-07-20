@@ -158,7 +158,7 @@
     "subscription_info_storage_quota_exceeded": "Hai superato la quota di archiviazione assegnata, si prega di aggiornare <a></a>",
     "subscription_status_renewal_active": "Si rinnova il {{date, date}}",
     "subscription_status_renewal_cancelled": "Termina il {{date, date}}",
-    "ADD_ON_AVAILABLE_TILL": "",
+    "add_on_valid_till": "",
     "subscription_expired": "Abbonamento scaduto",
     "storage_quota_exceeded": "Limite d'archiviazione superato",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>Abbiamo ricevuto il tuo pagamento</p><p>Il tuo abbonamento è valido fino a <strong>{{date, date}}</strong></p>",
