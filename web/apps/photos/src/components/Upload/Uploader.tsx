@@ -652,7 +652,7 @@ export default function Uploader({
                 notification = {
                     variant: "critical",
                     subtext: t("SUBSCRIPTION_EXPIRED"),
-                    message: t("RENEW_NOW"),
+                    message: t("renew_now"),
                     onClick: () => billingService.redirectToCustomerPortal(),
                 };
                 break;
@@ -660,7 +660,7 @@ export default function Uploader({
                 notification = {
                     variant: "critical",
                     subtext: t("storage_quota_exceeded"),
-                    message: t("UPGRADE_NOW"),
+                    message: t("upgrade_now"),
                     onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon />,
                 };
