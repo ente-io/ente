@@ -179,7 +179,7 @@
     "SUBSCRIPTION_CANCEL_FAILED": "Échec lors de l'annulation de l'abonnement",
     "SUBSCRIPTION_CANCEL_SUCCESS": "Votre abonnement a bien été annulé",
     "REACTIVATE_SUBSCRIPTION": "Réactiver l'abonnement",
-    "REACTIVATE_SUBSCRIPTION_MESSAGE": "Une fois réactivée, vous serrez facturé de  {{val, date}}",
+    "REACTIVATE_SUBSCRIPTION_MESSAGE": "Une fois réactivée, vous serrez facturé de {{date, date}}",
     "SUBSCRIPTION_ACTIVATE_SUCCESS": "Votre abonnement est bien activé ",
     "SUBSCRIPTION_ACTIVATE_FAILED": "Échec lors de la réactivation de l'abonnement",
     "SUBSCRIPTION_PURCHASE_SUCCESS_TITLE": "Merci",
