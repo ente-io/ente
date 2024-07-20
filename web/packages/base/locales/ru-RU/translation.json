@@ -254,7 +254,7 @@
     "DETAILS": "Подробности",
     "VIEW_EXIF": "Просмотр всех данных Exif",
     "NO_EXIF": "Нет данных Exif",
-    "Exif": "Exif",
+    "exif": "Exif",
     "ISO": "ISO",
     "TWO_FACTOR": "Двухфакторный",
     "TWO_FACTOR_AUTHENTICATION": "Двухфакторная аутентификация",
