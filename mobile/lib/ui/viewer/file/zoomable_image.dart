@@ -58,6 +58,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
   bool _isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -72,7 +75,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
         _isFileSwipeLocked = event.shouldSwipeLock;
       });
@@ -81,6 +85,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   @override
   void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
     _photoViewController.dispose();
     _scaleStateController.dispose();
     super.dispose();

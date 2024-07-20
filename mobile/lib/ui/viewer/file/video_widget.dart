@@ -49,6 +49,9 @@ class _VideoWidgetState extends State<VideoWidget> {
   bool _isPlaying = false;
   final EnteWakeLock _wakeLock = EnteWakeLock();
   bool _isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -77,7 +80,8 @@ class _VideoWidgetState extends State<VideoWidget> {
         }
       });
     }
-    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
         _isFileSwipeLocked = event.shouldSwipeLock;
       });
@@ -128,6 +132,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
     removeCallBack(widget.file);
     _videoPlayerController?.dispose();
     _chewieController?.dispose();

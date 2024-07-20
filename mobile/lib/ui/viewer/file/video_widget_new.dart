@@ -48,6 +48,9 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool _isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+
   @override
   void initState() {
     _logger.info(
@@ -91,7 +94,8 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
     });
-    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
         _isFileSwipeLocked = event.shouldSwipeLock;
       });
@@ -109,6 +113,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
 
   @override
   void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
     pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();

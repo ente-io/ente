@@ -53,6 +53,7 @@ class FileAppBarState extends State<FileAppBar> {
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
   bool _isFileSwipeLocked = false;
+
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);

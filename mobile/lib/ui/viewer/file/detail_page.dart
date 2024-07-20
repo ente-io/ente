@@ -87,6 +87,9 @@ class _DetailPageState extends State<DetailPage> {
   final _enableFullScreenNotifier = ValueNotifier(false);
   bool _isFirstOpened = true;
   bool isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -96,7 +99,8 @@ class _DetailPageState extends State<DetailPage> {
     _selectedIndexNotifier.value = widget.config.selectedIndex;
     _preloadEntries();
     _pageController = PageController(initialPage: _selectedIndexNotifier.value);
-    Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
         isFileSwipeLocked = event.shouldSwipeLock;
       });
@@ -105,6 +109,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
     _pageController.dispose();
     _enableFullScreenNotifier.dispose();
     _selectedIndexNotifier.dispose();
@@ -132,9 +137,16 @@ class _DetailPageState extends State<DetailPage> {
           _files!.length.toString() +
           " files .",
     );
-    return WillPopScope.new(
-      onWillPop: () async =>
-          isFileSwipeLocked ? await _requestAuthentication() : true,
+    return PopScope(
+      canPop: !isFileSwipeLocked,
+      onPopInvoked: (didPop) async {
+        if (isFileSwipeLocked) {
+          final auth = await _requestAuthentication();
+          if (auth) {
+            Bus.instance.fire(FileSwipeLockEvent(false));
+          }
+        }
+      },
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(80),
