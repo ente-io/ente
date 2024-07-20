@@ -4,8 +4,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { useContext } from "react";
 import { formatNumber } from "utils/number/format";
 
 interface Props {
@@ -19,10 +17,8 @@ const SelectedFileOptions = ({
     count,
     clearSelection,
 }: Props) => {
-    const { isMobile } = useContext(AppContext);
-
     return (
-        <SelectionBar isMobile={isMobile}>
+        <SelectionBar>
             <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />

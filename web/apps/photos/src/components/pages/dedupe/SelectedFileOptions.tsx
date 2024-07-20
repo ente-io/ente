@@ -3,7 +3,7 @@ import { SelectionBar } from "@ente/shared/components/Navbar/SelectionBar";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, IconButton, Tooltip, useMediaQuery } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
@@ -24,13 +24,12 @@ export default function DeduplicateOptions({
     clearSelection,
 }: IProps) {
     const { setDialogMessage } = useContext(AppContext);
-    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const trashHandler = () =>
         setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     return (
-        <SelectionBar isMobile={isMobile}>
+        <SelectionBar>
             <FluidContainer>
                 {count ? (
                     <IconButton onClick={clearSelection}>
