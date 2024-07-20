@@ -155,7 +155,7 @@
     "subscription_info_family": "U hebt een familieplan dat beheerd wordt door",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Vernieuwt op {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Eindigt op {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Uw abonnement loopt af op {{date, date}}",
+    "subscription_info_renewal_cancelled": "Uw abonnement loopt af op {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Jouw {{storage, string}} add-on is geldig tot {{date, date}}",
     "subscription_expired": "Abonnement verlopen",
     "subscription_info_expired": "Uw abonnement is verlopen, gelieve <a>vernieuwen</a>",

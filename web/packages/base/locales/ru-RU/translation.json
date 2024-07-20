@@ -155,7 +155,7 @@
     "subscription_info_family": "Вы используете семейный план, управляемый",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Продление {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Заканчивается на {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Ваша подписка будет отменена в {{date, date}}",
+    "subscription_info_renewal_cancelled": "Ваша подписка будет отменена в {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Ваш {{storage, string}} дополнение действует до {{date, date}}",
     "subscription_expired": "Подписка закончилась",
     "subscription_info_expired": "Срок действия вашей подписки истек, пожалуйста, <a>продлите</a>",

@@ -155,7 +155,7 @@
     "subscription_info_family": "Kamu menggunakan paket keluarga yang diatur oleh",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Berakhir pada {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Langganan kamu akan dibatalkan pada {{date, date}}",
+    "subscription_info_renewal_cancelled": "Langganan kamu akan dibatalkan pada {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "",
     "subscription_expired": "Langganan kedaluwarsa",
     "subscription_info_expired": "Langganan kamu telah kedaluwarsa, silakan <a>perpanjang</a>",

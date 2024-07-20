@@ -155,7 +155,7 @@
     "subscription_info_family": "Sie haben einen Familienplan verwaltet von",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Erneuert am {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Endet am {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Ihr Abo endet am {{date, date}}",
+    "subscription_info_renewal_cancelled": "Ihr Abo endet am {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Dein {{storage, string}} Add-on ist gültig bis {{date, date}}",
     "subscription_expired": "Abonnement abgelaufen",
     "subscription_info_expired": "Dein Abonnement ist abgelaufen, bitte <a>erneuere es</a>",

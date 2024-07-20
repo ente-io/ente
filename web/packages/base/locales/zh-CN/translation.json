@@ -155,7 +155,7 @@
     "subscription_info_family": "您正在使用由 管理的家庭计划",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "于 {{date, date}} 续费",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "结束于 {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "您的订阅将于 {{date, date}} 取消",
+    "subscription_info_renewal_cancelled": "您的订阅将于 {{date, date}} 取消",
     "ADD_ON_AVAILABLE_TILL": "您的 {{storage, string}} 插件有效期至 {{date, date}}",
     "subscription_expired": "订阅已过期",
     "subscription_info_expired": "您的订阅已过期，请 <a>续期</a>",

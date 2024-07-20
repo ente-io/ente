@@ -155,7 +155,7 @@
     "subscription_info_family": "Jesteś na planie rodzinnym zarządzanym przez",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Odnawia się dnia {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Kończy się dnia {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Twoja subskrypcja zostanie anulowana dnia {{date, date}}",
+    "subscription_info_renewal_cancelled": "Twoja subskrypcja zostanie anulowana dnia {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Twój dodatek {{storage, string}} jest ważny do {{date, date}}",
     "subscription_expired": "Subskrypcja wygasła",
     "subscription_info_expired": "Twoja subskrypcja wygasła, prosimy o <a>odnowienie</a>",

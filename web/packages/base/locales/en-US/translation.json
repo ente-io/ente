@@ -155,7 +155,7 @@
     "subscription_info_family": "You are on a family plan managed by",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Renews on {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Ends on {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Your subscription will be cancelled on {{date, date}}",
+    "subscription_info_renewal_cancelled": "Your subscription will be cancelled on {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Your {{storage, string}} add-on is valid till {{date, date}}",
     "subscription_expired": "Subscription expired",
     "subscription_info_expired": "Your subscription has expired, please <a>renew</a>",

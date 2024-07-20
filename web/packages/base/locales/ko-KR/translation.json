@@ -155,7 +155,7 @@
     "subscription_info_family": "",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "",
+    "subscription_info_renewal_cancelled": "",
     "ADD_ON_AVAILABLE_TILL": "",
     "subscription_expired": "구독 만료",
     "subscription_info_expired": "당신 구독이 만료되었으니, 구독을 <a>갱신</a>해주세요",

@@ -155,7 +155,7 @@
     "subscription_info_family": "Estás en un plan familiar administrado por",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Se renueva en {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Termina el {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Tu suscripción será cancelada el {{date, date}}",
+    "subscription_info_renewal_cancelled": "Tu suscripción será cancelada el {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Tu {{storage, string}} adicional es válido hasta {{date, date}}",
     "subscription_expired": "Suscripción caducada",
     "subscription_info_expired": "Tu suscripción ha caducado, por favor <a>renuévala</a>",

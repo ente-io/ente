@@ -155,7 +155,7 @@
     "subscription_info_family": "Vous êtes sur le plan famille géré par",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Renouveler le {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Pris fin le {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Votre abonnement sera annulé le {{date, date}}",
+    "subscription_info_renewal_cancelled": "Votre abonnement sera annulé le {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Votre module {{storage, string}} est valable jusqu'au {{date, date}}",
     "subscription_expired": "Abonnement expiré",
     "subscription_info_expired": "Votre abonnement a expiré, veuillez <a>le renouveler </a>",

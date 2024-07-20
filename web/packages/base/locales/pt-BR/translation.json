@@ -155,7 +155,7 @@
     "subscription_info_family": "Você está em um plano familiar gerenciado por",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Renovações em {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Termina em {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Sua assinatura será cancelada em {{date, date}}",
+    "subscription_info_renewal_cancelled": "Sua assinatura será cancelada em {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "Seu complemento {{storage, string}} é válido até o dia {{date, date}}",
     "subscription_expired": "Assinatura expirada",
     "subscription_info_expired": "Sua assinatura expirou, por favor <a>renove-a</a>",

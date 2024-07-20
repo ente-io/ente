@@ -155,7 +155,7 @@
     "subscription_info_family": "Fai parte di un piano famiglia gestito da",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Si rinnova il {{date, date}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Termina il {{date, date}}",
-    "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Il tuo abbonamento verrà annullato il {{date, date}}",
+    "subscription_info_renewal_cancelled": "Il tuo abbonamento verrà annullato il {{date, date}}",
     "ADD_ON_AVAILABLE_TILL": "",
     "subscription_expired": "Abbonamento scaduto",
     "subscription_info_expired": "Il tuo abbonamento è scaduto, per favore <a>rinnova</a>",
