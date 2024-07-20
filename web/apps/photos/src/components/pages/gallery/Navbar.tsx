@@ -1,8 +1,8 @@
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
-import SidebarToggler from "@ente/shared/components/Navbar/SidebarToggler";
 import NavbarBase from "@ente/shared/components/Navbar/base";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Typography } from "@mui/material";
 import SearchBar from "components/Search/SearchBar";
 import UploadButton from "components/Upload/UploadButton";
@@ -53,7 +53,9 @@ export function GalleryNavbar({
             ) : (
                 <>
                     {!isInSearchMode && (
-                        <SidebarToggler openSidebar={openSidebar} />
+                        <IconButton onClick={openSidebar} sx={{ pl: 0 }}>
+                            <MenuIcon />
+                        </IconButton>
                     )}
                     <SearchBar
                         isInSearchMode={isInSearchMode}
