@@ -150,7 +150,7 @@
     "LEAVE_FAMILY_CONFIRM": "Weet je zeker dat je het familie-plan wilt verlaten?",
     "CHOOSE_PLAN": "Kies uw abonnement",
     "MANAGE_PLAN": "Beheer uw abonnement",
-    "ACTIVE": "Actief",
+    "active": "Actief",
     "subscription_info_free": "Je hebt het <strong>gratis</strong> abonnement dat verloopt op {{date, date}}",
     "subscription_info_family": "U hebt een familieplan dat beheerd wordt door",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Vernieuwt op {{date, date}}",

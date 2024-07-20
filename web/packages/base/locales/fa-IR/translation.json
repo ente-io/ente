@@ -150,7 +150,7 @@
     "LEAVE_FAMILY_CONFIRM": "",
     "CHOOSE_PLAN": "",
     "MANAGE_PLAN": "",
-    "ACTIVE": "",
+    "active": "",
     "subscription_info_free": "",
     "subscription_info_family": "",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "",

@@ -150,7 +150,7 @@
     "LEAVE_FAMILY_CONFIRM": "Êtes-vous certains de vouloir quitter le plan famille?",
     "CHOOSE_PLAN": "Choisir votre plan",
     "MANAGE_PLAN": "Gérer votre abonnement",
-    "ACTIVE": "Actif",
+    "active": "Actif",
     "subscription_info_free": "Vous êtes sur le plan <strong>gratuit</strong> qui expire le {{date, date}}",
     "subscription_info_family": "Vous êtes sur le plan famille géré par",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Renouveler le {{date, date}}",

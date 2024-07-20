@@ -150,7 +150,7 @@
     "LEAVE_FAMILY_CONFIRM": "Apakah kamu yakin ingin meninggalkan paket keluarga?",
     "CHOOSE_PLAN": "Pilih paket kamu",
     "MANAGE_PLAN": "Atur langganan kamu",
-    "ACTIVE": "Aktif",
+    "active": "Aktif",
     "subscription_info_free": "Kamu sedang menggunakan paket <strong>gratis</strong> yang akan berakhir pada {{date, date}}",
     "subscription_info_family": "Kamu menggunakan paket keluarga yang diatur oleh",
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "",
