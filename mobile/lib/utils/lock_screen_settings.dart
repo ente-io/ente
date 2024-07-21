@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/utils/crypto_util.dart";
+import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LockScreenSettings {
@@ -25,11 +26,22 @@ class LockScreenSettings {
     _preferences = prefs;
   }
 
-  Future<void> shouldShowAppContent(bool show) async {
-    await _preferences.setBool(keyShowAppContent, show);
+  Future<void> shouldShowAppContent({bool isContentVisible = true}) async {
+    isContentVisible
+        ? await PrivacyScreen.instance.disable()
+        : await PrivacyScreen.instance.enable(
+            iosOptions: const PrivacyIosOptions(
+              enablePrivacy: true,
+            ),
+            androidOptions: const PrivacyAndroidOptions(
+              enableSecure: true,
+            ),
+            blurEffect: PrivacyBlurEffect.extraLight,
+          );
+    await _preferences.setBool(keyShowAppContent, isContentVisible);
   }
 
-  bool getShowAppContent() {
+  bool getShouldShowAppContent() {
     return _preferences.getBool(keyShowAppContent) ?? true;
   }
 

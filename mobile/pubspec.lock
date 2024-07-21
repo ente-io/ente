@@ -1903,6 +1903,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
+  privacy_screen:
+    dependency: "direct main"
+    description:
+      name: privacy_screen
+      sha256: b80297d2726d96e8a8341149e81a415302755f02d3af7c05c820d9e191bbfbee
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.6"
   process:
     dependency: transitive
     description:
@@ -2047,14 +2055,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.8"
-  secure_app_switcher:
-    dependency: "direct main"
-    description:
-      name: secure_app_switcher
-      sha256: "6f8a1755d15358291e697d212a2a5a28a302cc14798c0849e8630c12b4df4efd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0+1"
   sentry:
     dependency: "direct main"
     description:

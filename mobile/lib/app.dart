@@ -20,6 +20,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:privacy_screen/privacy_screen.dart";
 import "package:secure_app_switcher/secure_app_switcher.dart";
 
 class EnteApp extends StatefulWidget {
@@ -110,12 +111,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
             darkTheme: dartTheme,
             home: AppLifecycleService.instance.mediaExtensionAction.action ==
                     IntentAction.view
-                ? const SecureAppSwitcherPage(
-                    style: SecureMaskStyle.blurDark,
+                ? const PrivacyGate(
                     child: FileViewer(),
                   )
-                : const SecureAppSwitcherPage(
-                    style: SecureMaskStyle.blurDark,
+                : const PrivacyGate(
                     child: HomeWidget(),
                   ),
             debugShowCheckedModeBanner: false,
