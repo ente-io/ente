@@ -21,7 +21,6 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
 import "package:privacy_screen/privacy_screen.dart";
-import "package:secure_app_switcher/secure_app_switcher.dart";
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -135,8 +134,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         themeMode: ThemeMode.system,
         theme: lightThemeData,
         darkTheme: darkThemeData,
-        home: const SecureAppSwitcherPage(
-          style: SecureMaskStyle.blurDark,
+        home: const PrivacyGate(
           child: HomeWidget(),
         ),
         debugShowCheckedModeBanner: false,
