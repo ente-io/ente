@@ -1,22 +1,23 @@
 import "dart:convert";
 
-class Embedding {
+class ClipEmbedding {
   final int fileID;
   final List<double> embedding;
-  int? updationTime;
+  int version;
 
   bool get isEmpty => embedding.isEmpty;
 
-  Embedding({
+  ClipEmbedding({
     required this.fileID,
     required this.embedding,
-    this.updationTime,
+    required this.version,
   });
 
-  factory Embedding.empty(int fileID) {
-    return Embedding(
+  factory ClipEmbedding.empty(int fileID) {
+    return ClipEmbedding(
       fileID: fileID,
       embedding: <double>[],
+      version: 0,
     );
   }
 
