@@ -16,7 +16,9 @@ import "package:ente_auth/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:ente_auth/ui/tools/app_lock.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
 import "package:ente_auth/utils/navigation_util.dart";
+import "package:ente_auth/utils/platform_util.dart";
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -32,10 +34,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
   late int autoLockTimeInMilliseconds;
+  bool showAppContent = true;
 
   @override
   void initState() {
     super.initState();
+    showAppContent = _lockscreenSetting.getShouldShowAppContent();
     autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
     _initializeSettings();
     appLock = isPinEnabled ||
@@ -46,9 +50,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _initializeSettings() async {
     final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
+    final bool shouldShowAppContent =
+        _lockscreenSetting.getShouldShowAppContent();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
+      showAppContent = shouldShowAppContent;
     });
   }
 
@@ -115,6 +122,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
+    if (appLock == true) {
+      await _lockscreenSetting.shouldShowAppContent(showAppContent: true);
+    }
     await _lockscreenSetting.setAppLockType(
       appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
     );
@@ -140,6 +150,16 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
         });
       },
     );
+  }
+
+  Future<void> _onShowContent() async {
+    showAppContent = _lockscreenSetting.getShouldShowAppContent();
+    await _lockscreenSetting.shouldShowAppContent(
+      showAppContent: !showAppContent,
+    );
+    setState(() {
+      showAppContent = !showAppContent;
+    });
   }
 
   String _formatTime(Duration duration) {
@@ -297,43 +317,56 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       textAlign: TextAlign.left,
                                     ),
                                   ),
-                                  const SizedBox(height: 24),
-                                  MenuItemWidget(
-                                    captionedTextWidget: CaptionedTextWidget(
-                                      title: "App content in Task switcher",
-                                      textStyle: textTheme.small.copyWith(
-                                        color: colorTheme.textMuted,
-                                      ),
-                                    ),
-                                    isBottomBorderRadiusRemoved: true,
-                                    alignCaptionedTextToLeft: true,
-                                    menuItemColor: colorTheme.fillFaint,
-                                  ),
-                                  MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "Show Content",
-                                    ),
-                                    alignCaptionedTextToLeft: true,
-                                    isTopBorderRadiusRemoved: true,
-                                    menuItemColor: colorTheme.fillFaint,
-                                    trailingWidget: ToggleSwitchWidget(
-                                      value: () => appLock,
-                                      onChanged: () => _onToggleSwitch(),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 14,
-                                      left: 14,
-                                      right: 12,
-                                    ),
-                                    child: Text(
-                                      "If disabled app content will be displayed in the task switcher",
-                                      style: textTheme.miniFaint,
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
+                                  PlatformUtil.isMobile()
+                                      ? Column(
+                                          children: [
+                                            const SizedBox(height: 24),
+                                            MenuItemWidget(
+                                              captionedTextWidget:
+                                                  CaptionedTextWidget(
+                                                title:
+                                                    "App content in Task switcher",
+                                                textStyle:
+                                                    textTheme.small.copyWith(
+                                                  color: colorTheme.textMuted,
+                                                ),
+                                              ),
+                                              isBottomBorderRadiusRemoved: true,
+                                              alignCaptionedTextToLeft: true,
+                                              menuItemColor:
+                                                  colorTheme.fillFaint,
+                                            ),
+                                            MenuItemWidget(
+                                              captionedTextWidget:
+                                                  const CaptionedTextWidget(
+                                                title: "Show Content",
+                                              ),
+                                              alignCaptionedTextToLeft: true,
+                                              isTopBorderRadiusRemoved: true,
+                                              menuItemColor:
+                                                  colorTheme.fillFaint,
+                                              trailingWidget:
+                                                  ToggleSwitchWidget(
+                                                value: () => showAppContent,
+                                                onChanged: () =>
+                                                    _onShowContent(),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 14,
+                                                left: 14,
+                                                right: 12,
+                                              ),
+                                              child: Text(
+                                                "If disabled app content will be displayed in the task switcher",
+                                                style: textTheme.miniFaint,
+                                                textAlign: TextAlign.left,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : Container(),
                                 ],
                               )
                             : Container(),

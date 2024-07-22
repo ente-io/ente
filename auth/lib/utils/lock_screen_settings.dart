@@ -1,9 +1,13 @@
 import "dart:convert";
 import "dart:typed_data";
+import "dart:ui";
 
 import "package:ente_auth/events/app_lock_update_event.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LockScreenSettings {
@@ -18,6 +22,7 @@ class LockScreenSettings {
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const autoLockTime = "ls_auto_lock_time";
   static const appLockType = "ls_app_lock_type";
+  static const keyShowAppContent = "ls_show_app_content";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
     Duration(seconds: 5),
@@ -33,6 +38,29 @@ class LockScreenSettings {
   Future<void> init() async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
+  }
+
+  Future<void> shouldShowAppContent({bool showAppContent = true}) async {
+    final brightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    bool isInDarkMode = brightness == Brightness.dark;
+    showAppContent
+        ? PrivacyScreen.instance.disable()
+        : await PrivacyScreen.instance.enable(
+            iosOptions: const PrivacyIosOptions(),
+            androidOptions: const PrivacyAndroidOptions(
+              enableSecure: true,
+            ),
+            backgroundColor: isInDarkMode ? Colors.black : Colors.white,
+            blurEffect: isInDarkMode
+                ? PrivacyBlurEffect.dark
+                : PrivacyBlurEffect.extraLight,
+          );
+    await _preferences.setBool(keyShowAppContent, showAppContent);
+  }
+
+  bool getShouldShowAppContent() {
+    return _preferences.getBool(keyShowAppContent) ?? true;
   }
 
   Future<void> setAppLockType(AppLockUpdateType lockType) async {
