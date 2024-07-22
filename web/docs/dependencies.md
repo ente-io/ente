@@ -192,7 +192,8 @@ For more details, see [translations.md](translations.md).
 ## Media
 
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
-    parsing.
+    parsing. [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing
+    back Exif (only supports JPEG).
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
     web code (Live photos are zip files under the hood). Note that the desktop
