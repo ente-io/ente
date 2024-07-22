@@ -338,7 +338,7 @@ export async function updateFileCreationDateInEXIF(
     updatedDate: Date,
 ) {
     try {
-        let imageDataURL = await convertImageToDataURL(fileBlob);
+        let imageDataURL = await blobToDataURL(fileBlob);
         imageDataURL =
             "data:image/jpeg;base64" +
             imageDataURL.slice(imageDataURL.indexOf(","));
@@ -354,29 +354,36 @@ export async function updateFileCreationDateInEXIF(
         ]);
         const exifBytes = piexif.dump(exifObj);
         const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
-        return dataURIToBlob(exifInsertedFile);
+        return dataURLToBlob(exifInsertedFile);
     } catch (e) {
         log.error("updateFileModifyDateInEXIF failed", e);
         return fileBlob;
     }
 }
 
-async function convertImageToDataURL(blob: Blob) {
-    const reader = new FileReader();
-    const dataURL = await new Promise<string>((resolve) => {
+/**
+ * Convert a blob to a `data:` URL.
+ */
+const blobToDataURL = (blob: Blob) =>
+    new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        // We need to cast to a string here. This should be safe since MDN says:
+        //
+        // > the result attribute contains the data as a data: URL representing
+        // > the file's data as a base64 encoded string.
+        // >
+        // > https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
     });
-    return dataURL;
-}
 
 /**
- * Convert a `data:` URI to a blob.
+ * Convert a `data:` URL to a blob.
  *
  * Requires `connect-src data:` in the CSP (since it internally uses `fetch` to
  * perform the conversion).
  */
-const dataURIToBlob = (dataURI: string) =>
+const dataURLToBlob = (dataURI: string) =>
     fetch(dataURI).then((res) => res.blob());
 
 function convertToExifDateFormat(date: Date) {
