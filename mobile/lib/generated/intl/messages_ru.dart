@@ -939,8 +939,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "locations": MessageLookupByLibrary.simpleMessage("Локации"),
         "lockButtonLabel":
             MessageLookupByLibrary.simpleMessage("Заблокировать"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Чтобы включить блокировку, настройте пароль устройства или блокировку экрана в настройках системы."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Экран блокировки"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Войти"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Выход..."),

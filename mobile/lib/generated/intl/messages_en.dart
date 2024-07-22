@@ -911,8 +911,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "A location tag groups all photos that were taken within some radius of a photo"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable lockscreen, please setup device passcode or screen lock in your system settings."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Lockscreen"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logging out..."),

@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "Por favor, autentique-se para configurar a autenticação de dois fatores",
   "lockscreen": "Tela de bloqueio",
   "authToChangeLockscreenSetting": "Por favor, autentique-se para alterar a configuração da tela de bloqueio",
-  "lockScreenEnablePreSteps": "Para ativar o bloqueio de tela, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
   "viewActiveSessions": "Ver sessões ativas",
   "authToViewYourActiveSessions": "Por favor, autentique-se para ver as sessões ativas",
   "disableTwofactor": "Desativar autenticação de dois fatores",

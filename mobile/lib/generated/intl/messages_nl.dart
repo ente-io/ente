@@ -949,8 +949,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Een locatie tag groept alle foto\'s die binnen een bepaalde straal van een foto zijn genomen"),
         "locations": MessageLookupByLibrary.simpleMessage("Locaties"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Vergrendel"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Vergrendelscherm"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Inloggen"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Uitloggen..."),

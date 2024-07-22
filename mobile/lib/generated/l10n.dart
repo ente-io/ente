@@ -3734,16 +3734,6 @@ class S {
     );
   }
 
-  /// `To enable lockscreen, please setup device passcode or screen lock in your system settings.`
-  String get lockScreenEnablePreSteps {
-    return Intl.message(
-      'To enable lockscreen, please setup device passcode or screen lock in your system settings.',
-      name: 'lockScreenEnablePreSteps',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `View active sessions`
   String get viewActiveSessions {
     return Intl.message(

@@ -860,8 +860,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Un tag di localizzazione raggruppa tutte le foto scattate entro il raggio di una foto"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Blocca"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Per abilitare la schermata di blocco, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema."),
         "lockscreen":
             MessageLookupByLibrary.simpleMessage("Schermata di blocco"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Accedi"),

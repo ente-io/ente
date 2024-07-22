@@ -532,7 +532,6 @@
   "authToConfigureTwofactorAuthentication": "İki faktörlü kimlik doğrulamayı yapılandırmak için lütfen kimlik doğrulaması yapın",
   "lockscreen": "Kilit ekranı",
   "authToChangeLockscreenSetting": "Kilit ekranı ayarını değiştirmek için lütfen kimliğinizi doğrulayın",
-  "lockScreenEnablePreSteps": "Kilit ekranını aktif etmek için lütfen cihazın ayarlarından şifreyi ya da ekran kilidini ayarlayın.",
   "viewActiveSessions": "Aktif oturumları görüntüle",
   "authToViewYourActiveSessions": "Aktif oturumlarınızı görüntülemek için lütfen kimliğinizi doğrulayın",
   "disableTwofactor": "İki Aşamalı Doğrulamayı Devre Dışı Bırak",

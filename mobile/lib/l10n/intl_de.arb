@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "Bitte authentifizieren, um Zwei-Faktor-Authentifizierung zu konfigurieren",
   "lockscreen": "Sperrbildschirm",
   "authToChangeLockscreenSetting": "Bitte authentifizieren, um die Sperrbildschirm-Einstellung zu ändern",
-  "lockScreenEnablePreSteps": "Um den Sperrbildschirm zu aktivieren, legen Sie bitte den Geräte-Passcode oder die Bildschirmsperre in den Systemeinstellungen fest.",
   "viewActiveSessions": "Aktive Sitzungen anzeigen",
   "authToViewYourActiveSessions": "Bitte authentifizieren, um die aktiven Sitzungen anzusehen",
   "disableTwofactor": "Zweiten Faktor (2FA) deaktivieren",

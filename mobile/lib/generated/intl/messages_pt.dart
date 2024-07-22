@@ -941,8 +941,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Uma tag em grupo de todas as fotos que foram tiradas dentro de algum raio de uma foto"),
         "locations": MessageLookupByLibrary.simpleMessage("Locais"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Para ativar o bloqueio de tela, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Tela de bloqueio"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Login"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Desconectando..."),

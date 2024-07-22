@@ -532,7 +532,6 @@
   "authToConfigureTwofactorAuthentication": "Por favor, autentícate para configurar la autenticación de dos factores",
   "lockscreen": "Pantalla de bloqueo",
   "authToChangeLockscreenSetting": "Por favor, autentícate para cambiar la configuración de la pantalla de bloqueo",
-  "lockScreenEnablePreSteps": "Para activar la pantalla de bloqueo, por favor configura el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de tu sistema.",
   "viewActiveSessions": "Ver sesiones activas",
   "authToViewYourActiveSessions": "Por favor, autentícate para ver tus sesiones activas",
   "disableTwofactor": "Deshabilitar dos factores",

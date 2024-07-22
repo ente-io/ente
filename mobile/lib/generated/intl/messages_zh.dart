@@ -773,8 +773,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("位置标签将在照片的某个半径范围内拍摄的所有照片进行分组"),
         "locations": MessageLookupByLibrary.simpleMessage("位置"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("锁定"),
-        "lockScreenEnablePreSteps":
-            MessageLookupByLibrary.simpleMessage("要启用锁屏，请在系统设置中设置设备密码或屏幕锁定。"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("锁屏"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("登录"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("正在退出登录..."),

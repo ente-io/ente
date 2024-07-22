@@ -950,8 +950,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ein Standort-Tag gruppiert alle Fotos, die in einem Radius eines Fotos aufgenommen wurden"),
         "locations": MessageLookupByLibrary.simpleMessage("Orte"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Sperren"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Um den Sperrbildschirm zu aktivieren, legen Sie bitte den Geräte-Passcode oder die Bildschirmsperre in den Systemeinstellungen fest."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Sperrbildschirm"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Anmelden"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Abmeldung..."),

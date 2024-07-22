@@ -940,8 +940,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Znacznik lokalizacji grupuje wszystkie zdjęcia, które zostały zrobione w promieniu zdjęcia"),
         "locations": MessageLookupByLibrary.simpleMessage("Lokalizacje"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Zablokuj"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Aby włączyć ekran blokady, ustaw hasło urządzenia lub blokadę ekranu w ustawieniach systemu."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Ekran blokady"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Wylogowywanie..."),

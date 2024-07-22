@@ -938,8 +938,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bir fotoğrafın belli bir yarıçapında çekilen fotoğrafları gruplandırın"),
         "locations": MessageLookupByLibrary.simpleMessage("Konum"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Kilit"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Kilit ekranını aktif etmek için lütfen cihazın ayarlarından şifreyi ya da ekran kilidini ayarlayın."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Kilit ekranı"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Giriş yap"),
         "loggingOut":

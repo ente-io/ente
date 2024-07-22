@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "Uwierzytelnij się, aby skonfigurować uwierzytelnianie dwuskładnikowe",
   "lockscreen": "Ekran blokady",
   "authToChangeLockscreenSetting": "Proszę uwierzytelnić się, aby zmienić ustawienia ekranu blokady",
-  "lockScreenEnablePreSteps": "Aby włączyć ekran blokady, ustaw hasło urządzenia lub blokadę ekranu w ustawieniach systemu.",
   "viewActiveSessions": "Zobacz aktywne sesje",
   "authToViewYourActiveSessions": "Proszę uwierzytelnić, aby wyświetlić swoje aktywne sesje",
   "disableTwofactor": "Wyłącz Uwierzytelnianie Dwuetapowe",

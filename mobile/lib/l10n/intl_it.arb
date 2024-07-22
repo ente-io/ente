@@ -517,7 +517,6 @@
   "authToConfigureTwofactorAuthentication": "Autenticati per configurare l'autenticazione a due fattori",
   "lockscreen": "Schermata di blocco",
   "authToChangeLockscreenSetting": "Autenticati per modificare le impostazioni della schermata di blocco",
-  "lockScreenEnablePreSteps": "Per abilitare la schermata di blocco, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema.",
   "viewActiveSessions": "Visualizza sessioni attive",
   "authToViewYourActiveSessions": "Autenticati per visualizzare le sessioni attive",
   "disableTwofactor": "Disabilita autenticazione a due fattori",

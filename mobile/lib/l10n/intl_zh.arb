@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "请进行身份验证以配置双重身份认证",
   "lockscreen": "锁屏",
   "authToChangeLockscreenSetting": "请验证以更改锁屏设置",
-  "lockScreenEnablePreSteps": "要启用锁屏，请在系统设置中设置设备密码或屏幕锁定。",
   "viewActiveSessions": "查看活动会话",
   "authToViewYourActiveSessions": "请验证以查看您的活动会话",
   "disableTwofactor": "禁用双重认证",

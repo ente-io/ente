@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "Graag verifiëren om tweestapsverificatie te configureren",
   "lockscreen": "Vergrendelscherm",
   "authToChangeLockscreenSetting": "Graag verifiëren om de vergrendelscherm instellingen te wijzigen",
-  "lockScreenEnablePreSteps": "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "viewActiveSessions": "Actieve sessies bekijken",
   "authToViewYourActiveSessions": "Graag verifiëren om uw actieve sessies te bekijken",
   "disableTwofactor": "Tweestapsverificatie uitschakelen",
