@@ -97,12 +97,14 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
   }
   for (final EnteFile enteFile in hiddenFiles) {
-    final skip = _skipAnalysisEnteFile(enteFile);
+    if (_skipAnalysisEnteFile(enteFile)) {
+      continue;
+    }
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (skip && !shouldRunFaces && !shouldRunClip) {
+    if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
     final instruction = FileMLInstruction(
