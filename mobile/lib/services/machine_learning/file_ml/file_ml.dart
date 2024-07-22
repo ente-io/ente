@@ -3,7 +3,7 @@ import "package:photos/face/model/face.dart";
 class RemoteFileML {
   final int fileID;
   final Map<String, dynamic> remoteRawData;
-  final RemoteFaceEmbedding faceEmbedding;
+  final RemoteFaceEmbedding? faceEmbedding;
   final RemoteClipEmbedding? clipEmbedding;
 
   RemoteFileML(
@@ -23,9 +23,11 @@ class RemoteFileML {
     return RemoteFileML(
       fileID,
       json,
-      faceEmbedding: RemoteFaceEmbedding.fromJson(
-        json['face'] as Map<String, dynamic>,
-      ),
+      faceEmbedding: json['face'] != null
+          ? RemoteFaceEmbedding.fromJson(
+              json['face'] as Map<String, dynamic>,
+            )
+          : null,
       clipEmbedding: json['clip'] == null
           ? null
           : RemoteClipEmbedding.fromJson(

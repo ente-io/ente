@@ -160,19 +160,21 @@ class EmbeddingsDecoderInput {
   EmbeddingsDecoderInput(this.embedding, this.decryptionKey);
 }
 
-bool shouldDiscardRemoteEmbedding(RemoteFileML fileMl) {
-  if (fileMl.faceEmbedding.version < faceMlVersion) {
-    debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-        "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
+bool shouldDiscardRemoteEmbedding(RemoteFileML fileML) {
+  final fileID = fileML.fileID;
+  final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
+  if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {
+    debugPrint("Discarding remote embedding for fileID $fileID "
+        "because version is ${faceEmbedding?.version} and we need $faceMlVersion");
     return true;
   }
   // are all landmarks equal?
   bool allLandmarksEqual = true;
-  if (fileMl.faceEmbedding.faces.isEmpty) {
-    debugPrint("No face for ${fileMl.fileID}");
+  if (faceEmbedding.faces.isEmpty) {
+    debugPrint("No face for ${fileID}");
     allLandmarksEqual = false;
   }
-  for (final face in fileMl.faceEmbedding.faces) {
+  for (final face in faceEmbedding.faces) {
     if (face.detection.landmarks.isEmpty) {
       allLandmarksEqual = false;
       break;
@@ -183,10 +185,10 @@ bool shouldDiscardRemoteEmbedding(RemoteFileML fileMl) {
     }
   }
   if (allLandmarksEqual) {
-    debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
+    debugPrint("Discarding remote embedding for fileID $fileID "
         "because landmarks are equal");
     debugPrint(
-      fileMl.faceEmbedding.faces
+      faceEmbedding.faces
           .map((e) => e.detection.landmarks.toString())
           .toList()
           .toString(),
