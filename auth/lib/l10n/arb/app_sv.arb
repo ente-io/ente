@@ -62,6 +62,7 @@
   "changePassword": "Ändra lösenord",
   "importCodes": "Importera koder",
   "exportCodes": "Exportera koder",
+  "importLabel": "Importera",
   "cancel": "Avbryt",
   "yes": "Ja",
   "no": "Nej",
@@ -91,6 +92,7 @@
   "moderateStrength": "Måttligt",
   "confirmPassword": "Bekräfta lösenord",
   "close": "Stäng",
+  "selectLanguage": "Välj språk",
   "language": "Språk",
   "searchHint": "Sök...",
   "search": "Sök",
@@ -150,6 +152,7 @@
   "enterPassword": "Ange lösenord",
   "export": "Exportera",
   "singIn": "Logga in",
+  "shouldHideCode": "Dölj koder",
   "androidCancelButton": "Avbryt",
   "@androidCancelButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."

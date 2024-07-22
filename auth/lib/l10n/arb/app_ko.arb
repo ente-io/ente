@@ -1,1 +1,86 @@
-{}
+{
+  "account": "계정",
+  "unlock": "잠금해제",
+  "recoveryKey": "복구 키",
+  "counterAppBarTitle": "카운터",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "2단계 인증 코드를 안전하게 백업하세요",
+  "onBoardingGetStarted": "시작하기",
+  "setupFirstAccount": "첫번째 계정을 설정하세요",
+  "importScanQrCode": "QR 코드 스캔",
+  "qrCode": "QR 코드",
+  "importEnterSetupKey": "설정 키 입력",
+  "importAccountPageTitle": "계정 상세 정보 입력",
+  "secretCanNotBeEmpty": "비밀 키는 비워둘 수 없습니다",
+  "bothIssuerAndAccountCanNotBeEmpty": "발행인과 계정을 모두 비워둘 수 없습니다",
+  "incorrectDetails": "세부 정보가 잘못 됨",
+  "pleaseVerifyDetails": "입력된 정보를 확인하고 다시 시도하세요",
+  "codeIssuerHint": "발행인",
+  "codeSecretKeyHint": "비밀 키",
+  "codeAccountHint": "계정 (you@domain.com)",
+  "codeTagHint": "태그",
+  "accountKeyType": "키 종류",
+  "sessionExpired": "세션 만료 됨",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "다시 로그인하세요",
+  "loggingOut": "로그아웃하는 중...",
+  "timeBasedKeyType": "시간 기반 (TOTP)",
+  "counterBasedKeyType": "카운터 기반 (HOTP)",
+  "saveAction": "저장",
+  "nextTotpTitle": "다음",
+  "deleteCodeTitle": "코드를 삭제할까요?",
+  "deleteCodeMessage": "정말 이 코드를 삭제하시겠습니까? 이 동작은 되돌릴 수 없습니다.",
+  "viewLogsAction": "로그 확인",
+  "sendLogsDescription": "이렇게 하면 문제를 디버깅하는 데 도움이 되는 로그가 전송됩니다. 민감한 정보가 기록되지 않도록 예방 조치를 취하고 있지만, 로그를 공유하기 전에 해당 로그를 확인하는 것이 좋습니다.",
+  "preparingLogsTitle": "로그를 준비하는 중...",
+  "emailLogsTitle": "이메일 로그",
+  "emailLogsMessage": "{email} 로 로그를 보내주세요",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "이메일 복사",
+  "exportLogsAction": "로그 내보내기",
+  "reportABug": "버그 제보",
+  "crashAndErrorReporting": "충돌 & 에러 보고",
+  "reportBug": "버그 제보",
+  "emailUsMessage": "{email} 로 이메일을 보내주세요",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "지원 연락",
+  "rateUsOnStore": "{storeName} 에서 평가해주세요",
+  "blog": "블로그",
+  "merchandise": "제품",
+  "verifyPassword": "비밀번호 확인",
+  "pleaseWait": "잠시만 기다려주세요...",
+  "generatingEncryptionKeysTitle": "암호화 키를 생성하는 중...",
+  "recreatePassword": "비밀번호 재생성",
+  "recreatePasswordMessage": "현재 기기는 비밀번호를 확인할 수 있을 만큼 강력하지 않으므로, 모든 기기에서 작동하는 방식으로 비밀번호를 한 번 더 생성해야 합니다. \n\n복구 키를 사용하여 로그인하고 비밀번호를 다시 생성해 주세요. (원하는 경우 동일한 비밀번호를 다시 사용할 수 있습니다)",
+  "useRecoveryKey": "복구 키 사용",
+  "incorrectPasswordTitle": "올바르지 않은 비밀번호",
+  "welcomeBack": "돌아오신 것을 환영합니다!",
+  "madeWithLoveAtPrefix": "made with ❤️ at ",
+  "supportDevs": "<bold-green>ente</bold-green>를 구독하고 저희를 지원해주세요",
+  "supportDiscount": "쿠폰 코드 \"AUTH\"를 사용하고 첫 해 10% 할인 혜택을 받으세요",
+  "changeEmail": "이메일 변경",
+  "changePassword": "비밀번호 변경",
+  "data": "데이터",
+  "importCodes": "코드 가져오기",
+  "importTypePlainText": "일반 텍스트",
+  "importTypeEnteEncrypted": "Ente로 암호화된 내보내기",
+  "passwordForDecryptingExport": "복호화용 비밀번호",
+  "passwordEmptyError": "비밀번호는 비어있을 수 없습니다",
+  "importSelectJsonFile": "JSON 파일 선택"
+}
