@@ -25,7 +25,7 @@ import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import { moveToHiddenCollection } from "services/collectionService";
-import { updateFileCreationDateInEXIF } from "services/exif";
+import { updateFileCreationDateInEXIF } from "@/new/photos/services/exif";
 import {
     deleteFromTrash,
     trashFiles,
