@@ -121,9 +121,10 @@ export const updateExifIfNeeded = async (
     // Not a JPEG (likely).
     if (extension != "jpeg" && extension != "jpg") return stream;
 
+    const blob = await new Response(stream).blob();
     try {
         const updatedBlob = await setJPEGExifDateTimeOriginal(
-            await new Response(stream).blob(),
+            blob,
             new Date(enteFile.pubMagicMetadata.data.editedTime / 1000),
         );
         return updatedBlob.stream();
@@ -133,7 +134,7 @@ export const updateExifIfNeeded = async (
         // in case of errors, return the original back instead of causing the
         // entire download or export to fail.
         log.error(`Failed to modify Exif date for ${fileName}`, e);
-        return stream;
+        return blob.stream();
     }
 };
 
