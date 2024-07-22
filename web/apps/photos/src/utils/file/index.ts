@@ -49,6 +49,43 @@ export enum FILE_OPS_TYPE {
     DELETE_PERMANENTLY,
 }
 
+export async function downloadFile(file: EnteFile) {
+    try {
+        let fileBlob = await new Response(
+            await DownloadManager.getFile(file),
+        ).blob();
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            const { imageFileName, imageData, videoFileName, videoData } =
+                await decodeLivePhoto(file.metadata.title, fileBlob);
+            const image = new File([imageData], imageFileName);
+            const imageType = await detectFileTypeInfo(image);
+            const tempImageURL = URL.createObjectURL(
+                new Blob([imageData], { type: imageType.mimeType }),
+            );
+            const video = new File([videoData], videoFileName);
+            const videoType = await detectFileTypeInfo(video);
+            const tempVideoURL = URL.createObjectURL(
+                new Blob([videoData], { type: videoType.mimeType }),
+            );
+            downloadUsingAnchor(tempImageURL, imageFileName);
+            downloadUsingAnchor(tempVideoURL, videoFileName);
+        } else {
+            const fileType = await detectFileTypeInfo(
+                new File([fileBlob], file.metadata.title),
+            );
+            fileBlob = await new Response(
+                await streamWithUpdatedExif(file, fileBlob.stream()),
+            ).blob();
+            fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+            const tempURL = URL.createObjectURL(fileBlob);
+            downloadUsingAnchor(tempURL, file.metadata.title);
+        }
+    } catch (e) {
+        log.error("failed to download file", e);
+        throw e;
+    }
+}
+
 /**
  * Return a new stream after applying Exif updates if applicable to the given
  * stream, otherwise return the original.
@@ -90,43 +127,6 @@ export const streamWithUpdatedExif = async (
         return stream;
     }
 };
-
-export async function downloadFile(file: EnteFile) {
-    try {
-        let fileBlob = await new Response(
-            await DownloadManager.getFile(file),
-        ).blob();
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const { imageFileName, imageData, videoFileName, videoData } =
-                await decodeLivePhoto(file.metadata.title, fileBlob);
-            const image = new File([imageData], imageFileName);
-            const imageType = await detectFileTypeInfo(image);
-            const tempImageURL = URL.createObjectURL(
-                new Blob([imageData], { type: imageType.mimeType }),
-            );
-            const video = new File([videoData], videoFileName);
-            const videoType = await detectFileTypeInfo(video);
-            const tempVideoURL = URL.createObjectURL(
-                new Blob([videoData], { type: videoType.mimeType }),
-            );
-            downloadUsingAnchor(tempImageURL, imageFileName);
-            downloadUsingAnchor(tempVideoURL, videoFileName);
-        } else {
-            const fileType = await detectFileTypeInfo(
-                new File([fileBlob], file.metadata.title),
-            );
-            fileBlob = await new Response(
-                await streamWithUpdatedExif(file, fileBlob.stream()),
-            ).blob();
-            fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
-            const tempURL = URL.createObjectURL(fileBlob);
-            downloadUsingAnchor(tempURL, file.metadata.title);
-        }
-    } catch (e) {
-        log.error("failed to download file", e);
-        throw e;
-    }
-}
 
 /** Segment the given {@link files} into lists indexed by their collection ID */
 export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
