@@ -517,7 +517,6 @@
   "authToConfigureTwofactorAuthentication": "Veuillez vous authentifier pour configurer l'authentification à deux facteurs",
   "lockscreen": "Ecran de vérouillage",
   "authToChangeLockscreenSetting": "Veuillez vous authentifier pour modifier les paramètres de l'écran de verrouillage",
-  "lockScreenEnablePreSteps": "Pour activer l'écran de verrouillage, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
   "viewActiveSessions": "Afficher les sessions actives",
   "authToViewYourActiveSessions": "Veuillez vous authentifier pour voir vos sessions actives",
   "disableTwofactor": "Désactiver la double-authentification",
@@ -1182,6 +1181,8 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
   "autoLock": "Auto lock",
   "immediately": "Immediately",
   "autoLockFeatureDescription": "Time after which the app locks after being put in the background"

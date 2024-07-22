@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewers": m1,
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hva er hovedårsaken til at du sletter kontoen din?"),
         "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
@@ -111,6 +113,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setNewPassword":
             MessageLookupByLibrary.simpleMessage("Set new password"),
         "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(

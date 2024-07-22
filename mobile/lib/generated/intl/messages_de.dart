@@ -312,6 +312,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage(
             "Authentifizierung erforderlich"),
         "appLock": MessageLookupByLibrary.simpleMessage("App-Sperre"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),
@@ -952,8 +954,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ein Standort-Tag gruppiert alle Fotos, die in einem Radius eines Fotos aufgenommen wurden"),
         "locations": MessageLookupByLibrary.simpleMessage("Orte"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Sperren"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Um den Sperrbildschirm zu aktivieren, legen Sie bitte den Geräte-Passcode oder die Bildschirmsperre in den Systemeinstellungen fest."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Sperrbildschirm"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Anmelden"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Abmeldung..."),
@@ -1497,6 +1497,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Verbesserung vorschlagen"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisierung angehalten"),

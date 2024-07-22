@@ -532,7 +532,6 @@
   "authToConfigureTwofactorAuthentication": "Por favor, autentícate para configurar la autenticación de dos factores",
   "lockscreen": "Pantalla de bloqueo",
   "authToChangeLockscreenSetting": "Por favor, autentícate para cambiar la configuración de la pantalla de bloqueo",
-  "lockScreenEnablePreSteps": "Para activar la pantalla de bloqueo, por favor configura el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de tu sistema.",
   "viewActiveSessions": "Ver sesiones activas",
   "authToViewYourActiveSessions": "Por favor, autentícate para ver tus sesiones activas",
   "disableTwofactor": "Deshabilitar dos factores",
@@ -1265,6 +1264,8 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
   "autoLock": "Auto lock",
   "immediately": "Immediately",
   "autoLockFeatureDescription": "Time after which the app locks after being put in the background"

@@ -3734,16 +3734,6 @@ class S {
     );
   }
 
-  /// `To enable lockscreen, please setup device passcode or screen lock in your system settings.`
-  String get lockScreenEnablePreSteps {
-    return Intl.message(
-      'To enable lockscreen, please setup device passcode or screen lock in your system settings.',
-      name: 'lockScreenEnablePreSteps',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `View active sessions`
   String get viewActiveSessions {
     return Intl.message(
@@ -9125,11 +9115,31 @@ class S {
     );
   }
 
+  /// `Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescription {
+    return Intl.message(
+      'Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Auto lock`
   String get autoLock {
     return Intl.message(
       'Auto lock',
       name: 'autoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
+  String get swipeLockEnablePreSteps {
+    return Intl.message(
+      'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
+      name: 'swipeLockEnablePreSteps',
       desc: '',
       args: [],
     );
