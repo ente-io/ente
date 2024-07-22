@@ -1264,6 +1264,7 @@
       }
     }
   },
+  "panorama": "全景",
   "reenterPassword": "再次输入密码",
   "reenterPin": "再次输入 PIN 码",
   "deviceLock": "设备锁",
@@ -1276,5 +1277,6 @@
   "noSystemLockFound": "未找到系统锁",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁定。",
   "tapToUnlock": "点击解锁",
-  "tooManyIncorrectAttempts": "错误尝试次数过多"
+  "tooManyIncorrectAttempts": "错误尝试次数过多",
+  "videoInfo": "视频详情"
 }
