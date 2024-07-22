@@ -468,9 +468,8 @@ async function downloadFileDesktop(
     downloadDir: string,
 ) {
     const fs = electron.fs;
-    const stream = (await DownloadManager.getFile(
-        file,
-    )) as ReadableStream<Uint8Array>;
+
+    const stream = await DownloadManager.getFile(file);
     const updatedStream = await getUpdatedEXIFFileForDownload(file, stream);
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
