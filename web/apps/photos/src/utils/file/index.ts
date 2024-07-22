@@ -129,12 +129,18 @@ export const updateExifIfNeeded = async (
         );
         return updatedBlob.stream();
     } catch (e) {
-        // We used the file's extension to determine if this was a JPEG, but
-        // this is not a guarantee. Misnamed files, while rare, do exist. So
-        // in case of errors, return the original back instead of causing the
-        // entire download or export to fail.
         log.error(`Failed to modify Exif date for ${fileName}`, e);
-        return blob.stream();
+        // We used the file's extension to determine if this was a JPEG, but
+        // this is not a guarantee. Misnamed files, while rare, do exist. So in
+        // that is the error thrown by the underlying library, fallback to the
+        // original instead of causing the entire download or export to fail.
+        if (
+            e instanceof Error &&
+            e.message.endsWith("Given file is neither JPEG nor TIFF")
+        ) {
+            return blob.stream();
+        }
+        throw e;
     }
 };
 
