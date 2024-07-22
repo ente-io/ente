@@ -339,6 +339,9 @@ export async function updateFileCreationDateInEXIF(
 ) {
     try {
         let imageDataURL = await blobToDataURL(fileBlob);
+        // Since we pass a Blob without an associated type, we get back a
+        // generic data URL like "data:application/octet-stream;base64,...".
+        // Modify it to have a `image/jpeg` MIME type.
         imageDataURL =
             "data:image/jpeg;base64" +
             imageDataURL.slice(imageDataURL.indexOf(","));
