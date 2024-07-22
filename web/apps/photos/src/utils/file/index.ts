@@ -49,26 +49,47 @@ export enum FILE_OPS_TYPE {
     DELETE_PERMANENTLY,
 }
 
-export async function getUpdatedEXIFFileForDownload(
-    file: EnteFile,
-    fileStream: ReadableStream<Uint8Array>,
-): Promise<ReadableStream<Uint8Array>> {
-    const extension = lowercaseExtension(file.metadata.title);
+/**
+ * Return a new stream after applying Exif updates if applicable to the given
+ * stream, otherwise return the original.
+ *
+ * This function is meant to provide a stream that can be used to download (or
+ * export) a file to the user's computer after applying any Exif updates to the
+ * original file's data.
+ *
+ * -   This only updates JPEG files.
+ *
+ * -   For JPEG files, the DateTimeOriginal Exif entry is updated to reflect the
+ *     time that the user edited within Ente.
+ *
+ * @param enteFile The {@link EnteFile} whose data we want.
+ *
+ * @param stream A {@link ReadableStream} containing the original data for
+ * {@link enteFile}.
+ *
+ * @returns A new {@link ReadableStream} with updates if any updates were
+ * needed, otherwise return the original stream.
+ */
+export const streamWithUpdatedExif = async (
+    enteFile: EnteFile,
+    stream: ReadableStream<Uint8Array>,
+): Promise<ReadableStream<Uint8Array>> => {
+    const extension = lowercaseExtension(enteFile.metadata.title);
     if (
-        file.metadata.fileType === FILE_TYPE.IMAGE &&
-        file.pubMagicMetadata?.data.editedTime &&
+        enteFile.metadata.fileType === FILE_TYPE.IMAGE &&
+        enteFile.pubMagicMetadata?.data.editedTime &&
         (extension == "jpeg" || extension == "jpg")
     ) {
-        const fileBlob = await new Response(fileStream).blob();
+        const fileBlob = await new Response(stream).blob();
         const updatedFileBlob = await updateFileCreationDateInEXIF(
             fileBlob,
-            new Date(file.pubMagicMetadata.data.editedTime / 1000),
+            new Date(enteFile.pubMagicMetadata.data.editedTime / 1000),
         );
         return updatedFileBlob.stream();
     } else {
-        return fileStream;
+        return stream;
     }
-}
+};
 
 export async function downloadFile(file: EnteFile) {
     try {
@@ -95,7 +116,7 @@ export async function downloadFile(file: EnteFile) {
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
-                await getUpdatedEXIFFileForDownload(file, fileBlob.stream()),
+                await streamWithUpdatedExif(file, fileBlob.stream()),
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
@@ -470,7 +491,7 @@ async function downloadFileDesktop(
     const fs = electron.fs;
 
     const stream = await DownloadManager.getFile(file);
-    const updatedStream = await getUpdatedEXIFFileForDownload(file, stream);
+    const updatedStream = await streamWithUpdatedExif(file, stream);
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedStream).blob();
