@@ -96,7 +96,6 @@ class FaceRecognitionService {
     int filesIndexedForFaces = 0;
     int filesIndexedForClip = 0;
     for (final chunk in chunks) {
-      // Fetching and storing remote embeddings
       try {
         final fileIds = chunk
             .map((instruction) => instruction.enteFile.uploadedFileID!)

@@ -178,7 +178,6 @@ class MLService {
       _logger.info('starting image indexing');
 
       final filesToIndex = await getFilesForMlIndexing();
-
       final List<List<FileMLInstruction>> chunks =
           filesToIndex.chunks(_fileDownloadLimit);
 

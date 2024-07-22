@@ -8,7 +8,6 @@ import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
 import "package:photos/services/machine_learning/file_ml/remote_embedding.dart";
@@ -158,43 +157,4 @@ class EmbeddingsDecoderInput {
   final Uint8List decryptionKey;
 
   EmbeddingsDecoderInput(this.embedding, this.decryptionKey);
-}
-
-bool shouldDiscardRemoteEmbedding(RemoteFileML fileML) {
-  final fileID = fileML.fileID;
-  final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
-  if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {
-    debugPrint("Discarding remote embedding for fileID $fileID "
-        "because version is ${faceEmbedding?.version} and we need $faceMlVersion");
-    return true;
-  }
-  // are all landmarks equal?
-  bool allLandmarksEqual = true;
-  if (faceEmbedding.faces.isEmpty) {
-    debugPrint("No face for ${fileID}");
-    allLandmarksEqual = false;
-  }
-  for (final face in faceEmbedding.faces) {
-    if (face.detection.landmarks.isEmpty) {
-      allLandmarksEqual = false;
-      break;
-    }
-    if (face.detection.landmarks.any((landmark) => landmark.x != landmark.y)) {
-      allLandmarksEqual = false;
-      break;
-    }
-  }
-  if (allLandmarksEqual) {
-    debugPrint("Discarding remote embedding for fileID $fileID "
-        "because landmarks are equal");
-    debugPrint(
-      faceEmbedding.faces
-          .map((e) => e.detection.landmarks.toString())
-          .toList()
-          .toString(),
-    );
-    return true;
-  }
-
-  return false;
 }
