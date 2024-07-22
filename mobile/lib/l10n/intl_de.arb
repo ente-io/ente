@@ -1264,6 +1264,7 @@
       }
     }
   },
+  "panorama": "Panorama",
   "reenterPassword": "Passwort erneut eingeben",
   "reenterPin": "PIN erneut eingeben",
   "deviceLock": "Gerätsperre",
@@ -1279,5 +1280,6 @@
   "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche",
   "autoLock": "Auto lock",
   "immediately": "Immediately",
-  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "videoInfo": "Video-Informationen"
 }

@@ -1264,6 +1264,7 @@
       }
     }
   },
+  "panorama": "全景",
   "reenterPassword": "再次输入密码",
   "reenterPin": "再次输入 PIN 码",
   "deviceLock": "设备锁",
@@ -1279,5 +1280,6 @@
   "tooManyIncorrectAttempts": "错误尝试次数过多",
   "autoLock": "Auto lock",
   "immediately": "Immediately",
-  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "videoInfo": "视频详情"
 }

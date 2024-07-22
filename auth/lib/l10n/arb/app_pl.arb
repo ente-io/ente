@@ -144,7 +144,7 @@
   "verifyEmail": "Zweryfikuj adres e-mail",
   "enterCodeHint": "Wprowadź sześciocyfrowy kod z twojej aplikacji uwierzytelniającej",
   "lostDeviceTitle": "Zagubiono urządzenie?",
-  "twoFactorAuthTitle": "Uwierzytelnianie dwuetapowe",
+  "twoFactorAuthTitle": "Uwierzytelnianie dwustopniowe",
   "passkeyAuthTitle": "Weryfikacja kluczem dostępu",
   "verifyPasskey": "Zweryfikuj klucz dostępu",
   "recoverAccount": "Odzyskaj konto",
@@ -330,7 +330,7 @@
   "emailChangedTo": "Adres e-mail został zmieniony na {newEmail}",
   "authenticationFailedPleaseTryAgain": "Uwierzytelnianie nie powiodło się, proszę spróbować ponownie",
   "authenticationSuccessful": "Uwierzytelnianie powiodło się!",
-  "twofactorAuthenticationSuccessfullyReset": "Pomyślnie zresetowano uwierzytelnianie dwuskładnikowe",
+  "twofactorAuthenticationSuccessfullyReset": "Pomyślnie zresetowano uwierzytelnianie dwustopniowe",
   "incorrectRecoveryKey": "Nieprawidłowy klucz odzyskiwania",
   "theRecoveryKeyYouEnteredIsIncorrect": "Wprowadzony klucz odzyskiwania jest nieprawidłowy",
   "enterPassword": "Wprowadź hasło",
@@ -442,5 +442,8 @@
   "deleteTagTitle": "Usunąć etykietę?",
   "deleteTagMessage": "Czy na pewno chcesz usunąć tę etykietę? Ta akcja jest nieodwracalna.",
   "somethingWentWrongParsingCode": "Nie udało się przetworzyć kodów {x}.",
-  "updateNotAvailable": "Aktualizacja jest niedostępna"
+  "updateNotAvailable": "Aktualizacja jest niedostępna",
+  "viewRawCodes": "Zobacz surowe kody",
+  "rawCodes": "Surowe kody",
+  "rawCodeData": "Dane surowego kodu"
 }

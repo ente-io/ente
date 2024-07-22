@@ -436,5 +436,8 @@
   "deleteTagTitle": "Supprimer le tag ?",
   "deleteTagMessage": "Êtes-vous sûr de vouloir supprimer ce tag ? Cette action est irréversible.",
   "somethingWentWrongParsingCode": "Impossible d'analyser les codes {x}.",
-  "updateNotAvailable": "Mise à jour non disponible"
+  "updateNotAvailable": "Mise à jour non disponible",
+  "viewRawCodes": "Afficher les codes bruts",
+  "rawCodes": "Codes bruts",
+  "rawCodeData": "Données de code brut"
 }
