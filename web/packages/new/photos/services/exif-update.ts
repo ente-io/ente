@@ -54,7 +54,7 @@ export const updateExifIfNeededAndPossible = async (
         // original instead of causing the entire download or export to fail.
         if (
             e instanceof Error &&
-            e.message.endsWith("Given file is neither JPEG nor TIFF")
+            e.message.endsWith("Given file is neither JPEG nor TIFF.")
         ) {
             return blob.stream();
         }
