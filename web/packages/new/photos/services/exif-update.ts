@@ -1,12 +1,23 @@
 import log from "@/base/log";
 import piexif from "piexifjs";
 
-export const updateFileCreationDateInEXIF = async (
-    fileBlob: Blob,
+/**
+ * Return a new blob with the "DateTimeOriginal" Exif tag set to the given
+ * {@link date}.
+ *
+ * @param jpegBlob A {@link Blob} containing JPEG data.
+ *
+ * @param date A {@link Date} to use as the value for the Exif
+ * "DateTimeOriginal" tag.
+ *
+ * @returns A new blob derived from {@link jpegBlob} but with the updated date.
+ */
+export const setJPEGExifDateTimeOriginal = async (
+    jpegBlob: Blob,
     updatedDate: Date,
 ) => {
     try {
-        let imageDataURL = await blobToDataURL(fileBlob);
+        let imageDataURL = await blobToDataURL(jpegBlob);
         // Since we pass a Blob without an associated type, we get back a
         // generic data URL like "data:application/octet-stream;base64,...".
         // Modify it to have a `image/jpeg` MIME type.
@@ -26,7 +37,7 @@ export const updateFileCreationDateInEXIF = async (
         return dataURLToBlob(exifInsertedFile);
     } catch (e) {
         log.error("updateFileModifyDateInEXIF failed", e);
-        return fileBlob;
+        return jpegBlob;
     }
 };
 
@@ -55,8 +66,9 @@ const blobToDataURL = (blob: Blob) =>
 const dataURLToBlob = (dataURI: string) =>
     fetch(dataURI).then((res) => res.blob());
 
-function convertToExifDateFormat(date: Date) {
-    return `${date.getFullYear()}:${
-        date.getMonth() + 1
-    }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-}
+/**
+ * Convert the given {@link Date} to a format that is expected by Exif for the
+ * DateTimeOriginal tag.
+ */
+const convertToExifDateFormat = (date: Date) =>
+    `${date.getFullYear()}:${date.getMonth() + 1}:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;

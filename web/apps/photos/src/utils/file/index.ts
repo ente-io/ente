@@ -4,6 +4,7 @@ import { type Electron } from "@/base/types/ipc";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
+import { setJPEGExifDateTimeOriginal } from "@/new/photos/services/exif-update";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -25,7 +26,6 @@ import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import { moveToHiddenCollection } from "services/collectionService";
-import { updateFileCreationDateInEXIF } from "@/new/photos/services/exif";
 import {
     deleteFromTrash,
     trashFiles,
@@ -81,7 +81,7 @@ export const streamWithUpdatedExif = async (
         (extension == "jpeg" || extension == "jpg")
     ) {
         const fileBlob = await new Response(stream).blob();
-        const updatedFileBlob = await updateFileCreationDateInEXIF(
+        const updatedFileBlob = await setJPEGExifDateTimeOriginal(
             fileBlob,
             new Date(enteFile.pubMagicMetadata.data.editedTime / 1000),
         );
