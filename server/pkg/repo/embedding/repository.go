@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
-	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
@@ -177,7 +176,7 @@ func (r *Repository) AddNewDC(ctx context.Context, fileID int64, model ente.Mode
 	return nil
 }
 
-func (r *Repository) GetIndexedFiles(ctx *gin.Context, id int64, model ente.Model, since int64, limit *int64) ([]ente.IndexedFile, error) {
+func (r *Repository) GetIndexedFiles(ctx context.Context, id int64, model ente.Model, since int64, limit *int64) ([]ente.IndexedFile, error) {
 	var rows *sql.Rows
 	var err error
 	if limit == nil {
