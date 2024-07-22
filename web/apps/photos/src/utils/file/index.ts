@@ -1,10 +1,9 @@
-import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
-import { setJPEGExifDateTimeOriginal } from "@/new/photos/services/exif-update";
+import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -74,7 +73,7 @@ export async function downloadFile(file: EnteFile) {
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
-                await updateExifIfNeeded(file, fileBlob.stream()),
+                await updateExifIfNeededAndPossible(file, fileBlob.stream()),
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
@@ -85,64 +84,6 @@ export async function downloadFile(file: EnteFile) {
         throw e;
     }
 }
-
-/**
- * Return a new stream after applying Exif updates if applicable to the given
- * stream, otherwise return the original.
- *
- * This function is meant to provide a stream that can be used to download (or
- * export) a file to the user's computer after applying any Exif updates to the
- * original file's data.
- *
- * -   This only updates JPEG files.
- *
- * -   For JPEG files, the DateTimeOriginal Exif entry is updated to reflect the
- *     time that the user edited within Ente.
- *
- * @param enteFile The {@link EnteFile} whose data we want.
- *
- * @param stream A {@link ReadableStream} containing the original data for
- * {@link enteFile}.
- *
- * @returns A new {@link ReadableStream} with updates if any updates were
- * needed, otherwise return the original stream.
- */
-export const updateExifIfNeeded = async (
-    enteFile: EnteFile,
-    stream: ReadableStream<Uint8Array>,
-): Promise<ReadableStream<Uint8Array>> => {
-    // Not an image.
-    if (enteFile.metadata.fileType != FILE_TYPE.IMAGE) return stream;
-    // Time was not edited.
-    if (!enteFile.pubMagicMetadata?.data.editedTime) return stream;
-
-    const fileName = enteFile.metadata.title;
-    const extension = lowercaseExtension(fileName);
-    // Not a JPEG (likely).
-    if (extension != "jpeg" && extension != "jpg") return stream;
-
-    const blob = await new Response(stream).blob();
-    try {
-        const updatedBlob = await setJPEGExifDateTimeOriginal(
-            blob,
-            new Date(enteFile.pubMagicMetadata.data.editedTime / 1000),
-        );
-        return updatedBlob.stream();
-    } catch (e) {
-        log.error(`Failed to modify Exif date for ${fileName}`, e);
-        // We used the file's extension to determine if this was a JPEG, but
-        // this is not a guarantee. Misnamed files, while rare, do exist. So in
-        // that is the error thrown by the underlying library, fallback to the
-        // original instead of causing the entire download or export to fail.
-        if (
-            e instanceof Error &&
-            e.message.endsWith("Given file is neither JPEG nor TIFF")
-        ) {
-            return blob.stream();
-        }
-        throw e;
-    }
-};
 
 /** Segment the given {@link files} into lists indexed by their collection ID */
 export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
@@ -507,7 +448,7 @@ async function downloadFileDesktop(
     const fs = electron.fs;
 
     const stream = await DownloadManager.getFile(file);
-    const updatedStream = await updateExifIfNeeded(file, stream);
+    const updatedStream = await updateExifIfNeededAndPossible(file, stream);
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedStream).blob();

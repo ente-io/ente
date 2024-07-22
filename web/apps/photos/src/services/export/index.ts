@@ -4,6 +4,7 @@ import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
 import downloadManager from "@/new/photos/services/download";
+import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
@@ -36,7 +37,7 @@ import {
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
-import { getPersonalFiles, updateExifIfNeeded } from "utils/file";
+import { getPersonalFiles } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
 import { migrateExport } from "./migration";
 
@@ -970,7 +971,7 @@ class ExportService {
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.getFile(file);
-            const updatedFileStream = await updateExifIfNeeded(
+            const updatedFileStream = await updateExifIfNeededAndPossible(
                 file,
                 originalFileStream,
             );
