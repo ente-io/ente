@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';

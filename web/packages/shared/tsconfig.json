@@ -17,7 +17,7 @@
         "**/*.tsx",
         "**/*.js",
         "themes/mui-theme.d.ts",
-        "../next/log-web.ts",
-        "../next/global-electron.d.ts"
+        "../base/log-web.ts",
+        "../base/global-electron.d.ts"
     ]
 }

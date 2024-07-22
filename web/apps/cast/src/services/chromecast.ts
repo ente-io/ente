@@ -1,6 +1,6 @@
 /// <reference types="chromecast-caf-receiver" />
 
-import log from "@/next/log";
+import log from "@/base/log";
 
 export type Cast = typeof cast;
 

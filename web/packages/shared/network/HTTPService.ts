@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import { ApiError, CustomError, isApiErrorResponse } from "../error";
 

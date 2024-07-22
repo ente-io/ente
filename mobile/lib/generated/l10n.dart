@@ -8965,6 +8965,16 @@ class S {
     );
   }
 
+  /// `Panorama`
+  String get panorama {
+    return Intl.message(
+      'Panorama',
+      name: 'panorama',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Re-enter password`
   String get reenterPassword {
     return Intl.message(
@@ -9115,11 +9125,41 @@ class S {
     );
   }
 
+  /// `Auto lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto lock',
+      name: 'autoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
   String get swipeLockEnablePreSteps {
     return Intl.message(
       'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
       name: 'swipeLockEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Immediately`
+  String get immediately {
+    return Intl.message(
+      'Immediately',
+      name: 'immediately',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time after which the app locks after being put in the background`
+  String get autoLockFeatureDescription {
+    return Intl.message(
+      'Time after which the app locks after being put in the background',
+      name: 'autoLockFeatureDescription',
       desc: '',
       args: [],
     );

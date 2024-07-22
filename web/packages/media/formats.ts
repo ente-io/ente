@@ -27,15 +27,6 @@ export const needsJPEGConversion = (extension: string) =>
     needsJPEGConversionExtensions.includes(extension.toLowerCase());
 
 /**
- * Return true if {@link extension} _might_ be supported by the user's browser.
- *
- * For example, JPEG 2000 (jp2) is supported by Safari, but not by Chrome or
- * Firefox, and this function will return true for `jp2`.
- */
-export const hasPartialBrowserSupport = (extension: string) =>
-    ["jp2"].includes(extension.toLowerCase());
-
-/**
  * Return `true` if {@link extension} in for an HEIC-like file.
  */
 export const isHEICExtension = (extension: string) => {

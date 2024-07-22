@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -13,13 +13,13 @@ import {
     getFileFromURL,
 } from "utils/file";
 
+import { isDesktop } from "@/base/app";
+import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
-import { isDesktop } from "@/next/app";
-import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";

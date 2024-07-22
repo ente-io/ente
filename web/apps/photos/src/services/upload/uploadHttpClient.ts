@@ -1,6 +1,6 @@
+import log from "@/base/log";
+import { apiURL, uploaderOrigin } from "@/base/origins";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
-import { apiURL, uploaderOrigin } from "@/next/origins";
 import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

@@ -355,6 +355,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Autenticazione non riuscita, prova di nuovo"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Autenticazione riuscita!"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "available": MessageLookupByLibrary.simpleMessage("Disponibile"),
         "availableStorageSpace": m8,
         "backedUpFolders":
@@ -762,6 +765,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignora"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alcuni file in questo album vengono ignorati dal caricamento perché erano stati precedentemente cancellati da ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing":
             MessageLookupByLibrary.simpleMessage("Importazione in corso...."),
         "incorrectCode":

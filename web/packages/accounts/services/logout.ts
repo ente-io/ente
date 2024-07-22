@@ -1,6 +1,6 @@
-import { clearBlobCaches } from "@/next/blob-cache";
-import { clearKVDB } from "@/next/kv";
-import log from "@/next/log";
+import { clearBlobCaches } from "@/base/blob-cache";
+import { clearKVDB } from "@/base/kv";
+import log from "@/base/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import { clearData } from "@ente/shared/storage/localStorage";

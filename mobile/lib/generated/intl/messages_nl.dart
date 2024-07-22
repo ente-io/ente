@@ -378,6 +378,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Je zult de beschikbare Cast apparaten hier zien."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Zorg ervoor dat lokale netwerkrechten zijn ingeschakeld voor de Ente Photos app, in Instellingen."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Door een technische storing bent u uitgelogd. Onze excuses voor het ongemak."),
         "autoPair":
@@ -845,6 +848,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Negeren"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Sommige bestanden in dit album worden genegeerd voor uploaden omdat ze eerder van Ente zijn verwijderd."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importeren...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Onjuiste code"),
         "incorrectPasswordTitle":

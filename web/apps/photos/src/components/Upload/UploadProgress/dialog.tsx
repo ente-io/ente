@@ -41,7 +41,7 @@ export function UploadProgressDialog() {
     const handleClose = dialogCloseHandler({ staticBackdrop: true, onClose });
 
     return (
-        <Dialog maxWidth="xs" open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
             <UploadProgressHeader />
             {(uploadStage === UPLOAD_STAGES.UPLOADING ||
                 uploadStage === UPLOAD_STAGES.FINISH ||

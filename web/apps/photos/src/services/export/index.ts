@@ -1,3 +1,5 @@
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
@@ -11,11 +13,8 @@ import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
-import { Events, eventBus } from "@ente/shared/events";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { formatDateTimeShort } from "@ente/shared/time/format";
 import type { User } from "@ente/shared/user/types";
@@ -177,41 +176,30 @@ class ExportService {
     }
 
     enableContinuousExport() {
-        try {
-            if (this.continuousExportEventHandler) {
-                log.info("continuous export already enabled");
-                return;
-            }
-            log.info("enabling continuous export");
-            this.continuousExportEventHandler = () => {
-                this.scheduleExport({ resync: this.resyncOnce() });
-            };
-            this.continuousExportEventHandler();
-            eventBus.addListener(
-                Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventHandler,
-            );
-        } catch (e) {
-            log.error("failed to enableContinuousExport ", e);
-            throw e;
+        if (this.continuousExportEventHandler) {
+            log.warn("Continuous export already enabled");
+            return;
         }
+        this.continuousExportEventHandler = () => {
+            this.scheduleExport({ resync: this.resyncOnce() });
+        };
+        this.continuousExportEventHandler();
     }
 
     disableContinuousExport() {
-        try {
-            if (!this.continuousExportEventHandler) {
-                log.info("continuous export already disabled");
-                return;
-            }
-            log.info("disabling continuous export");
-            eventBus.removeListener(
-                Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventHandler,
-            );
-            this.continuousExportEventHandler = null;
-        } catch (e) {
-            log.error("failed to disableContinuousExport", e);
-            throw e;
+        if (!this.continuousExportEventHandler) {
+            log.warn("Continuous export already disabled");
+            return;
+        }
+        this.continuousExportEventHandler = null;
+    }
+
+    /**
+     * Called when the local database of files changes.
+     */
+    onLocalFilesUpdated() {
+        if (this.continuousExportEventHandler) {
+            this.continuousExportEventHandler();
         }
     }
 

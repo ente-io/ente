@@ -35,6 +35,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
         "clusteringProgress":
@@ -57,6 +60,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Face recognition"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
             "Indexing is paused, will automatically resume when device is ready"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),

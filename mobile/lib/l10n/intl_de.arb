@@ -1263,6 +1263,7 @@
       }
     }
   },
+  "panorama": "Panorama",
   "reenterPassword": "Passwort erneut eingeben",
   "reenterPin": "PIN erneut eingeben",
   "deviceLock": "Gerätsperre",
@@ -1277,5 +1278,9 @@
   "tapToUnlock": "Zum Entsperren antippen",
   "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche",
   "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
-  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings."
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "videoInfo": "Video-Informationen"
 }

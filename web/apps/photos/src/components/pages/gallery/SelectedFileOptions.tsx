@@ -1,5 +1,5 @@
+import { SelectionBar } from "@/base/components/Navbar";
 import { FluidContainer } from "@ente/shared/components/Container";
-import { SelectionBar } from "@ente/shared/components/Navbar/SelectionBar";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
@@ -66,7 +66,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { setDialogMessage, isMobile } = useContext(AppContext);
+    const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
@@ -89,7 +89,7 @@ const SelectedFileOptions = ({
                 text: t("DELETE"),
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
 
     const restoreHandler = () =>
@@ -115,7 +115,7 @@ const SelectedFileOptions = ({
                     text: t("YES_REMOVE"),
                     variant: "primary",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         } else {
             setDialogMessage({
@@ -130,7 +130,7 @@ const SelectedFileOptions = ({
                     text: t("YES_REMOVE"),
                     variant: "critical",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         }
     };
@@ -155,7 +155,7 @@ const SelectedFileOptions = ({
     };
 
     return (
-        <SelectionBar isMobile={isMobile}>
+        <SelectionBar>
             <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />

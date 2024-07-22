@@ -1,6 +1,7 @@
-import { ensureOk } from "@/next/http";
-import { getKV, removeKV, setKV } from "@/next/kv";
-import log from "@/next/log";
+import { useIsMobileWidth } from "@/base/hooks";
+import { ensureOk } from "@/base/http";
+import { getKV, removeKV, setKV } from "@/base/kv";
+import log from "@/base/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -11,7 +12,6 @@ import {
     InputAdornment,
     Link,
     TextField,
-    useMediaQuery,
     type ModalProps,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -33,7 +33,7 @@ interface DevSettingsProps {
  * See: [Note: Configuring custom server].
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useIsMobileWidth();
 
     const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.
@@ -46,6 +46,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             onClose={handleDialogClose}
             TransitionComponent={SlideTransition}
             maxWidth="xs"
+            fullWidth
         >
             <Contents {...{ onClose }} />
         </Dialog>
@@ -196,7 +197,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     fullWidth
                     disableRipple
                 >
-                    {t("CANCEL")}
+                    {t("cancel")}
                 </FocusVisibleButton>
             </DialogActions>
         </form>

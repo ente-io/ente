@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import type { Location } from "@/new/photos/types/metadata";
-import log from "@/next/log";
 import type { LocationTagData } from "types/entity";
 
 export interface City {

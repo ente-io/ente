@@ -79,7 +79,7 @@ function StripeSubscriptionOptions({
                 variant: "accent",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
     const confirmCancel = () =>

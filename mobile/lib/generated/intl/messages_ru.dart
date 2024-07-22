@@ -371,6 +371,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Здесь вы увидите доступные устройства."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Убедитесь, что для приложения Ente Photos включены права доступа к локальной сети в настройках."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "В связи с технической ошибкой вы вышли из системы. Приносим свои извинения."),
         "autoPair":
@@ -830,6 +833,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ничего не делать"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Некоторые файлы в этом альбоме пропущены, потому что они ранее были удалены из Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Импорт...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Неверный код"),
         "incorrectPasswordTitle":

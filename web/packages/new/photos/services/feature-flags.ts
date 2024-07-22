@@ -1,8 +1,8 @@
-import { isDevBuild } from "@/next/env";
-import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
-import { localUser } from "@/next/local-user";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
+import { isDevBuild } from "@/base/env";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { localUser } from "@/base/local-user";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 

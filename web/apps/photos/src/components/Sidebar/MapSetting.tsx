@@ -1,7 +1,7 @@
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemGroup } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
-import log from "@/next/log";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
+import log from "@/base/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -186,7 +186,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                         {t("ENABLE")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 </Stack>
             </Stack>
@@ -217,7 +217,7 @@ function DisableMap({ onClose, disableMap, onRootClose }) {
                         {t("DISABLE")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 </Stack>
             </Stack>

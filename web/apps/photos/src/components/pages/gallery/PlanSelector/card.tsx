@@ -1,7 +1,6 @@
+import log from "@/base/log";
 import { bytesInGB } from "@/new/photos/utils/units";
-import log from "@/next/log";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
-import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
 import Close from "@mui/icons-material/Close";
 import { IconButton, Link, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -151,7 +150,7 @@ function PlanSelectorCard(props: Props) {
                     ),
                     variant: "accent",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         } else if (hasMobileSubscription(subscription)) {
             appContext.setDialogMessage({
@@ -166,9 +165,9 @@ function PlanSelectorCard(props: Props) {
                     <Trans
                         i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
                         components={{
-                            a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
+                            a: <Link href="mailto:support@ente.io" />,
                         }}
-                        values={{ emailID: SUPPORT_EMAIL }}
+                        values={{ emailID: "support@ente.io" }}
                     />
                 ),
                 close: { variant: "secondary" },
@@ -329,10 +328,10 @@ function PaidSubscriptionPlanSelectorCard({
                 <Box py={1} px={1.5}>
                     <Typography color={"text.muted"}>
                         {!isSubscriptionCancelled(subscription)
-                            ? t("RENEWAL_ACTIVE_SUBSCRIPTION_STATUS", {
+                            ? t("subscription_status_renewal_active", {
                                   date: subscription.expiryTime,
                               })
-                            : t("RENEWAL_CANCELLED_SUBSCRIPTION_STATUS", {
+                            : t("subscription_status_renewal_cancelled", {
                                   date: subscription.expiryTime,
                               })}
                     </Typography>
