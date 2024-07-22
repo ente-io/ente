@@ -29,14 +29,17 @@ export const updateExifIfNeededAndPossible = async (
     enteFile: EnteFile,
     stream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> => {
-    // Not an image.
+    // Not needed: Not an image.
     if (enteFile.metadata.fileType != FILE_TYPE.IMAGE) return stream;
-    // Time was not edited.
+
+    // Not needed: Time was not edited.
+    // TODO: Until the types reflect reality
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!enteFile.pubMagicMetadata?.data.editedTime) return stream;
 
     const fileName = enteFile.metadata.title;
     const extension = lowercaseExtension(fileName);
-    // Not a JPEG (likely).
+    // Not possible: Not a JPEG (likely).
     if (extension != "jpeg" && extension != "jpg") return stream;
 
     const blob = await new Response(stream).blob();
