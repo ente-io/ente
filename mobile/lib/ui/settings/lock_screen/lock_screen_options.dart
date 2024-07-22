@@ -104,9 +104,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          const TitleBarWidget(
+          TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: 'App lock',
+              title: S.of(context).appLock,
             ),
           ),
           SliverList(
@@ -122,8 +122,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                         Column(
                           children: [
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: 'App lock',
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).appLock,
                               ),
                               alignCaptionedTextToLeft: true,
                               singleBorderRadius: 8,
@@ -141,7 +141,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+                                      S.of(context).appLockDescription,
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),

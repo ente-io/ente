@@ -305,6 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Требуется аутентификация"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Применить"),
@@ -1484,6 +1486,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Предложить идею"),
         "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Синхронизация остановлена"),

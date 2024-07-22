@@ -413,7 +413,7 @@ class FileAppBarState extends State<FileAppBar> {
       await showErrorDialog(
         context,
         S.of(context).noSystemLockFound,
-        "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+        S.of(context).swipeLockEnablePreSteps,
       );
     }
   }

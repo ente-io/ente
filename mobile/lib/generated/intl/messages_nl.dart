@@ -311,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Verificatie vereist"),
         "appLock": MessageLookupByLibrary.simpleMessage("App-vergrendeling"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Toepassen"),
@@ -1491,6 +1493,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Features voorstellen"),
         "support": MessageLookupByLibrary.simpleMessage("Ondersteuning"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisatie gestopt"),

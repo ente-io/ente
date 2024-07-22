@@ -311,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wymagane uwierzytelnienie"),
         "appLock": MessageLookupByLibrary.simpleMessage(
             "Blokada dostępu do aplikacji"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Użyj"),
@@ -1482,6 +1484,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Zaproponuj funkcje"),
         "support": MessageLookupByLibrary.simpleMessage("Wsparcie techniczne"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronizacja zatrzymana"),
