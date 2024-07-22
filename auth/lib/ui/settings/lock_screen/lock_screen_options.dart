@@ -32,6 +32,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
   late int autoLockTimeInMilliseconds;
+
   @override
   void initState() {
     super.initState();
@@ -149,7 +150,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else if (duration.inSeconds != 0) {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
-      return "Disabled";
+      return "Immediately";
     }
   }
 
@@ -291,7 +292,44 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      "Require ${_lockscreenSetting.getAppLockType()} if away for some time .",
+                                      "Time after which the app locks after being put in the background",
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: "App content in Task switcher",
+                                      textStyle: textTheme.small.copyWith(
+                                        color: colorTheme.textMuted,
+                                      ),
+                                    ),
+                                    isBottomBorderRadiusRemoved: true,
+                                    alignCaptionedTextToLeft: true,
+                                    menuItemColor: colorTheme.fillFaint,
+                                  ),
+                                  MenuItemWidget(
+                                    captionedTextWidget:
+                                        const CaptionedTextWidget(
+                                      title: "Show Content",
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    isTopBorderRadiusRemoved: true,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    trailingWidget: ToggleSwitchWidget(
+                                      value: () => appLock,
+                                      onChanged: () => _onToggleSwitch(),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      "If disabled app content will be displayed in the task switcher",
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),

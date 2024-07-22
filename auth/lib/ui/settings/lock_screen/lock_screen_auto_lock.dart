@@ -69,7 +69,8 @@ class AutoLockItems extends StatefulWidget {
 class _AutoLockItemsState extends State<AutoLockItems> {
   final autoLockDurations = LockScreenSettings.instance.autoLockDurations;
   List<Widget> items = [];
-  late Duration currentAutoLockTime;
+  Duration currentAutoLockTime = const Duration(seconds: 5);
+
   @override
   void initState() {
     for (Duration autoLockDuration in autoLockDurations) {
@@ -135,7 +136,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
     } else if (duration.inSeconds != 0) {
       return "${duration.inSeconds}s";
     } else {
-      return "Disabled";
+      return "Immediately";
     }
   }
 }

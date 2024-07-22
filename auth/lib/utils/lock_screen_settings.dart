@@ -20,16 +20,16 @@ class LockScreenSettings {
   static const appLockType = "ls_app_lock_type";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
-    Duration(seconds: 30),
+    Duration(seconds: 5),
+    Duration(seconds: 15),
     Duration(minutes: 1),
     Duration(minutes: 5),
-    Duration(minutes: 15),
     Duration(minutes: 30),
-    Duration(hours: 1),
   ];
 
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
+
   Future<void> init() async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
@@ -61,7 +61,7 @@ class LockScreenSettings {
   }
 
   int getAutoLockTime() {
-    return _preferences.getInt(autoLockTime) ?? 0;
+    return _preferences.getInt(autoLockTime) ?? 5000;
   }
 
   Future<void> setLastInvalidAttemptTime(int time) async {
