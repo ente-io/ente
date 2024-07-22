@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
+	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
@@ -174,6 +175,35 @@ func (r *Repository) AddNewDC(ctx context.Context, fileID int64, model ente.Mode
 		return stacktrace.Propagate(errors.New("no row got updated"), "")
 	}
 	return nil
+}
+
+func (r *Repository) GetIndexedFiles(ctx *gin.Context, id int64, model ente.Model, since int64, limit *int64) ([]ente.IndexedFile, error) {
+	var rows *sql.Rows
+	var err error
+	if limit == nil {
+		rows, err = r.DB.QueryContext(ctx, `SELECT file_id, updated_at FROM embeddings WHERE owner_id = $1 AND model = $2 AND updated_at > $3`, id, model, since)
+	} else {
+		rows, err = r.DB.QueryContext(ctx, `SELECT file_id, updated_at FROM embeddings WHERE owner_id = $1 AND model = $2 AND updated_at > $3 LIMIT $4`, id, model, since, *limit)
+	}
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logrus.Error(err)
+		}
+	}()
+	result := make([]ente.IndexedFile, 0)
+	for rows.Next() {
+		var meta ente.IndexedFile
+		err := rows.Scan(&meta.FileID, &meta.UpdatedAt)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		result = append(result, meta)
+	}
+	return result, nil
+
 }
 
 func convertRowsToEmbeddings(rows *sql.Rows) ([]ente.Embedding, error) {
