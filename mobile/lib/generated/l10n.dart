@@ -9124,6 +9124,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Auto lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto lock',
+      name: 'autoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Immediately`
+  String get immediately {
+    return Intl.message(
+      'Immediately',
+      name: 'immediately',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time after which the app locks after being put in the background`
+  String get autoLockFeatureDescription {
+    return Intl.message(
+      'Time after which the app locks after being put in the background',
+      name: 'autoLockFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

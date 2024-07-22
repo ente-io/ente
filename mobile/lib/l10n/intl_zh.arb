@@ -1278,5 +1278,8 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁定。",
   "tapToUnlock": "点击解锁",
   "tooManyIncorrectAttempts": "错误尝试次数过多",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
   "videoInfo": "视频详情"
 }

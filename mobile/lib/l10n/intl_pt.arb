@@ -1276,5 +1276,8 @@
   "noSystemLockFound": "Nenhum bloqueio de sistema encontrado",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio de app, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
   "tapToUnlock": "Toque para desbloquear",
-  "tooManyIncorrectAttempts": "Muitas tentativas incorretas"
+  "tooManyIncorrectAttempts": "Muitas tentativas incorretas",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
 }
