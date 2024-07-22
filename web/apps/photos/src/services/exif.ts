@@ -334,12 +334,11 @@ export function getEXIFTime(exifData: ParsedEXIFData): number {
 }
 
 export async function updateFileCreationDateInEXIF(
-    reader: FileReader,
     fileBlob: Blob,
     updatedDate: Date,
 ) {
     try {
-        let imageDataURL = await convertImageToDataURL(reader, fileBlob);
+        let imageDataURL = await convertImageToDataURL(fileBlob);
         imageDataURL =
             "data:image/jpeg;base64" +
             imageDataURL.slice(imageDataURL.indexOf(","));
@@ -349,7 +348,10 @@ export async function updateFileCreationDateInEXIF(
         }
         exifObj["Exif"][piexif.ExifIFD.DateTimeOriginal] =
             convertToExifDateFormat(updatedDate);
-
+        log.debug(() => [
+            "updateFileCreationDateInEXIF",
+            { updatedDate, exifObj },
+        ]);
         const exifBytes = piexif.dump(exifObj);
         const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
         return dataURIToBlob(exifInsertedFile);
@@ -359,7 +361,8 @@ export async function updateFileCreationDateInEXIF(
     }
 }
 
-async function convertImageToDataURL(reader: FileReader, blob: Blob) {
+async function convertImageToDataURL(blob: Blob) {
+    const reader = new FileReader();
     const dataURL = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);

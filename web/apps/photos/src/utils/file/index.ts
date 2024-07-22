@@ -50,7 +50,6 @@ export enum FILE_OPS_TYPE {
 }
 
 export async function getUpdatedEXIFFileForDownload(
-    fileReader: FileReader,
     file: EnteFile,
     fileStream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> {
@@ -62,7 +61,6 @@ export async function getUpdatedEXIFFileForDownload(
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const updatedFileBlob = await updateFileCreationDateInEXIF(
-            fileReader,
             fileBlob,
             new Date(file.pubMagicMetadata.data.editedTime / 1000),
         );
@@ -74,7 +72,6 @@ export async function getUpdatedEXIFFileForDownload(
 
 export async function downloadFile(file: EnteFile) {
     try {
-        const fileReader = new FileReader();
         let fileBlob = await new Response(
             await DownloadManager.getFile(file),
         ).blob();
@@ -98,11 +95,7 @@ export async function downloadFile(file: EnteFile) {
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
-                await getUpdatedEXIFFileForDownload(
-                    fileReader,
-                    file,
-                    fileBlob.stream(),
-                ),
+                await getUpdatedEXIFFileForDownload(file, fileBlob.stream()),
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
@@ -455,13 +448,12 @@ async function downloadFilesDesktop(
     },
     downloadPath: string,
 ) {
-    const fileReader = new FileReader();
     for (const file of files) {
         try {
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFileDesktop(electron, fileReader, file, downloadPath);
+            await downloadFileDesktop(electron, file, downloadPath);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             log.error("download fail for file", e);
@@ -472,7 +464,6 @@ async function downloadFilesDesktop(
 
 async function downloadFileDesktop(
     electron: Electron,
-    fileReader: FileReader,
     file: EnteFile,
     downloadDir: string,
 ) {
@@ -480,11 +471,7 @@ async function downloadFileDesktop(
     const stream = (await DownloadManager.getFile(
         file,
     )) as ReadableStream<Uint8Array>;
-    const updatedStream = await getUpdatedEXIFFileForDownload(
-        fileReader,
-        file,
-        stream,
-    );
+    const updatedStream = await getUpdatedEXIFFileForDownload(file, stream);
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedStream).blob();
