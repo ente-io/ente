@@ -74,7 +74,7 @@ export async function downloadFile(file: EnteFile) {
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
-                await streamWithUpdatedExif(file, fileBlob.stream()),
+                await updateExifIfNeeded(file, fileBlob.stream()),
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
@@ -107,23 +107,32 @@ export async function downloadFile(file: EnteFile) {
  * @returns A new {@link ReadableStream} with updates if any updates were
  * needed, otherwise return the original stream.
  */
-export const streamWithUpdatedExif = async (
+export const updateExifIfNeeded = async (
     enteFile: EnteFile,
     stream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> => {
-    const extension = lowercaseExtension(enteFile.metadata.title);
-    if (
-        enteFile.metadata.fileType === FILE_TYPE.IMAGE &&
-        enteFile.pubMagicMetadata?.data.editedTime &&
-        (extension == "jpeg" || extension == "jpg")
-    ) {
-        const fileBlob = await new Response(stream).blob();
-        const updatedFileBlob = await setJPEGExifDateTimeOriginal(
-            fileBlob,
+    // Not an image.
+    if (enteFile.metadata.fileType != FILE_TYPE.IMAGE) return stream;
+    // Time was not edited.
+    if (!enteFile.pubMagicMetadata?.data.editedTime) return stream;
+
+    const fileName = enteFile.metadata.title;
+    const extension = lowercaseExtension(fileName);
+    // Not a JPEG (likely).
+    if (extension != "jpeg" && extension != "jpg") return stream;
+
+    try {
+        const updatedBlob = await setJPEGExifDateTimeOriginal(
+            await new Response(stream).blob(),
             new Date(enteFile.pubMagicMetadata.data.editedTime / 1000),
         );
-        return updatedFileBlob.stream();
-    } else {
+        return updatedBlob.stream();
+    } catch (e) {
+        // We used the file's extension to determine if this was a JPEG, but
+        // this is not a guarantee. Misnamed files, while rare, do exist. So
+        // in case of errors, return the original back instead of causing the
+        // entire download or export to fail.
+        log.error(`Failed to modify Exif date for ${fileName}`, e);
         return stream;
     }
 };
@@ -491,7 +500,7 @@ async function downloadFileDesktop(
     const fs = electron.fs;
 
     const stream = await DownloadManager.getFile(file);
-    const updatedStream = await streamWithUpdatedExif(file, stream);
+    const updatedStream = await updateExifIfNeeded(file, stream);
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         const fileBlob = await new Response(updatedStream).blob();

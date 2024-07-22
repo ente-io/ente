@@ -36,7 +36,7 @@ import {
     getCollectionUserFacingName,
     getNonEmptyPersonalCollections,
 } from "utils/collection";
-import { getPersonalFiles, streamWithUpdatedExif } from "utils/file";
+import { getPersonalFiles, updateExifIfNeeded } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
 import { migrateExport } from "./migration";
 
@@ -970,7 +970,7 @@ class ExportService {
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.getFile(file);
-            const updatedFileStream = await streamWithUpdatedExif(
+            const updatedFileStream = await updateExifIfNeeded(
                 file,
                 originalFileStream,
             );

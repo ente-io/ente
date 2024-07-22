@@ -1,4 +1,3 @@
-import log from "@/base/log";
 import piexif from "piexifjs";
 
 /**
@@ -14,31 +13,23 @@ import piexif from "piexifjs";
  */
 export const setJPEGExifDateTimeOriginal = async (
     jpegBlob: Blob,
-    updatedDate: Date,
+    date: Date,
 ) => {
-    try {
-        let imageDataURL = await blobToDataURL(jpegBlob);
-        // Since we pass a Blob without an associated type, we get back a
-        // generic data URL like "data:application/octet-stream;base64,...".
-        // Modify it to have a `image/jpeg` MIME type.
-        imageDataURL =
-            "data:image/jpeg;base64" +
-            imageDataURL.slice(imageDataURL.indexOf(","));
-        const exifObj = piexif.load(imageDataURL);
-        if (!exifObj.Exif) exifObj.Exif = {};
-        exifObj.Exif[piexif.ExifIFD.DateTimeOriginal] =
-            convertToExifDateFormat(updatedDate);
-        log.debug(() => [
-            "updateFileCreationDateInEXIF",
-            { updatedDate, exifObj },
-        ]);
-        const exifBytes = piexif.dump(exifObj);
-        const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
-        return dataURLToBlob(exifInsertedFile);
-    } catch (e) {
-        log.error("updateFileModifyDateInEXIF failed", e);
-        return jpegBlob;
-    }
+    let dataURL = await blobToDataURL(jpegBlob);
+    // Since we pass a Blob without an associated type, we get back a generic
+    // data URL of the form "data:application/octet-stream;base64,...".
+    //
+    // Modify it to have a `image/jpeg` MIME type.
+    dataURL = "data:image/jpeg;base64" + dataURL.slice(dataURL.indexOf(","));
+
+    const exifObj = piexif.load(dataURL);
+    if (!exifObj.Exif) exifObj.Exif = {};
+    exifObj.Exif[piexif.ExifIFD.DateTimeOriginal] =
+        convertToExifDateFormat(date);
+    const exifBytes = piexif.dump(exifObj);
+    const exifInsertedFile = piexif.insert(exifBytes, dataURL);
+
+    return dataURLToBlob(exifInsertedFile);
 };
 
 /**
