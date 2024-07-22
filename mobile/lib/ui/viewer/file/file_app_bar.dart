@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import "package:photos/core/event_bus.dart";
@@ -406,7 +407,15 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _onSwipeLock() async {
-    Bus.instance.fire(FileSwipeLockEvent(!_isFileSwipeLocked));
+    if (await LocalAuthentication().isDeviceSupported()) {
+      Bus.instance.fire(FileSwipeLockEvent(!_isFileSwipeLocked));
+    } else {
+      await showErrorDialog(
+        context,
+        S.of(context).noSystemLockFound,
+        "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+      );
+    }
   }
 
   Future<void> _requestAuthentication() async {

@@ -141,8 +141,8 @@ class _DetailPageState extends State<DetailPage> {
       canPop: !isFileSwipeLocked,
       onPopInvoked: (didPop) async {
         if (isFileSwipeLocked) {
-          final auth = await _requestAuthentication();
-          if (auth) {
+          final authenticated = await _requestAuthentication();
+          if (authenticated) {
             Bus.instance.fire(FileSwipeLockEvent(false));
           }
         }
