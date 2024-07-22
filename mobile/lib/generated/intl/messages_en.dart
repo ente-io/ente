@@ -365,6 +365,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "You\'ll see available Cast devices here."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Due to technical glitch, you have been logged out. Our apologies for the inconvenience."),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
@@ -809,6 +812,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Some files in this album are ignored from upload because they had previously been deleted from Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importing...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Incorrect code"),
         "incorrectPasswordTitle":

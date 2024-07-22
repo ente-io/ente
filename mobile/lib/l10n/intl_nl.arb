@@ -1276,5 +1276,8 @@
   "noSystemLockFound": "Geen systeemvergrendeling gevonden",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "tapToUnlock": "Tik om te ontgrendelen",
-  "tooManyIncorrectAttempts": "Te veel onjuiste pogingen"
+  "tooManyIncorrectAttempts": "Te veel onjuiste pogingen",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
 }

@@ -37,6 +37,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hva er hovedårsaken til at du sletter kontoen din?"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
@@ -73,6 +76,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
             "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":

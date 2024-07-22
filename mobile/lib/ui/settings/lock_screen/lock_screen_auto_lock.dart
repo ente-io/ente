@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
@@ -22,9 +23,9 @@ class _LockScreenAutoLockState extends State<LockScreenAutoLock> {
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          const TitleBarWidget(
+          TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "Auto lock",
+              title: S.of(context).autoLock,
             ),
           ),
           SliverList(

@@ -118,7 +118,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else if (duration.inSeconds != 0) {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
-      return "Immediately";
+      return S.of(context).immediately;
     }
   }
 
@@ -236,7 +236,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                   ),
                                   MenuItemWidget(
                                     captionedTextWidget: CaptionedTextWidget(
-                                      title: "Auto lock",
+                                      title: S.of(context).autoLock,
                                       subTitle: _formatTime(
                                         Duration(
                                           milliseconds:
@@ -259,7 +259,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      "Time after which the app locks after being put in the background",
+                                      S.of(context).autoLockFeatureDescription,
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),

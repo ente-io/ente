@@ -1276,5 +1276,8 @@
   "noSystemLockFound": "Nie znaleziono blokady systemowej",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Aby włączyć blokadę aplikacji, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach systemu.",
   "tapToUnlock": "Naciśnij, aby odblokować",
-  "tooManyIncorrectAttempts": "Zbyt wiele błędnych prób"
+  "tooManyIncorrectAttempts": "Zbyt wiele błędnych prób",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
 }

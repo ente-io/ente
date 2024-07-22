@@ -1276,5 +1276,8 @@
   "noSystemLockFound": "Keine Systemsperre gefunden",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen.",
   "tapToUnlock": "Zum Entsperren antippen",
-  "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche"
+  "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
 }
