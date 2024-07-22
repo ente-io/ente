@@ -11,7 +11,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
-import "package:photos/services/machine_learning/semantic_search/remote_embedding.dart";
+import "package:photos/services/machine_learning/file_ml/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
