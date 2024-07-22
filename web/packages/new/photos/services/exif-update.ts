@@ -14,10 +14,8 @@ export const updateFileCreationDateInEXIF = async (
             "data:image/jpeg;base64" +
             imageDataURL.slice(imageDataURL.indexOf(","));
         const exifObj = piexif.load(imageDataURL);
-        if (!exifObj["Exif"]) {
-            exifObj["Exif"] = {};
-        }
-        exifObj["Exif"][piexif.ExifIFD.DateTimeOriginal] =
+        if (!exifObj.Exif) exifObj.Exif = {};
+        exifObj.Exif[piexif.ExifIFD.DateTimeOriginal] =
             convertToExifDateFormat(updatedDate);
         log.debug(() => [
             "updateFileCreationDateInEXIF",
