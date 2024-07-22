@@ -1,8 +1,6 @@
 import "dart:convert";
 import "dart:typed_data";
-import "dart:ui";
 
-import "package:ente_auth/events/app_lock_update_event.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -21,7 +19,6 @@ class LockScreenSettings {
   static const keyInvalidAttempts = "ls_invalid_attempts";
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const autoLockTime = "ls_auto_lock_time";
-  static const appLockType = "ls_app_lock_type";
   static const keyShowAppContent = "ls_show_app_content";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
@@ -61,27 +58,6 @@ class LockScreenSettings {
 
   bool getShouldShowAppContent() {
     return _preferences.getBool(keyShowAppContent) ?? true;
-  }
-
-  Future<void> setAppLockType(AppLockUpdateType lockType) async {
-    switch (lockType) {
-      case AppLockUpdateType.device:
-        await _preferences.setString(appLockType, "Device lock");
-        break;
-      case AppLockUpdateType.pin:
-        await _preferences.setString(appLockType, "Pin");
-        break;
-      case AppLockUpdateType.password:
-        await _preferences.setString(appLockType, "Password");
-        break;
-      default:
-        await _preferences.setString(appLockType, "None");
-        break;
-    }
-  }
-
-  String getAppLockType() {
-    return _preferences.getString(appLockType) ?? "None";
   }
 
   Future<void> setAutoLockTime(Duration duration) async {

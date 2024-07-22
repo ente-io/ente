@@ -1,8 +1,6 @@
 import "dart:async";
 
 import "package:ente_auth/core/configuration.dart";
-import "package:ente_auth/core/event_bus.dart";
-import "package:ente_auth/events/app_lock_update_event.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/components/captioned_text_widget.dart";
 import "package:ente_auth/ui/components/divider_widget.dart";
@@ -18,7 +16,6 @@ import "package:ente_auth/utils/lock_screen_settings.dart";
 import "package:ente_auth/utils/navigation_util.dart";
 import "package:ente_auth/utils/platform_util.dart";
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
@@ -62,12 +59,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _deviceLock() async {
     await _lockscreenSetting.removePinAndPassword();
     await _initializeSettings();
-    await _lockscreenSetting.setAppLockType(AppLockUpdateType.device);
-    Bus.instance.fire(
-      AppLockUpdateEvent(
-        AppLockUpdateType.device,
-      ),
-    );
   }
 
   Future<void> _pinLock() async {
@@ -81,12 +72,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
-        Bus.instance.fire(
-          AppLockUpdateEvent(
-            AppLockUpdateType.pin,
-          ),
-        );
-        _lockscreenSetting.setAppLockType(AppLockUpdateType.pin);
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -105,12 +90,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       _initializeSettings();
       if (result) {
-        Bus.instance.fire(
-          AppLockUpdateEvent(
-            AppLockUpdateType.password,
-          ),
-        );
-        _lockscreenSetting.setAppLockType(AppLockUpdateType.password);
         appLock = isPinEnabled ||
             isPasswordEnabled ||
             _configuration.shouldShowSystemLockScreen();
@@ -125,14 +104,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     if (appLock == true) {
       await _lockscreenSetting.shouldShowAppContent(showAppContent: true);
     }
-    await _lockscreenSetting.setAppLockType(
-      appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
-    );
-    Bus.instance.fire(
-      AppLockUpdateEvent(
-        appLock ? AppLockUpdateType.none : AppLockUpdateType.device,
-      ),
-    );
     setState(() {
       _initializeSettings();
       appLock = !appLock;

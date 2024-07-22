@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/events/app_lock_update_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/user_details.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
@@ -20,7 +18,6 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/lock_screen/lock_screen_options.dart';
 import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -40,25 +37,15 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
   late bool _hasLoggedIn;
   final Logger _logger = Logger('SecuritySectionWidget');
-  late String appLockSubtitle;
-  late StreamSubscription<AppLockUpdateEvent> _appLockUpdateEvent;
+
   @override
   void initState() {
     _hasLoggedIn = _config.hasConfiguredAccount();
-    appLockSubtitle = LockScreenSettings.instance.getAppLockType();
-    _appLockUpdateEvent = Bus.instance.on<AppLockUpdateEvent>().listen((event) {
-      if (mounted) {
-        setState(() {
-          appLockSubtitle = LockScreenSettings.instance.getAppLockType();
-        });
-      }
-    });
     super.initState();
   }
 
   @override
   void dispose() {
-    _appLockUpdateEvent.cancel();
     super.dispose();
   }
 
@@ -150,9 +137,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
+        captionedTextWidget: const CaptionedTextWidget(
           title: "App lock",
-          subTitle: appLockSubtitle,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
