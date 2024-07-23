@@ -123,6 +123,7 @@ class FileAppBarState extends State<FileAppBar> {
             switchInCurve: Curves.easeInOut,
             switchOutCurve: Curves.easeInOut,
             child: AppBar(
+              clipBehavior: Clip.none,
               key: ValueKey(_isFileSwipeLocked),
               iconTheme: const IconThemeData(
                 color: Colors.white,
