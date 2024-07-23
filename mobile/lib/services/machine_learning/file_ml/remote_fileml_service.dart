@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:convert";
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart" show Uint8List;
@@ -10,7 +9,6 @@ import "package:photos/models/file/file.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
 import "package:photos/services/machine_learning/file_ml/remote_embedding.dart";
-import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -36,22 +34,18 @@ class RemoteFileMLService {
   }) async {
     fileML.putClipIfNotNull(clipEmbedding);
     fileML.putFaceIfNotNull(faceEmbedding);
-    final encryptionKey = getFileKey(file);
-    final embeddingJSON = jsonEncode(fileML.remoteRawData);
-    final compressedData = gzipUInt8List(utf8.encode(embeddingJSON));
-    final encryptedEmbedding =
-        await CryptoUtil.encryptChaCha(compressedData, encryptionKey);
-    final encryptedData =
-        CryptoUtil.bin2base64(encryptedEmbedding.encryptedData!);
-    final header = CryptoUtil.bin2base64(encryptedEmbedding.header!);
+    final ChaChaEncryptionResult encryptionResult = await gzipAndEncryptJson(
+      fileML.remoteRawData,
+      getFileKey(file),
+    );
     try {
       final _ = await _dio.put(
         "/embeddings",
         data: {
           "fileID": file.uploadedFileID!,
           "model": 'ggml-clip',
-          "encryptedEmbedding": encryptedData,
-          "decryptionHeader": header,
+          "encryptedEmbedding": encryptionResult.encData,
+          "decryptionHeader": encryptionResult.header,
         },
       );
     } catch (e, s) {
@@ -131,20 +125,15 @@ Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
   final result = <int, RemoteFileML>{};
   final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
   for (final input in inputs) {
-    final decryptArgs = <String, dynamic>{};
-    decryptArgs["source"] =
-        CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
-    decryptArgs["key"] = input.decryptionKey;
-    decryptArgs["header"] =
-        CryptoUtil.base642bin(input.embedding.decryptionHeader);
-    final embeddingData = chachaDecryptData(decryptArgs);
-    final unzippedData = unGzipUInt8List(embeddingData);
-    final decodedJson = jsonDecode(utf8.decode(unzippedData));
-    final RemoteFileML decodedEmbedding = RemoteFileML.fromRemote(
-      input.embedding.fileID,
-      decodedJson as Map<String, dynamic>,
+    final decodedJson = decryptAndUnzipJsonSync(
+      input.decryptionKey,
+      encryptedData: input.embedding.encryptedEmbedding,
+      header: input.embedding.decryptionHeader,
     );
-    result[input.embedding.fileID] = decodedEmbedding;
+    result[input.embedding.fileID] = RemoteFileML.fromRemote(
+      input.embedding.fileID,
+      decodedJson,
+    );
   }
   return result;
 }
