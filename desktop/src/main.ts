@@ -501,28 +501,31 @@ const allowExternalLinks = (webContents: WebContents) =>
     });
 
 /**
- * Allow uploading to arbitrary S3 buckets.
+ * Allow connecting to arbitrary S3 buckets.
  *
- * The files in the desktop app are served over the ente:// protocol. When that
- * is returned as the CORS allowed origin, "Access-Control-Allow-Origin:
- * ente://app", CORS requests fail.
+ * The embedded web app within in the desktop app is served over the ente://
+ * protocol. When pages in that web app make requests, their originate from this
+ * "ente://app" origin, which thus serves as the value for the
+ * "Access-Control-Allow-Origin" header in the CORS preflight requests.
  *
- * Further, during testing or self-hosting, file uploads involve a redirection
- * (This doesn't affect our production systems since we upload via a worker,
- * See: [Note: Passing credentials for self-hosted file fetches]).
+ * Some S3 providers (B2 is the motivating example for this workaround) do not
+ * allow whitelisting custom URI schemes. That is, even if we set
+ * "`allowedOrigin: ["*"]` in our B2 bucket CORS configuration, when the web
+ * code makes a CORS request with ACAO "ente://app", it gets back
+ * "Access-Control-Allow-Origin" set to `null` in the response, and thus the
+ * request fails (since it does not match the origin we sent).
  *
- * In some cases, we might be using a S3 bucket that does not allow whitelisting
- * a custom URI scheme. Echoing back the value of `Origin` (even if the bucket
- * would allow us to) would also not work, since the browser sends `null` as the
- * `Origin` for the redirected request (this is as per the CORS spec). So the
- * only way in such cases would be to require the bucket to set an
- * "Access-Control-Allow-Origin: *".
+ * This is not an issue for production apps since they upload via a worker
+ * instead of directly touching an S3 provider. However, this impacts people who
+ * are self hosting (or when we ourselves are trying to test things by with an
+ * arbitrary S3 bucket without going via a worker).
  *
- * To avoid these issues, we intercepting the ACAO header and set it to `*`.
+ * To avoid these issues, we intercept the ACAO header and set it to `*`.
  *
- * However, that cause problems with requests that use credentials since "*" is
- * not a valid value in such cases. One such example is the HCaptcha requests
- * made by Stripe when we initiate a payment within the desktop app:
+ * However, an unconditional interception causes problems with requests that use
+ * credentials, since "*" is not a valid value in such cases. One such example
+ * is the HCaptcha requests made by Stripe when we initiate a payment within the
+ * desktop app:
  *
  * > Access to XMLHttpRequest at 'https://api2.hcaptcha.com/getcaptcha/xxx' from
  * > origin 'https://newassets.hcaptcha.com' has been blocked by CORS policy:
@@ -532,7 +535,8 @@ const allowExternalLinks = (webContents: WebContents) =>
  * > controlled by the withCredentials attribute.
  *
  * So we only do this workaround if there was either no ACAO specified in the
- * response, or if the ACAO was "ente://app".
+ * response, or if the ACAO in the response was "null" (the string serialization
+ * of `null`).
  */
 const allowAllCORSOrigins = (webContents: WebContents) =>
     webContents.session.webRequest.onHeadersReceived(
@@ -543,7 +547,7 @@ const allowAllCORSOrigins = (webContents: WebContents) =>
             for (const [key, value] of Object.entries(responseHeaders ?? {}))
                 if (key.toLowerCase() == "access-control-allow-origin") {
                     headers["Access-Control-Allow-Origin"] =
-                        value[0] == rendererURL ? ["*"] : value;
+                        value[0] == "null" ? ["*"] : value;
                 } else {
                     headers[key] = value;
                 }
