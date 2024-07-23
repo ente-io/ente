@@ -92,7 +92,6 @@ class FaceRecognitionService {
     final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
     final List<List<FileMLInstruction>> chunks =
         filesToIndex.chunks(_embeddingFetchLimit); // Chunks of 200
-    int fetchedCount = 0;
     int filesIndexedForFaces = 0;
     int filesIndexedForClip = 0;
     for (final chunk in chunks) {
@@ -104,7 +103,6 @@ class FaceRecognitionService {
         final res =
             await RemoteFileMLService.instance.getFileEmbeddings(fileIds);
         _logger.info('fetched ${res.mlData.length} embeddings');
-        fetchedCount += res.mlData.length;
         final List<Face> faces = [];
         final List<ClipEmbedding> clipEmbeddings = [];
         for (RemoteFileML fileMl in res.mlData.values) {
