@@ -131,11 +131,8 @@ class LockScreenSettings {
       sodium,
     );
 
-    final String saltPassword = base64Encode(salt);
-    final String hashPassword = base64Encode(hash);
-
-    await _secureStorage.write(key: saltKey, value: saltPassword);
-    await _secureStorage.write(key: password, value: hashPassword);
+    await _secureStorage.write(key: saltKey, value: base64Encode(salt));
+    await _secureStorage.write(key: password, value: base64Encode(hash));
     await _secureStorage.delete(key: pin);
 
     return;
