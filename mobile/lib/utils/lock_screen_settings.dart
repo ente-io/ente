@@ -24,6 +24,7 @@ class LockScreenSettings {
   void init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
+    await shouldShowAppContent(isContentVisible: getShouldShowAppContent());
   }
 
   Future<void> shouldShowAppContent({bool isContentVisible = true}) async {
