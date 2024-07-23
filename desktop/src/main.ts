@@ -501,7 +501,7 @@ const allowExternalLinks = (webContents: WebContents) =>
     });
 
 /**
- * Allow connecting to arbitrary S3 buckets.
+ * Allow uploads to arbitrary S3 buckets.
  *
  * The embedded web app within in the desktop app is served over the ente://
  * protocol. When pages in that web app make requests, their originate from this
@@ -515,12 +515,21 @@ const allowExternalLinks = (webContents: WebContents) =>
  * "Access-Control-Allow-Origin" set to `null` in the response, and thus the
  * request fails (since it does not match the origin we sent).
  *
- * This is not an issue for production apps since they upload via a worker
- * instead of directly touching an S3 provider. However, this impacts people who
- * are self hosting (or when we ourselves are trying to test things by with an
- * arbitrary S3 bucket without going via a worker).
+ * This is not an issue for production apps since they fetches or uploads via a
+ * worker instead of directly touching an S3 provider.
  *
- * To avoid these issues, we intercept the ACAO header and set it to `*`.
+ * This is not also an issue for fetches in the self hosted apps since those
+ * involve a redirection, and during a redirection Chromium sets the ACAO in the
+ * request to `null` (this is the correct behaviour as per the spec, for more
+ * details See: [Note: Passing credentials for self-hosted file fetches]).
+ *
+ * But this is an issue for uploads in the self hosted apps (or when we
+ * ourselves are trying to test things by with an arbitrary S3 bucket without
+ * going via a worker). During upload, theer is no redirection, so the request
+ * ACAO is "ente://app" but the response ACAO is `null` which don't match,
+ * causing the request to fail.
+ *
+ * As a workaround, we intercept the ACAO header and set it to `*`.
  *
  * However, an unconditional interception causes problems with requests that use
  * credentials, since "*" is not a valid value in such cases. One such example
