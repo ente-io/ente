@@ -302,7 +302,7 @@ class SemanticSearchService {
       final String tokenizerVocabPath =
           await RemoteAssetsService.instance.getAssetPath(remotePath);
       final textEmbedding = await _computer.compute(
-        ClipTextEncoder.infer,
+        ClipTextEncoder.predict,
         param: {
           "text": query,
           "address": clipAddress,
