@@ -92,7 +92,6 @@ class FaceRecognitionService {
     final List<List<FileMLInstruction>> chunks =
         filesToIndex.chunks(_embeddingFetchLimit); // Chunks of 200
 
-    int fetchedCount = 0;
     for (final chunk in chunks) {
       // Fetching and storing remote embeddings
       try {
@@ -103,7 +102,6 @@ class FaceRecognitionService {
         final res =
             await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
         _logger.info('fetched ${res.mlData.length} embeddings');
-        fetchedCount += res.mlData.length;
         final List<Face> faces = [];
         final remoteFileIdToVersion = <int, int>{};
         for (FileMl fileMl in res.mlData.values) {
@@ -134,7 +132,6 @@ class FaceRecognitionService {
             remoteFileIdToVersion[fileID] = faceMlVersion;
           }
         }
-
         await FaceMLDataDB.instance.bulkInsertFaces(faces);
         _logger.info(
           'stored embeddings, already indexed files ${remoteFileIdToVersion.length}',
@@ -158,7 +155,6 @@ class FaceRecognitionService {
         }
       }
     }
-    _logger.info('Fetched $fetchedCount embeddings');
   }
 
   static Future<List<FaceResult>> runFacesPipeline(
