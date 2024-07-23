@@ -92,5 +92,17 @@ export const indexExif = async (_enteFile: EnteFile, blob: Blob) => {
     //
     delete (tags as Record<string, unknown>).mpf;
 
+    // Remove the raw XMP (if any).
+    //
+    // The `includeUnknown` flag does not have any effect on the XMP parser, so
+    // we already get all the key value pairs in the XMP as part of the "xmp"
+    // object, retaining the raw string is unnecessary.
+    //
+    // We need to cast to remove the non-optional _raw property. Be aware that
+    // this means that from this point onwards, the TypeScript type is out of
+    // sync with the actual value (TypeScript type says _raw is always present,
+    // while the actual value doesn't have it).
+    delete (tags.xmp as Partial<typeof tags.xmp>)?._raw;
+
     return tags;
 };
