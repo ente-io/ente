@@ -1,8 +1,8 @@
 import "dart:convert";
+import "dart:io" show File;
 import "dart:math";
 
 import "package:html_unescape/html_unescape.dart";
-import "package:photos/services/remote_assets_service.dart";
 import "package:tuple/tuple.dart";
 
 class ClipTextTokenizer {
@@ -38,18 +38,17 @@ class ClipTextTokenizer {
   static final instance = ClipTextTokenizer._privateConstructor();
   factory ClipTextTokenizer() => instance;
 
-  Future<List<int>> tokenize(String text) async {
-    await _init();
+  Future<List<int>> tokenize(String text, String vocabPath) async {
+    await _init(vocabPath);
     var tokens = _encode(text);
     tokens =
         [sot] + tokens.sublist(0, min(totalTokens - 2, tokens.length)) + [eot];
     return tokens + List.filled(totalTokens - tokens.length, 0);
   }
 
-  Future<void> _init() async {
+  Future<void> _init(String vocabPath) async {
     if (_isInitialized) return;
-    final vocabFile =
-        await RemoteAssetsService.instance.getAsset(kVocabRemotePath);
+    final vocabFile = File(vocabPath);
     final String vocabulary = await vocabFile.readAsString();
     this.vocabulary = vocabulary;
     byteEncoder = _bytesToUnicode();

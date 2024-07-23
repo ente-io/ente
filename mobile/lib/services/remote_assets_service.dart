@@ -32,6 +32,20 @@ class RemoteAssetsService {
     }
   }
 
+  Future<String> getAssetPath(String remotePath, {bool refetch = false}) async {
+    final path = await _getLocalPath(remotePath);
+    final file = File(path);
+    if (file.existsSync() && !refetch) {
+      _logger.info("Returning path of cached file for $remotePath");
+      return file.path;
+    } else {
+      final tempFile = File(path + ".temp");
+      await _downloadFile(remotePath, tempFile.path);
+      tempFile.renameSync(path);
+      return path;
+    }
+  }
+
   ///Returns asset if the remote asset is new compared to the local copy of it
   Future<File?> getAssetIfUpdated(String remotePath) async {
     try {
