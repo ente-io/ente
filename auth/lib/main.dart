@@ -29,7 +29,6 @@ import 'package:ente_auth/utils/window_protocol_handler.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
-import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
