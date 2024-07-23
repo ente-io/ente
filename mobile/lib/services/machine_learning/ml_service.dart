@@ -133,7 +133,6 @@ class MLService {
 
   Future<void> sync() async {
     await FaceRecognitionService.instance.sync();
-    await SemanticSearchService.instance.sync();
   }
 
   Future<void> runAllML({bool force = false}) async {

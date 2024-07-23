@@ -42,7 +42,6 @@ class SemanticSearchService {
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
-  bool _isSyncing = false;
   List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
@@ -84,15 +83,6 @@ class SemanticSearchService {
     _hasInitialized = false;
     await ClipTextEncoder.instance.release();
     _cachedImageEmbeddings.clear();
-  }
-
-  Future<void> sync() async {
-    if (_isSyncing) {
-      return;
-    }
-    _isSyncing = true;
-
-    _isSyncing = false;
   }
 
   bool isMagicSearchEnabledAndReady() {
