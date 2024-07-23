@@ -1,7 +1,7 @@
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 
 class FilesMLDataResponse {
-  final Map<int, FileMl> mlData;
+  final Map<int, RemoteFileML> mlData;
   // fileIDs that were indexed but they don't contain any meaningful embeddings
   // and hence should be discarded for re-indexing
   final Set<int> noEmbeddingFileIDs;

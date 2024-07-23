@@ -1,17 +1,16 @@
 import "dart:async";
 import "dart:convert";
+import "dart:io";
 
 import "package:computer/computer.dart";
-import "package:flutter/foundation.dart" show debugPrint;
+import "package:flutter/foundation.dart" show Uint8List;
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
-import "package:photos/services/machine_learning/semantic_search/embedding_store.dart";
-import "package:photos/services/machine_learning/semantic_search/remote_embedding.dart";
+import "package:photos/services/machine_learning/file_ml/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -29,13 +28,19 @@ class RemoteFileMLService {
 
   void init(SharedPreferences prefs) {}
 
-  Future<void> putFileEmbedding(EnteFile file, FileMl fileML) async {
+  Future<void> putFileEmbedding(
+    EnteFile file,
+    RemoteFileML fileML, {
+    RemoteClipEmbedding? clipEmbedding,
+    RemoteFaceEmbedding? faceEmbedding,
+  }) async {
+    fileML.putClipIfNotNull(clipEmbedding);
+    fileML.putFaceIfNotNull(faceEmbedding);
     final encryptionKey = getFileKey(file);
-    final embeddingJSON = jsonEncode(fileML.toJson());
-    final encryptedEmbedding = await CryptoUtil.encryptChaCha(
-      utf8.encode(embeddingJSON),
-      encryptionKey,
-    );
+    final embeddingJSON = jsonEncode(fileML.remoteRawData);
+    final compressedData = gzipUInt8List(utf8.encode(embeddingJSON));
+    final encryptedEmbedding =
+        await CryptoUtil.encryptChaCha(compressedData, encryptionKey);
     final encryptedData =
         CryptoUtil.bin2base64(encryptedEmbedding.encryptedData!);
     final header = CryptoUtil.bin2base64(encryptedEmbedding.header!);
@@ -44,19 +49,18 @@ class RemoteFileMLService {
         "/embeddings",
         data: {
           "fileID": file.uploadedFileID!,
-          "model": 'file-ml-clip-face',
+          "model": 'ggml-clip',
           "encryptedEmbedding": encryptedData,
           "decryptionHeader": header,
         },
       );
-      // final updationTime = response.data["updatedAt"];
     } catch (e, s) {
       _logger.severe("Failed to put embedding", e, s);
       rethrow;
     }
   }
 
-  Future<FilesMLDataResponse> getFilessEmbedding(
+  Future<FilesMLDataResponse> getFileEmbeddings(
     Set<int> fileIds,
   ) async {
     try {
@@ -64,7 +68,7 @@ class RemoteFileMLService {
         "/embeddings/files",
         data: {
           "fileIDs": fileIds.toList(),
-          "model": 'file-ml-clip-face',
+          "model": 'ggml-clip',
         },
       );
       final remoteEmb = res.data['embeddings'] as List;
@@ -93,10 +97,10 @@ class RemoteFileMLService {
     }
   }
 
-  Future<Map<int, FileMl>> decryptFileMLData(
+  Future<Map<int, RemoteFileML>> decryptFileMLData(
     List<RemoteEmbedding> remoteEmbeddings,
   ) async {
-    final result = <int, FileMl>{};
+    final result = <int, RemoteFileML>{};
     if (remoteEmbeddings.isEmpty) {
       return result;
     }
@@ -112,75 +116,55 @@ class RemoteFileMLService {
       final input = EmbeddingsDecoderInput(embedding, fileKey);
       inputs.add(input);
     }
-    return _computer.compute<Map<String, dynamic>, Map<int, FileMl>>(
+    return _computer.compute<Map<String, dynamic>, Map<int, RemoteFileML>>(
       _decryptFileMLComputer,
       param: {
         "inputs": inputs,
       },
     );
   }
-
 }
 
-Future<Map<int, FileMl>> _decryptFileMLComputer(
-    Map<String, dynamic> args,
-  ) async {
-    final result = <int, FileMl>{};
-    final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
-    for (final input in inputs) {
-      final decryptArgs = <String, dynamic>{};
-      decryptArgs["source"] =
-          CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
-      decryptArgs["key"] = input.decryptionKey;
-      decryptArgs["header"] =
-          CryptoUtil.base642bin(input.embedding.decryptionHeader);
-      final embeddingData = chachaDecryptData(decryptArgs);
-      final decodedJson = jsonDecode(utf8.decode(embeddingData));
-      final FileMl decodedEmbedding =
-          FileMl.fromJson(decodedJson as Map<String, dynamic>);
-      result[input.embedding.fileID] = decodedEmbedding;
-    }
-    return result;
-  }
+Uint8List ungzipUint8List(Uint8List compressedData) {
+  final codec = GZipCodec();
+  final List<int> decompressedList = codec.decode(compressedData);
+  return Uint8List.fromList(decompressedList);
+}
 
-bool shouldDiscardRemoteEmbedding(FileMl fileMl) {
-    if (fileMl.faceEmbedding.version < faceMlVersion) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because version is ${fileMl.faceEmbedding.version} and we need $faceMlVersion");
-      return true;
-    }
-    // are all landmarks equal?
-    bool allLandmarksEqual = true;
-    if (fileMl.faceEmbedding.faces.isEmpty) {
-      debugPrint("No face for ${fileMl.fileID}");
-      allLandmarksEqual = false;
-    }
-    for (final face in fileMl.faceEmbedding.faces) {
-      if (face.detection.landmarks.isEmpty) {
-        allLandmarksEqual = false;
-        break;
-      }
-      if (face.detection.landmarks
-          .any((landmark) => landmark.x != landmark.y)) {
-        allLandmarksEqual = false;
-        break;
-      }
-    }
-    if (allLandmarksEqual) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because landmarks are equal");
-      debugPrint(
-        fileMl.faceEmbedding.faces
-            .map((e) => e.detection.landmarks.toString())
-            .toList()
-            .toString(),
-      );
-      return true;
-    }
-    if (fileMl.width == null || fileMl.height == null) {
-      debugPrint("Discarding remote embedding for fileID ${fileMl.fileID} "
-          "because width is null");
-      return true;
-    }
-    return false;
+// gzipUInt8List
+Uint8List gzipUInt8List(Uint8List data) {
+  final codec = GZipCodec();
+  final compressedData = codec.encode(data);
+  return Uint8List.fromList(compressedData);
+}
+
+Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
+  Map<String, dynamic> args,
+) async {
+  final result = <int, RemoteFileML>{};
+  final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
+  for (final input in inputs) {
+    final decryptArgs = <String, dynamic>{};
+    decryptArgs["source"] =
+        CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
+    decryptArgs["key"] = input.decryptionKey;
+    decryptArgs["header"] =
+        CryptoUtil.base642bin(input.embedding.decryptionHeader);
+    final embeddingData = chachaDecryptData(decryptArgs);
+    final unzippedData = ungzipUint8List(embeddingData);
+    final decodedJson = jsonDecode(utf8.decode(unzippedData));
+    final RemoteFileML decodedEmbedding = RemoteFileML.fromRemote(
+      input.embedding.fileID,
+      decodedJson as Map<String, dynamic>,
+    );
+    result[input.embedding.fileID] = decodedEmbedding;
   }
+  return result;
+}
+
+class EmbeddingsDecoderInput {
+  final RemoteEmbedding embedding;
+  final Uint8List decryptionKey;
+
+  EmbeddingsDecoderInput(this.embedding, this.decryptionKey);
+}

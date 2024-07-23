@@ -29,8 +29,8 @@ import 'package:photos/services/machine_learning/face_ml/face_embedding/face_emb
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
-import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
+import "package:photos/services/machine_learning/file_ml/file_ml.dart";
+import "package:photos/services/machine_learning/file_ml/remote_fileml_service.dart";
 import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
@@ -133,27 +133,31 @@ class MLService {
 
   Future<void> sync() async {
     await FaceRecognitionService.instance.sync();
-    await SemanticSearchService.instance.sync();
   }
 
   Future<void> runAllML({bool force = false}) async {
-    if (force) {
-      _mlControllerStatus = true;
-    }
-    if (_cannotRunMLFunction() && !force) return;
+    try {
+      if (force) {
+        _mlControllerStatus = true;
+      }
+      if (_cannotRunMLFunction() && !force) return;
 
-    await sync();
+      await sync();
 
-    final int unclusteredFacesCount =
-        await FaceMLDataDB.instance.getUnclusteredFaceCount();
-    if (unclusteredFacesCount > _kForceClusteringFaceCount) {
-      _logger.info(
-        "There are $unclusteredFacesCount unclustered faces, doing clustering first",
-      );
+      final int unclusteredFacesCount =
+          await FaceMLDataDB.instance.getUnclusteredFaceCount();
+      if (unclusteredFacesCount > _kForceClusteringFaceCount) {
+        _logger.info(
+          "There are $unclusteredFacesCount unclustered faces, doing clustering first",
+        );
+        await clusterAllImages();
+      }
+      await indexAllImages();
       await clusterAllImages();
+    } catch (e, s) {
+      _logger.severe("runAllML failed", e, s);
+      rethrow;
     }
-    await indexAllImages();
-    await clusterAllImages();
   }
 
   void pauseIndexingAndClustering() {
@@ -173,7 +177,6 @@ class MLService {
       _logger.info('starting image indexing');
 
       final filesToIndex = await getFilesForMlIndexing();
-
       final List<List<FileMLInstruction>> chunks =
           filesToIndex.chunks(_fileDownloadLimit);
 
@@ -465,16 +468,26 @@ class MLService {
         if (!result.errorOccured) {
           await RemoteFileMLService.instance.putFileEmbedding(
             instruction.enteFile,
-            FileMl(
-              instruction.enteFile.uploadedFileID!,
-              FaceEmbeddings(
-                faces,
-                result.mlVersion,
-                client: client,
-              ),
-              height: result.decodedImageSize.height,
-              width: result.decodedImageSize.width,
-            ),
+            instruction.existingRemoteFileML ??
+                RemoteFileML.empty(
+                  instruction.enteFile.uploadedFileID!,
+                ),
+            faceEmbedding: result.facesRan
+                ? RemoteFaceEmbedding(
+                    faces,
+                    result.mlVersion,
+                    client: client,
+                    height: result.decodedImageSize.height,
+                    width: result.decodedImageSize.width,
+                  )
+                : null,
+            clipEmbedding: result.clipRan
+                ? RemoteClipEmbedding(
+                    result.clip!.embedding,
+                    version: result.mlVersion,
+                    client: client,
+                  )
+                : null,
           );
         } else {
           _logger.warning(
@@ -482,7 +495,6 @@ class MLService {
           );
         }
         await FaceMLDataDB.instance.bulkInsertFaces(faces);
-        return actuallyRanML;
       }
 
       if (result.clipRan) {
@@ -855,6 +867,9 @@ class MLService {
   }
 
   bool _cannotRunMLFunction({String function = ""}) {
+    if (kDebugMode && Platform.isIOS) {
+      return false;
+    }
     if (_isIndexingOrClusteringRunning) {
       _logger.info(
         "Cannot run $function because indexing or clustering is already running",

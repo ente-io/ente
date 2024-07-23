@@ -11,6 +11,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/services/machine_learning/file_ml/file_ml.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
@@ -31,12 +32,14 @@ class FileMLInstruction {
 
   final bool shouldRunFaces;
   final bool shouldRunClip;
+  RemoteFileML? existingRemoteFileML;
 
   FileMLInstruction({
     required this.enteFile,
     required this.shouldRunFaces,
     required this.shouldRunClip,
   });
+
 }
 
 Future<IndexStatus> getIndexStatus() async {
@@ -75,12 +78,14 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> filesWithoutLocalID = [];
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
-    final skip = _skipAnalysisEnteFile(enteFile);
+    if (_skipAnalysisEnteFile(enteFile)) {
+      continue;
+    }
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (skip && !shouldRunFaces && !shouldRunClip) {
+    if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
     final instruction = FileMLInstruction(
@@ -95,12 +100,14 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
   }
   for (final EnteFile enteFile in hiddenFiles) {
-    final skip = _skipAnalysisEnteFile(enteFile);
+    if (_skipAnalysisEnteFile(enteFile)) {
+      continue;
+    }
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (skip && !shouldRunFaces && !shouldRunClip) {
+    if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
     final instruction = FileMLInstruction(
@@ -120,6 +127,44 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   );
 
   return sortedBylocalID;
+}
+
+bool shouldDiscardRemoteEmbedding(RemoteFileML fileML) {
+  final fileID = fileML.fileID;
+  final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
+  if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {
+    _logger.info("Discarding remote embedding for fileID $fileID "
+        "because version is ${faceEmbedding?.version} and we need $faceMlVersion");
+    return true;
+  }
+  // are all landmarks equal?
+  bool allLandmarksEqual = true;
+  if (faceEmbedding.faces.isEmpty) {
+    allLandmarksEqual = false;
+  }
+  for (final face in faceEmbedding.faces) {
+    if (face.detection.landmarks.isEmpty) {
+      allLandmarksEqual = false;
+      break;
+    }
+    if (face.detection.landmarks.any((landmark) => landmark.x != landmark.y)) {
+      allLandmarksEqual = false;
+      break;
+    }
+  }
+  if (allLandmarksEqual) {
+    _logger.info("Discarding remote embedding for fileID $fileID "
+        "because landmarks are equal");
+    _logger.info(
+      faceEmbedding.faces
+          .map((e) => e.detection.landmarks.toString())
+          .toList()
+          .toString(),
+    );
+    return true;
+  }
+
+  return false;
 }
 
 Future<Set<int>> getIndexableFileIDs() async {
