@@ -1,45 +1,58 @@
 import "package:photos/face/model/face.dart";
 
+const _faceKey = 'face';
+const _clipKey = 'clip';
+
 class RemoteFileML {
   final int fileID;
   final Map<String, dynamic> remoteRawData;
-  final RemoteFaceEmbedding? faceEmbedding;
-  final RemoteClipEmbedding? clipEmbedding;
 
   RemoteFileML(
     this.fileID,
-    this.remoteRawData, {
-    required this.faceEmbedding,
-    this.clipEmbedding,
-  });
+    this.remoteRawData,
+  );
 
-  // toJson
-  Map<String, dynamic> toJson() {
-    throw UnimplementedError();
-  }
-
-  // fromRemote
   factory RemoteFileML.fromRemote(int fileID, Map<String, dynamic> json) {
     return RemoteFileML(
       fileID,
       json,
-      faceEmbedding: json['face'] != null
-          ? RemoteFaceEmbedding.fromJson(
-              json['face'] as Map<String, dynamic>,
-            )
-          : null,
-      clipEmbedding: json['clip'] == null
-          ? null
-          : RemoteClipEmbedding.fromJson(
-              json['clip'] as Map<String, dynamic>,
-            ),
     );
   }
+
+  static RemoteFileML empty(int i) {
+    final Map<String, dynamic> json = {};
+    return RemoteFileML(i, json);
+  }
+
+  void putFaceIfNotNull(RemoteFaceEmbedding? faceEmbedding) {
+    if (faceEmbedding != null) {
+      remoteRawData[_faceKey] = faceEmbedding.toJson();
+    }
+  }
+
+  void putClipIfNotNull(RemoteClipEmbedding? clipEmbedding) {
+    if (clipEmbedding != null) {
+      remoteRawData[_clipKey] = clipEmbedding.toJson();
+    }
+  }
+
+  RemoteFaceEmbedding? get faceEmbedding => remoteRawData[_faceKey] != null
+      ? RemoteFaceEmbedding.fromJson(
+          remoteRawData[_faceKey] as Map<String, dynamic>,
+        )
+      : null;
+
+  RemoteClipEmbedding? get clipEmbedding => remoteRawData[_clipKey] != null
+      ? RemoteClipEmbedding.fromJson(
+          remoteRawData[_clipKey] as Map<String, dynamic>,
+        )
+      : null;
 }
 
 class RemoteFaceEmbedding {
   final List<Face> faces;
   final int version;
+
   // packageName/version
   final String client;
   final int height;

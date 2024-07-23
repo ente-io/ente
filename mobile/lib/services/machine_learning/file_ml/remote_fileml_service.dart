@@ -3,7 +3,7 @@ import "dart:convert";
 import "dart:io";
 
 import "package:computer/computer.dart";
-import "package:flutter/foundation.dart" show Uint8List, debugPrint;
+import "package:flutter/foundation.dart" show Uint8List;
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -28,14 +28,19 @@ class RemoteFileMLService {
 
   void init(SharedPreferences prefs) {}
 
-  Future<void> putFileEmbedding(EnteFile file, RemoteFileML fileML) async {
-    throw Exception("need to update implementation");
+  Future<void> putFileEmbedding(
+    EnteFile file,
+    RemoteFileML fileML, {
+    RemoteClipEmbedding? clipEmbedding,
+    RemoteFaceEmbedding? faceEmbedding,
+  }) async {
+    fileML.putClipIfNotNull(clipEmbedding);
+    fileML.putFaceIfNotNull(faceEmbedding);
     final encryptionKey = getFileKey(file);
-    final embeddingJSON = jsonEncode(fileML.toJson());
-    final encryptedEmbedding = await CryptoUtil.encryptChaCha(
-      utf8.encode(embeddingJSON),
-      encryptionKey,
-    );
+    final embeddingJSON = jsonEncode(fileML.remoteRawData);
+    final compressedData = gzipUInt8List(utf8.encode(embeddingJSON));
+    final encryptedEmbedding =
+        await CryptoUtil.encryptChaCha(compressedData, encryptionKey);
     final encryptedData =
         CryptoUtil.bin2base64(encryptedEmbedding.encryptedData!);
     final header = CryptoUtil.bin2base64(encryptedEmbedding.header!);
@@ -44,12 +49,11 @@ class RemoteFileMLService {
         "/embeddings",
         data: {
           "fileID": file.uploadedFileID!,
-          "model": 'file-ml-clip-face',
+          "model": 'ggml-clip',
           "encryptedEmbedding": encryptedData,
           "decryptionHeader": header,
         },
       );
-      // final updationTime = response.data["updatedAt"];
     } catch (e, s) {
       _logger.severe("Failed to put embedding", e, s);
       rethrow;
@@ -127,6 +131,13 @@ Uint8List ungzipUint8List(Uint8List compressedData) {
   return Uint8List.fromList(decompressedList);
 }
 
+// gzipUInt8List
+Uint8List gzipUInt8List(Uint8List data) {
+  final codec = GZipCodec();
+  final compressedData = codec.encode(data);
+  return Uint8List.fromList(compressedData);
+}
+
 Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
   Map<String, dynamic> args,
 ) async {
@@ -140,7 +151,6 @@ Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
     decryptArgs["header"] =
         CryptoUtil.base642bin(input.embedding.decryptionHeader);
     final embeddingData = chachaDecryptData(decryptArgs);
-    // unzip the gzip data
     final unzippedData = ungzipUint8List(embeddingData);
     final decodedJson = jsonDecode(utf8.decode(unzippedData));
     final RemoteFileML decodedEmbedding = RemoteFileML.fromRemote(

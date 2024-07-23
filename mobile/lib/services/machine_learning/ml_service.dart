@@ -469,24 +469,26 @@ class MLService {
         if (!result.errorOccured) {
           await RemoteFileMLService.instance.putFileEmbedding(
             instruction.enteFile,
-            RemoteFileML(
-              instruction.enteFile.uploadedFileID!,
-              {},
-              faceEmbedding: RemoteFaceEmbedding(
-                faces,
-                result.mlVersion,
-                client: client,
-                height: result.decodedImageSize.height,
-                width: result.decodedImageSize.width,
-              ),
-              clipEmbedding: result.clipRan
-                  ? RemoteClipEmbedding(
-                      result.clip!.embedding,
-                      version: result.mlVersion,
-                      client: client,
-                    )
-                  : null,
-            ),
+            instruction.existingRemoteFileML ??
+                RemoteFileML.empty(
+                  instruction.enteFile.uploadedFileID!,
+                ),
+            faceEmbedding: result.facesRan
+                ? RemoteFaceEmbedding(
+                    faces,
+                    result.mlVersion,
+                    client: client,
+                    height: result.decodedImageSize.height,
+                    width: result.decodedImageSize.width,
+                  )
+                : null,
+            clipEmbedding: result.clipRan
+                ? RemoteClipEmbedding(
+                    result.clip!.embedding,
+                    version: result.mlVersion,
+                    client: client,
+                  )
+                : null,
           );
         } else {
           _logger.warning(

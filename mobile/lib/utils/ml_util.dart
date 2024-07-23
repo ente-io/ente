@@ -32,12 +32,14 @@ class FileMLInstruction {
 
   final bool shouldRunFaces;
   final bool shouldRunClip;
+  RemoteFileML? existingRemoteFileML;
 
   FileMLInstruction({
     required this.enteFile,
     required this.shouldRunFaces,
     required this.shouldRunClip,
   });
+
 }
 
 Future<IndexStatus> getIndexStatus() async {

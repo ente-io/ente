@@ -89,7 +89,7 @@ class FaceRecognitionService {
   }
 
   Future<void> _syncFaceEmbeddings({int retryFetchCount = 10}) async {
-    final filesToIndex = await getFilesForMlIndexing();
+    final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
     final List<List<FileMLInstruction>> chunks =
         filesToIndex.chunks(_embeddingFetchLimit); // Chunks of 200
     int fetchedCount = 0;
