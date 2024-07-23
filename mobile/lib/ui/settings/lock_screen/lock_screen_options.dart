@@ -26,11 +26,11 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   late bool appLock;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
-  late bool showAppContent;
+  late bool hideAppContent;
   @override
   void initState() {
     super.initState();
-    showAppContent = _lockscreenSetting.getShouldShowAppContent();
+    hideAppContent = _lockscreenSetting.getShouldShowAppContent();
     _initializeSettings();
     appLock = isPinEnabled ||
         isPasswordEnabled ||
@@ -45,7 +45,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
-      showAppContent = shouldShowAppContent;
+      hideAppContent = shouldShowAppContent;
     });
   }
 
@@ -95,7 +95,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
     if (appLock == true) {
-      await _lockscreenSetting.shouldShowAppContent(isContentVisible: true);
+      await _lockscreenSetting.shouldShowAppContent(isContentVisible: false);
     }
     setState(() {
       _initializeSettings();
@@ -103,12 +103,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     });
   }
 
-  Future<void> _tapShowContent() async {
+  Future<void> _tapHideContent() async {
     setState(() {
-      showAppContent = !showAppContent;
+      hideAppContent = !hideAppContent;
     });
     await _lockscreenSetting.shouldShowAppContent(
-      isContentVisible: showAppContent,
+      isContentVisible: hideAppContent,
     );
   }
 
@@ -170,6 +170,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                         ),
                         appLock
                             ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   MenuItemWidget(
                                     captionedTextWidget: CaptionedTextWidget(
@@ -224,27 +225,16 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     height: 24,
                                   ),
                                   MenuItemWidget(
-                                    captionedTextWidget: CaptionedTextWidget(
-                                      title: "App content in Task switcher",
-                                      textStyle: textTheme.small.copyWith(
-                                        color: colorTheme.textMuted,
-                                      ),
-                                    ),
-                                    alignCaptionedTextToLeft: true,
-                                    isBottomBorderRadiusRemoved: true,
-                                    menuItemColor: colorTheme.fillFaint,
-                                  ),
-                                  MenuItemWidget(
                                     captionedTextWidget:
                                         const CaptionedTextWidget(
-                                      title: "Show content",
+                                      title: "Hide content",
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: true,
                                     menuItemColor: colorTheme.fillFaint,
                                     trailingWidget: ToggleSwitchWidget(
-                                      value: () => showAppContent,
-                                      onChanged: () => _tapShowContent(),
+                                      value: () => hideAppContent,
+                                      onChanged: () => _tapHideContent(),
                                     ),
                                     trailingIconColor: colorTheme.tabIcon,
                                   ),
@@ -255,7 +245,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      'If disabled app content will be displayed in the task switcher',
+                                      'Hides app content in the app switcher',
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),

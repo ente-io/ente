@@ -28,7 +28,7 @@ class LockScreenSettings {
   }
 
   Future<void> shouldShowAppContent({bool isContentVisible = true}) async {
-    isContentVisible
+    !isContentVisible
         ? await PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
@@ -44,7 +44,7 @@ class LockScreenSettings {
   }
 
   bool getShouldShowAppContent() {
-    return _preferences.getBool(keyShowAppContent) ?? true;
+    return _preferences.getBool(keyShowAppContent) ?? false;
   }
 
   Future<void> setLastInvalidAttemptTime(int time) async {
