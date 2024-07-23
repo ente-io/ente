@@ -1,8 +1,8 @@
-import { clientPackageName, isDesktop } from "@/next/app";
-import { clientPackageHeader } from "@/next/http";
-import log from "@/next/log";
-import { accountsAppOrigin, apiURL } from "@/next/origins";
-import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { clientPackageName, isDesktop } from "@/base/app";
+import { clientPackageHeader, HTTPError } from "@/base/http";
+import log from "@/base/log";
+import { accountsAppOrigin, apiURL } from "@/base/origins";
+import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -14,8 +14,8 @@ import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
-    LS_KEYS,
     getData,
+    LS_KEYS,
     setData,
     setLSUser,
 } from "@ente/shared/storage/localStorage";
@@ -240,7 +240,7 @@ export const checkPasskeyVerificationStatus = async (
         if (res.status == 404 || res.status == 410)
             throw new Error(passkeySessionExpiredErrorMessage);
         if (res.status == 400) return undefined; /* verification pending */
-        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        throw new HTTPError(res);
     }
     return TwoFactorAuthorizationResponse.parse(await res.json());
 };

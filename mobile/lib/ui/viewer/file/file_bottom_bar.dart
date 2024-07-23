@@ -1,18 +1,26 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import 'package:photos/utils/delete_file_util.dart';
+import "package:photos/utils/file_util.dart";
+import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/share_util.dart';
 
 class FileBottomBar extends StatefulWidget {
@@ -30,8 +38,8 @@ class FileBottomBar extends StatefulWidget {
     required this.onFileRemoved,
     required this.enableFullScreenNotifier,
     this.userID,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   FileBottomBarState createState() => FileBottomBarState();
@@ -39,10 +47,50 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
+  bool _isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+  bool isPanorama = false;
+  int? lastFileGenID;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        _isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (flagService.internalUser) {
+      isPanorama = widget.file.isPanorama() ?? false;
+      _checkPanorama();
+    }
     return _getBottomBar();
+  }
+
+  // _checkPanorama() method is used to check if the file is a panorama image.
+  // This handles the case when the the file dims (width and height) are not available.
+  Future<void> _checkPanorama() async {
+    if (lastFileGenID == widget.file.generatedID) {
+      return;
+    }
+    lastFileGenID = widget.file.generatedID;
+    final result = await checkIfPanorama(widget.file);
+    if (mounted && isPanorama == !result) {
+      isPanorama = result;
+      setState(() {});
+    }
   }
 
   void safeRefresh() {
@@ -126,6 +174,26 @@ class FileBottomBarState extends State<FileBottomBar> {
           ),
         );
       }
+
+      if (isPanorama) {
+        children.add(
+          Tooltip(
+            message: S.of(context).panorama,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.threesixty,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  await openPanoramaViewerPage(widget.file);
+                },
+              ),
+            ),
+          ),
+        );
+      }
       children.add(
         Tooltip(
           message: S.of(context).share,
@@ -152,10 +220,11 @@ class FileBottomBarState extends State<FileBottomBar> {
       valueListenable: widget.enableFullScreenNotifier,
       builder: (BuildContext context, bool isFullScreen, _) {
         return IgnorePointer(
-          ignoring: isFullScreen,
+          ignoring: isFullScreen || _isFileSwipeLocked,
           child: AnimatedOpacity(
-            opacity: isFullScreen ? 0 : 1,
-            duration: const Duration(milliseconds: 150),
+            opacity: isFullScreen || _isFileSwipeLocked ? 0 : 1,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -217,6 +286,20 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       },
     );
+  }
+
+  Future<void> openPanoramaViewerPage(EnteFile file) async {
+    final fetchedFile = await getFile(file);
+    if (fetchedFile == null) {
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return PanoramaViewerScreen(file: fetchedFile);
+        },
+      ),
+    ).ignore();
   }
 
   Future<void> _showSingleFileDeleteSheet(EnteFile file) async {

@@ -1,3 +1,3 @@
-import Page from "@ente/shared/next/pages/404";
+import Page from "@/base/components/pages/404";
 
 export default Page;

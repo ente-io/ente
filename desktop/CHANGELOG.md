@@ -1,6 +1,11 @@
 # CHANGELOG
 
-## v1.7.2 (Unreleased)
+## v1.7.3 (Unreleased)
+
+-   Support Polish translations.
+-   .
+
+## v1.7.2
 
 -   Significantly improve the speed of the metadata parsing step during imports
     of Google takeouts.
@@ -8,7 +13,6 @@
 -   Fix an issue preventing subscription purchases and renewals.
 -   Clear cached password after changing it on a different device.
 -   Reconcile exported files with disk on app start and resync.
--   .
 
 ## v1.7.1
 

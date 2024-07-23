@@ -1,3 +1,6 @@
+import { ensureElectron } from "@/base/electron";
+import { nameAndExtension } from "@/base/file";
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import downloadManager from "@/new/photos/services/download";
@@ -10,9 +13,6 @@ import {
     safeFileName,
     sanitizeFilename,
 } from "@/new/photos/utils/native-fs";
-import { ensureElectron } from "@/next/electron";
-import { nameAndExtension } from "@/next/file";
-import log from "@/next/log";
 import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";

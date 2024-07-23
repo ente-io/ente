@@ -1,4 +1,7 @@
-import log from "@/next/log";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
+import log from "@/base/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -8,9 +11,6 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { EnteDrawer } from "components/EnteDrawer";
-import { MenuItemGroup } from "components/Menu/MenuItemGroup";
-import Titlebar from "components/Titlebar";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
@@ -186,7 +186,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                         {t("ENABLE")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 </Stack>
             </Stack>
@@ -217,7 +217,7 @@ function DisableMap({ onClose, disableMap, onRootClose }) {
                         {t("DISABLE")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
-                        {t("CANCEL")}
+                        {t("cancel")}
                     </Button>
                 </Stack>
             </Stack>

@@ -2,7 +2,7 @@
 
 The Ente CLI is a Command Line Utility for exporting data from
 [Ente](https://ente.io). It also does a few more things, for example, you can
-use it to decrypting the export from Ente Auth.
+use it to decrypt the export from Ente Auth.
 
 ## Install
 

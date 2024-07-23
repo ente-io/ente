@@ -7,9 +7,9 @@ import "package:flutter/scheduler.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tools/app_lock.dart';
@@ -35,16 +35,7 @@ class _LockScreenState extends State<LockScreen>
   int lockedTimeInSeconds = 0;
   int invalidAttemptCount = 0;
   int remainingTimeInSeconds = 0;
-  bool showErrorMessage = true;
   final _lockscreenSetting = LockScreenSettings.instance;
-  late final AnimationController _controller = AnimationController(
-    duration: const Duration(milliseconds: 500),
-    vsync: this,
-  );
-  late final animation = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeInOut,
-  );
   late Brightness _platformBrightness;
 
   @override
@@ -70,6 +61,16 @@ class _LockScreenState extends State<LockScreen>
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.logout_outlined),
+          color: Theme.of(context).iconTheme.color,
+          onPressed: () {
+            _onLogoutTapped(context);
+          },
+        ),
+      ),
       body: GestureDetector(
         onTap: () {
           isTimerRunning ? null : _showLockScreen(source: "tap");
@@ -125,8 +126,10 @@ class _LockScreenState extends State<LockScreen>
                         width: 75,
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(
-                            begin: 0,
-                            end: _getFractionOfTimeElapsed(),
+                            begin: isTimerRunning ? 0 : 1,
+                            end: isTimerRunning
+                                ? _getFractionOfTimeElapsed()
+                                : 1,
                           ),
                           duration: const Duration(seconds: 1),
                           builder: (context, value, _) =>
@@ -202,37 +205,25 @@ class _LockScreenState extends State<LockScreen>
     return shortestSide > 600 ? true : false;
   }
 
-  Future<void> _autoLogoutOnMaxInvalidAttempts() async {
-    final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).tooManyIncorrectAttempts),
-      content: Text(S.of(context).pleaseLoginAgain),
-      actions: [
-        TextButton(
-          child: Text(
-            S.of(context).ok,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            Navigator.of(context).popUntil((route) => route.isFirst);
-            final dialog =
-                createProgressDialog(context, S.of(context).loggingOut);
-            await dialog.show();
-            await Configuration.instance.logout();
-            await dialog.hide();
-          },
-        ),
-      ],
-    );
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
+  void _onLogoutTapped(BuildContext context) {
+    showChoiceActionSheet(
+      context,
+      title: S.of(context).areYouSureYouWantToLogout,
+      firstButtonLabel: S.of(context).yesLogout,
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await UserService.instance.logout(context);
       },
     );
+  }
+
+  Future<void> _autoLogoutOnMaxInvalidAttempts() async {
+    _logger.info("Auto logout on max invalid attempts");
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    final dialog = createProgressDialog(context, S.of(context).loggingOut);
+    await dialog.show();
+    await Configuration.instance.logout();
+    await dialog.hide();
   }
 
   @override

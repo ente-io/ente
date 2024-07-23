@@ -47,7 +47,7 @@ const Page: React.FC<PageProps> = () => {
         setUser(user);
         if (!user?.token) {
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.CHANGE_PASSWORD);
-            router.push(PAGES.ROOT);
+            router.push("/");
         } else {
             setToken(user.token);
         }

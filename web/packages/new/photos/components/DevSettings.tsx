@@ -1,5 +1,7 @@
-import { getKV, removeKV, setKV } from "@/next/kv";
-import log from "@/next/log";
+import { useIsMobileWidth } from "@/base/hooks";
+import { ensureOk } from "@/base/http";
+import { getKV, removeKV, setKV } from "@/base/kv";
+import log from "@/base/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -10,7 +12,6 @@ import {
     InputAdornment,
     Link,
     TextField,
-    useMediaQuery,
     type ModalProps,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -32,7 +33,7 @@ interface DevSettingsProps {
  * See: [Note: Configuring custom server].
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useIsMobileWidth();
 
     const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.
@@ -45,6 +46,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             onClose={handleDialogClose}
             TransitionComponent={SlideTransition}
             maxWidth="xs"
+            fullWidth
         >
             <Contents {...{ onClose }} />
         </Dialog>
@@ -70,8 +72,11 @@ const Contents: React.FC<ContentsProps> = (props) => {
         () =>
             void getKV("apiOrigin").then((o) =>
                 setInitialAPIOrigin(
-                    // TODO: Migration of apiOrigin from local storage to indexed DB
-                    // Remove me after a bit (27 June 2024).
+                    // Migrate apiOrigin from local storage to indexed DB.
+                    //
+                    // This code was added 27 June 2024. Note that the legacy
+                    // value was never in production builds, only nightlies, so
+                    // this code can be removed soon (tag: Migration).
                     o ?? localStorage.getItem("apiOrigin") ?? "",
                 ),
             ),
@@ -192,7 +197,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     fullWidth
                     disableRipple
                 >
-                    {t("CANCEL")}
+                    {t("cancel")}
                 </FocusVisibleButton>
             </DialogActions>
         </form>
@@ -214,15 +219,17 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
 const updateAPIOrigin = async (origin: string) => {
     if (!origin) {
         await removeKV("apiOrigin");
-        // TODO: Migration of apiOrigin from local storage to indexed DB
-        // Remove me after a bit (27 June 2024).
+        // Migrate apiOrigin from local storage to indexed DB.
+        //
+        // This code was added 27 June 2024. Note that the legacy value was
+        // never in production builds, only nightlies, so this code can be
+        // removed at some point soon (tag: Migration).
         localStorage.removeItem("apiOrigin");
         return;
     }
 
-    const url = `${origin}/ping`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    const res = await fetch(`${origin}/ping`);
+    ensureOk(res);
     try {
         PingResponse.parse(await res.json());
     } catch (e) {

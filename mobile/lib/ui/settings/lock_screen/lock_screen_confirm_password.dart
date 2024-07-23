@@ -140,7 +140,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
                       height: 75,
                       width: 75,
                       child: CircularProgressIndicator(
-                        backgroundColor: colorTheme.fillFaintPressed,
+                        color: colorTheme.fillFaintPressed,
                         value: 1,
                         strokeWidth: 1.5,
                       ),

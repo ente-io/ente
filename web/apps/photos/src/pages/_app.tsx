@@ -1,15 +1,16 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import DownloadManager from "@/new/photos/services/download";
-import { initML } from "@/new/photos/services/ml";
-import { clientPackageName, staticAppTitle } from "@/next/app";
-import { CustomHead } from "@/next/components/Head";
-import { setupI18n } from "@/next/i18n";
-import log from "@/next/log";
+import { clientPackageName, staticAppTitle } from "@/base/app";
+import { CustomHead } from "@/base/components/Head";
+import { AppNavbar } from "@/base/components/Navbar";
+import { setupI18n } from "@/base/i18n";
+import log from "@/base/log";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
-} from "@/next/log-web";
-import { AppUpdate } from "@/next/types/ipc";
+} from "@/base/log-web";
+import { AppUpdate } from "@/base/types/ipc";
+import DownloadManager from "@/new/photos/services/download";
+import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
@@ -21,7 +22,6 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import { AppNavbar } from "@ente/shared/components/Navbar/app";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -39,7 +39,7 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import { CssBaseline, useMediaQuery } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
 import { REDIRECTS } from "constants/redirects";
@@ -121,7 +121,6 @@ export default function App({ Component, pageProps }: AppProps) {
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const isMobile = useMediaQuery("(max-width: 428px)");
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
@@ -174,7 +173,7 @@ export default function App({ Component, pageProps }: AppProps) {
             }
         };
 
-        initML();
+        if (isMLSupported) initML();
 
         electron.onOpenURL(handleOpenURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
@@ -306,7 +305,7 @@ export default function App({ Component, pageProps }: AppProps) {
         });
 
     const logout = () => {
-        void photosLogout().then(() => router.push(PAGES.ROOT));
+        void photosLogout().then(() => router.push("/"));
     };
 
     const appContext = {
@@ -319,7 +318,6 @@ export default function App({ Component, pageProps }: AppProps) {
         setWatchFolderView,
         watchFolderFiles,
         setWatchFolderFiles,
-        isMobile,
         setNotificationAttributes,
         themeColor,
         setThemeColor,
@@ -342,7 +340,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, "photos")}>
                 <CssBaseline enableColorScheme />
-                {showNavbar && <AppNavbar isMobile={isMobile} />}
+                {showNavbar && <AppNavbar />}
                 <MessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>

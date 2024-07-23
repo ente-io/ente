@@ -1,7 +1,7 @@
+import { PeopleList } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { Row } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
-import { PeopleList } from "components/ml/PeopleList";
 import { t } from "i18next";
 import { components } from "react-select";
 import { Suggestion, SuggestionType } from "types/search";

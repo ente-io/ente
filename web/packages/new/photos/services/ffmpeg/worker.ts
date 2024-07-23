@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";
@@ -128,7 +128,4 @@ const substitutePlaceholders = (
                 return segment;
             }
         })
-        // TODO: The type guard should automatically get deduced with TS 5.5
-        // We still need to wait for VSCode to ship with TS 5.5 otherwise the
-        // red squigglies in the editor will remain.
-        .filter((s): s is string => !!s);
+        .filter((s) => s !== undefined);

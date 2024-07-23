@@ -1,8 +1,8 @@
-import { clientPackageName } from "@/next/app";
-import { isDevBuild } from "@/next/env";
-import { clientPackageHeader } from "@/next/http";
-import { apiURL } from "@/next/origins";
-import { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import { clientPackageName } from "@/base/app";
+import { isDevBuild } from "@/base/env";
+import { clientPackageHeader, ensureOk, HTTPError } from "@/base/http";
+import { apiURL } from "@/base/origins";
+import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import {
@@ -57,11 +57,10 @@ const GetPasskeysResponse = z.object({
  * has no passkeys.
  */
 export const getPasskeys = async (token: string) => {
-    const url = await apiURL("/passkeys");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/passkeys"), {
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
     const { passkeys } = GetPasskeysResponse.parse(await res.json());
     return passkeys ?? [];
 };
@@ -86,7 +85,7 @@ export const renamePasskey = async (
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -97,12 +96,11 @@ export const renamePasskey = async (
  * @param id The `id` of the existing passkey to delete.
  */
 export const deletePasskey = async (token: string, id: string) => {
-    const url = await apiURL(`/passkeys/${id}`);
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL(`/passkeys/${id}`), {
         method: "DELETE",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -148,12 +146,11 @@ interface BeginPasskeyRegistrationResponse {
 }
 
 const beginPasskeyRegistration = async (token: string) => {
-    const url = await apiURL("/passkeys/registration/begin");
-    const res = await fetch(url, {
+    const res = await fetch(await apiURL("/passkeys/registration/begin"), {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     // [Note: Converting binary data in WebAuthn API payloads]
     //
@@ -310,7 +307,7 @@ const finishPasskeyRegistration = async ({
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 };
 
 /**
@@ -422,7 +419,7 @@ export const beginPasskeyAuthentication = async (
     if (!res.ok) {
         if (res.status == 409)
             throw new Error(passkeySessionAlreadyClaimedErrorMessage);
-        throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+        throw new HTTPError(res);
     }
 
     // See: [Note: Converting binary data in WebAuthn API payloads]
@@ -457,7 +454,61 @@ export const beginPasskeyAuthentication = async (
  */
 export const signChallenge = async (
     publicKey: PublicKeyCredentialRequestOptions,
-) => nullToUndefined(await navigator.credentials.get({ publicKey }));
+) => {
+    // Hint all transports to make security keys like Yubikey work across
+    // varying registration/verification scenarios.
+    //
+    // During verification, we need to pass a `transport` property.
+    //
+    // > The `transports` property is hint of the methods that the client could
+    // > use to communicate with the relevant authenticator of the public key
+    // > credential to retrieve. Possible values are ["ble", "hybrid",
+    // > "internal", "nfc", "usb"].
+    // >
+    // > MDN
+    //
+    // When we register a passkey, we save the transport alongwith the
+    // credential. During authentication, we pass that transport back to the
+    // browser. This is the approach recommended by the spec:
+    //
+    // > When registering a new credential, the Relying Party SHOULD store the
+    // > value returned from getTransports(). When creating a
+    // > PublicKeyCredentialDescriptor for that credential, the Relying Party
+    // > SHOULD retrieve that stored value and set it as the value of the
+    // > transports member.
+    // >
+    // > https://www.w3.org/TR/webauthn-3/#dom-publickeycredentialdescriptor-transports
+    //
+    // However, following this recommendation break things currently (2024) in
+    // various ways. For example, if a user registers a Yubikey NFC security key
+    // on Firefox on their laptop, then Firefox returns ["usb"]. This is
+    // incorrect, it should be ["usb", "nfc"] (which is what Chrome does, since
+    // the hardware itself supports both USB and NFC transports).
+    //
+    // Later, if the user tries to verifying with their security key on their
+    // iPhone Safari via NFC, the browser doesn't recognize it (which seems
+    // incorrect too, the transport is meant to be a "hint" not a binding).
+    //
+    // > Note that these hints represent the WebAuthn Relying Party's best
+    // > belief as to how an authenticator may be reached.
+    // >
+    // > https://www.w3.org/TR/webauthn-3/#dom-publickeycredentialdescriptor-transports
+    //
+    // As a workaround, we override transports with known possible values.
+
+    for (const cred of publicKey.allowCredentials ?? []) {
+        cred.transports = [
+            ...(cred.transports ?? []),
+            "usb",
+            "nfc",
+            "ble",
+            "hybrid",
+            "internal",
+        ];
+    }
+
+    return nullToUndefined(await navigator.credentials.get({ publicKey }));
+};
 
 interface FinishPasskeyAuthenticationOptions {
     passkeySessionID: string;
@@ -527,7 +578,7 @@ export const finishPasskeyAuthentication = async ({
             },
         }),
     });
-    if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
+    ensureOk(res);
 
     return TwoFactorAuthorizationResponse.parse(await res.json());
 };

@@ -3734,16 +3734,6 @@ class S {
     );
   }
 
-  /// `To enable lockscreen, please setup device passcode or screen lock in your system settings.`
-  String get lockScreenEnablePreSteps {
-    return Intl.message(
-      'To enable lockscreen, please setup device passcode or screen lock in your system settings.',
-      name: 'lockScreenEnablePreSteps',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `View active sessions`
   String get viewActiveSessions {
     return Intl.message(
@@ -8975,6 +8965,16 @@ class S {
     );
   }
 
+  /// `Panorama`
+  String get panorama {
+    return Intl.message(
+      'Panorama',
+      name: 'panorama',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Re-enter password`
   String get reenterPassword {
     return Intl.message(
@@ -9104,6 +9104,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Video Info`
+  String get videoInfo {
+    return Intl.message(
+      'Video Info',
+      name: 'videoInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescription {
+    return Intl.message(
+      'Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto lock',
+      name: 'autoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
+  String get swipeLockEnablePreSteps {
+    return Intl.message(
+      'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
+      name: 'swipeLockEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Immediately`
+  String get immediately {
+    return Intl.message(
+      'Immediately',
+      name: 'immediately',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time after which the app locks after being put in the background`
+  String get autoLockFeatureDescription {
+    return Intl.message(
+      'Time after which the app locks after being put in the background',
+      name: 'autoLockFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -9123,6 +9183,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'tr'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }

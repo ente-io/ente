@@ -1,5 +1,6 @@
+import { EnteSwitch } from "@/base/components/EnteSwitch";
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
@@ -13,7 +14,6 @@ import {
     Dialog,
     DialogContent,
     Divider,
-    Switch,
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
@@ -156,7 +156,12 @@ export default function ExportModal(props: Props) {
     };
 
     return (
-        <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
+        <Dialog
+            open={props.show}
+            onClose={props.onHide}
+            maxWidth="xs"
+            fullWidth
+        >
             <DialogTitleWithCloseButton onClose={props.onHide}>
                 {t("EXPORT_DATA")}
             </DialogTitleWithCloseButton>
@@ -195,7 +200,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
             <>
                 {!exportFolder ? (
                     <Button color={"accent"} onClick={changeExportDirectory}>
-                        {t("SELECT_FOLDER")}
+                        {t("select_folder")}
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>
@@ -220,7 +225,7 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
             <Box>
-                <Switch
+                <EnteSwitch
                     color="accent"
                     checked={continuousExport}
                     onChange={toggleContinuousExport}

@@ -9,7 +9,7 @@
     "include": [
         "src",
         "next-env.d.ts",
-        "../../packages/next/global-electron.d.ts",
+        "../../packages/base/global-electron.d.ts",
         "../../packages/shared/themes/mui-theme.d.ts"
     ]
 }

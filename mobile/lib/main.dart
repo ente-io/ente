@@ -68,7 +68,6 @@ const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
-const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -100,7 +99,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
-        backgroundLockLatency: kBackgroundLockLatency,
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
@@ -307,7 +305,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       preferences,
     );
 
-    MagicCacheService.instance.init(preferences);
+    if (flagService.internalUser) {
+      MagicCacheService.instance.init(preferences);
+    }
 
     initComplete = true;
     _logger.info("Initialization done");

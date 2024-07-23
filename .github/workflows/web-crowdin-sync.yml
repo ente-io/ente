@@ -5,10 +5,12 @@ on:
         branches: [main]
         paths:
             # Run workflow when web's en-US/translation.json is changed
-            - "web/packages/next/locales/en-US/translation.json"
+            - "web/packages/base/locales/en-US/translation.json"
             # Or the workflow itself is changed
             - ".github/workflows/web-crowdin.yml"
     schedule:
+        # Run Mondays at ~6:00 AM IST
+        #
         # [Note: Run workflow on specific days of the week]
         #
         # The last (5th) component of the cron syntax denotes the day of the
@@ -16,7 +18,7 @@ on:
         # and FRI, this can be set to `2,5`.
         #
         # See also: [Note: Run workflow every 24 hours]
-        - cron: "20 1 * * 2"
+        - cron: "20 0 * * 1"
     # Also allow manually running the workflow.
     workflow_dispatch:
 

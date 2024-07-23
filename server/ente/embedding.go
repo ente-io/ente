@@ -10,6 +10,12 @@ type Embedding struct {
 	Size               *int64
 }
 
+// IndexedFile ...
+type IndexedFile struct {
+	FileID    int64 `json:"fileID"`
+	UpdatedAt int64 `json:"updatedAt"`
+}
+
 type InsertOrUpdateEmbeddingRequest struct {
 	FileID             int64  `json:"fileID" binding:"required"`
 	Model              string `json:"model" binding:"required"`
@@ -23,6 +29,12 @@ type GetEmbeddingDiffRequest struct {
 	// SinceTime *int64. Pointer allows us to pass 0 value otherwise binding fails for zero Value.
 	SinceTime *int64 `form:"sinceTime" binding:"required"`
 	Limit     int16  `form:"limit" binding:"required"`
+}
+
+type GetIndexedFiles struct {
+	Model     Model  `form:"model"`
+	SinceTime *int64 `form:"sinceTime" binding:"required"`
+	Limit     *int64 `form:"limit"`
 }
 
 type GetFilesEmbeddingRequest struct {

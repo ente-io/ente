@@ -1,3 +1,5 @@
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";
 import {
     EncryptedEnteFile,
@@ -8,12 +10,11 @@ import {
 } from "@/new/photos/types/file";
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { REQUEST_BATCH_SIZE } from "constants/api";
+import exportService from "services/export";
 import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
 import { batch } from "utils/common";
@@ -30,9 +31,11 @@ export const syncFiles = async (
 ) => {
     const localFiles = await getLocalFiles(type);
     let files = await removeDeletedCollectionFiles(collections, localFiles);
+    let didUpdateFiles = false;
     if (files.length !== localFiles.length) {
         await setLocalFiles(type, files);
         setFiles(sortFiles(mergeMetadata(files)));
+        didUpdateFiles = true;
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -46,8 +49,10 @@ export const syncFiles = async (
         const newFiles = await getFiles(collection, lastSyncTime, setFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(type, files);
+        didUpdateFiles = true;
         setCollectionLastSyncTime(collection, collection.updationTime);
     }
+    if (didUpdateFiles) exportService.onLocalFilesUpdated();
     return files;
 };
 

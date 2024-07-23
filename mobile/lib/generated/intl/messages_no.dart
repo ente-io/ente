@@ -35,8 +35,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewers": m1,
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hva er hovedårsaken til at du sletter kontoen din?"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
@@ -73,6 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
             "Indexing is paused, will automatically resume when device is ready"),
         "invalidEmailAddress":
@@ -107,6 +113,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setNewPassword":
             MessageLookupByLibrary.simpleMessage("Set new password"),
         "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(

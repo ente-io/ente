@@ -1,5 +1,6 @@
-import { ensureElectron } from "@/next/electron";
-import { AppUpdate } from "@/next/types/ipc";
+import { ensureElectron } from "@/base/electron";
+import { AppUpdate } from "@/base/types/ipc";
+import { openURL } from "@/new/photos/utils/web";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
@@ -7,7 +8,6 @@ import { Link } from "@mui/material";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
-import { openLink } from "utils/common";
 
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
@@ -25,7 +25,7 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
     };
 };
 
-const downloadApp = () => openLink("https://ente.io/download/desktop", true);
+const downloadApp = () => openURL("https://ente.io/download/desktop");
 
 export const getTrashFilesMessage = (
     deleteFileHelper,
@@ -37,7 +37,7 @@ export const getTrashFilesMessage = (
         text: t("MOVE_TO_TRASH"),
         variant: "critical",
     },
-    close: { text: t("CANCEL") },
+    close: { text: t("cancel") },
 });
 
 export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
@@ -48,7 +48,7 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
         text: t("MOVE_TO_TRASH"),
         variant: "critical",
     },
-    close: { text: t("CANCEL") },
+    close: { text: t("cancel") },
 });
 
 export const getUpdateReadyToInstallMessage = ({
@@ -156,7 +156,7 @@ export const getMapEnableConfirmationDialog = (
         text: t("ENABLE"),
         variant: "accent",
     },
-    close: { text: t("CANCEL") },
+    close: { text: t("cancel") },
 });
 
 export const getMapDisableConfirmationDialog = (
@@ -169,7 +169,7 @@ export const getMapDisableConfirmationDialog = (
         text: t("DISABLE"),
         variant: "accent",
     },
-    close: { text: t("CANCEL") },
+    close: { text: t("cancel") },
 });
 
 export const getEditorCloseConfirmationMessage = (
@@ -182,5 +182,5 @@ export const getEditorCloseConfirmationMessage = (
         text: t("CLOSE"),
         variant: "critical",
     },
-    close: { text: t("CANCEL") },
+    close: { text: t("cancel") },
 });

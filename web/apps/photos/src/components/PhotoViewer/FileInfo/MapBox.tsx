@@ -1,4 +1,4 @@
-import { haveWindow } from "@/next/env";
+import { haveWindow } from "@/base/env";
 import { styled } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { MapButton } from "./MapButton";

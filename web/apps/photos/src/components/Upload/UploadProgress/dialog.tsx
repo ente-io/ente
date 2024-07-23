@@ -41,7 +41,7 @@ export function UploadProgressDialog() {
     const handleClose = dialogCloseHandler({ staticBackdrop: true, onClose });
 
     return (
-        <Dialog maxWidth="xs" open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
             <UploadProgressHeader />
             {(uploadStage === UPLOAD_STAGES.UPLOADING ||
                 uploadStage === UPLOAD_STAGES.FINISH ||
@@ -96,10 +96,9 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={t("FAILED_UPLOADS")}
                                 sectionInfo={
-                                    /* TODO(MR): Move these to localized strings when finalized. */
                                     uploadStage === UPLOAD_STAGES.FINISH
                                         ? undefined
-                                        : "There will be an option to retry these when the upload finishes."
+                                        : t("failed_uploads_hint")
                                 }
                             />
                             <ResultSection

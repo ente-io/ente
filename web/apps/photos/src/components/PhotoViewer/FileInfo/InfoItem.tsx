@@ -42,9 +42,19 @@ export default function InfoItem({
                             <Typography sx={{ wordBreak: "break-all" }}>
                                 {title}
                             </Typography>
-                            <Typography variant="small" color="text.muted">
-                                {caption}
-                            </Typography>
+                            {!caption || typeof caption == "string" ? (
+                                <Typography variant="small" color="text.muted">
+                                    {caption}
+                                </Typography>
+                            ) : (
+                                <Typography
+                                    variant="small"
+                                    component="div"
+                                    color="text.muted"
+                                >
+                                    {caption}
+                                </Typography>
+                            )}
                         </>
                     )}
                 </Box>

@@ -1,6 +1,10 @@
 // TODO: Remove this override
 /* eslint-disable @typescript-eslint/no-empty-function */
 
+import { isDesktop } from "@/base/app";
+import { blobCache, type BlobCache } from "@/base/blob-cache";
+import log from "@/base/log";
+import { customAPIOrigin } from "@/base/origins";
 import { FILE_TYPE } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
@@ -9,11 +13,7 @@ import type {
     LivePhotoSourceURL,
     SourceURLs,
 } from "@/new/photos/types/file";
-import { getRenderableImage } from "@/new/photos/utils/file";
-import { isDesktop } from "@/next/app";
-import { blobCache, type BlobCache } from "@/next/blob-cache";
-import log from "@/next/log";
-import { customAPIOrigin } from "@/next/origins";
+import { renderableImageBlob } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
@@ -458,7 +458,7 @@ async function getRenderableFileURL(
 
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
-            const convertedBlob = await getRenderableImage(
+            const convertedBlob = await renderableImageBlob(
                 file.metadata.title,
                 fileBlob,
             );
@@ -466,7 +466,7 @@ async function getRenderableFileURL(
             url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
             isRenderable = !!convertedURL;
-            mimeType = convertedBlob?.type;
+            mimeType = convertedBlob.type;
             break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
@@ -511,13 +511,9 @@ async function getRenderableLivePhotoURL(
     const getRenderableLivePhotoImageURL = async () => {
         try {
             const imageBlob = new Blob([livePhoto.imageData]);
-            const convertedImageBlob = await getRenderableImage(
-                livePhoto.imageFileName,
-                imageBlob,
+            return URL.createObjectURL(
+                await renderableImageBlob(livePhoto.imageFileName, imageBlob),
             );
-            if (!convertedImageBlob) return undefined;
-
-            return URL.createObjectURL(convertedImageBlob);
         } catch (e) {
             //ignore and return null
             return undefined;

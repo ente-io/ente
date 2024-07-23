@@ -21,7 +21,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
             title: t("DISABLE_TWO_FACTOR"),
 
             content: t("DISABLE_TWO_FACTOR_MESSAGE"),
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 variant: "critical",
                 text: t("DISABLE"),
@@ -51,7 +51,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
             title: t("UPDATE_TWO_FACTOR"),
 
             content: t("UPDATE_TWO_FACTOR_MESSAGE"),
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 variant: "accent",
                 text: t("UPDATE"),

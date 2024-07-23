@@ -4,12 +4,12 @@
     "private": true,
     "dependencies": {
         "@/accounts": "*",
+        "@/base": "*",
+        "@/build-config": "*",
         "@/media": "*",
-        "@/next": "*",
-        "@ente/eslint-config": "*",
         "@ente/shared": "*"
     },
     "devDependencies": {
-        "@types/chromecast-caf-receiver": "^6.0.14"
+        "@types/chromecast-caf-receiver": "^6.0"
     }
 }

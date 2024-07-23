@@ -41,7 +41,7 @@ FileType fileTypeFromAsset(AssetEntity asset) {
     case AssetType.image:
       type = FileType.image;
       // PHAssetMediaSubtype.photoLive.rawValue is 8
-      // This hack should go away once photos_manager support livePhotos
+      // This hack should go away once photo_manager support livePhotos
       if (asset.subtype > -1 && (asset.subtype & 8) != 0) {
         type = FileType.livePhoto;
       }

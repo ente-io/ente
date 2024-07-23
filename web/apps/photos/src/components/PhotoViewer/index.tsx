@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -13,13 +13,13 @@ import {
     getFileFromURL,
 } from "utils/file";
 
+import { isDesktop } from "@/base/app";
+import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
-import { isNonWebImageFileExtension } from "@/media/formats";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
-import { isNativeConvertibleToJPEG } from "@/new/photos/utils/file";
-import { lowercaseExtension } from "@/next/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -350,11 +350,16 @@ function PhotoViewer(props: Iprops) {
 
     function updateShowEditButton(file: EnteFile) {
         const extension = lowercaseExtension(file.metadata.title);
-        const isSupported =
-            !isNonWebImageFileExtension(extension) ||
-            // TODO: This condition doesn't sound correct when running in the
-            // web app?
-            isNativeConvertibleToJPEG(extension);
+        // Assume it is supported.
+        let isSupported = true;
+        if (needsJPEGConversion(extension)) {
+            // See if the file is on the whitelist of extensions that we know
+            // will not be directly renderable.
+            if (!isDesktop) {
+                // On the web, we only support HEIC conversion.
+                isSupported = isHEICExtension(extension);
+            }
+        }
         setShowEditButton(
             file.metadata.fileType === FILE_TYPE.IMAGE && isSupported,
         );

@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -41,8 +41,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                     }
                 }),
         );
-        // Remove undefined values
-        const filteredAuthCodes = authCodes.filter((f): f is Code => !!f);
+        const filteredAuthCodes = authCodes.filter((f) => f !== undefined);
         filteredAuthCodes.sort((a, b) => {
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);

@@ -1,6 +1,6 @@
-import { ensureElectron } from "@/next/electron";
-import { basename, dirname } from "@/next/file";
-import type { CollectionMapping, FolderWatch } from "@/next/types/ipc";
+import { ensureElectron } from "@/base/electron";
+import { basename, dirname } from "@/base/file";
+import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
@@ -149,7 +149,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
 };
 
 const Title_ = styled("div")`
-    padding: 32px 16px 16px 24px;
+    padding: 16px 12px 16px 16px;
 `;
 
 interface WatchList {
@@ -242,7 +242,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
             title: t("STOP_WATCHING_FOLDER"),
             content: t("STOP_WATCHING_DIALOG_MESSAGE"),
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
                 variant: "secondary",
             },
             proceed: {

@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
@@ -15,6 +15,30 @@ import {
 } from "types/entity";
 import { getLatestVersionEntities } from "utils/entity";
 
+/**
+ * The maximum number of items to fetch in a single diff
+ *
+ * [Note: Limit of returned items in /diff requests]
+ *
+ * The various GET /diff API methods, which tell the client what all has changed
+ * since a timestamp (provided by the client) take a limit parameter.
+ *
+ * These diff API calls return all items whose updated at is greater
+ * (non-inclusive) than the timestamp we provide. So there is no mechanism for
+ * pagination of items which have the same exact updated at.
+ *
+ * Conceptually, it may happen that there are more items than the limit we've
+ * provided, but there are practical safeguards.
+ *
+ * For file diff, the limit is advisory, and remote may return less, equal or
+ * more items than the provided limit. The scenario where it returns more is
+ * when more files than the limit have the same updated at. Theoretically it
+ * would make the diff response unbounded, however in practice file
+ * modifications themselves are all batched. Even if the user were to select all
+ * the files in their library and updates them all in one go in the UI, their
+ * client app is required to use batched API calls to make those updates, and
+ * each of those batches would get distinct updated at.
+ */
 const DIFF_LIMIT = 500;
 
 const ENTITY_TABLES: Record<EntityType, string> = {

@@ -5,8 +5,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import { nameAndExtension } from "@/base/file";
+import log from "@/base/log";
+import { apiURL, customAPIOrigin } from "@/base/origins";
 import { FILE_TYPE } from "@/media/file-type";
-import { isHEICExtension, isNonWebImageFileExtension } from "@/media/formats";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
 import type {
@@ -15,9 +18,6 @@ import type {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "@/new/photos/types/file";
-import { nameAndExtension } from "@/next/file";
-import log from "@/next/log";
-import { apiURL, customAPIOrigin } from "@/next/origins";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -258,8 +258,8 @@ const isFileEligible = (file: EnteFile) => {
     // extension. To detect the actual type, we need to sniff the MIME type, but
     // that requires downloading and decrypting the file first.
     const [, extension] = nameAndExtension(file.metadata.title);
-    if (extension && isNonWebImageFileExtension(extension)) {
-        // Of the known non-web types, we support HEIC.
+    if (extension && needsJPEGConversion(extension)) {
+        // On the web, we only support HEIC conversion.
         return isHEICExtension(extension);
     }
 

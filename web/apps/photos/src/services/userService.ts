@@ -1,6 +1,6 @@
 import { putAttributes } from "@/accounts/api/user";
-import log from "@/next/log";
-import { apiURL, customAPIOrigin, familyAppOrigin } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL, customAPIOrigin, familyAppOrigin } from "@/base/origins";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -202,47 +202,6 @@ export const deleteAccount = async (
         );
     } catch (e) {
         log.error("deleteAccount api call failed", e);
-        throw e;
-    }
-};
-
-export const getFaceSearchEnabledStatus = async () => {
-    try {
-        const token = getToken();
-        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
-            await HTTPService.get(
-                await apiURL("/remote-store"),
-                {
-                    key: "faceSearchEnabled",
-                    defaultValue: false,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        return resp.data.value === "true";
-    } catch (e) {
-        log.error("failed to get face search enabled status", e);
-        throw e;
-    }
-};
-
-export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
-    try {
-        const token = getToken();
-        await HTTPService.post(
-            await apiURL("/remote-store/update"),
-            {
-                key: "faceSearchEnabled",
-                value: newStatus.toString(),
-            },
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-    } catch (e) {
-        log.error("failed to update face search enabled status", e);
         throw e;
     }
 };

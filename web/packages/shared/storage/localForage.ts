@@ -1,4 +1,4 @@
-import { haveWindow } from "@/next/env";
+import { haveWindow } from "@/base/env";
 
 import localForage from "localforage";
 
