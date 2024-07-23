@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:convert";
-import "dart:io";
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart" show Uint8List;
@@ -13,6 +12,7 @@ import "package:photos/services/machine_learning/file_ml/files_ml_data_response.
 import "package:photos/services/machine_learning/file_ml/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
+import "package:photos/utils/gzip.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class RemoteFileMLService {
@@ -125,19 +125,6 @@ class RemoteFileMLService {
   }
 }
 
-Uint8List ungzipUint8List(Uint8List compressedData) {
-  final codec = GZipCodec();
-  final List<int> decompressedList = codec.decode(compressedData);
-  return Uint8List.fromList(decompressedList);
-}
-
-// gzipUInt8List
-Uint8List gzipUInt8List(Uint8List data) {
-  final codec = GZipCodec();
-  final compressedData = codec.encode(data);
-  return Uint8List.fromList(compressedData);
-}
-
 Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
   Map<String, dynamic> args,
 ) async {
@@ -151,7 +138,7 @@ Future<Map<int, RemoteFileML>> _decryptFileMLComputer(
     decryptArgs["header"] =
         CryptoUtil.base642bin(input.embedding.decryptionHeader);
     final embeddingData = chachaDecryptData(decryptArgs);
-    final unzippedData = ungzipUint8List(embeddingData);
+    final unzippedData = unGzipUInt8List(embeddingData);
     final decodedJson = jsonDecode(utf8.decode(unzippedData));
     final RemoteFileML decodedEmbedding = RemoteFileML.fromRemote(
       input.embedding.fileID,
