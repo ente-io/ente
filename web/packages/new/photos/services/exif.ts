@@ -78,5 +78,19 @@ export const indexExif = async (_enteFile: EnteFile, blob: Blob) => {
         expanded: true,
     });
 
+    // Remove the embedded thumbnail (if any).
+    delete tags.Thumbnail;
+    delete tags.exif?.Thumbnail;
+
+    // Remove the embedded MPF images (if any).
+    //
+    // The TypeScript definition is out of data and doesn't include the top
+    // level 'mpf', so we need to cast. From the source:
+    //
+    // > The images can be accessed by the tags.Images array (tags.mpf.Images if
+    // > using expanded: true).
+    //
+    delete (tags as Record<string, unknown>).mpf;
+
     return tags;
 };
