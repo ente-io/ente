@@ -19,7 +19,7 @@ class LockScreenSettings {
   static const keyInvalidAttempts = "ls_invalid_attempts";
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const autoLockTime = "ls_auto_lock_time";
-  static const keyShowAppContent = "ls_show_app_content";
+  static const keyHideAppContent = "ls_show_app_content";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
     Duration(seconds: 5),
@@ -35,16 +35,19 @@ class LockScreenSettings {
   Future<void> init() async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
+    await shouldHideAppContent(isContentVisible: getShouldHideAppContent());
   }
 
-  Future<void> shouldShowAppContent({bool showAppContent = true}) async {
+  Future<void> shouldHideAppContent({bool isContentVisible = true}) async {
     final brightness =
         SchedulerBinding.instance.platformDispatcher.platformBrightness;
     bool isInDarkMode = brightness == Brightness.dark;
-    showAppContent
+    !isContentVisible
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
-            iosOptions: const PrivacyIosOptions(),
+            iosOptions: const PrivacyIosOptions(
+              enablePrivacy: true,
+            ),
             androidOptions: const PrivacyAndroidOptions(
               enableSecure: true,
             ),
@@ -53,11 +56,11 @@ class LockScreenSettings {
                 ? PrivacyBlurEffect.dark
                 : PrivacyBlurEffect.extraLight,
           );
-    await _preferences.setBool(keyShowAppContent, showAppContent);
+    await _preferences.setBool(keyHideAppContent, isContentVisible);
   }
 
-  bool getShouldShowAppContent() {
-    return _preferences.getBool(keyShowAppContent) ?? true;
+  bool getShouldHideAppContent() {
+    return _preferences.getBool(keyHideAppContent) ?? false;
   }
 
   Future<void> setAutoLockTime(Duration duration) async {
@@ -146,6 +149,7 @@ class LockScreenSettings {
     await _secureStorage.delete(key: saltKey);
     await _secureStorage.delete(key: pin);
     await _secureStorage.delete(key: password);
+    await _preferences.remove(keyHideAppContent);
   }
 
   Future<bool> isPinSet() async {

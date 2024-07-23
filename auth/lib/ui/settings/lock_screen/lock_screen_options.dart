@@ -31,12 +31,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
   late int autoLockTimeInMilliseconds;
-  bool showAppContent = true;
+  late bool hideAppContent;
 
   @override
   void initState() {
     super.initState();
-    showAppContent = _lockscreenSetting.getShouldShowAppContent();
+    hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
     _initializeSettings();
     appLock = isPinEnabled ||
@@ -47,12 +47,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _initializeSettings() async {
     final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
-    final bool shouldShowAppContent =
-        _lockscreenSetting.getShouldShowAppContent();
+    final bool shouldHideAppContent =
+        _lockscreenSetting.getShouldHideAppContent();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
-      showAppContent = shouldShowAppContent;
+      hideAppContent = shouldHideAppContent;
     });
   }
 
@@ -102,7 +102,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
     if (appLock == true) {
-      await _lockscreenSetting.shouldShowAppContent(showAppContent: true);
+      await _lockscreenSetting.shouldHideAppContent(isContentVisible: false);
     }
     setState(() {
       _initializeSettings();
@@ -123,14 +123,13 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     );
   }
 
-  Future<void> _onShowContent() async {
-    showAppContent = _lockscreenSetting.getShouldShowAppContent();
-    await _lockscreenSetting.shouldShowAppContent(
-      showAppContent: !showAppContent,
-    );
+  Future<void> _onHideContent() async {
     setState(() {
-      showAppContent = !showAppContent;
+      hideAppContent = !hideAppContent;
     });
+    await _lockscreenSetting.shouldHideAppContent(
+      isContentVisible: hideAppContent,
+    );
   }
 
   String _formatTime(Duration duration) {
@@ -290,27 +289,14 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                   ),
                                   PlatformUtil.isMobile()
                                       ? Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             const SizedBox(height: 24),
                                             MenuItemWidget(
                                               captionedTextWidget:
-                                                  CaptionedTextWidget(
-                                                title:
-                                                    "App content in Task switcher",
-                                                textStyle:
-                                                    textTheme.small.copyWith(
-                                                  color: colorTheme.textMuted,
-                                                ),
-                                              ),
-                                              isBottomBorderRadiusRemoved: true,
-                                              alignCaptionedTextToLeft: true,
-                                              menuItemColor:
-                                                  colorTheme.fillFaint,
-                                            ),
-                                            MenuItemWidget(
-                                              captionedTextWidget:
                                                   const CaptionedTextWidget(
-                                                title: "Show Content",
+                                                title: "Hide Content",
                                               ),
                                               alignCaptionedTextToLeft: true,
                                               isTopBorderRadiusRemoved: true,
@@ -318,9 +304,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                                   colorTheme.fillFaint,
                                               trailingWidget:
                                                   ToggleSwitchWidget(
-                                                value: () => showAppContent,
+                                                value: () => hideAppContent,
                                                 onChanged: () =>
-                                                    _onShowContent(),
+                                                    _onHideContent(),
                                               ),
                                             ),
                                             Padding(
@@ -330,7 +316,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                                 right: 12,
                                               ),
                                               child: Text(
-                                                "If disabled app content will be displayed in the task switcher",
+                                                "Hides app content in the app switcher",
                                                 style: textTheme.miniFaint,
                                                 textAlign: TextAlign.left,
                                               ),
