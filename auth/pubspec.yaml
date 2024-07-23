@@ -78,7 +78,7 @@ dependencies:
   password_strength: ^0.2.0
   path: ^1.8.3
   path_provider: ^2.0.11
-  pinput: ^2.0.2
+  pinput: ^5.0.0
   pointycastle: ^3.7.3
   privacy_screen: ^0.0.6
   protobuf: ^3.0.0
