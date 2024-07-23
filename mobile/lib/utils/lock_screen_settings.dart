@@ -32,6 +32,7 @@ class LockScreenSettings {
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
               enablePrivacy: true,
+              lockTrigger: IosLockTrigger.didEnterBackground,
             ),
             androidOptions: const PrivacyAndroidOptions(
               enableSecure: true,
