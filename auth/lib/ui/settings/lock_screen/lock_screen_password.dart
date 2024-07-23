@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/common/dynamic_fab.dart";
 import "package:ente_auth/ui/components/buttons/icon_button_widget.dart";
@@ -98,7 +99,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
         builder: (context, isFormValid, child) {
           return DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            buttonText: "Next",
+            buttonText: context.l10n.next,
             isFormValid: isFormValid,
             onPressedFunction: () async {
               _submitNotifier.value = !_submitNotifier.value;
@@ -164,8 +165,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
               ),
               Text(
                 widget.isChangingLockScreenSettings
-                    ? "Enter Password"
-                    : "Set new Password",
+                    ? context.l10n.enterPassword
+                    : context.l10n.setNewPassword,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyBold,
               ),
@@ -173,7 +174,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextInputWidget(
-                  hintText: "Password",
+                  hintText: context.l10n.password,
                   autoFocus: true,
                   textCapitalization: TextCapitalization.none,
                   isPasswordInput: true,

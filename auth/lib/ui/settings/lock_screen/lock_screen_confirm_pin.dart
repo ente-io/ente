@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/settings/lock_screen/custom_pin_keypad.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
@@ -158,7 +159,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             ),
           ),
           Text(
-            "Re-enter PIN",
+            context.l10n.reEnterPin,
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

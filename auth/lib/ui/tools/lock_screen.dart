@@ -149,7 +149,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                         alignment: Alignment.center,
                         children: [
                           Text(
-                            "Too many incorrect attempts",
+                            context.l10n.tooManyIncorrectAttempts,
                             style: textTheme.small,
                           )
                               .animate(
@@ -175,7 +175,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                     : GestureDetector(
                         onTap: () => _showLockScreen(source: "tap"),
                         child: Text(
-                          "Tap to unlock",
+                          context.l10n.tapToUnlock,
                           style: textTheme.small,
                         ),
                       ),
@@ -201,8 +201,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
-      title: "Are you sure you want to logout?",
-      firstButtonLabel: "Yes, logout",
+      title: context.l10n.areYouSureYouWantToLogout,
+      firstButtonLabel: context.l10n.yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);

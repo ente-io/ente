@@ -137,8 +137,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "App lock",
+        captionedTextWidget: CaptionedTextWidget(
+          title: context.l10n.appLock,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -146,7 +146,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           if (await LocalAuthentication().isDeviceSupported()) {
             final bool result = await requestAuthentication(
               context,
-              "Please authenticate to change lockscreen setting",
+              context.l10n.authToChangeLockscreenSetting,
             );
             if (result) {
               await Navigator.of(context).push(
@@ -160,8 +160,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           } else {
             await showErrorDialog(
               context,
-              "No system lock found",
-              "To enable app lock, please setup device passcode or screen lock in your system settings.",
+              context.l10n.noSystemLockFound,
+              context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
             );
           }
         },

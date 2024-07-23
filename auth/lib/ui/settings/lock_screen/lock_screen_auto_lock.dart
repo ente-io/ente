@@ -1,3 +1,4 @@
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/divider_widget.dart';
@@ -22,9 +23,9 @@ class _LockScreenAutoLockState extends State<LockScreenAutoLock> {
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          const TitleBarWidget(
+          TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "Auto lock",
+              title: context.l10n.autoLock,
             ),
           ),
           SliverList(
@@ -136,7 +137,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
     } else if (duration.inSeconds != 0) {
       return "${duration.inSeconds}s";
     } else {
-      return "Immediately";
+      return context.l10n.immediately;
     }
   }
 }

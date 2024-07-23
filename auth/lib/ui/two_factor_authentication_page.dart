@@ -102,10 +102,6 @@ class _TwoFactorAuthenticationPageState
                 ),
               ),
             ),
-            // submittedFieldDecoration: _pinPutDecoration.copyWith(
-            //   borderRadius: BorderRadius.circular(20.0),
-            // ),
-            // selectedFieldDecoration: _pinPutDecoration,
             defaultPinTheme: _pinPutDecoration,
             followingPinTheme: _pinPutDecoration.copyWith(
               decoration: BoxDecoration(
@@ -115,13 +111,6 @@ class _TwoFactorAuthenticationPageState
                 ),
               ),
             ),
-            // followingFieldDecoration: _pinPutDecoration.copyWith(
-            //   borderRadius: BorderRadius.circular(5.0),
-            //   border: Border.all(
-            //     color: const Color.fromRGBO(45, 194, 98, 0.5),
-            //   ),
-            // ),
-
             autofocus: true,
           ),
         ),

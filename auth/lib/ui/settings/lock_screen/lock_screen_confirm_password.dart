@@ -1,3 +1,4 @@
+import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/common/dynamic_fab.dart";
 import "package:ente_auth/ui/components/buttons/icon_button_widget.dart";
@@ -87,7 +88,7 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
         builder: (context, isFormValid, child) {
           return DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            buttonText: "Confirm",
+            buttonText: context.l10n.confirm,
             isFormValid: isFormValid,
             onPressedFunction: () async {
               _submitNotifier.value = !_submitNotifier.value;
@@ -152,14 +153,14 @@ class _LockScreenConfirmPasswordState extends State<LockScreenConfirmPassword> {
                 ),
               ),
               Text(
-                "Re-enter Password",
+                context.l10n.reEnterPassword,
                 style: textTheme.bodyBold,
               ),
               const Padding(padding: EdgeInsets.all(12)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextInputWidget(
-                  hintText: "Confirm Password",
+                  hintText: context.l10n.confirmPassword,
                   autoFocus: true,
                   textCapitalization: TextCapitalization.none,
                   isPasswordInput: true,
