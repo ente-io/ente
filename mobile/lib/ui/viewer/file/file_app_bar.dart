@@ -118,21 +118,27 @@ class FileAppBarState extends State<FileAppBar> {
               stops: const [0, 0.2, 1],
             ),
           ),
-          child: AppBar(
-            iconTheme: const IconThemeData(
-              color: Colors.white,
-            ), //same for both themes
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                _isFileSwipeLocked
-                    ? _requestAuthentication()
-                    : Navigator.of(context).pop();
-              },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            child: AppBar(
+              key: ValueKey(_isFileSwipeLocked),
+              iconTheme: const IconThemeData(
+                color: Colors.white,
+              ), //same for both themes
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  _isFileSwipeLocked
+                      ? _requestAuthentication()
+                      : Navigator.of(context).pop();
+                },
+              ),
+              actions: shouldShowActions && !_isFileSwipeLocked ? _actions : [],
+              elevation: 0,
+              backgroundColor: const Color(0x00000000),
             ),
-            actions: shouldShowActions && !_isFileSwipeLocked ? _actions : [],
-            elevation: 0,
-            backgroundColor: const Color(0x00000000),
           ),
         ),
       ),
