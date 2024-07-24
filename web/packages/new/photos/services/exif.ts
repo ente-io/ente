@@ -2,6 +2,25 @@ import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
 
 /**
+ * Data extracted from the Exif and other metadata embedded in the original
+ * image, and saved in the metadata associated with an {@link EnteFile}.
+ *
+ * These are the bits of information that are commonly needed, and having them
+ * be attached to an {@link EnteFile} allows us to perform operations using
+ * these attributes without needing to re-download the original image.
+ */
+interface ParsedMetadata {
+    /** The width of the image, in pixels. */
+    width?: number;
+    /** The height of the image, in pixels. */
+    height?: number;
+    /** The time when this photo was taken. */
+    creationTime?: number;
+    /** The GPS coordinates where the photo was taken. */
+    location?: { latitude: number; longitude: number };
+}
+
+/**
  * Extract Exif and other metadata from the given file.
  *
  * [Note: Exif]
@@ -22,7 +41,6 @@ import type { EnteFile } from "../types/file";
  *
  * The library we use is https://github.com/mattiasw/ExifReader.
  */
-
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const extractExif = () => {};
 
@@ -283,10 +301,13 @@ const parseIPTCDate = (
 /**
  * Parse GPS location from the metadata embedded in the file.
  */
-const parseLocation = (tags: ExifReader.ExpandedTags) => ({
-    Latitude: tags.gps?.Latitude,
-    Longitude: tags.gps?.Longitude,
-});
+const parseLocation = (tags: ExifReader.ExpandedTags) => {
+    const latitude = tags.gps?.Latitude;
+    const longitude = tags.gps?.Longitude;
+    return latitude !== undefined && longitude !== undefined
+        ? { latitude, longitude }
+        : undefined;
+};
 
 /**
  * Parse the width and height of the image from the metadata embedded in the
@@ -296,7 +317,7 @@ const parseDimensions = (tags: ExifReader.ExpandedTags) => {
     // Go through all possiblities in order, returning the first pair with both
     // the width and height defined, and non-zero.
     const pair = (w: number | undefined, h: number | undefined) =>
-        w && h ? { ImageWidth: w, ImageHeight: h } : undefined;
+        w && h ? { width: w, height: h } : undefined;
 
     return (
         pair(
@@ -453,10 +474,12 @@ export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
 const backfill = (enteFile: EnteFile, tags: ExifReader.ExpandedTags) => {
     // const date =
     // TODO:Exif: Testing
-    console.log([
-        enteFile,
-        parseCreationDate(tags),
-        parseLocation(tags),
-        parseDimensions(tags),
-    ]);
+    const location = parseLocation(tags);
+    const creationDate = parseCreationDate(tags);
+    const dimensions = parseDimensions(tags);
+    const metadata: ParsedMetadata = dimensions ?? {};
+    if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
+    if (location) metadata.location = location;
+    console.log(enteFile, metadata);
+    return metadata;
 };
