@@ -18,7 +18,7 @@ import type { EnteFile } from "../types/file";
  * extract and operate on not just Exif tags, but also XMP (XML metadata
  * embedded in images) and IPTC (another metadat standard) tags.
  *
- * The de facto reference for Exif (in its general form) is exiftool.
+ * A list for metadata tags can be found in exiftool's documentation:
  * https://exiftool.org/TagNames
  *
  * The library we use is https://github.com/mattiasw/ExifReader.
@@ -132,7 +132,7 @@ const parseExifDate = (
     // time. This is the behaviour we want (See: [Note: Exif dates]).
 
     return new Date(
-        `${YYYY}-${MM}-${DD}T${HH}:${mm}:${ss}.000${offsetString ?? ""}`,
+        `${YYYY}-${MM}-${DD}T${HH}:${mm}:${ss}${offsetString ?? ""}`,
     );
 };
 
@@ -161,27 +161,27 @@ const parseXMPDates = ({ xmp }: ExifReader.ExpandedTags) => ({
 /**
  * Parse an XMP date tag.
  *
- * Dates in XMP are encoded as strings of the same base format as Exif, but they
- * additionally allow for sub-seconds and a timezone to be specified.
+ * [Note: XMP dates]
  *
- *     YYYY:mm:dd HH:MM:SS[.ss][+/-HH:MM]
+ * XMP dates use a format same as the ISO-8601 format that is used by JavaScript
+ * as its date time string format.
  *
+ *     YYYY-MM-DDThh:mm:ss.sTZD
+ *
+ * The main difference being, unlike JavaScript, all of the above components
+ * except YYYY are optional. In practice, browsers gracefully handle these
+ * scenarios, so we can directly use the JavaScript date constructor.
+ *
+ * References:
+ * - https://www.iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#date-value-type
+ * - https://developer.adobe.com/xmp/docs/XMPNamespaces/XMPDataTypes/#date
  */
 const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
     if (!xmpTag) return undefined;
     const s = xmpTag.value;
     if (typeof s != "string") return undefined;
 
-    // Do some minimal string manipulation to transform the XMP date string
-    // format into the Javascript date time string format. This is not going to
-    // be robust if the XMP data is malformed.
-    //
-    //     XMP  YYYY:mm:dd HH:MM:SS[.ss][+/-HH:MM]
-    //     JS   YYYY-MM-DDTHH:mm:ss.sssZ
-    //
-    return new Date(
-        s.trim().replace(":", "-").replace(":", "-").replace(" ", "T"),
-    );
+    return new Date(s);
 };
 
 /**
