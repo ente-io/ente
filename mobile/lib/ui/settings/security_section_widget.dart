@@ -145,6 +145,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
+        surfaceExecutionStates: false,
         onTap: () async {
           if (await LocalAuthentication().isDeviceSupported()) {
             final bool result = await requestAuthentication(
