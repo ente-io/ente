@@ -199,6 +199,49 @@ const parseLocation = (tags: ExifReader.ExpandedTags) => ({
 });
 
 /**
+ * Parse the width and height of the image from the metadata embedded in the
+ * file.
+ */
+const parseDimensions = (tags: ExifReader.ExpandedTags) => ({
+    ImageWidth: [
+        tags.exif?.ImageWidth?.value,
+        tags.exif?.PixelXDimension?.value,
+        tags.file?.["Image Width"]?.value,
+        parseXMPNum(tags.xmp?.ImageWidth),
+        parseXMPNum(tags.xmp?.ExifImageWidth),
+        tags.pngFile?.["Image Width"]?.value,
+        tags.gif?.["Image Width"]?.value,
+        tags.riff?.ImageWidth?.value,
+        tags.file?.["Image Width"]?.value,
+    ].find((x) => x),
+    ImageHeight: [
+        // Note: The Exif spec calls it ImageLength, not ImageHeight.
+        tags.exif?.ImageLength?.value,
+        tags.exif?.PixelYDimension?.value,
+        tags.file?.["Image Height"]?.value,
+        parseXMPNum(tags.xmp?.ImageHeight),
+        parseXMPNum(tags.xmp?.ExifImageHeight),
+        tags.pngFile?.["Image Height"]?.value,
+        tags.gif?.["Image Height"]?.value,
+        tags.riff?.ImageHeight?.value,
+        tags.file?.["Image Height"]?.value,
+    ].find((x) => x),
+});
+
+/**
+ * Try to parse the given XMP tag as a number.
+ */
+const parseXMPNum = (xmpTag: ExifReader.XmpTag | undefined) => {
+    if (!xmpTag) return undefined;
+    const s = xmpTag.value;
+    if (typeof s != "string") return undefined;
+
+    const n = parseInt(s, 10);
+    if (isNaN(n)) return undefined;
+    return n;
+};
+
+/**
  * Index Exif in the given {@link EnteFile}.
  *
  * This function is invoked as part of the ML indexing pipeline, which is why it
