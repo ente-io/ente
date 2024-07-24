@@ -140,8 +140,9 @@ const parseExifDate = (
     }
 
     const date = new Date(YYYY, MM - 1, DD, HH, mm, ss);
-
-
+    // Fix interpretation of 2 digit years
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#interpretation_of_two-digit_years
+    date.setFullYear(YYYY);
 
     const [offsetString] = offsetTag?.value ?? [];
     return "";
