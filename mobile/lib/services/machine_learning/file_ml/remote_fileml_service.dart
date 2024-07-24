@@ -15,6 +15,7 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class RemoteFileMLService {
   RemoteFileMLService._privateConstructor();
+  static const String _derivedModelKey = "derived";
 
   static final Computer _computer = Computer.shared();
 
@@ -43,7 +44,7 @@ class RemoteFileMLService {
         "/embeddings",
         data: {
           "fileID": file.uploadedFileID!,
-          "model": 'ggml-clip',
+          "model": _derivedModelKey,
           "encryptedEmbedding": encryptionResult.encData,
           "decryptionHeader": encryptionResult.header,
         },
@@ -62,7 +63,7 @@ class RemoteFileMLService {
         "/embeddings/files",
         data: {
           "fileIDs": fileIds.toList(),
-          "model": 'ggml-clip',
+          "model": _derivedModelKey,
         },
       );
       final remoteEmb = res.data['embeddings'] as List;
