@@ -41,8 +41,21 @@ interface ParsedMetadata {
  *
  * The library we use is https://github.com/mattiasw/ExifReader.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const extractExif = () => {};
+export const extractMetadata = async (file: File) => {
+    const tags = await ExifReader.load(await file.arrayBuffer(), {
+        async: true,
+        expanded: true,
+    });
+
+    const location = parseLocation(tags);
+    const creationDate = parseCreationDate(tags);
+    const dimensions = parseDimensions(tags);
+
+    const metadata: ParsedMetadata = dimensions ?? {};
+    if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
+    if (location) metadata.location = location;
+    return metadata;
+};
 
 /**
  * Parse a single "best" creation date for an image from the metadata embedded
@@ -472,14 +485,13 @@ export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
 };
 
 const backfill = (enteFile: EnteFile, tags: ExifReader.ExpandedTags) => {
-    // const date =
-    // TODO:Exif: Testing
-    const location = parseLocation(tags);
     const creationDate = parseCreationDate(tags);
-    const dimensions = parseDimensions(tags);
-    const metadata: ParsedMetadata = dimensions ?? {};
-    if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
-    if (location) metadata.location = location;
-    console.log(enteFile, metadata);
-    return metadata;
+    if (!creationDate) return;
+
+    const creationTime = creationDate.getTime() * 1000;
+
+    if (enteFile.metadata.creationTime == creationTime) return;
+
+    // TODO: Exif: backfill
+    console.log(enteFile, creationTime);
 };

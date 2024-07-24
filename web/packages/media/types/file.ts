@@ -57,7 +57,13 @@ export interface Metadata {
      * See: [Note: File name for local EnteFile objects]
      */
     title: string;
-    creationTime: number;
+    /**
+     * The time when this file was created.
+     *
+     * For photos (and images in general), this is the time when the photo was
+     * taken, or when the screenshot was captured.
+     */
+    creationTime: number | undefined;
     modificationTime: number;
     latitude: number;
     longitude: number;
