@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
@@ -230,7 +232,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       title: "Hide content",
                                     ),
                                     alignCaptionedTextToLeft: true,
-                                    isTopBorderRadiusRemoved: true,
+                                    singleBorderRadius: 8,
                                     menuItemColor: colorTheme.fillFaint,
                                     trailingWidget: ToggleSwitchWidget(
                                       value: () => hideAppContent,
@@ -245,7 +247,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      'Hides app content in the app switcher',
+                                      Platform.isAndroid
+                                          ? 'Hides app content in the app switcher and disables screenshots'
+                                          : 'Hides app content in the app switcher',
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),
