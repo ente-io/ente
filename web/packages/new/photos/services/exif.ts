@@ -27,6 +27,75 @@ import type { EnteFile } from "../types/file";
 export const extractExif = () => {};
 
 /**
+ * Parse a date from an Exif date and offset tag combination.
+ *
+ * @param tags Metadata tags associated with a file.
+ *
+ * @param dateTag The name of the date tag to use.
+ *
+ * @param offsetTag The name of the offset tag corresponding to {@link dateTag}.
+ *
+ * @returns a {@link Date} (UTC epoch milliseconds).
+ *
+ * [Note: Exif dates]
+ *
+ * The most important bit we usually wish out of Exif is the date and time when
+ * the photo was taken. The Exif specification has the following tags related to
+ * photo's date:
+ *
+ * -   DateTimeOriginal
+ * -   DateTime (aka "ModifyDate")
+ * -   DateTimeDigitized (aka "CreateDate")
+ *
+ * DateTimeOriginal is meant to signify best when the original image was taken,
+ * and we use it as the photo's creation date whenever it is present. If not, we
+ * fallback to DateTime or DateTimeDigitized (in that order).
+ *
+ * Each of these is a string of the format
+ *
+ *     YYYY:MM:DD HH:mm:ss
+ *
+ * where
+ *
+ *     YYYY  4 digit (zero padded) year
+ *     MM    2 digit (zero padded) month, with Jan as 01 and Dec as 12.
+ *     DD    2 digit (zero padded) day of the month (1 to 31)
+ *     HH    2 digit (zero padded) hours since midnight (00 to 23)
+ *     mm    2 digit (zero padded) minutes (00 to 59)
+ *     ss    2 digit (zero padded) seconds (00 to 59)
+ *
+ * These dates are all in the local time of the place where the photo was taken.
+ * To convert these to UTC, we also need to know the offset from UTC of that
+ * local time. This is provided by the three OffsetTime* tags (one for each of
+ * the above):
+ *
+ * -   OffsetTimeOriginal
+ * -   OffsetTime
+ * -   OffsetTimeDigitized
+ *
+ * Each of these is a string of the format
+ *
+ *     ±HH:mm
+ *
+ * denoting the signed hour and minute offset from UTC.
+ *
+ * Note that these OffsetTime* tags are relatively new additions (prior to
+ * smartphones, cameras did not have a good way of knowing their TZ), and most
+ * old photos will not have this information. In such cases, we assume that
+ * these photos are in the local time where this code is running. This is
+ * manifestly going to be incorrect in some cases, but it is a better assumption
+ * than assuming UTC, which, while deterministic, is going to incorrect in an
+ * overwhelming majority of cases.
+ */
+const parseExifDate = (
+    tags: ExifReader.ExpandedTags,
+    dateTag: keyof ExifReader.ExifTags,
+    offsetTag: keyof ExifReader.ExifTags,
+) => {
+    console.log(tags, dateTag, offsetTag);
+};
+
+/**
  * Index Exif in the given {@link EnteFile}.
  *
  * This function is invoked as part of the ML indexing pipeline, which is why it
