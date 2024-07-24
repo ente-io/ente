@@ -51,17 +51,14 @@ export const updateExifIfNeededAndPossible = async (
         return updatedBlob.stream();
     } catch (e) {
         log.error(`Failed to modify Exif date for ${fileName}`, e);
-        // We used the file's extension to determine if this was a JPEG, but
-        // this is not a guarantee. Misnamed files, while rare, do exist. So if
-        // that is the error thrown by the underlying library, fallback to the
-        // original instead of causing the entire download or export to fail.
-        if (
-            e instanceof Error &&
-            e.message.endsWith("Given file is neither JPEG nor TIFF.")
-        ) {
-            return blob.stream();
-        }
-        throw e;
+        // Ignore errors and use the original - we don't want to block the whole
+        // download or export for an errant file. TODO: This is not always going
+        // to be the correct choice, but instead trying further hack around with
+        // the Exif modifications (and all the caveats that come with it), a
+        // more principled approach is to put our metadata in a sidecar and
+        // never touch the original. We can then and provide additional tools to
+        // update the original if the user so wishes from the sidecar.
+        return blob.stream();
     }
 };
 
@@ -123,54 +120,20 @@ const dataURLToBlob = (dataURI: string) =>
  * Convert the given {@link Date} to a format that is expected by Exif for the
  * DateTimeOriginal tag.
  *
- * [Note: Exif dates]
- *
- * Summary:
- *
- * DateTimeOriginal is in local time, not UTC. Which local time? The
- * OffsetTimeOriginal specifies the time zone. But support for it is limited.
- *
- * Details:
- *
- * Common Exif date time tags, an in particular "DateTimeOriginal", are
- * specified in the form:
- *
- *     yyyy:MM:DD HH:mm:ss
- *
- * These values thus do not have an associated UTC offset or TZ.
- *
- * The common convention is that these times are interpreted to be the local
- * time where the photo was taken.
- *
- * > The reason (I assume) for this omission is because (prior to smartphones),
- * > cameras did not have a good way of being aware of their time zone.
- *
- * Recently, there seems to be increasing support for the newly standardized
- * "OffsetTimeOriginal" and siblings, which specify time zone for
- * "DateTimeOriginal" (and related fields).
- *
- * However, support is still not universal, and there will anyways be older
- * photos. So when the offset is missing, we stick with the common convention:
- *
- * -   When reading, assume that the Exif date is in the local TZ when deriving
- *     a UTC timestamp from it.
- *
- * -   When writing, convert the UTC timestamp to local time.
- *
- * These assumptions are fallible, because the local time where we're uploading
- * or downloading the photo is not necessarily the same as the local time where
- * the photo was taken.
+ * See: [Note: Exif dates]
  */
 const convertToExifDateFormat = (date: Date) => {
     // TODO: Exif - Handle offsettime if present
-    const yyyy = date.getFullYear();
+    const YYYY = zeroPad(date.getFullYear(), 4);
+    // JavaScript getMonth is zero-indexed, we want one-indexed.
     const MM = zeroPad(date.getMonth() + 1, 2);
-    const dd = zeroPad(date.getDate(), 2);
+    // JavaScript getDate is NOT zero-indexed, it is already one-indexed.
+    const DD = zeroPad(date.getDate(), 2);
     const HH = zeroPad(date.getHours(), 2);
     const mm = zeroPad(date.getMinutes(), 2);
     const ss = zeroPad(date.getSeconds(), 2);
 
-    return `${yyyy}:${MM}:${dd} ${HH}:${mm}:${ss}`;
+    return `${YYYY}:${MM}:${DD} ${HH}:${mm}:${ss}`;
 };
 
 /** Zero pad the given number to {@link d} digits. */
