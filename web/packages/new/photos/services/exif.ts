@@ -2,7 +2,32 @@ import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
 
 /**
- * Index Exif in the given file.
+ * Extract Exif and other metadata from the given file.
+ *
+ * [Note: Exif]
+ *
+ * Exif is a standard for metadata embedded in photos. Exif tags arise from the
+ * TIFF specification but now can be found in other file formats, notably JPG,
+ * PNG, AVI, MOV, TIFF-based RAW images (and TIFF itself)
+ *
+ * The standard uses "Exif" (not "EXIF") to refer to itself. We do the same.
+ *
+ * Exif is now commonly used as a synedoche for all forms of metadata that gets
+ * embedded in a file, and this is also how we use the term. So these functions
+ * extract and operate on not just Exif tags, but also XMP (XML metadata
+ * embedded in images) and IPTC (another metadat standard) tags.
+ *
+ * The de facto reference for Exif (in its general form) is exiftool.
+ * https://exiftool.org/TagNames
+ *
+ * The library we use is https://github.com/mattiasw/ExifReader.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const extractExif = () => {};
+
+/**
+ * Index Exif in the given {@link EnteFile}.
  *
  * This function is invoked as part of the ML indexing pipeline, which is why it
  * uses the same "index" nomenclature. But what it does is more of an extraction
@@ -18,11 +43,8 @@ import type { EnteFile } from "../types/file";
  * @param blob A {@link Blob} containing the {@link enteFile}'s data. This is
  * where we extract the Exif from.
  *
- * [Note: Exif not EXIF]
- *
- * The standard uses "Exif" (not "EXIF") to refer to itself. We do the same.
  */
-export const indexExif = async (_enteFile: EnteFile, blob: Blob) => {
+export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
     // [Note: Defining "raw" Exif]
     //
     // Our goal is to get a "raw" JSON representing all the Exif data associated
@@ -71,7 +93,7 @@ export const indexExif = async (_enteFile: EnteFile, blob: Blob) => {
     //
     // So this is not really "raw" Exif. But with that caveat out of the way,
     // practically this should be raw enough given the tradeoffs mentioned
-    // above, and consuming this JSON should be reasonable enough for arbitrary
+    // above, and consuming this JSON should be easy enough for arbitrary
     // clients without needing to know about ExifReader specifically.
     const tags = await ExifReader.load(await blob.arrayBuffer(), {
         async: true,
@@ -104,5 +126,12 @@ export const indexExif = async (_enteFile: EnteFile, blob: Blob) => {
     // while the actual value doesn't have it).
     delete (tags.xmp as Partial<typeof tags.xmp>)?._raw;
 
+    backfill(enteFile, tags);
+
     return tags;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const backfill = (_enteFile: EnteFile, _tags: ExifReader.ExpandedTags) => {
+    // const date =
 };

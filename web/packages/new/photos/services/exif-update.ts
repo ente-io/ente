@@ -51,17 +51,14 @@ export const updateExifIfNeededAndPossible = async (
         return updatedBlob.stream();
     } catch (e) {
         log.error(`Failed to modify Exif date for ${fileName}`, e);
-        // We used the file's extension to determine if this was a JPEG, but
-        // this is not a guarantee. Misnamed files, while rare, do exist. So if
-        // that is the error thrown by the underlying library, fallback to the
-        // original instead of causing the entire download or export to fail.
-        if (
-            e instanceof Error &&
-            e.message.endsWith("Given file is neither JPEG nor TIFF.")
-        ) {
-            return blob.stream();
-        }
-        throw e;
+        // Ignore errors and use the original - we don't want to block the whole
+        // download or export for an errant file. TODO: This is not always going
+        // to be the correct choice, but instead trying further hack around with
+        // the Exif modifications (and all the caveats that come with it), a
+        // more principled approach is to put our metadata in a sidecar and
+        // never touch the original. We can then and provide additional tools to
+        // update the original if the user so wishes from the sidecar.
+        return blob.stream();
     }
 };
 
