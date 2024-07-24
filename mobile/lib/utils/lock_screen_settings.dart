@@ -32,11 +32,11 @@ class LockScreenSettings {
   void init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
-    await shouldShowAppContent(isContentVisible: getShouldShowAppContent());
+    await setShowAppContent(getShouldShowAppContent());
   }
 
-  Future<void> shouldShowAppContent({bool isContentVisible = true}) async {
-    !isContentVisible
+  Future<void> setShowAppContent(bool showContent) async {
+    !showContent
         ? await PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
@@ -48,7 +48,7 @@ class LockScreenSettings {
             ),
             blurEffect: PrivacyBlurEffect.extraLight,
           );
-    await _preferences.setBool(keyShowAppContent, isContentVisible);
+    await _preferences.setBool(keyShowAppContent, showContent);
   }
 
   bool getShouldShowAppContent() {
