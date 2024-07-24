@@ -1,6 +1,8 @@
 import "dart:async";
+import "dart:io";
 
 import "package:ente_auth/core/configuration.dart";
+import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/components/captioned_text_widget.dart";
 import "package:ente_auth/ui/components/divider_widget.dart";
@@ -47,12 +49,10 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _initializeSettings() async {
     final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
-    final bool shouldHideAppContent =
-        _lockscreenSetting.getShouldHideAppContent();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
-      hideAppContent = shouldHideAppContent;
+      hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     });
   }
 
@@ -101,8 +101,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
-    if (appLock == true) {
-      await _lockscreenSetting.shouldHideAppContent(isContentVisible: false);
+    if (appLock == false) {
+      await _lockscreenSetting.setHideAppContent(true);
     }
     setState(() {
       _initializeSettings();
@@ -127,9 +127,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       hideAppContent = !hideAppContent;
     });
-    await _lockscreenSetting.shouldHideAppContent(
-      isContentVisible: hideAppContent,
-    );
+    await _lockscreenSetting.setHideAppContent(hideAppContent);
   }
 
   String _formatTime(Duration duration) {
@@ -152,9 +150,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          const TitleBarWidget(
+          TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: 'App lock',
+              title: context.l10n.appLock,
             ),
           ),
           SliverList(
@@ -170,8 +168,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                         Column(
                           children: [
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: 'App lock',
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: context.l10n.appLock,
                               ),
                               alignCaptionedTextToLeft: true,
                               singleBorderRadius: 8,
@@ -205,9 +203,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "Device lock",
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: context.l10n.deviceLock,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: false,
@@ -261,7 +258,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                   ),
                                   MenuItemWidget(
                                     captionedTextWidget: CaptionedTextWidget(
-                                      title: "Auto lock",
+                                      title: context.l10n.autoLock,
                                       subTitle: _formatTime(
                                         Duration(
                                           milliseconds:
@@ -295,8 +292,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                             const SizedBox(height: 24),
                                             MenuItemWidget(
                                               captionedTextWidget:
-                                                  const CaptionedTextWidget(
-                                                title: "Hide Content",
+                                                  CaptionedTextWidget(
+                                                title: context.l10n.deviceLock,
                                               ),
                                               alignCaptionedTextToLeft: true,
                                               isTopBorderRadiusRemoved: true,
@@ -316,7 +313,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                                 right: 12,
                                               ),
                                               child: Text(
-                                                "Hides app content in the app switcher",
+                                                Platform.isAndroid
+                                                    ? "Hides app content in the app switcher and disables screenshots"
+                                                    : "Hides app content in the app switcher",
                                                 style: textTheme.miniFaint,
                                                 textAlign: TextAlign.left,
                                               ),

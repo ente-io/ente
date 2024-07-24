@@ -35,14 +35,16 @@ class LockScreenSettings {
   Future<void> init() async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
-    await shouldHideAppContent(isContentVisible: getShouldHideAppContent());
+
+    ///Workaround for privacyScreen not working when app is killed and opened.
+    await setHideAppContent(getShouldHideAppContent());
   }
 
-  Future<void> shouldHideAppContent({bool isContentVisible = true}) async {
+  Future<void> setHideAppContent(bool showContent) async {
     final brightness =
         SchedulerBinding.instance.platformDispatcher.platformBrightness;
     bool isInDarkMode = brightness == Brightness.dark;
-    !isContentVisible
+    !showContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
@@ -56,7 +58,7 @@ class LockScreenSettings {
                 ? PrivacyBlurEffect.dark
                 : PrivacyBlurEffect.extraLight,
           );
-    await _preferences.setBool(keyHideAppContent, isContentVisible);
+    await _preferences.setBool(keyHideAppContent, showContent);
   }
 
   bool getShouldHideAppContent() {
@@ -149,7 +151,6 @@ class LockScreenSettings {
     await _secureStorage.delete(key: saltKey);
     await _secureStorage.delete(key: pin);
     await _secureStorage.delete(key: password);
-    await _preferences.remove(keyHideAppContent);
   }
 
   Future<bool> isPinSet() async {
