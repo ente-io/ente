@@ -608,6 +608,14 @@ function PhotoViewer(props: Iprops) {
                     fileObject,
                     fileTypeInfo,
                 );
+                // TODO: Exif debugging code.
+                // if (isDesktop && isDevBuild) {
+                //     const newLib = await extractMetadata(fileObject);
+                //     log.debug(() => [
+                //         "exif",
+                //         { oldLib: file.metadata, newLib },
+                //     ]);
+                // }
                 if (exifExtractionInProgress.current === file.src) {
                     if (exifData) {
                         setExif({ key: file.src, value: exifData });

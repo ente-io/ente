@@ -1,6 +1,24 @@
-import log from "@/base/log";
 import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
+
+/**
+ * Data extracted from the Exif and other metadata embedded in the original
+ * image, and saved in the metadata associated with an {@link EnteFile}.
+ *
+ * These are the bits of information that are commonly needed, and having them
+ * be attached to an {@link EnteFile} allows us to perform operations using
+ * these attributes without needing to re-download the original image.
+ */
+interface ParsedMetadata {
+    /** The width of the image, in pixels. */
+    width?: number;
+    /** The height of the image, in pixels. */
+    height?: number;
+    /** The time when this photo was taken. */
+    creationTime?: number;
+    /** The GPS coordinates where the photo was taken. */
+    location?: { latitude: number; longitude: number };
+}
 
 /**
  * Extract Exif and other metadata from the given file.
@@ -23,23 +41,62 @@ import type { EnteFile } from "../types/file";
  *
  * The library we use is https://github.com/mattiasw/ExifReader.
  */
+export const extractMetadata = async (file: File) => {
+    const tags = await ExifReader.load(await file.arrayBuffer(), {
+        async: true,
+        expanded: true,
+    });
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const extractExif = () => {};
+    const location = parseLocation(tags);
+    const creationDate = parseCreationDate(tags);
+    const dimensions = parseDimensions(tags);
+
+    const metadata: ParsedMetadata = dimensions ?? {};
+    if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
+    if (location) metadata.location = location;
+    return metadata;
+};
 
 /**
- * Parse all date related fields from the metadata embedded in the file.
+ * Parse a single "best" creation date for an image from the metadata embedded
+ * in the file.
+ *
+ * A file has multiple types of metadata, and each of these has multiple types
+ * of dates, so we use some an a heuristic ordering (based on experience with
+ * the photos we find out in the wild) to pick a "best" date.
+ */
+const parseCreationDate = (tags: ExifReader.ExpandedTags) => {
+    const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
+        parseDates(tags);
+    return DateTimeOriginal ?? DateTimeDigitized ?? MetadataDate ?? DateTime;
+};
+
+/**
+ * Parse all date related fields from the metadata embedded in the file,
+ * grouping them into chunks that somewhat reflect the Exif ontology.
  */
 const parseDates = (tags: ExifReader.ExpandedTags) => {
+    // We have come across real examples of customer photos with Exif dates set
+    // to "0000:00:00 00:00:00". So ignore any date whose epoch is 0, so that we
+    // can try with a subsequent (possibly correct) date in the sequence.
+    const valid = (d: Date | undefined) => (d?.getTime() ? d : undefined);
+
     const exif = parseExifDates(tags);
+    const iptc = parseIPTCDates(tags);
     const xmp = parseXMPDates(tags);
     return {
-        DateTimeOriginal: xmp.DateTimeOriginal ?? exif.DateTimeOriginal,
+        DateTimeOriginal:
+            valid(xmp.DateTimeOriginal) ??
+            valid(iptc.DateTimeOriginal) ??
+            valid(exif.DateTimeOriginal) ??
+            valid(xmp.DateCreated),
         DateTimeDigitized:
-            xmp.DateTimeDigitized ?? exif.DateTimeDigitized ?? xmp.CreateDate,
-        DateTime: xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate,
-        MetadataDate: xmp.MetadataDate,
-        DateCreated: xmp.DateCreated,
+            valid(xmp.DateTimeDigitized) ??
+            valid(iptc.DateTimeDigitized) ??
+            valid(exif.DateTimeDigitized) ??
+            valid(xmp.CreateDate),
+        MetadataDate: valid(xmp.MetadataDate),
+        DateTime: valid(xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate),
     };
 };
 
@@ -123,24 +180,23 @@ const parseExifDate = (
     const [dateString] = dateTag?.value ?? [];
     if (!dateString) return undefined;
 
-    const components = dateString.trim().replace(" ", ":").split(":");
-    const [YYYY, MM, DD, HH, mm, ss] = components;
-    if (!YYYY || !MM || !DD || !HH || !mm || !ss) {
-        log.warn(`Ignoring malformed Exif date ${dateString}`);
-        return undefined;
-    }
-
     const [offsetString] = offsetTag?.value ?? [];
 
-    // Use the string components we have from the Exif date (and optional
-    // offset) to construct a string in the Javascript date time string format.
+    // Perform minor syntactic changes to the Exif date, and add the optional
+    // offset, to construct a string in the Javascript date time string format.
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_time_string_format
     //
+    //     YYYY:MM:DD HH:mm:ss±HH:mm
+    //     YYYY-MM-DDTHH:mm:ss±HH:mm
+    //
     // When the offset string is missing, the date time is interpreted as local
-    // time. This is the behaviour we want (See: [Note: Exif dates]).
+    // time. This is the behaviour we want.
+    //
+    // For details see [Note: Exif dates]
 
     return new Date(
-        `${YYYY}-${MM}-${DD}T${HH}:${mm}:${ss}${offsetString ?? ""}`,
+        dateString.replace(":", "-").replace(":", "-").replace(" ", "T") +
+            (offsetString ?? ""),
     );
 };
 
@@ -153,6 +209,7 @@ const parseExifDate = (
  * For a list of XMP tags, see https://exiftool.org/TagNames/XMP.html.
  */
 const parseXMPDates = ({ xmp }: ExifReader.ExpandedTags) => ({
+    /* XMP namespace is indicated for each group */
     // exif:
     DateTimeOriginal: parseXMPDate(xmp?.DateTimeOriginal),
     DateTimeDigitized: parseXMPDate(xmp?.DateTimeDigitized),
@@ -193,41 +250,121 @@ const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
 };
 
 /**
+ * Parse date related tags from IPTC.
+ */
+const parseIPTCDates = ({ iptc }: ExifReader.ExpandedTags) => ({
+    DateTimeOriginal: parseIPTCDate(
+        iptc?.["Date Created"],
+        iptc?.["Time Created"],
+    ),
+    DateTimeDigitized: parseIPTCDate(
+        iptc?.["Digital Creation Date"],
+        iptc?.["Digital Creation Time"],
+    ),
+});
+
+/**
+ * Parse an IPTC date tag.
+ *
+ * [Note: IPTC dates]
+ *
+ * IPTC date time values are split across two tag:
+ *
+ * - A tag containing the date as as 8 digit number of the form `YYYYMMDD`.
+ *
+ * - A tag containing the time as an 11 character string of the form
+ *   `HHMMSS±HHMM`.
+ *
+ * They lack separators, but together these tags are meant to encode the same
+ * information as the ISO 8601 date format (that XMP and JavaScript also use).
+ *
+ * Reference:
+ * - http://www.iptc.org/std/IIM/4.1/specification/IIMV4.1.pdf
+ *
+ * ---
+ *
+ * @param dateTag The tag containing the date part of the date.
+ *
+ * @param timeTag The tag containing the time part of the date.
+ */
+const parseIPTCDate = (
+    dateTag: ExifReader.NumberArrayTag | undefined,
+    timeTag: ExifReader.NumberArrayTag | undefined,
+) => {
+    // The library we use (ExifReader) parses them into a usable representation,
+    // which we can use directly. Some notes:
+    //
+    // -   There are currently no separate TypeScript types for the IPTC tags,
+    //     and instead they are listed as part of the ExifTags.
+    //
+    // -   For the date, ExifReader parses the raw data into a description of
+    //     the form 'YYYY-MM-DD' (See `getCreationDate` in its source code).
+    //
+    // -   For the time, ExifReader parses the raw data into a description
+    //     either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
+    //     `getCreationTime` in its source code).
+    if (!dateTag) return undefined;
+    let s = dateTag.description;
+
+    if (timeTag) s = s + "T" + timeTag.description;
+
+    return new Date(s);
+};
+
+/**
  * Parse GPS location from the metadata embedded in the file.
  */
-const parseLocation = (tags: ExifReader.ExpandedTags) => ({
-    Latitude: tags.gps?.Latitude,
-    Longitude: tags.gps?.Longitude,
-});
+const parseLocation = (tags: ExifReader.ExpandedTags) => {
+    const latitude = tags.gps?.Latitude;
+    const longitude = tags.gps?.Longitude;
+    return latitude !== undefined && longitude !== undefined
+        ? { latitude, longitude }
+        : undefined;
+};
 
 /**
  * Parse the width and height of the image from the metadata embedded in the
  * file.
  */
-const parseDimensions = (tags: ExifReader.ExpandedTags) => ({
-    ImageWidth: [
-        // Take the first (defined) non-zero value.
-        tags.exif?.ImageWidth?.value,
-        tags.exif?.PixelXDimension?.value,
-        parseXMPNum(tags.xmp?.ImageWidth),
-        parseXMPNum(tags.xmp?.PixelXDimension),
-        tags.pngFile?.["Image Width"]?.value,
-        tags.gif?.["Image Width"]?.value,
-        tags.riff?.ImageWidth?.value,
-        tags.file?.["Image Width"]?.value,
-    ].find((x) => x),
-    ImageHeight: [
-        // Note: The Exif spec calls it ImageLength, not ImageHeight.
-        tags.exif?.ImageLength?.value,
-        tags.exif?.PixelYDimension?.value,
-        parseXMPNum(tags.xmp?.ImageLength),
-        parseXMPNum(tags.xmp?.PixelYDimension),
-        tags.pngFile?.["Image Height"]?.value,
-        tags.gif?.["Image Height"]?.value,
-        tags.riff?.ImageHeight?.value,
-        tags.file?.["Image Height"]?.value,
-    ].find((x) => x),
-});
+const parseDimensions = (tags: ExifReader.ExpandedTags) => {
+    // Go through all possiblities in order, returning the first pair with both
+    // the width and height defined, and non-zero.
+    const pair = (w: number | undefined, h: number | undefined) =>
+        w && h ? { width: w, height: h } : undefined;
+
+    return (
+        pair(
+            tags.exif?.ImageWidth?.value,
+            /* The Exif spec calls it ImageLength, not ImageHeight. */
+            tags.exif?.ImageLength?.value,
+        ) ??
+        pair(
+            tags.exif?.PixelXDimension?.value,
+            tags.exif?.PixelYDimension?.value,
+        ) ??
+        pair(
+            parseXMPNum(tags.xmp?.ImageWidth),
+            parseXMPNum(tags.xmp?.ImageLength),
+        ) ??
+        pair(
+            parseXMPNum(tags.xmp?.PixelXDimension),
+            parseXMPNum(tags.xmp?.PixelYDimension),
+        ) ??
+        pair(
+            tags.pngFile?.["Image Width"]?.value,
+            tags.pngFile?.["Image Height"]?.value,
+        ) ??
+        pair(
+            tags.gif?.["Image Width"]?.value,
+            tags.gif?.["Image Height"]?.value,
+        ) ??
+        pair(tags.riff?.ImageWidth?.value, tags.riff?.ImageHeight?.value) ??
+        pair(
+            tags.file?.["Image Width"]?.value,
+            tags.file?.["Image Height"]?.value,
+        )
+    );
+};
 
 /**
  * Try to parse the given XMP tag as a number.
@@ -348,12 +485,13 @@ export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
 };
 
 const backfill = (enteFile: EnteFile, tags: ExifReader.ExpandedTags) => {
-    // const date =
-    // TODO:Exif: Testing
-    console.log([
-        enteFile,
-        parseDates(tags),
-        parseLocation(tags),
-        parseDimensions(tags),
-    ]);
+    const creationDate = parseCreationDate(tags);
+    if (!creationDate) return;
+
+    const creationTime = creationDate.getTime() * 1000;
+
+    if (enteFile.metadata.creationTime == creationTime) return;
+
+    // TODO: Exif: backfill
+    console.log(enteFile, creationTime);
 };
