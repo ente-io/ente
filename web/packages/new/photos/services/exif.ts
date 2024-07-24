@@ -27,7 +27,8 @@ import type { EnteFile } from "../types/file";
 export const extractExif = () => {};
 
 /**
- * Parse all date related fields from the metadata embedded in the file.
+ * Parse all date related fields from the metadata embedded in the file,
+ * grouping them into chunks that somewhat reflect the Exif ontology.
  */
 const parseDates = (tags: ExifReader.ExpandedTags) => {
     const exif = parseExifDates(tags);
@@ -37,7 +38,8 @@ const parseDates = (tags: ExifReader.ExpandedTags) => {
         DateTimeOriginal:
             xmp.DateTimeOriginal ??
             iptc.DateTimeOriginal ??
-            exif.DateTimeOriginal,
+            exif.DateTimeOriginal ??
+            xmp.DateCreated,
         DateTimeDigitized:
             xmp.DateTimeDigitized ??
             iptc.DateTimeDigitized ??
@@ -45,7 +47,6 @@ const parseDates = (tags: ExifReader.ExpandedTags) => {
             xmp.CreateDate,
         DateTime: xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate,
         MetadataDate: xmp.MetadataDate,
-        DateCreated: xmp.DateCreated,
     };
 };
 
