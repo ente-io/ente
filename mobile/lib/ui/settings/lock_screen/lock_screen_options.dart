@@ -288,9 +288,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     height: 24,
                                   ),
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "Hide content",
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: S.of(context).hideContent,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     singleBorderRadius: 8,
@@ -309,8 +308,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     ),
                                     child: Text(
                                       Platform.isAndroid
-                                          ? 'Hides app content in the app switcher and disables screenshots'
-                                          : 'Hides app content in the app switcher',
+                                          ? S
+                                              .of(context)
+                                              .hideContentDescriptionAndroid
+                                          : S
+                                              .of(context)
+                                              .hideContentDescriptionIos,
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),

@@ -820,6 +820,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Yardım"),
         "hidden": MessageLookupByLibrary.simpleMessage("Gizle"),
         "hide": MessageLookupByLibrary.simpleMessage("Gizle"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Gizleniyor..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("OSM Fransa\'da ağırlandı"),

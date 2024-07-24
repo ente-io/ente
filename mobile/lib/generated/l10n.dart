@@ -9125,21 +9125,21 @@ class S {
     );
   }
 
-  /// `Auto lock`
-  String get autoLock {
-    return Intl.message(
-      'Auto lock',
-      name: 'autoLock',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
   String get swipeLockEnablePreSteps {
     return Intl.message(
       'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
       name: 'swipeLockEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto lock',
+      name: 'autoLock',
       desc: '',
       args: [],
     );
@@ -9160,6 +9160,36 @@ class S {
     return Intl.message(
       'Time after which the app locks after being put in the background',
       name: 'autoLockFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide content`
+  String get hideContent {
+    return Intl.message(
+      'Hide content',
+      name: 'hideContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides app content in the app switcher and disables screenshots`
+  String get hideContentDescriptionAndroid {
+    return Intl.message(
+      'Hides app content in the app switcher and disables screenshots',
+      name: 'hideContentDescriptionAndroid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides app content in the app switcher`
+  String get hideContentDescriptionIos {
+    return Intl.message(
+      'Hides app content in the app switcher',
+      name: 'hideContentDescriptionIos',
       desc: '',
       args: [],
     );

@@ -751,6 +751,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Come hai sentito parlare di Ente? (opzionale)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Nascosti"),
         "hide": MessageLookupByLibrary.simpleMessage("Nascondi"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Nascondendo..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Ospitato presso OSM France"),
