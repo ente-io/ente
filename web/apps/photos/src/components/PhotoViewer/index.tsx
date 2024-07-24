@@ -14,12 +14,10 @@ import {
 } from "utils/file";
 
 import { isDesktop } from "@/base/app";
-import { isDevBuild } from "@/base/env";
 import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
-import { extractMetadata } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -610,10 +608,14 @@ function PhotoViewer(props: Iprops) {
                     fileObject,
                     fileTypeInfo,
                 );
-                if (isDesktop && isDevBuild) {
-                    const newLib = await extractMetadata(fileObject);
-                    log.debug(() => ["exif", { oldLib: exifData, newLib }]);
-                }
+                // TODO: Exif debugging code.
+                // if (isDesktop && isDevBuild) {
+                //     const newLib = await extractMetadata(fileObject);
+                //     log.debug(() => [
+                //         "exif",
+                //         { oldLib: file.metadata, newLib },
+                //     ]);
+                // }
                 if (exifExtractionInProgress.current === file.src) {
                     if (exifData) {
                         setExif({ key: file.src, value: exifData });
