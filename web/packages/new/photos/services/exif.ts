@@ -204,30 +204,45 @@ const parseLocation = (tags: ExifReader.ExpandedTags) => ({
  * Parse the width and height of the image from the metadata embedded in the
  * file.
  */
-const parseDimensions = (tags: ExifReader.ExpandedTags) => ({
-    ImageWidth: [
-        // Take the first (defined) non-zero value.
-        tags.exif?.ImageWidth?.value,
-        tags.exif?.PixelXDimension?.value,
-        parseXMPNum(tags.xmp?.ImageWidth),
-        parseXMPNum(tags.xmp?.PixelXDimension),
-        tags.pngFile?.["Image Width"]?.value,
-        tags.gif?.["Image Width"]?.value,
-        tags.riff?.ImageWidth?.value,
-        tags.file?.["Image Width"]?.value,
-    ].find((x) => x),
-    ImageHeight: [
-        // Note: The Exif spec calls it ImageLength, not ImageHeight.
-        tags.exif?.ImageLength?.value,
-        tags.exif?.PixelYDimension?.value,
-        parseXMPNum(tags.xmp?.ImageLength),
-        parseXMPNum(tags.xmp?.PixelYDimension),
-        tags.pngFile?.["Image Height"]?.value,
-        tags.gif?.["Image Height"]?.value,
-        tags.riff?.ImageHeight?.value,
-        tags.file?.["Image Height"]?.value,
-    ].find((x) => x),
-});
+const parseDimensions = (tags: ExifReader.ExpandedTags) => {
+    // Go through all possiblities in order, returning the first pair with both
+    // the width and height defined, and non-zero.
+    const pair = (w: number | undefined, h: number | undefined) =>
+        w && h ? { ImageWidth: w, ImageHeight: h } : undefined;
+
+    return (
+        pair(
+            tags.exif?.ImageWidth?.value,
+            /* The Exif spec calls it ImageLength, not ImageHeight. */
+            tags.exif?.ImageLength?.value,
+        ) ??
+        pair(
+            tags.exif?.PixelXDimension?.value,
+            tags.exif?.PixelYDimension?.value,
+        ) ??
+        pair(
+            parseXMPNum(tags.xmp?.ImageWidth),
+            parseXMPNum(tags.xmp?.ImageLength),
+        ) ??
+        pair(
+            parseXMPNum(tags.xmp?.PixelXDimension),
+            parseXMPNum(tags.xmp?.PixelYDimension),
+        ) ??
+        pair(
+            tags.pngFile?.["Image Width"]?.value,
+            tags.pngFile?.["Image Height"]?.value,
+        ) ??
+        pair(
+            tags.gif?.["Image Width"]?.value,
+            tags.gif?.["Image Height"]?.value,
+        ) ??
+        pair(tags.riff?.ImageWidth?.value, tags.riff?.ImageHeight?.value) ??
+        pair(
+            tags.file?.["Image Width"]?.value,
+            tags.file?.["Image Height"]?.value,
+        )
+    );
+};
 
 /**
  * Try to parse the given XMP tag as a number.
