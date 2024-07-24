@@ -87,29 +87,27 @@ export const extractExif = () => {};
  * than assuming UTC, which, while deterministic, is going to incorrect in an
  * overwhelming majority of cases.
  */
-const parseExifDates = ({ exif }: ExifReader.ExpandedTags) => {
-    const parse = (
-        dateTag: ExifReader.StringArrayTag | undefined,
-        offsetTag: ExifReader.StringArrayTag | undefined,
-    ) => {
-        const [dateString] = dateTag?.value ?? [];
-        if (!dateString) return undefined;
+const parseExifDates = ({ exif }: ExifReader.ExpandedTags) => ({
+    DateTimeOriginal: parseExifDate(
+        exif?.DateTimeOriginal,
+        exif?.OffsetTimeOriginal,
+    ),
+    DateTimeDigitized: parseExifDate(
+        exif?.DateTimeDigitized,
+        exif?.OffsetTimeDigitized,
+    ),
+    DateTime: parseExifDate(exif?.DateTime, exif?.OffsetTime),
+});
 
-        const [offsetString] = offsetTag?.value ?? [];
-        return "";
-    };
+const parseExifDate = (
+    dateTag: ExifReader.StringArrayTag | undefined,
+    offsetTag: ExifReader.StringArrayTag | undefined,
+) => {
+    const [dateString] = dateTag?.value ?? [];
+    if (!dateString) return undefined;
 
-    return {
-        DateTimeOriginal: parse(
-            exif?.DateTimeOriginal,
-            exif?.OffsetTimeOriginal,
-        ),
-        DateTimeDigitized: parse(
-            exif?.DateTimeDigitized,
-            exif?.OffsetTimeDigitized,
-        ),
-        DateTime: parse(exif?.DateTime, exif?.OffsetTime),
-    };
+    const [offsetString] = offsetTag?.value ?? [];
+    return "";
 };
 
 /**
