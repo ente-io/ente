@@ -139,28 +139,22 @@ const parseExifDate = (
 /**
  * Parse date related tags from XMP.
  *
- * XMP might have tags with the same name (or an alias) of an Exif tag:
- *
- * -   DateTimeOriginal
- * -   DateTimeDigitized (aka "CreateDate")
- * -   DateTime (aka "ModifyDate")
- *
- * In addition, it might have the following XMP specific tag:
- *
- * -   MetadataDate
- *
- * In addition, it might have the following Photoshop tag:
- *
- * -   DateCreated
+ * The XMP information in the file can have the date related information in tags
+ * spread across multiple namespaces.
  *
  * For a list of XMP tags, see https://exiftool.org/TagNames/XMP.html.
  */
 const parseXMPDates = ({ xmp }: ExifReader.ExpandedTags) => ({
+    // exif:
     DateTimeOriginal: parseXMPDate(xmp?.DateTimeOriginal),
-    DateTimeDigitized:
-        parseXMPDate(xmp?.DateTimeDigitized) ?? parseXMPDate(xmp?.CreateDate),
-    DateTime: parseXMPDate(xmp?.DateTime) ?? parseXMPDate(xmp?.ModifyDate),
+    DateTimeDigitized: parseXMPDate(xmp?.DateTimeDigitized),
+    // exif: or tiff:
+    DateTime: parseXMPDate(xmp?.DateTime),
+    // xmp:
+    CreateDate: parseXMPDate(xmp?.CreateDate),
+    ModifyDate: parseXMPDate(xmp?.ModifyDate),
     MetadataDate: parseXMPDate(xmp?.MetadataDate),
+    // photoshop:
     DateCreated: parseXMPDate(xmp?.DateCreated),
 });
 
