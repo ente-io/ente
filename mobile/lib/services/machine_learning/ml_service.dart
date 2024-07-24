@@ -75,6 +75,11 @@ class MLService {
     }
     _logger.info("init called");
 
+    // Get client name
+    final packageInfo = await PackageInfo.fromPlatform();
+    client = "${packageInfo.packageName}/${packageInfo.version}";
+    _logger.info("client: $client");
+
     // Activate FaceRecognitionService
     await FaceRecognitionService.instance.init();
 
@@ -503,13 +508,6 @@ class MLService {
     return _initModelLock.synchronized(() async {
       if (_isModelsInitialized) return;
       _logger.info('initModels called');
-
-      // Get client name
-      final packageInfo = await PackageInfo.fromPlatform();
-      client = "${packageInfo.packageName}/${packageInfo.version}";
-      _logger.info("client: $client");
-
-      // Initialize models
       try {
         await FaceDetectionService.instance.loadModel();
       } catch (e, s) {
@@ -536,12 +534,6 @@ class MLService {
       if (_isModelsInitUsingEntePlugin) return;
       _logger.info('initModelUsingEntePlugin called');
 
-      // Get client name
-      final packageInfo = await PackageInfo.fromPlatform();
-      client = "${packageInfo.packageName}/${packageInfo.version}";
-      _logger.info("client: $client");
-
-      // Initialize models
       try {
         await MLIsolate.instance.loadModels();
         _isModelsInitUsingEntePlugin = true;
