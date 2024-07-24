@@ -16,8 +16,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
+import "package:photos/services/machine_learning/ml_isolate.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
@@ -295,7 +295,7 @@ class SemanticSearchService {
     if (cachedResult != null) {
       return cachedResult;
     }
-    final textEmbedding = await MLService.instance.runClipTextInIsolate(query);
+    final textEmbedding = await MLIsolate.instance.runClipText(query);
     _queryCache.put(query, textEmbedding);
     return textEmbedding;
   }
