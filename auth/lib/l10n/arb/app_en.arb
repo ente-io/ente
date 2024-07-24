@@ -421,9 +421,9 @@
   "waitingForVerification": "Waiting for verification...",
   "passkey": "Passkey",
   "passKeyPendingVerification": "Verification is still pending",
-  "loginSessionExpired" : "Session expired",
+  "loginSessionExpired": "Session expired",
   "loginSessionExpiredDetails": "Your session has expired. Please login again.",
-  "developerSettingsWarning":"Are you sure that you want to modify Developer settings?",
+  "developerSettingsWarning": "Are you sure that you want to modify Developer settings?",
   "developerSettings": "Developer settings",
   "serverEndpoint": "Server endpoint",
   "invalidEndpoint": "Invalid endpoint",
@@ -456,5 +456,14 @@
   "next": "Next",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
   "tapToUnlock": "Tap to unlock",
-  "setNewPassword": "Set new password"
+  "setNewPassword": "Set new password",
+  "deviceLock": "Device lock",
+  "hideContent": "Hide content",
+  "hideContentDescriptionAndroid": "Hides app content in the app switcher and disables screenshots",
+  "hideContentDescriptioniOS": "Hides app content in the app switcher",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "appLockDescription": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
+  "pinLock": "Pin lock",
+  "enterPin": "Enter PIN",
+  "setNewPin": "Set new PIN"
 }

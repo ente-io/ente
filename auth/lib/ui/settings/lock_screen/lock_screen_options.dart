@@ -138,7 +138,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else if (duration.inSeconds != 0) {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
-      return "Immediately";
+      return context.l10n.immediately;
     }
   }
 
@@ -187,7 +187,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+                                      context.l10n.appLockDescription,
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),
@@ -222,9 +222,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     bgColor: colorTheme.fillFaint,
                                   ),
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "Pin lock",
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: context.l10n.pinLock,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: true,
@@ -240,9 +239,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     bgColor: colorTheme.fillFaint,
                                   ),
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "Password",
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: context.l10n.password,
                                     ),
                                     alignCaptionedTextToLeft: true,
                                     isTopBorderRadiusRemoved: true,
@@ -279,7 +277,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       right: 12,
                                     ),
                                     child: Text(
-                                      "Time after which the app locks after being put in the background",
+                                      context.l10n.autoLockFeatureDescription,
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),
@@ -314,8 +312,10 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                               ),
                                               child: Text(
                                                 Platform.isAndroid
-                                                    ? "Hides app content in the app switcher and disables screenshots"
-                                                    : "Hides app content in the app switcher",
+                                                    ? context.l10n
+                                                        .hideContentDescriptionAndroid
+                                                    : context.l10n
+                                                        .hideContentDescriptioniOS,
                                                 style: textTheme.miniFaint,
                                                 textAlign: TextAlign.left,
                                               ),

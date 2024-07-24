@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:io";
 
+import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/theme/colors.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/theme/text_style.dart";
@@ -229,7 +230,9 @@ class _LockScreenPinState extends State<LockScreenPin> {
             ),
           ),
           Text(
-            widget.isChangingLockScreenSettings ? "Enter PIN" : "Set new PIN",
+            widget.isChangingLockScreenSettings
+                ? context.l10n.enterPin
+                : context.l10n.setNewPin,
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

@@ -40,11 +40,11 @@ class LockScreenSettings {
     await setHideAppContent(getShouldHideAppContent());
   }
 
-  Future<void> setHideAppContent(bool showContent) async {
+  Future<void> setHideAppContent(bool hideContent) async {
     final brightness =
         SchedulerBinding.instance.platformDispatcher.platformBrightness;
     bool isInDarkMode = brightness == Brightness.dark;
-    !showContent
+    !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
@@ -58,7 +58,7 @@ class LockScreenSettings {
                 ? PrivacyBlurEffect.dark
                 : PrivacyBlurEffect.extraLight,
           );
-    await _preferences.setBool(keyHideAppContent, showContent);
+    await _preferences.setBool(keyHideAppContent, hideContent);
   }
 
   bool getShouldHideAppContent() {
