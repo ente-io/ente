@@ -28,18 +28,18 @@ class IndexStatus {
 }
 
 class FileMLInstruction {
-  final EnteFile enteFile;
-
-  final bool shouldRunFaces;
-  final bool shouldRunClip;
+  final EnteFile file;
+  bool shouldRunFaces;
+  bool shouldRunClip;
   RemoteFileML? existingRemoteFileML;
 
   FileMLInstruction({
-    required this.enteFile,
+    required this.file,
     required this.shouldRunFaces,
     required this.shouldRunClip,
   });
-
+  // Returns true if the file should be indexed for either faces or clip
+  bool get pendingML => shouldRunFaces || shouldRunClip;
 }
 
 Future<IndexStatus> getIndexStatus() async {
@@ -89,7 +89,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       continue;
     }
     final instruction = FileMLInstruction(
-      enteFile: enteFile,
+      file: enteFile,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );
@@ -111,7 +111,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       continue;
     }
     final instruction = FileMLInstruction(
-      enteFile: enteFile,
+      file: enteFile,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );

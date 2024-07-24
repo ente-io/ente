@@ -393,7 +393,7 @@ class MLService {
   Future<bool> processImage(FileMLInstruction instruction) async {
     // TODO: clean this function up
     _logger.info(
-      "`processImage` start processing image with uploadedFileID: ${instruction.enteFile.uploadedFileID}",
+      "`processImage` start processing image with uploadedFileID: ${instruction.file.uploadedFileID}",
     );
     bool actuallyRanML = false;
 
@@ -404,7 +404,7 @@ class MLService {
       if (result == null) {
         if (!_shouldPauseIndexingAndClustering) {
           _logger.severe(
-            "Failed to analyze image with uploadedFileID: ${instruction.enteFile.uploadedFileID}",
+            "Failed to analyze image with uploadedFileID: ${instruction.file.uploadedFileID}",
           );
         }
         return actuallyRanML;
@@ -414,7 +414,7 @@ class MLService {
         final List<Face> faces = [];
         if (result.foundNoFaces) {
           debugPrint(
-            'No faces detected for file with name:${instruction.enteFile.displayName}',
+            'No faces detected for file with name:${instruction.file.displayName}',
           );
           faces.add(
             Face.empty(result.fileId, error: result.errorOccured),
@@ -425,9 +425,9 @@ class MLService {
               result.decodedImageSize.height == -1) {
             _logger.severe(
                 "decodedImageSize is not stored correctly for image with "
-                "ID: ${instruction.enteFile.uploadedFileID}");
+                "ID: ${instruction.file.uploadedFileID}");
             _logger.info(
-              "Using aligned image size for image with ID: ${instruction.enteFile.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${instruction.enteFile.width}x${instruction.enteFile.height} in the metadata",
+              "Using aligned image size for image with ID: ${instruction.file.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${instruction.file.width}x${instruction.file.height} in the metadata",
             );
           }
           for (int i = 0; i < result.faces!.length; ++i) {
@@ -467,10 +467,10 @@ class MLService {
         _logger.info("inserting ${faces.length} faces for ${result.fileId}");
         if (!result.errorOccured) {
           await RemoteFileMLService.instance.putFileEmbedding(
-            instruction.enteFile,
+            instruction.file,
             instruction.existingRemoteFileML ??
                 RemoteFileML.empty(
-                  instruction.enteFile.uploadedFileID!,
+                  instruction.file.uploadedFileID!,
                 ),
             faceEmbedding: result.facesRan
                 ? RemoteFaceEmbedding(
@@ -501,25 +501,25 @@ class MLService {
         actuallyRanML = true;
         await SemanticSearchService.storeClipImageResult(
           result.clip!,
-          instruction.enteFile,
+          instruction.file,
         );
       }
     } on ThumbnailRetrievalException catch (e, s) {
       _logger.severe(
-        'ThumbnailRetrievalException while processing image with ID ${instruction.enteFile.uploadedFileID}, storing empty face so indexing does not get stuck',
+        'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty face so indexing does not get stuck',
         e,
         s,
       );
       await FaceMLDataDB.instance.bulkInsertFaces(
-        [Face.empty(instruction.enteFile.uploadedFileID!, error: true)],
+        [Face.empty(instruction.file.uploadedFileID!, error: true)],
       );
       await SemanticSearchService.storeEmptyClipImageResult(
-        instruction.enteFile,
+        instruction.file,
       );
       return true;
     } catch (e, s) {
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${instruction.enteFile.uploadedFileID}. Not storing any faces, which means it will be automatically retried later.",
+        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID}. Not storing any faces, which means it will be automatically retried later.",
         e,
         s,
       );
@@ -756,7 +756,7 @@ class MLService {
   Future<MLResult?> _analyzeImageInSingleIsolate(
     FileMLInstruction instruction,
   ) async {
-    final String filePath = await getImagePathForML(instruction.enteFile);
+    final String filePath = await getImagePathForML(instruction.file);
 
     final Stopwatch stopwatch = Stopwatch()..start();
     late MLResult result;
@@ -766,7 +766,7 @@ class MLService {
         (
           FaceMlOperation.analyzeImage,
           {
-            "enteFileID": instruction.enteFile.uploadedFileID ?? -1,
+            "enteFileID": instruction.file.uploadedFileID ?? -1,
             "filePath": filePath,
             "runFaces": instruction.shouldRunFaces,
             "runClip": instruction.shouldRunClip,
@@ -787,21 +787,21 @@ class MLService {
       result = MLResult.fromJsonString(resultJsonString);
     } catch (e, s) {
       _logger.severe(
-        "Could not analyze image with ID ${instruction.enteFile.uploadedFileID} \n",
+        "Could not analyze image with ID ${instruction.file.uploadedFileID} \n",
         e,
         s,
       );
       debugPrint(
-        "This image with ID ${instruction.enteFile.uploadedFileID} has name ${instruction.enteFile.displayName}.",
+        "This image with ID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
       );
       final resultBuilder =
-          MLResult.fromEnteFileID(instruction.enteFile.uploadedFileID!)
+          MLResult.fromEnteFileID(instruction.file.uploadedFileID!)
             ..errorOccurred();
       return resultBuilder;
     }
     stopwatch.stop();
     _logger.info(
-      "Finished Analyze image with uploadedFileID ${instruction.enteFile.uploadedFileID}, in "
+      "Finished Analyze image with uploadedFileID ${instruction.file.uploadedFileID}, in "
       "${stopwatch.elapsedMilliseconds} ms (including time waiting for inference engine availability)",
     );
 
