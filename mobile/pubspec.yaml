@@ -142,6 +142,7 @@ dependencies:
   pinput: ^5.0.0
   pointycastle: ^3.7.3
   pool: ^1.5.1
+  privacy_screen: ^0.0.6
   protobuf: ^3.1.0
   provider: ^6.0.0
   quiver: ^3.0.1

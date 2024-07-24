@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
@@ -29,9 +31,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
   late int autoLockTimeInMilliseconds;
+  late bool hideAppContent;
+
   @override
   void initState() {
     super.initState();
+    hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
     _initializeSettings();
     appLock = isPinEnabled ||
@@ -42,9 +47,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _initializeSettings() async {
     final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
+    final bool shouldShowAppContent =
+        _lockscreenSetting.getShouldHideAppContent();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
+      hideAppContent = shouldShowAppContent;
     });
   }
 
@@ -104,10 +112,22 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
+    if (appLock == true) {
+      await _lockscreenSetting.setHideAppContent(false);
+    }
     setState(() {
       _initializeSettings();
       appLock = !appLock;
     });
+  }
+
+  Future<void> _tapHideContent() async {
+    setState(() {
+      hideAppContent = !hideAppContent;
+    });
+    await _lockscreenSetting.setHideAppContent(
+      hideAppContent,
+    );
   }
 
   String _formatTime(Duration duration) {
@@ -260,6 +280,40 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     ),
                                     child: Text(
                                       S.of(context).autoLockFeatureDescription,
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: S.of(context).hideContent,
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    singleBorderRadius: 8,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    trailingWidget: ToggleSwitchWidget(
+                                      value: () => hideAppContent,
+                                      onChanged: () => _tapHideContent(),
+                                    ),
+                                    trailingIconColor: colorTheme.tabIcon,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      Platform.isAndroid
+                                          ? S
+                                              .of(context)
+                                              .hideContentDescriptionAndroid
+                                          : S
+                                              .of(context)
+                                              .hideContentDescriptionIos,
                                       style: textTheme.miniFaint,
                                       textAlign: TextAlign.left,
                                     ),

@@ -676,6 +676,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("帮助"),
         "hidden": MessageLookupByLibrary.simpleMessage("已隐藏"),
         "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("正在隐藏..."),
         "hostedAtOsmFrance": MessageLookupByLibrary.simpleMessage("法国 OSM 主办"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("工作原理"),
@@ -883,6 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pair": MessageLookupByLibrary.simpleMessage("配对"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("用 PIN 配对"),
         "pairingComplete": MessageLookupByLibrary.simpleMessage("配对完成"),
+        "panorama": MessageLookupByLibrary.simpleMessage("全景"),
         "passKeyPendingVerification":
             MessageLookupByLibrary.simpleMessage("仍需进行验证"),
         "passkey": MessageLookupByLibrary.simpleMessage("通行密钥"),
@@ -1315,6 +1321,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifying": MessageLookupByLibrary.simpleMessage("正在验证..."),
         "verifyingRecoveryKey":
             MessageLookupByLibrary.simpleMessage("正在验证恢复密钥..."),
+        "videoInfo": MessageLookupByLibrary.simpleMessage("视频详情"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("视频"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage("查看活动会话"),

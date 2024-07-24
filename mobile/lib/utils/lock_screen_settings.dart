@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:photos/utils/crypto_util.dart";
+import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LockScreenSettings {
@@ -16,8 +17,8 @@ class LockScreenSettings {
   static const saltKey = "ls_salt";
   static const keyInvalidAttempts = "ls_invalid_attempts";
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
+  static const keyHideAppContent = "ls_hide_app_content";
   static const autoLockTime = "ls_auto_lock_time";
-
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
   static const List<Duration> autoLockDurations = [
@@ -31,6 +32,29 @@ class LockScreenSettings {
   void init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
+
+    ///Workaround for privacyScreen not working when app is killed and opened.
+    await setHideAppContent(getShouldHideAppContent());
+  }
+
+  Future<void> setHideAppContent(bool hideContent) async {
+    !hideContent
+        ? await PrivacyScreen.instance.disable()
+        : await PrivacyScreen.instance.enable(
+            iosOptions: const PrivacyIosOptions(
+              enablePrivacy: true,
+              lockTrigger: IosLockTrigger.didEnterBackground,
+            ),
+            androidOptions: const PrivacyAndroidOptions(
+              enableSecure: true,
+            ),
+            blurEffect: PrivacyBlurEffect.extraLight,
+          );
+    await _preferences.setBool(keyHideAppContent, hideContent);
+  }
+
+  bool getShouldHideAppContent() {
+    return _preferences.getBool(keyHideAppContent) ?? false;
   }
 
   Future<void> setAutoLockTime(Duration duration) async {

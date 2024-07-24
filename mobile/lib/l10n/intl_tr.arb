@@ -1279,5 +1279,8 @@
   "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
   "autoLock": "Auto lock",
   "immediately": "Immediately",
-  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "hideContent": "Hide content",
+  "hideContentDescriptionAndroid": "Hides app content in the app switcher and disables screenshots",
+  "hideContentDescriptionIos": "Hides app content in the app switcher"
 }
