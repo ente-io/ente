@@ -28,6 +28,14 @@ import type { EnteFile } from "../types/file";
 export const extractExif = () => {};
 
 /**
+ * Parse all date related fields from the metadata embedded in the file.
+ */
+const parseDates = (tags: ExifReader.ExpandedTags) => ({
+    ...parseExifDates(tags),
+    ...parseXMPDates(tags),
+});
+
+/**
  * Parse a date from an Exif date and offset tag combination.
  *
  * @param tags Metadata tags associated with a file.
@@ -129,6 +137,34 @@ const parseExifDate = (
 };
 
 /**
+ * Parse date related tags from XMP.
+ *
+ * XMP might have tags with the same name (or an alias) of an Exif tag:
+ *
+ * -   DateTimeOriginal
+ * -   DateTimeDigitized (aka "CreateDate")
+ * -   DateTime (aka "ModifyDate")
+ *
+ * In addition, it might have the following XMP specific tag:
+ *
+ * -   MetadataDate
+ *
+ * In addition, it might have the following Photoshop tag:
+ *
+ * -   DateCreated
+ *
+ * For a list of XMP tags, see https://exiftool.org/TagNames/XMP.html.
+ */
+const parseXMPDates = ({ xmp }: ExifReader.ExpandedTags) => ({
+    DateTimeOriginal: parseXMPDate(xmp?.DateTimeOriginal),
+    DateTimeDigitized:
+        parseXMPDate(xmp?.DateTimeDigitized) ?? parseXMPDate(xmp?.CreateDate),
+    DateTime: parseXMPDate(xmp?.DateTime) ?? parseXMPDate(xmp?.ModifyDate),
+    MetadataDate: parseXMPDate(xmp?.MetadataDate),
+    DateCreated: parseXMPDate(xmp?.DateCreated),
+});
+
+/**
  * Parse an XMP date tag.
  *
  * Dates in XMP are encoded as strings of the same base format as Exif, but they
@@ -136,10 +172,11 @@ const parseExifDate = (
  *
  *     YYYY:mm:dd HH:MM:SS[.ss][+/-HH:MM]
  *
- * See: https://exiftool.org/TagNames/XMP.html
  */
-const parseXMPDate = (s: string | undefined) => {
-    if (!s) return undefined;
+const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
+    if (!xmpTag) return undefined;
+    const s = xmpTag.value;
+    if (typeof s != "string") return undefined;
 
     // Do some minimal string manipulation to transform the XMP date string
     // format into the Javascript date time string format. This is not going to
