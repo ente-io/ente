@@ -44,12 +44,12 @@ export const extractExif = () => {};
  * photo's date:
  *
  * -   DateTimeOriginal
- * -   DateTime (aka "ModifyDate")
  * -   DateTimeDigitized (aka "CreateDate")
+ * -   DateTime (aka "ModifyDate")
  *
  * DateTimeOriginal is meant to signify best when the original image was taken,
  * and we use it as the photo's creation date whenever it is present. If not, we
- * fallback to DateTime or DateTimeDigitized (in that order).
+ * fallback to DateTimeDigitized or DateTime (in that order).
  *
  * Each of these is a string of the format
  *
@@ -70,8 +70,8 @@ export const extractExif = () => {};
  * the above):
  *
  * -   OffsetTimeOriginal
- * -   OffsetTime
  * -   OffsetTimeDigitized
+ * -   OffsetTime
  *
  * Each of these is a string of the format
  *
@@ -87,12 +87,29 @@ export const extractExif = () => {};
  * than assuming UTC, which, while deterministic, is going to incorrect in an
  * overwhelming majority of cases.
  */
-const parseExifDate = (
-    tags: ExifReader.ExpandedTags,
-    dateTag: keyof ExifReader.ExifTags,
-    offsetTag: keyof ExifReader.ExifTags,
-) => {
-    console.log(tags, dateTag, offsetTag);
+const parseExifDates = ({ exif }: ExifReader.ExpandedTags) => {
+    const parse = (
+        dateTag: ExifReader.StringArrayTag | undefined,
+        offsetTag: ExifReader.StringArrayTag | undefined,
+    ) => {
+        const [dateString] = dateTag?.value ?? [];
+        if (!dateString) return undefined;
+
+        const [offsetString] = offsetTag?.value ?? [];
+        return "";
+    };
+
+    return {
+        DateTimeOriginal: parse(
+            exif?.DateTimeOriginal,
+            exif?.OffsetTimeOriginal,
+        ),
+        DateTimeDigitized: parse(
+            exif?.DateTimeDigitized,
+            exif?.OffsetTimeDigitized,
+        ),
+        DateTime: parse(exif?.DateTime, exif?.OffsetTime),
+    };
 };
 
 /**
