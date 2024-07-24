@@ -38,6 +38,10 @@ abstract class MlModel {
     }
   }
 
+  Future<void> downloadModel() async {
+    await RemoteAssetsService.instance.getAssetIfUpdated(modelRemotePath);
+  }
+
   Future<void> _loadModelWithEntePlugin(
     String modelName,
     String modelPath,
