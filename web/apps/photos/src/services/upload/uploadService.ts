@@ -1,3 +1,7 @@
+import { ensureElectron } from "@/base/electron";
+import { basename } from "@/base/file";
+import log from "@/base/log";
+import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
@@ -21,10 +25,6 @@ import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
-import { ensureElectron } from "@/next/electron";
-import { basename } from "@/next/file";
-import log from "@/next/log";
-import { CustomErrorMessage } from "@/next/types/ipc";
 import { ensure } from "@/utils/ensure";
 import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
@@ -665,7 +665,7 @@ interface ExtractAssetMetadataResult {
 }
 
 /**
- * Compute the hash, extract EXIF or other metadata, and merge in data from the
+ * Compute the hash, extract Exif or other metadata, and merge in data from the
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
@@ -808,7 +808,7 @@ async function tryExtractImageMetadata(
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        // The library we use for extracting EXIF from images, exifr, doesn't
+        // The library we use for extracting Exif from images, exifr, doesn't
         // support streams. But unlike videos, for images it is reasonable to
         // read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);
@@ -1037,26 +1037,24 @@ const withThumbnail = async (
         } else {
             // 3. Browser based thumbnail generation for paths.
             //
-            // There are two reasons why we could get here:
+            // We can only get here when we're running in our desktop app (since
+            // only that works with non-File uploadItems), and the thumbnail
+            // generation failed. The scenarios are:
             //
-            // - We're running under Electron, but thumbnail generation is not
-            //   available. This is currently only a specific scenario for image
-            //   files on Windows.
+            // 1. We're trying to generate an image thumbnail on Windows or on
+            //    ARM64 Linux. This won't be possible since the bundled
+            //    imagemagick doesn't yet support these OS/arch combinations.
             //
-            // - We're running under the Electron, but the thumbnail generation
-            //   otherwise failed for some exception.
+            // 2. We're trying to generate a video thumbnail on Intel macOS.
+            //    This won't be possible since the bundled ffmpeg doesn't
+            //    support Rosetta.
+            //
+            // 3. Some other arbitrary exception happened.
             //
             // The fallback in this case involves reading the entire stream into
             // memory, and passing that data across the IPC boundary in a single
             // go (i.e. not in a streaming manner). This is risky for videos of
-            // unbounded sizes, plus we shouldn't even be getting here unless
-            // something went wrong.
-            //
-            // So instead of trying to cater for arbitrary exceptions, we only
-            // run this fallback to cover for the case where thumbnail
-            // generation was not available for an image file on Windows.
-            // If/when we add support of native thumbnailing on Windows too,
-            // this entire branch can be removed.
+            // unbounded sizes, so we can only apply this fallback for images.
 
             if (fileTypeInfo.fileType == FILE_TYPE.IMAGE) {
                 const data = await readEntireStream(fileStream.stream);

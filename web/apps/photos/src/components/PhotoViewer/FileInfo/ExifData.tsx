@@ -1,4 +1,4 @@
-import { Titlebar } from "@/new/shared/components/Titlebar";
+import { Titlebar } from "@/base/components/Titlebar";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { formatDateTimeFull } from "@ente/shared/time/format";
 import { Box, Stack, styled, Typography } from "@mui/material";
@@ -51,7 +51,7 @@ export function ExifData(props: {
         <FileInfoSidebar open={open} onClose={onClose}>
             <Titlebar
                 onClose={onClose}
-                title={t("EXIF")}
+                title={t("exif")}
                 caption={filename}
                 onRootClose={handleRootClose}
                 actionButton={

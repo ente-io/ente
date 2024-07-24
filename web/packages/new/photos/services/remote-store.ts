@@ -1,5 +1,5 @@
-import { authenticatedRequestHeaders, ensureOk } from "@/next/http";
-import { apiURL } from "@/next/origins";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { apiURL } from "@/base/origins";
 import { z } from "zod";
 
 /**

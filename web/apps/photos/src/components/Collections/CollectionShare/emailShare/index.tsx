@@ -5,7 +5,7 @@ import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/shared/components/Menu";
+} from "@/base/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import ChevronRight from "@mui/icons-material/ChevronRight";

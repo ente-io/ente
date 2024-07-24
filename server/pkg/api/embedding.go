@@ -50,6 +50,24 @@ func (h *EmbeddingHandler) GetDiff(c *gin.Context) {
 	})
 }
 
+// GetIndexedFiles returns the fileIDs that has been indexed or updated for given user
+func (h *EmbeddingHandler) GetIndexedFiles(c *gin.Context) {
+	var request ente.GetIndexedFiles
+	if err := c.ShouldBindQuery(&request); err != nil {
+		handler.Error(c,
+			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		return
+	}
+	embeddings, err := h.Controller.GetIndexedFiles(c, request)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"diff": embeddings,
+	})
+}
+
 // GetFilesEmbedding returns the embeddings for the files
 func (h *EmbeddingHandler) GetFilesEmbedding(c *gin.Context) {
 	var request ente.GetFilesEmbeddingRequest

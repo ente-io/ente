@@ -70,7 +70,7 @@ const FreePlanRow: React.FC<FreePlanRowProps> = ({ closeModal, storage }) => {
     return (
         <FreePlanRow_ onClick={closeModal}>
             <Box>
-                <Typography> {t("FREE_PLAN_OPTION_LABEL")}</Typography>
+                <Typography>{t("free_plan_option")}</Typography>
                 <Typography variant="small" color="text.muted">
                     {t("free_plan_description", {
                         storage: formattedStorageByteSize(storage),

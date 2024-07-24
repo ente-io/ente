@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import { apiURL, paymentsAppOrigin } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL, paymentsAppOrigin } from "@/base/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     LS_KEYS,

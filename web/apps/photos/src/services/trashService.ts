@@ -1,11 +1,11 @@
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import {
     getLocalTrash,
     getTrashedFiles,
     TRASH,
 } from "@/new/photos/services/files";
 import { EncryptedTrashItem, Trash } from "@/new/photos/types/file";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";

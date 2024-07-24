@@ -2,13 +2,13 @@
  * @file Main thread interface to the ML subsystem.
  */
 
+import { isDesktop } from "@/base/app";
+import { blobCache } from "@/base/blob-cache";
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FILE_TYPE } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
-import { isDesktop } from "@/next/app";
-import { blobCache } from "@/next/blob-cache";
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
 import { isBetaUser, isInternalUser } from "../feature-flags";
@@ -58,7 +58,6 @@ const worker = async () => {
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
     const mlWorkerElectron = {
-        appVersion: electron.appVersion,
         detectFaces: electron.detectFaces,
         computeFaceEmbeddings: electron.computeFaceEmbeddings,
         computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
@@ -100,7 +99,7 @@ export const terminateMLWorker = () => {
  */
 // TODO-ML:
 export const isMLSupported =
-    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML;
+    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML_DONT_USE;
 
 /**
  * Was this someone who might've enabled the beta ML? If so, show them the
@@ -363,8 +362,7 @@ const setInterimScheduledStatus = () => {
     let nSyncedFiles = 0,
         nTotalFiles = 0;
     if (_mlStatusSnapshot && _mlStatusSnapshot.phase != "disabled") {
-        nSyncedFiles = _mlStatusSnapshot.nSyncedFiles;
-        nTotalFiles = _mlStatusSnapshot.nTotalFiles;
+        ({ nSyncedFiles, nTotalFiles } = _mlStatusSnapshot);
     }
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
@@ -379,7 +377,7 @@ export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
-    return index?.faceEmbedding.faces.map((f) => f.faceID) ?? [];
+    return index?.faces.map((f) => f.faceID) ?? [];
 };
 
 /**
@@ -393,7 +391,7 @@ export const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
     const index = await faceIndex(enteFile.id);
     if (!index) return false;
 
-    const faceIDs = index.faceEmbedding.faces.map((f) => f.faceID);
+    const faceIDs = index.faces.map((f) => f.faceID);
     const cache = await blobCache("face-crops");
     for (const id of faceIDs) {
         if (!(await cache.has(id))) {

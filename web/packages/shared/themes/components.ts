@@ -62,10 +62,6 @@ export const getComponents = (
                 },
             },
         },
-        defaultProps: {
-            fullWidth: true,
-            maxWidth: "sm",
-        },
     },
     MuiPaper: {
         styleOverrides: { root: { backgroundImage: "none" } },

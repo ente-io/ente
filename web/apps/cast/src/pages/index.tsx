@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";

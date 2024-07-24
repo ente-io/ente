@@ -1,14 +1,18 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -34,8 +38,8 @@ class FileBottomBar extends StatefulWidget {
     required this.onFileRemoved,
     required this.enableFullScreenNotifier,
     this.userID,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   FileBottomBarState createState() => FileBottomBarState();
@@ -43,18 +47,35 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
-  late bool isPanorama;
+  bool _isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+  bool isPanorama = false;
   int? lastFileGenID;
 
   @override
   void initState() {
     super.initState();
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        _isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    isPanorama = widget.file.isPanorama() ?? false;
-    _checkPanorama();
+    if (flagService.internalUser) {
+      isPanorama = widget.file.isPanorama() ?? false;
+      _checkPanorama();
+    }
     return _getBottomBar();
   }
 
@@ -199,10 +220,11 @@ class FileBottomBarState extends State<FileBottomBar> {
       valueListenable: widget.enableFullScreenNotifier,
       builder: (BuildContext context, bool isFullScreen, _) {
         return IgnorePointer(
-          ignoring: isFullScreen,
+          ignoring: isFullScreen || _isFileSwipeLocked,
           child: AnimatedOpacity(
-            opacity: isFullScreen ? 0 : 1,
-            duration: const Duration(milliseconds: 150),
+            opacity: isFullScreen || _isFileSwipeLocked ? 0 : 1,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(

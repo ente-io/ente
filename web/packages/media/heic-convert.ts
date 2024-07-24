@@ -1,4 +1,4 @@
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { wait } from "@/utils/promise";
 import type { HEICConvertWorker } from "./heic-convert.worker";
 

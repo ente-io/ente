@@ -1,3 +1,6 @@
+import { isDesktop } from "@/base/app";
+import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import {
     isMLEnabled,
@@ -7,9 +10,6 @@ import {
 import { clipMatches } from "@/new/photos/services/ml/clip";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
-import { isDesktop } from "@/next/app";
-import { ensureElectron } from "@/next/electron";
-import log from "@/next/log";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
 import { Collection } from "types/collection";

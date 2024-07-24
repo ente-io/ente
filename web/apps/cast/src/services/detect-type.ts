@@ -1,5 +1,5 @@
+import { lowercaseExtension } from "@/base/file";
 import { KnownFileTypeInfos } from "@/media/file-type";
-import { lowercaseExtension } from "@/next/file";
 import FileType from "file-type";
 
 /**

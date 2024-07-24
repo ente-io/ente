@@ -2,7 +2,7 @@ import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
-} from "@/new/shared/components/Menu";
+} from "@/base/components/Menu";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SubmitButton from "@ente/shared/components/SubmitButton";
@@ -218,7 +218,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                     }}
                                     {...restSubmitButtonProps}
                                 >
-                                    {t("CANCEL")}
+                                    {t("cancel")}
                                 </Button>
                             )}
 

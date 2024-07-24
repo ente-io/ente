@@ -47,6 +47,8 @@ export function PublicLinkSetPassword({
             BackdropProps={{ sx: { position: "absolute" } }}
             sx={{ position: "absolute" }}
             PaperProps={{ sx: { p: 1 } }}
+            maxWidth={"sm"}
+            fullWidth
         >
             <Stack spacing={3} p={1.5}>
                 <Typography variant="h3" px={1} py={0.5} fontWeight={"bold"}>

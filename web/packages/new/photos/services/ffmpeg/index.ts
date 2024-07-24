@@ -1,3 +1,6 @@
+import { ensureElectron } from "@/base/electron";
+import type { Electron } from "@/base/types/ipc";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import {
     NULL_LOCATION,
     toDataOrPathOrZipEntry,
@@ -10,9 +13,6 @@ import {
     readConvertToMP4Stream,
     writeConvertToMP4Stream,
 } from "@/new/photos/utils/native-stream";
-import { ensureElectron } from "@/next/electron";
-import type { Electron } from "@/next/types/ipc";
-import { ComlinkWorker } from "@/next/worker/comlink-worker";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { Remote } from "comlink";
 import {

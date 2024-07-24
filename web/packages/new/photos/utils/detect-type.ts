@@ -1,10 +1,10 @@
+import { lowercaseExtension } from "@/base/file";
 import {
     FILE_TYPE,
     KnownFileTypeInfos,
     KnownNonMediaFileExtensions,
     type FileTypeInfo,
 } from "@/media/file-type";
-import { lowercaseExtension } from "@/next/file";
 import { CustomError } from "@ente/shared/error";
 import FileType from "file-type";
 
