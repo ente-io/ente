@@ -81,6 +81,7 @@ abstract class MlModel {
     }
   }
 
+  // TODO: add release method for native plugin
   Future<void> release() async {
     if (isInitialized) {
       await computer.compute(_releaseModel, param: {'address': sessionAddress});
