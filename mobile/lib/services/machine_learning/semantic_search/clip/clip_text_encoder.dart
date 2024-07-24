@@ -10,13 +10,15 @@ import 'package:photos/services/machine_learning/semantic_search/clip/clip_text_
 import "package:photos/utils/ml_util.dart";
 
 class ClipTextEncoder extends MlModel {
-  static const kRemoteBucketModelPath = "clip-text-vit-32-float32-int32.onnx";
+  static const _kRemoteBucketModelPath = "clip-text-vit-32-float32-int32.onnx";
+  static const _kVocabRemotePath = "bpe_simple_vocab_16e6.txt";
 
   // static const kRemoteBucketModelPath = "clip-text-vit-32-uint8.onnx";
   static const _modelName = "ClipTextEncoder";
 
   @override
-  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+  String get modelRemotePath => kModelBucketEndpoint + _kRemoteBucketModelPath;
+  String get vocabRemotePath => kModelBucketEndpoint + _kVocabRemotePath;
 
   @override
   Logger get logger => _logger;
@@ -34,6 +36,7 @@ class ClipTextEncoder extends MlModel {
     final text = args["text"];
     final address = args["address"] as int;
     final vocabPath = args["vocabPath"] as String;
+    final useEntePlugin = args["useEntePlugin"] ?? false;
     final List<int> tokenize =
         await ClipTextTokenizer.instance.tokenize(text, vocabPath);
     final int32list = Int32List.fromList(tokenize);

@@ -35,7 +35,6 @@ import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
-import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_util.dart";
@@ -806,7 +805,7 @@ class MLService {
   Future<List<double>> runClipTextInIsolate(String query) async {
     try {
       final int clipAddress = ClipTextEncoder.instance.sessionAddress;
-      const remotePath = ClipTextTokenizer.kVocabRemotePath;
+      final String remotePath = ClipTextEncoder.instance.vocabRemotePath;
       final String tokenizerVocabPath =
           await RemoteAssetsService.instance.getAssetPath(remotePath);
       final textEmbedding = await _runInIsolate(

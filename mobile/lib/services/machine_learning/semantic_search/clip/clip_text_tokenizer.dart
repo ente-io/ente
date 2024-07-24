@@ -6,8 +6,6 @@ import "package:html_unescape/html_unescape.dart";
 import "package:tuple/tuple.dart";
 
 class ClipTextTokenizer {
-  static const String kVocabRemotePath =
-      "https://models.ente.io/bpe_simple_vocab_16e6.txt";
   static const int totalTokens = 77;
 
   late String vocabulary;
