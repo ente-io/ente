@@ -124,7 +124,32 @@ const parseExifDate = (
     // time. This is the behaviour we want (See: [Note: Exif dates]).
 
     return new Date(
-        `${YYYY}-${MM}-${DD}T${HH}-${mm}-${ss}.000${offsetString ?? ""}`,
+        `${YYYY}-${MM}-${DD}T${HH}:${mm}:${ss}.000${offsetString ?? ""}`,
+    );
+};
+
+/**
+ * Parse an XMP date tag.
+ *
+ * Dates in XMP are encoded as strings of the same base format as Exif, but they
+ * additionally allow for sub-seconds and a timezone to be specified.
+ *
+ *     YYYY:mm:dd HH:MM:SS[.ss][+/-HH:MM]
+ *
+ * See: https://exiftool.org/TagNames/XMP.html
+ */
+const parseXMPDate = (s: string | undefined) => {
+    if (!s) return undefined;
+
+    // Do some minimal string manipulation to transform the XMP date string
+    // format into the Javascript date time string format. This is not going to
+    // be robust if the XMP data is malformed.
+    //
+    //     XMP  YYYY:mm:dd HH:MM:SS[.ss][+/-HH:MM]
+    //     JS   YYYY-MM-DDTHH:mm:ss.sssZ
+    //
+    return new Date(
+        s.trim().replace(":", "-").replace(":", "-").replace(" ", "T"),
     );
 };
 
