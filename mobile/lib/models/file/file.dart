@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import "package:motion_photos/src/xmp_extractor.dart";
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -13,6 +14,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
+import "package:photos/utils/panorama_util.dart";
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
@@ -179,6 +181,15 @@ class EnteFile {
             hasExifTime = true;
             creationTime = exifTime.microsecondsSinceEpoch;
           }
+          mediaUploadData.isPanorama = checkPanoramaFromEXIF(null, exifData);
+
+          try {
+            final xmpData = XMPExtractor()
+                .extract(mediaUploadData.sourceFile!.readAsBytesSync());
+            mediaUploadData.isPanorama = checkPanoramaFromXMP(xmpData);
+          } catch (_) {}
+
+          mediaUploadData.isPanorama ??= false;
         }
         if (Platform.isAndroid) {
           //Fix for missing location data in lower android versions.

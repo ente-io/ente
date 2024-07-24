@@ -50,7 +50,6 @@ class FileBottomBarState extends State<FileBottomBar> {
   bool _isFileSwipeLocked = false;
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
-  bool isPanorama = false;
   int? lastFileGenID;
 
   @override
@@ -73,24 +72,14 @@ class FileBottomBarState extends State<FileBottomBar> {
   @override
   Widget build(BuildContext context) {
     if (flagService.internalUser) {
-      isPanorama = widget.file.isPanorama() ?? false;
-      _checkPanorama();
+      if (widget.file.canBePanorama()) {
+        lastFileGenID = widget.file.generatedID;
+        if (lastFileGenID != widget.file.generatedID) {
+          guardedCheckPanorama(widget.file).ignore();
+        }
+      }
     }
     return _getBottomBar();
-  }
-
-  // _checkPanorama() method is used to check if the file is a panorama image.
-  // This handles the case when the the file dims (width and height) are not available.
-  Future<void> _checkPanorama() async {
-    if (lastFileGenID == widget.file.generatedID) {
-      return;
-    }
-    lastFileGenID = widget.file.generatedID;
-    final result = await checkIfPanorama(widget.file);
-    if (mounted && isPanorama == !result) {
-      isPanorama = result;
-      setState(() {});
-    }
   }
 
   void safeRefresh() {
@@ -175,25 +164,6 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       }
 
-      if (isPanorama) {
-        children.add(
-          Tooltip(
-            message: S.of(context).panorama,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.threesixty,
-                  color: Colors.white,
-                ),
-                onPressed: () async {
-                  await openPanoramaViewerPage(widget.file);
-                },
-              ),
-            ),
-          ),
-        );
-      }
       children.add(
         Tooltip(
           message: S.of(context).share,
@@ -227,59 +197,92 @@ class FileBottomBarState extends State<FileBottomBar> {
             curve: Curves.easeInOut,
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.6),
-                      Colors.black.withOpacity(0.72),
-                    ],
-                    stops: const [0, 0.8, 1],
-                  ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      widget.file.caption?.isNotEmpty ?? false
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                16,
-                                12,
-                                16,
-                                0,
-                              ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  await _displayDetails(widget.file);
-                                  await Future.delayed(
-                                    const Duration(milliseconds: 500),
-                                  ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
-                                  safeRefresh();
-                                },
-                                child: Text(
-                                  widget.file.caption!,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: getEnteTextTheme(context)
-                                      .mini
-                                      .copyWith(color: textBaseDark),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: children,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.file.isPanorama() == true)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Tooltip(
+                        message: S.of(context).panorama,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 12,
+                            bottom: 12,
+                            right: 20,
+                          ),
+                          child: IconButton(
+                            style: IconButton.styleFrom(
+                              backgroundColor: const Color(0xFF252525),
+                              fixedSize: const Size(44, 44),
+                            ),
+                            icon: const Icon(
+                              Icons.vrpano_outlined,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                            onPressed: () async {
+                              await openPanoramaViewerPage(widget.file);
+                            },
+                          ),
+                        ),
                       ),
-                    ],
+                    ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.6),
+                          Colors.black.withOpacity(0.72),
+                        ],
+                        stops: const [0, 0.8, 1],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          widget.file.caption?.isNotEmpty ?? false
+                              ? Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    12,
+                                    16,
+                                    0,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      await _displayDetails(widget.file);
+                                      await Future.delayed(
+                                        const Duration(milliseconds: 500),
+                                      ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+                                      safeRefresh();
+                                    },
+                                    child: Text(
+                                      widget.file.caption!,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: getEnteTextTheme(context)
+                                          .mini
+                                          .copyWith(color: textBaseDark),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: children,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
