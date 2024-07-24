@@ -26,16 +26,16 @@ import "package:photos/utils/ml_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
+  final _logger = Logger("SemanticSearchService");
   SemanticSearchService._privateConstructor();
 
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
-  static final Computer _computer = Computer.shared();
-  static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
 
+  static final Computer _computer = Computer.shared();
+  final LRUMap<String, List<double>> _queryCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.20;
 
-  final _logger = Logger("SemanticSearchService");
   final _reloadCacheDebouncer = Debouncer(
     const Duration(milliseconds: 4000),
     executionInterval: const Duration(milliseconds: 8000),
