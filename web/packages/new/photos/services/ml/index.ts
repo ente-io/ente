@@ -99,7 +99,7 @@ export const terminateMLWorker = () => {
  */
 // TODO-ML:
 export const isMLSupported =
-    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML;
+    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML_DONT_USE;
 
 /**
  * Was this someone who might've enabled the beta ML? If so, show them the

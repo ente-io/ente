@@ -442,5 +442,8 @@
   "deleteTagTitle": "要删除标签吗？",
   "deleteTagMessage": "您确定要删除此标签吗？此操作是不可逆的。",
   "somethingWentWrongParsingCode": "我们无法解析 {x} 代码。",
-  "updateNotAvailable": "更新不可用"
+  "updateNotAvailable": "更新不可用",
+  "viewRawCodes": "查看原始代码",
+  "rawCodes": "原始代码",
+  "rawCodeData": "原始代码数据"
 }

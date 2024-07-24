@@ -442,5 +442,8 @@
   "deleteTagTitle": "Eliminare il tag?",
   "deleteTagMessage": "Sei sicuro di voler eliminare questo tag? Questa azione è irreversibile.",
   "somethingWentWrongParsingCode": "Non siamo riusciti ad analizzare i codici {x}.",
-  "updateNotAvailable": "Aggiornamento non disponibile"
+  "updateNotAvailable": "Aggiornamento non disponibile",
+  "viewRawCodes": "Visualizza codici raw",
+  "rawCodes": "Codici raw",
+  "rawCodeData": "Dati codice raw"
 }

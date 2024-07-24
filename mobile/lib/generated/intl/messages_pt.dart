@@ -309,6 +309,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autenticação necessária"),
         "appLock": MessageLookupByLibrary.simpleMessage("Bloqueio de app"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("ID da Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
@@ -374,6 +376,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Você verá dispositivos disponíveis para transmitir aqui."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Certifique-se de que as permissões de Rede local estão ativadas para o aplicativo de Fotos Ente, em Configurações."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Devido a erros técnicos, você foi desconectado. Pedimos desculpas pelo inconveniente."),
         "autoPair":
@@ -833,6 +838,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorar"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alguns arquivos neste álbum são ignorados do envio porque eles tinham sido anteriormente excluídos do Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importando...."),
         "incorrectCode":
             MessageLookupByLibrary.simpleMessage("Código incorreto"),
@@ -939,8 +945,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Uma tag em grupo de todas as fotos que foram tiradas dentro de algum raio de uma foto"),
         "locations": MessageLookupByLibrary.simpleMessage("Locais"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Para ativar o bloqueio de tela, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Tela de bloqueio"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Login"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Desconectando..."),
@@ -1487,6 +1491,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Sugerir recurso"),
         "support": MessageLookupByLibrary.simpleMessage("Suporte"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Sincronização interrompida"),

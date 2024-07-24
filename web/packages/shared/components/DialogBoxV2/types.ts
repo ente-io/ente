@@ -1,5 +1,12 @@
 import type { ButtonProps } from "@mui/material";
 
+/**
+ * Customize the properties of the dialog box.
+ *
+ * Our custom dialog box helpers are meant for small message boxes, usually
+ * meant to confirm some user action. If more customization is needed, it might
+ * be a better idea to reach out for a bespoke MUI {@link DialogBox} instead.
+ */
 export interface DialogBoxAttributesV2 {
     icon?: React.ReactNode;
     /**
@@ -13,15 +20,43 @@ export interface DialogBoxAttributesV2 {
     title?: React.ReactNode;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
+    /**
+     * The dialog's content.
+     */
     content?: React.ReactNode;
+    /**
+     * Customize the cancel (dismiss) action button offered by the dialog box.
+     *
+     * Usually dialog boxes should have a cancel action, but this can be skipped
+     * to only show one of the other types of buttons.
+     */
     close?: {
+        /** The string to use as the label for the cancel button. */
         text?: string;
+        /** The color of the button. */
         variant?: ButtonProps["color"];
+        /**
+         * The function to call when the user cancels.
+         *
+         * If provided, this callback is invoked before closing the dialog.
+         */
         action?: () => void;
     };
+    /**
+     * Customize the primary action button offered by the dialog box.
+     */
     proceed?: {
+        /** The string to use as the label for the primary action. */
         text: string;
-        action: (setLoading?: (value: boolean) => void) => void | Promise<void>;
+        /**
+         * The function to call when the user presses the primary action button.
+         *
+         * It is passed a {@link setLoading} function that can be used to show
+         * or hide loading indicator or the primary action button.
+         */
+        action:
+            | (() => void | Promise<void>)
+            | ((setLoading: (value: boolean) => void) => void | Promise<void>);
         variant?: ButtonProps["color"];
         disabled?: boolean;
     };

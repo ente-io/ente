@@ -287,10 +287,10 @@ export function FileInfo({
                                     fontWeight: "bold",
                                 }}
                             >
-                                {t("VIEW_EXIF")}
+                                {t("view_exif")}
                             </LinkButton>
                         ) : (
-                            t("NO_EXIF")
+                            t("no_exif")
                         )
                     }
                     hideEditOption

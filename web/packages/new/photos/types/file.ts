@@ -116,6 +116,11 @@ export interface FileMagicMetadataProps {
 export type FileMagicMetadata = MagicMetadataCore<FileMagicMetadataProps>;
 
 export interface FilePublicMagicMetadataProps {
+    /**
+     * Modified value of the date time associated with an {@link EnteFile}.
+     *
+     * Epoch microseconds.
+     */
     editedTime?: number;
     editedName?: string;
     caption?: string;

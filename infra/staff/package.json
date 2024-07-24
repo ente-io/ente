@@ -11,9 +11,17 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@date-io/date-fns": "^3.0.0",
+        "@emotion/react": "^11.11.4",
+        "@emotion/styled": "^11.11.5",
+        "@mui/icons-material": "^5.16.0",
+        "@mui/lab": "^5.0.0-alpha.171",
+        "@mui/material": "^5.16.0",
+        "@mui/x-date-pickers": "^7.9.0",
+        "@types/react-datepicker": "^6.2.0",
         "date-fns": "^3.6.0",
         "react": "^18",
-        "react-datepicker": "^7.1.0",
+        "react-datepicker": "^7.3.0",
         "react-dom": "^18",
         "react-toastify": "^10.0.5",
         "zod": "^3"

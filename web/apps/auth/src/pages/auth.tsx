@@ -1,3 +1,4 @@
+import { NavbarBase } from "@/base/components/Navbar";
 import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
@@ -6,7 +7,6 @@ import {
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { sessionExpiredDialogAttributes } from "@ente/shared/components/LoginComponents";
-import NavbarBase from "@ente/shared/components/Navbar/base";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -141,10 +141,10 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { isMobile, logout } = ensure(useContext(AppContext));
+    const { logout } = ensure(useContext(AppContext));
 
     return (
-        <NavbarBase isMobile={isMobile}>
+        <NavbarBase>
             <HorizontalFlex flex={1} justifyContent={"center"}>
                 <EnteLogo />
             </HorizontalFlex>

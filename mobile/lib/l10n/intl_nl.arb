@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "Graag verifiëren om tweestapsverificatie te configureren",
   "lockscreen": "Vergrendelscherm",
   "authToChangeLockscreenSetting": "Graag verifiëren om de vergrendelscherm instellingen te wijzigen",
-  "lockScreenEnablePreSteps": "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "viewActiveSessions": "Actieve sessies bekijken",
   "authToViewYourActiveSessions": "Graag verifiëren om uw actieve sessies te bekijken",
   "disableTwofactor": "Tweestapsverificatie uitschakelen",
@@ -1276,5 +1275,10 @@
   "noSystemLockFound": "Geen systeemvergrendeling gevonden",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "tapToUnlock": "Tik om te ontgrendelen",
-  "tooManyIncorrectAttempts": "Te veel onjuiste pogingen"
+  "tooManyIncorrectAttempts": "Te veel onjuiste pogingen",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
 }

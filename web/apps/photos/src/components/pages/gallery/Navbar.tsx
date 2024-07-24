@@ -1,14 +1,12 @@
+import { NavbarBase } from "@/base/components/Navbar";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
-import SidebarToggler from "@ente/shared/components/Navbar/SidebarToggler";
-import NavbarBase from "@ente/shared/components/Navbar/base";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Typography } from "@mui/material";
 import SearchBar from "components/Search/SearchBar";
 import UploadButton from "components/Upload/UploadButton";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import React from "react";
 import { Collection } from "types/collection";
 import { UpdateSearch } from "types/search";
 
@@ -35,12 +33,8 @@ export function GalleryNavbar({
     setIsInSearchMode,
     exitHiddenSection,
 }: Iprops) {
-    const appContext = React.useContext(AppContext);
     return (
-        <NavbarBase
-            sx={{ background: "transparent", position: "absolute" }}
-            isMobile={appContext.isMobile}
-        >
+        <NavbarBase sx={{ background: "transparent", position: "absolute" }}>
             {isInHiddenSection ? (
                 <HorizontalFlex
                     gap={"24px"}
@@ -59,7 +53,9 @@ export function GalleryNavbar({
             ) : (
                 <>
                     {!isInSearchMode && (
-                        <SidebarToggler openSidebar={openSidebar} />
+                        <IconButton onClick={openSidebar} sx={{ pl: 0 }}>
+                            <MenuIcon />
+                        </IconButton>
                     )}
                     <SearchBar
                         isInSearchMode={isInSearchMode}

@@ -91,7 +91,7 @@ export default function ManageParticipant({
         appContext.setDialogMessage({
             title: t("CHANGE_PERMISSION"),
             content: contentText,
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 text: buttonText,
                 action: () => {
@@ -113,7 +113,7 @@ export default function ManageParticipant({
                     }}
                 />
             ),
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 text: t("CONFIRM_REMOVE"),
                 action: () => {

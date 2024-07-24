@@ -684,6 +684,7 @@ func main() {
 
 	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)
 	privateAPI.GET("/embeddings/diff", embeddingHandler.GetDiff)
+	privateAPI.GET("/embeddings/indexed-files", embeddingHandler.GetIndexedFiles)
 	privateAPI.POST("/embeddings/files", embeddingHandler.GetFilesEmbedding)
 	privateAPI.DELETE("/embeddings", embeddingHandler.DeleteAll)
 

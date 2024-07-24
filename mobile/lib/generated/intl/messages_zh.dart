@@ -271,6 +271,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("安卓, iOS, 网页端, 桌面端"),
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage("需要身份验证"),
         "appLock": MessageLookupByLibrary.simpleMessage("应用锁"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("应用"),
@@ -328,6 +330,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您将在此处看到可用的 Cast 设备。"),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "请确保已在“设置”中为 Ente Photos 应用打开本地网络权限。"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "由于技术故障，您已退出登录。对于由此造成的不便，我们深表歉意。"),
         "autoPair": MessageLookupByLibrary.simpleMessage("自动配对"),
@@ -684,6 +689,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("忽略"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "此相册中的某些文件在上传时会被忽略，因为它们之前已从 Ente 中删除。"),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("正在导入..."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("代码错误"),
         "incorrectPasswordTitle": MessageLookupByLibrary.simpleMessage("密码错误"),
@@ -771,8 +777,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("位置标签将在照片的某个半径范围内拍摄的所有照片进行分组"),
         "locations": MessageLookupByLibrary.simpleMessage("位置"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("锁定"),
-        "lockScreenEnablePreSteps":
-            MessageLookupByLibrary.simpleMessage("要启用锁屏，请在系统设置中设置设备密码或屏幕锁定。"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("锁屏"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("登录"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("正在退出登录..."),
@@ -1195,6 +1199,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "successfullyUnhid": MessageLookupByLibrary.simpleMessage("已成功取消隐藏"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("建议新功能"),
         "support": MessageLookupByLibrary.simpleMessage("支持"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped": MessageLookupByLibrary.simpleMessage("同步已停止"),
         "syncing": MessageLookupByLibrary.simpleMessage("正在同步···"),

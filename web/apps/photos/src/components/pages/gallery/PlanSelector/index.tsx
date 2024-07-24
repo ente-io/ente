@@ -1,6 +1,4 @@
-import { Dialog } from "@mui/material";
-import { AppContext } from "pages/_app";
-import { useContext } from "react";
+import { Dialog, useMediaQuery, useTheme } from "@mui/material";
 import { SetLoading } from "types/gallery";
 import PlanSelectorCard from "./card";
 
@@ -11,19 +9,20 @@ interface Props {
 }
 
 function PlanSelector(props: Props) {
-    const appContext = useContext(AppContext);
+    const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
+
     if (!props.modalView) {
         return <></>;
     }
 
     return (
         <Dialog
-            fullScreen={appContext.isMobile}
+            {...{ fullScreen }}
             open={props.modalView}
             onClose={props.closeModal}
             PaperProps={{
                 sx: (theme) => ({
-                    width: "391px",
+                    width: { sm: "391px" },
                     p: 1,
                     [theme.breakpoints.down(360)]: { p: 0 },
                 }),
