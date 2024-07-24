@@ -32,6 +32,8 @@ class LockScreenSettings {
   void init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
+
+    ///Workaround for privacyScreen not working when app is killed and opened.
     await setShowAppContent(getShouldShowAppContent());
   }
 
