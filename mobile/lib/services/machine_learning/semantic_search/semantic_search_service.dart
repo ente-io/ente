@@ -17,11 +17,10 @@ import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
-import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
-import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
@@ -296,25 +295,9 @@ class SemanticSearchService {
     if (cachedResult != null) {
       return cachedResult;
     }
-    try {
-      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
-      const remotePath = ClipTextTokenizer.kVocabRemotePath;
-      final String tokenizerVocabPath =
-          await RemoteAssetsService.instance.getAssetPath(remotePath);
-      final textEmbedding = await _computer.compute(
-        ClipTextEncoder.predict,
-        param: {
-          "text": query,
-          "address": clipAddress,
-          "vocabPath": tokenizerVocabPath,
-        },
-      ) as List<double>;
-      _queryCache.put(query, textEmbedding);
-      return textEmbedding;
-    } catch (e) {
-      _logger.severe("Could not get text embedding", e);
-      return [];
-    }
+    final textEmbedding = await MLService.instance.runClipTextInIsolate(query);
+    _queryCache.put(query, textEmbedding);
+    return textEmbedding;
   }
 
   Future<List<QueryResult>> _getSimilarities(

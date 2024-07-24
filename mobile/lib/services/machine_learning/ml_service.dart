@@ -34,14 +34,17 @@ import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.d
 import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum FaceMlOperation { analyzeImage, loadModels }
+enum FaceMlOperation { analyzeImage, loadModels, runClipText }
 
 /// This class is responsible for running the full face ml pipeline on images.
 ///
@@ -662,6 +665,10 @@ class MLService {
             await ClipImageEncoder.instance.loadModel(useEntePlugin: true);
             sendPort.send(true);
             break;
+          case FaceMlOperation.runClipText:
+            final textEmbedding = await ClipTextEncoder.predict(args);
+            sendPort.send(List.from(textEmbedding, growable: false));
+            break;
         }
       } catch (e, stackTrace) {
         dev.log(
@@ -794,6 +801,30 @@ class MLService {
     );
 
     return result;
+  }
+
+  Future<List<double>> runClipTextInIsolate(String query) async {
+    try {
+      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
+      const remotePath = ClipTextTokenizer.kVocabRemotePath;
+      final String tokenizerVocabPath =
+          await RemoteAssetsService.instance.getAssetPath(remotePath);
+      final textEmbedding = await _runInIsolate(
+        (
+          FaceMlOperation.runClipText,
+          {
+            "text": query,
+            "address": clipAddress,
+            "vocabPath": tokenizerVocabPath,
+            "useEntePlugin": Platform.isAndroid,
+          }
+        ),
+      ) as List<double>;
+      return textEmbedding;
+    } catch (e, s) {
+      _logger.severe("Could not run clip text in isolate", e, s);
+      rethrow;
+    }
   }
 
   static Future<MLResult> _analyzeImageSync(Map args) async {
