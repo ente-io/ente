@@ -9,7 +9,6 @@ import "package:photos/core/error-reporting/super_logging.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/ml_result.dart';
-import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/remote_assets_service.dart";
@@ -33,6 +32,8 @@ class MLIsolate {
   late SendPort _mainSendPort;
 
   bool _isIsolateSpawned = false;
+
+  bool shouldPauseIndexingAndClustering = false;
 
   // Singleton pattern
   MLIsolate._privateConstructor();
@@ -82,7 +83,7 @@ class MLIsolate {
         switch (function) {
           case MLOperation.analyzeImage:
             final time = DateTime.now();
-            final MLResult result = await MLService.analyzeImageSync(args);
+            final MLResult result = await analyzeImageStatic(args);
             _logger.info(
               "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
             );
@@ -115,7 +116,7 @@ class MLIsolate {
       _resetInactivityTimer();
 
       if (message.$1 == MLOperation.analyzeImage &&
-          MLService.instance.shouldPauseIndexingAndClustering) {
+          shouldPauseIndexingAndClustering) {
         return null;
       }
 
@@ -199,7 +200,7 @@ class MLIsolate {
         ),
       ) as String?;
       if (resultJsonString == null) {
-        if (!MLService.instance.shouldPauseIndexingAndClustering) {
+        if (!shouldPauseIndexingAndClustering) {
           _logger.severe('Analyzing image in isolate is giving back null');
         }
         return null;

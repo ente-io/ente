@@ -1,5 +1,6 @@
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:math" as math show sqrt, min, max;
+import "dart:typed_data" show ByteData;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
@@ -7,13 +8,18 @@ import "package:photos/core/configuration.dart";
 import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/face/db.dart";
+import "package:photos/face/model/dimension.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("MlUtil");
@@ -200,5 +206,63 @@ void normalizeEmbedding(List<double> embedding) {
   final double sqrtNormalization = math.sqrt(normalization);
   for (int i = 0; i < embedding.length; i++) {
     embedding[i] = embedding[i] / sqrtNormalization;
+  }
+}
+
+Future<MLResult> analyzeImageStatic(Map args) async {
+  try {
+    final int enteFileID = args["enteFileID"] as int;
+    final String imagePath = args["filePath"] as String;
+    final bool runFaces = args["runFaces"] as bool;
+    final bool runClip = args["runClip"] as bool;
+    final int faceDetectionAddress = args["faceDetectionAddress"] as int;
+    final int faceEmbeddingAddress = args["faceEmbeddingAddress"] as int;
+    final int clipImageAddress = args["clipImageAddress"] as int;
+
+    _logger.info(
+      "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
+    );
+    final time = DateTime.now();
+
+    // Decode the image once to use for both face detection and alignment
+    final imageData = await File(imagePath).readAsBytes();
+    final image = await decodeImageFromData(imageData);
+    final ByteData imageByteData = await getByteDataFromImage(image);
+    _logger.info('Reading and decoding image took '
+        '${DateTime.now().difference(time).inMilliseconds} ms');
+    final decodedImageSize =
+        Dimensions(height: image.height, width: image.width);
+    final result = MLResult.fromEnteFileID(enteFileID);
+    result.decodedImageSize = decodedImageSize;
+
+    if (runFaces) {
+      final resultFaces = await FaceRecognitionService.runFacesPipeline(
+        enteFileID,
+        image,
+        imageByteData,
+        faceDetectionAddress,
+        faceEmbeddingAddress,
+      );
+      if (resultFaces.isEmpty) {
+        return result..noFaceDetected();
+      }
+      result.faces = resultFaces;
+    }
+
+    if (runClip) {
+      final clipResult = await SemanticSearchService.runClipImage(
+        enteFileID,
+        image,
+        imageByteData,
+        clipImageAddress,
+        useEntePlugin: Platform.isAndroid,
+      );
+      result.clip = clipResult;
+    }
+
+    return result;
+  } catch (e, s) {
+    _logger.severe("Could not analyze image", e, s);
+    rethrow;
   }
 }

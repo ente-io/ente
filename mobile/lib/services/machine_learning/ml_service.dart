@@ -1,8 +1,7 @@
 import "dart:async";
-import "dart:developer" as dev show log;
-import "dart:io" show File, Platform;
+import "dart:io" show Platform;
 import "dart:math" show min;
-import "dart:typed_data" show Uint8List, ByteData;
+import "dart:typed_data" show Uint8List;
 
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
@@ -15,7 +14,6 @@ import "package:photos/extensions/list.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
-import "package:photos/face/model/dimension.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/landmark.dart";
 import "package:photos/service_locator.dart";
@@ -33,7 +31,6 @@ import "package:photos/services/machine_learning/ml_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -65,7 +62,7 @@ class MLService {
   bool _showClusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
-  bool shouldPauseIndexingAndClustering = false;
+  bool _shouldPauseIndexingAndClustering = false;
 
   static const int _fileDownloadLimit = 10;
   static const _kForceClusteringFaceCount = 8000;
@@ -88,8 +85,8 @@ class MLService {
       }
       _mlControllerStatus = event.shouldRun;
       if (_mlControllerStatus) {
-        if (shouldPauseIndexingAndClustering) {
-          shouldPauseIndexingAndClustering = false;
+        if (_shouldPauseIndexingAndClustering) {
+          _cancelPauseIndexingAndClustering();
           _logger.info(
             "MLController allowed running ML, faces indexing undoing previous pause",
           );
@@ -138,8 +135,14 @@ class MLService {
 
   void pauseIndexingAndClustering() {
     if (_isIndexingOrClusteringRunning) {
-      shouldPauseIndexingAndClustering = true;
+      _shouldPauseIndexingAndClustering = true;
+      MLIsolate.instance.shouldPauseIndexingAndClustering = true;
     }
+  }
+
+  void _cancelPauseIndexingAndClustering() {
+    _shouldPauseIndexingAndClustering = false;
+    MLIsolate.instance.shouldPauseIndexingAndClustering = false;
   }
 
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
@@ -169,7 +172,7 @@ class MLService {
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
-          if (shouldPauseIndexingAndClustering) {
+          if (_shouldPauseIndexingAndClustering) {
             _logger.info("indexAllImages() was paused, stopping");
             break outerLoop;
           }
@@ -192,7 +195,7 @@ class MLService {
       _logger.severe("indexAllImages failed", e, s);
     } finally {
       _isIndexingOrClusteringRunning = false;
-      shouldPauseIndexingAndClustering = false;
+      _cancelPauseIndexingAndClustering();
     }
   }
 
@@ -253,7 +256,7 @@ class MLService {
         int bucket = 1;
 
         while (true) {
-          if (shouldPauseIndexingAndClustering) {
+          if (_shouldPauseIndexingAndClustering) {
             _logger.info(
               "MLController does not allow running ML, stopping before clustering bucket $bucket",
             );
@@ -363,7 +366,7 @@ class MLService {
     } finally {
       _showClusteringIsHappening = false;
       _isIndexingOrClusteringRunning = false;
-      shouldPauseIndexingAndClustering = false;
+      _cancelPauseIndexingAndClustering();
     }
   }
 
@@ -379,7 +382,7 @@ class MLService {
         instruction,
       );
       if (result == null) {
-        if (!shouldPauseIndexingAndClustering) {
+        if (!_shouldPauseIndexingAndClustering) {
           _logger.severe(
             "Failed to analyze image with uploadedFileID: ${instruction.enteFile.uploadedFileID}",
           );
@@ -584,64 +587,6 @@ class MLService {
     }
   }
 
-  static Future<MLResult> analyzeImageSync(Map args) async {
-    try {
-      final int enteFileID = args["enteFileID"] as int;
-      final String imagePath = args["filePath"] as String;
-      final bool runFaces = args["runFaces"] as bool;
-      final bool runClip = args["runClip"] as bool;
-      final int faceDetectionAddress = args["faceDetectionAddress"] as int;
-      final int faceEmbeddingAddress = args["faceEmbeddingAddress"] as int;
-      final int clipImageAddress = args["clipImageAddress"] as int;
-
-      dev.log(
-        "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
-      );
-      final time = DateTime.now();
-
-      // Decode the image once to use for both face detection and alignment
-      final imageData = await File(imagePath).readAsBytes();
-      final image = await decodeImageFromData(imageData);
-      final ByteData imageByteData = await getByteDataFromImage(image);
-      dev.log('Reading and decoding image took '
-          '${DateTime.now().difference(time).inMilliseconds} ms');
-      final decodedImageSize =
-          Dimensions(height: image.height, width: image.width);
-      final result = MLResult.fromEnteFileID(enteFileID);
-      result.decodedImageSize = decodedImageSize;
-
-      if (runFaces) {
-        final resultFaces = await FaceRecognitionService.runFacesPipeline(
-          enteFileID,
-          image,
-          imageByteData,
-          faceDetectionAddress,
-          faceEmbeddingAddress,
-        );
-        if (resultFaces.isEmpty) {
-          return result..noFaceDetected();
-        }
-        result.faces = resultFaces;
-      }
-
-      if (runClip) {
-        final clipResult = await SemanticSearchService.runClipImage(
-          enteFileID,
-          image,
-          imageByteData,
-          clipImageAddress,
-          useEntePlugin: Platform.isAndroid,
-        );
-        result.clip = clipResult;
-      }
-
-      return result;
-    } catch (e, s) {
-      dev.log("Could not analyze image: \n e: $e \n s: $s");
-      rethrow;
-    }
-  }
-
   bool _cannotRunMLFunction({String function = ""}) {
     if (_isIndexingOrClusteringRunning) {
       _logger.info(
@@ -664,7 +609,7 @@ class MLService {
       _logStatus();
       return true;
     }
-    if (shouldPauseIndexingAndClustering) {
+    if (_shouldPauseIndexingAndClustering) {
       // This should ideally not be triggered, because one of the above should be triggered instead.
       _logger.warning(
         "Cannot run $function because indexing and clustering is being paused",
@@ -681,7 +626,7 @@ class MLService {
     isFaceIndexingEnabled: ${LocalSettings.instance.isFaceIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
-    shouldPauseIndexingAndClustering: $shouldPauseIndexingAndClustering
+    shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering
     debugIndexingDisabled: $debugIndexingDisabled
     ''';
     _logger.info(status);
