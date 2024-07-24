@@ -191,6 +191,14 @@ const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
 };
 
 /**
+ * Parse GPS location from the metadata embedded in the file.
+ */
+const parseLocation = (tags: ExifReader.ExpandedTags) => ({
+    Latitude: tags.gps?.Latitude,
+    Longitude: tags.gps?.Longitude,
+});
+
+/**
  * Index Exif in the given {@link EnteFile}.
  *
  * This function is invoked as part of the ML indexing pipeline, which is why it
