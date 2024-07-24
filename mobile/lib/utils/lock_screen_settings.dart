@@ -17,7 +17,7 @@ class LockScreenSettings {
   static const saltKey = "ls_salt";
   static const keyInvalidAttempts = "ls_invalid_attempts";
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
-  static const keyShowAppContent = "ls_show_app_content";
+  static const keyHideAppContent = "ls_hide_app_content";
   static const autoLockTime = "ls_auto_lock_time";
   late FlutterSecureStorage _secureStorage;
   late SharedPreferences _preferences;
@@ -34,11 +34,11 @@ class LockScreenSettings {
     _preferences = prefs;
 
     ///Workaround for privacyScreen not working when app is killed and opened.
-    await setShowAppContent(getShouldShowAppContent());
+    await setHideAppContent(getShouldHideAppContent());
   }
 
-  Future<void> setShowAppContent(bool showContent) async {
-    !showContent
+  Future<void> setHideAppContent(bool hideContent) async {
+    !hideContent
         ? await PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
             iosOptions: const PrivacyIosOptions(
@@ -50,11 +50,11 @@ class LockScreenSettings {
             ),
             blurEffect: PrivacyBlurEffect.extraLight,
           );
-    await _preferences.setBool(keyShowAppContent, showContent);
+    await _preferences.setBool(keyHideAppContent, hideContent);
   }
 
-  bool getShouldShowAppContent() {
-    return _preferences.getBool(keyShowAppContent) ?? false;
+  bool getShouldHideAppContent() {
+    return _preferences.getBool(keyHideAppContent) ?? false;
   }
 
   Future<void> setAutoLockTime(Duration duration) async {

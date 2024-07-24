@@ -49,7 +49,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
-      hideAppContent = _lockscreenSetting.getShouldShowAppContent();
+      hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     });
   }
 
@@ -110,7 +110,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
     if (appLock == true) {
-      await _lockscreenSetting.setShowAppContent(false);
+      await _lockscreenSetting.setHideAppContent(false);
     }
     setState(() {
       _initializeSettings();
@@ -122,7 +122,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       hideAppContent = !hideAppContent;
     });
-    await _lockscreenSetting.setShowAppContent(
+    await _lockscreenSetting.setHideAppContent(
       hideAppContent,
     );
   }
