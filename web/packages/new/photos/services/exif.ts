@@ -1,3 +1,4 @@
+import log from "@/base/log";
 import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
 
@@ -105,6 +106,42 @@ const parseExifDate = (
 ) => {
     const [dateString] = dateTag?.value ?? [];
     if (!dateString) return undefined;
+
+    const components = dateString
+        .trim()
+        .replace(" ", ":")
+        .split(":")
+        .map((s) => parseInt(s, 10));
+    const [YYYY, MM, DD, HH, mm, ss] = components;
+    if (
+        !(
+            YYYY !== undefined &&
+            YYYY >= 0 &&
+            YYYY <= 9999 &&
+            MM !== undefined &&
+            MM >= 1 &&
+            MM <= 12 &&
+            DD !== undefined &&
+            DD >= 1 &&
+            DD <= 31 &&
+            HH !== undefined &&
+            HH >= 0 &&
+            HH <= 23 &&
+            mm !== undefined &&
+            mm >= 0 &&
+            mm <= 59 &&
+            ss !== undefined &&
+            ss >= 0 &&
+            ss <= 59
+        )
+    ) {
+        log.warn(`Ignoring malformed Exif date ${dateString}`);
+        return undefined;
+    }
+
+    const date = new Date(YYYY, MM - 1, DD, HH, mm, ss);
+
+
 
     const [offsetString] = offsetTag?.value ?? [];
     return "";
