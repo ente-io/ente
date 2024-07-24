@@ -34,11 +34,12 @@ class SemanticSearchService {
   static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
 
   static const kMinimumSimilarityThreshold = 0.20;
-  static const kDebounceDuration = Duration(milliseconds: 4000);
 
   final _logger = Logger("SemanticSearchService");
-  final _reloadCacheDebouncer =
-      Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
+  final _reloadCacheDebouncer = Debouncer(
+    const Duration(milliseconds: 4000),
+    executionInterval: const Duration(milliseconds: 8000),
+  );
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
