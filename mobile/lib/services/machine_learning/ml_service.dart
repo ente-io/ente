@@ -14,7 +14,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/extensions/list.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
@@ -61,7 +60,9 @@ class MLService {
 
   // Singleton pattern
   MLService._privateConstructor();
+
   static final instance = MLService._privateConstructor();
+
   factory MLService() => instance;
 
   final _initModelLock = Lock();
@@ -175,26 +176,25 @@ class MLService {
     try {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
-
-      final filesToIndex = await getFilesForMlIndexing();
-      final List<List<FileMLInstruction>> chunks =
-          filesToIndex.chunks(_fileDownloadLimit);
+      final Stream<List<FileMLInstruction>> instructionStream =
+          FaceRecognitionService.instance
+              .syncEmbeddings(yieldSize: _fileDownloadLimit);
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
-      outerLoop:
-      for (final chunk in chunks) {
+
+      await for (final chunk in instructionStream) {
         if (!await canUseHighBandwidth()) {
           _logger.info(
             'stopping indexing because user is not connected to wifi',
           );
-          break outerLoop;
+          break;
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
           if (_shouldPauseIndexingAndClustering) {
             _logger.info("indexAllImages() was paused, stopping");
-            break outerLoop;
+            break;
           }
           await _ensureReadyForInference();
           futures.add(processImage(instruction));
@@ -206,7 +206,6 @@ class MLService {
         );
         fileAnalyzedCount += sumFutures;
       }
-
       _logger.info(
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image)",
       );

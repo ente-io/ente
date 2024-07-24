@@ -67,7 +67,6 @@ class FaceRecognitionService {
   Future<void> sync() async {
     await _syncPersonFeedback();
     if (LocalSettings.instance.remoteFetchEnabled) {
-      await _syncFaceEmbeddings();
     } else {
       _logger.severe(
         'Not fetching embeddings because user manually disabled it in debug options',
@@ -88,22 +87,24 @@ class FaceRecognitionService {
     _isSyncing = false;
   }
 
-  Future<List<FileMLInstruction>> _syncFaceEmbeddings() async {
+  Stream<List<FileMLInstruction>> syncEmbeddings({
+    int yieldSize = 10,
+  }) async* {
     final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
-    final Map<int, FileMLInstruction> pendingIndex = {};
     final List<List<FileMLInstruction>> chunks =
-        filesToIndex.chunks(_embeddingFetchLimit); // Chunks of 200
-    int filesIndexedForFaces = 0;
-    int filesIndexedForClip = 0;
+        filesToIndex.chunks(_embeddingFetchLimit);
+    List<FileMLInstruction> batchToYield = [];
+
     for (final chunk in chunks) {
       final Set<int> ids = {};
+      final Map<int, FileMLInstruction> pendingIndex = {};
       for (final instruction in chunk) {
         ids.add(instruction.file.uploadedFileID!);
         pendingIndex[instruction.file.uploadedFileID!] = instruction;
       }
-      _logger.info('starting remote fetch for ${ids.length} files');
+      _logger.info("fetching embeddings for ${ids.length} files");
       final res = await RemoteFileMLService.instance.getFileEmbeddings(ids);
-      _logger.info('fetched ${res.mlData.length} embeddings');
+      _logger.info("embeddingResponse ${res.debugLog()}");
       final List<Face> faces = [];
       final List<ClipEmbedding> clipEmbeddings = [];
       for (RemoteFileML fileMl in res.mlData.values) {
@@ -112,7 +113,6 @@ class FaceRecognitionService {
         //Note: Always do null check, empty value means no face was found.
         if (facesFromRemoteEmbedding != null) {
           faces.addAll(facesFromRemoteEmbedding);
-          filesIndexedForFaces++;
           existingInstruction.shouldRunFaces = false;
         }
         if (fileMl.clipEmbedding != null &&
@@ -125,7 +125,6 @@ class FaceRecognitionService {
             ),
           );
           existingInstruction.shouldRunClip = false;
-          filesIndexedForClip++;
         }
         if (!existingInstruction.pendingML) {
           pendingIndex.remove(fileMl.fileID);
@@ -134,23 +133,30 @@ class FaceRecognitionService {
           pendingIndex[fileMl.fileID] = existingInstruction;
         }
       }
-
+      for (final fileID in pendingIndex.keys) {
+        final instruction = pendingIndex[fileID]!;
+        if (instruction.pendingML) {
+          batchToYield.add(instruction);
+          if (batchToYield.length == yieldSize) {
+            _logger.info("queueing indexing for  $yieldSize");
+            yield batchToYield;
+            batchToYield = [];
+          }
+        }
+      }
       if (res.noEmbeddingFileIDs.isNotEmpty) {
-        _logger.info(
-          'No embeddings found for ${res.noEmbeddingFileIDs.length} files',
-        );
         for (final fileID in res.noEmbeddingFileIDs) {
           faces.add(Face.empty(fileID, error: false));
         }
       }
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
       await EmbeddingsDB.instance.putMany(clipEmbeddings);
-      _logger.info(
-        'Embedding store files for face $filesIndexedForFaces, and clip $filesIndexedForClip',
-      );
     }
-    final List<FileMLInstruction> instructions = pendingIndex.values.toList();
-    return instructions;
+    // Yield any remaining instructions
+    if (batchToYield.isNotEmpty) {
+      _logger.info("queueing indexing for  $batchToYield.length");
+      yield batchToYield;
+    }
   }
 
   // Returns a list of faces from the given remote fileML. null if the version is less than the current version

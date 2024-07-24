@@ -16,4 +16,17 @@ class FilesMLDataResponse {
     required this.fetchErrorFileIDs,
     required this.pendingIndexFileIDs,
   });
+
+  String debugLog() {
+    final nonZeroNoEmbeddingFileIDs = noEmbeddingFileIDs.isNotEmpty
+        ? ', smallEmbeddings: ${noEmbeddingFileIDs.length}'
+        : '';
+    final nonZeroFetchErrorFileIDs = fetchErrorFileIDs.isNotEmpty
+        ? ', errorForFileIDs: ${fetchErrorFileIDs.length}'
+        : '';
+    final nonZeroPendingIndexFileIDs = pendingIndexFileIDs.isNotEmpty
+        ? ', pendingIndexFileIDs: ${pendingIndexFileIDs.length}'
+        : '';
+    return 'MLRemote(mlData: ${mlData.length}$nonZeroNoEmbeddingFileIDs$nonZeroFetchErrorFileIDs$nonZeroPendingIndexFileIDs)';
+  }
 }
