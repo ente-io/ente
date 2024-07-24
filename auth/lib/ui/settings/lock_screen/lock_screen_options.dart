@@ -49,10 +49,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _initializeSettings() async {
     final bool passwordEnabled = await _lockscreenSetting.isPasswordSet();
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
+    final bool shouldHideAppContent =
+        _lockscreenSetting.getShouldHideAppContent();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
-      hideAppContent = _lockscreenSetting.getShouldHideAppContent();
+      hideAppContent = shouldHideAppContent;
     });
   }
 

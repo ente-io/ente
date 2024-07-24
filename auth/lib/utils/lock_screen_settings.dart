@@ -19,7 +19,7 @@ class LockScreenSettings {
   static const keyInvalidAttempts = "ls_invalid_attempts";
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const autoLockTime = "ls_auto_lock_time";
-  static const keyHideAppContent = "ls_show_app_content";
+  static const keyHideAppContent = "ls_hide_app_content";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
     Duration(seconds: 5),
