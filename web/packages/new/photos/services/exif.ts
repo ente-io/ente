@@ -1,4 +1,3 @@
-import log from "@/base/log";
 import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
 
@@ -32,11 +31,18 @@ export const extractExif = () => {};
  */
 const parseDates = (tags: ExifReader.ExpandedTags) => {
     const exif = parseExifDates(tags);
+    const iptc = parseIPTCDates(tags);
     const xmp = parseXMPDates(tags);
     return {
-        DateTimeOriginal: xmp.DateTimeOriginal ?? exif.DateTimeOriginal,
+        DateTimeOriginal:
+            xmp.DateTimeOriginal ??
+            iptc.DateTimeOriginal ??
+            exif.DateTimeOriginal,
         DateTimeDigitized:
-            xmp.DateTimeDigitized ?? exif.DateTimeDigitized ?? xmp.CreateDate,
+            xmp.DateTimeDigitized ??
+            iptc.DateTimeDigitized ??
+            exif.DateTimeDigitized ??
+            xmp.CreateDate,
         DateTime: xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate,
         MetadataDate: xmp.MetadataDate,
         DateCreated: xmp.DateCreated,
@@ -123,24 +129,23 @@ const parseExifDate = (
     const [dateString] = dateTag?.value ?? [];
     if (!dateString) return undefined;
 
-    const components = dateString.trim().replace(" ", ":").split(":");
-    const [YYYY, MM, DD, HH, mm, ss] = components;
-    if (!YYYY || !MM || !DD || !HH || !mm || !ss) {
-        log.warn(`Ignoring malformed Exif date ${dateString}`);
-        return undefined;
-    }
-
     const [offsetString] = offsetTag?.value ?? [];
 
-    // Use the string components we have from the Exif date (and optional
-    // offset) to construct a string in the Javascript date time string format.
+    // Perform minor syntactic changes to the Exif date, and add the optional
+    // offset, to construct a string in the Javascript date time string format.
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_time_string_format
     //
+    //     YYYY:MM:DD HH:mm:ss±HH:mm
+    //     YYYY-MM-DDTHH:mm:ss±HH:mm
+    //
     // When the offset string is missing, the date time is interpreted as local
-    // time. This is the behaviour we want (See: [Note: Exif dates]).
+    // time. This is the behaviour we want.
+    //
+    // For details see [Note: Exif dates]
 
     return new Date(
-        `${YYYY}-${MM}-${DD}T${HH}:${mm}:${ss}${offsetString ?? ""}`,
+        dateString.replace(":", "-").replace(":", "-").replace(" ", "T") +
+            (offsetString ?? ""),
     );
 };
 
@@ -153,6 +158,7 @@ const parseExifDate = (
  * For a list of XMP tags, see https://exiftool.org/TagNames/XMP.html.
  */
 const parseXMPDates = ({ xmp }: ExifReader.ExpandedTags) => ({
+    /* XMP namespace is indicated for each group */
     // exif:
     DateTimeOriginal: parseXMPDate(xmp?.DateTimeOriginal),
     DateTimeDigitized: parseXMPDate(xmp?.DateTimeDigitized),
@@ -191,6 +197,20 @@ const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
 
     return new Date(s);
 };
+
+/**
+ * Parse date related tags from IPTC.
+ */
+const parseIPTCDates = ({ iptc }: ExifReader.ExpandedTags) => ({
+    DateTimeOriginal: parseIPTCDate(
+        iptc?.["Date Created"],
+        iptc?.["Time Created"],
+    ),
+    DateTimeDigitized: parseIPTCDate(
+        iptc?.["Digital Creation Date"],
+        iptc?.["Digital Creation Time"],
+    ),
+});
 
 /**
  * Parse an IPTC date tag.
