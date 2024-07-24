@@ -6,6 +6,7 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
 import 'package:photos/ui/viewer/gallery/component/group/lazy_group_gallery.dart';
@@ -13,7 +14,6 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/utils/data_util.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 /*
@@ -114,7 +114,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
           enableFileGrouping,
           showSelectAllByDefault,
           logTag: logTag,
-          photoGridSize: LocalSettings.instance.getPhotoGridSize(),
+          photoGridSize: localSettings.getPhotoGridSize(),
           limitSelectionToOne: limitSelectionToOne,
         );
         if (header != null && index == 0) {

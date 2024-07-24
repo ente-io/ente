@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
@@ -16,7 +17,6 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/local_settings.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class MLDebugSectionWidget extends StatefulWidget {
@@ -63,7 +63,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
-                  title: LocalSettings.instance.isFaceIndexingEnabled
+                  title: localSettings.isFaceIndexingEnabled
                       ? "Disable faces (${snapshot.data!} files done)"
                       : "Enable faces (${snapshot.data!} files done)",
                 );
@@ -76,8 +76,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              final isEnabled =
-                  await LocalSettings.instance.toggleFaceIndexing();
+              final isEnabled = await localSettings.toggleFaceIndexing();
               if (!isEnabled) {
                 MLService.instance.pauseIndexingAndClustering();
               }
@@ -93,7 +92,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: LocalSettings.instance.remoteFetchEnabled
+            title: localSettings.remoteFetchEnabled
                 ? "Remote fetch enabled"
                 : "Remote fetch disabled",
           ),
@@ -102,7 +101,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await LocalSettings.instance.toggleRemoteFetch();
+              await localSettings.toggleRemoteFetch();
               if (mounted) {
                 setState(() {});
               }

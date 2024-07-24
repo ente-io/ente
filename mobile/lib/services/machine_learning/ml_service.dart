@@ -35,7 +35,6 @@ import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/utils/image_ml_util.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -93,8 +92,7 @@ class MLService {
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
-    if (LocalSettings.instance.isFaceIndexingEnabled == false ||
-        _isInitialized) {
+    if (localSettings.isFaceIndexingEnabled == false || _isInitialized) {
       return;
     }
     _logger.info("init called");
@@ -104,7 +102,7 @@ class MLService {
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (LocalSettings.instance.isFaceIndexingEnabled == false) {
+      if (localSettings.isFaceIndexingEnabled == false) {
         return;
       }
       _mlControllerStatus = event.shouldRun;
@@ -904,7 +902,7 @@ class MLService {
   void _logStatus() {
     final String status = '''
     isInternalUser: ${flagService.internalUser}
-    isFaceIndexingEnabled: ${LocalSettings.instance.isFaceIndexingEnabled}
+    isFaceIndexingEnabled: ${localSettings.isFaceIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering

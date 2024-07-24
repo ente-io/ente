@@ -53,7 +53,6 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
-import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -267,7 +266,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("SyncService init done");
 
     MemoriesService.instance.init(preferences);
-    LocalSettings.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     StorageBonusService.instance.init(preferences);
@@ -295,8 +293,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     if (flagService.faceSearchEnabled) {
       unawaited(MLService.instance.init());
     } else {
-      if (LocalSettings.instance.isFaceIndexingEnabled) {
-        unawaited(LocalSettings.instance.toggleFaceIndexing());
+      if (localSettings.isFaceIndexingEnabled) {
+        unawaited(localSettings.toggleFaceIndexing());
       }
     }
     PersonService.init(

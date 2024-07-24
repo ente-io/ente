@@ -15,13 +15,13 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -50,7 +50,7 @@ class SemanticSearchService {
   get hasInitialized => _hasInitialized;
 
   Future<void> init() async {
-    if (!LocalSettings.instance.isFaceIndexingEnabled) {
+    if (!localSettings.isFaceIndexingEnabled) {
       return;
     }
     if (_hasInitialized) {
@@ -87,7 +87,7 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return LocalSettings.instance.isFaceIndexingEnabled &&
+    return localSettings.isFaceIndexingEnabled &&
         _textModelIsLoaded &&
         _cachedImageEmbeddings.isNotEmpty;
   }

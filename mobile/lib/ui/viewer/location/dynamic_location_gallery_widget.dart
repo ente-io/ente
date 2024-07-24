@@ -6,12 +6,12 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
-import "package:photos/utils/local_settings.dart";
 
 ///This gallery will get rebuilt with the updated radius when
 ///InheritedLocationTagData notifies a change in radius.
@@ -127,7 +127,7 @@ class _DynamicLocationGalleryWidgetState
   }
 
   double _galleryHeight(int fileCount, double widthOfGrid) {
-    final photoGridSize = LocalSettings.instance.getPhotoGridSize();
+    final photoGridSize = localSettings.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
         galleryGridSpacing * (photoGridSize - 1);
 

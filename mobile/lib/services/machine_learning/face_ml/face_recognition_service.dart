@@ -14,6 +14,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -23,7 +24,6 @@ import "package:photos/services/machine_learning/file_ml/remote_fileml_service.d
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/image_ml_util.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 
 class FaceRecognitionService {
@@ -66,7 +66,7 @@ class FaceRecognitionService {
 
   Future<void> sync() async {
     await _syncPersonFeedback();
-    if (LocalSettings.instance.remoteFetchEnabled) {
+    if (localSettings.remoteFetchEnabled) {
     } else {
       _logger.severe(
         'Not fetching embeddings because user manually disabled it in debug options',
