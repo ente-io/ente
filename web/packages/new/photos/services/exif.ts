@@ -30,10 +30,18 @@ export const extractExif = () => {};
 /**
  * Parse all date related fields from the metadata embedded in the file.
  */
-const parseDates = (tags: ExifReader.ExpandedTags) => ({
-    ...parseExifDates(tags),
-    ...parseXMPDates(tags),
-});
+const parseDates = (tags: ExifReader.ExpandedTags) => {
+    const exif = parseExifDates(tags);
+    const xmp = parseXMPDates(tags);
+    return {
+        DateTimeOriginal: xmp.DateTimeOriginal ?? exif.DateTimeOriginal,
+        DateTimeDigitized:
+            xmp.DateTimeDigitized ?? exif.DateTimeDigitized ?? xmp.CreateDate,
+        DateTime: xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate,
+        MetadataDate: xmp.MetadataDate,
+        DateCreated: xmp.DateCreated,
+    };
+};
 
 /**
  * Parse a date from an Exif date and offset tag combination.
@@ -198,7 +206,7 @@ const parseLocation = (tags: ExifReader.ExpandedTags) => ({
  */
 const parseDimensions = (tags: ExifReader.ExpandedTags) => ({
     ImageWidth: [
-        // Take the first non-zero value
+        // Take the first (defined) non-zero value.
         tags.exif?.ImageWidth?.value,
         tags.exif?.PixelXDimension?.value,
         parseXMPNum(tags.xmp?.ImageWidth),
