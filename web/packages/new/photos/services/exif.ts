@@ -27,26 +27,45 @@ import type { EnteFile } from "../types/file";
 export const extractExif = () => {};
 
 /**
+ * Parse a single "best" creation date for an image from the metadata embedded
+ * in the file.
+ *
+ * A file has multiple types of metadata, and each of these has multiple types
+ * of dates, so we use some an a heuristic ordering (based on experience with
+ * the photos we find out in the wild) to pick a "best" date.
+ */
+const parseCreationDate = (tags: ExifReader.ExpandedTags) => {
+    const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
+        parseDates(tags);
+    return DateTimeOriginal ?? DateTimeDigitized ?? MetadataDate ?? DateTime;
+};
+
+/**
  * Parse all date related fields from the metadata embedded in the file,
  * grouping them into chunks that somewhat reflect the Exif ontology.
  */
 const parseDates = (tags: ExifReader.ExpandedTags) => {
+    // We have come across real examples of customer photos with Exif dates set
+    // to "0000:00:00 00:00:00". So ignore any date whose epoch is 0, so that we
+    // can try with a subsequent (possibly correct) date in the sequence.
+    const valid = (d: Date | undefined) => (d?.getTime() ? d : undefined);
+
     const exif = parseExifDates(tags);
     const iptc = parseIPTCDates(tags);
     const xmp = parseXMPDates(tags);
     return {
         DateTimeOriginal:
-            xmp.DateTimeOriginal ??
-            iptc.DateTimeOriginal ??
-            exif.DateTimeOriginal ??
-            xmp.DateCreated,
+            valid(xmp.DateTimeOriginal) ??
+            valid(iptc.DateTimeOriginal) ??
+            valid(exif.DateTimeOriginal) ??
+            valid(xmp.DateCreated),
         DateTimeDigitized:
-            xmp.DateTimeDigitized ??
-            iptc.DateTimeDigitized ??
-            exif.DateTimeDigitized ??
-            xmp.CreateDate,
-        DateTime: xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate,
-        MetadataDate: xmp.MetadataDate,
+            valid(xmp.DateTimeDigitized) ??
+            valid(iptc.DateTimeDigitized) ??
+            valid(exif.DateTimeDigitized) ??
+            valid(xmp.CreateDate),
+        MetadataDate: valid(xmp.MetadataDate),
+        DateTime: valid(xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate),
     };
 };
 
@@ -436,7 +455,7 @@ const backfill = (enteFile: EnteFile, tags: ExifReader.ExpandedTags) => {
     // TODO:Exif: Testing
     console.log([
         enteFile,
-        parseDates(tags),
+        parseCreationDate(tags),
         parseLocation(tags),
         parseDimensions(tags),
     ]);
