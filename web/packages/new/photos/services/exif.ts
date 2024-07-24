@@ -193,6 +193,54 @@ const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
 };
 
 /**
+ * Parse an IPTC date tag.
+ *
+ * [Note: IPTC dates]
+ *
+ * IPTC date time values are split across two tag:
+ *
+ * - A tag containing the date as as 8 digit number of the form `YYYYMMDD`.
+ *
+ * - A tag containing the time as an 11 character string of the form
+ *   `HHMMSS±HHMM`.
+ *
+ * They lack separators, but together these tags are meant to encode the same
+ * information as the ISO 8601 date format (that XMP and JavaScript also use).
+ *
+ * Reference:
+ * - http://www.iptc.org/std/IIM/4.1/specification/IIMV4.1.pdf
+ *
+ * ---
+ *
+ * @param dateTag The tag containing the date part of the date.
+ *
+ * @param timeTag The tag containing the time part of the date.
+ */
+const parseIPTCDate = (
+    dateTag: ExifReader.NumberArrayTag | undefined,
+    timeTag: ExifReader.NumberArrayTag | undefined,
+) => {
+    // The library we use (ExifReader) parses them into a usable representation,
+    // which we can use directly. Some notes:
+    //
+    // -   There are currently no separate TypeScript types for the IPTC tags,
+    //     and instead they are listed as part of the ExifTags.
+    //
+    // -   For the date, ExifReader parses the raw data into a description of
+    //     the form 'YYYY-MM-DD' (See `getCreationDate` in its source code).
+    //
+    // -   For the time, ExifReader parses the raw data into a description
+    //     either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
+    //     `getCreationTime` in its source code).
+    if (!dateTag) return undefined;
+    let s = dateTag.description;
+
+    if (timeTag) s = s + "T" + timeTag.description;
+
+    return new Date(s);
+};
+
+/**
  * Parse GPS location from the metadata embedded in the file.
  */
 const parseLocation = (tags: ExifReader.ExpandedTags) => ({
