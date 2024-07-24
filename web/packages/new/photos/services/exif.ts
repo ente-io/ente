@@ -204,11 +204,11 @@ const parseLocation = (tags: ExifReader.ExpandedTags) => ({
  */
 const parseDimensions = (tags: ExifReader.ExpandedTags) => ({
     ImageWidth: [
+        // Take the first non-zero value
         tags.exif?.ImageWidth?.value,
         tags.exif?.PixelXDimension?.value,
-        tags.file?.["Image Width"]?.value,
         parseXMPNum(tags.xmp?.ImageWidth),
-        parseXMPNum(tags.xmp?.ExifImageWidth),
+        parseXMPNum(tags.xmp?.PixelXDimension),
         tags.pngFile?.["Image Width"]?.value,
         tags.gif?.["Image Width"]?.value,
         tags.riff?.ImageWidth?.value,
@@ -218,9 +218,8 @@ const parseDimensions = (tags: ExifReader.ExpandedTags) => ({
         // Note: The Exif spec calls it ImageLength, not ImageHeight.
         tags.exif?.ImageLength?.value,
         tags.exif?.PixelYDimension?.value,
-        tags.file?.["Image Height"]?.value,
-        parseXMPNum(tags.xmp?.ImageHeight),
-        parseXMPNum(tags.xmp?.ExifImageHeight),
+        parseXMPNum(tags.xmp?.ImageLength),
+        parseXMPNum(tags.xmp?.PixelYDimension),
         tags.pngFile?.["Image Height"]?.value,
         tags.gif?.["Image Height"]?.value,
         tags.riff?.ImageHeight?.value,
