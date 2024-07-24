@@ -110,7 +110,7 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 		Version:            version,
 		EncryptedEmbedding: req.EncryptedEmbedding,
 		DecryptionHeader:   req.DecryptionHeader,
-		Client:             network.GetPrettyUA(ctx.GetHeader("User-Agent")) + "/" + ctx.GetHeader("X-Client-Version"),
+		Client:             network.GetClientInfo(ctx),
 	}
 	size, uploadErr := c.uploadObject(obj, c.getObjectKey(userID, req.FileID, req.Model), c.derivedStorageDataCenter)
 	if uploadErr != nil {
