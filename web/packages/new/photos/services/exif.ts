@@ -107,45 +107,25 @@ const parseExifDate = (
     const [dateString] = dateTag?.value ?? [];
     if (!dateString) return undefined;
 
-    const components = dateString
-        .trim()
-        .replace(" ", ":")
-        .split(":")
-        .map((s) => parseInt(s, 10));
+    const components = dateString.trim().replace(" ", ":").split(":");
     const [YYYY, MM, DD, HH, mm, ss] = components;
-    if (
-        !(
-            YYYY !== undefined &&
-            YYYY >= 0 &&
-            YYYY <= 9999 &&
-            MM !== undefined &&
-            MM >= 1 &&
-            MM <= 12 &&
-            DD !== undefined &&
-            DD >= 1 &&
-            DD <= 31 &&
-            HH !== undefined &&
-            HH >= 0 &&
-            HH <= 23 &&
-            mm !== undefined &&
-            mm >= 0 &&
-            mm <= 59 &&
-            ss !== undefined &&
-            ss >= 0 &&
-            ss <= 59
-        )
-    ) {
+    if (!YYYY || !MM || !DD || !HH || !mm || !ss) {
         log.warn(`Ignoring malformed Exif date ${dateString}`);
         return undefined;
     }
 
-    const date = new Date(YYYY, MM - 1, DD, HH, mm, ss);
-    // Fix interpretation of 2 digit years
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#interpretation_of_two-digit_years
-    date.setFullYear(YYYY);
-
     const [offsetString] = offsetTag?.value ?? [];
-    return "";
+
+    // Use the string components we have from the Exif date (and optional
+    // offset) to construct a string in the Javascript date time string format.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#date_time_string_format
+    //
+    // When the offset string is missing, the date time is interpreted as local
+    // time. This is the behaviour we want (See: [Note: Exif dates]).
+
+    return new Date(
+        `${YYYY}-${MM}-${DD}T${HH}-${mm}-${ss}.000${offsetString ?? ""}`,
+    );
 };
 
 /**
