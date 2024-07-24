@@ -347,7 +347,13 @@ export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
     return tags;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const backfill = (_enteFile: EnteFile, _tags: ExifReader.ExpandedTags) => {
+const backfill = (enteFile: EnteFile, tags: ExifReader.ExpandedTags) => {
     // const date =
+    // TODO:Exif: Testing
+    console.log([
+        enteFile,
+        parseDates(tags),
+        parseLocation(tags),
+        parseDimensions(tags),
+    ]);
 };
