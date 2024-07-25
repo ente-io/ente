@@ -56,13 +56,13 @@ abstract class MlModel {
     String modelPath,
   ) async {
     if (_usePlatformPlugin) {
-      return await _loadModelWithEntePlugin(modelName, modelPath);
+      return await _loadModelWithPlatformPlugin(modelName, modelPath);
     } else {
       return await _loadModelWithFFI(modelName, modelPath);
     }
   }
 
-  static Future<int> _loadModelWithEntePlugin(
+  static Future<int> _loadModelWithPlatformPlugin(
     String modelName,
     String modelPath,
   ) async {
