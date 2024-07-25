@@ -36,15 +36,14 @@ class ClipTextTokenizer {
   static final instance = ClipTextTokenizer._privateConstructor();
   factory ClipTextTokenizer() => instance;
 
-  Future<List<int>> tokenize(String text, String vocabPath) async {
-    await _init(vocabPath);
+  Future<List<int>> tokenize(String text) async {
     var tokens = _encode(text);
     tokens =
         [sot] + tokens.sublist(0, min(totalTokens - 2, tokens.length)) + [eot];
     return tokens + List.filled(totalTokens - tokens.length, 0);
   }
 
-  Future<void> _init(String vocabPath) async {
+  Future<void> init(String vocabPath) async {
     if (_isInitialized) return;
     final vocabFile = File(vocabPath);
     final String vocabulary = await vocabFile.readAsString();

@@ -33,11 +33,9 @@ class ClipTextEncoder extends MlModel {
   factory ClipTextEncoder() => instance;
 
   static Future<List<double>> predict(Map args) async {
-    final text = args["text"];
+    final text = args["text"] as String;
     final address = args["address"] as int;
-    final vocabPath = args["vocabPath"] as String;
-    final List<int> tokenize =
-        await ClipTextTokenizer.instance.tokenize(text, vocabPath);
+    final List<int> tokenize = await ClipTextTokenizer.instance.tokenize(text);
     final int32list = Int32List.fromList(tokenize);
     if (MlModel.usePlatformPlugin) {
       return await _runPlatformPlugin(int32list);
