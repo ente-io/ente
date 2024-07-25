@@ -179,7 +179,7 @@ class MLIsolate {
   void _dispose() async {
     if (!_isIsolateSpawned) return;
     _logger.info('Disposing isolate and models');
-    // await _releaseModels(); TODO: Implement this
+    await _releaseModels();
     _isIsolateSpawned = false;
     _isolate.kill();
     _receivePort.close();
@@ -289,7 +289,7 @@ class MLIsolate {
     }
   }
 
-  Future<void> releaseModels() async {
+  Future<void> _releaseModels() async {
     final List<String> modelNames = [];
     final List<int> modelAddresses = [];
     final List<MLModels> models = [];

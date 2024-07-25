@@ -501,31 +501,6 @@ class MLService {
     return actuallyRanML;
   }
 
-  Future<void> _releaseModels() async {
-    return _initModelLock.synchronized(() async {
-      _logger.info("dispose called");
-      if (!_isModelsInitialized) {
-        return;
-      }
-      try {
-        await FaceDetectionService.instance.release();
-      } catch (e, s) {
-        _logger.severe("Could not dispose yolo onnx", e, s);
-      }
-      try {
-        await FaceEmbeddingService.instance.release();
-      } catch (e, s) {
-        _logger.severe("Could not dispose mobilefacenet", e, s);
-      }
-      try {
-        await ClipImageEncoder.instance.release();
-      } catch (e, s) {
-        _logger.severe("Could not dispose clip image", e, s);
-      }
-      _isModelsInitialized = false;
-    });
-  }
-
   Future<void> _ensureLoadedModels(FileMLInstruction instruction) async {
     return _initModelLock.synchronized(() async {
       final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
