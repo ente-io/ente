@@ -1282,5 +1282,6 @@
   "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
   "hideContent": "Hide content",
   "hideContentDescriptionAndroid": "Hides app content in the app switcher and disables screenshots",
-  "hideContentDescriptionIos": "Hides app content in the app switcher"
+  "hideContentDescriptionIos": "Hides app content in the app switcher",
+  "passwordStrengthInfo": "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"
 }
