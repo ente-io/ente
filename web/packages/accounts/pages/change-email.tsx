@@ -1,5 +1,4 @@
 import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
-import { PAGES } from "@/accounts/constants/pages";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -25,7 +24,7 @@ const Page: React.FC<PageProps> = () => {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
-            router.push(PAGES.ROOT);
+            router.push("/");
         }
     }, []);
 

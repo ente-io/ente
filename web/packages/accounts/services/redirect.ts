@@ -1,4 +1,4 @@
-import { appName } from "@/next/app";
+import { appName } from "@/base/app";
 import { AUTH_PAGES, PHOTOS_PAGES } from "@ente/shared/constants/pages";
 
 /**

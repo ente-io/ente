@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { ApiError } from "../error";
 import { getToken } from "../storage/localStorage/helpers";
 import HTTPService from "./HTTPService";

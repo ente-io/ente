@@ -1,4 +1,4 @@
-import type { ZipItem } from "@/next/types/ipc";
+import type { ZipItem } from "@/base/types/ipc";
 import type { Location } from "../../types/metadata";
 
 /**

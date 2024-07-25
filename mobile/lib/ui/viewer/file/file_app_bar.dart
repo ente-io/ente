@@ -1,8 +1,12 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -13,6 +17,7 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
+import "package:photos/services/local_authentication_service.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -46,6 +51,9 @@ class FileAppBar extends StatefulWidget {
 class FileAppBarState extends State<FileAppBar> {
   final _logger = Logger("FadingAppBar");
   final List<Widget> _actions = [];
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
+  bool _isFileSwipeLocked = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -53,6 +61,23 @@ class FileAppBarState extends State<FileAppBar> {
     if (oldWidget.file.generatedID != widget.file.generatedID) {
       _getActions();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        _isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -93,13 +118,27 @@ class FileAppBarState extends State<FileAppBar> {
               stops: const [0, 0.2, 1],
             ),
           ),
-          child: AppBar(
-            iconTheme: const IconThemeData(
-              color: Colors.white,
-            ), //same for both themes
-            actions: shouldShowActions ? _actions : [],
-            elevation: 0,
-            backgroundColor: const Color(0x00000000),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            child: AppBar(
+              key: ValueKey(_isFileSwipeLocked),
+              iconTheme: const IconThemeData(
+                color: Colors.white,
+              ), //same for both themes
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  _isFileSwipeLocked
+                      ? _requestAuthentication()
+                      : Navigator.of(context).pop();
+                },
+              ),
+              actions: shouldShowActions && !_isFileSwipeLocked ? _actions : [],
+              elevation: 0,
+              backgroundColor: const Color(0x00000000),
+            ),
           ),
         ),
       ),
@@ -254,6 +293,23 @@ class FileAppBarState extends State<FileAppBar> {
         );
       }
     }
+    items.add(
+      PopupMenuItem(
+        value: 6,
+        child: Row(
+          children: [
+            Icon(
+              Icons.lock,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            const Padding(
+              padding: EdgeInsets.all(8),
+            ),
+            const Text("Swipe lock"),
+          ],
+        ),
+      ),
+    );
     if (items.isNotEmpty) {
       _actions.add(
         PopupMenuButton(
@@ -271,6 +327,8 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleHideRequest(context);
             } else if (value == 5) {
               await _handleUnHideRequest(context);
+            } else if (value == 6) {
+              await _onSwipeLock();
             }
           },
         ),
@@ -351,6 +409,29 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       _logger.severe("Failed to use as", e);
       await showGenericErrorDialog(context: context, error: e);
+    }
+  }
+
+  Future<void> _onSwipeLock() async {
+    if (await LocalAuthentication().isDeviceSupported()) {
+      Bus.instance.fire(FileSwipeLockEvent(!_isFileSwipeLocked));
+    } else {
+      await showErrorDialog(
+        context,
+        S.of(context).noSystemLockFound,
+        S.of(context).swipeLockEnablePreSteps,
+      );
+    }
+  }
+
+  Future<void> _requestAuthentication() async {
+    final hasAuthenticated =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      "Please authenticate to view more photos and videos.",
+    );
+    if (hasAuthenticated) {
+      Bus.instance.fire(FileSwipeLockEvent(false));
     }
   }
 }

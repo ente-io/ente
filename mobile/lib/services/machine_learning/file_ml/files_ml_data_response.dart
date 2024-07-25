@@ -1,7 +1,7 @@
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 
 class FilesMLDataResponse {
-  final Map<int, FileMl> mlData;
+  final Map<int, RemoteFileML> mlData;
   // fileIDs that were indexed but they don't contain any meaningful embeddings
   // and hence should be discarded for re-indexing
   final Set<int> noEmbeddingFileIDs;
@@ -16,4 +16,17 @@ class FilesMLDataResponse {
     required this.fetchErrorFileIDs,
     required this.pendingIndexFileIDs,
   });
+
+  String debugLog() {
+    final nonZeroNoEmbeddingFileIDs = noEmbeddingFileIDs.isNotEmpty
+        ? ', smallEmbeddings: ${noEmbeddingFileIDs.length}'
+        : '';
+    final nonZeroFetchErrorFileIDs = fetchErrorFileIDs.isNotEmpty
+        ? ', errorForFileIDs: ${fetchErrorFileIDs.length}'
+        : '';
+    final nonZeroPendingIndexFileIDs = pendingIndexFileIDs.isNotEmpty
+        ? ', pendingIndexFileIDs: ${pendingIndexFileIDs.length}'
+        : '';
+    return 'MLRemote(mlData: ${mlData.length}$nonZeroNoEmbeddingFileIDs$nonZeroFetchErrorFileIDs$nonZeroPendingIndexFileIDs)';
+  }
 }

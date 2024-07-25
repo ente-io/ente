@@ -1,3 +1,8 @@
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
+import { pt } from "@/base/i18n";
+import log from "@/base/log";
 import {
     disableML,
     enableML,
@@ -5,11 +10,6 @@ import {
     mlStatusSubscribe,
     type MLStatus,
 } from "@/new/photos/services/ml";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemGroup } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
-import { pt } from "@/next/i18n";
-import log from "@/next/log";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -277,7 +277,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                             size="large"
                             onClick={onClose}
                         >
-                            {t("CANCEL")}
+                            {t("cancel")}
                         </Button>
                     </Stack>
                 </Stack>
@@ -323,7 +323,7 @@ const ManageML: React.FC<ManageMLProps> = ({
             content: pt(
                 "Do you want to disable ML search on all your devices?",
             ),
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 variant: "critical",
                 text: pt("Disable"),

@@ -125,6 +125,19 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 	return &embedding, nil
 }
 
+func (c *Controller) GetIndexedFiles(ctx *gin.Context, req ente.GetIndexedFiles) ([]ente.IndexedFile, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	updateSince := int64(0)
+	if req.SinceTime != nil {
+		updateSince = *req.SinceTime
+	}
+	indexedFiles, err := c.Repo.GetIndexedFiles(ctx, userID, req.Model, updateSince, req.Limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return indexedFiles, nil
+}
+
 func (c *Controller) GetDiff(ctx *gin.Context, req ente.GetEmbeddingDiffRequest) ([]ente.Embedding, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
 

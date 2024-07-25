@@ -1,5 +1,5 @@
+import { SelectionBar } from "@/base/components/Navbar";
 import { FluidContainer } from "@ente/shared/components/Container";
-import { SelectionBar } from "@ente/shared/components/Navbar/SelectionBar";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -23,13 +23,13 @@ export default function DeduplicateOptions({
     count,
     clearSelection,
 }: IProps) {
-    const { setDialogMessage, isMobile } = useContext(AppContext);
+    const { setDialogMessage } = useContext(AppContext);
 
     const trashHandler = () =>
         setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     return (
-        <SelectionBar isMobile={isMobile}>
+        <SelectionBar>
             <FluidContainer>
                 {count ? (
                     <IconButton onClick={clearSelection}>

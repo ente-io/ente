@@ -19,7 +19,6 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/data_util.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/wakelock_util.dart";
 
@@ -107,7 +106,7 @@ class _MachineLearningSettingsPageState
 
   Widget _getMlSettings(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final hasEnabled = LocalSettings.instance.isFaceIndexingEnabled;
+    final hasEnabled = localSettings.isFaceIndexingEnabled;
     return Column(
       children: [
         MenuItemWidget(
@@ -116,12 +115,13 @@ class _MachineLearningSettingsPageState
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
-            value: () => LocalSettings.instance.isFaceIndexingEnabled,
+            value: () => localSettings.isFaceIndexingEnabled,
             onChanged: () async {
-              final isEnabled =
-                  await LocalSettings.instance.toggleFaceIndexing();
+              final isEnabled = await localSettings.toggleFaceIndexing();
               if (isEnabled) {
                 await MLService.instance.init();
+                MLService.instance.downloadModels().ignore();
+
                 await SemanticSearchService.instance.init();
                 unawaited(MLService.instance.runAllML(force: true));
               } else {}

@@ -1,4 +1,4 @@
-import log from "@/next/log";
+import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";

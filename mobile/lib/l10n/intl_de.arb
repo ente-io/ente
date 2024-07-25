@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "Bitte authentifizieren, um Zwei-Faktor-Authentifizierung zu konfigurieren",
   "lockscreen": "Sperrbildschirm",
   "authToChangeLockscreenSetting": "Bitte authentifizieren, um die Sperrbildschirm-Einstellung zu ändern",
-  "lockScreenEnablePreSteps": "Um den Sperrbildschirm zu aktivieren, legen Sie bitte den Geräte-Passcode oder die Bildschirmsperre in den Systemeinstellungen fest.",
   "viewActiveSessions": "Aktive Sitzungen anzeigen",
   "authToViewYourActiveSessions": "Bitte authentifizieren, um die aktiven Sitzungen anzusehen",
   "disableTwofactor": "Zweiten Faktor (2FA) deaktivieren",
@@ -1278,6 +1277,7 @@
       }
     }
   },
+  "panorama": "Panorama",
   "reenterPassword": "Passwort erneut eingeben",
   "reenterPin": "PIN erneut eingeben",
   "deviceLock": "Gerätsperre",
@@ -1290,5 +1290,11 @@
   "noSystemLockFound": "Keine Systemsperre gefunden",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen.",
   "tapToUnlock": "Zum Entsperren antippen",
-  "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche"
+  "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "videoInfo": "Video-Informationen"
 }

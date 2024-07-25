@@ -1,8 +1,8 @@
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { Titlebar } from "@/base/components/Titlebar";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { Titlebar } from "@/new/shared/components/Titlebar";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -287,10 +287,10 @@ export function FileInfo({
                                     fontWeight: "bold",
                                 }}
                             >
-                                {t("VIEW_EXIF")}
+                                {t("view_exif")}
                             </LinkButton>
                         ) : (
-                            t("NO_EXIF")
+                            t("no_exif")
                         )
                     }
                     hideEditOption

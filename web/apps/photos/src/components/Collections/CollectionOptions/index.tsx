@@ -1,5 +1,5 @@
+import log from "@/base/log";
 import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
-import log from "@/next/log";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
@@ -285,7 +285,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 variant: "primary",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
     };
@@ -300,7 +300,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 text: t("EMPTY_TRASH"),
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
 
     const confirmLeaveSharedAlbum = () => {
@@ -315,7 +315,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 variant: "critical",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
     };

@@ -1,9 +1,9 @@
+import log from "@/base/log";
+import { apiURL } from "@/base/origins";
 import { hasFileHash } from "@/media/file";
 import { FILE_TYPE } from "@/media/file-type";
 import type { Metadata } from "@/media/types/file";
 import { EnteFile } from "@/new/photos/types/file";
-import log from "@/next/log";
-import { apiURL } from "@/next/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 

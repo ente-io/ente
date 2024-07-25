@@ -1,1 +1,1 @@
-module.exports = require("@/next/next.config.base.js");
+module.exports = require("@/base/next.config.base.js");

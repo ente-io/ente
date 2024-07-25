@@ -1,5 +1,6 @@
-import { ensureElectron } from "@/next/electron";
-import { ut } from "@/next/i18n";
+import { ensureElectron } from "@/base/electron";
+import { useIsMobileWidth } from "@/base/hooks";
+import { ut } from "@/base/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
     Box,
@@ -10,7 +11,6 @@ import {
     DialogTitle,
     Typography,
     styled,
-    useMediaQuery,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { didShowWhatsNew } from "../services/changelog";
@@ -29,7 +29,7 @@ interface WhatsNewProps {
  * last time this dialog was shown.
  */
 export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useIsMobileWidth();
 
     useEffect(() => {
         if (open) void didShowWhatsNew(ensureElectron());
@@ -40,6 +40,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
             {...{ open, fullScreen }}
             TransitionComponent={SlideTransition}
             maxWidth="xs"
+            fullWidth
         >
             <Box m={1}>
                 <DialogTitle mt={2}>

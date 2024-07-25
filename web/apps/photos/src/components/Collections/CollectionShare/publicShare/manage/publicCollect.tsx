@@ -1,4 +1,4 @@
-import { MenuItemGroup, MenuSectionTitle } from "@/new/shared/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Stack } from "@mui/material";
 import { t } from "i18next";

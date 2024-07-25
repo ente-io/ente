@@ -33,16 +33,18 @@ class IndexStatus {
 }
 
 class FileMLInstruction {
-  final EnteFile enteFile;
-
-  final bool shouldRunFaces;
-  final bool shouldRunClip;
+  final EnteFile file;
+  bool shouldRunFaces;
+  bool shouldRunClip;
+  RemoteFileML? existingRemoteFileML;
 
   FileMLInstruction({
-    required this.enteFile,
+    required this.file,
     required this.shouldRunFaces,
     required this.shouldRunClip,
   });
+  // Returns true if the file should be indexed for either faces or clip
+  bool get pendingML => shouldRunFaces || shouldRunClip;
 }
 
 Future<IndexStatus> getIndexStatus() async {
@@ -81,16 +83,18 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final List<FileMLInstruction> filesWithoutLocalID = [];
   final List<FileMLInstruction> hiddenFilesToIndex = [];
   for (final EnteFile enteFile in enteFiles) {
-    final skip = _skipAnalysisEnteFile(enteFile);
+    if (_skipAnalysisEnteFile(enteFile)) {
+      continue;
+    }
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (skip && !shouldRunFaces && !shouldRunClip) {
+    if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
     final instruction = FileMLInstruction(
-      enteFile: enteFile,
+      file: enteFile,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );
@@ -101,16 +105,18 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     }
   }
   for (final EnteFile enteFile in hiddenFiles) {
-    final skip = _skipAnalysisEnteFile(enteFile);
+    if (_skipAnalysisEnteFile(enteFile)) {
+      continue;
+    }
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
         _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
-    if (skip && !shouldRunFaces && !shouldRunClip) {
+    if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
     final instruction = FileMLInstruction(
-      enteFile: enteFile,
+      file: enteFile,
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );
@@ -126,6 +132,44 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   );
 
   return sortedBylocalID;
+}
+
+bool shouldDiscardRemoteEmbedding(RemoteFileML fileML) {
+  final fileID = fileML.fileID;
+  final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
+  if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {
+    _logger.info("Discarding remote embedding for fileID $fileID "
+        "because version is ${faceEmbedding?.version} and we need $faceMlVersion");
+    return true;
+  }
+  // are all landmarks equal?
+  bool allLandmarksEqual = true;
+  if (faceEmbedding.faces.isEmpty) {
+    allLandmarksEqual = false;
+  }
+  for (final face in faceEmbedding.faces) {
+    if (face.detection.landmarks.isEmpty) {
+      allLandmarksEqual = false;
+      break;
+    }
+    if (face.detection.landmarks.any((landmark) => landmark.x != landmark.y)) {
+      allLandmarksEqual = false;
+      break;
+    }
+  }
+  if (allLandmarksEqual) {
+    _logger.info("Discarding remote embedding for fileID $fileID "
+        "because landmarks are equal");
+    _logger.info(
+      faceEmbedding.faces
+          .map((e) => e.detection.landmarks.toString())
+          .toList()
+          .toString(),
+    );
+    return true;
+  }
+
+  return false;
 }
 
 Future<Set<int>> getIndexableFileIDs() async {

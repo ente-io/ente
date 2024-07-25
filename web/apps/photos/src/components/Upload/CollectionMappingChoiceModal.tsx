@@ -1,4 +1,4 @@
-import type { CollectionMapping } from "@/next/types/ipc";
+import type { CollectionMapping } from "@/base/types/ipc";
 import {
     CenteredFlex,
     SpaceBetweenFlex,
@@ -21,7 +21,7 @@ export const CollectionMappingChoiceModal: React.FC<
     const handleClose = dialogCloseHandler({ onClose });
 
     return (
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={open} onClose={handleClose} maxWidth={"sm"} fullWidth>
             <DialogTitleWithCloseButton onClose={onClose}>
                 {t("MULTI_FOLDER_UPLOAD")}
             </DialogTitleWithCloseButton>

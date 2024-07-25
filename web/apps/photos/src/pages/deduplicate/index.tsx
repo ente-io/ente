@@ -58,7 +58,7 @@ export default function Deduplicate() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.DEDUPLICATE);
-            router.push(PAGES.ROOT);
+            router.push("/");
             return;
         }
         showNavBar(true);

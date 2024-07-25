@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:developer" as dev show log;
+import "dart:io";
 import "dart:math" show min;
 import "dart:typed_data" show ByteData;
 import "dart:ui" show Image;
@@ -14,43 +15,43 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
-import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
 import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/ml_util.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
+  final _logger = Logger("SemanticSearchService");
   SemanticSearchService._privateConstructor();
 
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
+
   static final Computer _computer = Computer.shared();
-  static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
-
+  final LRUMap<String, List<double>> _queryCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.20;
-  static const kDebounceDuration = Duration(milliseconds: 4000);
 
-  final _logger = Logger("SemanticSearchService");
-  final _embeddingLoaderDebouncer =
-      Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
+  final _reloadCacheDebouncer = Debouncer(
+    const Duration(milliseconds: 4000),
+    executionInterval: const Duration(milliseconds: 8000),
+  );
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
-  bool _isSyncing = false;
-  List<Embedding> _cachedImageEmbeddings = <Embedding>[];
+  List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
   get hasInitialized => _hasInitialized;
 
   Future<void> init() async {
-    if (!LocalSettings.instance.isFaceIndexingEnabled) {
+    if (!localSettings.isFaceIndexingEnabled) {
       return;
     }
     if (_hasInitialized) {
@@ -58,12 +59,11 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
-    await EmbeddingStore.instance.init();
     await EmbeddingsDB.instance.init();
     await _loadImageEmbeddings();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       if (!_hasInitialized) return;
-      _embeddingLoaderDebouncer.run(() async {
+      _reloadCacheDebouncer.run(() async {
         await _loadImageEmbeddings();
       });
     });
@@ -87,18 +87,8 @@ class SemanticSearchService {
     _cachedImageEmbeddings.clear();
   }
 
-  Future<void> sync() async {
-    if (_isSyncing) {
-      return;
-    }
-    _isSyncing = true;
-    await EmbeddingStore.instance.pullEmbeddings();
-    unawaited(EmbeddingStore.instance.pushEmbeddings());
-    _isSyncing = false;
-  }
-
   bool isMagicSearchEnabledAndReady() {
-    return LocalSettings.instance.isFaceIndexingEnabled &&
+    return localSettings.isFaceIndexingEnabled &&
         _textModelIsLoaded &&
         _cachedImageEmbeddings.isNotEmpty;
   }
@@ -140,7 +130,9 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await EmbeddingStore.instance.clearEmbeddings();
+    await EmbeddingsDB.instance.deleteAll();
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
   }
 
@@ -261,8 +253,8 @@ class SemanticSearchService {
   Future<void> _loadTextModel() async {
     _logger.info("Initializing ML framework");
     try {
-      await ClipTextEncoder.instance.loadModel();
-      await ClipTextEncoder.instance.loadModel(useEntePlugin: true);
+      await ClipTextEncoder.instance
+          .loadModel(useEntePlugin: Platform.isAndroid);
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
@@ -274,18 +266,16 @@ class SemanticSearchService {
     ClipResult clipResult,
     EnteFile entefile,
   ) async {
-    final embedding = Embedding(
+    final embedding = ClipEmbedding(
       fileID: clipResult.fileID,
       embedding: clipResult.embedding,
+      version: clipMlVersion,
     );
-    await EmbeddingStore.instance.storeEmbedding(
-      entefile,
-      embedding,
-    );
+    await EmbeddingsDB.instance.put(embedding);
   }
 
   static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
-    final embedding = Embedding.empty(entefile.uploadedFileID!);
+    final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
     await EmbeddingsDB.instance.put(embedding);
   }
 
@@ -346,7 +336,7 @@ class SemanticSearchService {
 
 List<QueryResult> computeBulkSimilarities(Map args) {
   final queryResults = <QueryResult>[];
-  final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
+  final imageEmbeddings = args["imageEmbeddings"] as List<ClipEmbedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
   final minimumSimilarity = args["minimumSimilarity"] ??
       SemanticSearchService.kMinimumSimilarityThreshold;

@@ -5,7 +5,25 @@ description: Migrating your existing photos from Apple Photos to Ente Photos
 
 # Import from Apple Photos
 
-The Apple Photos app provides an easy way download all your data.
+## Mobile
+
+If you are using Apple Photos on your phone, then the most seamless way is to
+install the Ente app on your mobile device. The Ente app will directly read from
+your iCloud library and import.
+
+> [!TIP]
+>
+> For large libraries, this process may take a bit of time, so you can speed it
+> up by keeping the app running in the foreground while the initial import is in
+> progress (Note: this is only needed during the initial import, subsequently
+> the app will automatically backup photos in the background as you take them).
+
+## Desktop
+
+Alternatively, or if you prefer to use the desktop app, then you can use the
+following steps:
+
+#### 1. Export your data from the Apple Photos app.
 
 Select the files you want to export (`Command + A` to select them all), and
 click on `File` > `Export` > `Export Unmodified Originals`.
@@ -20,6 +38,8 @@ portions of your Live Photos correctly.
 
 Finally, choose an export directory and confirm by clicking `Export Originals`.
 You will receive a notification from the app once your export is complete.
+
+#### 2. Import into Ente
 
 Now simply drag and drop the downloaded folders into
 [our desktop app](https://ente.io/download/desktop) and grab a cup of coffee (or

@@ -8,7 +8,6 @@ import { createContext, useContext } from "react";
 interface AppContextT {
     /** Show or hide the app's navigation bar. */
     showNavBar: (show: boolean) => void;
-    isMobile: boolean;
     setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
 }
 

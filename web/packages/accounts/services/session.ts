@@ -1,6 +1,6 @@
-import { authenticatedRequestHeaders, HTTPError } from "@/next/http";
-import { ensureLocalUser } from "@/next/local-user";
-import { apiURL } from "@/next/origins";
+import { authenticatedRequestHeaders, HTTPError } from "@/base/http";
+import { ensureLocalUser } from "@/base/local-user";
+import { apiURL } from "@/base/origins";
 import { ensure } from "@/utils/ensure";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";

@@ -1,5 +1,5 @@
 import { setRecoveryKey } from "@/accounts/api/user";
-import log from "@/next/log";
+import log from "@/base/log";
 import {
     LS_KEYS,
     getData,

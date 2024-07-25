@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:math";
 
 import 'package:extended_image/extended_image.dart';
@@ -8,9 +9,12 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/services/local_authentication_service.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import "package:photos/ui/tools/editor/video_editor_page.dart";
@@ -82,6 +86,9 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillEnd = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
   bool _isFirstOpened = true;
+  bool isFileSwipeLocked = false;
+  late final StreamSubscription<FileSwipeLockEvent>
+      _fileSwipeLockEventSubscription;
 
   @override
   void initState() {
@@ -92,10 +99,17 @@ class _DetailPageState extends State<DetailPage> {
     _selectedIndexNotifier.value = widget.config.selectedIndex;
     _preloadEntries();
     _pageController = PageController(initialPage: _selectedIndexNotifier.value);
+    _fileSwipeLockEventSubscription =
+        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+      setState(() {
+        isFileSwipeLocked = event.shouldSwipeLock;
+      });
+    });
   }
 
   @override
   void dispose() {
+    _fileSwipeLockEventSubscription.cancel();
     _pageController.dispose();
     _enableFullScreenNotifier.dispose();
     _selectedIndexNotifier.dispose();
@@ -123,43 +137,55 @@ class _DetailPageState extends State<DetailPage> {
           _files!.length.toString() +
           " files .",
     );
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: ValueListenableBuilder(
-          builder: (BuildContext context, int selectedIndex, _) {
-            return FileAppBar(
-              _files![selectedIndex],
-              _onFileRemoved,
-              100,
-              widget.config.mode == DetailPageMode.full,
-              enableFullScreenNotifier: _enableFullScreenNotifier,
-            );
-          },
-          valueListenable: _selectedIndexNotifier,
+    return PopScope(
+      canPop: !isFileSwipeLocked,
+      onPopInvoked: (didPop) async {
+        if (isFileSwipeLocked) {
+          final authenticated = await _requestAuthentication();
+          if (authenticated) {
+            Bus.instance.fire(FileSwipeLockEvent(false));
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: ValueListenableBuilder(
+            builder: (BuildContext context, int selectedIndex, _) {
+              return FileAppBar(
+                _files![selectedIndex],
+                _onFileRemoved,
+                100,
+                widget.config.mode == DetailPageMode.full,
+                enableFullScreenNotifier: _enableFullScreenNotifier,
+              );
+            },
+            valueListenable: _selectedIndexNotifier,
+          ),
         ),
-      ),
-      extendBodyBehindAppBar: true,
-      resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Stack(
-          children: [
-            _buildPageView(context),
-            ValueListenableBuilder(
-              builder: (BuildContext context, int selectedIndex, _) {
-                return FileBottomBar(
-                  _files![selectedIndex],
-                  _onEditFileRequested,
-                  widget.config.mode == DetailPageMode.minimalistic,
-                  onFileRemoved: _onFileRemoved,
-                  userID: Configuration.instance.getUserID(),
-                  enableFullScreenNotifier: _enableFullScreenNotifier,
-                );
-              },
-              valueListenable: _selectedIndexNotifier,
-            ),
-          ],
+        extendBodyBehindAppBar: true,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Stack(
+            children: [
+              _buildPageView(context),
+              ValueListenableBuilder(
+                builder: (BuildContext context, int selectedIndex, _) {
+                  return FileBottomBar(
+                    _files![selectedIndex],
+                    _onEditFileRequested,
+                    widget.config.mode == DetailPageMode.minimalistic &&
+                        !isFileSwipeLocked,
+                    onFileRemoved: _onFileRemoved,
+                    userID: Configuration.instance.getUserID(),
+                    enableFullScreenNotifier: _enableFullScreenNotifier,
+                  );
+                },
+                valueListenable: _selectedIndexNotifier,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -211,7 +237,7 @@ class _DetailPageState extends State<DetailPage> {
         }
         _preloadEntries();
       },
-      physics: _shouldDisableScroll
+      physics: _shouldDisableScroll || isFileSwipeLocked
           ? const NeverScrollableScrollPhysics()
           : const FastScrollPhysics(speedFactor: 4.0),
       controller: _pageController,
@@ -405,5 +431,12 @@ class _DetailPageState extends State<DetailPage> {
       await dialog.hide();
       _logger.warning("Failed to initiate edit", e);
     }
+  }
+
+  Future<bool> _requestAuthentication() async {
+    return await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      "Please authenticate to view more photos and videos.",
+    );
   }
 }

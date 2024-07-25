@@ -532,7 +532,6 @@
   "authToConfigureTwofactorAuthentication": "İki faktörlü kimlik doğrulamayı yapılandırmak için lütfen kimlik doğrulaması yapın",
   "lockscreen": "Kilit ekranı",
   "authToChangeLockscreenSetting": "Kilit ekranı ayarını değiştirmek için lütfen kimliğinizi doğrulayın",
-  "lockScreenEnablePreSteps": "Kilit ekranını aktif etmek için lütfen cihazın ayarlarından şifreyi ya da ekran kilidini ayarlayın.",
   "viewActiveSessions": "Aktif oturumları görüntüle",
   "authToViewYourActiveSessions": "Aktif oturumlarınızı görüntülemek için lütfen kimliğinizi doğrulayın",
   "disableTwofactor": "İki Aşamalı Doğrulamayı Devre Dışı Bırak",
@@ -1275,5 +1274,10 @@
   "noSystemLockFound": "No system lock found",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "tapToUnlock": "Tap to unlock",
-  "tooManyIncorrectAttempts": "Too many incorrect attempts"
+  "tooManyIncorrectAttempts": "Too many incorrect attempts",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+  "autoLock": "Auto lock",
+  "immediately": "Immediately",
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
 }

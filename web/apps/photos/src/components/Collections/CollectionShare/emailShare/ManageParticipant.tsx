@@ -1,7 +1,7 @@
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
-import log from "@/next/log";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
+import log from "@/base/log";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import BlockIcon from "@mui/icons-material/Block";
 import DoneIcon from "@mui/icons-material/Done";
@@ -91,7 +91,7 @@ export default function ManageParticipant({
         appContext.setDialogMessage({
             title: t("CHANGE_PERMISSION"),
             content: contentText,
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 text: buttonText,
                 action: () => {
@@ -113,7 +113,7 @@ export default function ManageParticipant({
                     }}
                 />
             ),
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 text: t("CONFIRM_REMOVE"),
                 action: () => {

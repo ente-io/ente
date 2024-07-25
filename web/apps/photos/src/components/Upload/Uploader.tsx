@@ -1,12 +1,12 @@
+import { basename } from "@/base/file";
+import log from "@/base/log";
+import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
     UploadItem,
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
-import { basename } from "@/next/file";
-import log from "@/next/log";
-import type { CollectionMapping, Electron, ZipItem } from "@/next/types/ipc";
 import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
@@ -651,16 +651,16 @@ export default function Uploader({
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: "critical",
-                    subtext: t("SUBSCRIPTION_EXPIRED"),
-                    message: t("RENEW_NOW"),
+                    subtext: t("subscription_expired"),
+                    message: t("renew_now"),
                     onClick: () => billingService.redirectToCustomerPortal(),
                 };
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
                     variant: "critical",
-                    subtext: t("STORAGE_QUOTA_EXCEEDED"),
-                    message: t("UPGRADE_NOW"),
+                    subtext: t("storage_quota_exceeded"),
+                    message: t("upgrade_now"),
                     onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon />,
                 };

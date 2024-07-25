@@ -1,3 +1,4 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import {
     FlexWrapper,
     VerticallyCentered,
@@ -12,7 +13,8 @@ import { preloadImage } from "utils/common";
 import { getFamilyPlanAdmin } from "utils/user/family";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { setDialogMessage, isMobile } = useContext(AppContext);
+    const { setDialogMessage } = useContext(AppContext);
+    const fullScreen = useIsMobileWidth();
 
     useEffect(() => {
         preloadImage("/images/family-plan");
@@ -39,7 +41,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 variant: "critical",
             },
             close: {
-                text: t("CANCEL"),
+                text: t("cancel"),
             },
         });
 
@@ -48,13 +50,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     }
 
     return (
-        <Dialog
-            fullWidth
-            open={open}
-            onClose={onClose}
-            maxWidth="xs"
-            fullScreen={isMobile}
-        >
+        <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <DialogTitleWithCloseButton onClose={onClose}>
                 <Typography variant="h3" fontWeight={"bold"}>
                     {t("SUBSCRIPTION")}
@@ -65,7 +61,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <VerticallyCentered>
                     <Box mb={4}>
                         <Typography color="text.muted">
-                            {t("FAMILY_SUBSCRIPTION_INFO")}
+                            {t("subscription_info_family")}
                         </Typography>
                         <Typography>
                             {getFamilyPlanAdmin(userDetails.familyData)?.email}

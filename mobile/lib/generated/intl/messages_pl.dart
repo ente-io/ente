@@ -311,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wymagane uwierzytelnienie"),
         "appLock": MessageLookupByLibrary.simpleMessage(
             "Blokada dostępu do aplikacji"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Użyj"),
@@ -375,6 +377,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tutaj zobaczysz dostępne urządzenia Cast."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Upewnij się, że uprawnienia sieci lokalnej są włączone dla aplikacji Ente Zdjęcia w Ustawieniach."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Z powodu technicznego błędu, zostałeś wylogowany. Przepraszamy za niedogodności."),
         "autoPair":
@@ -832,6 +837,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignoruj"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Niektóre pliki w tym albumie są ignorowane podczas przesyłania, ponieważ zostały wcześniej usunięte z Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importowanie...."),
         "incorrectCode":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy kod"),
@@ -938,8 +944,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Znacznik lokalizacji grupuje wszystkie zdjęcia, które zostały zrobione w promieniu zdjęcia"),
         "locations": MessageLookupByLibrary.simpleMessage("Lokalizacje"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Zablokuj"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Aby włączyć ekran blokady, ustaw hasło urządzenia lub blokadę ekranu w ustawieniach systemu."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Ekran blokady"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Wylogowywanie..."),
@@ -1482,6 +1486,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Zaproponuj funkcje"),
         "support": MessageLookupByLibrary.simpleMessage("Wsparcie techniczne"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronizacja zatrzymana"),

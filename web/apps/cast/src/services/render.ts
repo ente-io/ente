@@ -5,6 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import { nameAndExtension } from "@/base/file";
+import log from "@/base/log";
+import { apiURL, customAPIOrigin } from "@/base/origins";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
@@ -15,9 +18,6 @@ import type {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "@/new/photos/types/file";
-import { nameAndExtension } from "@/next/file";
-import log from "@/next/log";
-import { apiURL, customAPIOrigin } from "@/next/origins";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";

@@ -1,11 +1,9 @@
-import { EnteDrawer } from "@/new/shared/components/EnteDrawer";
-import { MenuItemDivider, MenuItemGroup } from "@/new/shared/components/Menu";
-import { Titlebar } from "@/new/shared/components/Titlebar";
-import log from "@/next/log";
+import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { Titlebar } from "@/base/components/Titlebar";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import EnteButton from "@ente/shared/components/EnteButton";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -18,11 +16,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import {
     Box,
-    Button,
+    Dialog,
     Stack,
     Typography,
     styled,
     useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
@@ -265,8 +264,34 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
+    const { setDialogBoxAttributesV2 } = useAppContext();
+
     const [showRenameDialog, setShowRenameDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+    const showDeleteConfirmationDialog = useCallback(() => {
+        const handleDelete = async (setLoading: (value: boolean) => void) => {
+            setLoading(true);
+            try {
+                await deletePasskey(ensure(token), ensure(passkey).id);
+                onUpdateOrDeletePasskey();
+            } catch (e) {
+                log.error("Failed to delete passkey", e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        setDialogBoxAttributesV2({
+            title: t("delete_passkey"),
+            content: t("delete_passkey_confirmation"),
+            proceed: {
+                text: t("DELETE"),
+                action: handleDelete,
+                variant: "critical",
+            },
+            close: { text: t("cancel") },
+        });
+    }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
 
     return (
         <>
@@ -297,9 +322,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             />
                             <MenuItemDivider />
                             <EnteMenuItem
-                                onClick={() => {
-                                    setShowDeleteDialog(true);
-                                }}
+                                onClick={showDeleteConfirmationDialog}
                                 startIcon={<DeleteIcon />}
                                 label={t("delete_passkey")}
                                 color="critical"
@@ -317,19 +340,6 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     passkey={passkey}
                     onRenamePasskey={() => {
                         setShowRenameDialog(false);
-                        onUpdateOrDeletePasskey();
-                    }}
-                />
-            )}
-
-            {token && passkey && (
-                <DeletePasskeyDialog
-                    open={showDeleteDialog}
-                    onClose={() => setShowDeleteDialog(false)}
-                    token={token}
-                    passkey={passkey}
-                    onDeletePasskey={() => {
-                        setShowDeleteDialog(false);
                         onUpdateOrDeletePasskey();
                     }}
                 />
@@ -358,7 +368,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     passkey,
     onRenamePasskey,
 }) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
     const handleSubmit = async (inputValue: string) => {
         try {
@@ -370,80 +380,24 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     };
 
     return (
-        <DialogBoxV2
-            fullWidth
+        <Dialog
             {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("rename_passkey") }}
+            PaperProps={{ sx: { width: { sm: "360px" } } }}
         >
-            <SingleInputForm
-                initialValue={passkey.friendlyName}
-                callback={handleSubmit}
-                placeholder={t("enter_passkey_name")}
-                buttonText={t("RENAME")}
-                fieldType="text"
-                secondaryButtonAction={onClose}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-            />
-        </DialogBoxV2>
-    );
-};
-
-interface DeletePasskeyDialogProps {
-    /** If `true`, then the dialog is shown. */
-    open: boolean;
-    /** Callback to invoke when the dialog wants to be closed. */
-    onClose: () => void;
-    /** Auth token for API requests. */
-    token: string;
-    /** The {@link Passkey} to delete. */
-    passkey: Passkey;
-    /** Callback to invoke when the passkey is deleted. */
-    onDeletePasskey: () => void;
-}
-
-const DeletePasskeyDialog: React.FC<DeletePasskeyDialogProps> = ({
-    open,
-    onClose,
-    token,
-    passkey,
-    onDeletePasskey,
-}) => {
-    const [isDeleting, setIsDeleting] = useState(false);
-    const fullScreen = useMediaQuery("(max-width: 428px)");
-
-    const handleConfirm = async () => {
-        setIsDeleting(true);
-        try {
-            await deletePasskey(token, passkey.id);
-            onDeletePasskey();
-        } catch (e) {
-            log.error("Failed to delete passkey", e);
-        } finally {
-            setIsDeleting(false);
-        }
-    };
-
-    return (
-        <DialogBoxV2
-            fullWidth
-            {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("delete_passkey") }}
-        >
-            <Stack spacing={"8px"}>
-                <Typography>{t("delete_passkey_confirmation")}</Typography>
-                <EnteButton
-                    type="submit"
-                    size="large"
-                    color="critical"
-                    loading={isDeleting}
-                    onClick={handleConfirm}
-                >
-                    {t("DELETE")}
-                </EnteButton>
-                <Button size="large" color={"secondary"} onClick={onClose}>
-                    {t("CANCEL")}
-                </Button>
+            <Stack gap={3} p={3}>
+                <Typography variant="large" fontWeight={"bold"}>
+                    {t("rename_passkey")}
+                </Typography>
+                <SingleInputForm
+                    initialValue={passkey.friendlyName}
+                    callback={handleSubmit}
+                    placeholder={t("enter_passkey_name")}
+                    buttonText={t("RENAME")}
+                    fieldType="text"
+                    secondaryButtonAction={onClose}
+                    submitButtonProps={{ sx: { mt: 1, mb: 0 } }}
+                />
             </Stack>
-        </DialogBoxV2>
+        </Dialog>
     );
 };

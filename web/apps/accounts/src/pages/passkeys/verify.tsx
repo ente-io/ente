@@ -1,5 +1,5 @@
-import log from "@/next/log";
-import type { TwoFactorAuthorizationResponse } from "@/next/types/credentials";
+import log from "@/base/log";
+import type { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
