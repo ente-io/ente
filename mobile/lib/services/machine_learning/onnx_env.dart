@@ -1,27 +1,24 @@
-import "package:computer/computer.dart";
 import "package:onnxruntime/onnxruntime.dart";
 
-class ONNXEnv {
+class ONNXEnvFFI {
   final Set<String> _loadedModels = {};
 
-  final _computer = Computer.shared();
-
   // Singleton pattern
-  ONNXEnv._privateConstructor();
-  static final instance = ONNXEnv._privateConstructor();
-  factory ONNXEnv() => instance;
+  ONNXEnvFFI._privateConstructor();
+  static final instance = ONNXEnvFFI._privateConstructor();
+  factory ONNXEnvFFI() => instance;
 
-  Future<void> initONNX(String modelName) async {
+  void initONNX(String modelName) {
     if (_loadedModels.isEmpty) {
-      await _computer.compute(() => OrtEnv.instance.init());
+      OrtEnv.instance.init();
     }
     _loadedModels.add(modelName);
   }
 
-  Future<void> releaseONNX(String modelName) async {
+  void releaseONNX(String modelName) {
     _loadedModels.remove(modelName);
     if (_loadedModels.isEmpty) {
-      await _computer.compute(() => OrtEnv.instance.release());
+      OrtEnv.instance.release();
     }
   }
 

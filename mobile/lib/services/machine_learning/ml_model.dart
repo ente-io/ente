@@ -86,6 +86,7 @@ abstract class MlModel {
     String modelPath,
   ) async {
     isolateLogger.info('Initializing $modelName with FFI');
+    ONNXEnvFFI.instance.initONNX(modelName);
     try {
       final startTime = DateTime.now();
       final sessionOptions = OrtSessionOptions()
