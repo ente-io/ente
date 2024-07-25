@@ -183,8 +183,8 @@ class MLComputerIsolate {
   }
 
   Future<void> _ensureLoadedClipTextModel() async {
+    if (ClipTextEncoder.instance.isInitialized) return;
     try {
-      if (ClipTextEncoder.instance.isInitialized) return;
       final String modelName = ClipTextEncoder.instance.modelName;
       final String remotePath = ClipTextEncoder.instance.modelRemotePath;
       final String modelPath =
