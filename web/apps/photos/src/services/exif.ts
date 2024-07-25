@@ -70,6 +70,8 @@ export const parseImageMetadata = async (
         exifTagsNeededForParsingImageMetadata,
     );
 
+    // TODO: Exif- remove me.
+    log.debug(() => ["exif/old", exifData]);
     return {
         location: getEXIFLocation(exifData),
         creationTime: getEXIFTime(exifData),

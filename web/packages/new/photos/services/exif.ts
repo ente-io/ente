@@ -2,17 +2,28 @@ import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
+import type { ParsedExtractedMetadata } from "../types/metadata";
 import { isInternalUser } from "./feature-flags";
 
 // TODO: Exif: WIP flag to inspect the migration from old to new lib.
 export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
-export const cmpNewLib = (oldLib: unknown, newLib: unknown) => {
-    log.debug(() => ["oldLib", oldLib]);
-    log.debug(() => ["newLib", newLib]);
-    // Need to replace nulls with undefined though; this check will just have
-    // too many false positives in its current form.
-    log.debug(() => ["eq", JSON.stringify(oldLib) == JSON.stringify(newLib)]);
+export const cmpNewLib = (
+    oldLib: ParsedExtractedMetadata,
+    newLib: ParsedMetadata,
+) => {
+    log.debug(() => ["exif/cmp", { oldLib, newLib }]);
+    if (
+        oldLib.width == newLib.width &&
+        oldLib.height == newLib.height &&
+        oldLib.creationTime == newLib.creationTime &&
+        oldLib.location.latitude == newLib.location?.latitude &&
+        oldLib.location.longitude == newLib.location?.longitude
+    ) {
+        log.info("Exif migration 🟢");
+    } else {
+        log.info("Exif migration - Potential mismatch ❗️🚩");
+    }
 };
 
 /**
@@ -99,7 +110,7 @@ const parseDates = (tags: ExifReader.ExpandedTags) => {
     const iptc = parseIPTCDates(tags);
     const xmp = parseXMPDates(tags);
 
-    log.debug(() => ["dates", { exif, iptc, xmp }]);
+    log.debug(() => ["exif/dates", { exif, iptc, xmp }]);
 
     return {
         DateTimeOriginal:
