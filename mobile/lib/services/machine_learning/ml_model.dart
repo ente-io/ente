@@ -16,12 +16,12 @@ abstract class MlModel {
 
   String get modelName;
 
-  static final bool _usePlatformPlugin = Platform.isAndroid;
+  static final bool usePlatformPlugin = Platform.isAndroid;
 
   bool get isInitialized =>
-      _usePlatformPlugin ? _isNativePluginInitialized : _isFfiInitialized;
+      usePlatformPlugin ? _isNativePluginInitialized : _isFfiInitialized;
   int get sessionAddress =>
-      _usePlatformPlugin ? _nativePluginSessionIndex : _ffiSessionAddress;
+      usePlatformPlugin ? _nativePluginSessionIndex : _ffiSessionAddress;
 
   // isInitialized is used to check if the model is loaded by the ffi based
   // plugin
@@ -38,7 +38,7 @@ abstract class MlModel {
   }
 
   void storeSessionAddress(int address) {
-    if (_usePlatformPlugin) {
+    if (usePlatformPlugin) {
       _nativePluginSessionIndex = address;
       _isNativePluginInitialized = true;
     } else {
@@ -48,7 +48,7 @@ abstract class MlModel {
   }
 
   void releaseSessionAddress() {
-    if (_usePlatformPlugin) {
+    if (usePlatformPlugin) {
       _nativePluginSessionIndex = -1;
       _isNativePluginInitialized = false;
     } else {
@@ -65,7 +65,7 @@ abstract class MlModel {
     String modelName,
     String modelPath,
   ) async {
-    if (_usePlatformPlugin) {
+    if (usePlatformPlugin) {
       return await _loadModelWithPlatformPlugin(modelName, modelPath);
     } else {
       return await _loadModelWithFFI(modelName, modelPath);
@@ -117,7 +117,7 @@ abstract class MlModel {
   }
 
   static Future<void> releaseModel(String modelName, int sessionAddress) async {
-    if (_usePlatformPlugin) {
+    if (usePlatformPlugin) {
       await _releaseModelWithPlatformPlugin(modelName);
     } else {
       await _releaseModelWithFFI(modelName, sessionAddress);
