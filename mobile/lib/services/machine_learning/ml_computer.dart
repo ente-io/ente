@@ -19,14 +19,9 @@ enum MLComputerOperation {
 class MLComputerIsolate {
   final _logger = Logger('MLComputerIsolate');
 
-  Timer? _inactivityTimer;
-  final Duration _inactivityDuration = const Duration(seconds: 60);
-  int _activeTasks = 0;
-
   final _initLock = Lock();
   final _functionLock = Lock();
 
-  late DartUiIsolate _isolate;
   late ReceivePort _receivePort = ReceivePort();
   late SendPort _mainSendPort;
 
@@ -45,14 +40,12 @@ class MLComputerIsolate {
       _receivePort = ReceivePort();
 
       try {
-        _isolate = await DartUiIsolate.spawn(
+        await DartUiIsolate.spawn(
           _isolateMain,
           _receivePort.sendPort,
         );
         _mainSendPort = await _receivePort.first as SendPort;
         isSpawned = true;
-
-        _resetInactivityTimer();
       } catch (e) {
         _logger.severe('Could not spawn isolate', e);
         isSpawned = false;
@@ -110,11 +103,9 @@ class MLComputerIsolate {
   ) async {
     await ensureSpawned();
     return _functionLock.synchronized(() async {
-      _resetInactivityTimer();
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
 
-      _activeTasks++;
       _mainSendPort.send([message.$1.index, message.$2, answerPort.sendPort]);
 
       answerPort.listen((receivedMessage) {
@@ -129,39 +120,9 @@ class MLComputerIsolate {
           completer.complete(receivedMessage);
         }
       });
-      _activeTasks--;
 
       return completer.future;
     });
-  }
-
-  /// Resets a timer that kills the isolate after a certain amount of inactivity.
-  ///
-  /// Should be called after initialization (e.g. inside `init()`) and after every call to isolate (e.g. inside `_runInIsolate()`)
-  void _resetInactivityTimer() {
-    _inactivityTimer?.cancel();
-    _inactivityTimer = Timer(_inactivityDuration, () {
-      if (_activeTasks > 0) {
-        _logger.info('Tasks are still running. Delaying isolate disposal.');
-        // Optionally, reschedule the timer to check again later.
-        _resetInactivityTimer();
-      } else {
-        _logger.info(
-          'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
-        );
-        dispose();
-      }
-    });
-  }
-
-  /// Disposes the isolate worker.
-  void dispose() {
-    if (!isSpawned) return;
-
-    isSpawned = false;
-    _isolate.kill();
-    _receivePort.close();
-    _inactivityTimer?.cancel();
   }
 
   /// Generates face thumbnails for all [faceBoxes] in [imageData].
