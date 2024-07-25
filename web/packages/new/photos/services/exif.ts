@@ -9,7 +9,7 @@ export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
 export const cmpNewLib = (
     oldLib: ParsedExtractedMetadata,
-    newLib: ParsedMetadata,
+    newLib: ExtractedExif,
 ) => {
     if (
         oldLib.width == newLib.width &&
@@ -34,7 +34,7 @@ export const cmpNewLib = (
  * be attached to an {@link EnteFile} allows us to perform operations using
  * these attributes without needing to re-download the original image.
  */
-interface ParsedMetadata {
+interface ExtractedExif {
     /** The width of the image, in pixels. */
     width?: number;
     /** The height of the image, in pixels. */
@@ -76,7 +76,7 @@ export const extractExif = async (file: File) => {
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
 
-    const metadata: ParsedMetadata = dimensions ?? {};
+    const metadata: ExtractedExif = dimensions ?? {};
     if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
     if (location) metadata.location = location;
     return metadata;

@@ -809,9 +809,9 @@ async function tryExtractImageMetadata(
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        // The library we use for extracting Exif from images, exifr, doesn't
-        // support streams. But unlike videos, for images it is reasonable to
-        // read the entire stream into memory here.
+        // The library we use for extracting Exif from images, ExifReader,
+        // doesn't support streams. But unlike videos, for images it is
+        // reasonable to read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);
         const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
         file = new File([await response.arrayBuffer()], basename(path), {
