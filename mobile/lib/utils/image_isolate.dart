@@ -185,7 +185,7 @@ class ImageIsolate {
 
   Future<List<double>> runClipText(String query) async {
     try {
-      final int clipAddress = ClipTextEncoder.instance.ffiSessionAddress;
+      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
       final String remotePath = ClipTextEncoder.instance.vocabRemotePath;
       final String tokenizerVocabPath =
           await RemoteAssetsService.instance.getAssetPath(remotePath);

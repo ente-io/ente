@@ -194,10 +194,10 @@ class MLIsolate {
             "runFaces": instruction.shouldRunFaces,
             "runClip": instruction.shouldRunClip,
             "faceDetectionAddress":
-                FaceDetectionService.instance.ffiSessionAddress,
+                FaceDetectionService.instance.sessionAddress,
             "faceEmbeddingAddress":
-                FaceEmbeddingService.instance.ffiSessionAddress,
-            "clipImageAddress": ClipImageEncoder.instance.ffiSessionAddress,
+                FaceEmbeddingService.instance.sessionAddress,
+            "clipImageAddress": ClipImageEncoder.instance.sessionAddress,
           }
         ),
       ) as String?;

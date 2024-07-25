@@ -19,15 +19,15 @@ abstract class MlModel {
   bool get isInitialized =>
       Platform.isAndroid ? isNativePluginInitialized : isFfiInitialized;
   int get sessionAddress =>
-      Platform.isAndroid ? nativePluginSessionIndex : ffiSessionAddress;
+      Platform.isAndroid ? _nativePluginSessionIndex : _ffiSessionAddress;
 
   // isInitialized is used to check if the model is loaded by the ffi based
   // plugin
   bool isFfiInitialized = false;
-  int ffiSessionAddress = -1;
+  int _ffiSessionAddress = -1;
 
   bool isNativePluginInitialized = false;
-  int nativePluginSessionIndex = -1;
+  int _nativePluginSessionIndex = -1;
 
   Future<(String, String)> getModelNameAndPath() async {
     final path =
@@ -37,10 +37,10 @@ abstract class MlModel {
 
   void storeSessionAddress(int address) {
     if (Platform.isAndroid) {
-      nativePluginSessionIndex = address;
+      _nativePluginSessionIndex = address;
       isNativePluginInitialized = true;
     } else {
-      ffiSessionAddress = address;
+      _ffiSessionAddress = address;
       isFfiInitialized = true;
     }
   }
@@ -106,10 +106,10 @@ abstract class MlModel {
   // TODO: add release method for native plugin
   Future<void> release() async {
     if (isFfiInitialized) {
-      await _releaseModel({'address': ffiSessionAddress});
+      await _releaseModel({'address': _ffiSessionAddress});
       await ONNXEnv.instance.releaseONNX(modelName);
       isFfiInitialized = false;
-      ffiSessionAddress = 0;
+      _ffiSessionAddress = 0;
     }
   }
 
