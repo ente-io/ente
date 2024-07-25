@@ -9194,6 +9194,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords`
+  String get passwordStrengthInfo {
+    return Intl.message(
+      'Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords',
+      name: 'passwordStrengthInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

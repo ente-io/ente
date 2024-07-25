@@ -343,9 +343,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           onTap: () {
                             showInfoDialog(
                               context,
-                              title: "",
-                              body:
-                                  "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords",
+                              body: S.of(context).passwordStrengthInfo,
                             );
                           },
                         ),
