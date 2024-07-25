@@ -49,6 +49,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   void initState() {
+    super.initState();
     _email = _config.getEmail();
     _password1FocusNode.addListener(() {
       setState(() {
@@ -60,7 +61,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _password2InFocus = _password2FocusNode.hasFocus;
       });
     });
-    super.initState();
   }
 
   @override
@@ -164,7 +164,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       suffixIcon: _emailIsValid
                           ? Icon(
                               Icons.check,
-                              size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
                                   .focusedBorder!
@@ -309,7 +308,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     onChanged: (cnfPassword) {
                       setState(() {
                         _cnfPassword = cnfPassword;
-                        if (_password != null || _password != '') {
+                        if (_password != null && _password != '') {
                           _passwordsMatch = _password == _cnfPassword;
                         }
                       });
@@ -317,7 +316,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                 ),
                 Opacity(
-                  opacity: (_password != '') && _password1InFocus ? 1 : 0,
+                  opacity: (_password != null && _password != '') ? 1 : 0,
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
