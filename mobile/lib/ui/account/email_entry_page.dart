@@ -15,7 +15,7 @@ import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({Key? key}) : super(key: key);
+  const EmailEntryPage({super.key});
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -52,16 +52,23 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   void initState() {
     super.initState();
     _email = _config.getEmail();
-    _password1FocusNode.addListener(() {
-      setState(() {
-        _password1InFocus = _password1FocusNode.hasFocus;
-      });
-    });
-    _password2FocusNode.addListener(() {
-      setState(() {
-        _password2InFocus = _password2FocusNode.hasFocus;
-      });
-    });
+    _password1FocusNode.addListener(
+      _password1FocusListener,
+    );
+    _password2FocusNode.addListener(
+      _password2FocusListener,
+    );
+  }
+
+  @override
+  void dispose() {
+    _password1FocusNode.removeListener(_password1FocusListener);
+    _password2FocusNode.removeListener(_password2FocusListener);
+    _password1FocusNode.dispose();
+    _password2FocusNode.dispose();
+    _passwordController1.dispose();
+    _passwordController2.dispose();
+    super.dispose();
   }
 
   @override
@@ -323,31 +330,33 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       horizontal: 24,
                       vertical: 8,
                     ),
-                    child: Row(
-                      children: [
-                        Text(
-                          S.of(context).passwordStrength(passwordStrengthText),
-                          style: TextStyle(
-                            color: passwordStrengthColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                    child: GestureDetector(
+                      onTap: () {
+                        showInfoDialog(
+                          context,
+                          body: S.of(context).passwordStrengthInfo,
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            S
+                                .of(context)
+                                .passwordStrength(passwordStrengthText),
+                            style: TextStyle(
+                              color: passwordStrengthColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          child: Icon(
+                          const SizedBox(width: 8),
+                          Icon(
                             Icons.info_outline,
                             size: 16,
                             color: getEnteColorScheme(context).fillStrong,
                           ),
-                          onTap: () {
-                            showInfoDialog(
-                              context,
-                              body: S.of(context).passwordStrengthInfo,
-                            );
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -541,6 +550,18 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         ],
       ),
     );
+  }
+
+  void _password1FocusListener() {
+    setState(() {
+      _password1InFocus = _password1FocusNode.hasFocus;
+    });
+  }
+
+  void _password2FocusListener() {
+    setState(() {
+      _password2InFocus = _password2FocusNode.hasFocus;
+    });
   }
 
   bool _isFormValid() {
