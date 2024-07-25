@@ -341,7 +341,6 @@ func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64)
 	err = c.TrashRepository.CleanUpDeletedFilesFromCollection(context.Background(), fileIDs, userID)
 	if err != nil {
 		logger.WithError(err).Error("Failed to clean up stale files from collection")
-
 	}
 
 }
@@ -372,10 +371,11 @@ func (c *FileController) GetCastFileUrl(ctx *gin.Context, fileID int64, objType 
 	return c.getSignedURLForType(ctx, fileID, objType)
 }
 
-func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
-	if isCliRequest(ctx) {
-		return c.getWasabiSignedUrlIfAvailable(fileID, objType)
-	}
+func (c *FileController) getSignedURLForType(_ *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
+	// todo:(neeraj) enable it back after wasabi changes
+	//if isCliRequest(ctx) {
+	//	return c.getWasabiSignedUrlIfAvailable(fileID, objType)
+	//}
 	s3Object, err := c.ObjectRepo.GetObject(fileID, objType)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
