@@ -67,10 +67,7 @@ interface ExtractedExif {
  * The library we use is https://github.com/mattiasw/ExifReader.
  */
 export const extractExif = async (file: File) => {
-    const tags = await ExifReader.load(await file.arrayBuffer(), {
-        async: true,
-        expanded: true,
-    });
+    const tags = await extractTags(file);
 
     const location = parseLocation(tags);
     const creationDate = parseCreationDate(tags);
@@ -80,6 +77,14 @@ export const extractExif = async (file: File) => {
     if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
     if (location) metadata.location = location;
     return metadata;
+};
+
+const extractTags = async (blob: Blob) => {
+    // See: [Note: Definining "raw" Exif] for the choice of options.
+    return await ExifReader.load(await blob.arrayBuffer(), {
+        async: true,
+        expanded: true,
+    });
 };
 
 /**
@@ -95,6 +100,27 @@ const parseCreationDate = (tags: ExifReader.ExpandedTags) => {
         parseDates(tags);
     return DateTimeOriginal ?? DateTimeDigitized ?? MetadataDate ?? DateTime;
 };
+
+/**
+ * Dates extracted from the Exif and other metadata embedded in a file.
+ *
+ * These are the dates corresponding to the various options we show to the user
+ * for the "Fix date" functionality. These don't come solely from the Exif but
+ * from all forms of metadata we support (Exif, XMP, IPTC). They roughly
+ * correspond to the three Exif DateTime* tags, and the XMP MetadataDate tag.
+ */
+interface ExtractedExifDates {
+    DateTimeOriginal: Date | undefined;
+    DateTimeDigitized: Date | undefined;
+    DateTime: Date | undefined;
+    MetadataDate: Date | undefined;
+}
+
+/**
+ * Extract dates from Exif and other metadata for the given file.
+ */
+export const extractExifDates = (file: File): Promise<ExtractedExifDates> =>
+    extractTags(file).then(parseDates);
 
 /**
  * Parse all date related fields from the metadata embedded in the file,
@@ -123,8 +149,8 @@ const parseDates = (tags: ExifReader.ExpandedTags) => {
             valid(iptc.DateTimeDigitized) ??
             valid(exif.DateTimeDigitized) ??
             valid(xmp.CreateDate),
-        MetadataDate: valid(xmp.MetadataDate),
         DateTime: valid(xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate),
+        MetadataDate: valid(xmp.MetadataDate),
     };
 };
 
@@ -469,10 +495,7 @@ const parseXMPNum = (xmpTag: ExifReader.XmpTag | undefined) => {
  * to know about ExifReader specifically.
  */
 export const extractRawExif = async (blob: Blob) => {
-    const tags = await ExifReader.load(await blob.arrayBuffer(), {
-        async: true,
-        expanded: true,
-    });
+    const tags = await extractTags(blob);
 
     // Remove the embedded thumbnail (if any).
     delete tags.Thumbnail;
