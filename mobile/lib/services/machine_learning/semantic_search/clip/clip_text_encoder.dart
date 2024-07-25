@@ -36,11 +36,14 @@ class ClipTextEncoder extends MlModel {
     final text = args["text"];
     final address = args["address"] as int;
     final vocabPath = args["vocabPath"] as String;
-    final useEntePlugin = args["useEntePlugin"] ?? false;
     final List<int> tokenize =
         await ClipTextTokenizer.instance.tokenize(text, vocabPath);
     final int32list = Int32List.fromList(tokenize);
-    return _runFFIBasedPredict(int32list, address);
+    if (MlModel.usePlatformPlugin) {
+      return await _runPlatformPlugin(int32list);
+    } else {
+      return _runFFIBasedPredict(int32list, address);
+    }
   }
 
   static List<double> _runFFIBasedPredict(
@@ -65,8 +68,8 @@ class ClipTextEncoder extends MlModel {
     return embedding;
   }
 
-  static Future<List<double>> _runEntePlugin(Int32List int32list) async {
-    final w = EnteWatch("ClipTextEncoder._runEntePlugin")..start();
+  static Future<List<double>> _runPlatformPlugin(Int32List int32list) async {
+    final w = EnteWatch("ClipTextEncoder._runPlatformPlugin")..start();
     final OnnxDart plugin = OnnxDart();
     final result = await plugin.predictInt(
       int32list,

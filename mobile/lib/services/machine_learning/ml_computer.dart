@@ -1,5 +1,5 @@
 import 'dart:async';
-import "dart:io" show File, Platform;
+import "dart:io" show File;
 import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
 
@@ -171,7 +171,6 @@ class MLComputerIsolate {
             "text": query,
             "address": clipAddress,
             "vocabPath": tokenizerVocabPath,
-            "useEntePlugin": Platform.isAndroid,
           }
         ),
       ) as List<double>;
