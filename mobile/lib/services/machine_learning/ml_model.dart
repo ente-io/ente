@@ -16,19 +16,19 @@ abstract class MlModel {
 
   String get modelName;
 
-  static final bool usePlatformPlugin = Platform.isAndroid;
+  static final bool _usePlatformPlugin = Platform.isAndroid;
 
   bool get isInitialized =>
-      usePlatformPlugin ? isNativePluginInitialized : isFfiInitialized;
+      _usePlatformPlugin ? _isNativePluginInitialized : _isFfiInitialized;
   int get sessionAddress =>
-      usePlatformPlugin ? _nativePluginSessionIndex : _ffiSessionAddress;
+      _usePlatformPlugin ? _nativePluginSessionIndex : _ffiSessionAddress;
 
   // isInitialized is used to check if the model is loaded by the ffi based
   // plugin
-  bool isFfiInitialized = false;
+  bool _isFfiInitialized = false;
   int _ffiSessionAddress = -1;
 
-  bool isNativePluginInitialized = false;
+  bool _isNativePluginInitialized = false;
   int _nativePluginSessionIndex = -1;
 
   Future<(String, String)> getModelNameAndPath() async {
@@ -38,12 +38,12 @@ abstract class MlModel {
   }
 
   void storeSessionAddress(int address) {
-    if (usePlatformPlugin) {
+    if (_usePlatformPlugin) {
       _nativePluginSessionIndex = address;
-      isNativePluginInitialized = true;
+      _isNativePluginInitialized = true;
     } else {
       _ffiSessionAddress = address;
-      isFfiInitialized = true;
+      _isFfiInitialized = true;
     }
   }
 
@@ -55,7 +55,7 @@ abstract class MlModel {
     String modelName,
     String modelPath,
   ) async {
-    if (usePlatformPlugin) {
+    if (_usePlatformPlugin) {
       return await _loadModelWithEntePlugin(modelName, modelPath);
     } else {
       return await _loadModelWithFFI(modelName, modelPath);
@@ -107,10 +107,10 @@ abstract class MlModel {
 
   // TODO: add release method for native plugin
   Future<void> release() async {
-    if (isFfiInitialized) {
+    if (_isFfiInitialized) {
       await _releaseModel({'address': _ffiSessionAddress});
       await ONNXEnv.instance.releaseONNX(modelName);
-      isFfiInitialized = false;
+      _isFfiInitialized = false;
       _ffiSessionAddress = 0;
     }
   }
