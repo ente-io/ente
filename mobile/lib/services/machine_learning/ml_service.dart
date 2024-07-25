@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:io" show Platform;
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List;
 
@@ -47,8 +46,6 @@ class MLService {
   final _initModelLock = Lock();
 
   bool _isInitialized = false;
-  bool _isModelsInitialized = false;
-  bool _isModelsInitUsingEntePlugin = false;
 
   late String client;
 
@@ -56,7 +53,7 @@ class MLService {
 
   bool get showClusteringIsHappening => _showClusteringIsHappening;
 
-  bool get allModelsLoaded => _isModelsInitialized;
+  bool modelsAreLoading = false;
 
   bool debugIndexingDisabled = false;
   bool _showClusteringIsHappening = false;
@@ -181,7 +178,7 @@ class MLService {
             _logger.info("indexAllImages() was paused, stopping");
             break outerLoop;
           }
-          await _ensureReadyForInference();
+          await _ensureLoadedModels(instruction);
           futures.add(processImage(instruction));
         }
         final awaitedFutures = await Future.wait(futures);
@@ -504,47 +501,6 @@ class MLService {
     return actuallyRanML;
   }
 
-  Future<void> _initModelsUsingFfiBasedPlugin() async {
-    return _initModelLock.synchronized(() async {
-      if (_isModelsInitialized) return;
-      _logger.info('initModels called');
-      try {
-        await FaceDetectionService.instance.loadModel();
-      } catch (e, s) {
-        _logger.severe("Could not initialize yolo onnx", e, s);
-      }
-      try {
-        await FaceEmbeddingService.instance.loadModel();
-      } catch (e, s) {
-        _logger.severe("Could not initialize mobilefacenet", e, s);
-      }
-      try {
-        await ClipImageEncoder.instance.loadModel();
-      } catch (e, s) {
-        _logger.severe("Could not initialize clip image", e, s);
-      }
-      _isModelsInitialized = true;
-      _logger.info('initModels done');
-      _logStatus();
-    });
-  }
-
-  Future<void> _initModelUsingEntePlugin() async {
-    return _initModelLock.synchronized(() async {
-      if (_isModelsInitUsingEntePlugin) return;
-      _logger.info('initModelUsingEntePlugin called');
-
-      try {
-        await MLIsolate.instance.loadModels();
-        _isModelsInitUsingEntePlugin = true;
-      } catch (e, s) {
-        _logger.severe("Could not initialize clip image", e, s);
-      }
-      _logger.info('initModelUsingEntePlugin done');
-      _logStatus();
-    });
-  }
-
   Future<void> _releaseModels() async {
     return _initModelLock.synchronized(() async {
       _logger.info("dispose called");
@@ -570,13 +526,29 @@ class MLService {
     });
   }
 
-  Future<void> _ensureReadyForInference() async {
-    await _initModelsUsingFfiBasedPlugin();
-    if (Platform.isAndroid) {
-      await _initModelUsingEntePlugin();
-    } else {
-      await _initModelsUsingFfiBasedPlugin();
-    }
+  Future<void> _ensureLoadedModels(FileMLInstruction instruction) async {
+    return _initModelLock.synchronized(() async {
+      final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
+      final faceEmbeddingLoaded = FaceEmbeddingService.instance.isInitialized;
+      final facesModelsLoaded = faceDetectionLoaded && faceEmbeddingLoaded;
+      final clipModelsLoaded = ClipImageEncoder.instance.isInitialized;
+
+      final shouldLoadFaces = instruction.shouldRunFaces && !facesModelsLoaded;
+      final shouldLoadClip = instruction.shouldRunClip && !clipModelsLoaded;
+      if (!shouldLoadFaces && !shouldLoadClip) {
+        return;
+      }
+
+      modelsAreLoading = true;
+      _logger.info(
+        'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
+      );
+      await MLIsolate.instance
+          .loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
+      _logger.info('Models loaded');
+      _logStatus();
+      modelsAreLoading = false;
+    });
   }
 
   bool _cannotRunMLFunction({String function = ""}) {

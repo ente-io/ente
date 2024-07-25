@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:io" show Platform;
 import "dart:isolate";
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
@@ -8,10 +7,10 @@ import "package:logging/logging.dart";
 import "package:photos/core/error-reporting/super_logging.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
+import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/services/machine_learning/ml_models_overview.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
-import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
-import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -90,10 +89,17 @@ class MLIsolate {
             sendPort.send(result.toJsonString());
             break;
           case MLOperation.loadModels:
-            await FaceDetectionService.instance.loadModel(useEntePlugin: true);
-            await FaceEmbeddingService.instance.loadModel(useEntePlugin: true);
-            await ClipImageEncoder.instance.loadModel(useEntePlugin: true);
-            sendPort.send(true);
+            final modelNames = args['modelNames'] as List<String>;
+            final modelPaths = args['modelPaths'] as List<String>;
+            final addresses = <int>[];
+            for (int i = 0; i < modelNames.length; i++) {
+              final int address = await MlModel.loadModel(
+                modelNames[i],
+                modelPaths[i],
+              );
+              addresses.add(address);
+            }
+            sendPort.send(List.from(addresses, growable: false));
             break;
         }
       } catch (e, s) {
@@ -188,10 +194,10 @@ class MLIsolate {
             "runFaces": instruction.shouldRunFaces,
             "runClip": instruction.shouldRunClip,
             "faceDetectionAddress":
-                FaceDetectionService.instance.sessionAddress,
+                FaceDetectionService.instance.ffiSessionAddress,
             "faceEmbeddingAddress":
-                FaceEmbeddingService.instance.sessionAddress,
-            "clipImageAddress": ClipImageEncoder.instance.sessionAddress,
+                FaceEmbeddingService.instance.ffiSessionAddress,
+            "clipImageAddress": ClipImageEncoder.instance.ffiSessionAddress,
           }
         ),
       ) as String?;
@@ -225,11 +231,47 @@ class MLIsolate {
     return result;
   }
 
-  Future<void> loadModels() async {
+  Future<void> loadModels({
+    required bool loadFaces,
+    required bool loadClip,
+  }) async {
+    if (!loadFaces && !loadClip) return;
+    final List<MLModels> models = [];
+    final List<String> modelNames = [];
+    final List<String> modelPaths = [];
+    if (loadFaces) {
+      models.addAll([MLModels.faceDetection, MLModels.faceEmbedding]);
+      final faceDetection =
+          await FaceDetectionService.instance.getModelNameAndPath();
+      modelNames.add(faceDetection.$1);
+      modelPaths.add(faceDetection.$2);
+      final faceEmbedding =
+          await FaceEmbeddingService.instance.getModelNameAndPath();
+      modelNames.add(faceEmbedding.$1);
+      modelPaths.add(faceEmbedding.$2);
+    }
+    if (loadClip) {
+      models.add(MLModels.clipImageEncoder);
+      final clipImage = await ClipImageEncoder.instance.getModelNameAndPath();
+      modelNames.add(clipImage.$1);
+      modelPaths.add(clipImage.$2);
+    }
+
     try {
-      await _runInIsolate(
-        (MLOperation.loadModels, {}),
-      );
+      final addresses = await _runInIsolate(
+        (
+          MLOperation.loadModels,
+          {
+            "modelNames": modelNames,
+            "modelPaths": modelPaths,
+          }
+        ),
+      ) as List<int>;
+      for (int i = 0; i < models.length; i++) {
+        final model = models[i].model;
+        final address = addresses[i];
+        model.storeSessionAddress(address);
+      }
     } catch (e, s) {
       _logger.severe("Could not load models in isolate", e, s);
       rethrow;

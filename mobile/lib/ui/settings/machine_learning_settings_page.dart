@@ -138,9 +138,9 @@ class _MachineLearningSettingsPageState
           height: 12,
         ),
         hasEnabled
-            ? MLService.instance.allModelsLoaded
-                ? const MLStatusWidget()
-                : const ModelLoadingState()
+            ? MLService.instance.modelsAreLoading
+                ? const ModelLoadingState()
+                : const MLStatusWidget()
             : const SizedBox.shrink(),
       ],
     );

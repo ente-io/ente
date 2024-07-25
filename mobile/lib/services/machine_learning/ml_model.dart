@@ -1,6 +1,5 @@
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 
-import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
@@ -8,6 +7,7 @@ import "package:photos/services/machine_learning/onnx_env.dart";
 import "package:photos/services/remote_assets_service.dart";
 
 abstract class MlModel {
+  static final Logger isolateLogger = Logger("MlModelInIsolate");
   Logger get logger;
 
   String get kModelBucketEndpoint => "https://models.ente.io/";
@@ -16,92 +16,100 @@ abstract class MlModel {
 
   String get modelName;
 
+  bool get isInitialized =>
+      Platform.isAndroid ? isNativePluginInitialized : isFfiInitialized;
+  int get sessionAddress =>
+      Platform.isAndroid ? nativePluginSessionIndex : ffiSessionAddress;
+
   // isInitialized is used to check if the model is loaded by the ffi based
   // plugin
-  bool isInitialized = false;
+  bool isFfiInitialized = false;
+  int ffiSessionAddress = -1;
 
   bool isNativePluginInitialized = false;
-  int sessionAddress = 0;
+  int nativePluginSessionIndex = -1;
 
-  final computer = Computer.shared();
+  Future<(String, String)> getModelNameAndPath() async {
+    final path =
+        await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
+    return (modelName, path);
+  }
+
+  void storeSessionAddress(int address) {
+    if (Platform.isAndroid) {
+      nativePluginSessionIndex = address;
+      isNativePluginInitialized = true;
+    } else {
+      ffiSessionAddress = address;
+      isFfiInitialized = true;
+    }
+  }
 
   // Initializes the model.
   // If `useEntePlugin` is set to true, the custom plugin is used for initialization.
   // Note: The custom plugin requires a dedicated isolate for loading the model to ensure thread safety and performance isolation.
   // In contrast, the current FFI-based plugin leverages the session memory address for session management, which does not require a dedicated isolate.
-  Future<void> loadModel({bool useEntePlugin = false}) async {
-    final model = await RemoteAssetsService.instance.getAsset(modelRemotePath);
-    if (useEntePlugin) {
-      await _loadModelWithEntePlugin(modelName, model.path);
-    } else {
-      await _loadModelWithFFI(modelName, model.path);
-    }
-  }
-
-  Future<void> _loadModelWithEntePlugin(
+  static Future<int> loadModel(
     String modelName,
     String modelPath,
   ) async {
-    if (!isNativePluginInitialized) {
-      final startTime = DateTime.now();
-      logger.info('Initializing $modelName with EntePlugin');
-      final OnnxDart plugin = OnnxDart();
-      final bool? initResult = await plugin.init(modelName, modelPath);
-      isNativePluginInitialized = initResult ?? false;
-      if (isNativePluginInitialized) {
-        final endTime = DateTime.now();
-        logger.info(
-          "$modelName loaded via EntePlugin ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
-        );
-      } else {
-        logger.severe("Failed to initialize $modelName with EntePlugin.");
-      }
+    if (Platform.isAndroid) {
+      return await _loadModelWithEntePlugin(modelName, modelPath);
     } else {
-      logger.info("$modelName already initialized with Ente Plugin.");
+      return await _loadModelWithFFI(modelName, modelPath);
     }
   }
 
-  Future<void> _loadModelWithFFI(String modelName, String modelPath) async {
-    if (!isInitialized) {
-      logger.info('Initializing $modelName with FFI');
+  static Future<int> _loadModelWithEntePlugin(
+    String modelName,
+    String modelPath,
+  ) async {
+    final startTime = DateTime.now();
+    isolateLogger.info('Initializing $modelName with EntePlugin');
+    final OnnxDart plugin = OnnxDart();
+    final bool? initResult = await plugin.init(modelName, modelPath);
+    if (initResult == null || !initResult) {
+      isolateLogger.severe("Failed to initialize $modelName with EntePlugin.");
+      throw Exception("Failed to initialize $modelName with EntePlugin.");
+    }
+    final endTime = DateTime.now();
+    isolateLogger.info(
+      "$modelName loaded via EntePlugin in ${endTime.difference(startTime).inMilliseconds}ms",
+    );
+    return 0;
+  }
+
+  static Future<int> _loadModelWithFFI(
+    String modelName,
+    String modelPath,
+  ) async {
+    isolateLogger.info('Initializing $modelName with FFI');
+    try {
       final startTime = DateTime.now();
-      sessionAddress = await computer.compute(
-        _loadModel,
-        param: {
-          "modelPath": modelPath,
-        },
-      );
-      isInitialized = true;
+      final sessionOptions = OrtSessionOptions()
+        ..setInterOpNumThreads(1)
+        ..setIntraOpNumThreads(1)
+        ..setSessionGraphOptimizationLevel(
+          GraphOptimizationLevel.ortEnableAll,
+        );
+      final session = OrtSession.fromFile(File(modelPath), sessionOptions);
       final endTime = DateTime.now();
-      logger.info(
-        "$modelName loaded with FFI, took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch).toString()}ms",
+      isolateLogger.info(
+        "$modelName loaded with FFI, took: ${endTime.difference(startTime).inMilliseconds}ms",
       );
-    } else {
-      logger.info("$modelName already initialized with FFI.");
+      return session.address;
+    } catch (e) {
+      rethrow;
     }
   }
 
   // TODO: add release method for native plugin
   Future<void> release() async {
-    if (isInitialized) {
-      await computer.compute(_releaseModel, param: {'address': sessionAddress});
+    if (isFfiInitialized) {
+      await _releaseModel({'address': ffiSessionAddress});
       await ONNXEnv.instance.releaseONNX(modelName);
-      isInitialized = false;
-      sessionAddress = 0;
-    }
-  }
-
-  static Future<int> _loadModel(Map args) async {
-    final sessionOptions = OrtSessionOptions()
-      ..setInterOpNumThreads(1)
-      ..setIntraOpNumThreads(1)
-      ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    try {
-      final session =
-          OrtSession.fromFile(File(args["modelPath"]), sessionOptions);
-      return session.address;
-    } catch (e) {
-      rethrow;
+      isFfiInitialized = false;
+      ffiSessionAddress = 0;
     }
   }
 
