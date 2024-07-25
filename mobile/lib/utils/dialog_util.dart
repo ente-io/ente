@@ -19,9 +19,9 @@ typedef DialogBuilder = DialogWidget Function(BuildContext context);
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showInfoDialog(
-  BuildContext context,
-  String title,
-  String? body, {
+  BuildContext context, {
+  String title = "",
+  String? body,
   IconData icon = Icons.info_outline_rounded,
   bool isDismissable = true,
 }) async {

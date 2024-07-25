@@ -9,6 +9,7 @@ import 'package:photos/services/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
@@ -318,15 +319,37 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 Opacity(
                   opacity: (_password != null && _password != '') ? 1 : 0,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: Text(
-                      S.of(context).passwordStrength(passwordStrengthText),
-                      style: TextStyle(
-                        color: passwordStrengthColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                      ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          S.of(context).passwordStrength(passwordStrengthText),
+                          style: TextStyle(
+                            color: passwordStrengthColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          child: Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: getEnteColorScheme(context).fillStrong,
+                          ),
+                          onTap: () {
+                            showInfoDialog(
+                              context,
+                              title: "",
+                              body:
+                                  "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords",
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
