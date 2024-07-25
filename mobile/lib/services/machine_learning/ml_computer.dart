@@ -11,13 +11,13 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum ImageOperation {
+enum MLComputerOperation {
   generateFaceThumbnails,
   runClipText,
 }
 
-class ImageIsolate {
-  final _logger = Logger('ImageIsolate');
+class MLComputerIsolate {
+  final _logger = Logger('MLComputerIsolate');
 
   Timer? _inactivityTimer;
   final Duration _inactivityDuration = const Duration(seconds: 60);
@@ -33,9 +33,10 @@ class ImageIsolate {
   bool isSpawned = false;
 
   // Singleton pattern
-  ImageIsolate._privateConstructor();
-  static final ImageIsolate instance = ImageIsolate._privateConstructor();
-  factory ImageIsolate() => instance;
+  MLComputerIsolate._privateConstructor();
+  static final MLComputerIsolate instance =
+      MLComputerIsolate._privateConstructor();
+  factory MLComputerIsolate() => instance;
 
   Future<void> init() async {
     return _initLock.synchronized(() async {
@@ -72,13 +73,13 @@ class ImageIsolate {
 
     receivePort.listen((message) async {
       final functionIndex = message[0] as int;
-      final function = ImageOperation.values[functionIndex];
+      final function = MLComputerOperation.values[functionIndex];
       final args = message[1] as Map<String, dynamic>;
       final sendPort = message[2] as SendPort;
 
       try {
         switch (function) {
-          case ImageOperation.generateFaceThumbnails:
+          case MLComputerOperation.generateFaceThumbnails:
             final imagePath = args['imagePath'] as String;
             final Uint8List imageData = await File(imagePath).readAsBytes();
             final faceBoxesJson =
@@ -91,7 +92,7 @@ class ImageIsolate {
               faceBoxes,
             );
             sendPort.send(List.from(results));
-          case ImageOperation.runClipText:
+          case MLComputerOperation.runClipText:
             final textEmbedding = await ClipTextEncoder.predict(args);
             sendPort.send(List.from(textEmbedding, growable: false));
             break;
@@ -105,7 +106,7 @@ class ImageIsolate {
 
   /// The common method to run any operation in the isolate. It sends the [message] to [_isolateMain] and waits for the result.
   Future<dynamic> _runInIsolate(
-    (ImageOperation, Map<String, dynamic>) message,
+    (MLComputerOperation, Map<String, dynamic>) message,
   ) async {
     await ensureSpawned();
     return _functionLock.synchronized(() async {
@@ -174,7 +175,7 @@ class ImageIsolate {
         faceBoxes.map((box) => box.toJson()).toList();
     return await _runInIsolate(
       (
-        ImageOperation.generateFaceThumbnails,
+        MLComputerOperation.generateFaceThumbnails,
         {
           'imagePath': imagePath,
           'faceBoxesList': faceBoxesJson,
@@ -191,7 +192,7 @@ class ImageIsolate {
           await RemoteAssetsService.instance.getAssetPath(remotePath);
       final textEmbedding = await _runInIsolate(
         (
-          ImageOperation.runClipText,
+          MLComputerOperation.runClipText,
           {
             "text": query,
             "address": clipAddress,
