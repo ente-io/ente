@@ -14,7 +14,7 @@ import "package:photos/services/machine_learning/semantic_search/clip/clip_image
 import "package:photos/utils/ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum MLOperation { analyzeImage, loadModels }
+enum MLOperation { analyzeImage, loadModels, releaseModels }
 
 class MLIsolate {
   static final _logger = Logger("MLIsolate");
@@ -100,6 +100,17 @@ class MLIsolate {
               addresses.add(address);
             }
             sendPort.send(List.from(addresses, growable: false));
+            break;
+          case MLOperation.releaseModels:
+            final modelNames = args['modelNames'] as List<String>;
+            final modelAddresses = args['modelAddresses'] as List<int>;
+            for (int i = 0; i < modelNames.length; i++) {
+              await MlModel.releaseModel(
+                modelNames[i],
+                modelAddresses[i],
+              );
+            }
+            sendPort.send(true);
             break;
         }
       } catch (e, s) {
@@ -273,7 +284,41 @@ class MLIsolate {
         model.storeSessionAddress(address);
       }
     } catch (e, s) {
-      _logger.severe("Could not load models in isolate", e, s);
+      _logger.severe("Could not load models in MLIndexingIsolate", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> releaseModels() async {
+    final List<String> modelNames = [];
+    final List<int> modelAddresses = [];
+    final List<MLModels> models = [];
+    for (final model in MLModels.values) {
+      if (!model.isIndexingModel) continue;
+      final mlModel = model.model;
+      if (mlModel.isInitialized) {
+        models.add(model);
+        modelNames.add(mlModel.modelName);
+        modelAddresses.add(mlModel.sessionAddress);
+      }
+    }
+    if (modelNames.isEmpty) return;
+    try {
+      await _runInIsolate(
+        (
+          MLOperation.releaseModels,
+          {
+            "modelNames": modelNames,
+            "modelAddresses": modelAddresses,
+          }
+        ),
+      );
+      for (final model in models) {
+        model.model.releaseSessionAddress();
+      }
+      _logger.info("Indexing models released in isolate");
+    } catch (e, s) {
+      _logger.severe("Could not release models in MLIndexingIsolate", e, s);
       rethrow;
     }
   }

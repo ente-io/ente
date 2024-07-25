@@ -47,6 +47,16 @@ abstract class MlModel {
     }
   }
 
+  void releaseSessionAddress() {
+    if (_usePlatformPlugin) {
+      _nativePluginSessionIndex = -1;
+      _isNativePluginInitialized = false;
+    } else {
+      _ffiSessionAddress = -1;
+      _isFfiInitialized = false;
+    }
+  }
+
   // Initializes the model.
   // If `useEntePlugin` is set to true, the custom plugin is used for initialization.
   // Note: The custom plugin requires a dedicated isolate for loading the model to ensure thread safety and performance isolation.
@@ -106,23 +116,33 @@ abstract class MlModel {
     }
   }
 
-  // TODO: add release method for native plugin
-  Future<void> release() async {
-    if (_isFfiInitialized) {
-      await _releaseModel({'address': _ffiSessionAddress});
-      await ONNXEnv.instance.releaseONNX(modelName);
-      _isFfiInitialized = false;
-      _ffiSessionAddress = 0;
+  static Future<void> releaseModel(String modelName, int sessionAddress) async {
+    if (_usePlatformPlugin) {
+      await _releaseModelWithPlatformPlugin(modelName);
+    } else {
+      await _releaseModelWithFFI(modelName, sessionAddress);
     }
   }
 
-  static Future<void> _releaseModel(Map args) async {
-    final address = args['address'] as int;
-    if (address == 0) {
+  static Future<void> _releaseModelWithPlatformPlugin(String modelName) async {
+    final OnnxDart plugin = OnnxDart();
+    final bool? initResult = await plugin.release(modelName);
+    if (initResult == null || !initResult) {
+      isolateLogger.severe("Failed to release $modelName with PlatformPlugin.");
+      throw Exception("Failed to release $modelName with PlatformPlugin.");
+    }
+  }
+
+  static Future<void> _releaseModelWithFFI(
+    String modelName,
+    int sessionAddress,
+  ) async {
+    if (sessionAddress == 0 || sessionAddress == -1) {
       return;
     }
-    final session = OrtSession.fromAddress(address);
+    final session = OrtSession.fromAddress(sessionAddress);
     session.release();
+    ONNXEnvFFI.instance.releaseONNX(modelName);
     return;
   }
 }

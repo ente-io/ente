@@ -24,4 +24,15 @@ extension MLModelsExtension on MLModels {
         return ClipTextEncoder.instance;
     }
   }
+
+  bool get isIndexingModel {
+    switch (this) {
+      case MLModels.faceDetection:
+      case MLModels.faceEmbedding:
+      case MLModels.clipImageEncoder:
+        return true;
+      case MLModels.clipTextEncoder:
+        return false;
+    }
+  }
 }
