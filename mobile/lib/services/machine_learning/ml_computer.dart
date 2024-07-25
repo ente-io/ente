@@ -38,7 +38,7 @@ class MLComputerIsolate {
       MLComputerIsolate._privateConstructor();
   factory MLComputerIsolate() => instance;
 
-  Future<void> init() async {
+  Future<void> _init() async {
     return _initLock.synchronized(() async {
       if (isSpawned) return;
 
@@ -56,12 +56,6 @@ class MLComputerIsolate {
         isSpawned = false;
       }
     });
-  }
-
-  Future<void> ensureSpawned() async {
-    if (!isSpawned) {
-      await init();
-    }
   }
 
   @pragma('vm:entry-point')
@@ -120,7 +114,7 @@ class MLComputerIsolate {
   Future<dynamic> _runInIsolate(
     (MLComputerOperation, Map<String, dynamic>) message,
   ) async {
-    await ensureSpawned();
+    await _init();
     return _functionLock.synchronized(() async {
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
