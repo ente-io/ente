@@ -58,16 +58,20 @@ export interface Metadata {
      */
     title: string;
     /**
-     * The time when this file was created.
+     * The time when this file was created (epoch microseconds).
      *
-     * For photos (and images in general), this is the time when the photo was
-     * taken, or when the screenshot was captured.
+     * For photos (and images in general), this is our best attempt (using Exif
+     * and other metadata, or deducing it from file name for screenshots without
+     * any embedded metadata) at detecting the time when the photo was taken.
+     *
+     * If nothing can be found, then it is set to the current time at the time
+     * of the upload.
      */
-    creationTime: number | undefined;
+    creationTime: number;
     modificationTime: number;
     latitude: number;
     longitude: number;
-    /** The "Ente" file type. */
+    /** The "Ente" file type - image, video or live photo. */
     fileType: FILE_TYPE;
     hasStaticThumbnail?: boolean;
     hash?: string;
