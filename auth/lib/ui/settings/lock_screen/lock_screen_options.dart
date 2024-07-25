@@ -217,6 +217,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       captionedTextWidget: CaptionedTextWidget(
                                         title: context.l10n.deviceLock,
                                       ),
+                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       isTopBorderRadiusRemoved: false,
                                       isBottomBorderRadiusRemoved: true,
@@ -236,6 +237,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       captionedTextWidget: CaptionedTextWidget(
                                         title: context.l10n.pinLock,
                                       ),
+                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       isTopBorderRadiusRemoved: true,
                                       isBottomBorderRadiusRemoved: true,
@@ -253,6 +255,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       captionedTextWidget: CaptionedTextWidget(
                                         title: context.l10n.password,
                                       ),
+                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       isTopBorderRadiusRemoved: true,
                                       isBottomBorderRadiusRemoved: false,
@@ -276,6 +279,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                           ),
                                         ),
                                       ),
+                                      surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
                                       singleBorderRadius: 8,
                                       menuItemColor: colorTheme.fillFaint,

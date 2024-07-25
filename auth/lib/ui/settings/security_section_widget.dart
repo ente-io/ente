@@ -140,6 +140,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.appLock,
         ),
+        surfaceExecutionStates: false,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
