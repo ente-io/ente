@@ -9,7 +9,6 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
-import { indexExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -32,6 +31,7 @@ import {
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
+import { extractRawExif } from "../exif";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -439,7 +439,7 @@ const index = async (
             [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
-                originalBlob ? indexExif(enteFile, originalBlob) : undefined,
+                originalBlob ? extractRawExif(originalBlob) : undefined,
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]

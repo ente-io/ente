@@ -1,7 +1,6 @@
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import ExifReader from "exifreader";
-import type { EnteFile } from "../types/file";
 import type { ParsedExtractedMetadata } from "../types/metadata";
 import { isInternalUser } from "./feature-flags";
 
@@ -12,7 +11,6 @@ export const cmpNewLib = (
     oldLib: ParsedExtractedMetadata,
     newLib: ParsedMetadata,
 ) => {
-    log.debug(() => ["exif/cmp", { oldLib, newLib }]);
     if (
         oldLib.width == newLib.width &&
         oldLib.height == newLib.height &&
@@ -21,8 +19,10 @@ export const cmpNewLib = (
         oldLib.location.longitude == newLib.location?.longitude
     ) {
         log.info("Exif migration 🟢");
+        log.debug(() => ["exif/cmp", { oldLib, newLib }]);
     } else {
         log.info("Exif migration - Potential mismatch ❗️🚩");
+        log.info({ oldLib, newLib });
     }
 };
 
@@ -408,74 +408,67 @@ const parseXMPNum = (xmpTag: ExifReader.XmpTag | undefined) => {
 };
 
 /**
- * Index Exif in the given {@link EnteFile}.
+ * Extract "raw" exif and other metadata from the given file.
  *
- * This function is invoked as part of the ML indexing pipeline, which is why it
- * uses the same "index" nomenclature. But what it does is more of an extraction
- * / backfill process. The idea is that since we are anyways retrieving the
- * original file to index it for faces and CLIP, we might as well extract the
- * Exif and store it as part of the derived data (so that future features can
- * more readily use it), and also backfill any fields that old clients might've
- * not extracted during their file uploads.
+ * @param blob A {@link Blob} containing the data of an {@link EnteFile}.
  *
- * @param enteFile The {@link EnteFile} which we're indexing. This is the file
- * whose metadata we update if needed (for backfilling).
+ * @return A JSON object containing the raw exif and other metadata that was
+ * found in the given {@link blob}.
  *
- * @param blob A {@link Blob} containing the {@link enteFile}'s data. This is
- * where we extract the Exif from.
+ * ---
  *
+ * [Note: Defining "raw" Exif]
+ *
+ * We wish for a canonical "raw" JSON representing all the Exif data associated
+ * with a file. This goal is tricky to achieve because:
+ *
+ * -   While Exif itself is a standard, with a standard set of tags (a numeric
+ *     id), in practice vendors can use tags more than what are currently listed
+ *     in the standard.
+ *
+ * -   We're not just interested in Exif tags, but rather at all forms of
+ *     metadata (e.g. XMP, IPTC) that can be embedded in a file.
+ *
+ * By default, the library we use (ExifReader) returns a merged object
+ * containing all tags it understands from all forms of metadata that it knows
+ * about.
+ *
+ * Since it only returns the tags it understands, it acts an an implicit
+ * whitelist. This implicit whitelist behaviour can be turned off by specifying
+ * the `includeUnknown` flag, but for our case it is useful since it acts as a
+ * safeguard against extracting an unbounded amounts of data (for example, there
+ * is an Exif tag for thumbnails. While we specifically filter out that
+ * particular tag, it is not hard to imagine some other unforseen vendor
+ * specific tag containing a similarly large amounts of embedded data).
+ *
+ * So we keep the default behaviour of returning only the tags that the library
+ * knows about. Luckily for us, it returns all the XMP tags even if this flag is
+ * specified, and that is one place where we'd like unknown tags so that we can
+ * selectively start adding support for them.
+ *
+ * The other default behaviour, of returning a merged object, is a bit more
+ * problematic for our use case, since it loses information. Thus, to keep
+ * things more deterministic, we specify the `expanded` flag which returns all
+ * these different forms of metadata separately.
+ *
+ * That's for the tags we get. Now to their contents. Generally for each tag
+ * (but not for always), we get an entry with an "id", "value" (e.g. the raw
+ * bytes), and a "description" (which is the raw data parsed to a form that is
+ * more usable). Technically speaking, the value is the raw data we want, but in
+ * some cases, the availability of a pre-parsed description will be convenient
+ * too. So we don't prune anything, and keep all three.
+ *
+ * All this means we end up with a JSON whose exact structure is tied to the
+ * library we're using (ExifReader), or even its version (the library reserves
+ * the right to change the formatting of the "description" fields in minor
+ * version updates).
+ *
+ * So this is not really "raw" Exif. But with that caveat out of the way,
+ * practically this should be raw enough given the tradeoffs mentioned above,
+ * while allowing us to consume this JSON in arbitrary clients without needing
+ * to know about ExifReader specifically.
  */
-export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
-    // [Note: Defining "raw" Exif]
-    //
-    // Our goal is to get a "raw" JSON representing all the Exif data associated
-    // with a file. This goal is tricky to achieve for the following reasons:
-    //
-    // -   While Exif itself is a standard, with a standard set of tags (a
-    //     numeric id), in practice vendors can use tags more than what are
-    //     currently listed in the standard.
-    //
-    // -   We're not just interested in Exif tags, but rather at all forms of
-    //     metadata (e.g. XMP, IPTC) that can be embedded in a file.
-    //
-    // By default, the library we use (ExifReader) returns a merged object
-    // containing all tags it understands from all forms of metadata that it
-    // knows about.
-    //
-    // This implicit whitelist behaviour can be turned off by specifying the
-    // `includeUnknown` flag, but this behaviour acts as a safeguard against us
-    // trying to include unbounded amounts of data. e.g. there is an Exif tag
-    // for thumbnails, which contains a raw image. We don't want this data to
-    // blow up the size of the Exif we extract, so we filter it out. However, if
-    // we tell the library to include unknown tags, we might get files with
-    // other forms of embedded images.
-    //
-    // So we keep the default behaviour of returning only the tags that the
-    // library knows about. Luckily for us, it returns all the XMP tags even if
-    // this flag is specified, and that is one place where we'd like unknown
-    // tags so that we can selectively start adding support for them.
-    //
-    // The other default behaviour, of returning a merged object, is a bit more
-    // problematic for our use case, since it loses information. To keep things
-    // more deterministic, we use the `expanded` flag which returns all these
-    // different forms of metadata separately.
-    //
-    // Generally for each tag (but not for always), we get an entry with an
-    // "id", "value" (e.g. the raw bytes), and a "description" (which is the raw
-    // data parsed to a form that is more usable). Technically speaking, the
-    // value is the raw data we want, but in some cases, the availability of a
-    // pre-parsed description will be convenient too. So we don't prune
-    // anything, and keep all three.
-    //
-    // All this means we end up with a JSON whose exact structure is tied to the
-    // library we're using (ExifReader), and even its version (the library
-    // reserves the right to change the formatting of the "description" fields
-    // in minor version updates).
-    //
-    // So this is not really "raw" Exif. But with that caveat out of the way,
-    // practically this should be raw enough given the tradeoffs mentioned
-    // above, and consuming this JSON should be easy enough for arbitrary
-    // clients without needing to know about ExifReader specifically.
+export const extractRawExif = async (blob: Blob) => {
     const tags = await ExifReader.load(await blob.arrayBuffer(), {
         async: true,
         expanded: true,
@@ -507,19 +500,5 @@ export const indexExif = async (enteFile: EnteFile, blob: Blob) => {
     // while the actual value doesn't have it).
     delete (tags.xmp as Partial<typeof tags.xmp>)?._raw;
 
-    backfill(enteFile, tags);
-
     return tags;
-};
-
-const backfill = (enteFile: EnteFile, tags: ExifReader.ExpandedTags) => {
-    const creationDate = parseCreationDate(tags);
-    if (!creationDate) return;
-
-    const creationTime = creationDate.getTime() * 1000;
-
-    if (enteFile.metadata.creationTime == creationTime) return;
-
-    // TODO: Exif: backfill
-    console.log(enteFile, creationTime);
 };
