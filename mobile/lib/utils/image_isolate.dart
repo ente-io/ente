@@ -1,16 +1,19 @@
 import 'dart:async';
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
 enum ImageOperation {
   generateFaceThumbnails,
+  runClipText,
 }
 
 class ImageIsolate {
@@ -88,6 +91,10 @@ class ImageIsolate {
               faceBoxes,
             );
             sendPort.send(List.from(results));
+          case ImageOperation.runClipText:
+            final textEmbedding = await ClipTextEncoder.predict(args);
+            sendPort.send(List.from(textEmbedding, growable: false));
+            break;
         }
       } catch (e, stackTrace) {
         sendPort
@@ -174,5 +181,29 @@ class ImageIsolate {
         },
       ),
     ).then((value) => value.cast<Uint8List>());
+  }
+
+  Future<List<double>> runClipText(String query) async {
+    try {
+      final int clipAddress = ClipTextEncoder.instance.ffiSessionAddress;
+      final String remotePath = ClipTextEncoder.instance.vocabRemotePath;
+      final String tokenizerVocabPath =
+          await RemoteAssetsService.instance.getAssetPath(remotePath);
+      final textEmbedding = await _runInIsolate(
+        (
+          ImageOperation.runClipText,
+          {
+            "text": query,
+            "address": clipAddress,
+            "vocabPath": tokenizerVocabPath,
+            "useEntePlugin": Platform.isAndroid,
+          }
+        ),
+      ) as List<double>;
+      return textEmbedding;
+    } catch (e, s) {
+      _logger.severe("Could not run clip text in isolate", e, s);
+      rethrow;
+    }
   }
 }

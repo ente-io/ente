@@ -15,7 +15,7 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum MLOperation { analyzeImage, loadModels, runClipText }
+enum MLOperation { analyzeImage, loadModels }
 
 class MLIsolate {
   static final _logger = Logger("MLIsolate");
@@ -94,10 +94,6 @@ class MLIsolate {
             await FaceEmbeddingService.instance.loadModel(useEntePlugin: true);
             await ClipImageEncoder.instance.loadModel(useEntePlugin: true);
             sendPort.send(true);
-            break;
-          case MLOperation.runClipText:
-            final textEmbedding = await ClipTextEncoder.predict(args);
-            sendPort.send(List.from(textEmbedding, growable: false));
             break;
         }
       } catch (e, s) {
@@ -227,30 +223,6 @@ class MLIsolate {
     );
 
     return result;
-  }
-
-  Future<List<double>> runClipText(String query) async {
-    try {
-      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
-      final String remotePath = ClipTextEncoder.instance.vocabRemotePath;
-      final String tokenizerVocabPath =
-          await RemoteAssetsService.instance.getAssetPath(remotePath);
-      final textEmbedding = await _runInIsolate(
-        (
-          MLOperation.runClipText,
-          {
-            "text": query,
-            "address": clipAddress,
-            "vocabPath": tokenizerVocabPath,
-            "useEntePlugin": Platform.isAndroid,
-          }
-        ),
-      ) as List<double>;
-      return textEmbedding;
-    } catch (e, s) {
-      _logger.severe("Could not run clip text in isolate", e, s);
-      rethrow;
-    }
   }
 
   Future<void> loadModels() async {
