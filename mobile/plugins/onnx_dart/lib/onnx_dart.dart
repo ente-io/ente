@@ -16,6 +16,10 @@ class OnnxDart {
         .init(modelType, modelPath, sessionsCount: sessionsCount);
   }
 
+  Future<bool?> release(String modelType) {
+    return OnnxDartPlatform.instance.release(modelType);
+  }
+
   Future<Float32List?> predict(
     Float32List inputData,
     String modelType, {
