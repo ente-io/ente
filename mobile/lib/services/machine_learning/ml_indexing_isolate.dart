@@ -14,10 +14,10 @@ import "package:photos/services/machine_learning/semantic_search/clip/clip_image
 import "package:photos/utils/ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum MLOperation { analyzeImage, loadModels, releaseModels }
+enum MLIndexingOperation { analyzeImage, loadModels, releaseModels }
 
-class MLIsolate {
-  static final _logger = Logger("MLIsolate");
+class MLIndexingIsolate {
+  static final _logger = Logger("MLIndexingIsolate");
 
   Timer? _inactivityTimer;
   final Duration _inactivityDuration = const Duration(seconds: 120);
@@ -35,9 +35,9 @@ class MLIsolate {
   bool shouldPauseIndexingAndClustering = false;
 
   // Singleton pattern
-  MLIsolate._privateConstructor();
-  static final instance = MLIsolate._privateConstructor();
-  factory MLIsolate() => instance;
+  MLIndexingIsolate._privateConstructor();
+  static final instance = MLIndexingIsolate._privateConstructor();
+  factory MLIndexingIsolate() => instance;
 
   Future<void> _initIsolate() async {
     return _initIsolateLock.synchronized(() async {
@@ -74,13 +74,13 @@ class MLIsolate {
     mainSendPort.send(receivePort.sendPort);
     receivePort.listen((message) async {
       final functionIndex = message[0] as int;
-      final function = MLOperation.values[functionIndex];
+      final function = MLIndexingOperation.values[functionIndex];
       final args = message[1] as Map<String, dynamic>;
       final sendPort = message[2] as SendPort;
 
       try {
         switch (function) {
-          case MLOperation.analyzeImage:
+          case MLIndexingOperation.analyzeImage:
             final time = DateTime.now();
             final MLResult result = await analyzeImageStatic(args);
             _logger.info(
@@ -88,7 +88,7 @@ class MLIsolate {
             );
             sendPort.send(result.toJsonString());
             break;
-          case MLOperation.loadModels:
+          case MLIndexingOperation.loadModels:
             final modelNames = args['modelNames'] as List<String>;
             final modelPaths = args['modelPaths'] as List<String>;
             final addresses = <int>[];
@@ -101,7 +101,7 @@ class MLIsolate {
             }
             sendPort.send(List.from(addresses, growable: false));
             break;
-          case MLOperation.releaseModels:
+          case MLIndexingOperation.releaseModels:
             final modelNames = args['modelNames'] as List<String>;
             final modelAddresses = args['modelAddresses'] as List<int>;
             for (int i = 0; i < modelNames.length; i++) {
@@ -122,13 +122,13 @@ class MLIsolate {
 
   /// The common method to run any operation in the isolate. It sends the [message] to [_isolateMain] and waits for the result.
   Future<dynamic> _runInIsolate(
-    (MLOperation, Map<String, dynamic>) message,
+    (MLIndexingOperation, Map<String, dynamic>) message,
   ) async {
     await _initIsolate();
     return _functionLock.synchronized(() async {
       _resetInactivityTimer();
 
-      if (message.$1 == MLOperation.analyzeImage &&
+      if (message.$1 == MLIndexingOperation.analyzeImage &&
           shouldPauseIndexingAndClustering) {
         return null;
       }
@@ -198,7 +198,7 @@ class MLIsolate {
     try {
       final resultJsonString = await _runInIsolate(
         (
-          MLOperation.analyzeImage,
+          MLIndexingOperation.analyzeImage,
           {
             "enteFileID": instruction.enteFile.uploadedFileID ?? -1,
             "filePath": filePath,
@@ -271,7 +271,7 @@ class MLIsolate {
     try {
       final addresses = await _runInIsolate(
         (
-          MLOperation.loadModels,
+          MLIndexingOperation.loadModels,
           {
             "modelNames": modelNames,
             "modelPaths": modelPaths,
@@ -306,7 +306,7 @@ class MLIsolate {
     try {
       await _runInIsolate(
         (
-          MLOperation.releaseModels,
+          MLIndexingOperation.releaseModels,
           {
             "modelNames": modelNames,
             "modelAddresses": modelAddresses,

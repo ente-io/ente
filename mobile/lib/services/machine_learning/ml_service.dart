@@ -26,7 +26,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
 import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import 'package:photos/services/machine_learning/ml_exceptions.dart';
-import "package:photos/services/machine_learning/ml_isolate.dart";
+import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
@@ -138,13 +138,13 @@ class MLService {
   void pauseIndexingAndClustering() {
     if (_isIndexingOrClusteringRunning) {
       _shouldPauseIndexingAndClustering = true;
-      MLIsolate.instance.shouldPauseIndexingAndClustering = true;
+      MLIndexingIsolate.instance.shouldPauseIndexingAndClustering = true;
     }
   }
 
   void _cancelPauseIndexingAndClustering() {
     _shouldPauseIndexingAndClustering = false;
-    MLIsolate.instance.shouldPauseIndexingAndClustering = false;
+    MLIndexingIsolate.instance.shouldPauseIndexingAndClustering = false;
   }
 
   /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
@@ -380,7 +380,7 @@ class MLService {
     bool actuallyRanML = false;
 
     try {
-      final MLResult? result = await MLIsolate.instance.analyzeImage(
+      final MLResult? result = await MLIndexingIsolate.instance.analyzeImage(
         instruction,
       );
       if (result == null) {
@@ -518,7 +518,7 @@ class MLService {
       _logger.info(
         'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
       );
-      await MLIsolate.instance
+      await MLIndexingIsolate.instance
           .loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
       _logger.info('Models loaded');
       _logStatus();
