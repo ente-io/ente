@@ -105,16 +105,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           sectionOptionSpacing,
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.passkey,
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async => await onPasskeyClick(context),
-          ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
               title: S.of(context).emailVerificationToggle,
             ),
             trailingWidget: ToggleSwitchWidget(
@@ -133,6 +123,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 }
               },
             ),
+          ),
+          sectionOptionSpacing,
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: context.l10n.passkey,
+            ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () async => await onPasskeyClick(context),
           ),
           sectionOptionSpacing,
         ],
