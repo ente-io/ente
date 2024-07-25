@@ -16,10 +16,12 @@ abstract class MlModel {
 
   String get modelName;
 
+  static final bool usePlatformPlugin = Platform.isAndroid;
+
   bool get isInitialized =>
-      Platform.isAndroid ? isNativePluginInitialized : isFfiInitialized;
+      usePlatformPlugin ? isNativePluginInitialized : isFfiInitialized;
   int get sessionAddress =>
-      Platform.isAndroid ? _nativePluginSessionIndex : _ffiSessionAddress;
+      usePlatformPlugin ? _nativePluginSessionIndex : _ffiSessionAddress;
 
   // isInitialized is used to check if the model is loaded by the ffi based
   // plugin
@@ -36,7 +38,7 @@ abstract class MlModel {
   }
 
   void storeSessionAddress(int address) {
-    if (Platform.isAndroid) {
+    if (usePlatformPlugin) {
       _nativePluginSessionIndex = address;
       isNativePluginInitialized = true;
     } else {
@@ -53,7 +55,7 @@ abstract class MlModel {
     String modelName,
     String modelPath,
   ) async {
-    if (Platform.isAndroid) {
+    if (usePlatformPlugin) {
       return await _loadModelWithEntePlugin(modelName, modelPath);
     } else {
       return await _loadModelWithFFI(modelName, modelPath);
