@@ -12,6 +12,7 @@ const latKey = "lat";
 const longKey = "long";
 const motionVideoIndexKey = "mvi";
 const noThumbKey = "noThumb";
+const previewVersionKey = "previewVersion";
 
 class MagicMetadata {
   // 0 -> visible

@@ -130,6 +130,45 @@ void removeCallBack(EnteFile file) {
   }
 }
 
+Future<File?> getPreviewFileFromServer(
+  EnteFile file, {
+  ProgressCallback? progressCallback,
+}) async {
+  final cacheManager = DefaultCacheManager();
+  final fileFromCache = await cacheManager.getFileFromCache(file.downloadUrl);
+  if (fileFromCache != null) {
+    return fileFromCache.file;
+  }
+  final downloadID = file.uploadedFileID.toString();
+
+  if (progressCallback != null) {
+    _progressCallbacks[downloadID] = progressCallback;
+  }
+
+  if (!_fileDownloadsInProgress.containsKey(downloadID)) {
+    final completer = Completer<File?>();
+    _fileDownloadsInProgress[downloadID] = completer.future;
+
+    Future<File?> downloadFuture;
+
+    downloadFuture = _downloadAndCache(
+      file,
+      cacheManager,
+      progressCallback: (count, total) {
+        _progressCallbacks[downloadID]?.call(count, total);
+      },
+    );
+
+    // ignore: unawaited_futures
+    downloadFuture.then((downloadedFile) async {
+      completer.complete(downloadedFile);
+      await _fileDownloadsInProgress.remove(downloadID);
+      _progressCallbacks.remove(downloadID);
+    });
+  }
+  return _fileDownloadsInProgress[downloadID];
+}
+
 Future<File?> getFileFromServer(
   EnteFile file, {
   ProgressCallback? progressCallback,
