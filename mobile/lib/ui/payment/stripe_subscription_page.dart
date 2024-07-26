@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/ente_theme_data.dart';
@@ -14,13 +12,13 @@ import "package:photos/services/update_service.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
@@ -38,8 +36,8 @@ class StripeSubscriptionPage extends StatefulWidget {
 
   const StripeSubscriptionPage({
     this.isOnboarding = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<StripeSubscriptionPage> createState() => _StripeSubscriptionPageState();
@@ -63,11 +61,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _showYearlyPlan = false;
   EnteColorScheme colorScheme = darkScheme;
   final Logger logger = Logger("StripeSubscriptionPage");
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   Future<void> _fetchSub() async {
     return _userService
@@ -128,58 +121,70 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     colorScheme = getEnteColorScheme(context);
-    final appBar = PreferredSize(
-      preferredSize: const Size(double.infinity, 60),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.background,
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: widget.isOnboarding
-            ? AppBar(
-                elevation: 0,
-                title: Hero(
-                  tag: "subscription",
-                  child: StepProgressIndicator(
-                    totalSteps: 4,
-                    currentStep: 4,
-                    selectedColor:
-                        Theme.of(context).colorScheme.greenAlternative,
-                    roundedEdges: const Radius.circular(10),
-                    unselectedColor: Theme.of(context)
-                        .colorScheme
-                        .stepProgressUnselectedColor,
-                  ),
-                ),
-              )
-            : AppBar(
-                elevation: 0,
-                title: Text("${S.of(context).subscription}${kDebugMode ? ' '
-                    'Stripe' : ''}"),
-              ),
-      ),
-    );
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
-      appBar: appBar,
-      body: Stack(
-        alignment: Alignment.bottomCenter,
+      appBar: widget.isOnboarding
+          ? AppBar(
+              scrolledUnderElevation: 0,
+              elevation: 0,
+              title: Hero(
+                tag: "subscription",
+                child: StepProgressIndicator(
+                  totalSteps: 4,
+                  currentStep: 4,
+                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  roundedEdges: const Radius.circular(10),
+                  unselectedColor:
+                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                ),
+              ),
+            )
+          : AppBar(
+              scrolledUnderElevation: 0,
+              toolbarHeight: 48,
+              leadingWidth: 48,
+              leading: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Icon(
+                  Icons.arrow_back_outlined,
+                ),
+              ),
+            ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _getBody(),
-          const BottomShadowWidget(
-            offsetDy: 40,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TitleBarTitleWidget(
+                  title:
+                      widget.isOnboarding ? "Select your plan" : "Subscription",
+                ),
+                widget.isOnboarding
+                    ? Text(
+                        "Ente preserves your memories, so they’re always available to you, even if you lose your device.",
+                        style: textTheme.smallMuted,
+                      )
+                    : _isFreePlanUser()
+                        ? const SizedBox.shrink()
+                        : Text(
+                            convertBytesToReadableFormat(
+                              // _userDetails.getTotalStorage(),
+                              1234,
+                            ),
+                            style: textTheme.smallMuted,
+                          ),
+              ],
+            ),
           ),
+          Expanded(child: _getBody()),
         ],
       ),
     );

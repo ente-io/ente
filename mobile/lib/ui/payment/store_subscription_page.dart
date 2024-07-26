@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -22,6 +21,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -37,8 +37,8 @@ class StoreSubscriptionPage extends StatefulWidget {
 
   const StoreSubscriptionPage({
     this.isOnboarding = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<StoreSubscriptionPage> createState() => _StoreSubscriptionPageState();
@@ -155,6 +155,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     colorScheme = getEnteColorScheme(context);
     if (!_isLoading) {
       _isLoading = true;
@@ -168,7 +169,38 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     );
     return Scaffold(
       appBar: appBar,
-      body: _getBody(),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TitleBarTitleWidget(
+                  title:
+                      widget.isOnboarding ? "Select your plan" : "Subscription",
+                ),
+                widget.isOnboarding
+                    ? Text(
+                        "Ente preserves your memories, so they’re always available to you, even if you lose your device.",
+                        style: textTheme.smallMuted,
+                      )
+                    : _isFreePlanUser()
+                        ? const SizedBox.shrink()
+                        : Text(
+                            convertBytesToReadableFormat(
+                              // _userDetails.getTotalStorage(),
+                              1234,
+                            ),
+                            style: textTheme.smallMuted,
+                          ),
+              ],
+            ),
+          ),
+          _getBody(),
+        ],
+      ),
     );
   }
 
