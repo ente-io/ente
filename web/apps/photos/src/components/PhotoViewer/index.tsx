@@ -18,7 +18,7 @@ import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
-import { extractRawExif, type RawExif } from "@/new/photos/services/exif";
+import { extractRawExif, type RawExifTags } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -109,7 +109,7 @@ function PhotoViewer(props: Iprops) {
     const [showInfo, setShowInfo] = useState(false);
     const [rawExif, setRawExif] = useState<{
         key: string;
-        value: RawExif;
+        value: RawExifTags;
     }>();
     const rawExifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(

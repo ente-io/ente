@@ -66,9 +66,16 @@ interface ParsedExif {
  *
  * The library we use is https://github.com/mattiasw/ExifReader.
  */
-export const extractExif = async (file: File) => {
-    const tags = await extractTags(file);
+export const extractExif = async (file: File) =>
+    await extractRawExif(file).then(parseExif);
 
+/**
+ * Parse an already extracted {@link RawExifTags}.
+ *
+ * See: {@link extractExif}. This function does just the parsing step, for use
+ * when we've already extracted the raw data.
+ */
+export const parseExif = (tags: RawExifTags) => {
     const location = parseLocation(tags);
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
@@ -79,14 +86,6 @@ export const extractExif = async (file: File) => {
     return metadata;
 };
 
-const extractTags = async (blob: Blob) => {
-    // See: [Note: Definining "raw" Exif] for the choice of options.
-    return await ExifReader.load(await blob.arrayBuffer(), {
-        async: true,
-        expanded: true,
-    });
-};
-
 /**
  * Parse a single "best" creation date for an image from the metadata embedded
  * in the file.
@@ -95,7 +94,7 @@ const extractTags = async (blob: Blob) => {
  * of dates, so we use some an a heuristic ordering (based on experience with
  * the photos we find out in the wild) to pick a "best" date.
  */
-const parseCreationDate = (tags: ExifReader.ExpandedTags) => {
+const parseCreationDate = (tags: RawExifTags) => {
     const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
         parseDates(tags);
     return DateTimeOriginal ?? DateTimeDigitized ?? MetadataDate ?? DateTime;
@@ -120,13 +119,13 @@ interface ParsedExifDates {
  * Extract dates from Exif and other metadata for the given file.
  */
 export const extractExifDates = (file: File): Promise<ParsedExifDates> =>
-    extractTags(file).then(parseDates);
+    extractRawExif(file).then(parseDates);
 
 /**
  * Parse all date related fields from the metadata embedded in the file,
  * grouping them into chunks that somewhat reflect the Exif ontology.
  */
-const parseDates = (tags: ExifReader.ExpandedTags) => {
+const parseDates = (tags: RawExifTags) => {
     // We have come across real examples of customer photos with Exif dates set
     // to "0000:00:00 00:00:00". So ignore any date whose epoch is 0, so that we
     // can try with a subsequent (possibly correct) date in the sequence.
@@ -215,7 +214,7 @@ const parseDates = (tags: ExifReader.ExpandedTags) => {
  * than assuming UTC, which, while deterministic, is going to incorrect in an
  * overwhelming majority of cases.
  */
-const parseExifDates = ({ exif }: ExifReader.ExpandedTags) => ({
+const parseExifDates = ({ exif }: RawExifTags) => ({
     DateTimeOriginal: parseExifDate(
         exif?.DateTimeOriginal,
         exif?.OffsetTimeOriginal,
@@ -262,7 +261,7 @@ const parseExifDate = (
  *
  * For a list of XMP tags, see https://exiftool.org/TagNames/XMP.html.
  */
-const parseXMPDates = ({ xmp }: ExifReader.ExpandedTags) => ({
+const parseXMPDates = ({ xmp }: RawExifTags) => ({
     /* XMP namespace is indicated for each group */
     // exif:
     DateTimeOriginal: parseXMPDate(xmp?.DateTimeOriginal),
@@ -306,7 +305,7 @@ const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
 /**
  * Parse date related tags from IPTC.
  */
-const parseIPTCDates = ({ iptc }: ExifReader.ExpandedTags) => ({
+const parseIPTCDates = ({ iptc }: RawExifTags) => ({
     DateTimeOriginal: parseIPTCDate(
         iptc?.["Date Created"],
         iptc?.["Time Created"],
@@ -368,7 +367,7 @@ const parseIPTCDate = (
 /**
  * Parse GPS location from the metadata embedded in the file.
  */
-const parseLocation = (tags: ExifReader.ExpandedTags) => {
+const parseLocation = (tags: RawExifTags) => {
     const latitude = tags.gps?.Latitude;
     const longitude = tags.gps?.Longitude;
     return latitude !== undefined && longitude !== undefined
@@ -380,7 +379,7 @@ const parseLocation = (tags: ExifReader.ExpandedTags) => {
  * Parse the width and height of the image from the metadata embedded in the
  * file.
  */
-const parseDimensions = (tags: ExifReader.ExpandedTags) => {
+const parseDimensions = (tags: RawExifTags) => {
     // Go through all possiblities in order, returning the first pair with both
     // the width and height defined, and non-zero.
     const pair = (w: number | undefined, h: number | undefined) =>
@@ -433,7 +432,7 @@ const parseXMPNum = (xmpTag: ExifReader.XmpTag | undefined) => {
     return n;
 };
 
-export type RawExif = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
+export type RawExifTags = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
     xmp?: ExifReader.XmpTags;
 };
 
@@ -498,8 +497,11 @@ export type RawExif = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
  * while allowing us to consume this JSON in arbitrary clients without needing
  * to know about ExifReader specifically.
  */
-export const extractRawExif = async (blob: Blob): Promise<RawExif> => {
-    const tags = await extractTags(blob);
+export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
+    const tags = await ExifReader.load(await blob.arrayBuffer(), {
+        async: true,
+        expanded: true,
+    });
 
     // Remove the embedded thumbnail (if any).
     delete tags.Thumbnail;

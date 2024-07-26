@@ -1,6 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import type { RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -18,8 +19,7 @@ import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { getEXIFLocation } from "services/exif";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
     getMapDisableConfirmationDialog,
@@ -41,12 +41,12 @@ export const FileInfoSidebar = styled((props: DialogProps) => (
     },
 });
 
-interface Iprops {
+interface FileInfoProps {
     shouldDisableEdits?: boolean;
     showInfo: boolean;
     handleCloseInfo: () => void;
     file: EnteFile;
-    exif: any;
+    rawExif: RawExifTags | undefined;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
     fileToCollectionsMap?: Map<number, number[]>;
@@ -76,19 +76,19 @@ function getOpenStreetMapLink(location: {
     return `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
 }
 
-export function FileInfo({
+export const FileInfo: React.FC<FileInfoProps> = ({
     shouldDisableEdits,
     showInfo,
     handleCloseInfo,
     file,
-    exif,
+    rawExif,
     scheduleUpdate,
     refreshPhotoswipe,
     fileToCollectionsMap,
     collectionNameMap,
     showCollectionChips,
     closePhotoViewer,
-}: Iprops) {
+}) => {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -113,19 +113,12 @@ export function FileInfo({
                 };
             }
         }
-        if (exif) {
-            const exifLocation = getEXIFLocation(exif);
-            if (
-                (exifLocation.latitude || exifLocation.latitude === 0) &&
-                !(exifLocation.longitude === 0 && exifLocation.latitude === 0)
-            ) {
-                return exifLocation;
-            }
-        }
         return null;
-    }, [file, exif]);
+    }, [file]);
 
     useEffect(() => {
+        setParsedExifData(parseInfoExif(rawExif));
+
         if (!exif) {
             setParsedExifData({});
             return;
@@ -161,8 +154,7 @@ export function FileInfo({
         if (exif["ISO"]) {
             parsedExifData["ISO"] = `ISO${exif["ISO"]}`;
         }
-        setParsedExifData(parsedExifData);
-    }, [exif]);
+    }, [rawExif]);
 
     if (!file) {
         return <></>;
@@ -345,4 +337,56 @@ export function FileInfo({
             />
         </FileInfoSidebar>
     );
+};
+
+interface ParsedInfoExif {
+    resolution?: string;
+    megaPixels?: string;
+    takenOnDevice?: string;
+    fNumber?: string;
+    exposureTime?: string;
+    iso?: string;
 }
+
+/**
+ * Extract some immediate fields of interest and in the form that we want to
+ * display on the info panel for a file.
+ */
+const parseInfoExif = (rawExif: RawExifTags | undefined): ParsedInfoExif => {
+    const parsed = {};
+    if (!rawExif) return {};
+
+
+    if (rawExif.exif)
+    if (exif["fNumber"]) {
+        parsedExifData["fNumber"] = `f/${Math.ceil(exif["FNumber"])}`;
+    } else if (exif["ApertureValue"] && exif["FocalLength"]) {
+        parsedExifData["fNumber"] = `f/${Math.ceil(
+            exif["FocalLength"] / exif["ApertureValue"],
+        )}`;
+    }
+    const imageWidth = exif["ImageWidth"] ?? exif["ExifImageWidth"];
+    const imageHeight = exif["ImageHeight"] ?? exif["ExifImageHeight"];
+    if (imageWidth && imageHeight) {
+        parsedExifData["resolution"] = `${imageWidth} x ${imageHeight}`;
+        const megaPixels = Math.round((imageWidth * imageHeight) / 1000000);
+        if (megaPixels) {
+            parsedExifData["megaPixels"] = `${Math.round(
+                (imageWidth * imageHeight) / 1000000,
+            )}MP`;
+        }
+    }
+    if (exif["Make"] && exif["Model"]) {
+        parsedExifData["takenOnDevice"] =
+            `${exif["Make"]} ${exif["Model"]}`;
+    }
+    if (exif["ExposureTime"]) {
+        parsedExifData["exposureTime"] = `1/${
+            1 / parseFloat(exif["ExposureTime"])
+        }`;
+    }
+    if (exif["ISO"]) {
+        parsedExifData["ISO"] = `ISO${exif["ISO"]}`;
+    }
+    setParsedExifData(parsedExifData);
+}, [exif]);
