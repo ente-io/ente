@@ -32,7 +32,6 @@ import {
     getMapDisableConfirmationDialog,
     getMapEnableConfirmationDialog,
 } from "utils/ui";
-import { ExifData } from "./ExifData";
 import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
@@ -70,7 +69,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     showCollectionChips,
     closePhotoViewer,
 }) => {
-    const appContext = useContext(AppContext);
+    const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
+        useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -103,6 +103,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     if (!file) {
         return <></>;
     }
+
     const onCollectionChipClick = (collectionID) => {
         galleryContext.setActiveCollectionID(collectionID);
         galleryContext.setIsInSearchMode(false);
@@ -110,17 +111,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     };
 
     const openEnableMapConfirmationDialog = () =>
-        appContext.setDialogBoxAttributesV2(
-            getMapEnableConfirmationDialog(() =>
-                appContext.updateMapEnabled(true),
-            ),
+        setDialogBoxAttributesV2(
+            getMapEnableConfirmationDialog(() => updateMapEnabled(true)),
         );
 
     const openDisableMapConfirmationDialog = () =>
-        appContext.setDialogBoxAttributesV2(
-            getMapDisableConfirmationDialog(() =>
-                appContext.updateMapEnabled(false),
-            ),
+        setDialogBoxAttributesV2(
+            getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
         );
 
     return (
@@ -128,33 +125,32 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             <Titlebar onClose={handleCloseInfo} title={t("INFO")} backIsClose />
             <Stack pt={1} pb={3} spacing={"20px"}>
                 <RenderCaption
-                    shouldDisableEdits={shouldDisableEdits}
-                    file={file}
-                    scheduleUpdate={scheduleUpdate}
-                    refreshPhotoswipe={refreshPhotoswipe}
+                    {...{
+                        file,
+                        shouldDisableEdits,
+                        scheduleUpdate,
+                        refreshPhotoswipe,
+                    }}
                 />
 
                 <RenderCreationTime
-                    shouldDisableEdits={shouldDisableEdits}
-                    file={file}
-                    scheduleUpdate={scheduleUpdate}
+                    {...{ file, shouldDisableEdits, scheduleUpdate }}
                 />
 
                 <RenderFileName
-                    parsedExifData={parsedExifData}
-                    shouldDisableEdits={shouldDisableEdits}
-                    file={file}
-                    scheduleUpdate={scheduleUpdate}
+                    {...{
+                        file,
+                        parsedExif,
+                        shouldDisableEdits,
+                        scheduleUpdate,
+                    }}
                 />
-                {parsedExifData && parsedExifData["takenOnDevice"] && (
+
+                {parsedExif?.takenOnDevice && (
                     <InfoItem
                         icon={<CameraOutlined />}
-                        title={parsedExifData["takenOnDevice"]}
-                        caption={
-                            <BasicDeviceCamera
-                                parsedExifData={parsedExifData}
-                            />
-                        }
+                        title={parsedExif?.takenOnDevice}
+                        caption={<BasicDeviceCamera {...{ parsedExif }} />}
                         hideEditOption
                     />
                 )}
@@ -165,7 +161,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             icon={<LocationOnOutlined />}
                             title={t("LOCATION")}
                             caption={
-                                !appContext.mapEnabled ||
+                                !mapEnabled ||
                                 publicCollectionGalleryContext.accessedThroughSharedURL ? (
                                     <Link
                                         href={getOpenStreetMapLink(location)}
@@ -200,7 +196,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         {!publicCollectionGalleryContext.accessedThroughSharedURL && (
                             <MapBox
                                 location={location}
-                                mapEnabled={appContext.mapEnabled}
+                                mapEnabled={mapEnabled}
                                 openUpdateMapConfirmationDialog={
                                     openEnableMapConfirmationDialog
                                 }
@@ -345,17 +341,19 @@ const FileInfoSidebar = styled((props: DialogProps) => (
     },
 });
 
-function RenderFileName({
-    parsedExifData,
-    shouldDisableEdits,
-    file,
-    scheduleUpdate,
-}: {
-    parsedExifData: Record<string, any>;
+interface RenderFileNameProps {
+    parsedExif: ParsedFileInfoExif;
     shouldDisableEdits: boolean;
     file: EnteFile;
     scheduleUpdate: () => void;
-}) {
+}
+
+const RenderFileName: React.FC<RenderFileNameProps> = ({
+    parsedExif,
+    shouldDisableEdits,
+    file,
+    scheduleUpdate,
+}) => {
     const [isInEditMode, setIsInEditMode] = useState(false);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
@@ -398,7 +396,7 @@ function RenderFileName({
                     )
                 }
                 title={getFileTitle(filename, extension)}
-                caption={getCaption(file, parsedExifData)}
+                caption={getCaption(file, parsedExif)}
                 openEditor={openEditMode}
                 hideEditOption={shouldDisableEdits || isInEditMode}
             />
@@ -411,7 +409,7 @@ function RenderFileName({
             />
         </>
     );
-}
+};
 
 const getFileTitle = (filename, extension) => {
     if (extension) {
@@ -445,19 +443,17 @@ const getCaption = (file: EnteFile, parsedExifData) => {
     );
 };
 
-function BasicDeviceCamera({
-    parsedExifData,
-}: {
-    parsedExifData: Record<string, any>;
-}) {
+const BasicDeviceCamera: React.FC<{ parsedExif: ParsedFileInfoExif }> = ({
+    parsedExif,
+}) => {
     return (
         <FlexWrapper gap={1}>
-            <Box>{parsedExifData["fNumber"]}</Box>
-            <Box>{parsedExifData["exposureTime"]}</Box>
-            <Box>{parsedExifData["ISO"]}</Box>
+            <Box>{parsedExif.fNumber}</Box>
+            <Box>{parsedExif.exposureTime}</Box>
+            <Box>{parsedExif.ISO}</Box>
         </FlexWrapper>
     );
-}
+};
 
 function getOpenStreetMapLink(location: {
     latitude: number;
