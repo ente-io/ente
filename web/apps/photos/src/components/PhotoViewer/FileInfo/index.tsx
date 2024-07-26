@@ -83,9 +83,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         PublicCollectionGalleryContext,
     );
 
-    const [parsedExif, setParsedExif] = useState<
-        ParsedFileInfoExif | undefined
-    >();
+    const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const [openRawExif, setOpenRawExif] = useState(false);
 
     const location = useMemo(() => {
@@ -100,11 +98,11 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 };
             }
         }
-        return exif?.parsed.location;
+        return exif?.parsed?.location;
     }, [file, exif]);
 
     useEffect(() => {
-        setParsedExif(exif ? parseFileInfoExif(exif) : undefined);
+        setExifInfo(parseExifInfo(exif));
     }, [exif]);
 
     if (!file) {
@@ -147,17 +145,19 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 <RenderFileName
                     {...{
                         file,
-                        parsedExif,
+                        exifInfo: exifInfo,
                         shouldDisableEdits,
                         scheduleUpdate,
                     }}
                 />
 
-                {parsedExif?.takenOnDevice && (
+                {exifInfo?.takenOnDevice && (
                     <InfoItem
                         icon={<CameraOutlined />}
-                        title={parsedExif?.takenOnDevice}
-                        caption={<BasicDeviceCamera {...{ parsedExif }} />}
+                        title={exifInfo?.takenOnDevice}
+                        caption={
+                            <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
+                        }
                         hideEditOption
                     />
                 )}
@@ -291,7 +291,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
  * Some immediate fields of interest, in the form that we want to display on the
  * info panel for a file.
  */
-type ParsedFileInfoExif = FileInfoExif & {
+type ExifInfo = Required<FileInfoExif> & {
     resolution?: string;
     megaPixels?: string;
     takenOnDevice?: string;
@@ -300,14 +300,19 @@ type ParsedFileInfoExif = FileInfoExif & {
     iso?: string;
 };
 
-const parseFileInfoExif = (fileInfoExif: FileInfoExif): ParsedFileInfoExif => {
-    const parsed: ParsedFileInfoExif = { ...fileInfoExif };
+const parseExifInfo = (
+    fileInfoExif: FileInfoExif | undefined,
+): ExifInfo | undefined => {
+    if (!fileInfoExif || !fileInfoExif.tags || !fileInfoExif.parsed)
+        return undefined;
+
+    const info: ExifInfo = { ...fileInfoExif };
 
     const { width, height } = fileInfoExif.parsed;
     if (width && height) {
-        parsed.resolution = `${width} x ${height}`;
+        info.resolution = `${width} x ${height}`;
         const mp = Math.round((width * height) / 1000000);
-        if (mp) parsed.megaPixels = `${mp}MP`;
+        if (mp) info.megaPixels = `${mp}MP`;
     }
 
     const { tags } = fileInfoExif;
@@ -315,29 +320,29 @@ const parseFileInfoExif = (fileInfoExif: FileInfoExif): ParsedFileInfoExif => {
 
     if (exif) {
         if (exif.Make && exif.Model) {
-            parsed["takenOnDevice"] =
+            info["takenOnDevice"] =
                 `${exif.Make.description} ${exif.Model.description}`;
         }
 
         if (exif.FNumber) {
-            parsed.fNumber = `f/${Math.ceil(exif.FNumber.value)}`;
+            info.fNumber = `f/${Math.ceil(exif.FNumber.value)}`;
         } else if (exif.FocalLength && exif.ApertureValue) {
-            parsed.fNumber = `f/${Math.ceil(
+            info.fNumber = `f/${Math.ceil(
                 exif.FocalLength.value / exif.ApertureValue.value,
             )}`;
         }
 
         if (exif.ExposureTime) {
-            parsed["exposureTime"] = `1/${1 / exif.ExposureTime.value}`;
+            info["exposureTime"] = `1/${1 / exif.ExposureTime.value}`;
         }
 
         if (exif.ISOSpeedRatings) {
             const iso = exif.ISOSpeedRatings;
             const n = Array.isArray(iso) ? (iso[0] ?? 0) / (iso[1] ?? 1) : iso;
-            parsed.iso = `ISO${n}`;
+            info.iso = `ISO${n}`;
         }
     }
-    return parsed;
+    return info;
 };
 
 const FileInfoSidebar = styled((props: DialogProps) => (
@@ -352,14 +357,14 @@ const FileInfoSidebar = styled((props: DialogProps) => (
 interface RenderFileNameProps {
     file: EnteFile;
     shouldDisableEdits: boolean;
-    parsedExif: ParsedFileInfoExif | undefined;
+    exifInfo: ExifInfo | undefined;
     scheduleUpdate: () => void;
 }
 
 const RenderFileName: React.FC<RenderFileNameProps> = ({
     file,
     shouldDisableEdits,
-    parsedExif,
+    exifInfo,
     scheduleUpdate,
 }) => {
     const [isInEditMode, setIsInEditMode] = useState(false);
@@ -398,7 +403,7 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
                     )
                 }
                 title={[fileName, extension].join(".")}
-                caption={getCaption(file, parsedExif)}
+                caption={getCaption(file, exifInfo)}
                 openEditor={openEditMode}
                 hideEditOption={shouldDisableEdits || isInEditMode}
             />
@@ -413,12 +418,9 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
     );
 };
 
-const getCaption = (
-    file: EnteFile,
-    parsedExif: ParsedFileInfoExif | undefined,
-) => {
-    const megaPixels = parsedExif?.megaPixels;
-    const resolution = parsedExif?.resolution;
+const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
+    const megaPixels = exifInfo?.megaPixels;
+    const resolution = exifInfo?.resolution;
     const fileSize = file.info?.fileSize;
 
     const captionParts = [];
@@ -440,7 +442,7 @@ const getCaption = (
     );
 };
 
-const BasicDeviceCamera: React.FC<{ parsedExif: ParsedFileInfoExif }> = ({
+const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
     parsedExif,
 }) => {
     return (
