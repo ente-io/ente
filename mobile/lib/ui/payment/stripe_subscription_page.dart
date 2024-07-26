@@ -167,20 +167,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   title:
                       widget.isOnboarding ? "Select your plan" : "Subscription",
                 ),
-                widget.isOnboarding
-                    ? Text(
-                        "Ente preserves your memories, so they’re always available to you, even if you lose your device.",
+                _isFreePlanUser() || !_hasLoadedData
+                    ? const SizedBox.shrink()
+                    : Text(
+                        convertBytesToReadableFormat(
+                          _userDetails.getTotalStorage(),
+                        ),
                         style: textTheme.smallMuted,
-                      )
-                    : _isFreePlanUser()
-                        ? const SizedBox.shrink()
-                        : Text(
-                            convertBytesToReadableFormat(
-                              // _userDetails.getTotalStorage(),
-                              1234,
-                            ),
-                            style: textTheme.smallMuted,
-                          ),
+                      ),
               ],
             ),
           ),
