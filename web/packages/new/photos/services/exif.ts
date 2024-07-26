@@ -9,7 +9,7 @@ export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
 export const cmpNewLib = (
     oldLib: ParsedExtractedMetadata,
-    newLib: ExtractedExif,
+    newLib: ParsedExif,
 ) => {
     if (
         oldLib.width == newLib.width &&
@@ -34,7 +34,7 @@ export const cmpNewLib = (
  * be attached to an {@link EnteFile} allows us to perform operations using
  * these attributes without needing to re-download the original image.
  */
-interface ExtractedExif {
+interface ParsedExif {
     /** The width of the image, in pixels. */
     width?: number;
     /** The height of the image, in pixels. */
@@ -73,7 +73,7 @@ export const extractExif = async (file: File) => {
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
 
-    const metadata: ExtractedExif = dimensions ?? {};
+    const metadata: ParsedExif = dimensions ?? {};
     if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
     if (location) metadata.location = location;
     return metadata;
@@ -109,7 +109,7 @@ const parseCreationDate = (tags: ExifReader.ExpandedTags) => {
  * from all forms of metadata we support (Exif, XMP, IPTC). They roughly
  * correspond to the three Exif DateTime* tags, and the XMP MetadataDate tag.
  */
-interface ExtractedExifDates {
+interface ParsedExifDates {
     DateTimeOriginal: Date | undefined;
     DateTimeDigitized: Date | undefined;
     DateTime: Date | undefined;
@@ -119,7 +119,7 @@ interface ExtractedExifDates {
 /**
  * Extract dates from Exif and other metadata for the given file.
  */
-export const extractExifDates = (file: File): Promise<ExtractedExifDates> =>
+export const extractExifDates = (file: File): Promise<ParsedExifDates> =>
     extractTags(file).then(parseDates);
 
 /**
@@ -433,6 +433,10 @@ const parseXMPNum = (xmpTag: ExifReader.XmpTag | undefined) => {
     return n;
 };
 
+export type RawExif = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
+    xmp?: ExifReader.XmpTags;
+};
+
 /**
  * Extract "raw" exif and other metadata from the given file.
  *
@@ -494,7 +498,7 @@ const parseXMPNum = (xmpTag: ExifReader.XmpTag | undefined) => {
  * while allowing us to consume this JSON in arbitrary clients without needing
  * to know about ExifReader specifically.
  */
-export const extractRawExif = async (blob: Blob) => {
+export const extractRawExif = async (blob: Blob): Promise<RawExif> => {
     const tags = await extractTags(blob);
 
     // Remove the embedded thumbnail (if any).

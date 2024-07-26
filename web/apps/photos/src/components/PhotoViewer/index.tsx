@@ -18,8 +18,8 @@ import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
+import { extractRawExif, type RawExif } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
-import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -46,7 +46,6 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { isClipboardItemPresent } from "utils/common";
@@ -108,11 +107,11 @@ function PhotoViewer(props: Iprops) {
         useState<Photoswipe<Photoswipe.Options>>();
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] = useState<{
+    const [rawExif, setRawExif] = useState<{
         key: string;
-        value: Record<string, any>;
+        value: RawExif;
     }>();
-    const exifCopy = useRef(null);
+    const rawExifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions,
     );
@@ -291,8 +290,8 @@ function PhotoViewer(props: Iprops) {
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     useEffect(() => {
-        exifCopy.current = exif;
-    }, [exif]);
+        rawExifCopy.current = rawExif;
+    }, [rawExif]);
 
     function updateFavButton(file: EnteFile) {
         setIsFav(isInFav(file));
@@ -307,14 +306,14 @@ function PhotoViewer(props: Iprops) {
 
     function updateExif(file: EnteFile) {
         if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-            setExif({ key: file.src, value: null });
+            setRawExif({ key: file.src, value: null });
             return;
         }
         if (!file.isSourceLoaded || file.conversionFailed) {
             return;
         }
 
-        if (!file || !exifCopy?.current?.value === null) {
+        if (!file || !rawExifCopy?.current?.value === null) {
             return;
         }
         const key =
@@ -322,10 +321,10 @@ function PhotoViewer(props: Iprops) {
                 ? file.src
                 : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
 
-        if (exifCopy?.current?.key === key) {
+        if (rawExifCopy?.current?.key === key) {
             return;
         }
-        setExif({ key, value: undefined });
+        setRawExif({ key, value: undefined });
         checkExifAvailable(file);
     }
 
@@ -603,28 +602,20 @@ function PhotoViewer(props: Iprops) {
                         .image;
                     fileObject = await getFileFromURL(url, file.metadata.title);
                 }
-                const fileTypeInfo = await detectFileTypeInfo(fileObject);
-                const exifData = await getParsedExifData(
-                    fileObject,
-                    fileTypeInfo,
-                );
+                const rawExif = await extractRawExif(fileObject);
                 // TODO: Exif
                 // if (await wipNewLib()) {
                 //     const newLib = await extractExif(fileObject);
                 //     cmpNewLib(file.metadata, newLib);
                 // }
                 if (exifExtractionInProgress.current === file.src) {
-                    if (exifData) {
-                        setExif({ key: file.src, value: exifData });
-                    } else {
-                        setExif({ key: file.src, value: null });
-                    }
+                    setRawExif({ key: file.src, value: rawExif });
                 }
             } finally {
                 exifExtractionInProgress.current = null;
             }
         } catch (e) {
-            setExif({ key: file.src, value: null });
+            setRawExif({ key: file.src, value: null });
             log.error(
                 `checkExifAvailable failed for file ${file.metadata.title}`,
                 e,
@@ -955,7 +946,7 @@ function PhotoViewer(props: Iprops) {
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
-                exif={exif?.value}
+                rawExif={rawExif?.value}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
