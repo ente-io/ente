@@ -34,7 +34,7 @@ export const cmpNewLib = (
  * be attached to an {@link EnteFile} allows us to perform operations using
  * these attributes without needing to re-download the original image.
  */
-interface ParsedExif {
+export interface ParsedExif {
     /** The width of the image, in pixels. */
     width?: number;
     /** The height of the image, in pixels. */

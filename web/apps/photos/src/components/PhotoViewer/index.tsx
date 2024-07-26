@@ -18,7 +18,7 @@ import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
-import { extractRawExif, type RawExifTags } from "@/new/photos/services/exif";
+import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -52,7 +52,7 @@ import { isClipboardItemPresent } from "utils/common";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
-import { FileInfo } from "./FileInfo";
+import { FileInfo, type FileInfoExif } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
 import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
 import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
@@ -107,11 +107,11 @@ function PhotoViewer(props: Iprops) {
         useState<Photoswipe<Photoswipe.Options>>();
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [rawExif, setRawExif] = useState<{
+    const [exif, setExif] = useState<{
         key: string;
-        value: RawExifTags;
+        value: FileInfoExif | undefined;
     }>();
-    const rawExifCopy = useRef(null);
+    const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions,
     );
@@ -290,8 +290,8 @@ function PhotoViewer(props: Iprops) {
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     useEffect(() => {
-        rawExifCopy.current = rawExif;
-    }, [rawExif]);
+        exifCopy.current = exif;
+    }, [exif]);
 
     function updateFavButton(file: EnteFile) {
         setIsFav(isInFav(file));
@@ -306,14 +306,14 @@ function PhotoViewer(props: Iprops) {
 
     function updateExif(file: EnteFile) {
         if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-            setRawExif({ key: file.src, value: null });
+            setExif({ key: file.src, value: undefined });
             return;
         }
         if (!file.isSourceLoaded || file.conversionFailed) {
             return;
         }
 
-        if (!file || !rawExifCopy?.current?.value === null) {
+        if (!file || !exifCopy?.current?.value) {
             return;
         }
         const key =
@@ -321,10 +321,10 @@ function PhotoViewer(props: Iprops) {
                 ? file.src
                 : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
 
-        if (rawExifCopy?.current?.key === key) {
+        if (exifCopy?.current?.key === key) {
             return;
         }
-        setRawExif({ key, value: undefined });
+        setExif({ key, value: undefined });
         checkExifAvailable(file);
     }
 
@@ -584,40 +584,32 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async (file: EnteFile) => {
+    const checkExifAvailable = async (enteFile: EnteFile) => {
         try {
-            if (exifExtractionInProgress.current === file.src) {
+            if (exifExtractionInProgress.current === enteFile.src) {
                 return;
             }
             try {
-                exifExtractionInProgress.current = file.src;
-                let fileObject: File;
-                if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-                    fileObject = await getFileFromURL(
-                        file.src as string,
-                        file.metadata.title,
-                    );
-                } else {
-                    const url = (file.srcURLs.url as LoadedLivePhotoSourceURL)
-                        .image;
-                    fileObject = await getFileFromURL(url, file.metadata.title);
-                }
-                const rawExif = await extractRawExif(fileObject);
-                // TODO: Exif
-                // if (await wipNewLib()) {
-                //     const newLib = await extractExif(fileObject);
-                //     cmpNewLib(file.metadata, newLib);
-                // }
-                if (exifExtractionInProgress.current === file.src) {
-                    setRawExif({ key: file.src, value: rawExif });
+                exifExtractionInProgress.current = enteFile.src;
+                const file = await getFileFromURL(
+                    enteFile.metadata.fileType === FILE_TYPE.IMAGE
+                        ? (enteFile.src as string)
+                        : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL)
+                              .image,
+                    enteFile.metadata.title,
+                );
+                const tags = await extractRawExif(file);
+                const parsed = parseExif(tags);
+                if (exifExtractionInProgress.current === enteFile.src) {
+                    setExif({ key: enteFile.src, value: { tags, parsed } });
                 }
             } finally {
                 exifExtractionInProgress.current = null;
             }
         } catch (e) {
-            setRawExif({ key: file.src, value: null });
+            setExif({ key: enteFile.src, value: undefined });
             log.error(
-                `checkExifAvailable failed for file ${file.metadata.title}`,
+                `checkExifAvailable failed for file ${enteFile.metadata.title}`,
                 e,
             );
         }
@@ -946,7 +938,7 @@ function PhotoViewer(props: Iprops) {
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
-                rawExif={rawExif?.value}
+                exif={exif?.value}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
