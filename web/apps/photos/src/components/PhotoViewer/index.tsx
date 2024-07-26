@@ -20,6 +20,7 @@ import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
+import { fileLogID } from "@/new/photos/utils/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -321,9 +322,8 @@ function PhotoViewer(props: Iprops) {
                 ? file.src
                 : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
 
-        if (exifCopy?.current?.key === key) {
-            return;
-        }
+        if (exifCopy?.current?.key === key) return;
+
         setExif({ key, value: undefined });
         checkExifAvailable(file);
     }
@@ -585,33 +585,29 @@ function PhotoViewer(props: Iprops) {
     };
 
     const checkExifAvailable = async (enteFile: EnteFile) => {
+        if (exifExtractionInProgress.current === enteFile.src) return;
+
         try {
+            exifExtractionInProgress.current = enteFile.src;
+            const file = await getFileFromURL(
+                enteFile.metadata.fileType === FILE_TYPE.IMAGE
+                    ? (enteFile.src as string)
+                    : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL).image,
+                enteFile.metadata.title,
+            );
+            const tags = await extractRawExif(file);
+            const parsed = parseExif(tags);
             if (exifExtractionInProgress.current === enteFile.src) {
-                return;
-            }
-            try {
-                exifExtractionInProgress.current = enteFile.src;
-                const file = await getFileFromURL(
-                    enteFile.metadata.fileType === FILE_TYPE.IMAGE
-                        ? (enteFile.src as string)
-                        : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL)
-                              .image,
-                    enteFile.metadata.title,
-                );
-                const tags = await extractRawExif(file);
-                const parsed = parseExif(tags);
-                if (exifExtractionInProgress.current === enteFile.src) {
-                    setExif({ key: enteFile.src, value: { tags, parsed } });
-                }
-            } finally {
-                exifExtractionInProgress.current = null;
+                setExif({ key: enteFile.src, value: { tags, parsed } });
             }
         } catch (e) {
-            setExif({ key: enteFile.src, value: undefined });
-            log.error(
-                `checkExifAvailable failed for file ${enteFile.metadata.title}`,
-                e,
-            );
+            log.error(`Failed to extract Exif from ${fileLogID(enteFile)}`, e);
+            setExif({
+                key: enteFile.src,
+                value: { tags: undefined, parsed: undefined },
+            });
+        } finally {
+            exifExtractionInProgress.current = null;
         }
     };
 

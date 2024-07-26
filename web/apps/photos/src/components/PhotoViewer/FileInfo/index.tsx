@@ -45,8 +45,8 @@ import { RenderCaption } from "./RenderCaption";
 import { RenderCreationTime } from "./RenderCreationTime";
 
 export interface FileInfoExif {
-    tags: RawExifTags;
-    parsed: ParsedExif;
+    tags: RawExifTags | undefined;
+    parsed: ParsedExif | undefined;
 }
 
 interface FileInfoProps {
@@ -215,7 +215,11 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     icon={<TextSnippetOutlined />}
                     title={t("DETAILS")}
                     caption={
-                        exif ? (
+                        !exif ? (
+                            <EnteSpinner size={12} />
+                        ) : !exif.tags ? (
+                            t("no_exif")
+                        ) : (
                             <LinkButton
                                 onClick={() => setOpenRawExif(true)}
                                 sx={{
@@ -226,8 +230,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             >
                                 {t("view_exif")}
                             </LinkButton>
-                        ) : (
-                            <EnteSpinner size={11.33} />
                         )
                     }
                     hideEditOption
