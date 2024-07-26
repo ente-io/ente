@@ -1,6 +1,5 @@
-import "dart:async";
+import "dart:async" show unawaited;
 import "dart:developer" as dev show log;
-import "dart:io";
 import "dart:math" show min;
 import "dart:typed_data" show ByteData;
 import "dart:ui" show Image;
@@ -21,7 +20,6 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
-import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -68,23 +66,7 @@ class SemanticSearchService {
       });
     });
 
-    // ignore: unawaited_futures
-    _loadTextModel().then((_) async {
-      try {
-        _logger.info("Getting text embedding");
-        await _getTextEmbedding("warm up text encoder");
-        _logger.info("Got text embedding");
-      } catch (e) {
-        _logger.severe("Failed to get text embedding", e);
-      }
-    });
-  }
-
-  Future<void> dispose() async {
-    if (!_hasInitialized) return;
-    _hasInitialized = false;
-    await ClipTextEncoder.instance.release();
-    _cachedImageEmbeddings.clear();
+    unawaited(_loadTextModel(delay: true));
   }
 
   bool isMagicSearchEnabledAndReady() {
@@ -250,11 +232,11 @@ class SemanticSearchService {
     return matchingFileIDs;
   }
 
-  Future<void> _loadTextModel() async {
-    _logger.info("Initializing ML framework");
+  Future<void> _loadTextModel({bool delay = false}) async {
+    _logger.info("Initializing ClipText");
     try {
-      await ClipTextEncoder.instance
-          .loadModel(useEntePlugin: Platform.isAndroid);
+      if (delay) await Future.delayed(const Duration(seconds: 10));
+      await MLComputer.instance.runClipText("warm up text encoder");
       _textModelIsLoaded = true;
     } catch (e, s) {
       _logger.severe("Clip text loading failed", e, s);
@@ -285,7 +267,7 @@ class SemanticSearchService {
     if (cachedResult != null) {
       return cachedResult;
     }
-    final textEmbedding = await MLComputerIsolate.instance.runClipText(query);
+    final textEmbedding = await MLComputer.instance.runClipText(query);
     _queryCache.put(query, textEmbedding);
     return textEmbedding;
   }
