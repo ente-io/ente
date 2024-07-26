@@ -215,9 +215,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     icon={<TextSnippetOutlined />}
                     title={t("DETAILS")}
                     caption={
-                        typeof exif === "undefined" ? (
-                            <EnteSpinner size={11.33} />
-                        ) : exif !== null /* TODO */ ? (
+                        exif ? (
                             <LinkButton
                                 onClick={() => setOpenRawExif(true)}
                                 sx={{
@@ -229,7 +227,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 {t("view_exif")}
                             </LinkButton>
                         ) : (
-                            t("no_exif")
+                            <EnteSpinner size={11.33} />
                         )
                     }
                     hideEditOption
@@ -523,10 +521,7 @@ const RawExif: React.FC<RawExifProps> = ({
             <Stack py={3} px={1} spacing={2}>
                 {items.map(([key, namespace, tagName, description]) => (
                     <ExifItem key={key}>
-                        <Stack
-                            direction={"row"}
-                            gap={1}
-                        >
+                        <Stack direction={"row"} gap={1}>
                             <Typography variant="small" color={"text.muted"}>
                                 {tagName}
                             </Typography>
