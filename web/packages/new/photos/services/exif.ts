@@ -87,6 +87,17 @@ export const parseExif = (tags: RawExifTags) => {
 };
 
 /**
+ * Parse GPS location from the metadata embedded in the file.
+ */
+const parseLocation = (tags: RawExifTags) => {
+    const latitude = tags.gps?.Latitude;
+    const longitude = tags.gps?.Longitude;
+    return latitude !== undefined && longitude !== undefined
+        ? { latitude, longitude }
+        : undefined;
+};
+
+/**
  * Parse a single "best" creation date for an image from the metadata embedded
  * in the file.
  *
@@ -362,17 +373,6 @@ const parseIPTCDate = (
     if (timeTag) s = s + "T" + timeTag.description;
 
     return new Date(s);
-};
-
-/**
- * Parse GPS location from the metadata embedded in the file.
- */
-const parseLocation = (tags: RawExifTags) => {
-    const latitude = tags.gps?.Latitude;
-    const longitude = tags.gps?.Longitude;
-    return latitude !== undefined && longitude !== undefined
-        ? { latitude, longitude }
-        : undefined;
 };
 
 /**
