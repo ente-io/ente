@@ -53,7 +53,7 @@ Future<Map<String, Uint8List>?> getFaceCrops(
     faceBoxes.add(e.value);
   }
   final List<Uint8List> faceCrop =
-      await MLComputerIsolate.instance.generateFaceThumbnails(
+      await MLComputer.instance.generateFaceThumbnails(
     // await generateJpgFaceThumbnails(
     imagePath,
     faceBoxes,

@@ -20,7 +20,7 @@ enum MLComputerOperation {
   runClipText,
 }
 
-class MLComputerIsolate {
+class MLComputer {
   final _logger = Logger('MLComputerIsolate');
 
   final _initLock = Lock();
@@ -33,10 +33,9 @@ class MLComputerIsolate {
   bool isSpawned = false;
 
   // Singleton pattern
-  MLComputerIsolate._privateConstructor();
-  static final MLComputerIsolate instance =
-      MLComputerIsolate._privateConstructor();
-  factory MLComputerIsolate() => instance;
+  MLComputer._privateConstructor();
+  static final MLComputer instance = MLComputer._privateConstructor();
+  factory MLComputer() => instance;
 
   Future<void> _init() async {
     return _initLock.synchronized(() async {
