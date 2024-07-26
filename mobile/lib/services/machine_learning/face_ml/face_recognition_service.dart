@@ -262,7 +262,6 @@ class FaceRecognitionService {
         image,
         imageByteData,
         interpreterAddress,
-        useEntePlugin: Platform.isAndroid,
       );
 
       // Add detected faces to the faceResults

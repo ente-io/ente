@@ -46,11 +46,12 @@ class FaceDetectionService extends MlModel {
   static Future<List<FaceDetectionRelative>> predict(
     ui.Image image,
     ByteData imageByteData,
-    int sessionAddress, {
-    bool useEntePlugin = false,
-  }) async {
+    int sessionAddress,
+  ) async {
     assert(
-      !useEntePlugin ? (sessionAddress != 0 && sessionAddress != -1) : true,
+      !MlModel.usePlatformPlugin
+          ? (sessionAddress != 0 && sessionAddress != -1)
+          : true,
       'sessionAddress should be valid',
     );
 
@@ -79,10 +80,10 @@ class FaceDetectionService extends MlModel {
 
     List<List<List<double>>>? nestedResults = [];
     try {
-      if (useEntePlugin) {
-        nestedResults = await _runEntePlugin(inputImageList);
+      if (MlModel.usePlatformPlugin) {
+        nestedResults = await _runPlatformPluginPredict(inputImageList);
       } else {
-        nestedResults = _runFFIBasedPlugin(
+        nestedResults = _runFFIBasedPredict(
           sessionAddress,
           inputImageList,
         ); // [1, 25200, 16]
@@ -111,7 +112,7 @@ class FaceDetectionService extends MlModel {
     }
   }
 
-  static List<List<List<double>>>? _runFFIBasedPlugin(
+  static List<List<List<double>>>? _runFFIBasedPredict(
     int sessionAddress,
     Float32List inputImageList,
   ) {
@@ -129,13 +130,13 @@ class FaceDetectionService extends MlModel {
 
     final runOptions = OrtRunOptions();
     final session = OrtSession.fromAddress(sessionAddress);
-    final List<OrtValue?>? outputs = session.run(runOptions, inputs);
+    final List<OrtValue?> outputs = session.run(runOptions, inputs);
     // inputOrt.release();
     // runOptions.release();
-    return outputs?[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+    return outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
   }
 
-  static Future<List<List<List<double>>>> _runEntePlugin(
+  static Future<List<List<List<double>>>> _runPlatformPluginPredict(
     Float32List inputImageList,
   ) async {
     final OnnxDart plugin = OnnxDart();
