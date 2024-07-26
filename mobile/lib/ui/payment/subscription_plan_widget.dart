@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/data_util.dart';
 
@@ -77,8 +76,12 @@ class _Price extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     if (price.isEmpty) {
-      return Text(S.of(context).freeTrial);
+      return Text(
+        "Free",
+        style: textTheme.largeBold,
+      );
     }
     if (period == "month") {
       return RichText(
@@ -86,20 +89,9 @@ class _Price extends StatelessWidget {
           children: <TextSpan>[
             TextSpan(
               text: price,
-              style: TextStyle(
-                fontSize: 20,
-                color: colorScheme.textBase,
-                fontWeight: FontWeight.w600,
-              ),
+              style: textTheme.largeBold,
             ),
-            TextSpan(
-              text: ' / ' 'month',
-              style: TextStyle(
-                fontSize: 16,
-                color: colorScheme.textBase,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            TextSpan(text: ' / ' 'month', style: textTheme.largeBold),
           ],
         ),
       );
@@ -117,30 +109,18 @@ class _Price extends StatelessWidget {
               children: <TextSpan>[
                 TextSpan(
                   text: currencySymbol + pricePerMonthString,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: colorScheme.textBase,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: textTheme.largeBold,
                 ),
                 TextSpan(
                   text: ' / ' 'month',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: colorScheme.textBase,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: textTheme.largeBold,
                 ),
               ],
             ),
           ),
           Text(
-            price + " / " + "year",
-            style: TextStyle(
-              fontSize: 12,
-              color: colorScheme.textFaint,
-              fontWeight: FontWeight.w600,
-            ),
+            price + " / " + "yr",
+            style: textTheme.bodyFaint,
           ),
         ],
       );

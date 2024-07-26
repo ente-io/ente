@@ -583,7 +583,7 @@ class SubscriptionToggle extends StatefulWidget {
 }
 
 class _SubscriptionToggleState extends State<SubscriptionToggle> {
-  bool _isYearly = false;
+  bool _isYearly = true;
   @override
   Widget build(BuildContext context) {
     const borderPadding = 2.5;
@@ -599,7 +599,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
               2;
           return Container(
             decoration: BoxDecoration(
-              color: const Color.fromRGBO(242, 242, 242, 1),
+              color: getEnteColorScheme(context).fillBaseGrey,
               borderRadius: BorderRadius.circular(50),
             ),
             padding: const EdgeInsets.symmetric(
@@ -658,7 +658,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                     width: widthOfButton,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(255, 255, 255, 1),
+                      color: getEnteColorScheme(context).backgroundBase,
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: AnimatedSwitcher(
