@@ -99,7 +99,7 @@ class MLIndexingIsolate {
               );
               addresses.add(address);
             }
-            sendPort.send(List.from(addresses, growable: false));
+            sendPort.send(List<int>.from(addresses, growable: false));
             break;
           case MLIndexingOperation.releaseModels:
             final modelNames = args['modelNames'] as List<String>;

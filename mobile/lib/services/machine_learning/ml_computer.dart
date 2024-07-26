@@ -21,7 +21,7 @@ enum MLComputerOperation {
 }
 
 class MLComputer {
-  final _logger = Logger('MLComputerIsolate');
+  final _logger = Logger('MLComputer');
 
   final _initLock = Lock();
   final _functionLock = Lock();
@@ -99,7 +99,7 @@ class MLComputer {
             break;
           case MLComputerOperation.runClipText:
             final textEmbedding = await ClipTextEncoder.predict(args);
-            sendPort.send(List.from(textEmbedding, growable: false));
+            sendPort.send(List<double>.from(textEmbedding, growable: false));
             break;
         }
       } catch (e, stackTrace) {
@@ -158,8 +158,8 @@ class MLComputer {
   }
 
   Future<List<double>> runClipText(String query) async {
+    await _ensureLoadedClipTextModel();
     try {
-      await _ensureLoadedClipTextModel();
       final int clipAddress = ClipTextEncoder.instance.sessionAddress;
       final textEmbedding = await _runInIsolate(
         (
