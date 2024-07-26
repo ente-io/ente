@@ -107,10 +107,13 @@ function PhotoViewer(props: Iprops) {
         useState<Photoswipe<Photoswipe.Options>>();
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] = useState<{
-        key: string;
-        value: FileInfoExif | undefined;
-    }>();
+    const [exif, setExif] = useState<
+        | {
+              key: string;
+              value: FileInfoExif | undefined;
+          }
+        | undefined
+    >();
     const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions,
@@ -309,13 +312,10 @@ function PhotoViewer(props: Iprops) {
             setExif({ key: file.src, value: undefined });
             return;
         }
-        if (!file.isSourceLoaded || file.conversionFailed) {
+        if (!file || !file.isSourceLoaded || file.conversionFailed) {
             return;
         }
 
-        if (!file || !exifCopy?.current?.value) {
-            return;
-        }
         const key =
             file.metadata.fileType === FILE_TYPE.IMAGE
                 ? file.src
