@@ -36,7 +36,6 @@ class EnteColorScheme {
   final Color blurStrokeBase;
   final Color blurStrokeFaint;
   final Color blurStrokePressed;
-  final Color subscriptionPlanWidgetStoke;
 
   // Fixed Colors
   final Color primary700;
@@ -58,7 +57,6 @@ class EnteColorScheme {
   //other colors
   final Color tabIcon;
   final List<Color> avatarColors;
-  final Color subscriptionPlanWidgetColor;
 
   const EnteColorScheme(
     this.backgroundBase,
@@ -85,10 +83,8 @@ class EnteColorScheme {
     this.blurStrokeBase,
     this.blurStrokeFaint,
     this.blurStrokePressed,
-    this.subscriptionPlanWidgetStoke,
     this.tabIcon,
-    this.avatarColors,
-    this.subscriptionPlanWidgetColor, {
+    this.avatarColors, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -128,10 +124,8 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurStrokeBaseLight,
   blurStrokeFaintLight,
   blurStrokePressedLight,
-  subscriptionPlanWidgetStokeLight,
   tabIconLight,
   avatarLight,
-  subscriptionPlanWidgetLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -159,10 +153,8 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokeBaseDark,
   blurStrokeFaintDark,
   blurStrokePressedDark,
-  subscriptionPlanWidgetDark,
   tabIconDark,
   avatarDark,
-  subscriptionPlanWidgetDark,
 );
 
 // Background Colors
@@ -228,14 +220,9 @@ const Color blurStrokeBaseDark = Color.fromRGBO(255, 255, 255, 0.90);
 const Color blurStrokeFaintDark = Color.fromRGBO(255, 255, 255, 0.06);
 const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
-const Color subscriptionPlanWidgetStokeLight = Color.fromRGBO(229, 229, 229, 1);
-const Color subscriptionPlanWidgetStokeDark = Color.fromRGBO(44, 44, 44, 1);
-
 // Other colors
 const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);
 const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
-const Color subscriptionPlanWidgetDark = Color.fromRGBO(255, 255, 255, 0.04);
-const Color subscriptionPlanWidgetLight = Color.fromRGBO(251, 251, 251, 1);
 
 // Fixed Colors
 

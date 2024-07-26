@@ -1,8 +1,11 @@
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/scheduler.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/data_util.dart';
 
-class SubscriptionPlanWidget extends StatelessWidget {
+class SubscriptionPlanWidget extends StatefulWidget {
   const SubscriptionPlanWidget({
     super.key,
     required this.storage,
@@ -17,8 +20,22 @@ class SubscriptionPlanWidget extends StatelessWidget {
   final bool isActive;
 
   @override
+  State<SubscriptionPlanWidget> createState() => _SubscriptionPlanWidgetState();
+}
+
+class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
+  late final PlatformDispatcher _platformDispatcher;
+
+  @override
+  void initState() {
+    super.initState();
+    _platformDispatcher = SchedulerBinding.instance.platformDispatcher;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final numAndUnit = convertBytesToNumberAndUnit(storage);
+    final brightness = _platformDispatcher.platformBrightness;
+    final numAndUnit = convertBytesToNumberAndUnit(widget.storage);
     final String storageValue = numAndUnit.$1.toString();
     final String storageUnit = numAndUnit.$2;
     final colorScheme = getEnteColorScheme(context);
@@ -27,10 +44,16 @@ class SubscriptionPlanWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: colorScheme.subscriptionPlanWidgetColor,
+          color: backgroundElevated2Light,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: colorScheme.subscriptionPlanWidgetStoke,
+            color: brightness == Brightness.dark
+                ? widget.isActive
+                    ? const Color.fromRGBO(191, 191, 191, 1)
+                    : strokeMutedLight
+                : widget.isActive
+                    ? const Color.fromRGBO(177, 177, 177, 1)
+                    : const Color.fromRGBO(66, 66, 66, 0.4),
             width: 1,
           ),
         ),
@@ -42,10 +65,10 @@ class SubscriptionPlanWidget extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: storageValue,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
-                      color: getEnteColorScheme(context).textBase,
+                      color: textBaseLight,
                     ),
                   ),
                   WidgetSpan(
@@ -53,14 +76,16 @@ class SubscriptionPlanWidget extends StatelessWidget {
                       offset: const Offset(2, -16),
                       child: Text(
                         storageUnit,
-                        style: getEnteTextTheme(context).h3Muted,
+                        style: getEnteTextTheme(context).h3.copyWith(
+                              color: textMutedLight,
+                            ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            _Price(price: price, period: period),
+            _Price(price: widget.price, period: widget.period),
           ],
         ),
       ),
@@ -75,12 +100,11 @@ class _Price extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     if (price.isEmpty) {
       return Text(
         "Free",
-        style: textTheme.largeBold,
+        style: textTheme.largeBold.copyWith(color: textBaseLight),
       );
     }
     if (period == "month") {
@@ -89,9 +113,12 @@ class _Price extends StatelessWidget {
           children: <TextSpan>[
             TextSpan(
               text: price,
-              style: textTheme.largeBold,
+              style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
-            TextSpan(text: ' / ' 'month', style: textTheme.largeBold),
+            TextSpan(
+              text: ' / ' 'month',
+              style: textTheme.largeBold.copyWith(color: textBaseLight),
+            ),
           ],
         ),
       );
@@ -109,18 +136,18 @@ class _Price extends StatelessWidget {
               children: <TextSpan>[
                 TextSpan(
                   text: currencySymbol + pricePerMonthString,
-                  style: textTheme.largeBold,
+                  style: textTheme.largeBold.copyWith(color: textBaseLight),
                 ),
                 TextSpan(
                   text: ' / ' 'month',
-                  style: textTheme.largeBold,
+                  style: textTheme.largeBold.copyWith(color: textBaseLight),
                 ),
               ],
             ),
           ),
           Text(
             price + " / " + "yr",
-            style: textTheme.bodyFaint,
+            style: textTheme.body.copyWith(color: textFaintLight),
           ),
         ],
       );
