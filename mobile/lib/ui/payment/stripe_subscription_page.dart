@@ -209,7 +209,16 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ),
     );
 
-    widgets.add(_showSubscriptionToggle());
+    widgets.add(
+      SubscriptionToggle(
+        onToggle: (p0) {
+          Future.delayed(const Duration(milliseconds: 175), () {
+            _showYearlyPlan = p0;
+            _filterStripeForUI();
+          });
+        },
+      ),
+    );
 
     widgets.addAll([
       Column(
@@ -535,61 +544,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         freeProductID == _currentSubscription!.productID;
   }
 
-  Widget _showSubscriptionToggle() {
-    // return Container(
-    //   padding: const EdgeInsets.fromLTRB(16, 32, 16, 6),
-    //   child: Column(
-    //     children: [
-    //       RepaintBoundary(
-    //         child: SizedBox(
-    //           width: 250,
-    //           child: Row(
-    //             mainAxisSize: MainAxisSize.max,
-    //             mainAxisAlignment: MainAxisAlignment.center,
-    //             children: [
-    //               Expanded(
-    //                 child: SegmentedButton(
-    //                   style: SegmentedButton.styleFrom(
-    //                     selectedBackgroundColor:
-    //                         getEnteColorScheme(context).fillMuted,
-    //                     selectedForegroundColor:
-    //                         getEnteColorScheme(context).textBase,
-    //                     side: BorderSide(
-    //                       color: getEnteColorScheme(context).strokeMuted,
-    //                       width: 1,
-    //                     ),
-    //                   ),
-    //                   segments: <ButtonSegment<bool>>[
-    //                     ButtonSegment(
-    //                       label: Text(S.of(context).monthly),
-    //                       value: false,
-    //                     ),
-    //                     ButtonSegment(
-    //                       label: Text(S.of(context).yearly),
-    //                       value: true,
-    //                     ),
-    //                   ],
-    //                   selected: {_showYearlyPlan},
-    //                   onSelectionChanged: (p0) {
-    //                     _showYearlyPlan = p0.first;
-    //                     _filterStripeForUI();
-    //                   },
-    //                 ),
-    //               ),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //       const Padding(padding: EdgeInsets.all(8)),
-    //     ],
-    //   ),
-    // );
-
-    //
-
-    return SubscriptionToggle();
-  }
-
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
     // don't add current plan if it's monthly plan but UI is showing yearly plans
     // and vice versa.
@@ -621,7 +575,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 }
 
 class SubscriptionToggle extends StatefulWidget {
-  const SubscriptionToggle({super.key});
+  final Function(bool) onToggle;
+  const SubscriptionToggle({required this.onToggle, super.key});
 
   @override
   State<SubscriptionToggle> createState() => _SubscriptionToggleState();
@@ -658,10 +613,9 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          _isYearly = false;
-                        });
+                        setIsYearly(false);
                       },
+                      behavior: HitTestBehavior.opaque,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           vertical: 8,
@@ -678,10 +632,9 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                     const SizedBox(width: spaceBetweenButtons),
                     GestureDetector(
                       onTap: () {
-                        setState(() {
-                          _isYearly = true;
-                        });
+                        setIsYearly(true);
                       },
+                      behavior: HitTestBehavior.opaque,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           vertical: 8,
@@ -698,7 +651,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                   ],
                 ),
                 AnimatedPositioned(
-                  duration: const Duration(milliseconds: 500),
+                  duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOutQuart,
                   left: _isYearly ? widthOfButton + spaceBetweenButtons : 0,
                   child: Container(
@@ -709,7 +662,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
+                      duration: const Duration(milliseconds: 350),
                       switchInCurve: Curves.easeInOutExpo,
                       switchOutCurve: Curves.easeInOutExpo,
                       child: Text(
@@ -726,5 +679,12 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
         },
       ),
     );
+  }
+
+  setIsYearly(bool isYearly) {
+    setState(() {
+      _isYearly = isYearly;
+    });
+    widget.onToggle(isYearly);
   }
 }
