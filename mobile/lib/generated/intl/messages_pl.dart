@@ -89,7 +89,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m22(newEmail) => "Adres e-mail został zmieniony na ${newEmail}";
 
   static String m23(email) =>
-      "${email} nie posiada konta Ente.\n\nWyślij mu zaproszenie do udostępniania zdjęć.";
+      "${email} nie posiada konta Ente.\n\nWyślij im zaproszenie do udostępniania zdjęć.";
 
   static String m24(count, formattedNumber) =>
       "${Intl.plural(count, one: '1 plikowi', other: '${formattedNumber} plikom')} na tym urządzeniu została bezpiecznie utworzona kopia zapasowa";
@@ -306,7 +306,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
             "Uwierzytelnianie biometryczne nie jest skonfigurowane na tym urządzeniu. Przejdź do \'Ustawienia > Bezpieczeństwo\', aby dodać uwierzytelnianie biometryczne."),
         "androidIosWebDesktop": MessageLookupByLibrary.simpleMessage(
-            "Android, iOS, Strona Internetowa, Komputer"),
+            "Android, iOS, Strona Internetowa, Aplikacja Komputerowa"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Wymagane uwierzytelnienie"),
         "appLock": MessageLookupByLibrary.simpleMessage(
@@ -355,7 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Proszę uwierzytelnić się, aby zmienić hasło"),
         "authToConfigureTwofactorAuthentication":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnij się, aby skonfigurować uwierzytelnianie dwuskładnikowe"),
+                "Uwierzytelnij się, aby skonfigurować uwierzytelnianie dwustopniowe"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Proszę uwierzytelnić się, aby zainicjować usuwanie konta"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
@@ -488,7 +488,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "color": MessageLookupByLibrary.simpleMessage("Kolor"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
-            "Czy na pewno chcesz wyłączyć uwierzytelnianie dwuetapowe?"),
+            "Czy na pewno chcesz wyłączyć uwierzytelnianie dwustopniowe?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Potwierdź usunięcie konta"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -620,7 +620,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wyłącz blokadę ekranu urządzenia, gdy Ente jest na pierwszym planie i w trakcie tworzenia kopii zapasowej. Zwykle nie jest to potrzebne, ale może pomóc w szybszym przesyłaniu i początkowym imporcie dużych bibliotek."),
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Nie znaleziono urządzenia"),
-        "didYouKnow": MessageLookupByLibrary.simpleMessage("Czy wiedziałeś?"),
+        "didYouKnow":
+            MessageLookupByLibrary.simpleMessage("Czy wiedziałeś/aś?"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Wyłącz automatyczną blokadę"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -629,10 +630,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Uwaga"),
         "disableLinkMessage": m18,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage(
-            "Wyłącz Uwierzytelnianie Dwuetapowe"),
+            "Wyłącz uwierzytelnianie dwustopniowe"),
         "disablingTwofactorAuthentication":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnianie dwuskładnikowe jest wyłączane..."),
+                "Uwierzytelnianie dwustopniowe jest wyłączane..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Odrzuć"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
@@ -1054,8 +1055,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("Powiadomienia"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onDevice": MessageLookupByLibrary.simpleMessage("Na urządzeniu"),
-        "onEnte": MessageLookupByLibrary.simpleMessage(
-            "Na <branding>ente</branding>"),
+        "onEnte":
+            MessageLookupByLibrary.simpleMessage("W <branding>ente</branding>"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ups, nie udało się zapisać zmian"),
@@ -1075,6 +1076,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sparuj z kodem PIN"),
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Parowanie zakończone"),
+        "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "passKeyPendingVerification": MessageLookupByLibrary.simpleMessage(
             "Weryfikacja jest nadal w toku"),
         "passkey": MessageLookupByLibrary.simpleMessage("Klucz dostępu"),
@@ -1564,19 +1566,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "twoMonthsFreeOnYearlyPlans": MessageLookupByLibrary.simpleMessage(
             "2 miesiące za darmo w planach rocznych"),
-        "twofactor":
-            MessageLookupByLibrary.simpleMessage("Uwierzytelnianie dwuetapowe"),
+        "twofactor": MessageLookupByLibrary.simpleMessage(
+            "Uwierzytelnianie dwustopniowe"),
         "twofactorAuthenticationHasBeenDisabled":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnianie dwuskładnikowe zostało wyłączone"),
+                "Uwierzytelnianie dwustopniowe zostało wyłączone"),
         "twofactorAuthenticationPageTitle":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnianie dwuskładnikowe"),
+                "Uwierzytelnianie dwustopniowe"),
         "twofactorAuthenticationSuccessfullyReset":
             MessageLookupByLibrary.simpleMessage(
-                "Pomyślnie zresetowano uwierzytelnianie dwuskładnikowe"),
+                "Pomyślnie zresetowano uwierzytelnianie dwustopniowe"),
         "twofactorSetup": MessageLookupByLibrary.simpleMessage(
-            "Uwierzytelnianie dwuskładnikowe"),
+            "Uwierzytelnianie dwustopniowe"),
         "unarchive":
             MessageLookupByLibrary.simpleMessage("Przywróć z archiwum"),
         "unarchiveAlbum":
@@ -1632,6 +1634,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifying": MessageLookupByLibrary.simpleMessage("Weryfikowanie..."),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Weryfikowanie klucza odzyskiwania..."),
+        "videoInfo": MessageLookupByLibrary.simpleMessage("Informacje Wideo"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("wideo"),
         "videos": MessageLookupByLibrary.simpleMessage("Wideo"),
         "viewActiveSessions":
