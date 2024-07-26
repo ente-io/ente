@@ -8,7 +8,6 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
-import "package:photos/services/update_service.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -210,6 +209,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ),
     );
 
+    widgets.add(_showSubscriptionToggle());
+
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -217,8 +218,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ),
       const Padding(padding: EdgeInsets.all(4)),
     ]);
-
-    widgets.add(_showSubscriptionToggle());
 
     if (_currentSubscription != null) {
       widgets.add(
@@ -537,61 +536,58 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _showSubscriptionToggle() {
-    return Container(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
-      margin: const EdgeInsets.only(bottom: 6),
-      child: Column(
-        children: [
-          RepaintBoundary(
-            child: SizedBox(
-              width: 250,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: SegmentedButton(
-                      style: SegmentedButton.styleFrom(
-                        selectedBackgroundColor:
-                            getEnteColorScheme(context).fillMuted,
-                        selectedForegroundColor:
-                            getEnteColorScheme(context).textBase,
-                        side: BorderSide(
-                          color: getEnteColorScheme(context).strokeMuted,
-                          width: 1,
-                        ),
-                      ),
-                      segments: <ButtonSegment<bool>>[
-                        ButtonSegment(
-                          label: Text(S.of(context).monthly),
-                          value: false,
-                        ),
-                        ButtonSegment(
-                          label: Text(S.of(context).yearly),
-                          value: true,
-                        ),
-                      ],
-                      selected: {_showYearlyPlan},
-                      onSelectionChanged: (p0) {
-                        _showYearlyPlan = p0.first;
-                        _filterStripeForUI();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _isFreePlanUser() && !UpdateService.instance.isPlayStoreFlavor()
-              ? Text(
-                  S.of(context).twoMonthsFreeOnYearlyPlans,
-                  style: getEnteTextTheme(context).miniMuted,
-                )
-              : const SizedBox.shrink(),
-          const Padding(padding: EdgeInsets.all(8)),
-        ],
-      ),
-    );
+    // return Container(
+    //   padding: const EdgeInsets.fromLTRB(16, 32, 16, 6),
+    //   child: Column(
+    //     children: [
+    //       RepaintBoundary(
+    //         child: SizedBox(
+    //           width: 250,
+    //           child: Row(
+    //             mainAxisSize: MainAxisSize.max,
+    //             mainAxisAlignment: MainAxisAlignment.center,
+    //             children: [
+    //               Expanded(
+    //                 child: SegmentedButton(
+    //                   style: SegmentedButton.styleFrom(
+    //                     selectedBackgroundColor:
+    //                         getEnteColorScheme(context).fillMuted,
+    //                     selectedForegroundColor:
+    //                         getEnteColorScheme(context).textBase,
+    //                     side: BorderSide(
+    //                       color: getEnteColorScheme(context).strokeMuted,
+    //                       width: 1,
+    //                     ),
+    //                   ),
+    //                   segments: <ButtonSegment<bool>>[
+    //                     ButtonSegment(
+    //                       label: Text(S.of(context).monthly),
+    //                       value: false,
+    //                     ),
+    //                     ButtonSegment(
+    //                       label: Text(S.of(context).yearly),
+    //                       value: true,
+    //                     ),
+    //                   ],
+    //                   selected: {_showYearlyPlan},
+    //                   onSelectionChanged: (p0) {
+    //                     _showYearlyPlan = p0.first;
+    //                     _filterStripeForUI();
+    //                   },
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //       const Padding(padding: EdgeInsets.all(8)),
+    //     ],
+    //   ),
+    // );
+
+    //
+
+    return SubscriptionToggle();
   }
 
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
@@ -619,6 +615,115 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             isActive: _currentSubscription!.isValid(),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SubscriptionToggle extends StatefulWidget {
+  const SubscriptionToggle({super.key});
+
+  @override
+  State<SubscriptionToggle> createState() => _SubscriptionToggleState();
+}
+
+class _SubscriptionToggleState extends State<SubscriptionToggle> {
+  bool _isYearly = false;
+  @override
+  Widget build(BuildContext context) {
+    const borderPadding = 2.5;
+    const spaceBetweenButtons = 4.0;
+    final textTheme = getEnteTextTheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      child: LayoutBuilder(
+        builder: (context, constrains) {
+          final widthOfButton = (constrains.maxWidth -
+                  (borderPadding * 2) -
+                  spaceBetweenButtons) /
+              2;
+          return Container(
+            decoration: BoxDecoration(
+              color: const Color.fromRGBO(242, 242, 242, 1),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: borderPadding,
+              horizontal: borderPadding,
+            ),
+            width: double.infinity,
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isYearly = false;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        width: widthOfButton,
+                        child: Center(
+                          child: Text(
+                            "Monthly",
+                            style: textTheme.bodyFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: spaceBetweenButtons),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isYearly = true;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        width: widthOfButton,
+                        child: Center(
+                          child: Text(
+                            "Yearly",
+                            style: textTheme.bodyFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOutQuart,
+                  left: _isYearly ? widthOfButton + spaceBetweenButtons : 0,
+                  child: Container(
+                    width: widthOfButton,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(255, 255, 255, 1),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      switchInCurve: Curves.easeInOutExpo,
+                      switchOutCurve: Curves.easeInOutExpo,
+                      child: Text(
+                        key: ValueKey(_isYearly),
+                        _isYearly ? "Yearly" : "Monthly",
+                        style: textTheme.body,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
