@@ -137,9 +137,14 @@ export const extractExifDates = (file: File): Promise<ParsedExifDates> =>
  * grouping them into chunks that somewhat reflect the Exif ontology.
  */
 const parseDates = (tags: RawExifTags) => {
-    // We have come across real examples of customer photos with Exif dates set
-    // to "0000:00:00 00:00:00". So ignore any date whose epoch is 0, so that we
-    // can try with a subsequent (possibly correct) date in the sequence.
+    // Ignore 0 and NaN
+    //
+    // Some customers (not sure how prevalent this is) reported photos with Exif
+    // dates set to "0000:00:00 00:00:00". So we ignore any date whose epoch is
+    // 0, and try with a subsequent (possibly correct) date in the sequence.
+    //
+    // If the string we used to construct the date is invalid, then `getTime`
+    // will return `NaN`. Ignore these too.
     const valid = (d: Date | undefined) => (d?.getTime() ? d : undefined);
 
     const exif = parseExifDates(tags);
