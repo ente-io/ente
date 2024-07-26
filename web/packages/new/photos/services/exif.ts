@@ -12,13 +12,13 @@ export const cmpNewLib = (
     newLib: ParsedExif,
 ) => {
     if (
-        oldLib.width == newLib.width &&
-        oldLib.height == newLib.height &&
         oldLib.creationTime == newLib.creationTime &&
         oldLib.location.latitude == newLib.location?.latitude &&
         oldLib.location.longitude == newLib.location?.longitude
     ) {
-        log.info("Exif migration 🟢");
+        if (oldLib.width == newLib.width && oldLib.height == newLib.height)
+            log.info("Exif migration ✅");
+        else log.info("Exif migration 🟢");
         log.debug(() => ["exif/cmp", { oldLib, newLib }]);
     } else {
         log.info("Exif migration - Potential mismatch ❗️🚩");
