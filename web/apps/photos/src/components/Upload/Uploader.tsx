@@ -880,8 +880,11 @@ function getImportSuggestion(
         return DEFAULT_IMPORT_SUGGESTION;
     }
 
-    const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
-    paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
+    const separatorCounts = new Map(
+        paths.map((s) => [s, s.match(/\//g)?.length ?? 0]),
+    );
+    const separatorCount = (s: string) => ensure(separatorCounts.get(s));
+    paths.sort((path1, path2) => separatorCount(path1) - separatorCount(path2));
     const firstPath = paths[0];
     const lastPath = paths[paths.length - 1];
 
