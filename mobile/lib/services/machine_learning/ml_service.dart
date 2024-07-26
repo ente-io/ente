@@ -43,16 +43,16 @@ class MLService {
   factory MLService() => instance;
 
   final _initModelLock = Lock();
+  final _downloadModelLock = Lock();
 
   bool _isInitialized = false;
+  bool areModelsDownloaded = false;
 
   late String client;
 
   bool get isInitialized => _isInitialized;
 
   bool get showClusteringIsHappening => _showClusteringIsHappening;
-
-  bool modelsAreLoading = false;
 
   bool debugIndexingDisabled = false;
   bool _showClusteringIsHappening = false;
@@ -64,7 +64,7 @@ class MLService {
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
-  Future<void> init() async {
+  Future<void> init({bool firstTime = false}) async {
     if (localSettings.isFaceIndexingEnabled == false || _isInitialized) {
       return;
     }
@@ -77,6 +77,9 @@ class MLService {
 
     // Activate FaceRecognitionService
     await FaceRecognitionService.instance.init();
+
+    // Download models if not already downloaded
+    unawaited(_ensureDownloadedModels(firstTime));
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
@@ -509,6 +512,25 @@ class MLService {
     return actuallyRanML;
   }
 
+  Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {
+    if (_downloadModelLock.locked) {
+      _logger.finest("Download models already in progress");
+    }
+    return _downloadModelLock.synchronized(() async {
+      if (areModelsDownloaded) {
+        _logger.finest("Models already downloaded");
+        return;
+      }
+      _logger.info('Downloading models');
+      await Future.wait([
+        FaceDetectionService.instance.downloadModel(forceRefresh),
+        FaceEmbeddingService.instance.downloadModel(forceRefresh),
+        ClipImageEncoder.instance.downloadModel(forceRefresh),
+      ]);
+      areModelsDownloaded = true;
+    });
+  }
+
   Future<void> _ensureLoadedModels(FileMLInstruction instruction) async {
     return _initModelLock.synchronized(() async {
       final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
@@ -522,7 +544,6 @@ class MLService {
         return;
       }
 
-      modelsAreLoading = true;
       _logger.info(
         'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
       );
@@ -530,7 +551,6 @@ class MLService {
           .loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
       _logger.info('Models loaded');
       _logStatus();
-      modelsAreLoading = false;
     });
   }
 

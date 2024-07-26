@@ -5,6 +5,7 @@ import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/onnx_env.dart";
 import "package:photos/services/remote_assets_service.dart";
+import "package:synchronized/synchronized.dart";
 
 abstract class MlModel {
   static final Logger isolateLogger = Logger("MlModelInIsolate");
@@ -15,6 +16,8 @@ abstract class MlModel {
   String get modelRemotePath;
 
   String get modelName;
+
+  final _downloadModelLock = Lock();
 
   static final bool usePlatformPlugin = Platform.isAndroid;
 
@@ -32,9 +35,21 @@ abstract class MlModel {
   int _nativePluginSessionIndex = -1;
 
   Future<(String, String)> getModelNameAndPath() async {
-    final path =
-        await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
-    return (modelName, path);
+    return _downloadModelLock.synchronized(() async {
+      final path =
+          await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
+      return (modelName, path);
+    });
+  }
+
+  Future<void> downloadModel([bool forceRefresh = false]) async {
+    return _downloadModelLock.synchronized(() async {
+      if (forceRefresh) {
+        await RemoteAssetsService.instance.getAssetIfUpdated(modelRemotePath);
+      } else {
+        await RemoteAssetsService.instance.getAsset(modelRemotePath);
+      }
+    });
   }
 
   void storeSessionAddress(int address) {
