@@ -1,6 +1,5 @@
 import "dart:async" show unawaited;
 import "dart:developer" as dev show log;
-import "dart:io";
 import "dart:typed_data" show ByteData, Float32List;
 import "dart:ui" show Image;
 
@@ -327,7 +326,6 @@ class FaceRecognitionService {
       final List<List<double>> embeddings = await FaceEmbeddingService.predict(
         facesList,
         interpreterAddress,
-        useEntePlugin: Platform.isAndroid,
       );
 
       // Store the results

@@ -35,21 +35,21 @@ class FaceEmbeddingService extends MlModel {
 
   static Future<List<List<double>>> predict(
     Float32List input,
-    int sessionAddress, {
-    bool useEntePlugin = false,
-  }) async {
-    if (!useEntePlugin) {
+    int sessionAddress,
+  ) async {
+    if (!MlModel.usePlatformPlugin) {
       assert(sessionAddress != 0 && sessionAddress != -1);
     }
     try {
-      if (useEntePlugin) {
-        return await _runEntePlugin(input);
+      if (MlModel.usePlatformPlugin) {
+        return await _runPlatformPluginPredict(input);
       } else {
         return _runFFIBasedPredict(input, sessionAddress);
       }
     } catch (e) {
       _logger.info(
-          'MobileFaceNet  (entePlugin: $useEntePlugin)Error while running inference: $e',);
+        'MobileFaceNet  (PlatformPlugin: $MlModel.usePlatformPlugin)Error while running inference: $e',
+      );
       throw MobileFaceNetInterpreterRunException();
     }
   }
@@ -82,7 +82,7 @@ class FaceEmbeddingService extends MlModel {
     return embeddings;
   }
 
-  static Future<List<List<double>>> _runEntePlugin(
+  static Future<List<List<double>>> _runPlatformPluginPredict(
     Float32List inputImageList,
   ) async {
     final stopwatch = Stopwatch()..start();
@@ -102,7 +102,7 @@ class FaceEmbeddingService extends MlModel {
       normalizeEmbedding(embedding);
     }
     _logger.info(
-      'MobileFaceNetEntePlugin interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
+      'MobileFaceNetPlatformPlugin interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
     );
     return embeddings;
   }
