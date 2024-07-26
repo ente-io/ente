@@ -148,8 +148,8 @@ class _MachineLearningSettingsPageState
 
 class ModelLoadingState extends StatefulWidget {
   const ModelLoadingState({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ModelLoadingState> createState() => _ModelLoadingStateState();
@@ -222,7 +222,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
               alignCaptionedTextToLeft: true,
               isGestureDetectorDisabled: true,
             );
-          }).toList(),
+          }),
       ],
     );
   }
