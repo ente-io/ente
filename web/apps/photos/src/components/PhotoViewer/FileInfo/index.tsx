@@ -503,7 +503,8 @@ const RawExif: React.FC<RawExifProps> = ({
                 return [key, namespace, tagName, description] as const;
             });
         })
-        .flat();
+        .flat()
+        .filter(([, , , description]) => description);
 
     return (
         <FileInfoSidebar open={open} onClose={onClose}>
@@ -522,14 +523,17 @@ const RawExif: React.FC<RawExifProps> = ({
             <Stack py={3} px={1} spacing={2}>
                 {items.map(([key, namespace, tagName, description]) => (
                     <ExifItem key={key}>
-                        <Box gap={1}>
+                        <Stack
+                            direction={"row"}
+                            gap={1}
+                        >
                             <Typography variant="small" color={"text.muted"}>
                                 {tagName}
                             </Typography>
-                            <Typography variant="small" color={"text.faint"}>
+                            <Typography variant="tiny" color={"text.faint"}>
                                 {namespace}
                             </Typography>
-                        </Box>
+                        </Stack>
                         <Typography
                             sx={{
                                 width: "100%",
