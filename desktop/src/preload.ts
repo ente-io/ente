@@ -227,25 +227,13 @@ const watchRemoveListeners = () => {
 
 // - Upload
 
-const pathForFile = (file: File) => {
-    const path = webUtils.getPathForFile(file);
-    // The path that we get back from `webUtils.getPathForFile` on Windows uses
-    // "/" as the path separator. Convert them to POSIX separators.
-    //
-    // Note that we do not have access to the path or the os module in the
-    // preload script, thus this hand rolled transformation.
+// The path that we get back from `webUtils.getPathForFile` on Windows uses "\"
+// as the path separator. Convert them to POSIX separators.
 
-    // However that makes TypeScript fidgety since we it cannot find navigator,
-    // as we haven't included "lib": ["dom"] in our tsconfig to avoid making DOM
-    // APIs available to our main Node.js code. We could create a separate
-    // tsconfig just for the preload script, but for now let's go with a cast.
-    //
-    // @ts-expect-error navigator is not defined.
-    const platform = (navigator as { platform: string }).platform;
-    return platform.toLowerCase().includes("win")
-        ? path.split("\\").join("/")
-        : path;
-};
+const pathForFile =
+    process.platform == "win32"
+        ? (file: File) => webUtils.getPathForFile(file).replace(/\\/g, "/")
+        : (file: File) => webUtils.getPathForFile(file);
 
 const listZipItems = (zipPath: string) =>
     ipcRenderer.invoke("listZipItems", zipPath);
