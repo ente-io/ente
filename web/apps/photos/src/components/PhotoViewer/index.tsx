@@ -929,21 +929,21 @@ function PhotoViewer(props: Iprops) {
                 </div>
             </div>
             <FileInfo
+                showInfo={showInfo}
+                handleCloseInfo={handleCloseInfo}
+                closePhotoViewer={handleClose}
+                file={photoSwipe?.currItem as EnteFile}
+                exif={exif?.value}
                 shouldDisableEdits={!isOwnFile}
                 showCollectionChips={
                     !props.isTrashCollection &&
                     isOwnFile &&
                     !props.isInHiddenSection
                 }
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
-                file={photoSwipe?.currItem as EnteFile}
-                exif={exif?.value}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
                 collectionNameMap={props.collectionNameMap}
-                closePhotoViewer={handleClose}
             />
             <ImageEditorOverlay
                 show={showImageEditorOverlay}

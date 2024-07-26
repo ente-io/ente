@@ -50,17 +50,17 @@ export interface FileInfoExif {
 }
 
 interface FileInfoProps {
-    shouldDisableEdits?: boolean;
     showInfo: boolean;
     handleCloseInfo: () => void;
-    file: EnteFile;
+    closePhotoViewer: () => void;
+    file: EnteFile | undefined;
     exif: FileInfoExif | undefined;
+    shouldDisableEdits?: boolean;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
-    closePhotoViewer: () => void;
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -100,8 +100,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 };
             }
         }
-        return exif.parsed.location;
-    }, [file]);
+        return exif?.parsed.location;
+    }, [file, exif]);
 
     useEffect(() => {
         setParsedExif(exif ? parseFileInfoExif(exif) : undefined);
@@ -217,7 +217,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     caption={
                         typeof exif === "undefined" ? (
                             <EnteSpinner size={11.33} />
-                        ) : exif !== null ? (
+                        ) : exif !== null /* TODO */ ? (
                             <LinkButton
                                 onClick={() => setOpenRawExif(true)}
                                 sx={{
@@ -280,7 +280,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 open={openRawExif}
                 onClose={() => setOpenRawExif(false)}
                 onInfoClose={handleCloseInfo}
-                tags={exif.tags}
+                tags={exif?.tags}
                 fileName={file.metadata.title}
             />
         </FileInfoSidebar>
@@ -482,10 +482,25 @@ const RawExif: React.FC<RawExifProps> = ({
         onInfoClose();
     };
 
-    const items: [string, string, string, string] = Object.entries(tags)
-        .map((namespace, namespaceTags) => {
-            return Object.entries(namespaceTags).map((tagName, tag) => {
-                return [`${namespace}:${tagName}`, namespace, tagName, tag.description];
+    const items: (readonly [string, string, string, string])[] = Object.entries(
+        tags,
+    )
+        .map(([namespace, namespaceTags]) => {
+            return Object.entries(namespaceTags).map(([tagName, tag]) => {
+                const key = `${namespace}:${tagName}`;
+                let description = "<...>";
+                if (typeof tag == "string") {
+                    description = tag;
+                } else if (typeof tag == "number") {
+                    description = `${tag}`;
+                } else if (
+                    tag &&
+                    typeof tag == "object" &&
+                    "description" in tag
+                ) {
+                    description = tag.description;
+                }
+                return [key, namespace, tagName, description] as const;
             });
         })
         .flat();
@@ -505,38 +520,28 @@ const RawExif: React.FC<RawExifProps> = ({
                 }
             />
             <Stack py={3} px={1} spacing={2}>
-                {items.map(([key, namespace, tagName, value]) =>
-                    value ? (
-                        <ExifItem key={key}>
-                            <Box gap={1}>
-                                <Typography
-                                    variant="small"
-                                    color={"text.muted"}
-                                >
-                                    {tagName}
-                                </Typography>
-                                <Typography
-                                    variant="small"
-                                    color={"text.faint"}
-                                >
-                                    {namespace}
-                                </Typography>
-                            </Box>
-                            <Typography
-                                sx={{
-                                    width: "100%",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                }}
-                            >
-                                {parseExifValue(value)}
+                {items.map(([key, namespace, tagName, description]) => (
+                    <ExifItem key={key}>
+                        <Box gap={1}>
+                            <Typography variant="small" color={"text.muted"}>
+                                {tagName}
                             </Typography>
-                        </ExifItem>
-                    ) : (
-                        <React.Fragment key={key}></React.Fragment>
-                    ),
-                )}
+                            <Typography variant="small" color={"text.faint"}>
+                                {namespace}
+                            </Typography>
+                        </Box>
+                        <Typography
+                            sx={{
+                                width: "100%",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                            }}
+                        >
+                            {description}
+                        </Typography>
+                    </ExifItem>
+                ))}
             </Stack>
         </FileInfoSidebar>
     );
