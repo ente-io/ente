@@ -1,7 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { nameAndExtension } from "@/base/file";
-import log from "@/base/log";
 import { FILE_TYPE } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import type { ParsedExif, RawExifTags } from "@/new/photos/services/exif";
@@ -19,7 +18,14 @@ import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
-import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
+import {
+    Box,
+    DialogProps,
+    Link,
+    Stack,
+    styled,
+    Typography,
+} from "@mui/material";
 import { Chip } from "components/Chip";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
@@ -42,6 +48,7 @@ export interface FileInfoExif {
     tags: RawExifTags;
     parsed: ParsedExif;
 }
+
 interface FileInfoProps {
     shouldDisableEdits?: boolean;
     showInfo: boolean;
@@ -268,12 +275,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </>
                 )}
             </Stack>
-            <ExifData
-                exif={exif.tags}
+
+            <RawExif
                 open={openRawExif}
                 onClose={() => setOpenRawExif(false)}
                 onInfoClose={handleCloseInfo}
-                filename={file.metadata.title}
+                tags={exif.tags}
+                fileName={file.metadata.title}
             />
         </FileInfoSidebar>
     );
@@ -342,47 +350,41 @@ const FileInfoSidebar = styled((props: DialogProps) => (
 });
 
 interface RenderFileNameProps {
-    parsedExif: ParsedFileInfoExif;
-    shouldDisableEdits: boolean;
     file: EnteFile;
+    shouldDisableEdits: boolean;
+    parsedExif: ParsedFileInfoExif | undefined;
     scheduleUpdate: () => void;
 }
 
 const RenderFileName: React.FC<RenderFileNameProps> = ({
-    parsedExif,
-    shouldDisableEdits,
     file,
+    shouldDisableEdits,
+    parsedExif,
     scheduleUpdate,
 }) => {
     const [isInEditMode, setIsInEditMode] = useState(false);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
-    const [filename, setFilename] = useState<string>();
+    const [fileName, setFileName] = useState<string>();
     const [extension, setExtension] = useState<string>();
 
     useEffect(() => {
         const [filename, extension] = nameAndExtension(file.metadata.title);
-        setFilename(filename);
+        setFileName(filename);
         setExtension(extension);
     }, [file]);
 
     const saveEdits = async (newFilename: string) => {
-        try {
-            if (file) {
-                if (filename === newFilename) {
-                    closeEditMode();
-                    return;
-                }
-                setFilename(newFilename);
-                const newTitle = getFileTitle(newFilename, extension);
-                const updatedFile = await changeFileName(file, newTitle);
-                updateExistingFilePubMetadata(file, updatedFile);
-                scheduleUpdate();
-            }
-        } catch (e) {
-            log.error("failed to update file name", e);
-            throw e;
+        if (!file) return;
+        if (fileName === newFilename) {
+            closeEditMode();
+            return;
         }
+        setFileName(newFilename);
+        const newTitle = [newFilename, extension].join(".");
+        const updatedFile = await changeFileName(file, newTitle);
+        updateExistingFilePubMetadata(file, updatedFile);
+        scheduleUpdate();
     };
 
     return (
@@ -395,7 +397,7 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
                         <PhotoOutlined />
                     )
                 }
-                title={getFileTitle(filename, extension)}
+                title={[fileName, extension].join(".")}
                 caption={getCaption(file, parsedExif)}
                 openEditor={openEditMode}
                 hideEditOption={shouldDisableEdits || isInEditMode}
@@ -403,7 +405,7 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
             <FileNameEditDialog
                 isInEditMode={isInEditMode}
                 closeEditMode={closeEditMode}
-                filename={filename}
+                filename={fileName}
                 extension={extension}
                 saveEdits={saveEdits}
             />
@@ -411,17 +413,12 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
     );
 };
 
-const getFileTitle = (filename, extension) => {
-    if (extension) {
-        return filename + "." + extension;
-    } else {
-        return filename;
-    }
-};
-
-const getCaption = (file: EnteFile, parsedExifData) => {
-    const megaPixels = parsedExifData?.["megaPixels"];
-    const resolution = parsedExifData?.["resolution"];
+const getCaption = (
+    file: EnteFile,
+    parsedExif: ParsedFileInfoExif | undefined,
+) => {
+    const megaPixels = parsedExif?.megaPixels;
+    const resolution = parsedExif?.resolution;
     const fileSize = file.info?.fileSize;
 
     const captionParts = [];
@@ -450,21 +447,100 @@ const BasicDeviceCamera: React.FC<{ parsedExif: ParsedFileInfoExif }> = ({
         <FlexWrapper gap={1}>
             <Box>{parsedExif.fNumber}</Box>
             <Box>{parsedExif.exposureTime}</Box>
-            <Box>{parsedExif.ISO}</Box>
+            <Box>{parsedExif.iso}</Box>
         </FlexWrapper>
     );
 };
 
-function getOpenStreetMapLink(location: {
+const getOpenStreetMapLink = (location: {
     latitude: number;
     longitude: number;
-}) {
-    return `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
+}) =>
+    `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
+
+interface RawExifProps {
+    open: boolean;
+    onClose: () => void;
+    onInfoClose: () => void;
+    tags: RawExifTags | undefined;
+    fileName: string;
 }
 
-import { formatDateTimeFull } from "@ente/shared/time/format";
-import { Typography } from "@mui/material";
-import { FileInfoSidebar } from ".";
+const RawExif: React.FC<RawExifProps> = ({
+    open,
+    onClose,
+    onInfoClose,
+    tags,
+    fileName,
+}) => {
+    if (!tags) {
+        return <></>;
+    }
+
+    const handleRootClose = () => {
+        onClose();
+        onInfoClose();
+    };
+
+    const items: [string, string, string, string] = Object.entries(tags)
+        .map((namespace, namespaceTags) => {
+            return Object.entries(namespaceTags).map((tagName, tag) => {
+                return [`${namespace}:${tagName}`, namespace, tagName, tag.description];
+            });
+        })
+        .flat();
+
+    return (
+        <FileInfoSidebar open={open} onClose={onClose}>
+            <Titlebar
+                onClose={onClose}
+                title={t("exif")}
+                caption={fileName}
+                onRootClose={handleRootClose}
+                actionButton={
+                    <CopyButton
+                        code={JSON.stringify(tags)}
+                        color={"secondary"}
+                    />
+                }
+            />
+            <Stack py={3} px={1} spacing={2}>
+                {items.map(([key, namespace, tagName, value]) =>
+                    value ? (
+                        <ExifItem key={key}>
+                            <Box gap={1}>
+                                <Typography
+                                    variant="small"
+                                    color={"text.muted"}
+                                >
+                                    {tagName}
+                                </Typography>
+                                <Typography
+                                    variant="small"
+                                    color={"text.faint"}
+                                >
+                                    {namespace}
+                                </Typography>
+                            </Box>
+                            <Typography
+                                sx={{
+                                    width: "100%",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                }}
+                            >
+                                {parseExifValue(value)}
+                            </Typography>
+                        </ExifItem>
+                    ) : (
+                        <React.Fragment key={key}></React.Fragment>
+                    ),
+                )}
+            </Stack>
+        </FileInfoSidebar>
+    );
+};
 
 const ExifItem = styled(Box)`
     padding-left: 8px;
@@ -473,82 +549,3 @@ const ExifItem = styled(Box)`
     flex-direction: column;
     gap: 4px;
 `;
-
-function parseExifValue(value: any) {
-    switch (typeof value) {
-        case "string":
-        case "number":
-            return value;
-        default:
-            if (value instanceof Date) {
-                return formatDateTimeFull(value);
-            }
-            try {
-                return JSON.stringify(Array.from(value));
-            } catch (e) {
-                return null;
-            }
-    }
-}
-export function ExifData(props: {
-    exif: any;
-    open: boolean;
-    onClose: () => void;
-    filename: string;
-    onInfoClose: () => void;
-}) {
-    const { exif, open, onClose, filename, onInfoClose } = props;
-
-    if (!exif) {
-        return <></>;
-    }
-    const handleRootClose = () => {
-        onClose();
-        onInfoClose();
-    };
-
-    return (
-        <FileInfoSidebar open={open} onClose={onClose}>
-            <Titlebar
-                onClose={onClose}
-                title={t("exif")}
-                caption={filename}
-                onRootClose={handleRootClose}
-                actionButton={
-                    <CopyButton
-                        code={JSON.stringify(exif)}
-                        color={"secondary"}
-                    />
-                }
-            />
-            <Stack py={3} px={1} spacing={2}>
-                {[...Object.entries(exif)]
-                    .sort((a, b) => a[0].localeCompare(b[0]))
-                    .map(([key, value]) =>
-                        value ? (
-                            <ExifItem key={key}>
-                                <Typography
-                                    variant="small"
-                                    color={"text.muted"}
-                                >
-                                    {key}
-                                </Typography>
-                                <Typography
-                                    sx={{
-                                        width: "100%",
-                                        textOverflow: "ellipsis",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                    }}
-                                >
-                                    {parseExifValue(value)}
-                                </Typography>
-                            </ExifItem>
-                        ) : (
-                            <React.Fragment key={key}></React.Fragment>
-                        ),
-                    )}
-            </Stack>
-        </FileInfoSidebar>
-    );
-}
