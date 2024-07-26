@@ -202,7 +202,16 @@ const parseDates = (tags: RawExifTags) => {
  *     mm    2 digit (zero padded) minutes (00 to 59)
  *     ss    2 digit (zero padded) seconds (00 to 59)
  *
- * These dates are all in the local time of the place where the photo was taken.
+ * Additionally (and optionally), there are three SubSecTime* tags that provide
+ * the fractional seconds (one for each of the above):
+ *
+ * -   SubSecTimeOriginal
+ * -   SubSecTimeDigitized
+ * -   SubSecTime
+ *
+ * Each of which is a string specifying the fractional digits.
+ *
+ * The dates are all in the local time of the place where the photo was taken.
  * To convert these to UTC, we also need to know the offset from UTC of that
  * local time. This is provided by the three OffsetTime* tags (one for each of
  * the above):
@@ -228,22 +237,26 @@ const parseDates = (tags: RawExifTags) => {
 const parseExifDates = ({ exif }: RawExifTags) => ({
     DateTimeOriginal: parseExifDate(
         exif?.DateTimeOriginal,
+        exif?.SubSecTimeOriginal,
         exif?.OffsetTimeOriginal,
     ),
     DateTimeDigitized: parseExifDate(
         exif?.DateTimeDigitized,
+        exif?.SubSecTimeDigitized,
         exif?.OffsetTimeDigitized,
     ),
-    DateTime: parseExifDate(exif?.DateTime, exif?.OffsetTime),
+    DateTime: parseExifDate(exif?.DateTime, exif?.SubSecTime, exif?.OffsetTime),
 });
 
 const parseExifDate = (
     dateTag: ExifReader.StringArrayTag | undefined,
+    subSecTag: ExifReader.StringArrayTag | undefined,
     offsetTag: ExifReader.StringArrayTag | undefined,
 ) => {
     const [dateString] = dateTag?.value ?? [];
     if (!dateString) return undefined;
 
+    const [subSecString] = subSecTag?.value ?? [];
     const [offsetString] = offsetTag?.value ?? [];
 
     // Perform minor syntactic changes to the Exif date, and add the optional
@@ -260,6 +273,7 @@ const parseExifDate = (
 
     return new Date(
         dateString.replace(":", "-").replace(":", "-").replace(" ", "T") +
+            (subSecString ? "." + subSecString : "") +
             (offsetString ?? ""),
     );
 };
