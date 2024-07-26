@@ -22,34 +22,49 @@ class SubscriptionPlanWidget extends StatelessWidget {
     final numAndUnit = convertBytesToNumberAndUnit(storage);
     final String storageValue = numAndUnit.$1.toString();
     final String storageUnit = numAndUnit.$2;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: storageValue,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w600,
-                  color: getEnteColorScheme(context).textBase,
-                ),
-              ),
-              WidgetSpan(
-                child: Transform.translate(
-                  offset: const Offset(2, -16),
-                  child: Text(
-                    storageUnit,
-                    style: getEnteTextTheme(context).h3Muted,
-                  ),
-                ),
-              ),
-            ],
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: colorScheme.subscriptionPlanWidgetColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: colorScheme.subscriptionPlanWidgetStoke,
+            width: 1,
           ),
         ),
-        _Price(price: price, period: period),
-      ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: storageValue,
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w600,
+                      color: getEnteColorScheme(context).textBase,
+                    ),
+                  ),
+                  WidgetSpan(
+                    child: Transform.translate(
+                      offset: const Offset(2, -16),
+                      child: Text(
+                        storageUnit,
+                        style: getEnteTextTheme(context).h3Muted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _Price(price: price, period: period),
+          ],
+        ),
+      ),
     );
   }
 }
