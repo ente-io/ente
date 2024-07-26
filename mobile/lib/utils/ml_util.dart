@@ -1,4 +1,4 @@
-import "dart:io" show File, Platform;
+import "dart:io" show File;
 import "dart:math" as math show sqrt, min, max;
 import "dart:typed_data" show ByteData;
 
@@ -300,7 +300,6 @@ Future<MLResult> analyzeImageStatic(Map args) async {
         image,
         imageByteData,
         clipImageAddress,
-        useEntePlugin: Platform.isAndroid,
       );
       result.clip = clipResult;
     }

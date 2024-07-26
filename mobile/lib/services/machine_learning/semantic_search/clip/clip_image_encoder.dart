@@ -31,20 +31,14 @@ class ClipImageEncoder extends MlModel {
   static Future<List<double>> predict(
     Image image,
     ByteData imageByteData,
-    int sessionAddress, {
-    bool useEntePlugin = false,
-  }) async {
-    final w = EnteWatch("ClipImageEncoder.predict")..start();
+    int sessionAddress,
+  ) async {
     final inputList = await preprocessImageClip(image, imageByteData);
-    w.log("preprocessImageClip");
-    if (useEntePlugin) {
-      final result = await _runEntePlugin(inputList);
-      w.stopWithLog("done");
-      return result;
+    if (MlModel.usePlatformPlugin) {
+      return await _runPlatformPluginPredict(inputList);
+    } else {
+      return _runFFIBasedPredict(inputList, sessionAddress);
     }
-    final result = _runFFIBasedPredict(inputList, sessionAddress);
-    w.stopWithLog("done");
-    return result;
   }
 
   static List<double> _runFFIBasedPredict(
@@ -64,7 +58,7 @@ class ClipImageEncoder extends MlModel {
     return embedding;
   }
 
-  static Future<List<double>> _runEntePlugin(
+  static Future<List<double>> _runPlatformPluginPredict(
     Float32List inputImageList,
   ) async {
     final w = EnteWatch("ClipImageEncoder._runEntePlugin")..start();
