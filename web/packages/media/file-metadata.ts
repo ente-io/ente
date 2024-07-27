@@ -1,4 +1,4 @@
-import type { FileType } from "./file-type";
+import { FileType } from "./file-type";
 
 /**
  * Information about the file that never changes post upload.

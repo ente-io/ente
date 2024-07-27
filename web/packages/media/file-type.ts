@@ -12,6 +12,15 @@ export enum FileType {
      * containing both the parts.
      */
     livePhoto = 2,
+    /**
+     * An unknown file type.
+     *
+     * The exact value here doesn't matter (and won't likely match what we get
+     * from remote). This instead is serving as a placeholder, forcing us to
+     * deal with the scenario that an EnteFile's type can be different from one
+     * of the above.
+     */
+    other = 3,
 }
 
 export interface FileTypeInfo {
