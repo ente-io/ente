@@ -117,16 +117,12 @@ export interface ParsedMetadata {
     /** The height of the image, in pixels. */
     height?: number;
     /**
-     * The date (and time) when this photo was taken.
+     * The date/time when this photo was taken.
      *
-     * This in the local timezone of the place where the photo was taken, but it
-     * also has additional fields we need.
-     *
-     * See: [Note: Photos are always in local date/time]
+     * Logically this is a date in local timezone of the place where the photo
+     * was taken. See: [Note: Photos are always in local date/time].
      */
-    creationMetadataDate?: ParsedMetadataDate /** TODO: Exif */;
-    /** The time when this photo was taken. */
-    creationTime?: number;
+    creationDate?: ParsedMetadataDate;
     /** The GPS coordinates where the photo was taken. */
     location?: { latitude: number; longitude: number };
 }
