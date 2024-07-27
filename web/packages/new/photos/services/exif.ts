@@ -362,11 +362,12 @@ const parseIPTCDate = (
     // -   There are currently no separate TypeScript types for the IPTC tags,
     //     and instead they are listed as part of the ExifTags.
     //
-    // -   For the date, ExifReader parses the raw data into a description of
-    //     the form 'YYYY-MM-DD' (See `getCreationDate` in its source code).
+    // -   For the date, whenever possible ExifReader parses the raw data into a
+    //     description of the form 'YYYY-MM-DD' (See `getCreationDate` in its
+    //     source code).
     //
-    // -   For the time, ExifReader parses the raw data into a description
-    //     either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
+    // -   For the time, whenever possible ExifReader parses the raw data into a
+    //     description either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
     //     `getCreationTime` in its source code).
     if (!dateTag) return undefined;
     let s = dateTag.description;
