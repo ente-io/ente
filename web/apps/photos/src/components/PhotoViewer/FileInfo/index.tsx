@@ -3,7 +3,7 @@ import { Titlebar } from "@/base/components/Titlebar";
 import { nameAndExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
-import type { ParsedExif, RawExifTags } from "@/new/photos/services/exif";
+import type { ParsedMetadata, RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
@@ -46,7 +46,7 @@ import { RenderCreationTime } from "./RenderCreationTime";
 
 export interface FileInfoExif {
     tags: RawExifTags | undefined;
-    parsed: ParsedExif | undefined;
+    parsed: ParsedMetadata | undefined;
 }
 
 interface FileInfoProps {

@@ -8,15 +8,15 @@ import type { FILE_TYPE } from "../file-type";
  * There are three different sources of metadata relating to a file.
  *
  * 1. Metadata
- * 2. Magic Metadata
- * 3. Public Magic Metadata
+ * 2. Magic metadata
+ * 3. Public magic metadata
  *
  * The names of API entities are such for historical reasons, but we can think
  * of them as:
  *
  * 1. Metadata
- * 2. Private Mutable Metadata
- * 3. Shared Mutable Metadata
+ * 2. Private mutable metadata
+ * 3. Shared mutable metadata
  *
  * Metadata is the original metadata that we attached to the file when it was
  * uploaded. It is immutable, and it never changes.
@@ -36,12 +36,13 @@ import type { FILE_TYPE } from "../file-type";
  * When the client needs to show a file, it needs to "merge" in 2 or 3 of these
  * sources.
  *
- * - When showing a shared file, (1) and (3) are merged, with changes from (3)
- *   taking precedence, to obtain the full metadata pertinent to the file.
- * - When showing a normal (un-shared) file, (1), (2) and (3) are merged, with
- *   changes from (2) and (3) taking precedence, to obtain the full metadata.
- *   (2) and (3) have no intersection of keys, so they can be merged in any
- *   order.
+ * -   When showing a shared file, (1) and (3) are merged, with changes from (3)
+ *     taking precedence, to obtain the full metadata pertinent to the file.
+ *
+ * -   When showing a normal (un-shared) file, (1), (2) and (3) are merged, with
+ *     changes from (2) and (3) taking precedence, to obtain the full metadata.
+ *     (2) and (3) have no intersection of keys, so they can be merged in any
+ *     order.
  *
  * While these sources can be conceptually merged, it is important for the
  * client to also retain the original sources unchanged. This is because the
@@ -51,6 +52,8 @@ import type { FILE_TYPE } from "../file-type";
  * unchanged.
  */
 export interface Metadata {
+    /** The "Ente" file type - image, video or live photo. */
+    fileType: FILE_TYPE;
     /**
      * The file name.
      *
@@ -71,8 +74,6 @@ export interface Metadata {
     modificationTime: number;
     latitude: number;
     longitude: number;
-    /** The "Ente" file type - image, video or live photo. */
-    fileType: FILE_TYPE;
     hasStaticThumbnail?: boolean;
     hash?: string;
     imageHash?: string;

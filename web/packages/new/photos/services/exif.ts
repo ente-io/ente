@@ -9,7 +9,7 @@ export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
 export const cmpNewLib = (
     oldLib: ParsedExtractedMetadata,
-    newLib: ParsedExif,
+    newLib: ParsedMetadata,
 ) => {
     if (
         oldLib.creationTime == newLib.creationTime &&
@@ -27,14 +27,34 @@ export const cmpNewLib = (
 };
 
 /**
- * Data extracted from the Exif and other metadata embedded in the original
- * image, and saved in the metadata associated with an {@link EnteFile}.
+ * Metadata about a file extracted from various sources (like Exif) when
+ * uploading it into Ente.
  *
- * These are the bits of information that are commonly needed, and having them
- * be attached to an {@link EnteFile} allows us to perform operations using
- * these attributes without needing to re-download the original image.
+ * Depending on the file type and the upload sequence, this data can come from
+ * various places:
+ *
+ * -   For images it comes from the Exif and other forms of metadata (XMP, IPTC)
+ *     embedded in the file.
+ *
+ * -   For videos, similarly it is extracted from the metadata embedded in the
+ *     file using ffmpeg.
+ *
+ * -   From various sidecar files (like metadata JSONs) that might be sitting
+ *     next to the original during an import.
+ *
+ * These bits then get distributed and saved in the various metadata fields
+ * associated with an {@link EnteFile} (See: [Note: Metadatum]).
+ *
+ * The advantage of having them be attached to an {@link EnteFile} is that it
+ * allows us to perform operations using these attributes without needing to
+ * re-download the original image.
+ *
+ * The disadvantage is that it increases the network payload (anything attached
+ * to an {@link EnteFile} comes back in the diff response), and thus latency and
+ * local storage costs for all clients. Thus, we need to curate what gets
+ * preseved within the {@link EnteFile}'s metadatum.
  */
-export interface ParsedExif {
+export interface ParsedMetadata {
     /** The width of the image, in pixels. */
     width?: number;
     /** The height of the image, in pixels. */
@@ -80,7 +100,7 @@ export const parseExif = (tags: RawExifTags) => {
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
 
-    const metadata: ParsedExif = dimensions ?? {};
+    const metadata: ParsedMetadata = dimensions ?? {};
     if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
     if (location) metadata.location = location;
     return metadata;
