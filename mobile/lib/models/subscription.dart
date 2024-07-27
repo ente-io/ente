@@ -48,6 +48,10 @@ class Subscription {
     return 'year' == period;
   }
 
+  bool isFreePlan() {
+    return productID == freeProductID;
+  }
+
   static fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
     return Subscription(

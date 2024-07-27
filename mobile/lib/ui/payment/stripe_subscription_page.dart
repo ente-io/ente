@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/events/subscription_purchased_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
@@ -24,6 +26,7 @@ import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
+import "package:photos/ui/tabs/home_widget.dart";
 import "package:photos/utils/data_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -244,38 +247,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       );
     }
 
-    // only active subscription can be renewed/canceled
-    if (_hasActiveSubscription && _isStripeSubscriber) {
-      widgets.add(_stripeRenewOrCancelButton());
-    }
-
-    if (_currentSubscription!.productID != freeProductID) {
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
-          child: MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).paymentDetails,
-            ),
-            menuItemColor: colorScheme.fillFaint,
-            trailingWidget: Icon(
-              Icons.chevron_right_outlined,
-              color: colorScheme.strokeBase,
-            ),
-            singleBorderRadius: 4,
-            alignCaptionedTextToLeft: true,
-            onTap: () async {
-              _redirectToPaymentPortal();
-            },
-          ),
-        ),
-      );
-    }
-
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: S.of(context).manageFamily,
@@ -295,6 +270,40 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         ),
       );
       widgets.add(ViewAddOnButton(_userDetails.bonusData));
+    }
+
+    if (_currentSubscription!.productID != freeProductID) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+          child: MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).paymentDetails,
+            ),
+            menuItemColor: colorScheme.fillFaint,
+            trailingWidget: Icon(
+              Icons.chevron_right_outlined,
+              color: colorScheme.strokeBase,
+            ),
+            singleBorderRadius: 4,
+            alignCaptionedTextToLeft: true,
+            onTap: () async {
+              _redirectToPaymentPortal();
+            },
+          ),
+        ),
+      );
+    }
+
+    // only active subscription can be renewed/canceled
+    if (_hasActiveSubscription && _isStripeSubscriber) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          child: _stripeRenewOrCancelButton(),
+        ),
+      );
+
       widgets.add(const SizedBox(height: 80));
     }
 
@@ -365,16 +374,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     final String title = isRenewCancelled
         ? S.of(context).renewSubscription
         : S.of(context).cancelSubscription;
-    return TextButton(
-      child: Text(
-        title,
-        style: TextStyle(
-          color: (isRenewCancelled
-              ? colorScheme.primary700
-              : colorScheme.textMuted),
-        ),
+    return MenuItemWidget(
+      captionedTextWidget: CaptionedTextWidget(
+        title: title,
       ),
-      onPressed: () async {
+      menuItemColor: colorScheme.fillFaint,
+      trailingWidget: Icon(
+        Icons.chevron_right_outlined,
+        color: colorScheme.strokeBase,
+      ),
+      singleBorderRadius: 4,
+      alignCaptionedTextToLeft: true,
+      onTap: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
           final choice = await showChoiceDialog(
@@ -457,9 +468,27 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         foundActivePlan = true;
       }
       planWidgets.add(
-        Material(
-          child: InkWell(
-            onTap: () async {
+        GestureDetector(
+          onTap: () async {
+            if (widget.isOnboarding && plan.id == freeProductID) {
+              Bus.instance.fire(SubscriptionPurchasedEvent());
+              // ignore: unawaited_futures
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const HomeWidget();
+                  },
+                ),
+                (route) => false,
+              );
+              unawaited(
+                BillingService.instance.verifySubscription(
+                  freeProductID,
+                  "",
+                  paymentProvider: "ente",
+                ),
+              );
+            } else {
               if (isActive) {
                 return;
               }
@@ -520,14 +549,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   },
                 ),
               ).then((value) => onWebPaymentGoBack(value));
-            },
-            child: SubscriptionPlanWidget(
-              storage: plan.storage,
-              price: plan.price,
-              period: plan.period,
-              isActive: isActive && !_hideCurrentPlanSelection,
-              isPopular: _isPopularPlan(plan),
-            ),
+            }
+          },
+          child: SubscriptionPlanWidget(
+            storage: plan.storage,
+            price: plan.price,
+            period: plan.period,
+            isActive: isActive && !_hideCurrentPlanSelection,
+            isPopular: _isPopularPlan(plan),
           ),
         ),
       );
@@ -550,6 +579,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
     // don't add current plan if it's monthly plan but UI is showing yearly plans
     // and vice versa.
+
     if (_showYearlyPlan != _currentSubscription!.isYearlyPlan() &&
         _currentSubscription!.productID != freeProductID) {
       return;
@@ -562,15 +592,33 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
     planWidgets.insert(
       activePlanIndex,
-      Material(
-        child: InkWell(
-          onTap: () {},
-          child: SubscriptionPlanWidget(
-            storage: _currentSubscription!.storage,
-            price: _currentSubscription!.price,
-            period: _currentSubscription!.period,
-            isActive: _currentSubscription!.isValid(),
-          ),
+      GestureDetector(
+        onTap: () {
+          if (_currentSubscription!.isFreePlan()) {
+            Bus.instance.fire(SubscriptionPurchasedEvent());
+            // ignore: unawaited_futures
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const HomeWidget();
+                },
+              ),
+              (route) => false,
+            );
+            unawaited(
+              BillingService.instance.verifySubscription(
+                freeProductID,
+                "",
+                paymentProvider: "ente",
+              ),
+            );
+          }
+        },
+        child: SubscriptionPlanWidget(
+          storage: _currentSubscription!.storage,
+          price: _currentSubscription!.price,
+          period: _currentSubscription!.period,
+          isActive: _currentSubscription!.isValid(),
         ),
       ),
     );

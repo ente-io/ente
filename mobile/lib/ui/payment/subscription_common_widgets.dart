@@ -4,7 +4,6 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/bonus.dart";
 import 'package:photos/models/subscription.dart';
-import "package:photos/services/update_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
@@ -69,15 +68,15 @@ class ValidityWidget extends StatelessWidget {
   final Subscription? currentSubscription;
   final BonusData? bonusData;
 
-  const ValidityWidget({Key? key, this.currentSubscription, this.bonusData})
-      : super(key: key);
+  const ValidityWidget({super.key, this.currentSubscription, this.bonusData});
 
   @override
   Widget build(BuildContext context) {
-    if (currentSubscription == null) {
+    final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
+    if (currentSubscription == null ||
+        (currentSubscription!.isFreePlan() && addOnBonus.isEmpty)) {
       return const SizedBox.shrink();
     }
-    final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
     final bool isFreeTrialSub = currentSubscription!.productID == freeProductID;
     bool hideSubValidityView = false;
     if (isFreeTrialSub && addOnBonus.isNotEmpty) {
@@ -92,11 +91,7 @@ class ValidityWidget extends StatelessWidget {
     );
 
     var message = S.of(context).renewsOn(endDate);
-    if (isFreeTrialSub) {
-      message = UpdateService.instance.isPlayStoreFlavor()
-          ? S.of(context).playStoreFreeTrialValidTill(endDate)
-          : S.of(context).freeTrialValidTill(endDate);
-    } else if (currentSubscription!.attributes?.isCancelled ?? false) {
+    if (currentSubscription!.attributes?.isCancelled ?? false) {
       message = S.of(context).subWillBeCancelledOn(endDate);
       if (addOnBonus.isNotEmpty) {
         hideSubValidityView = true;
@@ -153,7 +148,7 @@ class SubFaqWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 40, 16, isOnboarding ? 40 : 4),
+      padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
       child: MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).faqs,

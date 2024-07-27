@@ -41,7 +41,6 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
     final numAndUnit = convertBytesToNumberAndUnit(widget.storage);
     final String storageValue = numAndUnit.$1.toString();
     final String storageUnit = numAndUnit.$2;
-    final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Container(
