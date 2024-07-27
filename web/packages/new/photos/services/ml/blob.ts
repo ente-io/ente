@@ -1,5 +1,5 @@
 import { basename } from "@/base/file";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
@@ -123,7 +123,7 @@ const indexableUploadItemBlobs = async (
     const fileType = enteFile.metadata.fileType;
     let originalBlob: Blob | undefined;
     let renderableBlob: Blob;
-    if (fileType == FILE_TYPE.VIDEO) {
+    if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         renderableBlob = new Blob([ensure(thumbnailData)]);
     } else {
@@ -182,7 +182,7 @@ export const indexableEnteFileBlobs = async (
     enteFile: EnteFile,
 ): Promise<IndexableBlobs> => {
     const fileType = enteFile.metadata.fileType;
-    if (fileType == FILE_TYPE.VIDEO) {
+    if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         return {
             originalBlob: undefined,
@@ -194,7 +194,7 @@ export const indexableEnteFileBlobs = async (
     const originalBlob = await new Response(fileStream).blob();
 
     let renderableBlob: Blob;
-    if (fileType == FILE_TYPE.LIVE_PHOTO) {
+    if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             enteFile.metadata.title,
             originalBlob,
@@ -203,7 +203,7 @@ export const indexableEnteFileBlobs = async (
             imageFileName,
             new Blob([imageData]),
         );
-    } else if (fileType == FILE_TYPE.IMAGE) {
+    } else if (fileType == FileType.image) {
         renderableBlob = await renderableImageBlob(
             enteFile.metadata.title,
             originalBlob,

@@ -1,5 +1,10 @@
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
+import {
+    parseMetadataDate,
+    type ParsedMetadata,
+    type ParsedMetadataDate,
+} from "@/media/file-metadata";
 import ExifReader from "exifreader";
 import type { ParsedExtractedMetadata } from "../types/metadata";
 import { isInternalUser } from "./feature-flags";
@@ -9,41 +14,22 @@ export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
 export const cmpNewLib = (
     oldLib: ParsedExtractedMetadata,
-    newLib: ParsedExif,
+    newLib: ParsedMetadata,
 ) => {
     if (
-        oldLib.creationTime == newLib.creationTime &&
+        oldLib.creationTime == newLib.creationDate?.timestamp &&
         oldLib.location.latitude == newLib.location?.latitude &&
         oldLib.location.longitude == newLib.location?.longitude
     ) {
         if (oldLib.width == newLib.width && oldLib.height == newLib.height)
             log.info("Exif migration ✅");
-        else log.info("Exif migration 🟢");
+        else log.info("Exif migration ✅✨");
         log.debug(() => ["exif/cmp", { oldLib, newLib }]);
     } else {
         log.info("Exif migration - Potential mismatch ❗️🚩");
         log.info({ oldLib, newLib });
     }
 };
-
-/**
- * Data extracted from the Exif and other metadata embedded in the original
- * image, and saved in the metadata associated with an {@link EnteFile}.
- *
- * These are the bits of information that are commonly needed, and having them
- * be attached to an {@link EnteFile} allows us to perform operations using
- * these attributes without needing to re-download the original image.
- */
-export interface ParsedExif {
-    /** The width of the image, in pixels. */
-    width?: number;
-    /** The height of the image, in pixels. */
-    height?: number;
-    /** The time when this photo was taken. */
-    creationTime?: number;
-    /** The GPS coordinates where the photo was taken. */
-    location?: { latitude: number; longitude: number };
-}
 
 /**
  * Extract Exif and other metadata from the given file.
@@ -80,8 +66,8 @@ export const parseExif = (tags: RawExifTags) => {
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
 
-    const metadata: ParsedExif = dimensions ?? {};
-    if (creationDate) metadata.creationTime = creationDate.getTime() * 1000;
+    const metadata: ParsedMetadata = dimensions ?? {};
+    if (creationDate) metadata.creationDate = creationDate;
     if (location) metadata.location = location;
     return metadata;
 };
@@ -120,10 +106,10 @@ const parseCreationDate = (tags: RawExifTags) => {
  * correspond to the three Exif DateTime* tags, and the XMP MetadataDate tag.
  */
 interface ParsedExifDates {
-    DateTimeOriginal: Date | undefined;
-    DateTimeDigitized: Date | undefined;
-    DateTime: Date | undefined;
-    MetadataDate: Date | undefined;
+    DateTimeOriginal: ParsedMetadataDate | undefined;
+    DateTimeDigitized: ParsedMetadataDate | undefined;
+    DateTime: ParsedMetadataDate | undefined;
+    MetadataDate: ParsedMetadataDate | undefined;
 }
 
 /**
@@ -137,15 +123,13 @@ export const extractExifDates = (file: File): Promise<ParsedExifDates> =>
  * grouping them into chunks that somewhat reflect the Exif ontology.
  */
 const parseDates = (tags: RawExifTags) => {
-    // Ignore 0 and NaN
+    // Ignore dates whose epoch is 0.
     //
     // Some customers (not sure how prevalent this is) reported photos with Exif
-    // dates set to "0000:00:00 00:00:00". So we ignore any date whose epoch is
-    // 0, and try with a subsequent (possibly correct) date in the sequence.
-    //
-    // If the string we used to construct the date is invalid, then `getTime`
-    // will return `NaN`. Ignore these too.
-    const valid = (d: Date | undefined) => (d?.getTime() ? d : undefined);
+    // dates set to "0000:00:00 00:00:00". Ignore any date whose timestamp is 0
+    // so that we try with a subsequent (possibly correct) date in the sequence.
+    const valid = (d: ParsedMetadataDate | undefined) =>
+        d?.timestamp ? d : undefined;
 
     const exif = parseExifDates(tags);
     const iptc = parseIPTCDates(tags);
@@ -276,7 +260,7 @@ const parseExifDate = (
     //
     // For details see [Note: Exif dates]
 
-    return new Date(
+    return parseMetadataDate(
         dateString.replace(":", "-").replace(":", "-").replace(" ", "T") +
             (subSecString ? "." + subSecString : "") +
             (offsetString ?? ""),
@@ -329,7 +313,7 @@ const parseXMPDate = (xmpTag: ExifReader.XmpTag | undefined) => {
     const s = xmpTag.value;
     if (typeof s != "string") return undefined;
 
-    return new Date(s);
+    return parseMetadataDate(s);
 };
 
 /**
@@ -380,18 +364,19 @@ const parseIPTCDate = (
     // -   There are currently no separate TypeScript types for the IPTC tags,
     //     and instead they are listed as part of the ExifTags.
     //
-    // -   For the date, ExifReader parses the raw data into a description of
-    //     the form 'YYYY-MM-DD' (See `getCreationDate` in its source code).
+    // -   For the date, whenever possible ExifReader parses the raw data into a
+    //     description of the form 'YYYY-MM-DD' (See `getCreationDate` in its
+    //     source code).
     //
-    // -   For the time, ExifReader parses the raw data into a description
-    //     either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
+    // -   For the time, whenever possible ExifReader parses the raw data into a
+    //     description either of the form 'HH:mm:ss` or `HH:mm:ss±HH:mm` (See
     //     `getCreationTime` in its source code).
     if (!dateTag) return undefined;
     let s = dateTag.description;
 
     if (timeTag) s = s + "T" + timeTag.description;
 
-    return new Date(s);
+    return parseMetadataDate(s);
 };
 
 /**
@@ -549,4 +534,21 @@ export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
     delete (tags.xmp as Partial<typeof tags.xmp>)?._raw;
 
     return tags;
+};
+
+/**
+ * Return a number from a raw Exif tag value.
+ *
+ * Some numeric Exif values are stored as arrays of two numbers [p, q]
+ * represeting a rational number p/q. ExifReader usually converts this and for
+ * us, but not always.
+ *
+ * This function takes such potentially ambiguous (already converted or not)
+ * values and returns a number.
+ */
+export const tagNumericValue = (
+    tag: ExifReader.NumberTag & ExifReader.NumberArrayTag,
+) => {
+    const v = tag.value;
+    return Array.isArray(v) ? (v[0] ?? 0) / (v[1] ?? 1) : v;
 };

@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
@@ -44,7 +44,7 @@ export async function updateCreationTimeWithExif(
                 if (fixOption === "custom-time") {
                     correctCreationTime = customTime.getTime() * 1000;
                 } else {
-                    if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+                    if (file.metadata.fileType !== FileType.image) {
                         continue;
                     }
                     const fileStream = await downloadManager.getFile(file);

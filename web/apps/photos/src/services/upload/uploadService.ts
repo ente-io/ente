@@ -3,9 +3,9 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
-import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import type { Metadata } from "@/media/file-metadata";
+import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
-import type { Metadata } from "@/media/types/file";
 import { cmpNewLib, extractExif, wipNewLib } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
@@ -615,7 +615,7 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
 
     return {
         fileTypeInfo: {
-            fileType: FILE_TYPE.LIVE_PHOTO,
+            fileType: FileType.livePhoto,
             extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
             imageType: img.fileTypeInfo.extension,
             videoType: vid.fileTypeInfo.extension,
@@ -704,7 +704,7 @@ const extractLivePhotoMetadata = async (
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
     const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FILE_TYPE.IMAGE,
+        fileType: FileType.image,
         extension: fileTypeInfo.imageType,
     };
     const { metadata: imageMetadata, publicMagicMetadata } =
@@ -723,7 +723,7 @@ const extractLivePhotoMetadata = async (
         metadata: {
             ...imageMetadata,
             title: uploadItemFileName(livePhotoAssets.image),
-            fileType: FILE_TYPE.LIVE_PHOTO,
+            fileType: FileType.livePhoto,
             imageHash: imageMetadata.hash,
             videoHash: videoHash,
             hash: undefined,
@@ -744,14 +744,14 @@ const extractImageOrVideoMetadata = async (
     const { fileType } = fileTypeInfo;
 
     let extractedMetadata: ParsedExtractedMetadata;
-    if (fileType === FILE_TYPE.IMAGE) {
+    if (fileType === FileType.image) {
         extractedMetadata =
             (await tryExtractImageMetadata(
                 uploadItem,
                 fileTypeInfo,
                 lastModifiedMs,
             )) ?? NULL_EXTRACTED_METADATA;
-    } else if (fileType === FILE_TYPE.VIDEO) {
+    } else if (fileType === FileType.video) {
         extractedMetadata =
             (await tryExtractVideoMetadata(uploadItem)) ??
             NULL_EXTRACTED_METADATA;
@@ -880,7 +880,7 @@ const areFilesSameHash = (f: Metadata, g: Metadata) => {
     if (f.fileType !== g.fileType || f.title !== g.title) {
         return false;
     }
-    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
+    if (f.fileType === FileType.livePhoto) {
         return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
     } else {
         return f.hash === g.hash;
@@ -936,7 +936,7 @@ const readLivePhoto = async (
         livePhotoAssets.image,
         {
             extension: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
+            fileType: FileType.image,
         },
         await readUploadItem(livePhotoAssets.image),
     );
@@ -1015,7 +1015,7 @@ const withThumbnail = async (
 
     const electron = globalThis.electron;
     const notAvailable =
-        fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
+        fileTypeInfo.fileType == FileType.image &&
         moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
     // 1. Native thumbnail generation using items's (effective) path.
@@ -1062,7 +1062,7 @@ const withThumbnail = async (
             // go (i.e. not in a streaming manner). This is risky for videos of
             // unbounded sizes, so we can only apply this fallback for images.
 
-            if (fileTypeInfo.fileType == FILE_TYPE.IMAGE) {
+            if (fileTypeInfo.fileType == FileType.image) {
                 const data = await readEntireStream(fileStream.stream);
                 blob = new Blob([data]);
 
