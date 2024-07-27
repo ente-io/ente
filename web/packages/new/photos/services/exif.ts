@@ -1,6 +1,6 @@
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
-import type { ParsedMetadata } from "@/media/types/file";
+import type { ParsedMetadata } from "@/media/file-metadata";
 import ExifReader from "exifreader";
 import type { ParsedExtractedMetadata } from "../types/metadata";
 import { isInternalUser } from "./feature-flags";

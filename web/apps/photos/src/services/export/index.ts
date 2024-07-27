@@ -1,8 +1,8 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import type { Metadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import type { Metadata } from "@/media/types/file";
 import downloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {

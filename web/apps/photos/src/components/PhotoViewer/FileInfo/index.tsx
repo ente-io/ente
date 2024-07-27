@@ -1,8 +1,8 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { nameAndExtension } from "@/base/file";
+import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import type { ParsedMetadata } from "@/media/types/file";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import type { RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
