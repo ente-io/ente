@@ -58,7 +58,6 @@ export const KnownFileTypeInfos: FileTypeInfo[] = [
         extension: "orf",
         mimeType: "image/x-olympus-orf",
     },
-
     {
         fileType: FileType.image,
         extension: "crw",

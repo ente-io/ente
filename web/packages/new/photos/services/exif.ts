@@ -1,5 +1,6 @@
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
+import type { ParsedMetadata } from "@/media/types/file";
 import ExifReader from "exifreader";
 import type { ParsedExtractedMetadata } from "../types/metadata";
 import { isInternalUser } from "./feature-flags";
@@ -25,45 +26,6 @@ export const cmpNewLib = (
         log.info({ oldLib, newLib });
     }
 };
-
-/**
- * Metadata about a file extracted from various sources (like Exif) when
- * uploading it into Ente.
- *
- * Depending on the file type and the upload sequence, this data can come from
- * various places:
- *
- * -   For images it comes from the Exif and other forms of metadata (XMP, IPTC)
- *     embedded in the file.
- *
- * -   For videos, similarly it is extracted from the metadata embedded in the
- *     file using ffmpeg.
- *
- * -   From various sidecar files (like metadata JSONs) that might be sitting
- *     next to the original during an import.
- *
- * These bits then get distributed and saved in the various metadata fields
- * associated with an {@link EnteFile} (See: [Note: Metadatum]).
- *
- * The advantage of having them be attached to an {@link EnteFile} is that it
- * allows us to perform operations using these attributes without needing to
- * re-download the original image.
- *
- * The disadvantage is that it increases the network payload (anything attached
- * to an {@link EnteFile} comes back in the diff response), and thus latency and
- * local storage costs for all clients. Thus, we need to curate what gets
- * preseved within the {@link EnteFile}'s metadatum.
- */
-export interface ParsedMetadata {
-    /** The width of the image, in pixels. */
-    width?: number;
-    /** The height of the image, in pixels. */
-    height?: number;
-    /** The time when this photo was taken. */
-    creationTime?: number;
-    /** The GPS coordinates where the photo was taken. */
-    location?: { latitude: number; longitude: number };
-}
 
 /**
  * Extract Exif and other metadata from the given file.
