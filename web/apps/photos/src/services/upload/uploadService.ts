@@ -6,6 +6,7 @@ import { hasFileHash } from "@/media/file";
 import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import type { Metadata } from "@/media/types/file";
+import { cmpNewLib, extractExif, wipNewLib } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
@@ -808,9 +809,9 @@ async function tryExtractImageMetadata(
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        // The library we use for extracting Exif from images, exifr, doesn't
-        // support streams. But unlike videos, for images it is reasonable to
-        // read the entire stream into memory here.
+        // The library we use for extracting Exif from images, ExifReader,
+        // doesn't support streams. But unlike videos, for images it is
+        // reasonable to read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);
         const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
         file = new File([await response.arrayBuffer()], basename(path), {
@@ -823,7 +824,12 @@ async function tryExtractImageMetadata(
     }
 
     try {
-        return await parseImageMetadata(file, fileTypeInfo);
+        const oldLib = await parseImageMetadata(file, fileTypeInfo);
+        if (await wipNewLib()) {
+            const newLib = await extractExif(file);
+            cmpNewLib(oldLib, newLib);
+        }
+        return oldLib;
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;

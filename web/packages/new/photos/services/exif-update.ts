@@ -121,9 +121,18 @@ const dataURLToBlob = (dataURI: string) =>
  * DateTimeOriginal tag.
  *
  * See: [Note: Exif dates]
+ *
+ * ---
+ *
+ * TODO: This functionality is deprecated. The library we use here is
+ * unmaintained and there are no comprehensive other JS libs.
+ *
+ * Instead of doing this in this selective way, we should provide a CLI tool
+ * with better format support and more comprehensive handling of Exif and other
+ * metadata fields (like captions) that can be used by the user to modify their
+ * original from the Ente sidecar if they so wish.
  */
 const convertToExifDateFormat = (date: Date) => {
-    // TODO: Exif - Handle offsettime if present
     const YYYY = zeroPad(date.getFullYear(), 4);
     // JavaScript getMonth is zero-indexed, we want one-indexed.
     const MM = zeroPad(date.getMonth() + 1, 2);

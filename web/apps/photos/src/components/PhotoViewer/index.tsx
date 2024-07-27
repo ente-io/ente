@@ -18,8 +18,9 @@ import { lowercaseExtension } from "@/base/file";
 import { FILE_TYPE } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
+import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
-import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
+import { fileLogID } from "@/new/photos/utils/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -46,14 +47,13 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { getParsedExifData } from "services/exif";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { isClipboardItemPresent } from "utils/common";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
-import { FileInfo } from "./FileInfo";
+import { FileInfo, type FileInfoExif } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
 import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
 import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
@@ -108,10 +108,13 @@ function PhotoViewer(props: Iprops) {
         useState<Photoswipe<Photoswipe.Options>>();
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] = useState<{
-        key: string;
-        value: Record<string, any>;
-    }>();
+    const [exif, setExif] = useState<
+        | {
+              key: string;
+              value: FileInfoExif | undefined;
+          }
+        | undefined
+    >();
     const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions,
@@ -307,24 +310,20 @@ function PhotoViewer(props: Iprops) {
 
     function updateExif(file: EnteFile) {
         if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-            setExif({ key: file.src, value: null });
+            setExif({ key: file.src, value: undefined });
             return;
         }
-        if (!file.isSourceLoaded || file.conversionFailed) {
+        if (!file || !file.isSourceLoaded || file.conversionFailed) {
             return;
         }
 
-        if (!file || !exifCopy?.current?.value === null) {
-            return;
-        }
         const key =
             file.metadata.fileType === FILE_TYPE.IMAGE
                 ? file.src
                 : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
 
-        if (exifCopy?.current?.key === key) {
-            return;
-        }
+        if (exifCopy?.current?.key === key) return;
+
         setExif({ key, value: undefined });
         checkExifAvailable(file);
     }
@@ -585,53 +584,30 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async (file: EnteFile) => {
+    const checkExifAvailable = async (enteFile: EnteFile) => {
+        if (exifExtractionInProgress.current === enteFile.src) return;
+
         try {
-            if (exifExtractionInProgress.current === file.src) {
-                return;
-            }
-            try {
-                exifExtractionInProgress.current = file.src;
-                let fileObject: File;
-                if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-                    fileObject = await getFileFromURL(
-                        file.src as string,
-                        file.metadata.title,
-                    );
-                } else {
-                    const url = (file.srcURLs.url as LoadedLivePhotoSourceURL)
-                        .image;
-                    fileObject = await getFileFromURL(url, file.metadata.title);
-                }
-                const fileTypeInfo = await detectFileTypeInfo(fileObject);
-                const exifData = await getParsedExifData(
-                    fileObject,
-                    fileTypeInfo,
-                );
-                // TODO: Exif debugging code.
-                // if (isDesktop && isDevBuild) {
-                //     const newLib = await extractMetadata(fileObject);
-                //     log.debug(() => [
-                //         "exif",
-                //         { oldLib: file.metadata, newLib },
-                //     ]);
-                // }
-                if (exifExtractionInProgress.current === file.src) {
-                    if (exifData) {
-                        setExif({ key: file.src, value: exifData });
-                    } else {
-                        setExif({ key: file.src, value: null });
-                    }
-                }
-            } finally {
-                exifExtractionInProgress.current = null;
+            exifExtractionInProgress.current = enteFile.src;
+            const file = await getFileFromURL(
+                enteFile.metadata.fileType === FILE_TYPE.IMAGE
+                    ? (enteFile.src as string)
+                    : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL).image,
+                enteFile.metadata.title,
+            );
+            const tags = await extractRawExif(file);
+            const parsed = parseExif(tags);
+            if (exifExtractionInProgress.current === enteFile.src) {
+                setExif({ key: enteFile.src, value: { tags, parsed } });
             }
         } catch (e) {
-            setExif({ key: file.src, value: null });
-            log.error(
-                `checkExifAvailable failed for file ${file.metadata.title}`,
-                e,
-            );
+            log.error(`Failed to extract Exif from ${fileLogID(enteFile)}`, e);
+            setExif({
+                key: enteFile.src,
+                value: { tags: undefined, parsed: undefined },
+            });
+        } finally {
+            exifExtractionInProgress.current = null;
         }
     };
 
@@ -949,21 +925,21 @@ function PhotoViewer(props: Iprops) {
                 </div>
             </div>
             <FileInfo
+                showInfo={showInfo}
+                handleCloseInfo={handleCloseInfo}
+                closePhotoViewer={handleClose}
+                file={photoSwipe?.currItem as EnteFile}
+                exif={exif?.value}
                 shouldDisableEdits={!isOwnFile}
                 showCollectionChips={
                     !props.isTrashCollection &&
                     isOwnFile &&
                     !props.isInHiddenSection
                 }
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
-                file={photoSwipe?.currItem as EnteFile}
-                exif={exif?.value}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
                 collectionNameMap={props.collectionNameMap}
-                closePhotoViewer={handleClose}
             />
             <ImageEditorOverlay
                 show={showImageEditorOverlay}
