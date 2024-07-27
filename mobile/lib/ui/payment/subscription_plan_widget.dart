@@ -1,6 +1,7 @@
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/scheduler.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/data_util.dart';
@@ -139,19 +140,14 @@ class _Price extends StatelessWidget {
       );
     }
     if (period == "month") {
-      return RichText(
-        text: TextSpan(
-          children: <TextSpan>[
-            TextSpan(
-              text: price,
-              style: textTheme.largeBold.copyWith(color: textBaseLight),
-            ),
-            TextSpan(
-              text: ' / ' 'month',
-              style: textTheme.largeBold.copyWith(color: textBaseLight),
-            ),
-          ],
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            price + ' / ' + 'month',
+            style: textTheme.largeBold.copyWith(color: textBaseLight),
+          ).animate().fadeIn(duration: const Duration(milliseconds: 175)),
+        ],
       );
     } else if (period == "year") {
       final currencySymbol = price[0];
@@ -162,26 +158,16 @@ class _Price extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          RichText(
-            text: TextSpan(
-              children: <TextSpan>[
-                TextSpan(
-                  text: currencySymbol + pricePerMonthString,
-                  style: textTheme.largeBold.copyWith(color: textBaseLight),
-                ),
-                TextSpan(
-                  text: ' / ' 'month',
-                  style: textTheme.largeBold.copyWith(color: textBaseLight),
-                ),
-              ],
-            ),
+          Text(
+            currencySymbol + pricePerMonthString + ' / ' + 'month',
+            style: textTheme.largeBold.copyWith(color: textBaseLight),
           ),
           Text(
             price + " / " + "yr",
             style: textTheme.body.copyWith(color: textFaintLight),
           ),
         ],
-      );
+      ).animate().fadeIn(duration: const Duration(milliseconds: 175));
     } else {
       assert(false, "Invalid period: $period");
       return const Text("");

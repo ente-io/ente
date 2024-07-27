@@ -212,10 +212,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     widgets.add(
       SubscriptionToggle(
         onToggle: (p0) {
-          Future.delayed(const Duration(milliseconds: 175), () {
-            _showYearlyPlan = p0;
-            _filterStripeForUI();
-          });
+          _showYearlyPlan = p0;
+          _filterStripeForUI();
         },
       ),
     );
