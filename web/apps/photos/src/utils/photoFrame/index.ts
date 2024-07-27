@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
 import { SetSelectedState } from "types/gallery";
@@ -30,7 +30,7 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
     file.isSourceLoaded = false;
     file.conversionFailed = false;
     file.isConverted = false;
-    if (file.metadata.fileType === FILE_TYPE.IMAGE) {
+    if (file.metadata.fileType === FileType.image) {
         file.src = url;
     } else {
         file.html = `
@@ -50,7 +50,7 @@ export async function updateFileSrcProps(
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded =
-        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+        file.metadata.fileType === FileType.livePhoto
             ? srcURLs.type === "livePhoto"
             : true;
     file.isConverted = !isOriginal;
@@ -61,7 +61,7 @@ export async function updateFileSrcProps(
         return;
     }
 
-    if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+    if (file.metadata.fileType === FileType.video) {
         file.html = `
                 <video controls ${
                     !enableDownload && 'controlsList="nodownload"'
@@ -70,7 +70,7 @@ export async function updateFileSrcProps(
                     Your browser does not support the video tag.
                 </video>
                 `;
-    } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+    } else if (file.metadata.fileType === FileType.livePhoto) {
         if (srcURLs.type === "normal") {
             file.html = `
                 <div class = 'pswp-item-container'>
@@ -91,7 +91,7 @@ export async function updateFileSrcProps(
             </div>
             `;
         }
-    } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
+    } else if (file.metadata.fileType === FileType.image) {
         file.src = url as string;
     } else {
         log.error(`unknown file type - ${file.metadata.fileType}`);

@@ -1,6 +1,6 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
@@ -52,7 +52,7 @@ export const generateThumbnailWeb = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-    fileTypeInfo.fileType === FILE_TYPE.IMAGE
+    fileTypeInfo.fileType === FileType.image
         ? await generateImageThumbnailWeb(blob, fileTypeInfo)
         : await generateVideoThumbnailWeb(blob);
 
@@ -193,7 +193,7 @@ export const generateThumbnailNative = async (
     desktopUploadItem: DesktopUploadItem,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-    fileTypeInfo.fileType === FILE_TYPE.IMAGE
+    fileTypeInfo.fileType === FileType.image
         ? await electron.generateImageThumbnail(
               toDataOrPathOrZipEntry(desktopUploadItem),
               maxThumbnailDimension,

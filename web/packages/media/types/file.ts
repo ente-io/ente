@@ -1,4 +1,4 @@
-import type { FILE_TYPE } from "../file-type";
+import type { FileType } from "../file-type";
 
 /**
  * Information about the file that never changes post upload.
@@ -53,7 +53,7 @@ import type { FILE_TYPE } from "../file-type";
  */
 export interface Metadata {
     /** The "Ente" file type - image, video or live photo. */
-    fileType: FILE_TYPE;
+    fileType: FileType;
     /**
      * The file name.
      *

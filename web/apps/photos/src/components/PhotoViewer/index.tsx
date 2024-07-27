@@ -15,7 +15,7 @@ import {
 
 import { isDesktop } from "@/base/app";
 import { lowercaseExtension } from "@/base/file";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
@@ -238,7 +238,7 @@ function PhotoViewer(props: Iprops) {
         if (!isOpen) return;
         const item = items[photoSwipe?.getCurrentIndex()];
         if (!item) return;
-        if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (item.metadata.fileType === FileType.livePhoto) {
             const getVideoAndImage = () => {
                 const video = document.getElementById(
                     `live-photo-video-${item.id}`,
@@ -309,7 +309,7 @@ function PhotoViewer(props: Iprops) {
     }
 
     function updateExif(file: EnteFile) {
-        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+        if (file.metadata.fileType === FileType.video) {
             setExif({ key: file.src, value: undefined });
             return;
         }
@@ -318,7 +318,7 @@ function PhotoViewer(props: Iprops) {
         }
 
         const key =
-            file.metadata.fileType === FILE_TYPE.IMAGE
+            file.metadata.fileType === FileType.image
                 ? file.src
                 : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
 
@@ -331,8 +331,8 @@ function PhotoViewer(props: Iprops) {
     function updateShowConvertBtn(file: EnteFile) {
         const shouldShowConvertBtn =
             isElectron() &&
-            (file.metadata.fileType === FILE_TYPE.VIDEO ||
-                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
+            (file.metadata.fileType === FileType.video ||
+                file.metadata.fileType === FileType.livePhoto) &&
             !file.isConverted &&
             file.isSourceLoaded &&
             !file.conversionFailed;
@@ -360,12 +360,12 @@ function PhotoViewer(props: Iprops) {
             }
         }
         setShowEditButton(
-            file.metadata.fileType === FILE_TYPE.IMAGE && isSupported,
+            file.metadata.fileType === FileType.image && isSupported,
         );
     }
 
     function updateShowZoomButton(file: EnteFile) {
-        setShowZoomButton(file.metadata.fileType === FILE_TYPE.IMAGE);
+        setShowZoomButton(file.metadata.fileType === FileType.image);
     }
 
     const openPhotoSwipe = () => {
@@ -590,7 +590,7 @@ function PhotoViewer(props: Iprops) {
         try {
             exifExtractionInProgress.current = enteFile.src;
             const file = await getFileFromURL(
-                enteFile.metadata.fileType === FILE_TYPE.IMAGE
+                enteFile.metadata.fileType === FileType.image
                     ? (enteFile.src as string)
                     : (enteFile.srcURLs.url as LoadedLivePhotoSourceURL).image,
                 enteFile.metadata.title,

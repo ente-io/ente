@@ -1,6 +1,6 @@
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import piexif from "piexifjs";
 import type { EnteFile } from "../types/file";
 
@@ -30,7 +30,7 @@ export const updateExifIfNeededAndPossible = async (
     stream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> => {
     // Not needed: Not an image.
-    if (enteFile.metadata.fileType != FILE_TYPE.IMAGE) return stream;
+    if (enteFile.metadata.fileType != FileType.image) return stream;
 
     // Not needed: Time was not edited.
     // TODO: Until the types reflect reality

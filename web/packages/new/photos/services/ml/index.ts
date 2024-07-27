@@ -7,7 +7,7 @@ import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
@@ -245,7 +245,7 @@ const mlSync = async () => {
  */
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (!_isMLEnabled) return;
-    if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
+    if (enteFile.metadata.fileType !== FileType.image) return;
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };

@@ -1,12 +1,22 @@
-export enum FILE_TYPE {
-    IMAGE,
-    VIDEO,
-    LIVE_PHOTO,
+/** The type of an {@link EnteFile}. */
+export enum FileType {
+    /** An image (e.g. JPEG). */
+    image,
+    /** A video (e.g. MP4). */
+    video,
+    /**
+     * A live photo, aka motion photo.
+     *
+     * This is a combination of an image and a (short) video capturing the
+     * before and after when the image was taken. We preserve it as a zip
+     * containing both the parts.
+     */
+    livePhoto,
     OTHERS,
 }
 
 export interface FileTypeInfo {
-    fileType: FILE_TYPE;
+    fileType: FileType;
     /**
      * A lowercased, standardized extension for files of the current type.
      *
@@ -20,41 +30,41 @@ export interface FileTypeInfo {
 
 // list of format that were missed by type-detection for some files.
 export const KnownFileTypeInfos: FileTypeInfo[] = [
-    { fileType: FILE_TYPE.IMAGE, extension: "jpeg", mimeType: "image/jpeg" },
-    { fileType: FILE_TYPE.IMAGE, extension: "jpg", mimeType: "image/jpeg" },
-    { fileType: FILE_TYPE.VIDEO, extension: "webm", mimeType: "video/webm" },
-    { fileType: FILE_TYPE.VIDEO, extension: "mod", mimeType: "video/mpeg" },
-    { fileType: FILE_TYPE.VIDEO, extension: "mp4", mimeType: "video/mp4" },
-    { fileType: FILE_TYPE.IMAGE, extension: "gif", mimeType: "image/gif" },
-    { fileType: FILE_TYPE.VIDEO, extension: "dv", mimeType: "video/x-dv" },
+    { fileType: FileType.image, extension: "jpeg", mimeType: "image/jpeg" },
+    { fileType: FileType.image, extension: "jpg", mimeType: "image/jpeg" },
+    { fileType: FileType.video, extension: "webm", mimeType: "video/webm" },
+    { fileType: FileType.video, extension: "mod", mimeType: "video/mpeg" },
+    { fileType: FileType.video, extension: "mp4", mimeType: "video/mp4" },
+    { fileType: FileType.image, extension: "gif", mimeType: "image/gif" },
+    { fileType: FileType.video, extension: "dv", mimeType: "video/x-dv" },
     {
-        fileType: FILE_TYPE.VIDEO,
+        fileType: FileType.video,
         extension: "wmv",
         mimeType: "video/x-ms-asf",
     },
     {
-        fileType: FILE_TYPE.VIDEO,
+        fileType: FileType.video,
         extension: "hevc",
         mimeType: "video/hevc",
     },
     {
-        fileType: FILE_TYPE.IMAGE,
+        fileType: FileType.image,
         extension: "raf",
         mimeType: "image/x-fuji-raf",
     },
     {
-        fileType: FILE_TYPE.IMAGE,
+        fileType: FileType.image,
         extension: "orf",
         mimeType: "image/x-olympus-orf",
     },
 
     {
-        fileType: FILE_TYPE.IMAGE,
+        fileType: FileType.image,
         extension: "crw",
         mimeType: "image/x-canon-crw",
     },
     {
-        fileType: FILE_TYPE.VIDEO,
+        fileType: FileType.video,
         extension: "mov",
         mimeType: "video/quicktime",
     },

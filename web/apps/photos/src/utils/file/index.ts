@@ -1,6 +1,6 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
@@ -53,7 +53,7 @@ export async function downloadFile(file: EnteFile) {
         let fileBlob = await new Response(
             await DownloadManager.getFile(file),
         ).blob();
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
             const image = new File([imageData], imageFileName);
@@ -450,7 +450,7 @@ async function downloadFileDesktop(
     const stream = await DownloadManager.getFile(file);
     const updatedStream = await updateExifIfNeededAndPossible(file, stream);
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+    if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(updatedStream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -495,8 +495,8 @@ async function downloadFileDesktop(
     }
 }
 
-export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+export const isImageOrVideo = (fileType: FileType) =>
+    [FileType.image, FileType.video].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);

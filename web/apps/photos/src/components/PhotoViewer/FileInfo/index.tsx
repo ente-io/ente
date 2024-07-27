@@ -1,7 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { nameAndExtension } from "@/base/file";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import type { ParsedMetadata, RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
@@ -396,7 +396,7 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
         <>
             <InfoItem
                 icon={
-                    file.metadata.fileType === FILE_TYPE.VIDEO ? (
+                    file.metadata.fileType === FileType.video ? (
                         <VideocamOutlined />
                     ) : (
                         <PhotoOutlined />
