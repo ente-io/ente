@@ -4,7 +4,7 @@ import { nameAndExtension } from "@/base/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
-import type { RawExifTags } from "@/new/photos/services/exif";
+import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
@@ -320,28 +320,18 @@ const parseExifInfo = (
     const { exif } = tags;
 
     if (exif) {
-        if (exif.Make && exif.Model) {
+        if (exif.Make && exif.Model)
             info["takenOnDevice"] =
                 `${exif.Make.description} ${exif.Model.description}`;
-        }
 
-        if (exif.FNumber) {
-            info.fNumber = `f/${Math.ceil(exif.FNumber.value)}`;
-        } else if (exif.FocalLength && exif.ApertureValue) {
-            info.fNumber = `f/${Math.ceil(
-                exif.FocalLength.value / exif.ApertureValue.value,
-            )}`;
-        }
+        if (exif.FNumber)
+            info.fNumber = exif.FNumber.description; /* e.g. "f/16" */
 
-        if (exif.ExposureTime) {
-            info["exposureTime"] = `1/${1 / exif.ExposureTime.value}`;
-        }
+        if (exif.ExposureTime)
+            info["exposureTime"] = exif.ExposureTime.description; /* "1/10" */
 
-        if (exif.ISOSpeedRatings) {
-            const iso = exif.ISOSpeedRatings;
-            const n = Array.isArray(iso) ? (iso[0] ?? 0) / (iso[1] ?? 1) : iso;
-            info.iso = `ISO${n}`;
-        }
+        if (exif.ISOSpeedRatings)
+            info.iso = `ISO${tagNumericValue(exif.ISOSpeedRatings)}`;
     }
     return info;
 };

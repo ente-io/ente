@@ -535,3 +535,20 @@ export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
 
     return tags;
 };
+
+/**
+ * Return a number from a raw Exif tag value.
+ *
+ * Some numeric Exif values are stored as arrays of two numbers [p, q]
+ * represeting a rational number p/q. ExifReader usually converts this and for
+ * us, but not always.
+ *
+ * This function takes such potentially ambiguous (already converted or not)
+ * values and returns a number.
+ */
+export const tagNumericValue = (
+    tag: ExifReader.NumberTag & ExifReader.NumberArrayTag,
+) => {
+    const v = tag.value;
+    return Array.isArray(v) ? (v[0] ?? 0) / (v[1] ?? 1) : v;
+};
