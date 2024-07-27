@@ -6,6 +6,7 @@ import {
     type FileTypeInfo,
 } from "@/media/file-type";
 import { CustomError } from "@ente/shared/error";
+import FileTypeDetect from "file-type";
 
 /**
  * Read the file's initial contents or use the file's name to detect its type.
@@ -91,7 +92,7 @@ const readInitialChunkOfFile = async (file: File) => {
 };
 
 const detectFileTypeFromBuffer = async (buffer: Uint8Array) => {
-    const result = await FileType.fromBuffer(buffer);
+    const result = await FileTypeDetect.fromBuffer(buffer);
     if (!result)
         throw Error("Could not deduce file type from the file's contents");
     return result;
