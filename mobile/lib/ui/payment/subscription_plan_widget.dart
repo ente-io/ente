@@ -140,15 +140,10 @@ class _Price extends StatelessWidget {
       );
     }
     if (period == "month") {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            price + ' / ' + 'month',
-            style: textTheme.largeBold.copyWith(color: textBaseLight),
-          ).animate().fadeIn(duration: const Duration(milliseconds: 175)),
-        ],
-      );
+      return Text(
+        price + ' / ' + 'month',
+        style: textTheme.largeBold.copyWith(color: textBaseLight),
+      ).animate().fadeIn(duration: const Duration(milliseconds: 175));
     } else if (period == "year") {
       final currencySymbol = price[0];
       final priceWithoutCurrency = price.substring(1);
@@ -164,7 +159,7 @@ class _Price extends StatelessWidget {
           ),
           Text(
             price + " / " + "yr",
-            style: textTheme.body.copyWith(color: textFaintLight),
+            style: textTheme.small.copyWith(color: textFaintLight),
           ),
         ],
       ).animate().fadeIn(duration: const Duration(milliseconds: 175));
