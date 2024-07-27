@@ -140,10 +140,17 @@ class _Price extends StatelessWidget {
       );
     }
     if (period == "month") {
-      return Text(
-        price + ' / ' + 'month',
-        style: textTheme.largeBold.copyWith(color: textBaseLight),
-      ).animate().fadeIn(duration: const Duration(milliseconds: 175));
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            price + ' / ' + 'month',
+            style: textTheme.largeBold.copyWith(color: textBaseLight),
+          )
+              .animate(delay: const Duration(milliseconds: 100))
+              .fadeIn(duration: const Duration(milliseconds: 250)),
+        ],
+      );
     } else if (period == "year") {
       final currencySymbol = price[0];
       final priceWithoutCurrency = price.substring(1);
@@ -162,7 +169,9 @@ class _Price extends StatelessWidget {
             style: textTheme.small.copyWith(color: textFaintLight),
           ),
         ],
-      ).animate().fadeIn(duration: const Duration(milliseconds: 175));
+      )
+          .animate(delay: const Duration(milliseconds: 100))
+          .fadeIn(duration: const Duration(milliseconds: 250));
     } else {
       assert(false, "Invalid period: $period");
       return const Text("");
