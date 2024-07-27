@@ -12,12 +12,14 @@ class SubscriptionPlanWidget extends StatefulWidget {
     required this.price,
     required this.period,
     this.isActive = false,
+    this.isPopular = false,
   });
 
   final int storage;
   final String price;
   final String period;
   final bool isActive;
+  final bool isPopular;
 
   @override
   State<SubscriptionPlanWidget> createState() => _SubscriptionPlanWidgetState();
@@ -42,7 +44,6 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: backgroundElevated2Light,
           borderRadius: BorderRadius.circular(8),
@@ -57,35 +58,65 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
             width: 1,
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
           children: [
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: storageValue,
-                    style: const TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w600,
-                      color: textBaseLight,
-                    ),
-                  ),
-                  WidgetSpan(
-                    child: Transform.translate(
-                      offset: const Offset(2, -16),
-                      child: Text(
-                        storageUnit,
-                        style: getEnteTextTheme(context).h3.copyWith(
-                              color: textMutedLight,
-                            ),
+            widget.isActive
+                ? Positioned(
+                    top: 0,
+                    right: 0,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(8),
+                      ),
+                      child: Image.asset(
+                        "assets/active_subscription.png",
                       ),
                     ),
+                  )
+                : widget.isPopular
+                    ? ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                        ),
+                        child: Image.asset(
+                          "assets/popular_subscription.png",
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: storageValue,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w600,
+                            color: textBaseLight,
+                          ),
+                        ),
+                        WidgetSpan(
+                          child: Transform.translate(
+                            offset: const Offset(2, -16),
+                            child: Text(
+                              storageUnit,
+                              style: getEnteTextTheme(context).h3.copyWith(
+                                    color: textMutedLight,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  _Price(price: widget.price, period: widget.period),
                 ],
               ),
             ),
-            _Price(price: widget.price, period: widget.period),
           ],
         ),
       ),

@@ -528,6 +528,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               price: plan.price,
               period: plan.period,
               isActive: isActive && !_hideCurrentPlanSelection,
+              isPopular: _isPopularPlan(plan),
             ),
           ),
         ),
@@ -542,6 +543,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _isFreePlanUser() {
     return _currentSubscription != null &&
         freeProductID == _currentSubscription!.productID;
+  }
+
+  bool _isPopularPlan(BillingPlan plan) {
+    return popularProductIDs.contains(plan.id);
   }
 
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
