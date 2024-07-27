@@ -1,9 +1,9 @@
 /** The type of an {@link EnteFile}. */
-export enum FileType {
+export const FileType = {
     /** An image (e.g. JPEG). */
-    image,
+    image: 0,
     /** A video (e.g. MP4). */
-    video,
+    video: 1,
     /**
      * A live photo, aka motion photo.
      *
@@ -11,8 +11,10 @@ export enum FileType {
      * before and after when the image was taken. We preserve it as a zip
      * containing both the parts.
      */
-    livePhoto,
-}
+    livePhoto: 2,
+} as const;
+
+export type FileType = (typeof FileType)[keyof typeof FileType];
 
 export interface FileTypeInfo {
     fileType: FileType;
