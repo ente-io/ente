@@ -12,7 +12,6 @@ export enum FileType {
      * containing both the parts.
      */
     livePhoto,
-    OTHERS,
 }
 
 export interface FileTypeInfo {
