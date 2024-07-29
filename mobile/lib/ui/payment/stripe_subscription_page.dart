@@ -22,7 +22,6 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
-import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
@@ -236,12 +235,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           bonusData: _userDetails.bonusData,
         ),
       );
+    } else {
+      const SizedBox(height: 56);
     }
 
     if (_currentSubscription!.productID == freeProductID) {
-      if (widget.isOnboarding) {
-        widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
-      }
       widgets.add(
         SubFaqWidget(isOnboarding: widget.isOnboarding),
       );
@@ -278,7 +276,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).paymentDetails,
+              title: "Manage payment method",
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -303,9 +301,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           child: _stripeRenewOrCancelButton(),
         ),
       );
-
-      widgets.add(const SizedBox(height: 80));
     }
+
+    widgets.add(const SizedBox(height: 80));
 
     return SingleChildScrollView(
       child: Column(

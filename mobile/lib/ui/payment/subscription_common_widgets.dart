@@ -75,7 +75,9 @@ class ValidityWidget extends StatelessWidget {
     final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
     if (currentSubscription == null ||
         (currentSubscription!.isFreePlan() && addOnBonus.isEmpty)) {
-      return const SizedBox.shrink();
+      return const SizedBox(
+        height: 56,
+      );
     }
     final bool isFreeTrialSub = currentSubscription!.productID == freeProductID;
     bool hideSubValidityView = false;
@@ -99,15 +101,21 @@ class ValidityWidget extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 0),
+      padding: const EdgeInsets.fromLTRB(16, 47, 16, 72),
       child: Column(
         children: [
           if (!hideSubValidityView)
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                message,
+                style: getEnteTextTheme(context).body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                textAlign: TextAlign.center,
+              ),
             ),
+          const SizedBox(height: 8),
           if (addOnBonus.isNotEmpty)
             ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)).toList(),
         ],
@@ -129,10 +137,10 @@ class AddOnBonusValidity extends StatelessWidget {
     );
     final String storage = convertBytesToReadableFormat(bonus.storage);
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      padding: const EdgeInsets.only(top: 4, bottom: 4),
       child: Text(
         S.of(context).addOnValidTill(storage, endDate),
-        style: Theme.of(context).textTheme.bodySmall,
+        style: getEnteTextTheme(context).smallFaint,
         textAlign: TextAlign.center,
       ),
     );
