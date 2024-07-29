@@ -49,16 +49,20 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
         decoration: BoxDecoration(
           color: backgroundElevated2Light,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: brightness == Brightness.dark
-                ? widget.isActive
-                    ? const Color.fromRGBO(191, 191, 191, 1)
-                    : strokeMutedLight
-                : widget.isActive
-                    ? const Color.fromRGBO(177, 177, 177, 1)
-                    : const Color.fromRGBO(66, 66, 66, 0.4),
-            width: 1,
-          ),
+          border: widget.isActive
+              ? Border.all(
+                  color: getEnteColorScheme(context).primary700,
+                  width: brightness == Brightness.dark ? 1.5 : 1,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                )
+              : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              offset: const Offset(0, 4),
+              blurRadius: 4,
+            ),
+          ],
         ),
         child: Stack(
           children: [
