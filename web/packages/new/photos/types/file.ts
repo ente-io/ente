@@ -1,4 +1,4 @@
-import type { Metadata } from "@/media/types/file";
+import type { Metadata } from "@/media/file-metadata";
 import {
     VISIBILITY_STATE,
     type EncryptedMagicMetadata,

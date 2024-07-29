@@ -82,6 +82,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noSystemLockFound":
             MessageLookupByLibrary.simpleMessage("No system lock found"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
         "reenterPassword":
             MessageLookupByLibrary.simpleMessage("Re-enter password"),

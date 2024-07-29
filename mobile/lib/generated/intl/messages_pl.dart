@@ -1092,6 +1092,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hasło zostało pomyślnie zmienione"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Blokada hasłem"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
         "paymentDetails":

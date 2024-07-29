@@ -5,7 +5,7 @@ import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type {
@@ -269,8 +269,8 @@ class DownloadManagerImpl {
         const cacheKey = file.id.toString();
 
         if (
-            file.metadata.fileType === FILE_TYPE.IMAGE ||
-            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+            file.metadata.fileType === FileType.image ||
+            file.metadata.fileType === FileType.livePhoto
         ) {
             const cachedBlob = await this.fileCache?.get(cacheKey);
             let encryptedArrayBuffer = await cachedBlob?.arrayBuffer();
@@ -457,7 +457,7 @@ async function getRenderableFileURL(
     let mimeType: string | undefined;
 
     switch (file.metadata.fileType) {
-        case FILE_TYPE.IMAGE: {
+        case FileType.image: {
             const convertedBlob = await renderableImageBlob(
                 file.metadata.title,
                 fileBlob,
@@ -469,14 +469,14 @@ async function getRenderableFileURL(
             mimeType = convertedBlob.type;
             break;
         }
-        case FILE_TYPE.LIVE_PHOTO: {
+        case FileType.livePhoto: {
             url = await getRenderableLivePhotoURL(file, fileBlob, forceConvert);
             isOriginal = false;
             isRenderable = false;
             type = "livePhoto";
             break;
         }
-        case FILE_TYPE.VIDEO: {
+        case FileType.video: {
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
                 fileBlob,

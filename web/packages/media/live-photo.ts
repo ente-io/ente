@@ -4,7 +4,7 @@ import {
     nameAndExtension,
 } from "@/base/file";
 import JSZip from "jszip";
-import { FILE_TYPE } from "./file-type";
+import { FileType } from "./file-type";
 
 const potentialImageExtensions = [
     "heic",
@@ -41,12 +41,12 @@ const potentialVideoExtensions = [
  */
 export const potentialFileTypeFromExtension = (
     fileName: string,
-): FILE_TYPE | undefined => {
+): FileType | undefined => {
     const ext = lowercaseExtension(fileName);
     if (!ext) return undefined;
 
-    if (potentialImageExtensions.includes(ext)) return FILE_TYPE.IMAGE;
-    else if (potentialVideoExtensions.includes(ext)) return FILE_TYPE.VIDEO;
+    if (potentialImageExtensions.includes(ext)) return FileType.image;
+    else if (potentialVideoExtensions.includes(ext)) return FileType.video;
     else return undefined;
 };
 

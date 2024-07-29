@@ -314,7 +314,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             icon: Icon(
               isQuickLink && (widget.collection!.hasLink)
                   ? Icons.link_outlined
-                  : Icons.people_outlined,
+                  : Icons.adaptive.share,
             ),
             onPressed: () async {
               await _showShareCollectionDialog();

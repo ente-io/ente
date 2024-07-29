@@ -1,4 +1,3 @@
-import { isDevBuild } from "@/base/env";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
@@ -104,16 +103,13 @@ const remoteFeatureFlagsFetchingIfNeeded = async () => {
 /**
  * Return `true` if the current user is marked as an "internal" user.
  *
- * 1. Everyone is considered as an internal user in dev builds.
- * 2. Emails that end in `@ente.io` are always considered as internal users.
- * 3. If the "internalUser" remote feature flag is set, the user is internal.
- * 4. Otherwise false.
+ * 1. Emails that end in `@ente.io` are considered as internal users.
+ * 2. If the "internalUser" remote feature flag is set, the user is internal.
+ * 3. Otherwise false.
  *
  * See also: [Note: Feature Flags].
  */
 export const isInternalUser = async () => {
-    if (isDevBuild) return true;
-
     const user = localUser();
     if (user?.email.endsWith("@ente.io")) return true;
 

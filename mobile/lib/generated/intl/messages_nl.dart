@@ -1098,6 +1098,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wachtwoord succesvol aangepast"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Wachtwoord slot"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Wij slaan dit wachtwoord niet op, dus als je het vergeet, kunnen <underline>we je gegevens niet ontsleutelen</underline>"),
         "paymentDetails":

@@ -68,9 +68,7 @@ const sortTrashFiles = (files: EnteFile[]) => {
                     b.metadata.modificationTime - a.metadata.modificationTime
                 );
             }
-            return (
-                (b.metadata.creationTime ?? 0) - (a.metadata.creationTime ?? 0)
-            );
+            return b.metadata.creationTime - a.metadata.creationTime;
         }
         return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
     });

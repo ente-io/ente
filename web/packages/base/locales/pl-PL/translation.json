@@ -291,7 +291,7 @@
     "SEND_OTT": "Wyślij OTP",
     "EMAIl_ALREADY_OWNED": "E-mail jest już zajęty",
     "ETAGS_BLOCKED": "<p>Nie mogliśmy przesłać następujących plików ze względu na konfigurację przeglądarki.</p><p>Prosimy wyłączyć wszelkie dodatki, które mogą uniemożliwiać Ente od użycia <code>eTags</code> do przesyłania dużych plików, lub użyj naszej <a>aplikacji komputerowej</a>, aby uzyskać bardziej wiarygodny import.</p>",
-    "LIVE_PHOTOS_DETECTED": "Zdjęcia i pliki wideo ze zdjęć na żywo zostały scalone w jeden plik",
+    "LIVE_PHOTOS_DETECTED": "Zdjęcia i pliki wideo ze zdjęć Live Photo zostały scalone w jeden plik",
     "RETRY_FAILED": "Ponów nieudane przesłania",
     "FAILED_UPLOADS": "Nieudane przesłania ",
     "failed_uploads_hint": "Po zakończeniu przesyłania będzie dostępna opcja do powtórzenia",
@@ -564,7 +564,7 @@
     "NEW_YEAR_EVE": "Sylwester",
     "IMAGE": "Zdjęcie",
     "VIDEO": "Wideo",
-    "LIVE_PHOTO": "Zdjęcia Live",
+    "LIVE_PHOTO": "Zdjęcia Live Photo",
     "editor": {
         "crop": "Przytnij"
     },
