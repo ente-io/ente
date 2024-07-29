@@ -254,48 +254,13 @@ Future<void> shareImageAndUrl(
   );
 }
 
-/// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
-/// This returns the position of the share button if context and key are not null
-/// and if not, it returns a default position so that the share sheet on iPad has
-/// some position to show up.
-Rect _sharePosOrigin(BuildContext? context, GlobalKey? key) {
-  late final Rect rect;
-  if (context != null) {
-    rect = shareButtonRect(context, key);
-  } else {
-    rect = const Offset(20.0, 20.0) & const Size(10, 10);
-  }
-  return rect;
-}
-
-/// The [ScreenshotController] is used to capture the image of a widget that serves as
-/// a placeholder for an album link. The placeholder is then shared along with the album link.
-final ScreenshotController screenshotController = ScreenshotController();
-
-Future<Uint8List> _createAlbumPlaceholder(
-  List<EnteFile> files,
-  ScreenshotController screenshotController,
-  BuildContext context,
-) async {
-  final Widget imageWidget = LinkPlaceholder(
-    files: files,
-  );
-  final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-  final bytesOfImageToWidget = await screenshotController.captureFromWidget(
-    imageWidget,
-    pixelRatio: pixelRatio,
-    targetSize: MediaQuery.sizeOf(context),
-    delay: const Duration(milliseconds: 300),
-  );
-  return bytesOfImageToWidget;
-}
-
 Future<void> shareAlbumLinkWithPlaceholder(
   BuildContext context,
   Collection collection,
   String url,
   GlobalKey key,
 ) async {
+  final ScreenshotController screenshotController = ScreenshotController();
   final int fileCount =
       await CollectionsService.instance.getFileCount(collection);
 
@@ -333,4 +298,36 @@ Future<void> shareAlbumLinkWithPlaceholder(
       key: key,
     );
   }
+}
+
+/// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
+/// This returns the position of the share button if context and key are not null
+/// and if not, it returns a default position so that the share sheet on iPad has
+/// some position to show up.
+Rect _sharePosOrigin(BuildContext? context, GlobalKey? key) {
+  late final Rect rect;
+  if (context != null) {
+    rect = shareButtonRect(context, key);
+  } else {
+    rect = const Offset(20.0, 20.0) & const Size(10, 10);
+  }
+  return rect;
+}
+
+Future<Uint8List> _createAlbumPlaceholder(
+  List<EnteFile> files,
+  ScreenshotController screenshotController,
+  BuildContext context,
+) async {
+  final Widget imageWidget = LinkPlaceholder(
+    files: files,
+  );
+  final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
+  final bytesOfImageToWidget = await screenshotController.captureFromWidget(
+    imageWidget,
+    pixelRatio: pixelRatio,
+    targetSize: MediaQuery.sizeOf(context),
+    delay: const Duration(milliseconds: 300),
+  );
+  return bytesOfImageToWidget;
 }
