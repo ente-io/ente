@@ -96,20 +96,23 @@ export class MLWorker {
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
 
-        // Take an explicit dependency on the DOMParser provided by xmldom so
-        // that webpack does not tree shake it.
-        //
         // Normally, DOMParser is available to web code, so our Exif library
         // (ExifReader) has an optional dependency on the the non-browser
         // alternative DOMParser provided by @xmldom/xmldom.
         //
         // But window.DOMParser is not available to web workers.
         //
-        // So we want to use the @xmldom/xmldom version. For this, we need to
-        // also explicitly refer to it so that webpack does not tree shake it,
-        // since inside ExifReader it is weakly referenced using
-        // `__non_webpack_require__('@xmldom/xmldom')`.
-        DOMParser;
+        // So we need to get ExifReader to use the @xmldom/xmldom version.
+        // ExifReader references it using the following code:
+        //
+        //     __non_webpack_require__('@xmldom/xmldom')
+        //
+        // So we need to explicitly reference it to ensure that it does not get
+        // tree shaken by webpack. But ensuring it is part of the bundle does
+        // not seem to work (for reasons I don't yet understand), so we also
+        // need to monkey patch it (This also ensures that it is not tree
+        // shaken).
+        globalThis.DOMParser = DOMParser;
     }
 
     /**
