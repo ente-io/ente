@@ -6,29 +6,60 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import ExifReader from "exifreader";
+import type { EnteFile } from "../types/file";
 import type { ParsedExtractedMetadata } from "../types/metadata";
 import { isInternalUser } from "./feature-flags";
 
 // TODO: Exif: WIP flag to inspect the migration from old to new lib.
 export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
+const cmpTsEq = (a: number | undefined | null, b: number | undefined) => {
+    if (!a || !b) return false;
+    if (a == b) return true;
+    if (a / 1e6 == b / 1e6) return true;
+    return false;
+};
+
 export const cmpNewLib = (
     oldLib: ParsedExtractedMetadata,
     newLib: ParsedMetadata,
 ) => {
+    const logM = (r: string) =>
+        log.info("[exif]", r, JSON.stringify({ old: oldLib, new: newLib }));
     if (
-        oldLib.creationTime == newLib.creationDate?.timestamp &&
+        cmpTsEq(oldLib.creationTime, newLib.creationDate?.timestamp) &&
         oldLib.location.latitude == newLib.location?.latitude &&
         oldLib.location.longitude == newLib.location?.longitude
     ) {
-        if (oldLib.width == newLib.width && oldLib.height == newLib.height)
-            log.info("Exif migration ✅");
-        else log.info("Exif migration ✅✨");
+        if (
+            oldLib.width == newLib.width &&
+            oldLib.height == newLib.height &&
+            oldLib.creationTime == newLib.creationDate?.timestamp
+        )
+            logM("exact match");
+        else logM("enhanced match");
         log.debug(() => ["exif/cmp", { oldLib, newLib }]);
     } else {
-        log.info("Exif migration - Potential mismatch ❗️🚩");
-        log.info({ oldLib, newLib });
+        logM("potential mismatch ❗️🚩");
     }
+};
+
+export const cmpNewLib2 = (enteFile: EnteFile, _exif: unknown) => {
+    // cast is fine here, this is just temporary debugging code.
+    const rawExif = _exif as RawExifTags;
+    const newLib = parseExif(rawExif);
+    const pem = {
+        location: {
+            latitude: enteFile.metadata.latitude,
+            longitude: enteFile.metadata.longitude,
+        },
+        creationTime: enteFile.metadata.creationTime,
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        width: enteFile.w || null,
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        height: enteFile.h || null,
+    };
+    cmpNewLib(pem, newLib);
 };
 
 /**

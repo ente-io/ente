@@ -9,7 +9,7 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose } from "comlink";
 import downloadManager from "../download";
-import { extractRawExif } from "../exif";
+import { cmpNewLib2, extractRawExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -410,7 +410,8 @@ const index = async (
 
     // There is at least one derived data type that still needs to be indexed.
 
-    const { originalBlob, renderableBlob } = await indexableBlobs(
+    // Videos will not have an original blob whilst having a renderable blob.
+    const { originalImageBlob, renderableBlob } = await indexableBlobs(
         enteFile,
         uploadItem,
         electron,
@@ -443,7 +444,9 @@ const index = async (
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
                 existingExif ??
-                    (originalBlob ? extractRawExif(originalBlob) : undefined),
+                    (originalImageBlob
+                        ? extractRawExif(originalImageBlob)
+                        : undefined),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -452,12 +455,14 @@ const index = async (
             throw e;
         }
 
+        if (originalImageBlob) cmpNewLib2(enteFile, exif);
+
         log.debug(() => {
             const ms = Date.now() - startTime;
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            if (!hasExistingExif && originalBlob) msg.push("exif");
+            if (!hasExistingExif && originalImageBlob) msg.push("exif");
             return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
