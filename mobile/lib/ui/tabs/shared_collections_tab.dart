@@ -99,7 +99,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const maxThumbnailWidth = 160.0;
-    const maxQuickLinks = 6;
+    const maxQuickLinks = 4;
     final numberOfQuickLinks = collections.quickLinks.length;
     const quickLinkTitleHeroTag = "quick_link_title";
     final SectionTitle sharedWithYou =
