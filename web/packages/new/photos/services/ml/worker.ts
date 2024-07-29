@@ -7,6 +7,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
+import { DOMParser } from "@xmldom/xmldom";
 import { expose } from "comlink";
 import downloadManager from "../download";
 import { cmpNewLib2, extractRawExif } from "../exif";
@@ -94,6 +95,21 @@ export class MLWorker {
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
+
+        // Take an explicit dependency on the DOMParser provided by xmldom so
+        // that webpack does not tree shake it.
+        //
+        // Normally, DOMParser is available to web code, so our Exif library
+        // (ExifReader) has an optional dependency on the the non-browser
+        // alternative DOMParser provided by @xmldom/xmldom.
+        //
+        // But window.DOMParser is not available to web workers.
+        //
+        // So we want to use the @xmldom/xmldom version. For this, we need to
+        // also explicitly refer to it so that webpack does not tree shake it,
+        // since inside ExifReader it is weakly referenced using
+        // `__non_webpack_require__('@xmldom/xmldom')`.
+        DOMParser;
     }
 
     /**

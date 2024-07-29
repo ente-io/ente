@@ -12,6 +12,7 @@
         "@ente/shared": "*",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
         "@stripe/stripe-js": "^1.13.2",
+        "@xmldom/xmldom": "^0.8.10",
         "bip39": "^3.0.4",
         "bs58": "^5.0.0",
         "chrono-node": "^2.2.6",
