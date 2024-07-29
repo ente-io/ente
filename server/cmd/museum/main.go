@@ -353,7 +353,7 @@ func main() {
 
 	p := ginprometheus.NewPrometheus("museum")
 	p.ReqCntURLLabelMappingFn = urlSanitizer
-	p.Use(server)
+	server.Use(p.HandlerFunc())
 
 	// note: the recover middleware must be in the last
 	server.Use(requestid.New(), middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
