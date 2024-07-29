@@ -2,12 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:photos/core/constants.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
-import "package:photos/models/file/file.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -21,13 +18,10 @@ import 'package:photos/ui/sharing/album_participants_page.dart';
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/manage_album_participant.dart";
 import 'package:photos/ui/sharing/manage_links_widget.dart';
-import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import "package:screenshot/screenshot.dart";
 
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
@@ -42,55 +36,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   late List<User?> _sharees;
   final CollectionActions collectionActions =
       CollectionActions(CollectionsService.instance);
-  final ScreenshotController screenshotController = ScreenshotController();
   final GlobalKey sendLinkButtonKey = GlobalKey();
-
-  Future<Uint8List> _createAlbumPlaceholder(
-    List<EnteFile> ownedSelectedFiles,
-  ) async {
-    final Widget imageWidget = LinkPlaceholder(
-      files: ownedSelectedFiles,
-    );
-    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final bytesOfImageToWidget = await screenshotController.captureFromWidget(
-      imageWidget,
-      pixelRatio: pixelRatio,
-      targetSize: MediaQuery.sizeOf(context),
-      delay: const Duration(milliseconds: 300),
-    );
-    return bytesOfImageToWidget;
-  }
-
-  Future<void> _shareAlbumLink(
-    BuildContext context,
-    Collection collection,
-    String url,
-  ) async {
-    final dialog = createProgressDialog(
-      context,
-      S.of(context).creatingLink,
-      isDismissible: true,
-    );
-    await dialog.show();
-
-    final List<EnteFile> filesInCollection =
-        (await FilesDB.instance.getFilesInCollection(
-      collection.id,
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-    ))
-            .files;
-
-    final placeholderBytes = await _createAlbumPlaceholder(filesInCollection);
-    await dialog.hide();
-
-    await shareImageAndUrl(
-      placeholderBytes,
-      url,
-      context: context,
-      key: sendLinkButtonKey,
-    );
-  }
 
   Future<void> _navigateToManageUser() async {
     if (_sharees.length == 1) {
@@ -250,10 +196,11 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               menuItemColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
                 // ignore: unawaited_futures
-                _shareAlbumLink(
+                await shareAlbumLinkWithPlaceholder(
                   context,
                   widget.collection,
                   url,
+                  sendLinkButtonKey,
                 );
               },
               isTopBorderRadiusRemoved: true,
