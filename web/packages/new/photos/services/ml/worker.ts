@@ -315,7 +315,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  *
  * So this function also does things that are not related to ML and/or indexing:
  *
- * -   Extracting and updating Exif.
+ * -   Extracting Exif.
  * -   Saving face crops.
  *
  * ---
@@ -368,6 +368,12 @@ const index = async (
     const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
     const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
 
+    // exif is expected to be a JSON object in the shape of RawExifTags, but
+    // this function don't care what's inside it and can just treat it as an
+    // opaque blob.
+    const existingExif = remoteDerivedData?.raw.exif;
+    const hasExistingExif = existingExif !== undefined && existingExif !== null;
+
     let existingFaceIndex: FaceIndex | undefined;
     if (
         existingRemoteFaceIndex &&
@@ -389,18 +395,14 @@ const index = async (
     // See if we already have all the derived data fields that we need. If so,
     // just update our local db and return.
 
-    if (
-        existingFaceIndex &&
-        existingCLIPIndex &&
-        !process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML_DONT_USE /* TODO-ML: WIP */
-    ) {
+    if (existingFaceIndex && existingCLIPIndex && hasExistingExif) {
         try {
             await saveIndexes(
                 { fileID, ...existingFaceIndex },
                 { fileID, ...existingCLIPIndex },
             );
         } catch (e) {
-            log.error(`Failed to save indexes data for ${f}`, e);
+            log.error(`Failed to save indexes for ${f}`, e);
             throw e;
         }
         return;
@@ -419,8 +421,9 @@ const index = async (
         image = await imageBitmapAndData(renderableBlob);
     } catch (e) {
         // If we cannot get the raw image data for the file, then retrying again
-        // won't help. It'd only make sense to retry later if modify
-        // `renderableBlob` to be do something different for this type of file.
+        // won't help (if in the future we enhance the underlying code for
+        // `indexableBlobs` to handle this failing type we can trigger a
+        // reindexing attempt for failed files).
         //
         // See: [Note: Transient and permanent indexing failures]
         log.error(`Failed to get image data for indexing ${f}`, e);
@@ -439,7 +442,8 @@ const index = async (
             [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
-                originalBlob ? extractRawExif(originalBlob) : undefined,
+                existingExif ??
+                    (originalBlob ? extractRawExif(originalBlob) : undefined),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -453,9 +457,8 @@ const index = async (
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            if (exif)
-                return ["exif", exif]; // TODO: Exif
-            else return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
+            if (!hasExistingExif && originalBlob) msg.push("exif");
+            return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
@@ -479,6 +482,7 @@ const index = async (
             ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
+            exif,
         };
 
         log.debug(() => ["Uploading derived data", rawDerivedData]);
