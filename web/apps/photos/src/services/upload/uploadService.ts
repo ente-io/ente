@@ -31,9 +31,9 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError, handleUploadError } from "@ente/shared/error";
+import { parseImageMetadata } from "@ente/shared/utils/exif-old";
 import type { Remote } from "comlink";
 import { addToCollection } from "services/collectionService";
-import { parseImageMetadata } from "services/exif";
 import {
     PublicUploadProps,
     type LivePhotoAssets,

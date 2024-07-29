@@ -1,10 +1,13 @@
 import { isDevBuild } from "@/base/env";
+import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import {
     parseMetadataDate,
     type ParsedMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
+import { parseImageMetadata } from "@ente/shared/utils/exif-old";
 import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
 import type { ParsedExtractedMetadata } from "../types/metadata";
@@ -45,22 +48,23 @@ export const cmpNewLib = (
     }
 };
 
-export const cmpNewLib2 = (enteFile: EnteFile, _exif: unknown) => {
+export const cmpNewLib2 = async (
+    enteFile: EnteFile,
+    blob: Blob,
+    _exif: unknown,
+) => {
+    const [, ext] = nameAndExtension(enteFile.metadata.title);
+    const oldLib = await parseImageMetadata(
+        new File([blob], enteFile.metadata.title),
+        {
+            fileType: FileType.image,
+            extension: ext ?? "",
+        },
+    );
     // cast is fine here, this is just temporary debugging code.
     const rawExif = _exif as RawExifTags;
     const newLib = parseExif(rawExif);
-    const pem = {
-        location: {
-            latitude: enteFile.metadata.latitude,
-            longitude: enteFile.metadata.longitude,
-        },
-        creationTime: enteFile.metadata.creationTime,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        width: enteFile.w || null,
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        height: enteFile.h || null,
-    };
-    cmpNewLib(pem, newLib);
+    cmpNewLib(oldLib, newLib);
 };
 
 /**

@@ -4,12 +4,12 @@ import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
+import { getParsedExifData } from "@ente/shared/utils/exif-old";
 import type { FixOption } from "components/FixCreationTime";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from "utils/file";
-import { getParsedExifData } from "./exif";
 
 const EXIF_TIME_TAGS = [
     "DateTimeOriginal",

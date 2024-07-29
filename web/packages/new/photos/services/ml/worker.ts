@@ -474,7 +474,8 @@ const index = async (
             throw e;
         }
 
-        if (originalImageBlob) cmpNewLib2(enteFile, exif);
+        if (originalImageBlob)
+            await cmpNewLib2(enteFile, originalImageBlob, exif);
 
         log.debug(() => {
             const ms = Date.now() - startTime;
