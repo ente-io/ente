@@ -284,6 +284,8 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 	return urls, nil
 }
 
+
+
 // GetFileURL verifies permissions and returns a presigned url to the requested file
 func (c *FileController) GetFileURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
 	err := c.verifyFileAccess(userID, fileID)

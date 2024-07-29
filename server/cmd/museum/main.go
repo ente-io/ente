@@ -408,6 +408,12 @@ func main() {
 	privateAPI.GET("/files/download/v2/:fileID", fileHandler.Get)
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
+
+	privateAPI.GET("/files/file-data/playlist/:fileID", fileHandler.GetVideoPlaylist)
+	privateAPI.POST("/files/file-data/playlist", fileHandler.ReportVideoPlayList)
+	privateAPI.GET("/files/file-data/preview/upload-url/:fileID", fileHandler.GetVideoUploadURL)
+	privateAPI.GET("/files/file-data/preview/:fileID", fileHandler.GetVideoUploadURL)
+
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
 	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
 	privateAPI.PUT("/files/update", fileHandler.Update)
