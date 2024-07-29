@@ -1,7 +1,7 @@
 
-DROP INDEX IF EXISTS idx_derived_user_id_updated_at;
-DROP INDEX IF EXISTS idx_derived_user_id_data_type;
+DROP INDEX IF EXISTS idx_file_data_user_id_data_type;
+DROP INDEX IF EXISTS idx_file_data_user_id_updated_at;
 
-DROP TABLE IF EXISTS derived;
+DROP TABLE IF EXISTS file_data;
 
-DROP TYPE IF EXISTS derived_data_type;
+DROP TYPE IF EXISTS file_data_type;
