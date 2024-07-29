@@ -278,7 +278,8 @@ const indexNextBatch = async (
             delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
-        } catch {
+        } catch (e) {
+            log.warn(`Skipping unindexable file ${item.enteFile.id}`, e);
             allSuccess = false;
         }
     }
@@ -474,7 +475,7 @@ const index = async (
             throw e;
         }
 
-        if (originalImageBlob)
+        if (originalImageBlob && exif)
             await cmpNewLib2(enteFile, originalImageBlob, exif);
 
         log.debug(() => {
