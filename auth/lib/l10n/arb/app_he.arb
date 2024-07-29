@@ -1,5 +1,6 @@
 {
   "account": "חשבון",
+  "unlock": "בטל נעילה",
   "recoveryKey": "מפתח שחזור",
   "counterAppBarTitle": "מונה",
   "@counterAppBarTitle": {
@@ -105,12 +106,15 @@
   "copied": "הועתק",
   "pleaseTryAgain": "אנא נסה שנית",
   "existingUser": "משתמש קיים",
+  "newUser": "חדש בente",
   "delete": "למחוק",
   "enterYourPasswordHint": "הכנס סיסמא",
   "forgotPassword": "שכחתי סיסמה",
   "oops": "אופס",
   "suggestFeatures": "הציעו מאפיינים",
   "faq": "שאלות נפוצות",
+  "faq_q_1": "כמה מאובטח ente Auth?",
+  "faq_a_1": "כל הקודים שאתה מגבה דרך ente מאוחסנים מקצה לקצה בהצפנה. הכוונה שרק אתה יכול לגשת לקודים שלך. האפליקציות שלנו הם מפותחות דרך קוד פתוח והקריפטוגרפיה שלנו מבוקרת חיצונית.",
   "faq_q_2": "האם ישנה אפשרות להשתמש בקודים שלי במחשב?",
   "faq_a_2": "אתה יכול לגשת לקודים שלך ברשת ב- auth.ente.io.",
   "faq_q_3": "איך אפשר למחוק קודים?",
@@ -183,6 +187,8 @@
   "recoveryKeySaveDescription": "אנחנו לא מאחסנים את המפתח הזה, אנא שמור את המפתח 24 מילים הזה במקום בטוח.",
   "doThisLater": "עשה זאת מאוחר יותר",
   "saveKey": "שמור מפתח",
+  "save": "שמור",
+  "send": "שלח",
   "back": "חזרה",
   "createAccount": "צור חשבון",
   "passwordStrength": "חוזק הסיסמא: {passwordStrengthValue}",
@@ -247,6 +253,7 @@
   "privacy": "פרטיות",
   "terms": "תנאים",
   "checkForUpdates": "בדוק אם קיימים עדכונים",
+  "checkStatus": "בדוק סטטוס",
   "downloadUpdate": "הורד",
   "criticalUpdateAvailable": "עדכון חשוב זמין",
   "updateAvailable": "עדכון זמין",
@@ -327,5 +334,8 @@
   "minimizeAppOnCopy": "מזער אפליקציה בהעתקה",
   "editCodeAuthMessage": "אמת כדי לערוך קוד",
   "deleteCodeAuthMessage": "אמת כדי למחוק קוד",
-  "showQRAuthMessage": "אמת כדי להראות קוד QR"
+  "showQRAuthMessage": "אמת כדי להראות קוד QR",
+  "confirmAccountDeleteTitle": "אישור מחיקת חשבון",
+  "noInternetConnection": "אין חיבור לאינטרנט",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "אנא בדוק את חיבור האינטרנט שלך ונסה שוב."
 }
