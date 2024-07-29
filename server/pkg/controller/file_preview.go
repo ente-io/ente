@@ -46,6 +46,11 @@ func (c *FileController) GetPreviewUrl(ctx context.Context, userID int64, fileID
 		return "", err
 	}
 	objectKey := strconv.FormatInt(userID, 10) + "/ml-data/" + strconv.FormatInt(fileID, 10) + "/hls_video"
+	// check if playlist exists
+	err = c.checkObjectExists(ctx, objectKey+"_playlist.m3u8", c.S3Config.GetDerivedStorageDataCenter())
+	if err != nil {
+		return "", stacktrace.Propagate(ente.NewBadRequestWithMessage("Video playlist does not exist"), fmt.Sprintf("objectKey: %s", objectKey))
+	}
 	s3Client := c.S3Config.GetDerivedStorageS3Client()
 	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
 		Bucket: c.S3Config.GetDerivedStorageBucket(),

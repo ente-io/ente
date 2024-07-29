@@ -138,7 +138,9 @@ func (h *FileHandler) GetVideoPreviewUrl(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	c.Redirect(http.StatusTemporaryRedirect, url)
+	c.JSON(http.StatusOK, gin.H{
+		"url": url,
+	})
 }
 
 func (h *FileHandler) ReportVideoPlayList(c *gin.Context) {
