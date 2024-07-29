@@ -14,9 +14,10 @@ import { isInternalUser } from "./feature-flags";
 export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
 const cmpTsEq = (a: number | undefined | null, b: number | undefined) => {
+    if (!a && !b) return true;
     if (!a || !b) return false;
     if (a == b) return true;
-    if (a / 1e6 == b / 1e6) return true;
+    if (Math.floor(a / 1e6) == Math.floor(b / 1e6)) return true;
     return false;
 };
 
