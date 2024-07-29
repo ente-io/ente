@@ -18,6 +18,7 @@ import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
@@ -235,7 +236,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           bonusData: _userDetails.bonusData,
         ),
       );
+      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
+      widgets.add(const SizedBox(height: 20));
     } else {
+      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
       const SizedBox(height: 56);
     }
 
@@ -376,6 +380,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       captionedTextWidget: CaptionedTextWidget(
         title: title,
       ),
+      alwaysShowSuccessState: false,
+      surfaceExecutionStates: false,
       menuItemColor: colorScheme.fillFaint,
       trailingWidget: Icon(
         Icons.chevron_right_outlined,
@@ -555,6 +561,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             period: plan.period,
             isActive: isActive && !_hideCurrentPlanSelection,
             isPopular: _isPopularPlan(plan),
+            isOnboarding: widget.isOnboarding,
           ),
         ),
       );
@@ -617,6 +624,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           price: _currentSubscription!.price,
           period: _currentSubscription!.period,
           isActive: _currentSubscription!.isValid(),
+          isOnboarding: widget.isOnboarding,
         ),
       ),
     );

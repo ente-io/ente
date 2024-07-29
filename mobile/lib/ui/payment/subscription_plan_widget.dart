@@ -12,6 +12,7 @@ class SubscriptionPlanWidget extends StatefulWidget {
     required this.storage,
     required this.price,
     required this.period,
+    required this.isOnboarding,
     this.isActive = false,
     this.isPopular = false,
   });
@@ -21,6 +22,7 @@ class SubscriptionPlanWidget extends StatefulWidget {
   final String period;
   final bool isActive;
   final bool isPopular;
+  final bool isOnboarding;
 
   @override
   State<SubscriptionPlanWidget> createState() => _SubscriptionPlanWidgetState();
@@ -60,7 +62,7 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
         ),
         child: Stack(
           children: [
-            widget.isActive
+            widget.isActive && !widget.isOnboarding
                 ? Positioned(
                     top: 0,
                     right: 0,

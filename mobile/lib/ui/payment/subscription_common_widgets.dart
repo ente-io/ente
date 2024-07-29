@@ -41,7 +41,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
       );
     } else {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
         child: RichText(
           text: TextSpan(
             children: [
@@ -101,7 +101,7 @@ class ValidityWidget extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 47, 16, 72),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Column(
         children: [
           if (!hideSubValidityView)
