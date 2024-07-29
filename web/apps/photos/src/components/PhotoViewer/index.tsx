@@ -310,7 +310,10 @@ function PhotoViewer(props: Iprops) {
 
     function updateExif(file: EnteFile) {
         if (file.metadata.fileType === FileType.video) {
-            setExif({ key: file.src, value: undefined });
+            setExif({
+                key: file.src,
+                value: { tags: undefined, parsed: undefined },
+            });
             return;
         }
         if (!file || !file.isSourceLoaded || file.conversionFailed) {

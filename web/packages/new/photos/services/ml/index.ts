@@ -11,7 +11,7 @@ import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
-import { isBetaUser, isInternalUser } from "../feature-flags";
+import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
@@ -97,17 +97,17 @@ export const terminateMLWorker = () => {
  *
  * ML currently only works when we're running in our desktop app.
  */
-// TODO-ML:
-export const isMLSupported =
-    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML_DONT_USE;
+export const isMLSupported = isDesktop;
 
 /**
+ * TODO-ML: This will not be needed when we move to a public beta.
  * Was this someone who might've enabled the beta ML? If so, show them the
  * coming back soon banner while we finalize it.
- * TODO-ML:
  */
 export const canEnableML = async () =>
-    (await isInternalUser()) || (await isBetaUser());
+    // TODO-ML: The interim condition should be
+    // isDevBuild || (await isInternalUser()) || (await isBetaUser());
+    await isInternalUser();
 
 /**
  * Initialize the ML subsystem if the user has enabled it in preferences.

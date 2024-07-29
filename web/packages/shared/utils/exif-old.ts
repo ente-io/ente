@@ -1,3 +1,8 @@
+// The code in this file is deprecated and meant to be deleted.
+//
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import log from "@/base/log";
 import { type FileTypeInfo } from "@/media/file-type";
 import { NULL_LOCATION } from "@/new/photos/services/upload/types";

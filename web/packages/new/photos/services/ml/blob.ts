@@ -22,7 +22,7 @@ export interface IndexableBlobs {
      * -   For live photos it will the (original) image component of the live
      *     photo.
      */
-    originalBlob: Blob | undefined;
+    originalImageBlob: Blob | undefined;
     /**
      * The original (if the browser possibly supports rendering this type of
      * images) or otherwise a converted JPEG blob.
@@ -121,19 +121,19 @@ const indexableUploadItemBlobs = async (
     electron: MLWorkerElectron,
 ) => {
     const fileType = enteFile.metadata.fileType;
-    let originalBlob: Blob | undefined;
+    let originalImageBlob: Blob | undefined;
     let renderableBlob: Blob;
     if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         renderableBlob = new Blob([ensure(thumbnailData)]);
     } else {
-        originalBlob = await readNonVideoUploadItem(uploadItem, electron);
+        originalImageBlob = await readNonVideoUploadItem(uploadItem, electron);
         renderableBlob = await renderableImageBlob(
             enteFile.metadata.title,
-            originalBlob,
+            originalImageBlob,
         );
     }
-    return { originalBlob, renderableBlob };
+    return { originalImageBlob, renderableBlob };
 };
 
 /**
@@ -185,19 +185,19 @@ export const indexableEnteFileBlobs = async (
     if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         return {
-            originalBlob: undefined,
+            originalImageBlob: undefined,
             renderableBlob: new Blob([ensure(thumbnailData)]),
         };
     }
 
     const fileStream = await DownloadManager.getFile(enteFile);
-    const originalBlob = await new Response(fileStream).blob();
+    const originalImageBlob = await new Response(fileStream).blob();
 
     let renderableBlob: Blob;
     if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             enteFile.metadata.title,
-            originalBlob,
+            originalImageBlob,
         );
         renderableBlob = await renderableImageBlob(
             imageFileName,
@@ -206,12 +206,12 @@ export const indexableEnteFileBlobs = async (
     } else if (fileType == FileType.image) {
         renderableBlob = await renderableImageBlob(
             enteFile.metadata.title,
-            originalBlob,
+            originalImageBlob,
         );
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 
-    return { originalBlob, renderableBlob };
+    return { originalImageBlob, renderableBlob };
 };
