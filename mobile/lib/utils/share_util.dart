@@ -13,7 +13,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/services/collections_service.dart";
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -261,8 +260,13 @@ Future<void> shareAlbumLinkWithPlaceholder(
   GlobalKey key,
 ) async {
   final ScreenshotController screenshotController = ScreenshotController();
-  final int fileCount =
-      await CollectionsService.instance.getFileCount(collection);
+  final List<EnteFile> filesInCollection =
+      (await FilesDB.instance.getFilesInCollection(
+    collection.id,
+    galleryLoadStartTime,
+    galleryLoadEndTime,
+  ))
+          .files;
 
   final dialog = createProgressDialog(
     context,
@@ -271,19 +275,11 @@ Future<void> shareAlbumLinkWithPlaceholder(
   );
   await dialog.show();
 
-  if (fileCount == 0) {
+  if (filesInCollection.isEmpty) {
     await dialog.hide();
     await shareText(url);
     return;
   } else {
-    final List<EnteFile> filesInCollection =
-        (await FilesDB.instance.getFilesInCollection(
-      collection.id,
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-    ))
-            .files;
-
     final placeholderBytes = await _createAlbumPlaceholder(
       filesInCollection,
       screenshotController,
