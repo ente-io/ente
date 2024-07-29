@@ -487,12 +487,35 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         _currentSubscription!.productID == freeProductID) {
       foundActivePlan = true;
       planWidgets.add(
-        SubscriptionPlanWidget(
-          storage: _freePlan.storage,
-          price: "",
-          period: S.of(context).freeTrial,
-          isActive: true,
-          isOnboarding: widget.isOnboarding,
+        GestureDetector(
+          onTap: () {
+            if (_currentSubscription!.isFreePlan() && widget.isOnboarding) {
+              Bus.instance.fire(SubscriptionPurchasedEvent());
+              // ignore: unawaited_futures
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const HomeWidget();
+                  },
+                ),
+                (route) => false,
+              );
+              unawaited(
+                BillingService.instance.verifySubscription(
+                  freeProductID,
+                  "",
+                  paymentProvider: "ente",
+                ),
+              );
+            }
+          },
+          child: SubscriptionPlanWidget(
+            storage: _freePlan.storage,
+            price: "",
+            period: S.of(context).freeTrial,
+            isActive: true,
+            isOnboarding: widget.isOnboarding,
+          ),
         ),
       );
     }
@@ -590,7 +613,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       activePlanIndex,
       GestureDetector(
         onTap: () {
-          if (_currentSubscription!.isFreePlan()) {
+          if (_currentSubscription!.isFreePlan() & widget.isOnboarding) {
             Bus.instance.fire(SubscriptionPurchasedEvent());
             // ignore: unawaited_futures
             Navigator.of(context).pushAndRemoveUntil(

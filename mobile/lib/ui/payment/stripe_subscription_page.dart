@@ -599,7 +599,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       activePlanIndex,
       GestureDetector(
         onTap: () {
-          if (_currentSubscription!.isFreePlan()) {
+          if (_currentSubscription!.isFreePlan() && widget.isOnboarding) {
             Bus.instance.fire(SubscriptionPurchasedEvent());
             // ignore: unawaited_futures
             Navigator.of(context).pushAndRemoveUntil(
