@@ -1,4 +1,4 @@
-Ente to prosta aplikacja do automatycznego tworzenia kopii zapasowych oraz porządkowania zdjęć i filmów.
+Ente to prosta aplikacja do automatycznego tworzenia kopii zapasowych oraz porządkowania zdjęć i wideo.
 
 Jeśli szukałeś/aś przyjaznej dla prywatności alternatywy, aby zachować swoje wspomnienia, to dotarłeś/aś do właściwego miejsca. Dzięki Ente są one przechowywane w pełni zaszyfrowane (e2ee). Oznacza to, że tylko Ty możesz je oglądać.
 
@@ -6,7 +6,7 @@ Mamy otwarto-źródłowe aplikacje na wszystkich platformach, a Twoje zdjęcia b
 
 Ente ułatwia również udostępnianie albumów najbliższym. Możesz udostępniać je bezpośrednio innym użytkownikom Ente, w pełni zaszyfrowane; lub za pomocą publicznie dostępnych linków.
 
-Twoje zaszyfrowane dane są przechowywane w wielu lokalizacjach, między innymi w schronie przeciwatomowym w Paryżu. Poważnie podchodzimy do kwestii zachowania pamięci i ułatwiamy zadbanie o to, by wspomnienia przetrwały dłużej niż ty sam.
+Twoje zaszyfrowane dane są przechowywane w wielu lokalizacjach, między innymi w schronie przeciwatomowym w Paryżu. Poważnie podchodzimy do kwestii zachowania pamięci i ułatwiamy zadbanie o to, by Twoje wspomnienia przetrwały dłużej, niż ty sam/a.
 
 Jesteśmy tutaj, aby zrobić najbezpieczniejszą aplikację na zdjęcia, dołącz do naszej podróży!
 
