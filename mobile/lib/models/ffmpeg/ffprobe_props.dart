@@ -20,6 +20,7 @@ class FFProbeProps {
   String? fps;
   String? codecWidth;
   String? codecHeight;
+  int? rotation;
 
   // dot separated bitrate, fps, codecWidth, codecHeight. Ignore null value
   String get videoInfo {
@@ -137,6 +138,8 @@ class FFProbeProps {
         } else if (key == FFProbeKeys.codedHeight) {
           result.codecHeight = stream[key].toString();
           parsedData[key] = result.codecHeight;
+        } else if (key == FFProbeKeys.sideDataList) {
+          result.rotation = stream[key][0][FFProbeKeys.rotation];
         }
       }
     }
