@@ -9,6 +9,7 @@ import log from "@/base/log";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
+import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
 import { isInternalUser } from "../feature-flags";
@@ -116,9 +117,27 @@ export const initML = () => {
     _isMLEnabled = isMLEnabledLocal();
     void (async () => {
         console.log("yyy", 1);
-        const port = await ensureElectron().createMLSession();
+        const port = await createMLSession();
         console.log("yyy", port);
     })();
+};
+
+const createMLSession = async () => {
+    ensureElectron().createMLSession();
+
+    // The main process will do its thing, and send back the port it created to
+    // us by sending an message on the "createMLSession/port" channel via the
+    // postMessage API. This roundabout way is needed because MessagePorts
+    // cannot be transferred via the usual send/invoke pattern.
+
+    return new Promise((resolve) => {
+        window.onmessage = ({ source, data, ports }: MessageEvent) => {
+            // The source check verifies that the message is coming from the
+            // preload script. The data is used as an arbitrary identifying tag.
+            if (source == window && data == "createMLSession/port")
+                resolve(ensure(ports[0]));
+        };
+    });
 };
 
 export const logoutML = async () => {

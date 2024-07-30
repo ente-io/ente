@@ -163,20 +163,7 @@ const ffmpegExec = (
 
 // - ML
 
-const createMLSession = () => {
-    ipcRenderer.send("createMLSession");
-
-    // The main process will do its thing, and send back the port it created to
-    // us by sending an message on the "createMLSession/port" channel via the
-    // postMessage API. This roundabout way is needed because MessagePorts
-    // cannot be transferred via the usual send/invoke pattern.
-
-    return new Promise((resolve) => {
-        ipcRenderer.on("createMLSession/port", (event) => {
-            resolve(event.ports[0]);
-        });
-    });
-};
+const createMLSession = () => ipcRenderer.send("createMLSession");
 
 const computeCLIPImageEmbedding = (input: Float32Array) =>
     ipcRenderer.invoke("computeCLIPImageEmbedding", input);
