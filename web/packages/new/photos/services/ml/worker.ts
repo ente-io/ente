@@ -72,7 +72,13 @@ const IPCResponse = z.object({
  * Sibling of the handleMessage function (in `ml-worker.ts`) in the desktop app.
  */
 const electronMLWorker = async (type: string, data: string) => {
-    const port = ensure(_port);
+    const port = _port;
+    if (!port) {
+        throw new Error(
+            "No MessagePort to communicate with Electron ML worker",
+        );
+    }
+
     // Generate a unique nonce to identify this RPC interaction.
     const id = Math.random();
     return new Promise((resolve) => {
