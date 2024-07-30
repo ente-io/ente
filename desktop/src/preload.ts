@@ -202,7 +202,8 @@ const createMLSession = () => {
     ipcRenderer.send("createMLSession");
     ipcRenderer.on("createMLSession/port", (event) => {
         void windowLoaded.then(() => {
-            window.postMessage("createMLSession/port", "", event.ports);
+            // "*"" is the origin
+            window.postMessage("createMLSession/port", "*", event.ports);
         });
     });
 };

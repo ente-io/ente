@@ -133,7 +133,7 @@ const createMLSession = async () => {
     return new Promise((resolve) => {
         window.onmessage = ({ source, data, ports }: MessageEvent) => {
             // The source check verifies that the message is coming from the
-            // preload script. The data is used as an arbitrary identifying tag.
+            // preload script. The data is the message that was posted.
             if (source == window && data == "createMLSession/port")
                 resolve(ensure(ports[0]));
         };
