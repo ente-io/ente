@@ -33,7 +33,7 @@ class FFProbeProps {
     return info.join(' * ');
   }
 
-  Map<String, int>? get videoDimentionsConsideringRotation {
+  Map<String, int>? get dimentionsConsideringRotation {
     final int w = int.tryParse(codecWidth ?? '0') ?? 0;
     final int h = int.tryParse(codecHeight ?? '0') ?? 0;
     if (w == 0 || h == 0) return null;
