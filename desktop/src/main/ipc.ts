@@ -45,8 +45,9 @@ import { logout } from "./services/logout";
 import {
     computeCLIPImageEmbedding,
     computeCLIPTextEmbeddingIfAvailable,
-} from "./services/ml-clip";
-import { computeFaceEmbeddings, detectFaces } from "./services/ml-face";
+    computeFaceEmbeddings,
+    detectFaces,
+} from "./services/ml-utility";
 import {
     encryptionKey,
     lastShownChangelogVersion,
