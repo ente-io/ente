@@ -42,6 +42,7 @@ import {
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
+import { createMLSession } from "./services/ml";
 import {
     computeCLIPImageEmbedding,
     computeCLIPTextEmbeddingIfAvailable,
@@ -186,6 +187,8 @@ export const attachIPCHandlers = () => {
     );
 
     // - ML
+
+    ipcMain.on("createMLSession", () => createMLSession());
 
     ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
         computeCLIPImageEmbedding(input),

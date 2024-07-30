@@ -342,6 +342,9 @@ export interface Electron {
      * {@link MessagePort} we get back.
      *
      * For more details about the IPC flow, see: [Note: ML IPC].
+     *
+     * Note: For simplicity of implementation, we assume that there is at most
+     * one outstanding call to {@link createMLSession}.
      */
     createMLSession: () => Promise<MessagePort>;
 

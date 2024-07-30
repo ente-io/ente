@@ -114,6 +114,11 @@ export const canEnableML = async () =>
  */
 export const initML = () => {
     _isMLEnabled = isMLEnabledLocal();
+    void (async () => {
+        console.log("yyy", 1);
+        const port = await ensureElectron().createMLSession();
+        console.log("yyy", port);
+    })();
 };
 
 export const logoutML = async () => {

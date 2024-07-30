@@ -65,5 +65,5 @@ export const createMLSession = () => {
     const child = utilityProcess.fork("./ml-util-test");
     child.postMessage(/* unused */ "", [port1]);
 
-    ipcRenderer.postMessage("ml-session-port", /* unused */ "", [port2]);
+    ipcRenderer.postMessage("createMLSession/port", /* unused */ "", [port2]);
 };
