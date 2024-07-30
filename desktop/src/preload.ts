@@ -36,6 +36,20 @@
  * -    [main]      desktop/src/main/ipc.ts             contains impl
  */
 
+// This code runs in the (isolated) web layer. Contrary to the impression given
+// by the Electron docs (as of 2024), the window object is actually available to
+// the preload script, and it is necessary for legitimate uses too.
+//
+// > The isolated world is connected to the DOM just the same is the main world,
+// > it is just the JS contexts that are separated.
+// >
+// > https://github.com/electron/electron/issues/27024#issuecomment-745618327
+//
+// Adding this reference here tells TypeScript that DOM typings (in particular,
+// window) should be introduced in the ambient scope.
+//
+/// <reference lib="dom" />
+
 import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
@@ -47,6 +61,19 @@ import type {
     PendingUploads,
     ZipItem,
 } from "./types/ipc";
+
+// - Infrastructure
+
+// We need to wait until the renderer is ready before sending ports via
+// postMessage, and this promise comes handy in such cases. We create the
+// promise at the top level so that it is guaranteed to be registered before the
+// load event is fired.
+//
+// See: https://www.electronjs.org/docs/latest/tutorial/message-ports
+
+const windowLoaded = new Promise((resolve) => {
+    window.onload = resolve;
+});
 
 // - General
 
@@ -163,7 +190,14 @@ const ffmpegExec = (
 
 // - ML
 
-const createMLSession = () => ipcRenderer.send("createMLSession");
+const createMLSession = () => {
+    ipcRenderer.send("createMLSession");
+    ipcRenderer.on("createMLSession/port", (event) => {
+        void windowLoaded.then(() => {
+            window.postMessage("createMLSession/port", "", event.ports);
+        });
+    });
+};
 
 const computeCLIPImageEmbedding = (input: Float32Array) =>
     ipcRenderer.invoke("computeCLIPImageEmbedding", input);
