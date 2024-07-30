@@ -3,7 +3,6 @@
  */
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
-import { createWriteStream, existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import { Readable } from "node:stream";
 import { ReadableStream } from "node:stream/web";
@@ -12,6 +11,7 @@ import log from "./log";
 import { ffmpegConvertToMP4 } from "./services/ffmpeg";
 import { markClosableZip, openZip } from "./services/zip";
 import { ensure } from "./utils/common";
+import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
     deleteTempFileIgnoringErrors,
@@ -158,42 +158,6 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
 const handleWrite = async (path: string, request: Request) => {
     await writeStream(path, ensure(request.body));
     return new Response("", { status: 200 });
-};
-
-/**
- * Write a (web) ReadableStream to a file at the given {@link filePath}.
- *
- * The returned promise resolves when the write completes.
- *
- * @param filePath The local file system path where the file should be written.
- *
- * @param readableStream A web
- * [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
- *
- */
-export const writeStream = (
-    filePath: string,
-    readableStream: unknown /*ReadableStream*/, // @ts-expect-error [Note: Node and web stream type mismatch]
-) => writeNodeStream(filePath, Readable.fromWeb(readableStream));
-
-const writeNodeStream = async (filePath: string, fileStream: Readable) => {
-    const writeable = createWriteStream(filePath);
-
-    fileStream.on("error", (err) => {
-        writeable.destroy(err); // Close the writable stream with an error
-    });
-
-    fileStream.pipe(writeable);
-
-    await new Promise((resolve, reject) => {
-        writeable.on("finish", resolve);
-        writeable.on("error", (err) => {
-            if (existsSync(filePath)) {
-                void fs.unlink(filePath);
-            }
-            reject(err);
-        });
-    });
 };
 
 /**
