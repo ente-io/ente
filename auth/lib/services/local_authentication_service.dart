@@ -23,7 +23,7 @@ class LocalAuthenticationService {
     BuildContext context,
     String infoMessage,
   ) async {
-    if (await _isLocalAuthSupportedOnDevice()) {
+    if (await isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.setEnabled(false);
       final result = await requestAuthentication(
         context,
@@ -94,7 +94,7 @@ class LocalAuthenticationService {
     String errorDialogContent, [
     String errorDialogTitle = "",
   ]) async {
-    if (await _isLocalAuthSupportedOnDevice()) {
+    if (await isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.disable();
       final result = await requestAuthentication(
         context,
@@ -120,7 +120,7 @@ class LocalAuthenticationService {
     return false;
   }
 
-  Future<bool> _isLocalAuthSupportedOnDevice() async {
+  Future<bool> isLocalAuthSupportedOnDevice() async {
     try {
       return Platform.isMacOS || Platform.isLinux
           ? await FlutterLocalAuthentication().canAuthenticate()

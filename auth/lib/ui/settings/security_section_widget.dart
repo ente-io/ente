@@ -23,7 +23,6 @@ import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
@@ -144,7 +143,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          if (await LocalAuthentication().isDeviceSupported()) {
+          if (await LocalAuthenticationService.instance
+              .isLocalAuthSupportedOnDevice()) {
             final bool result = await requestAuthentication(
               context,
               context.l10n.authToChangeLockscreenSetting,
