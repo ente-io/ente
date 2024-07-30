@@ -1,8 +1,10 @@
 // Adapted from: https://github.com/deckerst/aves
 
 import "dart:developer";
+import "dart:ui";
 
 import "package:collection/collection.dart";
+import "package:flutter/widgets.dart";
 import "package:intl/intl.dart";
 import "package:photos/models/ffmpeg/channel_layouts.dart";
 import "package:photos/models/ffmpeg/codecs.dart";
@@ -31,6 +33,20 @@ class FFProbeProps {
       info.add('$codecWidth x $codecHeight');
     }
     return info.join(' * ');
+  }
+
+  Size? get videoDimentionsConsideringRotation {
+    final int width = int.tryParse(codecWidth ?? '0') ?? 0;
+    final int height = int.tryParse(codecHeight ?? '0') ?? 0;
+    if (width == 0 || height == 0) return null;
+
+    if (rotation != null) {
+      if ((rotation! ~/ 90).isEven) {
+        return Size(width.toDouble(), height.toDouble());
+      } else {
+        return Size(height.toDouble(), width.toDouble());
+      }
+    }
   }
 
   // toString() method
