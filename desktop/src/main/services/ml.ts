@@ -73,11 +73,11 @@ export const createMLWorker = (window: BrowserWindow) => {
 
     window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
 
-    handleMLWorkerRequests(child);
+    handleMessagesFromUtilityProcess(child);
 };
 
 /**
- * Handle requests from the utility process.
+ * Handle messages posted from the utility process.
  *
  * [Note: Using Electron APIs in UtilityProcess]
  *
@@ -99,11 +99,11 @@ export const createMLWorker = (window: BrowserWindow) => {
  * -  When we need to communicate from the utility process to the main process,
  *    we use the `parentPort` in the utility process.
  */
-const handleMLWorkerRequests = (child: UtilityProcess) => {
+const handleMessagesFromUtilityProcess = (child: UtilityProcess) => {
     const logTag = "[ml-worker]";
     child.on("message", (m: unknown) => {
-        if (m && typeof m == "object" && "method" in m && "param" in m) {
-            const p = m.param;
+        if (m && typeof m == "object" && "method" in m && "p" in m) {
+            const p = m.p;
             switch (m.method) {
                 case "log.errorString":
                     if (typeof p == "string") {

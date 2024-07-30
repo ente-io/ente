@@ -35,9 +35,8 @@ const log = {
 /**
  * Send a message to the main process using a barebones protocol.
  */
-const mainProcess = (method: string, param: unknown) => {
-    process.parentPort.postMessage({ method, param });
-};
+const mainProcess = (method: string, param: unknown) =>
+    process.parentPort.postMessage({ method, p: param });
 
 log.debugString(
     `Started ML worker process with args ${process.argv.join(" ")}`,
@@ -47,10 +46,10 @@ process.parentPort.once("message", (e) => {
     parseInitData(e.data);
 
     const port = ensure(e.ports[0]);
-    port.on("message", (event) => {
-        void handleMessageFromRenderer(event.data).then((response) => {
-            if (response) port.postMessage(response);
-        });
+    port.on("message", (request) => {
+        void handleMessageFromRenderer(request.data).then((response) =>
+            port.postMessage(response),
+        );
     });
     port.start();
 });
@@ -69,6 +68,7 @@ const parseInitData = (data: unknown) => {
     if (
         data &&
         typeof data == "object" &&
+        "userDataPateh" in data &&
         "userDataPath" in data &&
         typeof data.userDataPath == "string"
     ) {
@@ -79,23 +79,43 @@ const parseInitData = (data: unknown) => {
 };
 
 /**
- * Our hand-rolled IPC handler and router - the Node.js utility process end.
+ * Our hand-rolled RPC handler and router - the Node.js utility process end.
  *
  * Sibling of the electronMLWorker function (in `ml/worker.ts`) in the web code.
+ *
+ * [Note: Node.js ML worker RPC protocol]
+ *
+ * -   Each RPC call (i.e. request message) has a "method" (string), "id"
+ *     (number) and "p" (arbitrary param).
+ *
+ * -   Each RPC result (i.e. response message) has an "id" (number) that is the
+ *     same as the "id" for the request which it corresponds to.
+ *
+ * -   If the RPC call was a success, then the response messege will have an
+ *     "result" (arbitrary result) property. Otherwise it will have a "error"
+ *     (string) property describing what went wrong.
  */
 const handleMessageFromRenderer = async (m: unknown) => {
-    if (m && typeof m == "object" && "type" in m && "id" in m) {
+    if (m && typeof m == "object" && "method" in m && "id" in m && "p" in m) {
         const id = m.id;
-        switch (m.type) {
-            case "foo":
-                if ("data" in m && typeof m.data == "string")
-                    return { id, data: await foo(m.data) };
-                break;
+        const p = m.p;
+        try {
+            switch (m.method) {
+                case "foo":
+                    if (p && typeof p == "string")
+                        return { id, result: await foo(p) };
+                    break;
+            }
+        } catch (e) {
+            return { id, error: e instanceof Error ? e.message : String(e) };
         }
+        return { id, error: "Unknown message" };
     }
 
-    log.info("Ignoring unexpected message", m);
-    return undefined;
+    // We don't even have an "id", so at least log it lest the renderer also
+    // ignore the "id"-less response.
+    log.info("Ignoring unknown message", m);
+    return { error: "Unknown message" };
 };
 
 const foo = async (a: string) => {
