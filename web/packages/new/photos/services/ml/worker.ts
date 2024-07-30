@@ -61,40 +61,6 @@ globalThis.onmessage = (event: MessageEvent) => {
     }
 };
 
-const IPCResponse = z.object({
-    id: z.number(),
-    result: z.any().optional(),
-    error: z.string().optional(),
-});
-
-/**
- * Make a call to the ML worker running in the Node.js layer using our
- * hand-rolled RPC protocol. See: [Note: Node.js ML worker RPC protocol].
- */
-const electronMLWorker = async (method: string, p: string) => {
-    const port = _port;
-    if (!port) {
-        throw new Error(
-            "No MessagePort to communicate with Electron ML worker",
-        );
-    }
-
-    // Generate a unique nonce to identify this RPC interaction.
-    const id = Math.random();
-    return new Promise((resolve, reject) => {
-        const handleMessage = (event: MessageEvent) => {
-            const response = IPCResponse.parse(event.data);
-            if (response.id != id) return;
-            port.removeEventListener("message", handleMessage);
-            const error = response.error;
-            if (error) reject(new Error(error));
-            else resolve(response.result);
-        };
-        port.addEventListener("message", handleMessage);
-        port.postMessage({ id, method, p });
-    });
-};
-
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
  *
@@ -299,6 +265,40 @@ export class MLWorker {
 }
 
 expose(MLWorker);
+
+/**
+ * Make a call to the ML worker running in the Node.js layer using our
+ * hand-rolled RPC protocol. See: [Note: Node.js ML worker RPC protocol].
+ */
+const electronMLWorker = async (method: string, p: string) => {
+    const port = _port;
+    if (!port) {
+        throw new Error(
+            "No MessagePort to communicate with Electron ML worker",
+        );
+    }
+
+    // Generate a unique nonce to identify this RPC interaction.
+    const id = Math.random();
+    return new Promise((resolve, reject) => {
+        const handleMessage = (event: MessageEvent) => {
+            const response = RPCResponse.parse(event.data);
+            if (response.id != id) return;
+            port.removeEventListener("message", handleMessage);
+            const error = response.error;
+            if (error) reject(new Error(error));
+            else resolve(response.result);
+        };
+        port.addEventListener("message", handleMessage);
+        port.postMessage({ id, method, p });
+    });
+};
+
+const RPCResponse = z.object({
+    id: z.number(),
+    result: z.any().optional(),
+    error: z.string().optional(),
+});
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
