@@ -28,6 +28,7 @@ process.parentPort.once("message", (e) => {
             if (response) port.postMessage(response);
         });
     });
+    port.start();
 });
 
 /**
@@ -40,8 +41,8 @@ const handleMessage = async (m: unknown) => {
         const id = m.id;
         switch (m.type) {
             case "foo":
-                if ("a" in m && typeof m.a == "string")
-                    return { id, data: await foo(m.a) };
+                if ("data" in m && typeof m.data == "string")
+                    return { id, data: await foo(m.data) };
                 break;
         }
     }
