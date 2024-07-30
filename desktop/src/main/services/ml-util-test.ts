@@ -12,12 +12,18 @@ process.parentPort.once("message", (e) => {
     });
 });
 
-/** Our hand-rolled IPC handler and router */
+/**
+ * Our hand-rolled IPC handler and router - the Node.js utility process end.
+ *
+ * Sibling of the electronMLWorker function (in `ml/worker.ts`) in the web code.
+ */
 const handleMessage = async (m: unknown) => {
-    if (m && typeof m == "object" && "type" in m) {
+    if (m && typeof m == "object" && "type" in m && "id" in m) {
+        const id = m.id;
         switch (m.type) {
             case "foo":
-                if ("a" in m && typeof m.a == "string") return await foo(m.a);
+                if ("a" in m && typeof m.a == "string")
+                    return { id, data: await foo(m.a) };
                 break;
         }
     }

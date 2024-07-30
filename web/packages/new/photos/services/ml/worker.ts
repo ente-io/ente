@@ -9,6 +9,7 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { DOMParser } from "@xmldom/xmldom";
 import { expose } from "comlink";
+import { z } from "zod";
 import downloadManager from "../download";
 import { cmpNewLib2, extractRawExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -45,6 +46,46 @@ interface IndexableItem {
     /** The existing derived data on remote corresponding to this file. */
     remoteDerivedData: RemoteDerivedData | undefined;
 }
+
+/**
+ * The port used to communicate with the Node.js ML worker process
+ *
+ * See: [Note: ML IPC]
+ * */
+let _port: MessagePort | undefined;
+
+globalThis.onmessage = (event: MessageEvent) => {
+    if (event.data == "createMLWorker/port") {
+        _port = event.ports[0];
+        _port?.start();
+    }
+};
+
+const IPCResponse = z.object({
+    id: z.number(),
+    data: z.any(),
+});
+
+/**
+ * Our hand-rolled IPC handler and router - the web worker end.
+ *
+ * Sibling of the handleMessage function (in `ml-worker.ts`) in the desktop app.
+ */
+const electronMLWorker = async (type: string, data: string) => {
+    const port = ensure(_port);
+    // Generate a unique nonce to identify this RPC interaction.
+    const id = Math.random();
+    return new Promise((resolve) => {
+        const handleMessage = (event: MessageEvent) => {
+            const response = IPCResponse.parse(event.data);
+            if (response.id != id) return;
+            port.removeEventListener("message", handleMessage);
+            resolve(response.data);
+        };
+        port.addEventListener("message", handleMessage);
+        port.postMessage({ type, id, data });
+    });
+};
 
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
@@ -113,6 +154,12 @@ export class MLWorker {
         // need to monkey patch it (This also ensures that it is not tree
         // shaken).
         globalThis.DOMParser = DOMParser;
+
+        void (async () => {
+            console.log("yyy calling foo with 3");
+            const res = await electronMLWorker("foo", "3");
+            console.log("yyy calling foo with 3 result", res);
+        })();
     }
 
     /**
@@ -244,10 +291,6 @@ export class MLWorker {
 }
 
 expose(MLWorker);
-
-globalThis.onmessage = (event: MessageEvent) => {
-    console.log("worker onmessage", event);
-};
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
