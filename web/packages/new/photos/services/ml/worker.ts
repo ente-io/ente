@@ -63,16 +63,15 @@ globalThis.onmessage = (event: MessageEvent) => {
 
 const IPCResponse = z.object({
     id: z.number(),
-    data: z.any(),
+    result: z.any().optional(),
+    error: z.string().optional(),
 });
 
 /**
- * Our hand-rolled IPC handler and router - the web worker end.
- *
- * Sibling of the handleMessageFromRenderer function (in `ml-worker.ts`) in the
- * desktop code.
+ * Make a call to the ML worker running in the Node.js layer using our
+ * hand-rolled RPC protocol. See: [Note: Node.js ML worker RPC protocol].
  */
-const electronMLWorker = async (type: string, data: string) => {
+const electronMLWorker = async (method: string, p: string) => {
     const port = _port;
     if (!port) {
         throw new Error(
@@ -82,15 +81,17 @@ const electronMLWorker = async (type: string, data: string) => {
 
     // Generate a unique nonce to identify this RPC interaction.
     const id = Math.random();
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const handleMessage = (event: MessageEvent) => {
             const response = IPCResponse.parse(event.data);
             if (response.id != id) return;
             port.removeEventListener("message", handleMessage);
-            resolve(response.data);
+            const error = response.error;
+            if (error) reject(new Error(error));
+            else resolve(response.result);
         };
         port.addEventListener("message", handleMessage);
-        port.postMessage({ type, id, data });
+        port.postMessage({ id, method, p });
     });
 };
 

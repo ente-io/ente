@@ -33,7 +33,7 @@ const log = {
 };
 
 /**
- * Send a message to the main process using a barebones protocol.
+ * Send a message to the main process using a barebones RPC protocol.
  */
 const mainProcess = (method: string, param: unknown) =>
     process.parentPort.postMessage({ method, p: param });

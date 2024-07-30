@@ -128,6 +128,6 @@ const handleMessagesFromUtilityProcess = (child: UtilityProcess) => {
                     break;
             }
         }
-        log.info("Ignoring unexpected message from ML worker", m);
+        log.info("Ignoring unknown message from ML worker", m);
     });
 };
