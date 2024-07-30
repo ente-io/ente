@@ -18,39 +18,54 @@ class FFProbeProps {
   String? bitrate;
   String? majorBrand;
   String? fps;
-  String? codecWidth;
-  String? codecHeight;
-  int? rotation;
+  String? _codecWidth;
+  String? _codecHeight;
+  int? _rotation;
 
   // dot separated bitrate, fps, codecWidth, codecHeight. Ignore null value
   String get videoInfo {
     final List<String> info = [];
     if (bitrate != null) info.add('$bitrate');
     if (fps != null) info.add('ƒ/$fps');
-    if (codecWidth != null && codecHeight != null) {
-      info.add('$codecWidth x $codecHeight');
+    if (_codecWidth != null && _codecHeight != null) {
+      info.add('$_codecWidth x $_codecHeight');
     }
     return info.join(' * ');
   }
 
-  Map<String, int>? get dimentionsConsideringRotation {
-    final int w = int.tryParse(codecWidth ?? '0') ?? 0;
-    final int h = int.tryParse(codecHeight ?? '0') ?? 0;
-    if (w == 0 || h == 0) return null;
-
-    if (rotation != null) {
-      if ((rotation! ~/ 90).isEven) {
-        return {
-          "width": w,
-          "height": h,
-        };
+  int? get width {
+    if (_codecWidth == null || _codecHeight == null) return null;
+    final intCodecWidth = int.tryParse(_codecWidth!);
+    if (_rotation == null) {
+      return intCodecWidth;
+    } else {
+      if ((_rotation! ~/ 90).isEven) {
+        return intCodecWidth;
       } else {
-        return {
-          "width": h,
-          "height": w,
-        };
+        return int.tryParse(_codecHeight!);
       }
     }
+  }
+
+  int? get height {
+    if (_codecWidth == null || _codecHeight == null) return null;
+    final intCodecHeight = int.tryParse(_codecHeight!);
+    if (_rotation == null) {
+      return intCodecHeight;
+    } else {
+      if ((_rotation! ~/ 90).isEven) {
+        return intCodecHeight;
+      } else {
+        return int.tryParse(_codecWidth!);
+      }
+    }
+  }
+
+  double? get aspectRatio {
+    if (width == null || height == null || height == 0 || width == 0) {
+      return null;
+    }
+    return width! / height!;
   }
 
   // toString() method
@@ -153,13 +168,13 @@ class FFProbeProps {
           result.fps = _formatFPS(stream[key]);
           parsedData[key] = result.fps;
         } else if (key == FFProbeKeys.codedWidth) {
-          result.codecWidth = stream[key].toString();
-          parsedData[key] = result.codecWidth;
+          result._codecWidth = stream[key].toString();
+          parsedData[key] = result._codecWidth;
         } else if (key == FFProbeKeys.codedHeight) {
-          result.codecHeight = stream[key].toString();
-          parsedData[key] = result.codecHeight;
+          result._codecHeight = stream[key].toString();
+          parsedData[key] = result._codecHeight;
         } else if (key == FFProbeKeys.sideDataList) {
-          result.rotation = stream[key][0][FFProbeKeys.rotation];
+          result._rotation = stream[key][0][FFProbeKeys.rotation];
         }
       }
     }
