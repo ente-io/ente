@@ -6,6 +6,7 @@ import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
@@ -67,6 +68,9 @@ const createComlinkWorker = async () => {
         workerDidProcessFile,
     };
 
+    // Obtain a message port from the Electron layer.
+    const messagePort = await createMLWorker(electron);
+
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ML",
         new Worker(new URL("worker.ts", import.meta.url)),
@@ -74,6 +78,10 @@ const createComlinkWorker = async () => {
     await cw.remote.then((w) =>
         w.init(proxy(mlWorkerElectron), proxy(delegate)),
     );
+
+    // Pass the message port to our web worker.
+    cw.worker.postMessage("createMLWorker/port", [messagePort]);
+
     return cw;
 };
 
@@ -91,6 +99,28 @@ export const terminateMLWorker = () => {
         _comlinkWorker.terminate();
         _comlinkWorker = undefined;
     }
+};
+
+/**
+ * Obtain a port from the Node.js layer that can be used to communicate with the
+ * ML worker process.
+ */
+const createMLWorker = async (electron: Electron): Promise<MessagePort> => {
+    electron.createMLWorker();
+
+    // The main process will do its thing, and send back the port it created to
+    // us by sending an message on the "createMLWorker/port" channel via the
+    // postMessage API. This roundabout way is needed because MessagePorts
+    // cannot be transferred via the usual send/invoke pattern.
+
+    return new Promise((resolve) => {
+        window.onmessage = ({ source, data, ports }: MessageEvent) => {
+            // The source check verifies that the message is coming from the
+            // preload script. The data is the message that was posted.
+            if (source == window && data == "createMLWorker/port")
+                resolve(ensure(ports[0]));
+        };
+    });
 };
 
 /**
@@ -115,29 +145,6 @@ export const canEnableML = async () =>
  */
 export const initML = () => {
     _isMLEnabled = isMLEnabledLocal();
-    void (async () => {
-        console.log("yyy", 1);
-        const port = await createMLSession();
-        console.log("yyy", port);
-    })();
-};
-
-const createMLSession = async () => {
-    ensureElectron().createMLSession();
-
-    // The main process will do its thing, and send back the port it created to
-    // us by sending an message on the "createMLSession/port" channel via the
-    // postMessage API. This roundabout way is needed because MessagePorts
-    // cannot be transferred via the usual send/invoke pattern.
-
-    return new Promise((resolve) => {
-        window.onmessage = ({ source, data, ports }: MessageEvent) => {
-            // The source check verifies that the message is coming from the
-            // preload script. The data is the message that was posted.
-            if (source == window && data == "createMLSession/port")
-                resolve(ensure(ports[0]));
-        };
-    });
 };
 
 export const logoutML = async () => {

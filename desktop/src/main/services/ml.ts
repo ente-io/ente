@@ -7,7 +7,7 @@ import { utilityProcess } from "electron/main";
 import path from "node:path";
 
 /**
- * Create a new ML session.
+ * Create a new ML worker process.
  *
  * [Note: ML IPC]
  *
@@ -60,13 +60,11 @@ import path from "node:path";
  *     Node.js utility process <-> Renderer web worker
  *
  */
-export const createMLSession = (window: BrowserWindow) => {
+export const createMLWorker = (window: BrowserWindow) => {
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ml-util-test.js"));
-    child.postMessage(/* unused */ "", [port1]);
+    child.postMessage(undefined, [port1]);
 
-    window.webContents.postMessage("createMLSession/port", /* unused */ "", [
-        port2,
-    ]);
+    window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
 };

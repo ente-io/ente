@@ -198,12 +198,12 @@ const ffmpegExec = (
 
 // - ML
 
-const createMLSession = () => {
-    ipcRenderer.send("createMLSession");
-    ipcRenderer.on("createMLSession/port", (event) => {
+const createMLWorker = () => {
+    ipcRenderer.send("createMLWorker");
+    ipcRenderer.on("createMLWorker/port", (event) => {
         void windowLoaded.then(() => {
             // "*"" is the origin
-            window.postMessage("createMLSession/port", "*", event.ports);
+            window.postMessage("createMLWorker/port", "*", event.ports);
         });
     });
 };
@@ -384,7 +384,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - ML
 
-    createMLSession,
+    createMLWorker,
     computeCLIPImageEmbedding,
     computeCLIPTextEmbeddingIfAvailable,
     detectFaces,

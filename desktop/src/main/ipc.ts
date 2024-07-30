@@ -43,7 +43,7 @@ import {
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
-import { createMLSession } from "./services/ml";
+import { createMLWorker } from "./services/ml";
 import {
     computeCLIPImageEmbedding,
     computeCLIPTextEmbeddingIfAvailable,
@@ -241,7 +241,7 @@ export const attachIPCHandlers = () => {
 export const attachMainWindowIPCHandlers = (mainWindow: BrowserWindow) => {
     // - ML
 
-    ipcMain.on("createMLSession", () => createMLSession(mainWindow));
+    ipcMain.on("createMLWorker", () => createMLWorker(mainWindow));
 };
 
 /**

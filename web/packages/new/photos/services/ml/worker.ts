@@ -245,6 +245,10 @@ export class MLWorker {
 
 expose(MLWorker);
 
+globalThis.onmessage = (event: MessageEvent) => {
+    console.log("worker onmessage", event);
+};
+
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
  *

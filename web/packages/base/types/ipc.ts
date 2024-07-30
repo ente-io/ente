@@ -339,14 +339,14 @@ export interface Electron {
      *
      * This creates a new Node.js utility process, and sets things up so that we
      * can communicate directly with that utility process using a
-     * {@link MessagePort} that gets posted using "createMLSession/port".
+     * {@link MessagePort} that gets posted using "createMLWorker/port".
      *
      * For more details about the IPC flow, see: [Note: ML IPC].
      *
      * Note: For simplicity of implementation, we assume that there is at most
-     * one outstanding call to {@link createMLSession}.
+     * one outstanding call to {@link createMLWorker}.
      */
-    createMLSession: () => void;
+    createMLWorker: () => void;
 
     /**
      * Return a CLIP embedding of the given image.
