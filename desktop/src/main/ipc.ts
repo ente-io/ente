@@ -9,6 +9,7 @@
  */
 
 import type { FSWatcher } from "chokidar";
+import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
@@ -188,8 +189,6 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.on("createMLSession", () => createMLSession());
-
     ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
         computeCLIPImageEmbedding(input),
     );
@@ -233,6 +232,16 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
+};
+
+/**
+ * A subset of {@link attachIPCHandlers} for functions that need a reference to
+ * the main window to do their thing.
+ */
+export const attachMainWindowIPCHandlers = (mainWindow: BrowserWindow) => {
+    // - ML
+
+    ipcMain.on("createMLSession", () => createMLSession(mainWindow));
 };
 
 /**
