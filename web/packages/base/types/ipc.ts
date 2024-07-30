@@ -335,6 +335,17 @@ export interface Electron {
     // - ML
 
     /**
+     * Create a new ML session.
+     *
+     * This creates a new Node.js utility process, and sets things up so that we
+     * can communicate directly with that utility process using a
+     * {@link MessagePort} we get back.
+     *
+     * For more details about the IPC flow, see: [Note: ML IPC].
+     */
+    createMLSession: () => Promise<MessagePort>;
+
+    /**
      * Return a CLIP embedding of the given image.
      *
      * See: [Note: Natural language search using CLIP]

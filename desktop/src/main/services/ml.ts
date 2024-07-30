@@ -62,7 +62,7 @@ import { utilityProcess } from "electron/main";
 export const createMLSession = () => {
     const { port1, port2 } = new MessageChannelMain();
 
-    const child = utilityProcess.fork("./ml-utility");
+    const child = utilityProcess.fork("./ml-util-test");
     child.postMessage(/* unused */ "", [port1]);
 
     ipcRenderer.postMessage("ml-session-port", /* unused */ "", [port2]);
