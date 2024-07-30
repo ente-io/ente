@@ -48,6 +48,14 @@
 // Adding this reference here tells TypeScript that DOM typings (in particular,
 // window) should be introduced in the ambient scope.
 //
+// [Note: Node and web stream type mismatch]
+//
+// Unfortunately, adding this reference causes the ReadableStream typings to
+// break since lib.dom.d.ts adds its own incompatible definitions of
+// ReadableStream to the global scope.
+//
+// https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/68407
+
 /// <reference lib="dom" />
 
 import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";

@@ -142,6 +142,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
     const modifiedMs = entry.time;
 
+    // @ts-expect-error [Note: Node and web stream type mismatch]
     return new Response(webReadableStream, {
         headers: {
             // We don't know the exact type, but it doesn't really matter, just
@@ -168,9 +169,12 @@ const handleWrite = async (path: string, request: Request) => {
  *
  * @param readableStream A web
  * [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream).
+ *
  */
-export const writeStream = (filePath: string, readableStream: ReadableStream) =>
-    writeNodeStream(filePath, Readable.fromWeb(readableStream));
+export const writeStream = (
+    filePath: string,
+    readableStream: unknown /*ReadableStream*/, // @ts-expect-error [Note: Node and web stream type mismatch]
+) => writeNodeStream(filePath, Readable.fromWeb(readableStream));
 
 const writeNodeStream = async (filePath: string, fileStream: Readable) => {
     const writeable = createWriteStream(filePath);
