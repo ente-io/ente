@@ -1,5 +1,23 @@
-import log from "../log";
+/**
+ * [Note: Using Electron APIs in UtilityProcess]
+ *
+ * Only a small subset of the Electron APIs are available to a UtilityProcess.
+ * As of writing (Jul 2024, Electron 30), only the following are available:
+ * - net
+ * - systemPreferences
+ *
+ * In particular, `app` is not available.
+ *
+ * We structure our code so that it doesn't need anything apart from `net`.
+ */
+
+// import log from "../log";
 import { ensure, wait } from "../utils/common";
+
+const log = {
+    info: (...ms: unknown[]) => console.log(...ms),
+    debug: (fn: () => unknown) => console.log(fn()),
+};
 
 log.debug(() => "Started ML worker process");
 
