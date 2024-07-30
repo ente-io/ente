@@ -2,8 +2,6 @@ import "dart:convert";
 import "dart:typed_data";
 
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:flutter/material.dart";
-import "package:flutter/scheduler.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -41,9 +39,6 @@ class LockScreenSettings {
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
-    final brightness =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
-    bool isInDarkMode = brightness == Brightness.dark;
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
@@ -53,10 +48,7 @@ class LockScreenSettings {
             androidOptions: const PrivacyAndroidOptions(
               enableSecure: true,
             ),
-            backgroundColor: isInDarkMode ? Colors.black : Colors.white,
-            blurEffect: isInDarkMode
-                ? PrivacyBlurEffect.dark
-                : PrivacyBlurEffect.extraLight,
+            blurEffect: PrivacyBlurEffect.extraLight,
           );
     await _preferences.setBool(keyHideAppContent, hideContent);
   }
