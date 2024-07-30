@@ -2,6 +2,9 @@
  * @file ML related functionality. This code runs in the main process.
  */
 
+import { ipcRenderer, MessageChannelMain } from "electron";
+import { utilityProcess } from "electron/main";
+
 /**
  * Create a new ML session.
  *
@@ -57,6 +60,10 @@
  *
  */
 export const createMLSession = () => {
-    // }: Promise<MessagePort> => {
-    throw new Error("Not implemented");
+    const { port1, port2 } = new MessageChannelMain();
+
+    const child = utilityProcess.fork("./ml-utility");
+    child.postMessage(/* unused */ "", [port1]);
+
+    ipcRenderer.postMessage("ml-session-port", /* unused */ "", [port2]);
 };
