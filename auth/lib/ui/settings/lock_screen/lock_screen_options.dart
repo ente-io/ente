@@ -272,35 +272,42 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     const SizedBox(
                                       height: 24,
                                     ),
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: context.l10n.autoLock,
-                                        subTitle: _formatTime(
-                                          Duration(
-                                            milliseconds:
-                                                autoLockTimeInMilliseconds,
-                                          ),
-                                        ),
-                                      ),
-                                      surfaceExecutionStates: false,
-                                      alignCaptionedTextToLeft: true,
-                                      singleBorderRadius: 8,
-                                      menuItemColor: colorTheme.fillFaint,
-                                      trailingIconColor: colorTheme.textBase,
-                                      onTap: () => _onAutoLock(),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 14,
-                                        left: 14,
-                                        right: 12,
-                                      ),
-                                      child: Text(
-                                        context.l10n.autoLockFeatureDescription,
-                                        style: textTheme.miniFaint,
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
+                                    PlatformUtil.isMobile()
+                                        ? MenuItemWidget(
+                                            captionedTextWidget:
+                                                CaptionedTextWidget(
+                                              title: context.l10n.autoLock,
+                                              subTitle: _formatTime(
+                                                Duration(
+                                                  milliseconds:
+                                                      autoLockTimeInMilliseconds,
+                                                ),
+                                              ),
+                                            ),
+                                            surfaceExecutionStates: false,
+                                            alignCaptionedTextToLeft: true,
+                                            singleBorderRadius: 8,
+                                            menuItemColor: colorTheme.fillFaint,
+                                            trailingIconColor:
+                                                colorTheme.textBase,
+                                            onTap: () => _onAutoLock(),
+                                          )
+                                        : const SizedBox.shrink(),
+                                    PlatformUtil.isMobile()
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 14,
+                                              left: 14,
+                                              right: 12,
+                                            ),
+                                            child: Text(
+                                              context.l10n
+                                                  .autoLockFeatureDescription,
+                                              style: textTheme.miniFaint,
+                                              textAlign: TextAlign.left,
+                                            ),
+                                          )
+                                        : const SizedBox.shrink(),
                                     PlatformUtil.isMobile()
                                         ? Column(
                                             crossAxisAlignment:
@@ -342,10 +349,10 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                               ),
                                             ],
                                           )
-                                        : Container(),
+                                        : const SizedBox.shrink(),
                                   ],
                                 )
-                              : Container(),
+                              : const SizedBox.shrink(),
                         ),
                       ],
                     ),
