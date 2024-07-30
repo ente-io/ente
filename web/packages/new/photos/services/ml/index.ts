@@ -75,12 +75,13 @@ const createComlinkWorker = async () => {
         "ML",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-    await cw.remote.then((w) =>
-        w.init(proxy(mlWorkerElectron), proxy(delegate)),
-    );
 
-    // Pass the message port to our web worker.
-    cw.worker.postMessage("createMLWorker/port", [messagePort]);
+    await cw.remote.then((w) => {
+        // Pass the message port to our web worker.
+        cw.worker.postMessage("createMLWorker/port", [messagePort]);
+        // Initialize it.
+        return w.init(proxy(mlWorkerElectron), proxy(delegate));
+    });
 
     return cw;
 };
