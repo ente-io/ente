@@ -1,11 +1,8 @@
--- Create the data_type enum
-CREATE TYPE file_data_type AS ENUM ('img_jpg_preview', 'vid_hls_preview', 'derived');
-
 -- Create the derived table
 CREATE TABLE file_data (
                          file_id BIGINT NOT NULL,
                          user_id BIGINT NOT NULL,
-                         data_type file_data_type NOT NULL,
+                         data_type OBJECT_TYPE NOT NULL,
                          size BIGINT NOT NULL,
                          latest_bucket s3region NOT NULL,
                          replicated_buckets s3region[] NOT NULL,
