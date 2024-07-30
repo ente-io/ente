@@ -103,8 +103,10 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
-    if (appLock == false) {
-      await _lockscreenSetting.setHideAppContent(true);
+    if (PlatformUtil.isMobile()) {
+      if (appLock == false) {
+        await _lockscreenSetting.setHideAppContent(true);
+      }
     }
     setState(() {
       _initializeSettings();
@@ -168,6 +170,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
@@ -308,10 +311,10 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                                 captionedTextWidget:
                                                     CaptionedTextWidget(
                                                   title:
-                                                      context.l10n.deviceLock,
+                                                      context.l10n.hideContent,
                                                 ),
                                                 alignCaptionedTextToLeft: true,
-                                                isTopBorderRadiusRemoved: true,
+                                                singleBorderRadius: 8,
                                                 menuItemColor:
                                                     colorTheme.fillFaint,
                                                 trailingWidget:
