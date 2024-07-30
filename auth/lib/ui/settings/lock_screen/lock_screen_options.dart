@@ -104,13 +104,12 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
     if (PlatformUtil.isMobile()) {
-      if (appLock == false) {
-        await _lockscreenSetting.setHideAppContent(true);
-      }
+      await _lockscreenSetting.setHideAppContent(!appLock);
     }
     setState(() {
       _initializeSettings();
       appLock = !appLock;
+      hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     });
   }
 

@@ -54,7 +54,7 @@ class LockScreenSettings {
   }
 
   bool getShouldHideAppContent() {
-    return _preferences.getBool(keyHideAppContent) ?? false;
+    return _preferences.getBool(keyHideAppContent) ?? true;
   }
 
   Future<void> setAutoLockTime(Duration duration) async {
