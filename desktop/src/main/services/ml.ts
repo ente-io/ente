@@ -2,9 +2,14 @@
  * @file ML related functionality. This code runs in the main process.
  */
 
-import { MessageChannelMain, type BrowserWindow } from "electron";
+import {
+    MessageChannelMain,
+    type BrowserWindow,
+    type UtilityProcess,
+} from "electron";
 import { utilityProcess } from "electron/main";
 import path from "node:path";
+import log from "../log";
 
 /**
  * Create a new ML worker process.
@@ -58,7 +63,6 @@ import path from "node:path";
  * worker can directly talk to each other!
  *
  *     Node.js utility process <-> Renderer web worker
- *
  */
 export const createMLWorker = (window: BrowserWindow) => {
     const { port1, port2 } = new MessageChannelMain();
@@ -67,4 +71,40 @@ export const createMLWorker = (window: BrowserWindow) => {
     child.postMessage(undefined, [port1]);
 
     window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
+
+    handleMLWorkerRequests(child);
+};
+
+/**
+ * Handle requests from the utility process.
+ *
+ * [Note: Using Electron APIs in UtilityProcess]
+ *
+ * Only a small subset of the Electron APIs are available to a UtilityProcess.
+ * As of writing (Jul 2024, Electron 30), only the following are available:
+ *
+ * - net
+ * - systemPreferences
+ *
+ * In particular, `app` is not available.
+ *
+ * We structure our code so that it doesn't need anything apart from `net`.
+ *
+ * For the other cases,
+ *
+ * -  When we need to communicate from the utility process to the main process,
+ *    we use the `parentPort` in the utility process.
+ */
+const handleMLWorkerRequests = (child: UtilityProcess) => {
+    child.on("message", (m: unknown) => {
+        if (m && typeof m == "object" && "method" in m) {
+            switch (m.method) {
+                default:
+                    break;
+            }
+        }
+
+        log.info("Ignoring unexpected message", m);
+        return undefined;
+    });
 };

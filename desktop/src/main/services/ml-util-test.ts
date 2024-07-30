@@ -1,22 +1,31 @@
-/**
- * [Note: Using Electron APIs in UtilityProcess]
- *
- * Only a small subset of the Electron APIs are available to a UtilityProcess.
- * As of writing (Jul 2024, Electron 30), only the following are available:
- * - net
- * - systemPreferences
- *
- * In particular, `app` is not available.
- *
- * We structure our code so that it doesn't need anything apart from `net`.
- */
-
-// import log from "../log";
+//
 import { ensure, wait } from "../utils/common";
 
+/**
+ * We cannot do
+ *
+ *     import log from "../log";
+ *
+ * because that requires the Electron APIs that are not available to a utility
+ * process (See: [Note: Using Electron APIs in UtilityProcess]). But even if
+ * that were to work, logging will still be problematic since we'd try opening
+ * the log file from two different Node.js processes (this one, and the main
+ * one), and I didn't find any indication in the electron-log repository that
+ * the log file's integrity would be maintained in such cases.
+ *
+ * So instead we create this proxy log object that uses `process.parentPort` to
+ * transport the logs over to the main process.
+ */
 const log = {
-    info: (...ms: unknown[]) => console.log(...ms),
+    info: (...ms: unknown[]) => mainProcess("log.info", ms),
     debug: (fn: () => unknown) => console.log(fn()),
+};
+
+/**
+ * Send a message to the main process using a barebones protocol.
+ */
+const mainProcess = (method: string, params: unknown[]) => {
+    process.parentPort.postMessage({ method, params });
 };
 
 log.debug(() => "Started ML worker process");
@@ -24,7 +33,7 @@ log.debug(() => "Started ML worker process");
 process.parentPort.once("message", (e) => {
     const port = ensure(e.ports[0]);
     port.on("message", (event) => {
-        void handleMessage(event.data).then((response) => {
+        void handleMessageFromRenderer(event.data).then((response) => {
             if (response) port.postMessage(response);
         });
     });
@@ -36,7 +45,7 @@ process.parentPort.once("message", (e) => {
  *
  * Sibling of the electronMLWorker function (in `ml/worker.ts`) in the web code.
  */
-const handleMessage = async (m: unknown) => {
+const handleMessageFromRenderer = async (m: unknown) => {
     if (m && typeof m == "object" && "type" in m && "id" in m) {
         const id = m.id;
         switch (m.type) {

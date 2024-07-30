@@ -69,7 +69,8 @@ const IPCResponse = z.object({
 /**
  * Our hand-rolled IPC handler and router - the web worker end.
  *
- * Sibling of the handleMessage function (in `ml-worker.ts`) in the desktop app.
+ * Sibling of the handleMessageFromRenderer function (in `ml-worker.ts`) in the
+ * desktop code.
  */
 const electronMLWorker = async (type: string, data: string) => {
     const port = _port;
