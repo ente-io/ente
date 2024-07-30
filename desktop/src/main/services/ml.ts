@@ -4,6 +4,7 @@
 
 import { ipcRenderer, MessageChannelMain } from "electron";
 import { utilityProcess } from "electron/main";
+import path from "node:path";
 
 /**
  * Create a new ML session.
@@ -62,7 +63,7 @@ import { utilityProcess } from "electron/main";
 export const createMLSession = () => {
     const { port1, port2 } = new MessageChannelMain();
 
-    const child = utilityProcess.fork("./ml-util-test");
+    const child = utilityProcess.fork(path.join(__dirname, "ml-util-test.js"));
     child.postMessage(/* unused */ "", [port1]);
 
     ipcRenderer.postMessage("createMLSession/port", /* unused */ "", [port2]);
