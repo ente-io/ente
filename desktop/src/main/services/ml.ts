@@ -97,14 +97,19 @@ export const createMLWorker = (window: BrowserWindow) => {
  */
 const handleMLWorkerRequests = (child: UtilityProcess) => {
     child.on("message", (m: unknown) => {
-        if (m && typeof m == "object" && "method" in m) {
+        if (m && typeof m == "object" && "method" in m && "params" in m) {
             switch (m.method) {
+                case "log.info":
+                    if (Array.isArray(m.params)) {
+                        const params = m.params as unknown[];
+                        log.info("[ml-worker]", ...params);
+                        return;
+                    }
+                    break;
                 default:
                     break;
             }
         }
-
-        log.info("Ignoring unexpected message", m);
-        return undefined;
+        log.warn("Ignoring unexpected message from ML worker", m);
     });
 };
