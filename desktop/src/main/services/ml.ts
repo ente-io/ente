@@ -7,7 +7,7 @@ import {
     type BrowserWindow,
     type UtilityProcess,
 } from "electron";
-import { utilityProcess } from "electron/main";
+import { app, utilityProcess } from "electron/main";
 import path from "node:path";
 import log from "../log";
 
@@ -68,7 +68,8 @@ export const createMLWorker = (window: BrowserWindow) => {
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ml-util-test.js"));
-    child.postMessage(undefined, [port1]);
+    const userDataPath = app.getPath("userData");
+    child.postMessage({ userDataPath }, [port1]);
 
     window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
 
@@ -92,6 +93,9 @@ export const createMLWorker = (window: BrowserWindow) => {
  *
  * For the other cases,
  *
+ * -  Additional parameters to the utility process are passed alongwith the
+ *    initial message where we provide it the message port.
+ *
  * -  When we need to communicate from the utility process to the main process,
  *    we use the `parentPort` in the utility process.
  */
@@ -101,6 +105,12 @@ const handleMLWorkerRequests = (child: UtilityProcess) => {
         if (m && typeof m == "object" && "method" in m && "param" in m) {
             const p = m.param;
             switch (m.method) {
+                case "log.errorString":
+                    if (typeof p == "string") {
+                        log.error(`${logTag} ${p}`);
+                        return;
+                    }
+                    break;
                 case "log.info":
                     if (Array.isArray(p)) {
                         // Need to cast from any[] to unknown[]
@@ -114,7 +124,6 @@ const handleMLWorkerRequests = (child: UtilityProcess) => {
                         return;
                     }
                     break;
-
                 default:
                     break;
             }

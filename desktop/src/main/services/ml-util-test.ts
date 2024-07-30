@@ -1,4 +1,6 @@
-//
+// See [Note: Using Electron APIs in UtilityProcess] about what we can and
+// cannot import.
+
 import { ensure, wait } from "../utils/common";
 
 /**
@@ -17,6 +19,11 @@ import { ensure, wait } from "../utils/common";
  * transport the logs over to the main process.
  */
 const log = {
+    /**
+     * Unlike the real {@link log.error}, this accepts only the first string
+     * argument, not the second optional error one.
+     */
+    errorString: (s: string) => mainProcess("log.errorString", s),
     info: (...ms: unknown[]) => mainProcess("log.info", ms),
     /**
      * Unlike the real {@link log.debug}, this is (a) eagerly evaluated, and (b)
@@ -37,6 +44,8 @@ log.debugString(
 );
 
 process.parentPort.once("message", (e) => {
+    parseInitData(e.data);
+
     const port = ensure(e.ports[0]);
     port.on("message", (event) => {
         void handleMessageFromRenderer(event.data).then((response) => {
@@ -45,6 +54,29 @@ process.parentPort.once("message", (e) => {
     });
     port.start();
 });
+
+/**
+ * We cannot access Electron's {@link app} object within a utility process, so
+ * we pass the value of `app.getPath("userData")` during initialization, and it
+ * can be subsequently retrieved from here.
+ */
+let _userDataPath: string | undefined;
+
+/** Equivalent to app.getPath("userData") */
+const userDataPath = () => ensure(_userDataPath);
+
+const parseInitData = (data: unknown) => {
+    if (
+        data &&
+        typeof data == "object" &&
+        "userDataPath" in data &&
+        typeof data.userDataPath == "string"
+    ) {
+        _userDataPath = data.userDataPath;
+    } else {
+        log.errorString("Unparseable initialization data");
+    }
+};
 
 /**
  * Our hand-rolled IPC handler and router - the Node.js utility process end.
@@ -67,7 +99,7 @@ const handleMessageFromRenderer = async (m: unknown) => {
 };
 
 const foo = async (a: string) => {
-    log.info("got message foo with argument", a);
+    log.info("got message foo with argument", a, userDataPath());
     await wait(0);
     return a.length;
 };
