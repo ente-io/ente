@@ -18,17 +18,23 @@ import { ensure, wait } from "../utils/common";
  */
 const log = {
     info: (...ms: unknown[]) => mainProcess("log.info", ms),
-    debug: (fn: () => unknown) => console.log(fn()),
+    /**
+     * Unlike the real {@link log.debug}, this is (a) eagerly evaluated, and (b)
+     * accepts only strings.
+     */
+    debugString: (s: string) => mainProcess("log.debugString", s),
 };
 
 /**
  * Send a message to the main process using a barebones protocol.
  */
-const mainProcess = (method: string, params: unknown[]) => {
-    process.parentPort.postMessage({ method, params });
+const mainProcess = (method: string, param: unknown) => {
+    process.parentPort.postMessage({ method, param });
 };
 
-log.debug(() => "Started ML worker process");
+log.debugString(
+    `Started ML worker process with args ${process.argv.join(" ")}`,
+);
 
 process.parentPort.once("message", (e) => {
     const port = ensure(e.ports[0]);
@@ -61,7 +67,7 @@ const handleMessageFromRenderer = async (m: unknown) => {
 };
 
 const foo = async (a: string) => {
-    console.log("got message foo with argument", a);
+    log.info("got message foo with argument", a);
     await wait(0);
     return a.length;
 };

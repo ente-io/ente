@@ -96,20 +96,29 @@ export const createMLWorker = (window: BrowserWindow) => {
  *    we use the `parentPort` in the utility process.
  */
 const handleMLWorkerRequests = (child: UtilityProcess) => {
+    const logTag = "[ml-worker]";
     child.on("message", (m: unknown) => {
-        if (m && typeof m == "object" && "method" in m && "params" in m) {
+        if (m && typeof m == "object" && "method" in m && "param" in m) {
+            const p = m.param;
             switch (m.method) {
                 case "log.info":
-                    if (Array.isArray(m.params)) {
-                        const params = m.params as unknown[];
-                        log.info("[ml-worker]", ...params);
+                    if (Array.isArray(p)) {
+                        // Need to cast from any[] to unknown[]
+                        log.info(logTag, ...(p as unknown[]));
                         return;
                     }
                     break;
+                case "log.debugString":
+                    if (typeof p == "string") {
+                        log.debug(() => `${logTag} ${p}`);
+                        return;
+                    }
+                    break;
+
                 default:
                     break;
             }
         }
-        log.warn("Ignoring unexpected message from ML worker", m);
+        log.info("Ignoring unexpected message from ML worker", m);
     });
 };
