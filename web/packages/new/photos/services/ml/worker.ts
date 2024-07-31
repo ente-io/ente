@@ -19,7 +19,12 @@ import {
     indexableBlobs,
     type ImageBitmapAndData,
 } from "./blob";
-import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
+import {
+    clipIndexingVersion,
+    clipMatches,
+    indexCLIP,
+    type CLIPIndex,
+} from "./clip";
 import { saveFaceCrops } from "./crop";
 import {
     indexableFileIDs,
@@ -33,7 +38,7 @@ import {
     type RemoteDerivedData,
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
-import type { MLWorkerDelegate } from "./worker-types";
+import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -68,6 +73,9 @@ interface IndexableItem {
  * -   "backfillq": fetching remote embeddings of unindexed items, and then
  *     indexing them if needed,
  * -   "idle": in between state transitions.
+ *
+ * In addition, MLWorker can also be invoked for interactive tasks: in
+ * particular, for finding the closest CLIP match when the user does a search.
  */
 export class MLWorker {
     private electron: ElectronMLWorker | undefined;
@@ -178,6 +186,13 @@ export class MLWorker {
         return this.state == "indexing";
     }
 
+    /**
+     * Find {@link CLIPMatches} for a given {@link searchPhrase}.
+     */
+    async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
+        return clipMatches(searchPhrase, ensure(this.electron));
+    }
+
     private async tick() {
         log.debug(() => [
             "ml/tick",
@@ -226,7 +241,7 @@ export class MLWorker {
     }
 
     /** Return the next batch of items to backfill (if any). */
-    async backfillQ() {
+    private async backfillQ() {
         const userID = ensure(await getKVN("userID"));
         // Find files that our local DB thinks need syncing.
         const filesByID = await syncWithLocalFilesAndGetFilesToIndex(
@@ -278,7 +293,8 @@ const indexNextBatch = async (
         try {
             await index(item, electron);
             delegate?.workerDidProcessFile();
-            // Possibly unnecessary, but let us drain the microtask queue.
+            // Let us drain the microtask queue. This also gives a chance for other
+            // interactive tasks like `clipMatches` to run.
             await wait(0);
         } catch (e) {
             log.warn(`Skipping unindexable file ${item.enteFile.id}`, e);

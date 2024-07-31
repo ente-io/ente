@@ -1,13 +1,12 @@
 import { isDesktop } from "@/base/app";
-import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
 import {
+    clipMatches,
     isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
 } from "@/new/photos/services/ml";
-import { clipMatches } from "@/new/photos/services/ml/clip";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
@@ -374,7 +373,7 @@ const searchClip = async (
     searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
     if (!isMLEnabled()) return undefined;
-    const matches = await clipMatches(searchPhrase, ensureElectron());
+    const matches = await clipMatches(searchPhrase);
     log.debug(() => ["clip/scores", matches]);
     return matches;
 };

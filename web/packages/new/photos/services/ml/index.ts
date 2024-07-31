@@ -19,6 +19,7 @@ import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
+import type { CLIPMatches } from "./worker-types";
 
 /**
  * In-memory flag that tracks if ML is enabled.
@@ -391,6 +392,22 @@ const setInterimScheduledStatus = () => {
 };
 
 const workerDidProcessFile = throttled(updateMLStatusSnapshot, 2000);
+
+/**
+ * Use CLIP to perform a natural language search over image embeddings.
+ *
+ * @param searchPhrase The text entered by the user in the search box.
+ *
+ * It returns file (IDs) that should be shown in the search results, along with
+ * their scores.
+ *
+ * The result can also be `undefined`, which indicates that the download for the
+ * ML model is still in progress (trying again later should succeed).
+ */
+export const clipMatches = (
+    searchPhrase: string,
+): Promise<CLIPMatches | undefined> =>
+    worker().then((w) => w.clipMatches(searchPhrase));
 
 /**
  * Return the IDs of all the faces in the given {@link enteFile} that are not
