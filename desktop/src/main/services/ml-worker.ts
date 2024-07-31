@@ -59,7 +59,8 @@ log.debugString(`Started ML worker process`);
 process.parentPort.once("message", (e) => {
     // Initialize ourselves with the data we got from our parent.
     parseInitData(e.data);
-    // Expose an 
+    // Expose an instance of `ElectronMLWorker` on the port we got from our
+    // parent.
     expose(
         {
             computeCLIPImageEmbedding,

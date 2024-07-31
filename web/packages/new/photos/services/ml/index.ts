@@ -69,12 +69,10 @@ const createComlinkWorker = async () => {
         new Worker(new URL("worker.ts", import.meta.url)),
     );
 
-    await cw.remote.then((w) => {
-        // Pass the message port to our web worker.
-        // cw.worker.postMessage("createMLWorker/port", [messagePort]);
-        // Initialize it.
-        return w.init(transfer(messagePort, [messagePort]), proxy(delegate));
-    });
+    await cw.remote.then((w) =>
+        // Forward the port to the web worker.
+        w.init(transfer(messagePort, [messagePort]), proxy(delegate)),
+    );
 
     return cw;
 };
@@ -88,9 +86,9 @@ const createComlinkWorker = async () => {
  *
  * It is also called when the user pauses or disables ML.
  */
-export const terminateMLWorker = () => {
+export const terminateMLWorker = async () => {
     if (_comlinkWorker) {
-        _comlinkWorker.terminate();
+        await _comlinkWorker.then((cw) => cw.terminate());
         _comlinkWorker = undefined;
     }
 };
@@ -188,7 +186,7 @@ export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
     setIsMLEnabledLocal(false);
     _isMLEnabled = false;
-    terminateMLWorker();
+    await terminateMLWorker();
     triggerStatusUpdate();
 };
 
