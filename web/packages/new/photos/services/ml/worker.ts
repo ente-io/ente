@@ -11,7 +11,7 @@ import { wait } from "@/utils/promise";
 import { DOMParser } from "@xmldom/xmldom";
 import { expose, wrap } from "comlink";
 import downloadManager from "../download";
-import { cmpNewLib2, extractRawExif } from "../exif";
+import { cmpNewLib2, extractRawExif, type RawExifTags } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -35,6 +35,7 @@ import {
 import {
     fetchDerivedData,
     putDerivedData,
+    type RawRemoteDerivedData,
     type RemoteDerivedData,
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
@@ -480,10 +481,7 @@ const index = async (
             [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
-                existingExif ??
-                    (originalImageBlob
-                        ? extractRawExif(originalImageBlob)
-                        : undefined),
+                existingExif ?? tryExtractExif(originalImageBlob, f),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -525,11 +523,11 @@ const index = async (
         // parts. See: [Note: Preserve unknown derived data fields].
 
         const existingRawDerivedData = remoteDerivedData?.raw ?? {};
-        const rawDerivedData = {
+        const rawDerivedData: RawRemoteDerivedData = {
             ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
-            exif,
+            ...(exif ? { exif } : {}),
         };
 
         log.debug(() => ["Uploading derived data", rawDerivedData]);
@@ -569,5 +567,36 @@ const index = async (
         }
     } finally {
         image.bitmap.close();
+    }
+};
+
+/**
+ * A helper function that tries to extract the raw Exif, but returns `undefined`
+ * if something goes wrong (or it isn't possible) instead of throwing.
+ *
+ * Exif extraction is not a critical item, we don't want the actual indexing to
+ * fail because we were unable to extract Exif. This is not rare: one scenario
+ * is if we were trying to index a file in an exotic format. The ML indexing
+ * will succeed (because we convert it to a renderable blob), but the Exif
+ * extraction will fail (since it needs the original blob, but the original blob
+ * can be an arbitrary format).
+ *
+ * @param originalImageBlob A {@link Blob} containing the original data for the
+ * image (or the image component of a live photo) whose Exif we're trying to
+ * extract. If this is not available, we skip the extraction and return
+ * `undefined`.
+ *
+ * @param f The {@link fileLogID} for the file this blob corresponds to.
+ */
+export const tryExtractExif = async (
+    originalImageBlob: Blob | undefined,
+    f: string,
+): Promise<RawExifTags | undefined> => {
+    if (!originalImageBlob) return undefined;
+    try {
+        return await extractRawExif(originalImageBlob);
+    } catch (e) {
+        log.warn(`Ignoring error during Exif extraction for ${f}`, e);
+        return undefined;
     }
 };
