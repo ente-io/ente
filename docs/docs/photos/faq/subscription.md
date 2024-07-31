@@ -152,10 +152,7 @@ you can gain more value out of a single subscription.
 
 ## Is there a forever-free plan?
 
-Sorry, since we're building a business that does not involve monetization of
-user data, we have to charge to remain sustainable.
-
-We do offer a generous free trial for you to experience the product.
+Yes, we offer 5 GB of storage for free.
 
 ## Will I need to pay for Ente Auth after my Ente Photos free plan expires?
 
