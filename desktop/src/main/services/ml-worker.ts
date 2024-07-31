@@ -15,10 +15,9 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
+import { messagePortMainEndpoint } from "../utils/comlink-endpoint";
 import { ensure, wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
-
-const nodeEndpoint = require("comlink/dist/umd/node-adapter");
 
 /**
  * We cannot do
@@ -63,7 +62,6 @@ process.parentPort.once("message", (e) => {
     parseInitData(e.data);
 
     const port = ensure(e.ports[0]);
-    port.on("message", (me: Electron.MessageEvent) => {});
     expose(
         {
             computeCLIPImageEmbedding,
@@ -71,8 +69,7 @@ process.parentPort.once("message", (e) => {
             detectFaces,
             computeFaceEmbeddings,
         },
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-        nodeEndpoint(port as unknown as any),
+        messagePortMainEndpoint(port),
     );
     // port.on("message", (request) => {
     //     void handleMessageFromRenderer(request.data).then((response) =>
