@@ -1,6 +1,5 @@
 
-DROP INDEX IF EXISTS idx_file_data_user_id_data_type;
-DROP INDEX IF EXISTS idx_file_data_user_id_updated_at;
+DROP INDEX IF EXISTS idx_file_data_user_type_deleted;
 
 DROP TABLE IF EXISTS file_data;
 
