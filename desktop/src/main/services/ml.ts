@@ -67,7 +67,7 @@ import log from "../log";
 export const createMLWorker = (window: BrowserWindow) => {
     const { port1, port2 } = new MessageChannelMain();
 
-    const child = utilityProcess.fork(path.join(__dirname, "ml-util-test.js"));
+    const child = utilityProcess.fork(path.join(__dirname, "ml-worker.js"));
     const userDataPath = app.getPath("userData");
     child.postMessage({ userDataPath }, [port1]);
 

@@ -44,12 +44,7 @@ import {
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import { createMLWorker } from "./services/ml";
-import {
-    computeCLIPImageEmbedding,
-    computeCLIPTextEmbeddingIfAvailable,
-    computeFaceEmbeddings,
-    detectFaces,
-} from "./services/ml-worker";
+
 import {
     encryptionKey,
     lastShownChangelogVersion,
@@ -189,21 +184,22 @@ export const attachIPCHandlers = () => {
 
     // - ML
 
-    ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
-        computeCLIPImageEmbedding(input),
-    );
+    // TODO:
+    // ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
+    //     computeCLIPImageEmbedding(input),
+    // );
 
-    ipcMain.handle("computeCLIPTextEmbeddingIfAvailable", (_, text: string) =>
-        computeCLIPTextEmbeddingIfAvailable(text),
-    );
+    // ipcMain.handle("computeCLIPTextEmbeddingIfAvailable", (_, text: string) =>
+    //     computeCLIPTextEmbeddingIfAvailable(text),
+    // );
 
-    ipcMain.handle("detectFaces", (_, input: Float32Array) =>
-        detectFaces(input),
-    );
+    // ipcMain.handle("detectFaces", (_, input: Float32Array) =>
+    //     detectFaces(input),
+    // );
 
-    ipcMain.handle("computeFaceEmbeddings", (_, input: Float32Array) =>
-        computeFaceEmbeddings(input),
-    );
+    // ipcMain.handle("computeFaceEmbeddings", (_, input: Float32Array) =>
+    //     computeFaceEmbeddings(input),
+    // );
 
     // - Upload
 

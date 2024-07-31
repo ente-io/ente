@@ -10,9 +10,6 @@
 
 import Tokenizer from "clip-bpe-js";
 import { expose } from "comlink";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import nodeEndpoint from "comlink/dist/umd/node-adapter";
 import { net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
@@ -20,6 +17,8 @@ import path from "node:path";
 import * as ort from "onnxruntime-node";
 import { ensure, wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
+
+const nodeEndpoint = require("comlink/dist/umd/node-adapter");
 
 /**
  * We cannot do
