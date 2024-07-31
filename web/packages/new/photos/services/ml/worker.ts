@@ -288,15 +288,34 @@ const indexNextBatch = async (
     // Nothing to do.
     if (items.length == 0) return false;
 
-    // Index, keeping track if any of the items failed.
+    // Keep track if any of the items failed.
     let allSuccess = true;
-    for (const item of items) {
-        try {
-            await index(item, electron);
-        } catch {
-            allSuccess = false;
+
+    // Index up to 4 items simultaneously.
+    const tasks = new Array<Promise<void> | undefined>(4).fill(undefined);
+
+    let i = 0;
+    while (i < items.length) {
+        for (let j = 0; j < tasks.length; j++) {
+            if (!tasks[j]) {
+                tasks[j] = index(ensure(items[i++]), electron)
+                    .then(() => {
+                        tasks[j] = undefined;
+                    })
+                    .catch(() => {
+                        allSuccess = false;
+                        tasks[j] = undefined;
+                    });
+            }
         }
+
+        // Wait for at least one to complete (the other runners continue running
+        // even if one promise reaches the finish line).
+        await Promise.race(tasks);
+
+        // Let the main thread now we're doing something.
         delegate?.workerDidProcessFile();
+
         // Let us drain the microtask queue. This also gives a chance for other
         // interactive tasks like `clipMatches` to run.
         await wait(0);
