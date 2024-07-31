@@ -202,23 +202,11 @@ const createMLWorker = () => {
     ipcRenderer.send("createMLWorker");
     ipcRenderer.on("createMLWorker/port", (event) => {
         void windowLoaded.then(() => {
-            // "*"" is the origin
+            // "*"" is the origin to send to.
             window.postMessage("createMLWorker/port", "*", event.ports);
         });
     });
 };
-
-const computeCLIPImageEmbedding = (input: Float32Array) =>
-    ipcRenderer.invoke("computeCLIPImageEmbedding", input);
-
-const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
-    ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);
-
-const detectFaces = (input: Float32Array) =>
-    ipcRenderer.invoke("detectFaces", input);
-
-const computeFaceEmbeddings = (input: Float32Array) =>
-    ipcRenderer.invoke("computeFaceEmbeddings", input);
 
 // - Watch
 
@@ -385,10 +373,6 @@ contextBridge.exposeInMainWorld("electron", {
     // - ML
 
     createMLWorker,
-    computeCLIPImageEmbedding,
-    computeCLIPTextEmbeddingIfAvailable,
-    detectFaces,
-    computeFaceEmbeddings,
 
     // - Watch
 

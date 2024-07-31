@@ -44,7 +44,6 @@ import {
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import { createMLWorker } from "./services/ml";
-
 import {
     encryptionKey,
     lastShownChangelogVersion,

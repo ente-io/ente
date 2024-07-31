@@ -96,46 +96,6 @@ const parseInitData = (data: unknown) => {
 };
 
 /**
- * Our hand-rolled RPC handler and router - the Node.js utility process end.
- *
- * Sibling of the electronMLWorker function (in `ml/worker.ts`) in the web code.
- *
- * [Note: Node.js ML worker RPC protocol]
- *
- * -   Each RPC call (i.e. request message) has a "method" (string), "id"
- *     (number) and "p" (arbitrary param).
- *
- * -   Each RPC result (i.e. response message) has an "id" (number) that is the
- *     same as the "id" for the request which it corresponds to.
- *
- * -   If the RPC call was a success, then the response messege will have an
- *     "result" (arbitrary result) property. Otherwise it will have a "error"
- *     (string) property describing what went wrong.
- */
-export const handleMessageFromRenderer = (m: unknown) => {
-    if (m && typeof m == "object" && "method" in m && "id" in m && "p" in m) {
-        const id = m.id;
-        // const p = m.p;
-        try {
-            switch (m.method) {
-                case "foo":
-                    // if (p && typeof p == "string")
-                    // return { id, result: await foo(p) };
-                    break;
-            }
-        } catch (e) {
-            return { id, error: e instanceof Error ? e.message : String(e) };
-        }
-        return { id, error: "Unknown message" };
-    }
-
-    // We don't even have an "id", so at least log it lest the renderer also
-    // ignore the "id"-less response.
-    log.info("Ignoring unknown message", m);
-    return { error: "Unknown message" };
-};
-
-/**
  * Return a function that can be used to trigger a download of the specified
  * model, and the creating of an ONNX inference session initialized using it.
  *
