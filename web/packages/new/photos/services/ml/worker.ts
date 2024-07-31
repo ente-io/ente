@@ -297,7 +297,7 @@ const indexNextBatch = async (
     let i = 0;
     while (i < items.length) {
         for (let j = 0; j < tasks.length; j++) {
-            if (!tasks[j]) {
+            if (i < items.length && !tasks[j]) {
                 tasks[j] = index(ensure(items[i++]), electron)
                     .then(() => {
                         tasks[j] = undefined;
