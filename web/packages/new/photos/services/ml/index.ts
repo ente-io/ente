@@ -35,7 +35,7 @@ import { MLWorker } from "./worker";
 let _isMLEnabled = false;
 
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
-let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
+let _comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
 
 /**
  * Subscriptions to {@link MLStatus}.
@@ -52,10 +52,8 @@ let _mlStatusListeners: (() => void)[] = [];
 let _mlStatusSnapshot: MLStatus | undefined;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
-const worker = async () => {
-    if (!_comlinkWorker) _comlinkWorker = await createComlinkWorker();
-    return _comlinkWorker.remote;
-};
+const worker = () =>
+    (_comlinkWorker ??= createComlinkWorker()).then((cw) => cw.remote);
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
