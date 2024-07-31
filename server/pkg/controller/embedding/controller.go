@@ -110,7 +110,7 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 		Version:            version,
 		EncryptedEmbedding: req.EncryptedEmbedding,
 		DecryptionHeader:   req.DecryptionHeader,
-		Client:             network.GetPrettyUA(ctx.GetHeader("User-Agent")) + "/" + ctx.GetHeader("X-Client-Version"),
+		Client:             network.GetClientInfo(ctx),
 	}
 	size, uploadErr := c.uploadObject(obj, c.getObjectKey(userID, req.FileID, req.Model), c.derivedStorageDataCenter)
 	if uploadErr != nil {
@@ -123,6 +123,19 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return &embedding, nil
+}
+
+func (c *Controller) GetIndexedFiles(ctx *gin.Context, req ente.GetIndexedFiles) ([]ente.IndexedFile, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	updateSince := int64(0)
+	if req.SinceTime != nil {
+		updateSince = *req.SinceTime
+	}
+	indexedFiles, err := c.Repo.GetIndexedFiles(ctx, userID, req.Model, updateSince, req.Limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return indexedFiles, nil
 }
 
 func (c *Controller) GetDiff(ctx *gin.Context, req ente.GetEmbeddingDiffRequest) ([]ente.Embedding, error) {

@@ -1,5 +1,10 @@
 import { Switch, styled, type SwitchProps } from "@mui/material";
-const PublicShareSwitch = styled((props: SwitchProps) => (
+import React from "react";
+
+/**
+ * A custom variant of the MUI {@link Switch}, styled per our requirements.
+ */
+export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
     <Switch
         focusVisibleClassName=".Mui-focusVisible"
         disableRipple
@@ -57,5 +62,3 @@ const PublicShareSwitch = styled((props: SwitchProps) => (
         }),
     },
 }));
-
-export default PublicShareSwitch;

@@ -292,6 +292,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autenticazione necessaria"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Applica"),
@@ -353,6 +355,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Autenticazione non riuscita, prova di nuovo"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Autenticazione riuscita!"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "available": MessageLookupByLibrary.simpleMessage("Disponibile"),
         "availableStorageSpace": m8,
         "backedUpFolders":
@@ -746,6 +751,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Come hai sentito parlare di Ente? (opzionale)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Nascosti"),
         "hide": MessageLookupByLibrary.simpleMessage("Nascondi"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Nascondendo..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Ospitato presso OSM France"),
@@ -760,6 +770,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignora"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alcuni file in questo album vengono ignorati dal caricamento perché erano stati precedentemente cancellati da ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing":
             MessageLookupByLibrary.simpleMessage("Importazione in corso...."),
         "incorrectCode":
@@ -858,8 +869,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Un tag di localizzazione raggruppa tutte le foto scattate entro il raggio di una foto"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Blocca"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Per abilitare la schermata di blocco, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema."),
         "lockscreen":
             MessageLookupByLibrary.simpleMessage("Schermata di blocco"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Accedi"),
@@ -972,6 +981,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Blocco con password"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Noi non memorizziamo la tua password, quindi se te la dimentichi, <underline>non possiamo decriptare i tuoi dati</underline>"),
         "paymentDetails":
@@ -1314,6 +1325,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Suggerisci una funzionalità"),
         "support": MessageLookupByLibrary.simpleMessage("Assistenza"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Sincronizzazione interrotta"),

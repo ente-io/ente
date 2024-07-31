@@ -218,7 +218,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                     }}
                                     {...restSubmitButtonProps}
                                 >
-                                    {t("CANCEL")}
+                                    {t("cancel")}
                                 </Button>
                             )}
 

@@ -7,13 +7,15 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
+import { DOMParser } from "@xmldom/xmldom";
 import { expose } from "comlink";
 import downloadManager from "../download";
+import { cmpNewLib2, extractRawExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
     imageBitmapAndData,
-    renderableBlob,
+    indexableBlobs,
     type ImageBitmapAndData,
 } from "./blob";
 import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
@@ -93,6 +95,24 @@ export class MLWorker {
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
+
+        // Normally, DOMParser is available to web code, so our Exif library
+        // (ExifReader) has an optional dependency on the the non-browser
+        // alternative DOMParser provided by @xmldom/xmldom.
+        //
+        // But window.DOMParser is not available to web workers.
+        //
+        // So we need to get ExifReader to use the @xmldom/xmldom version.
+        // ExifReader references it using the following code:
+        //
+        //     __non_webpack_require__('@xmldom/xmldom')
+        //
+        // So we need to explicitly reference it to ensure that it does not get
+        // tree shaken by webpack. But ensuring it is part of the bundle does
+        // not seem to work (for reasons I don't yet understand), so we also
+        // need to monkey patch it (This also ensures that it is not tree
+        // shaken).
+        globalThis.DOMParser = DOMParser;
     }
 
     /**
@@ -258,7 +278,8 @@ const indexNextBatch = async (
             delegate?.workerDidProcessFile();
             // Possibly unnecessary, but let us drain the microtask queue.
             await wait(0);
-        } catch {
+        } catch (e) {
+            log.warn(`Skipping unindexable file ${item.enteFile.id}`, e);
             allSuccess = false;
         }
     }
@@ -314,7 +335,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  *
  * So this function also does things that are not related to ML and/or indexing:
  *
- * -   Extracting and updating Exif.
+ * -   Extracting Exif.
  * -   Saving face crops.
  *
  * ---
@@ -367,6 +388,12 @@ const index = async (
     const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
     const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
 
+    // exif is expected to be a JSON object in the shape of RawExifTags, but
+    // this function don't care what's inside it and can just treat it as an
+    // opaque blob.
+    const existingExif = remoteDerivedData?.raw.exif;
+    const hasExistingExif = existingExif !== undefined && existingExif !== null;
+
     let existingFaceIndex: FaceIndex | undefined;
     if (
         existingRemoteFaceIndex &&
@@ -388,14 +415,14 @@ const index = async (
     // See if we already have all the derived data fields that we need. If so,
     // just update our local db and return.
 
-    if (existingFaceIndex && existingCLIPIndex) {
+    if (existingFaceIndex && existingCLIPIndex && hasExistingExif) {
         try {
             await saveIndexes(
                 { fileID, ...existingFaceIndex },
                 { fileID, ...existingCLIPIndex },
             );
         } catch (e) {
-            log.error(`Failed to save indexes data for ${f}`, e);
+            log.error(`Failed to save indexes for ${f}`, e);
             throw e;
         }
         return;
@@ -403,15 +430,21 @@ const index = async (
 
     // There is at least one derived data type that still needs to be indexed.
 
-    const imageBlob = await renderableBlob(enteFile, uploadItem, electron);
+    // Videos will not have an original blob whilst having a renderable blob.
+    const { originalImageBlob, renderableBlob } = await indexableBlobs(
+        enteFile,
+        uploadItem,
+        electron,
+    );
 
     let image: ImageBitmapAndData;
     try {
-        image = await imageBitmapAndData(imageBlob);
+        image = await imageBitmapAndData(renderableBlob);
     } catch (e) {
         // If we cannot get the raw image data for the file, then retrying again
-        // won't help. It'd only make sense to retry later if modify
-        // `renderableBlob` to be do something different for this type of file.
+        // won't help (if in the future we enhance the underlying code for
+        // `indexableBlobs` to handle this failing type we can trigger a
+        // reindexing attempt for failed files).
         //
         // See: [Note: Transient and permanent indexing failures]
         log.error(`Failed to get image data for indexing ${f}`, e);
@@ -422,13 +455,18 @@ const index = async (
     try {
         let faceIndex: FaceIndex;
         let clipIndex: CLIPIndex;
+        let exif: unknown;
 
         const startTime = Date.now();
 
         try {
-            [faceIndex, clipIndex] = await Promise.all([
+            [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
+                existingExif ??
+                    (originalImageBlob
+                        ? extractRawExif(originalImageBlob)
+                        : undefined),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -437,11 +475,15 @@ const index = async (
             throw e;
         }
 
+        if (originalImageBlob && exif)
+            await cmpNewLib2(enteFile, originalImageBlob, exif);
+
         log.debug(() => {
             const ms = Date.now() - startTime;
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
+            if (!hasExistingExif && originalImageBlob) msg.push("exif");
             return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
@@ -466,6 +508,7 @@ const index = async (
             ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
+            exif,
         };
 
         log.debug(() => ["Uploading derived data", rawDerivedData]);

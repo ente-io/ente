@@ -38,7 +38,6 @@ class SecuritySectionWidget extends StatefulWidget {
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
-
   late StreamSubscription<TwoFactorStatusChangeEvent>
       _twoFactorStatusChangeEvent;
   final Logger _logger = Logger('SecuritySectionWidget');
@@ -106,16 +105,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           sectionOptionSpacing,
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.passkey,
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async => await onPasskeyClick(context),
-          ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
               title: S.of(context).emailVerificationToggle,
             ),
             trailingWidget: ToggleSwitchWidget(
@@ -136,6 +125,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             ),
           ),
           sectionOptionSpacing,
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: context.l10n.passkey,
+            ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () async => await onPasskeyClick(context),
+          ),
+          sectionOptionSpacing,
         ],
       );
     }
@@ -146,6 +145,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
+        surfaceExecutionStates: false,
         onTap: () async {
           if (await LocalAuthentication().isDeviceSupported()) {
             final bool result = await requestAuthentication(

@@ -533,7 +533,6 @@
   "authToConfigureTwofactorAuthentication": "请进行身份验证以配置双重身份认证",
   "lockscreen": "锁屏",
   "authToChangeLockscreenSetting": "请验证以更改锁屏设置",
-  "lockScreenEnablePreSteps": "要启用锁屏，请在系统设置中设置设备密码或屏幕锁定。",
   "viewActiveSessions": "查看活动会话",
   "authToViewYourActiveSessions": "请验证以查看您的活动会话",
   "disableTwofactor": "禁用双重认证",
@@ -1264,6 +1263,7 @@
       }
     }
   },
+  "panorama": "全景",
   "reenterPassword": "再次输入密码",
   "reenterPin": "再次输入 PIN 码",
   "deviceLock": "设备锁",
@@ -1276,5 +1276,15 @@
   "noSystemLockFound": "未找到系统锁",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁定。",
   "tapToUnlock": "点击解锁",
-  "tooManyIncorrectAttempts": "错误尝试次数过多"
+  "tooManyIncorrectAttempts": "错误尝试次数过多",
+  "videoInfo": "视频详情",
+  "appLockDescription": "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。",
+  "swipeLockEnablePreSteps": "要启用滑动锁定，请在系统设置中设置设备密码或屏幕锁。",
+  "autoLock": "自动锁定",
+  "immediately": "立即",
+  "autoLockFeatureDescription": "应用程序进入后台后锁定的时间",
+  "hideContent": "隐藏内容",
+  "hideContentDescriptionAndroid": "在应用切换器中隐藏应用内容并禁用屏幕截图",
+  "hideContentDescriptionIos": "在应用切换器中隐藏应用内容",
+  "passwordStrengthInfo": "密码强度的计算考虑了密码的长度、使用的字符以及密码是否出现在最常用的 10,000 个密码中"
 }

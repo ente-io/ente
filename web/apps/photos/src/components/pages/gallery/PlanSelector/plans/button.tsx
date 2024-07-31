@@ -37,7 +37,7 @@ function CurrentPlanTileButton() {
             variant={"outlined"}
         >
             <SpaceBetweenFlex>
-                {t("ACTIVE")}
+                {t("active")}
                 <Done />
             </SpaceBetweenFlex>
         </Button>

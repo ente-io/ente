@@ -26,10 +26,15 @@ const (
 func GetOrCreateClISecret() []byte {
 	// get password
 	secret, err := keyring.Get(secretService, secretUser)
+
 	if err != nil {
 		if !errors.Is(err, keyring.ErrNotFound) {
+
+			if secretsFile := os.Getenv("ENTE_CLI_SECRETS_PATH"); secretsFile != "" {
+				return GetSecretFromSecretText(secretsFile)
+			}
 			if IsRunningInContainer() {
-				return GetSecretFromSecretText()
+				return GetSecretFromSecretText(fmt.Sprintf("%s.secret.txt", constants.CliDataPath))
 			} else {
 				log.Fatal(fmt.Errorf("error getting password from keyring: %w", err))
 			}
@@ -51,9 +56,7 @@ func GetOrCreateClISecret() []byte {
 
 // GetSecretFromSecretText reads the scecret from the secret text file.
 // If the file does not exist, it will be created and write random 32 byte secret to it.
-func GetSecretFromSecretText() []byte {
-	// Define the path to the secret text file
-	secretFilePath := fmt.Sprintf("%s.secret.txt", constants.CliDataPath)
+func GetSecretFromSecretText(secretFilePath string) []byte {
 
 	// Check if file exists
 	_, err := os.Stat(secretFilePath)

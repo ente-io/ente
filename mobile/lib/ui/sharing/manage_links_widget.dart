@@ -28,7 +28,7 @@ import 'package:photos/utils/toast_util.dart';
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
 
-  const ManageSharedLinkWidget({Key? key, this.collection}) : super(key: key);
+  const ManageSharedLinkWidget({super.key, this.collection});
 
   @override
   State<ManageSharedLinkWidget> createState() => _ManageSharedLinkWidgetState();
@@ -37,6 +37,7 @@ class ManageSharedLinkWidget extends StatefulWidget {
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   final CollectionActions sharingActions =
       CollectionActions(CollectionsService.instance);
+  final GlobalKey sendLinkButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -271,6 +272,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   if (!url.isExpired)
                     MenuItemWidget(
+                      key: sendLinkButtonKey,
                       captionedTextWidget: CaptionedTextWidget(
                         title: S.of(context).sendLink,
                         makeTextBold: true,
@@ -279,7 +281,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
                         // ignore: unawaited_futures
-                        shareText(urlValue);
+                        await shareAlbumLinkWithPlaceholder(
+                          context,
+                          widget.collection!,
+                          urlValue,
+                          sendLinkButtonKey,
+                        );
                       },
                       isTopBorderRadiusRemoved: true,
                     ),

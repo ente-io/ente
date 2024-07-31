@@ -89,7 +89,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m22(newEmail) => "Adres e-mail został zmieniony na ${newEmail}";
 
   static String m23(email) =>
-      "${email} nie posiada konta Ente.\n\nWyślij mu zaproszenie do udostępniania zdjęć.";
+      "${email} nie posiada konta Ente.\n\nWyślij im zaproszenie do udostępniania zdjęć.";
 
   static String m24(count, formattedNumber) =>
       "${Intl.plural(count, one: '1 plikowi', other: '${formattedNumber} plikom')} na tym urządzeniu została bezpiecznie utworzona kopia zapasowa";
@@ -306,11 +306,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
             "Uwierzytelnianie biometryczne nie jest skonfigurowane na tym urządzeniu. Przejdź do \'Ustawienia > Bezpieczeństwo\', aby dodać uwierzytelnianie biometryczne."),
         "androidIosWebDesktop": MessageLookupByLibrary.simpleMessage(
-            "Android, iOS, Strona Internetowa, Komputer"),
+            "Android, iOS, Strona Internetowa, Aplikacja Komputerowa"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Wymagane uwierzytelnienie"),
         "appLock": MessageLookupByLibrary.simpleMessage(
             "Blokada dostępu do aplikacji"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Użyj"),
@@ -353,7 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Proszę uwierzytelnić się, aby zmienić hasło"),
         "authToConfigureTwofactorAuthentication":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnij się, aby skonfigurować uwierzytelnianie dwuskładnikowe"),
+                "Uwierzytelnij się, aby skonfigurować uwierzytelnianie dwustopniowe"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Proszę uwierzytelnić się, aby zainicjować usuwanie konta"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
@@ -375,6 +377,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tutaj zobaczysz dostępne urządzenia Cast."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Upewnij się, że uprawnienia sieci lokalnej są włączone dla aplikacji Ente Zdjęcia w Ustawieniach."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Z powodu technicznego błędu, zostałeś wylogowany. Przepraszamy za niedogodności."),
         "autoPair":
@@ -483,7 +488,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "color": MessageLookupByLibrary.simpleMessage("Kolor"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
-            "Czy na pewno chcesz wyłączyć uwierzytelnianie dwuetapowe?"),
+            "Czy na pewno chcesz wyłączyć uwierzytelnianie dwustopniowe?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Potwierdź usunięcie konta"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -615,7 +620,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wyłącz blokadę ekranu urządzenia, gdy Ente jest na pierwszym planie i w trakcie tworzenia kopii zapasowej. Zwykle nie jest to potrzebne, ale może pomóc w szybszym przesyłaniu i początkowym imporcie dużych bibliotek."),
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Nie znaleziono urządzenia"),
-        "didYouKnow": MessageLookupByLibrary.simpleMessage("Czy wiedziałeś?"),
+        "didYouKnow":
+            MessageLookupByLibrary.simpleMessage("Czy wiedziałeś/aś?"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Wyłącz automatyczną blokadę"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -624,10 +630,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Uwaga"),
         "disableLinkMessage": m18,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage(
-            "Wyłącz Uwierzytelnianie Dwuetapowe"),
+            "Wyłącz uwierzytelnianie dwustopniowe"),
         "disablingTwofactorAuthentication":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnianie dwuskładnikowe jest wyłączane..."),
+                "Uwierzytelnianie dwustopniowe jest wyłączane..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Odrzuć"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
@@ -818,6 +824,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Pomoc"),
         "hidden": MessageLookupByLibrary.simpleMessage("Ukryte"),
         "hide": MessageLookupByLibrary.simpleMessage("Ukryj"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ukrywanie..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hostowane w OSM Francja"),
@@ -832,6 +843,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignoruj"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Niektóre pliki w tym albumie są ignorowane podczas przesyłania, ponieważ zostały wcześniej usunięte z Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importowanie...."),
         "incorrectCode":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy kod"),
@@ -938,8 +950,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Znacznik lokalizacji grupuje wszystkie zdjęcia, które zostały zrobione w promieniu zdjęcia"),
         "locations": MessageLookupByLibrary.simpleMessage("Lokalizacje"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Zablokuj"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Aby włączyć ekran blokady, ustaw hasło urządzenia lub blokadę ekranu w ustawieniach systemu."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Ekran blokady"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Wylogowywanie..."),
@@ -1050,8 +1060,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("Powiadomienia"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onDevice": MessageLookupByLibrary.simpleMessage("Na urządzeniu"),
-        "onEnte": MessageLookupByLibrary.simpleMessage(
-            "Na <branding>ente</branding>"),
+        "onEnte":
+            MessageLookupByLibrary.simpleMessage("W <branding>ente</branding>"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ups, nie udało się zapisać zmian"),
@@ -1071,6 +1081,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sparuj z kodem PIN"),
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Parowanie zakończone"),
+        "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "passKeyPendingVerification": MessageLookupByLibrary.simpleMessage(
             "Weryfikacja jest nadal w toku"),
         "passkey": MessageLookupByLibrary.simpleMessage("Klucz dostępu"),
@@ -1081,6 +1092,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hasło zostało pomyślnie zmienione"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Blokada hasłem"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
         "paymentDetails":
@@ -1482,6 +1495,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Zaproponuj funkcje"),
         "support": MessageLookupByLibrary.simpleMessage("Wsparcie techniczne"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronizacja zatrzymana"),
@@ -1558,19 +1573,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "twoMonthsFreeOnYearlyPlans": MessageLookupByLibrary.simpleMessage(
             "2 miesiące za darmo w planach rocznych"),
-        "twofactor":
-            MessageLookupByLibrary.simpleMessage("Uwierzytelnianie dwuetapowe"),
+        "twofactor": MessageLookupByLibrary.simpleMessage(
+            "Uwierzytelnianie dwustopniowe"),
         "twofactorAuthenticationHasBeenDisabled":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnianie dwuskładnikowe zostało wyłączone"),
+                "Uwierzytelnianie dwustopniowe zostało wyłączone"),
         "twofactorAuthenticationPageTitle":
             MessageLookupByLibrary.simpleMessage(
-                "Uwierzytelnianie dwuskładnikowe"),
+                "Uwierzytelnianie dwustopniowe"),
         "twofactorAuthenticationSuccessfullyReset":
             MessageLookupByLibrary.simpleMessage(
-                "Pomyślnie zresetowano uwierzytelnianie dwuskładnikowe"),
+                "Pomyślnie zresetowano uwierzytelnianie dwustopniowe"),
         "twofactorSetup": MessageLookupByLibrary.simpleMessage(
-            "Uwierzytelnianie dwuskładnikowe"),
+            "Uwierzytelnianie dwustopniowe"),
         "unarchive":
             MessageLookupByLibrary.simpleMessage("Przywróć z archiwum"),
         "unarchiveAlbum":
@@ -1626,6 +1641,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifying": MessageLookupByLibrary.simpleMessage("Weryfikowanie..."),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Weryfikowanie klucza odzyskiwania..."),
+        "videoInfo": MessageLookupByLibrary.simpleMessage("Informacje Wideo"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("wideo"),
         "videos": MessageLookupByLibrary.simpleMessage("Wideo"),
         "viewActiveSessions":

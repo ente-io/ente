@@ -277,7 +277,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                             size="large"
                             onClick={onClose}
                         >
-                            {t("CANCEL")}
+                            {t("cancel")}
                         </Button>
                     </Stack>
                 </Stack>
@@ -323,7 +323,7 @@ const ManageML: React.FC<ManageMLProps> = ({
             content: pt(
                 "Do you want to disable ML search on all your devices?",
             ),
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
             proceed: {
                 variant: "critical",
                 text: pt("Disable"),

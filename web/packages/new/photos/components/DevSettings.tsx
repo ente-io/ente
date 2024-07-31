@@ -46,6 +46,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
             onClose={handleDialogClose}
             TransitionComponent={SlideTransition}
             maxWidth="xs"
+            fullWidth
         >
             <Contents {...{ onClose }} />
         </Dialog>
@@ -196,7 +197,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     fullWidth
                     disableRipple
                 >
-                    {t("CANCEL")}
+                    {t("cancel")}
                 </FocusVisibleButton>
             </DialogActions>
         </form>

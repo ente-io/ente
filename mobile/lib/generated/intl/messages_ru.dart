@@ -305,6 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Требуется аутентификация"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Применить"),
@@ -369,6 +371,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Здесь вы увидите доступные устройства."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Убедитесь, что для приложения Ente Photos включены права доступа к локальной сети в настройках."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "В связи с технической ошибкой вы вышли из системы. Приносим свои извинения."),
         "autoPair":
@@ -813,6 +818,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("помощь"),
         "hidden": MessageLookupByLibrary.simpleMessage("Скрыто"),
         "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Скрытие..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Размещено на OSM France"),
@@ -828,6 +838,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ничего не делать"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Некоторые файлы в этом альбоме пропущены, потому что они ранее были удалены из Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Импорт...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Неверный код"),
         "incorrectPasswordTitle":
@@ -937,8 +948,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "locations": MessageLookupByLibrary.simpleMessage("Локации"),
         "lockButtonLabel":
             MessageLookupByLibrary.simpleMessage("Заблокировать"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Чтобы включить блокировку, настройте пароль устройства или блокировку экрана в настройках системы."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Экран блокировки"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Войти"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Выход..."),
@@ -1080,6 +1089,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Блокировка паролем"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Мы не храним этот пароль, поэтому если вы забудете его, <underline>мы не сможем расшифровать ваши данные</underline>"),
         "paymentDetails":
@@ -1484,6 +1495,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Предложить идею"),
         "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Синхронизация остановлена"),

@@ -651,16 +651,16 @@ export default function Uploader({
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: "critical",
-                    subtext: t("SUBSCRIPTION_EXPIRED"),
-                    message: t("RENEW_NOW"),
+                    subtext: t("subscription_expired"),
+                    message: t("renew_now"),
                     onClick: () => billingService.redirectToCustomerPortal(),
                 };
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
                     variant: "critical",
-                    subtext: t("STORAGE_QUOTA_EXCEEDED"),
-                    message: t("UPGRADE_NOW"),
+                    subtext: t("storage_quota_exceeded"),
+                    message: t("upgrade_now"),
                     onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon />,
                 };
@@ -880,8 +880,11 @@ function getImportSuggestion(
         return DEFAULT_IMPORT_SUGGESTION;
     }
 
-    const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
-    paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
+    const separatorCounts = new Map(
+        paths.map((s) => [s, s.match(/\//g)?.length ?? 0]),
+    );
+    const separatorCount = (s: string) => ensure(separatorCounts.get(s));
+    paths.sort((path1, path2) => separatorCount(path1) - separatorCount(path2));
     const firstPath = paths[0];
     const lastPath = paths[paths.length - 1];
 

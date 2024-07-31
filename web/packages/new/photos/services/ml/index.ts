@@ -7,11 +7,11 @@ import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { throttled } from "@/utils/promise";
 import { proxy } from "comlink";
-import { isBetaUser, isInternalUser } from "../feature-flags";
+import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
@@ -97,17 +97,17 @@ export const terminateMLWorker = () => {
  *
  * ML currently only works when we're running in our desktop app.
  */
-// TODO-ML:
-export const isMLSupported =
-    isDesktop && process.env.NEXT_PUBLIC_ENTE_ENABLE_WIP_ML;
+export const isMLSupported = isDesktop;
 
 /**
+ * TODO-ML: This will not be needed when we move to a public beta.
  * Was this someone who might've enabled the beta ML? If so, show them the
  * coming back soon banner while we finalize it.
- * TODO-ML:
  */
 export const canEnableML = async () =>
-    (await isInternalUser()) || (await isBetaUser());
+    // TODO-ML: The interim condition should be
+    // isDevBuild || (await isInternalUser()) || (await isBetaUser());
+    await isInternalUser();
 
 /**
  * Initialize the ML subsystem if the user has enabled it in preferences.
@@ -245,7 +245,7 @@ const mlSync = async () => {
  */
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (!_isMLEnabled) return;
-    if (enteFile.metadata.fileType !== FILE_TYPE.IMAGE) return;
+    if (enteFile.metadata.fileType !== FileType.image) return;
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };

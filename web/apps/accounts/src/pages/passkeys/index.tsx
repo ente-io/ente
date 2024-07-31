@@ -4,7 +4,6 @@ import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -15,7 +14,15 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import { Box, Stack, Typography, styled, useMediaQuery } from "@mui/material";
+import {
+    Box,
+    Dialog,
+    Stack,
+    Typography,
+    styled,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -282,7 +289,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                 action: handleDelete,
                 variant: "critical",
             },
-            close: { text: t("CANCEL") },
+            close: { text: t("cancel") },
         });
     }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
 
@@ -361,7 +368,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     passkey,
     onRenamePasskey,
 }) => {
-    const fullScreen = useMediaQuery("(max-width: 428px)");
+    const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
     const handleSubmit = async (inputValue: string) => {
         try {
@@ -373,20 +380,24 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
     };
 
     return (
-        <DialogBoxV2
-            fullWidth
+        <Dialog
             {...{ open, onClose, fullScreen }}
-            attributes={{ title: t("rename_passkey") }}
+            PaperProps={{ sx: { width: { sm: "360px" } } }}
         >
-            <SingleInputForm
-                initialValue={passkey.friendlyName}
-                callback={handleSubmit}
-                placeholder={t("enter_passkey_name")}
-                buttonText={t("RENAME")}
-                fieldType="text"
-                secondaryButtonAction={onClose}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-            />
-        </DialogBoxV2>
+            <Stack gap={3} p={3}>
+                <Typography variant="large" fontWeight={"bold"}>
+                    {t("rename_passkey")}
+                </Typography>
+                <SingleInputForm
+                    initialValue={passkey.friendlyName}
+                    callback={handleSubmit}
+                    placeholder={t("enter_passkey_name")}
+                    buttonText={t("RENAME")}
+                    fieldType="text"
+                    secondaryButtonAction={onClose}
+                    submitButtonProps={{ sx: { mt: 1, mb: 0 } }}
+                />
+            </Stack>
+        </Dialog>
     );
 };

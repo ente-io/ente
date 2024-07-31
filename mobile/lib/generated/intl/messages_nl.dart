@@ -311,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Verificatie vereist"),
         "appLock": MessageLookupByLibrary.simpleMessage("App-vergrendeling"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Toepassen"),
@@ -376,6 +378,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Je zult de beschikbare Cast apparaten hier zien."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Zorg ervoor dat lokale netwerkrechten zijn ingeschakeld voor de Ente Photos app, in Instellingen."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Door een technische storing bent u uitgelogd. Onze excuses voor het ongemak."),
         "autoPair":
@@ -829,6 +834,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Hulp"),
         "hidden": MessageLookupByLibrary.simpleMessage("Verborgen"),
         "hide": MessageLookupByLibrary.simpleMessage("Verbergen"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Verbergen..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehost bij OSM France"),
@@ -843,6 +853,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Negeren"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Sommige bestanden in dit album worden genegeerd voor uploaden omdat ze eerder van Ente zijn verwijderd."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importeren...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Onjuiste code"),
         "incorrectPasswordTitle":
@@ -947,8 +958,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Een locatie tag groept alle foto\'s die binnen een bepaalde straal van een foto zijn genomen"),
         "locations": MessageLookupByLibrary.simpleMessage("Locaties"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Vergrendel"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Vergrendelscherm"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Inloggen"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Uitloggen..."),
@@ -1089,6 +1098,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wachtwoord succesvol aangepast"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Wachtwoord slot"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Wij slaan dit wachtwoord niet op, dus als je het vergeet, kunnen <underline>we je gegevens niet ontsleutelen</underline>"),
         "paymentDetails":
@@ -1491,6 +1502,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Features voorstellen"),
         "support": MessageLookupByLibrary.simpleMessage("Ondersteuning"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisatie gestopt"),

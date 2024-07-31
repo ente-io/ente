@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
@@ -149,7 +149,7 @@ export default function SearchInput(props: Iprops) {
                 search = { person: selectedOption.value as Person };
                 break;
             case SuggestionType.FILE_TYPE:
-                search = { fileType: selectedOption.value as FILE_TYPE };
+                search = { fileType: selectedOption.value as FileType };
                 break;
             case SuggestionType.CLIP:
                 search = { clip: selectedOption.value as ClipSearchScores };

@@ -311,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autentificación requerida"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("ID de Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
@@ -375,6 +377,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Aquí verás los dispositivos de transmisión disponibles."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Asegúrate de que los permisos de la red local están activados para la aplicación Ente Fotos, en Configuración."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Debido a un fallo técnico, has sido desconectado. Nuestras disculpas por las molestias."),
         "autoPair":
@@ -829,6 +834,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Ayuda"),
         "hidden": MessageLookupByLibrary.simpleMessage("Oculto"),
         "hide": MessageLookupByLibrary.simpleMessage("Ocultar"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Alojado en OSM France"),
@@ -843,6 +853,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorar"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Algunos archivos de este álbum son ignorados de la carga porque previamente habían sido borrados de Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing": MessageLookupByLibrary.simpleMessage("Importando...."),
         "incorrectCode":
             MessageLookupByLibrary.simpleMessage("Código incorrecto"),
@@ -950,8 +961,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Una etiqueta de ubicación agrupa todas las fotos que fueron tomadas dentro de un radio de una foto"),
         "locations": MessageLookupByLibrary.simpleMessage("Ubicaciones"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Para activar la pantalla de bloqueo, por favor configura el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de tu sistema."),
         "lockscreen":
             MessageLookupByLibrary.simpleMessage("Pantalla de bloqueo"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Iniciar sesión"),
@@ -1095,6 +1104,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Bloqueo por contraseña"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "No almacenamos esta contraseña, así que si la olvidas, <underline>no podemos descifrar tus datos</underline>"),
         "paymentDetails":
@@ -1504,6 +1515,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Sugerir una característica"),
         "support": MessageLookupByLibrary.simpleMessage("Soporte"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Sincronización detenida"),

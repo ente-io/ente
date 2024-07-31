@@ -4,7 +4,6 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/bonus.dart";
 import 'package:photos/models/subscription.dart';
-import "package:photos/services/update_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
@@ -16,10 +15,10 @@ class SubscriptionHeaderWidget extends StatefulWidget {
   final int? currentUsage;
 
   const SubscriptionHeaderWidget({
-    Key? key,
+    super.key,
     this.isOnboarding,
     this.currentUsage,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -30,51 +29,34 @@ class SubscriptionHeaderWidget extends StatefulWidget {
 class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     if (widget.isOnboarding!) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              S.of(context).selectYourPlan,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              S.of(context).enteSubscriptionPitch,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              S.of(context).enteSubscriptionShareWithFamily,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Text(
+          S.of(context).enteSubscriptionPitch,
+          style: getEnteTextTheme(context).smallFaint,
         ),
       );
     } else {
-      return SizedBox(
-        height: 72,
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: S.of(context).currentUsageIs,
-                  style: Theme.of(context).textTheme.titleMedium,
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
+        child: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: S.of(context).currentUsageIs,
+                style: textTheme.bodyFaint,
+              ),
+              TextSpan(
+                text: formatBytes(widget.currentUsage!),
+                style: textTheme.body.copyWith(
+                  color: colorScheme.primary700,
+                  fontWeight: FontWeight.w600,
                 ),
-                TextSpan(
-                  text: formatBytes(widget.currentUsage!),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -86,15 +68,17 @@ class ValidityWidget extends StatelessWidget {
   final Subscription? currentSubscription;
   final BonusData? bonusData;
 
-  const ValidityWidget({Key? key, this.currentSubscription, this.bonusData})
-      : super(key: key);
+  const ValidityWidget({super.key, this.currentSubscription, this.bonusData});
 
   @override
   Widget build(BuildContext context) {
-    if (currentSubscription == null) {
-      return const SizedBox.shrink();
-    }
     final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
+    if (currentSubscription == null ||
+        (currentSubscription!.isFreePlan() && addOnBonus.isEmpty)) {
+      return const SizedBox(
+        height: 56,
+      );
+    }
     final bool isFreeTrialSub = currentSubscription!.productID == freeProductID;
     bool hideSubValidityView = false;
     if (isFreeTrialSub && addOnBonus.isNotEmpty) {
@@ -109,11 +93,7 @@ class ValidityWidget extends StatelessWidget {
     );
 
     var message = S.of(context).renewsOn(endDate);
-    if (isFreeTrialSub) {
-      message = UpdateService.instance.isPlayStoreFlavor()
-          ? S.of(context).playStoreFreeTrialValidTill(endDate)
-          : S.of(context).freeTrialValidTill(endDate);
-    } else if (currentSubscription!.attributes?.isCancelled ?? false) {
+    if (currentSubscription!.attributes?.isCancelled ?? false) {
       message = S.of(context).subWillBeCancelledOn(endDate);
       if (addOnBonus.isNotEmpty) {
         hideSubValidityView = true;
@@ -121,15 +101,21 @@ class ValidityWidget extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 0),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Column(
         children: [
           if (!hideSubValidityView)
-            Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                message,
+                style: getEnteTextTheme(context).body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                textAlign: TextAlign.center,
+              ),
             ),
+          const SizedBox(height: 8),
           if (addOnBonus.isNotEmpty)
             ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)).toList(),
         ],
@@ -151,10 +137,10 @@ class AddOnBonusValidity extends StatelessWidget {
     );
     final String storage = convertBytesToReadableFormat(bonus.storage);
     return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      padding: const EdgeInsets.only(top: 4, bottom: 4),
       child: Text(
         S.of(context).addOnValidTill(storage, endDate),
-        style: Theme.of(context).textTheme.bodySmall,
+        style: getEnteTextTheme(context).smallFaint,
         textAlign: TextAlign.center,
       ),
     );
@@ -170,7 +156,7 @@ class SubFaqWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 40, 16, isOnboarding ? 40 : 4),
+      padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
       child: MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).faqs,
@@ -195,5 +181,122 @@ class SubFaqWidget extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class SubscriptionToggle extends StatefulWidget {
+  final Function(bool) onToggle;
+  const SubscriptionToggle({required this.onToggle, super.key});
+
+  @override
+  State<SubscriptionToggle> createState() => _SubscriptionToggleState();
+}
+
+class _SubscriptionToggleState extends State<SubscriptionToggle> {
+  bool _isYearly = true;
+  @override
+  Widget build(BuildContext context) {
+    const borderPadding = 2.5;
+    const spaceBetweenButtons = 4.0;
+    final textTheme = getEnteTextTheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+      child: LayoutBuilder(
+        builder: (context, constrains) {
+          final widthOfButton = (constrains.maxWidth -
+                  (borderPadding * 2) -
+                  spaceBetweenButtons) /
+              2;
+          return Container(
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).fillBaseGrey,
+              borderRadius: BorderRadius.circular(50),
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: borderPadding,
+              horizontal: borderPadding,
+            ),
+            width: double.infinity,
+            child: Stack(
+              children: [
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setIsYearly(false);
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        width: widthOfButton,
+                        child: Center(
+                          child: Text(
+                            "Monthly",
+                            style: textTheme.bodyFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: spaceBetweenButtons),
+                    GestureDetector(
+                      onTap: () {
+                        setIsYearly(true);
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                        ),
+                        width: widthOfButton,
+                        child: Center(
+                          child: Text(
+                            "Yearly",
+                            style: textTheme.bodyFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeInOutQuart,
+                  left: _isYearly ? widthOfButton + spaceBetweenButtons : 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                    ),
+                    width: widthOfButton,
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).backgroundBase,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 350),
+                      switchInCurve: Curves.easeInOutExpo,
+                      switchOutCurve: Curves.easeInOutExpo,
+                      child: Text(
+                        key: ValueKey(_isYearly),
+                        _isYearly ? "Yearly" : "Monthly",
+                        style: textTheme.body,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  setIsYearly(bool isYearly) {
+    setState(() {
+      _isYearly = isYearly;
+    });
+    widget.onToggle(isYearly);
   }
 }

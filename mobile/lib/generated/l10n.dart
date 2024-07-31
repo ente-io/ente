@@ -3734,16 +3734,6 @@ class S {
     );
   }
 
-  /// `To enable lockscreen, please setup device passcode or screen lock in your system settings.`
-  String get lockScreenEnablePreSteps {
-    return Intl.message(
-      'To enable lockscreen, please setup device passcode or screen lock in your system settings.',
-      name: 'lockScreenEnablePreSteps',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `View active sessions`
   String get viewActiveSessions {
     return Intl.message(
@@ -9120,6 +9110,96 @@ class S {
     return Intl.message(
       'Video Info',
       name: 'videoInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescription {
+    return Intl.message(
+      'Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
+  String get swipeLockEnablePreSteps {
+    return Intl.message(
+      'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
+      name: 'swipeLockEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto lock',
+      name: 'autoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Immediately`
+  String get immediately {
+    return Intl.message(
+      'Immediately',
+      name: 'immediately',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time after which the app locks after being put in the background`
+  String get autoLockFeatureDescription {
+    return Intl.message(
+      'Time after which the app locks after being put in the background',
+      name: 'autoLockFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide content`
+  String get hideContent {
+    return Intl.message(
+      'Hide content',
+      name: 'hideContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides app content in the app switcher and disables screenshots`
+  String get hideContentDescriptionAndroid {
+    return Intl.message(
+      'Hides app content in the app switcher and disables screenshots',
+      name: 'hideContentDescriptionAndroid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides app content in the app switcher`
+  String get hideContentDescriptionIos {
+    return Intl.message(
+      'Hides app content in the app switcher',
+      name: 'hideContentDescriptionIos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords`
+  String get passwordStrengthInfo {
+    return Intl.message(
+      'Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords',
+      name: 'passwordStrengthInfo',
       desc: '',
       args: [],
     );

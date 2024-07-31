@@ -150,7 +150,7 @@ function PlanSelectorCard(props: Props) {
                     ),
                     variant: "accent",
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
         } else if (hasMobileSubscription(subscription)) {
             appContext.setDialogMessage({
@@ -328,10 +328,10 @@ function PaidSubscriptionPlanSelectorCard({
                 <Box py={1} px={1.5}>
                     <Typography color={"text.muted"}>
                         {!isSubscriptionCancelled(subscription)
-                            ? t("RENEWAL_ACTIVE_SUBSCRIPTION_STATUS", {
+                            ? t("subscription_status_renewal_active", {
                                   date: subscription.expiryTime,
                               })
-                            : t("RENEWAL_CANCELLED_SUBSCRIPTION_STATUS", {
+                            : t("subscription_status_renewal_cancelled", {
                                   date: subscription.expiryTime,
                               })}
                     </Typography>

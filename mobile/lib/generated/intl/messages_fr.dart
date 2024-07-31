@@ -299,6 +299,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Authentification requise"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Appliquer"),
@@ -362,6 +364,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "L\'authentification a échouée, veuillez réessayer"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentification réussie!"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "available": MessageLookupByLibrary.simpleMessage("Disponible"),
         "availableStorageSpace": m8,
         "backedUpFolders":
@@ -776,6 +781,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Comment avez-vous entendu parler de Ente? (facultatif)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Masqué"),
         "hide": MessageLookupByLibrary.simpleMessage("Masquer"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Masquage en cours..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hébergé chez OSM France"),
@@ -791,6 +801,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorer"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Certains fichiers de cet album sont ignorés parce qu\'ils avaient été précédemment supprimés de ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing":
             MessageLookupByLibrary.simpleMessage("Importation en cours..."),
         "incorrectCode":
@@ -890,8 +901,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Un tag d\'emplacement regroupe toutes les photos qui ont été prises dans un certain rayon d\'une photo"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Verrouiller"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Pour activer l\'écran de verrouillage, veuillez configurer le code d\'accès de l\'appareil ou le verrouillage de l\'écran dans les paramètres de votre système."),
         "lockscreen":
             MessageLookupByLibrary.simpleMessage("Ecran de vérouillage"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Se connecter"),
@@ -1005,6 +1014,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Mot de passe verrou"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nous ne stockons pas ce mot de passe, donc si vous l\'oubliez, <underline>nous ne pouvons pas déchiffrer vos données</underline>"),
         "paymentDetails":
@@ -1386,6 +1397,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures": MessageLookupByLibrary.simpleMessage(
             "Suggérer des fonctionnalités"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisation arrêtée ?"),

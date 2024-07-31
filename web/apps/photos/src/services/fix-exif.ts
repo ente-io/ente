@@ -1,15 +1,15 @@
 import log from "@/base/log";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
+import { getParsedExifData } from "@ente/shared/utils/exif-old";
 import type { FixOption } from "components/FixCreationTime";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from "utils/file";
-import { getParsedExifData } from "./exif";
 
 const EXIF_TIME_TAGS = [
     "DateTimeOriginal",
@@ -44,7 +44,7 @@ export async function updateCreationTimeWithExif(
                 if (fixOption === "custom-time") {
                     correctCreationTime = customTime.getTime() * 1000;
                 } else {
-                    if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+                    if (file.metadata.fileType !== FileType.image) {
                         continue;
                     }
                     const fileStream = await downloadManager.getFile(file);

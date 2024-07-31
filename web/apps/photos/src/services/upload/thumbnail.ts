@@ -1,6 +1,6 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
@@ -15,6 +15,24 @@ import { withTimeout } from "@/utils/promise";
 const maxThumbnailDimension = 720;
 /** Maximum size (in bytes) of the generated thumbnail */
 const maxThumbnailSize = 100 * 1024; // 100 KB
+
+/**
+ * Timeout (ms) to wait before giving up on canvas thumbnail generation.
+ *
+ * [Note: Rendering arbitrary file types to the canvas needs a timeout]
+ *
+ * When generating thumbnails on the web (or as a fallback on the desktop app),
+ * we use an HTML canvas. We take the file's content, a blob, and load it on the
+ * canvas by creating an image URL for this blob (using `createObjectURL`).
+ *
+ * In case when the browser knows how to render images of this type, this works
+ * great. Later we can read off the thumbnail from the (resized) canvas.
+ *
+ * However, if this in not a file format that the browser can understand, then
+ * this process just hangs. There isn't a trivial way of knowing beforehand
+ * which browser will support which file type, so we need to add a timeout.
+ */
+const canvasThumbnailGenerationTimeout = 30 * 1000;
 
 /**
  * Generate a JPEG thumbnail for the given image or video blob.
@@ -34,7 +52,7 @@ export const generateThumbnailWeb = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-    fileTypeInfo.fileType === FILE_TYPE.IMAGE
+    fileTypeInfo.fileType === FileType.image
         ? await generateImageThumbnailWeb(blob, fileTypeInfo)
         : await generateVideoThumbnailWeb(blob);
 
@@ -76,7 +94,7 @@ const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
                 }
             };
         }),
-        30 * 1000,
+        canvasThumbnailGenerationTimeout,
     );
 
     return await compressedJPEGData(canvas);
@@ -147,7 +165,7 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
                 }
             });
         }),
-        30 * 1000,
+        canvasThumbnailGenerationTimeout,
     );
 
     return await compressedJPEGData(canvas);
@@ -175,7 +193,7 @@ export const generateThumbnailNative = async (
     desktopUploadItem: DesktopUploadItem,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-    fileTypeInfo.fileType === FILE_TYPE.IMAGE
+    fileTypeInfo.fileType === FileType.image
         ? await electron.generateImageThumbnail(
               toDataOrPathOrZipEntry(desktopUploadItem),
               maxThumbnailDimension,

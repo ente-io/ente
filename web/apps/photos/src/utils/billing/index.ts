@@ -292,7 +292,7 @@ function handleFailureReason(
                         setLoading,
                     ),
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
             break;
 
@@ -311,7 +311,7 @@ function handleFailureReason(
                         setLoading,
                     ),
                 },
-                close: { text: t("CANCEL") },
+                close: { text: t("cancel") },
             });
             break;
 

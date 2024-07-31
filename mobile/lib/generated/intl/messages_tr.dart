@@ -305,6 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Kimlik doğrulaması gerekli"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
+        "appLockDescription": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple kimliği"),
         "apply": MessageLookupByLibrary.simpleMessage("Uygula"),
@@ -369,6 +371,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "You\'ll see available Cast devices here."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Make sure Local Network permissions are turned on for the Ente Photos app, in Settings."),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "Time after which the app locks after being put in the background"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Due to technical glitch, you have been logged out. Our apologies for the inconvenience."),
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
@@ -815,6 +820,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Yardım"),
         "hidden": MessageLookupByLibrary.simpleMessage("Gizle"),
         "hide": MessageLookupByLibrary.simpleMessage("Gizle"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Gizleniyor..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("OSM Fransa\'da ağırlandı"),
@@ -829,6 +839,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Yoksay"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Some files in this album are ignored from upload because they had previously been deleted from Ente."),
+        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
         "importing":
             MessageLookupByLibrary.simpleMessage("İçeri aktarılıyor...."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("Yanlış kod"),
@@ -936,8 +947,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bir fotoğrafın belli bir yarıçapında çekilen fotoğrafları gruplandırın"),
         "locations": MessageLookupByLibrary.simpleMessage("Konum"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Kilit"),
-        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Kilit ekranını aktif etmek için lütfen cihazın ayarlarından şifreyi ya da ekran kilidini ayarlayın."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Kilit ekranı"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Giriş yap"),
         "loggingOut":
@@ -1075,6 +1084,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Şifreniz başarılı bir şekilde değiştirildi"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Sifre kilidi"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Şifrelerinizi saklamıyoruz, bu yüzden unutursanız, <underline>verilerinizi deşifre edemeyiz</underline>"),
         "paymentDetails":
@@ -1473,6 +1484,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Özellik önerin"),
         "support": MessageLookupByLibrary.simpleMessage("Destek"),
+        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Senkronizasyon durduruldu"),

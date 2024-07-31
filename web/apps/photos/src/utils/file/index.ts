@@ -1,9 +1,9 @@
-import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
+import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -25,7 +25,6 @@ import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import { moveToHiddenCollection } from "services/collectionService";
-import { updateFileCreationDateInEXIF } from "services/exif";
 import {
     deleteFromTrash,
     trashFiles,
@@ -49,36 +48,12 @@ export enum FILE_OPS_TYPE {
     DELETE_PERMANENTLY,
 }
 
-export async function getUpdatedEXIFFileForDownload(
-    fileReader: FileReader,
-    file: EnteFile,
-    fileStream: ReadableStream<Uint8Array>,
-): Promise<ReadableStream<Uint8Array>> {
-    const extension = lowercaseExtension(file.metadata.title);
-    if (
-        file.metadata.fileType === FILE_TYPE.IMAGE &&
-        file.pubMagicMetadata?.data.editedTime &&
-        (extension == "jpeg" || extension == "jpg")
-    ) {
-        const fileBlob = await new Response(fileStream).blob();
-        const updatedFileBlob = await updateFileCreationDateInEXIF(
-            fileReader,
-            fileBlob,
-            new Date(file.pubMagicMetadata.data.editedTime / 1000),
-        );
-        return updatedFileBlob.stream();
-    } else {
-        return fileStream;
-    }
-}
-
 export async function downloadFile(file: EnteFile) {
     try {
-        const fileReader = new FileReader();
         let fileBlob = await new Response(
             await DownloadManager.getFile(file),
         ).blob();
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
             const image = new File([imageData], imageFileName);
@@ -98,11 +73,7 @@ export async function downloadFile(file: EnteFile) {
                 new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
-                await getUpdatedEXIFFileForDownload(
-                    fileReader,
-                    file,
-                    fileBlob.stream(),
-                ),
+                await updateExifIfNeededAndPossible(file, fileBlob.stream()),
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
@@ -455,13 +426,12 @@ async function downloadFilesDesktop(
     },
     downloadPath: string,
 ) {
-    const fileReader = new FileReader();
     for (const file of files) {
         try {
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFileDesktop(electron, fileReader, file, downloadPath);
+            await downloadFileDesktop(electron, file, downloadPath);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             log.error("download fail for file", e);
@@ -472,21 +442,15 @@ async function downloadFilesDesktop(
 
 async function downloadFileDesktop(
     electron: Electron,
-    fileReader: FileReader,
     file: EnteFile,
     downloadDir: string,
 ) {
     const fs = electron.fs;
-    const stream = (await DownloadManager.getFile(
-        file,
-    )) as ReadableStream<Uint8Array>;
-    const updatedStream = await getUpdatedEXIFFileForDownload(
-        fileReader,
-        file,
-        stream,
-    );
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+    const stream = await DownloadManager.getFile(file);
+    const updatedStream = await updateExifIfNeededAndPossible(file, stream);
+
+    if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(updatedStream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -531,8 +495,8 @@ async function downloadFileDesktop(
     }
 }
 
-export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+export const isImageOrVideo = (fileType: FileType) =>
+    [FileType.image, FileType.video].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);

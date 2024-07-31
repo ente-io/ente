@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import type { MLStatus } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
@@ -34,7 +34,7 @@ export interface Suggestion {
         | MLStatus
         | LocationTagData
         | City
-        | FILE_TYPE
+        | FileType
         | ClipSearchScores;
     hide?: boolean;
 }
@@ -46,7 +46,7 @@ export type Search = {
     collection?: number;
     files?: number[];
     person?: Person;
-    fileType?: FILE_TYPE;
+    fileType?: FileType;
     clip?: ClipSearchScores;
 };
 

@@ -353,7 +353,7 @@ func main() {
 
 	p := ginprometheus.NewPrometheus("museum")
 	p.ReqCntURLLabelMappingFn = urlSanitizer
-	p.Use(server)
+	server.Use(p.HandlerFunc())
 
 	// note: the recover middleware must be in the last
 	server.Use(requestid.New(), middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
@@ -684,6 +684,7 @@ func main() {
 
 	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)
 	privateAPI.GET("/embeddings/diff", embeddingHandler.GetDiff)
+	privateAPI.GET("/embeddings/indexed-files", embeddingHandler.GetIndexedFiles)
 	privateAPI.POST("/embeddings/files", embeddingHandler.GetFilesEmbedding)
 	privateAPI.DELETE("/embeddings", embeddingHandler.DeleteAll)
 
