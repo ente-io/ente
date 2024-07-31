@@ -63,6 +63,7 @@ process.parentPort.once("message", (e) => {
     parseInitData(e.data);
 
     const port = ensure(e.ports[0]);
+    port.on("message", (me: Electron.MessageEvent) => {});
     expose(
         {
             computeCLIPImageEmbedding,
