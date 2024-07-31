@@ -15,7 +15,7 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
-import { messagePortMainEndpoint } from "../utils/comlink-endpoint";
+import { messagePortMainEndpoint } from "../utils/comlink";
 import { ensure, wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
 
@@ -54,14 +54,12 @@ const log = {
 const mainProcess = (method: string, param: unknown) =>
     process.parentPort.postMessage({ method, p: param });
 
-log.debugString(
-    `Started ML worker process with args ${process.argv.join(" ")}`,
-);
+log.debugString(`Started ML worker process`);
 
 process.parentPort.once("message", (e) => {
+    // Initialize ourselves with the data we got from our parent.
     parseInitData(e.data);
-
-    const port = ensure(e.ports[0]);
+    // Expose an 
     expose(
         {
             computeCLIPImageEmbedding,
@@ -69,14 +67,8 @@ process.parentPort.once("message", (e) => {
             detectFaces,
             computeFaceEmbeddings,
         },
-        messagePortMainEndpoint(port),
+        messagePortMainEndpoint(ensure(e.ports[0])),
     );
-    // port.on("message", (request) => {
-    //     void handleMessageFromRenderer(request.data).then((response) =>
-    //         port.postMessage(response),
-    //     );
-    // });
-    // port.start();
 });
 
 /**

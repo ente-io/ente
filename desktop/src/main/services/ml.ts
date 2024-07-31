@@ -63,6 +63,9 @@ import log from "../log";
  * worker can directly talk to each other!
  *
  *     Node.js utility process <-> Renderer web worker
+ *
+ * The RPC protocol is handled using comlink on both ends. The port itself needs
+ * to be relayed using `postMessage`.
  */
 export const createMLWorker = (window: BrowserWindow) => {
     const { port1, port2 } = new MessageChannelMain();

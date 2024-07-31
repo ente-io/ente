@@ -1,9 +1,8 @@
-import type { Electron } from "@/base/types/ipc";
+import type { Electron, ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
 import { dotProduct, norm } from "./math";
-import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * The version of the CLIP indexing pipeline implemented by the current client.
@@ -98,19 +97,19 @@ export type LocalCLIPIndex = CLIPIndex & {
  * be set to the {@link UploadItem} that was uploaded. This way, we can directly
  * use the on-disk file instead of needing to download the original from remote.
  *
- * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * @param electron The {@link ElectronMLWorker} instance that allows us to call
  * our Node.js layer to run the ONNX inference.
  */
 export const indexCLIP = async (
     image: ImageBitmapAndData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<CLIPIndex> => ({
     embedding: await computeEmbedding(image.data, electron),
 });
 
 const computeEmbedding = async (
     imageData: ImageData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<number[]> => {
     const clipInput = convertToCLIPInput(imageData);
     return normalized(await electron.computeCLIPImageEmbedding(clipInput));

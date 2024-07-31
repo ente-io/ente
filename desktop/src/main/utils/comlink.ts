@@ -10,7 +10,7 @@ import type { MessagePortMain } from "electron";
  *
  * It has been modified (somewhat hackily) to be useful with an Electron
  * MessagePortMain instead of a Node.js worker_thread. Only things that we
- * currently need have been made to work as you can see by the abuntant type
+ * currently need have been made to work as you can see by the abundant type
  * casts. Caveat emptor.
  */
 export const messagePortMainEndpoint = (mp: MessagePortMain): Endpoint => {

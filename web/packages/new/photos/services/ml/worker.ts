@@ -3,6 +3,7 @@ import { isHTTP4xxError } from "@/base/http";
 import { getKVN } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
+import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
@@ -32,8 +33,7 @@ import {
     type RemoteDerivedData,
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
-import { startUsingMessagePort } from "./worker-rpc";
-import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
+import type { MLWorkerDelegate } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -46,11 +46,6 @@ interface IndexableItem {
     /** The existing derived data on remote corresponding to this file. */
     remoteDerivedData: RemoteDerivedData | undefined;
 }
-
-globalThis.onmessage = (event: MessageEvent) => {
-    if (event.data == "createMLWorker/port")
-        startUsingMessagePort(ensure(event.ports[0]));
-};
 
 /**
  * Run operations related to machine learning (e.g. indexing) in a Web Worker.
@@ -75,7 +70,7 @@ globalThis.onmessage = (event: MessageEvent) => {
  * -   "idle": in between state transitions.
  */
 export class MLWorker {
-    private electron: MLWorkerElectron | undefined;
+    private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
     private state: "idle" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
@@ -88,20 +83,16 @@ export class MLWorker {
      * This is conceptually the constructor, however it is easier to have this
      * as a separate function to avoid complicating the comlink types further.
      *
-     * @param electron The {@link MLWorkerElectron} that allows the worker to
-     * use the functionality provided by our Node.js layer when running in the
-     * context of our desktop app.
+     * @param port A {@link MessagePort} that allows us to communicate with an
+     * Electron utility process running in the Node.js layer of our desktop app,
+     * exposing an object that conforms to the {@link ElectronMLWorker}
+     * interface.
      *
      * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
      * the main thread of interesting events.
      */
     async init(port: MessagePort, delegate: MLWorkerDelegate) {
-        // this.electron = electron;
-        this.electron = wrap<MLWorkerElectron>(port); /* mlWorkerElectron = {
-            detectFaces: electron.detectFaces,
-            computeFaceEmbeddings: electron.computeFaceEmbeddings,
-            computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
-        };*/
+        this.electron = wrap<ElectronMLWorker>(port);
         this.delegate = delegate;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
@@ -267,7 +258,7 @@ expose(MLWorker);
  */
 const indexNextBatch = async (
     items: IndexableItem[],
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
     delegate: MLWorkerDelegate | undefined,
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
@@ -385,7 +376,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  */
 const index = async (
     { enteFile, uploadItem, remoteDerivedData }: IndexableItem,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(enteFile);
     const fileID = enteFile.id;
