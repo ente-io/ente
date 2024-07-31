@@ -292,14 +292,14 @@ const indexNextBatch = async (
     for (const item of items) {
         try {
             await index(item, electron);
-            delegate?.workerDidProcessFile();
-            // Let us drain the microtask queue. This also gives a chance for other
-            // interactive tasks like `clipMatches` to run.
-            await wait(0);
         } catch (e) {
             log.warn(`Skipping unindexable file ${item.enteFile.id}`, e);
             allSuccess = false;
         }
+        delegate?.workerDidProcessFile();
+        // Let us drain the microtask queue. This also gives a chance for other
+        // interactive tasks like `clipMatches` to run.
+        await wait(0);
     }
 
     // Return true if nothing failed.
