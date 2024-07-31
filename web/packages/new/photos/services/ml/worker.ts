@@ -3,14 +3,15 @@ import { isHTTP4xxError } from "@/base/http";
 import { getKVN } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
+import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { DOMParser } from "@xmldom/xmldom";
-import { expose } from "comlink";
+import { expose, wrap } from "comlink";
 import downloadManager from "../download";
-import { cmpNewLib2, extractRawExif } from "../exif";
+import { cmpNewLib2, extractRawExif, type RawExifTags } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -18,7 +19,12 @@ import {
     indexableBlobs,
     type ImageBitmapAndData,
 } from "./blob";
-import { clipIndexingVersion, indexCLIP, type CLIPIndex } from "./clip";
+import {
+    clipIndexingVersion,
+    clipMatches,
+    indexCLIP,
+    type CLIPIndex,
+} from "./clip";
 import { saveFaceCrops } from "./crop";
 import {
     indexableFileIDs,
@@ -29,10 +35,11 @@ import {
 import {
     fetchDerivedData,
     putDerivedData,
+    type RawRemoteDerivedData,
     type RemoteDerivedData,
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
-import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
+import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -67,9 +74,12 @@ interface IndexableItem {
  * -   "backfillq": fetching remote embeddings of unindexed items, and then
  *     indexing them if needed,
  * -   "idle": in between state transitions.
+ *
+ * In addition, MLWorker can also be invoked for interactive tasks: in
+ * particular, for finding the closest CLIP match when the user does a search.
  */
 export class MLWorker {
-    private electron: MLWorkerElectron | undefined;
+    private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
     private state: "idle" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
@@ -82,15 +92,16 @@ export class MLWorker {
      * This is conceptually the constructor, however it is easier to have this
      * as a separate function to avoid complicating the comlink types further.
      *
-     * @param electron The {@link MLWorkerElectron} that allows the worker to
-     * use the functionality provided by our Node.js layer when running in the
-     * context of our desktop app.
+     * @param port A {@link MessagePort} that allows us to communicate with an
+     * Electron utility process running in the Node.js layer of our desktop app,
+     * exposing an object that conforms to the {@link ElectronMLWorker}
+     * interface.
      *
      * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
      * the main thread of interesting events.
      */
-    async init(electron: MLWorkerElectron, delegate?: MLWorkerDelegate) {
-        this.electron = electron;
+    async init(port: MessagePort, delegate: MLWorkerDelegate) {
+        this.electron = wrap<ElectronMLWorker>(port);
         this.delegate = delegate;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
@@ -176,6 +187,13 @@ export class MLWorker {
         return this.state == "indexing";
     }
 
+    /**
+     * Find {@link CLIPMatches} for a given {@link searchPhrase}.
+     */
+    async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
+        return clipMatches(searchPhrase, ensure(this.electron));
+    }
+
     private async tick() {
         log.debug(() => [
             "ml/tick",
@@ -224,7 +242,7 @@ export class MLWorker {
     }
 
     /** Return the next batch of items to backfill (if any). */
-    async backfillQ() {
+    private async backfillQ() {
         const userID = ensure(await getKVN("userID"));
         // Find files that our local DB thinks need syncing.
         const filesByID = await syncWithLocalFilesAndGetFilesToIndex(
@@ -256,7 +274,7 @@ expose(MLWorker);
  */
 const indexNextBatch = async (
     items: IndexableItem[],
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
     delegate: MLWorkerDelegate | undefined,
 ) => {
     // Don't try to index if we wouldn't be able to upload them anyway. The
@@ -270,18 +288,37 @@ const indexNextBatch = async (
     // Nothing to do.
     if (items.length == 0) return false;
 
-    // Index, keeping track if any of the items failed.
+    // Keep track if any of the items failed.
     let allSuccess = true;
-    for (const item of items) {
-        try {
-            await index(item, electron);
-            delegate?.workerDidProcessFile();
-            // Possibly unnecessary, but let us drain the microtask queue.
-            await wait(0);
-        } catch (e) {
-            log.warn(`Skipping unindexable file ${item.enteFile.id}`, e);
-            allSuccess = false;
+
+    // Index up to 4 items simultaneously.
+    const tasks = new Array<Promise<void> | undefined>(4).fill(undefined);
+
+    let i = 0;
+    while (i < items.length) {
+        for (let j = 0; j < tasks.length; j++) {
+            if (i < items.length && !tasks[j]) {
+                tasks[j] = index(ensure(items[i++]), electron)
+                    .then(() => {
+                        tasks[j] = undefined;
+                    })
+                    .catch(() => {
+                        allSuccess = false;
+                        tasks[j] = undefined;
+                    });
+            }
         }
+
+        // Wait for at least one to complete (the other runners continue running
+        // even if one promise reaches the finish line).
+        await Promise.race(tasks);
+
+        // Let the main thread now we're doing something.
+        delegate?.workerDidProcessFile();
+
+        // Let us drain the microtask queue. This also gives a chance for other
+        // interactive tasks like `clipMatches` to run.
+        await wait(0);
     }
 
     // Return true if nothing failed.
@@ -374,7 +411,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  */
 const index = async (
     { enteFile, uploadItem, remoteDerivedData }: IndexableItem,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(enteFile);
     const fileID = enteFile.id;
@@ -463,10 +500,7 @@ const index = async (
             [faceIndex, clipIndex, exif] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
-                existingExif ??
-                    (originalImageBlob
-                        ? extractRawExif(originalImageBlob)
-                        : undefined),
+                existingExif ?? tryExtractExif(originalImageBlob, f),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -475,8 +509,12 @@ const index = async (
             throw e;
         }
 
-        if (originalImageBlob && exif)
-            await cmpNewLib2(enteFile, originalImageBlob, exif);
+        try {
+            if (originalImageBlob && exif)
+                await cmpNewLib2(enteFile, originalImageBlob, exif);
+        } catch (e) {
+            log.warn(`Skipping exif cmp for ${f}`, e);
+        }
 
         log.debug(() => {
             const ms = Date.now() - startTime;
@@ -504,22 +542,27 @@ const index = async (
         // parts. See: [Note: Preserve unknown derived data fields].
 
         const existingRawDerivedData = remoteDerivedData?.raw ?? {};
-        const rawDerivedData = {
+        const rawDerivedData: RawRemoteDerivedData = {
             ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
-            exif,
+            ...(exif ? { exif } : {}),
         };
 
-        log.debug(() => ["Uploading derived data", rawDerivedData]);
+        if (existingFaceIndex && existingCLIPIndex && !exif) {
+            // If we were indexing just for exif, but exif generation didn't
+            // happen, there is no need to upload.
+        } else {
+            log.debug(() => ["Uploading derived data", rawDerivedData]);
 
-        try {
-            await putDerivedData(enteFile, rawDerivedData);
-        } catch (e) {
-            // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to put derived data for ${f}`, e);
-            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
-            throw e;
+            try {
+                await putDerivedData(enteFile, rawDerivedData);
+            } catch (e) {
+                // See: [Note: Transient and permanent indexing failures]
+                log.error(`Failed to put derived data for ${f}`, e);
+                if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+                throw e;
+            }
         }
 
         try {
@@ -548,5 +591,36 @@ const index = async (
         }
     } finally {
         image.bitmap.close();
+    }
+};
+
+/**
+ * A helper function that tries to extract the raw Exif, but returns `undefined`
+ * if something goes wrong (or it isn't possible) instead of throwing.
+ *
+ * Exif extraction is not a critical item, we don't want the actual indexing to
+ * fail because we were unable to extract Exif. This is not rare: one scenario
+ * is if we were trying to index a file in an exotic format. The ML indexing
+ * will succeed (because we convert it to a renderable blob), but the Exif
+ * extraction will fail (since it needs the original blob, but the original blob
+ * can be an arbitrary format).
+ *
+ * @param originalImageBlob A {@link Blob} containing the original data for the
+ * image (or the image component of a live photo) whose Exif we're trying to
+ * extract. If this is not available, we skip the extraction and return
+ * `undefined`.
+ *
+ * @param f The {@link fileLogID} for the file this blob corresponds to.
+ */
+export const tryExtractExif = async (
+    originalImageBlob: Blob | undefined,
+    f: string,
+): Promise<RawExifTags | undefined> => {
+    if (!originalImageBlob) return undefined;
+    try {
+        return await extractRawExif(originalImageBlob);
+    } catch (e) {
+        log.warn(`Ignoring error during Exif extraction for ${f}`, e);
+        return undefined;
     }
 };

@@ -42,7 +42,7 @@ export const MLSettingsBeta: React.FC<MLSettingsBetaProps> = ({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={pt("ML search")}
+                        title={pt("Face and magic search")}
                         onRootClose={onRootClose}
                     />
 

@@ -1,4 +1,5 @@
 import { basename } from "@/base/file";
+import type { ElectronMLWorker } from "@/base/types/ipc";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensure } from "@/utils/ensure";
@@ -7,7 +8,6 @@ import { renderableImageBlob } from "../../utils/file";
 import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
-import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * A pair of blobs - the original, and a possibly converted "renderable" one -
@@ -103,13 +103,14 @@ export const imageBitmapAndData = async (
  * be set to the {@link UploadItem} that was uploaded. This way, we can directly
  * use the on-disk file instead of needing to download the original from remote.
  *
- * @param electron The {@link MLWorkerElectron} instance that allows us to call
- * our Node.js layer for various functionality.
+ * @param electron The {@link ElectronMLWorker} instance that stands as a
+ * witness that we're actually running in our desktop app (and thus can safely
+ * call our Node.js layer for various functionality).
  */
 export const indexableBlobs = async (
     enteFile: EnteFile,
     uploadItem: UploadItem | undefined,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<IndexableBlobs> =>
     uploadItem
         ? await indexableUploadItemBlobs(enteFile, uploadItem, electron)
@@ -118,7 +119,7 @@ export const indexableBlobs = async (
 const indexableUploadItemBlobs = async (
     enteFile: EnteFile,
     uploadItem: UploadItem,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ) => {
     const fileType = enteFile.metadata.fileType;
     let originalImageBlob: Blob | undefined;
@@ -149,7 +150,7 @@ const indexableUploadItemBlobs = async (
  */
 const readNonVideoUploadItem = async (
     uploadItem: UploadItem,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<File> => {
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         const { response, lastModifiedMs } = await readStream(
