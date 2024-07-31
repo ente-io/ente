@@ -8,7 +8,7 @@ import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { DOMParser } from "@xmldom/xmldom";
-import { expose } from "comlink";
+import { expose, wrap } from "comlink";
 import downloadManager from "../download";
 import { cmpNewLib2, extractRawExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -95,8 +95,13 @@ export class MLWorker {
      * @param delegate The {@link MLWorkerDelegate} the worker can use to inform
      * the main thread of interesting events.
      */
-    async init(electron: MLWorkerElectron, delegate?: MLWorkerDelegate) {
-        this.electron = electron;
+    async init(port: MessagePort, delegate: MLWorkerDelegate) {
+        // this.electron = electron;
+        this.electron = wrap<MLWorkerElectron>(port); /* mlWorkerElectron = {
+            detectFaces: electron.detectFaces,
+            computeFaceEmbeddings: electron.computeFaceEmbeddings,
+            computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
+        };*/
         this.delegate = delegate;
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.

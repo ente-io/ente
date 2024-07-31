@@ -12,7 +12,7 @@ import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
-import { proxy } from "comlink";
+import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
@@ -59,11 +59,6 @@ const worker = async () => {
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const mlWorkerElectron = {
-        detectFaces: electron.detectFaces,
-        computeFaceEmbeddings: electron.computeFaceEmbeddings,
-        computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
-    };
     const delegate = {
         workerDidProcessFile,
     };
@@ -78,9 +73,9 @@ const createComlinkWorker = async () => {
 
     await cw.remote.then((w) => {
         // Pass the message port to our web worker.
-        cw.worker.postMessage("createMLWorker/port", [messagePort]);
+        // cw.worker.postMessage("createMLWorker/port", [messagePort]);
         // Initialize it.
-        return w.init(proxy(mlWorkerElectron), proxy(delegate));
+        return w.init(transfer(messagePort, [messagePort]), proxy(delegate));
     });
 
     return cw;

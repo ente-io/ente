@@ -9,6 +9,10 @@
 // cannot import.
 
 import Tokenizer from "clip-bpe-js";
+import { expose } from "comlink";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import nodeEndpoint from "comlink/dist/umd/node-adapter";
 import { net } from "electron/main";
 import { existsSync } from "fs";
 import fs from "node:fs/promises";
@@ -60,12 +64,22 @@ process.parentPort.once("message", (e) => {
     parseInitData(e.data);
 
     const port = ensure(e.ports[0]);
-    port.on("message", (request) => {
-        void handleMessageFromRenderer(request.data).then((response) =>
-            port.postMessage(response),
-        );
-    });
-    port.start();
+    expose(
+        {
+            computeCLIPImageEmbedding,
+            computeCLIPTextEmbeddingIfAvailable,
+            detectFaces,
+            computeFaceEmbeddings,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+        nodeEndpoint(port as unknown as any),
+    );
+    // port.on("message", (request) => {
+    //     void handleMessageFromRenderer(request.data).then((response) =>
+    //         port.postMessage(response),
+    //     );
+    // });
+    // port.start();
 });
 
 /**
@@ -109,15 +123,15 @@ const parseInitData = (data: unknown) => {
  *     "result" (arbitrary result) property. Otherwise it will have a "error"
  *     (string) property describing what went wrong.
  */
-const handleMessageFromRenderer = async (m: unknown) => {
+export const handleMessageFromRenderer = (m: unknown) => {
     if (m && typeof m == "object" && "method" in m && "id" in m && "p" in m) {
         const id = m.id;
-        const p = m.p;
+        // const p = m.p;
         try {
             switch (m.method) {
                 case "foo":
-                    if (p && typeof p == "string")
-                        return { id, result: await foo(p) };
+                    // if (p && typeof p == "string")
+                    // return { id, result: await foo(p) };
                     break;
             }
         } catch (e) {

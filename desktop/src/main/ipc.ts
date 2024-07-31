@@ -49,7 +49,7 @@ import {
     computeCLIPTextEmbeddingIfAvailable,
     computeFaceEmbeddings,
     detectFaces,
-} from "./services/ml-utility";
+} from "./services/ml-worker";
 import {
     encryptionKey,
     lastShownChangelogVersion,
