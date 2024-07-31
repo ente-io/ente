@@ -95,7 +95,6 @@ const parseInitData = (data: unknown) => {
     if (
         data &&
         typeof data == "object" &&
-        "userDataPateh" in data &&
         "userDataPath" in data &&
         typeof data.userDataPath == "string"
     ) {
