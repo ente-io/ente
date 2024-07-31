@@ -292,8 +292,7 @@ const indexNextBatch = async (
     for (const item of items) {
         try {
             await index(item, electron);
-        } catch (e) {
-            log.warn(`Skipping unindexable file ${item.enteFile.id}`, e);
+        } catch {
             allSuccess = false;
         }
         delegate?.workerDidProcessFile();
@@ -493,8 +492,12 @@ const index = async (
             throw e;
         }
 
-        if (originalImageBlob && exif)
-            await cmpNewLib2(enteFile, originalImageBlob, exif);
+        try {
+            if (originalImageBlob && exif)
+                await cmpNewLib2(enteFile, originalImageBlob, exif);
+        } catch (e) {
+            log.warn(`Skipping exif cmp for ${f}`, e);
+        }
 
         log.debug(() => {
             const ms = Date.now() - startTime;
