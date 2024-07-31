@@ -314,8 +314,11 @@ const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
  * operation when it happens across threads.
  * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
  *
- * In our case though, we're not dealing with threads but separate processes. So
- * the ArrayBuffer will be copied:
+ * In our case though, we're not dealing with threads but separate processes.
+ * Electron currently only supports transferring MessagePorts:
+ * https://github.com/electron/electron/issues/34905
+ *
+ * So the ArrayBuffer will be copied:
  *
  * > "parameters, errors and return values are **copied** when they're sent over
  * > the bridge".
