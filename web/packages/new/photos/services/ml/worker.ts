@@ -9,7 +9,6 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { DOMParser } from "@xmldom/xmldom";
 import { expose } from "comlink";
-import { z } from "zod";
 import downloadManager from "../download";
 import { cmpNewLib2, extractRawExif } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -33,6 +32,7 @@ import {
     type RemoteDerivedData,
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
+import { startUsingMessagePort } from "./worker-rpc";
 import type { MLWorkerDelegate, MLWorkerElectron } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
@@ -47,18 +47,9 @@ interface IndexableItem {
     remoteDerivedData: RemoteDerivedData | undefined;
 }
 
-/**
- * The port used to communicate with the Node.js ML worker process
- *
- * See: [Note: ML IPC]
- * */
-let _port: MessagePort | undefined;
-
 globalThis.onmessage = (event: MessageEvent) => {
-    if (event.data == "createMLWorker/port") {
-        _port = event.ports[0];
-        _port?.start();
-    }
+    if (event.data == "createMLWorker/port")
+        startUsingMessagePort(ensure(event.ports[0]));
 };
 
 /**
@@ -128,12 +119,6 @@ export class MLWorker {
         // need to monkey patch it (This also ensures that it is not tree
         // shaken).
         globalThis.DOMParser = DOMParser;
-
-        void (async () => {
-            console.log("yyy calling foo with 3");
-            const res = await electronMLWorker("foo", "3");
-            console.log("yyy calling foo with 3 result", res);
-        })();
     }
 
     /**
@@ -265,40 +250,6 @@ export class MLWorker {
 }
 
 expose(MLWorker);
-
-/**
- * Make a call to the ML worker running in the Node.js layer using our
- * hand-rolled RPC protocol. See: [Note: Node.js ML worker RPC protocol].
- */
-const electronMLWorker = async (method: string, p: string) => {
-    const port = _port;
-    if (!port) {
-        throw new Error(
-            "No MessagePort to communicate with Electron ML worker",
-        );
-    }
-
-    // Generate a unique nonce to identify this RPC interaction.
-    const id = Math.random();
-    return new Promise((resolve, reject) => {
-        const handleMessage = (event: MessageEvent) => {
-            const response = RPCResponse.parse(event.data);
-            if (response.id != id) return;
-            port.removeEventListener("message", handleMessage);
-            const error = response.error;
-            if (error) reject(new Error(error));
-            else resolve(response.result);
-        };
-        port.addEventListener("message", handleMessage);
-        port.postMessage({ id, method, p });
-    });
-};
-
-const RPCResponse = z.object({
-    id: z.number(),
-    result: z.any().optional(),
-    error: z.string().optional(),
-});
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
