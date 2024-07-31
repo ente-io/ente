@@ -1,10 +1,12 @@
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -27,7 +29,6 @@ class AllQuickLinksPage extends StatefulWidget {
 class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
   List<Collection> selectedQuickLinks = [];
   bool isAnyQuickLinkSelected = false;
-  final _logger = Logger("QuickLinks");
   static const heroTagPrefix = "outgoing_collection";
 
   Future<void> _navigateToCollectionPage(Collection c) async {
@@ -54,34 +55,58 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
     });
   }
 
-  Future<void> _removeQuickLink() async {
-    try {
-      final dialog = createProgressDialog(
+  Future<bool> _removeQuickLink() async {
+    if (selectedQuickLinks.isEmpty) {
+      await showErrorDialog(
         context,
-        S.of(context).removeLink,
-        isDismissible: true,
+        "No quick links selected",
+        "Please select quick link to remove.",
       );
-      await dialog.show();
-
-      for (var selectedQuickLink in selectedQuickLinks) {
-        if (selectedQuickLink.isQuickLinkCollection() &&
-            !selectedQuickLink.hasSharees) {
-          await CollectionActions(CollectionsService.instance)
-              .trashCollectionKeepingPhotos(selectedQuickLink, context);
-          widget.quickLinks.remove(selectedQuickLink);
-        } else {
-          widget.quickLinks.remove(selectedQuickLink);
-          await CollectionsService.instance.disableShareUrl(selectedQuickLink);
-        }
+      return true;
+    }
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: S.of(context).yesRemove,
+          onTap: () async {
+            for (var selectedQuickLink in selectedQuickLinks) {
+              await CollectionActions(CollectionsService.instance)
+                  .trashCollectionKeepingPhotos(selectedQuickLink, context);
+              widget.quickLinks.remove(selectedQuickLink);
+            }
+            setState(() {
+              selectedQuickLinks.clear();
+              isAnyQuickLinkSelected = false;
+            });
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: S.of(context).cancel,
+        ),
+      ],
+      title: S.of(context).removePublicLink,
+      body: "Remove the public link for accessing the selected quick links.",
+    );
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.error) {
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
       }
-      setState(() {
-        selectedQuickLinks.clear();
-        isAnyQuickLinkSelected = false;
-      });
-      await dialog.hide();
-    } catch (e, s) {
-      _logger.severe("failed to trash collection", e, s);
-      await showGenericErrorDialog(context: context, error: e);
+      return actionResult.action == ButtonAction.first;
+    } else {
+      return false;
     }
   }
 
