@@ -549,15 +549,20 @@ const index = async (
             ...(exif ? { exif } : {}),
         };
 
-        log.debug(() => ["Uploading derived data", rawDerivedData]);
+        if (existingFaceIndex && existingCLIPIndex && !exif) {
+            // If we were indexing just for exif, but exif generation didn't
+            // happen, there is no need to upload.
+        } else {
+            log.debug(() => ["Uploading derived data", rawDerivedData]);
 
-        try {
-            await putDerivedData(enteFile, rawDerivedData);
-        } catch (e) {
-            // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to put derived data for ${f}`, e);
-            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
-            throw e;
+            try {
+                await putDerivedData(enteFile, rawDerivedData);
+            } catch (e) {
+                // See: [Note: Transient and permanent indexing failures]
+                log.error(`Failed to put derived data for ${f}`, e);
+                if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+                throw e;
+            }
         }
 
         try {
