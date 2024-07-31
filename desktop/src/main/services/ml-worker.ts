@@ -253,10 +253,10 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
  */
 export const computeCLIPImageEmbedding = async (input: Float32Array) => {
     const session = await cachedCLIPImageSession();
-    const t = Date.now();
     const feeds = {
         input: new ort.Tensor("float32", input, [1, 3, 224, 224]),
     };
+    const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/CLIP image embedding took ${Date.now() - t} ms`);
     /* Need these model specific casts to type the result */
@@ -296,13 +296,13 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     }
 
     const session = sessionOrSkip;
-    const t = Date.now();
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
     const feeds = {
         input: new ort.Tensor("int32", tokenizedText, [1, 77]),
     };
 
+    const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/CLIP text embedding took ${Date.now() - t} ms`);
     return ensure(results.output).data as Float32Array;
@@ -318,10 +318,10 @@ const cachedFaceDetectionSession = makeCachedInferenceSession(
  */
 export const detectFaces = async (input: Float32Array) => {
     const session = await cachedFaceDetectionSession();
-    const t = Date.now();
     const feeds = {
         input: new ort.Tensor("float32", input, [1, 3, 640, 640]),
     };
+    const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/YOLO face detection took ${Date.now() - t} ms`);
     return ensure(results.output).data;
@@ -345,8 +345,8 @@ export const computeFaceEmbeddings = async (input: Float32Array) => {
     const inputTensor = new ort.Tensor("float32", input, [n, z, z, 3]);
 
     const session = await cachedFaceEmbeddingSession();
-    const t = Date.now();
     const feeds = { img_inputs: inputTensor };
+    const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/MFNT face embedding took ${Date.now() - t} ms`);
     /* Need these model specific casts to extract and type the result */
