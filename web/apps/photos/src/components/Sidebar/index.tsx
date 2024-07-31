@@ -289,14 +289,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     if (!hasAddOnBonus(userDetails.bonusData)) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isOnFreePlan(userDetails.subscription)) {
-                message = (
-                    <Trans
-                        i18nKey={"subscription_info_free"}
-                        values={{
-                            date: userDetails.subscription?.expiryTime,
-                        }}
-                    />
-                );
+                message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
                     date: userDetails.subscription?.expiryTime,
