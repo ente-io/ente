@@ -11,8 +11,11 @@ import { app, utilityProcess } from "electron/main";
 import path from "node:path";
 import log from "../log";
 
+/** The active ML worker (utility) process, if any. */
+let _child: UtilityProcess | undefined;
+
 /**
- * Create a new ML worker process.
+ * Create a new ML worker process, terminating the older ones (if any).
  *
  * [Note: ML IPC]
  *
@@ -68,6 +71,12 @@ import log from "../log";
  * to be relayed using `postMessage`.
  */
 export const createMLWorker = (window: BrowserWindow) => {
+    if (_child) {
+        log.debug(() => "Terminating previous ML worker process");
+        _child.kill();
+        _child = undefined;
+    }
+
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ml-worker.js"));
@@ -77,6 +86,8 @@ export const createMLWorker = (window: BrowserWindow) => {
     window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
 
     handleMessagesFromUtilityProcess(child);
+
+    _child = child;
 };
 
 /**

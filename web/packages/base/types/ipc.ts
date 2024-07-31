@@ -335,7 +335,7 @@ export interface Electron {
     // - ML
 
     /**
-     * Create a new ML worker.
+     * Create a new ML worker, terminating the older ones (if any).
      *
      * This creates a new Node.js utility process, and sets things up so that we
      * can communicate directly with that utility process using a

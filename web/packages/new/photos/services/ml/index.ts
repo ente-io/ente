@@ -98,22 +98,27 @@ export const terminateMLWorker = async () => {
  * Obtain a port from the Node.js layer that can be used to communicate with the
  * ML worker process.
  */
-const createMLWorker = async (electron: Electron): Promise<MessagePort> => {
-    electron.createMLWorker();
-
+const createMLWorker = (electron: Electron): Promise<MessagePort> => {
     // The main process will do its thing, and send back the port it created to
     // us by sending an message on the "createMLWorker/port" channel via the
     // postMessage API. This roundabout way is needed because MessagePorts
     // cannot be transferred via the usual send/invoke pattern.
 
-    return new Promise((resolve) => {
-        window.onmessage = ({ source, data, ports }: MessageEvent) => {
-            // The source check verifies that the message is coming from the
+    const port = new Promise<MessagePort>((resolve) => {
+        const l = ({ source, data, ports }: MessageEvent) => {
+            // The source check verifies that the message is coming from our own
             // preload script. The data is the message that was posted.
-            if (source == window && data == "createMLWorker/port")
+            if (source == window && data == "createMLWorker/port") {
+                window.removeEventListener("message", l);
                 resolve(ensure(ports[0]));
+            }
         };
+        window.addEventListener("message", l);
     });
+
+    electron.createMLWorker();
+
+    return port;
 };
 
 /**
