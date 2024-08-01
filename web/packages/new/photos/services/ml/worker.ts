@@ -1,6 +1,6 @@
 import { clientPackageName } from "@/base/app";
 import { isHTTP4xxError } from "@/base/http";
-import { getKVN } from "@/base/kv";
+import { getKVN, setKV } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
@@ -34,6 +34,7 @@ import {
 } from "./db";
 import {
     fetchDerivedData,
+    getIndexedDerivedDataFiles,
     putDerivedData,
     type RawRemoteDerivedData,
     type RemoteDerivedData,
@@ -311,8 +312,43 @@ expose(MLWorker);
  *
  * Return true atleast one embedding was pulled.
  */
-// eslint-disable-next-line @typescript-eslint/require-await
 const pull = async () => {
+    // If we've never pulled before, start at the beginning (0).
+    return pullSince((await latestDerivedDataUpdatedAt()) ?? 0);
+};
+
+const latestDerivedDataUpdatedAt = () => getKVN("latestDerivedDataUpdatedAt");
+
+const setLatestDerivedDataUpdatedAt = (n: number) =>
+    setKV("latestDerivedDataUpdatedAt", n);
+
+const pullSince = async (sinceTime: number) => {
+    // See if anything has changed since `sinceTime`.
+    const indexedFiles = await getIndexedDerivedDataFiles(sinceTime, 200);
+
+    // Nope. Nothing more is left to do.
+    if (!indexedFiles.length) return undefined;
+
+    // Find the latest from amongst all the updatedAt we got back. This'll serve
+    // as our checkpoint for the next pull.
+    const latestUpdatedAt = indexedFiles.reduce(
+        (max, { updatedAt }) => Math.max(max, updatedAt),
+        sinceTime,
+    );
+
+    // Fetch the embeddings for the files which changed.
+    //
+    // In rare cases, remote might return a partial response, but that will not
+    // have any lasting impact since we anyways refetch the derived data before
+    // attempting indexing.
+
+    
+
+
+    const items = await fetchDerivedData();
+
+    // getIndexedFiles(model)
+
     return "";
 };
 
