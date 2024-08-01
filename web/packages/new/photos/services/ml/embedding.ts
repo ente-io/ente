@@ -309,26 +309,39 @@ const putEmbedding = async (
     ensureOk(res);
 };
 
+interface PullEmbeddingsResult {
+    /**
+     * Derived data indexed by the file id whose data this is.
+     */
+    items: Map<number, RemoteDerivedData>;
+    /**
+     * The latest {@link updatedAt} epoch milliseconds from all the derived data
+     * in {@link items}.
+     */
+    latestUpdatedAt: number;
+}
+
 /**
- * Fetch new {@link model} embeddings since the given {@link sinceTime}.
+ * Fetch derived data that has been created or updated since the given
+ * {@link sinceTime}.
  *
  * This allows a client to perform a quick "diff" and get embeddings that has
- * changed (created or updated) since the last time it checked. By fetching
- * these all upfront instead of doing them one by one during the indexing, we
- * can speed up the initial sync of existing embeddings on a new client.
- *
- * @param model The {@link EmbeddingModel} which we want.
+ * changed since the last time it checked. By fetching these all upfront instead
+ * of doing them one by one during the indexing, we can speed up the initial
+ * sync of existing embeddings on a new client.
  *
  * @param sinceTime Epoch milliseconds. We use this to ask remote to provide us
- * embeddings whose {@link updatedAt} is more than the given value. If not
+ * derived data whose {@link updatedAt} is more than the given value. If not
  * specified, then we'll start from the beginning.
  *
- * @param limit The maximum number of files to provide in the response.
+ * @param limit An advisory limit on the number of items to return.
  *
- * @returns a list of {@link RemoteEmbedding}, and the latest {@link updatedAt}
- * from amongst all embeddings that were fetched. The caller should persist that
- * and use it in subsequent calls to {@link pullEmbeddings} to resume pulling
- * from the current checkpoint.
+ * @returns a map of {@link RemoteDerivedData} indexed by the id of the file
+ * whose derived data it is, and the latest {@link updatedAt} from amongst all
+ * the data that was fetched.
+ *
+ * The caller should persist the returned timestamp for use in subsequent calls
+ * to {@link pullEmbeddings} to resume pulling from the current checkpoint.
  *
  * Returns undefined if nothing more is left to pull.
  */
@@ -336,8 +349,9 @@ const pullEmbeddings = async (
     model: EmbeddingModel,
     sinceTime: number | undefined,
     limit: number,
-) => {
-    getIndexedFiles(model)
+): Promise<PullEmbeddingsResult | undefined> => {
+    return undefined;
+    // getIndexedFiles(model)
 };
 
 /** A single entry in the response of {@link getIndexedFiles}. */
