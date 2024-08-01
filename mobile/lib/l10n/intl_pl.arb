@@ -1286,5 +1286,9 @@
   "hideContent": "Ukryj zawartość",
   "hideContentDescriptionAndroid": "Ukrywa zawartość aplikacji w przełączniku aplikacji i wyłącza zrzuty ekranu",
   "hideContentDescriptionIos": "Ukrywa zawartość aplikacji w przełączniku aplikacji",
-  "passwordStrengthInfo": "Siła hasła jest obliczana, biorąc pod uwagę długość hasła, użyte znaki, i czy hasło pojawi się w 10 000 najczęściej używanych haseł"
+  "passwordStrengthInfo": "Siła hasła jest obliczana, biorąc pod uwagę długość hasła, użyte znaki, i czy hasło pojawi się w 10 000 najczęściej używanych haseł",
+  "noQuickLinksSelected": "No quick links selected",
+  "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
+  "removePublicLinks": "Remove public links",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
 }

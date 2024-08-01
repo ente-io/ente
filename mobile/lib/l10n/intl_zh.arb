@@ -1286,5 +1286,9 @@
   "hideContent": "隐藏内容",
   "hideContentDescriptionAndroid": "在应用切换器中隐藏应用内容并禁用屏幕截图",
   "hideContentDescriptionIos": "在应用切换器中隐藏应用内容",
-  "passwordStrengthInfo": "密码强度的计算考虑了密码的长度、使用的字符以及密码是否出现在最常用的 10,000 个密码中"
+  "passwordStrengthInfo": "密码强度的计算考虑了密码的长度、使用的字符以及密码是否出现在最常用的 10,000 个密码中",
+  "noQuickLinksSelected": "No quick links selected",
+  "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
+  "removePublicLinks": "Remove public links",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
 }

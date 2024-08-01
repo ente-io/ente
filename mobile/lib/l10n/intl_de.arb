@@ -1286,5 +1286,9 @@
   "hideContent": "Inhalte verstecken",
   "hideContentDescriptionAndroid": "Versteckt Inhalte der App beim Wechseln zwischen Apps und deaktiviert Screenshots",
   "hideContentDescriptionIos": "Versteckt Inhalte der App beim Wechseln zwischen Apps",
-  "passwordStrengthInfo": "Die Berechnung der Stärke des Passworts basiert auf dessen Länge, den verwendeten Zeichen, und ob es in den 10.000 am häufigsten verwendeten Passwörtern vorkommt"
+  "passwordStrengthInfo": "Die Berechnung der Stärke des Passworts basiert auf dessen Länge, den verwendeten Zeichen, und ob es in den 10.000 am häufigsten verwendeten Passwörtern vorkommt",
+  "noQuickLinksSelected": "No quick links selected",
+  "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
+  "removePublicLinks": "Remove public links",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
 }
