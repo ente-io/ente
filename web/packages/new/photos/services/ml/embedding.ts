@@ -309,6 +309,37 @@ const putEmbedding = async (
     ensureOk(res);
 };
 
+/**
+ * Fetch new {@link model} embeddings since the given {@link sinceTime}.
+ *
+ * This allows a client to perform a quick "diff" and get embeddings that has
+ * changed (created or updated) since the last time it checked. By fetching
+ * these all upfront instead of doing them one by one during the indexing, we
+ * can speed up the initial sync of existing embeddings on a new client.
+ *
+ * @param model The {@link EmbeddingModel} which we want.
+ *
+ * @param sinceTime Epoch milliseconds. We use this to ask remote to provide us
+ * embeddings whose {@link updatedAt} is more than the given value. If not
+ * specified, then we'll start from the beginning.
+ *
+ * @param limit The maximum number of files to provide in the response.
+ *
+ * @returns a list of {@link RemoteEmbedding}, and the latest {@link updatedAt}
+ * from amongst all embeddings that were fetched. The caller should persist that
+ * and use it in subsequent calls to {@link pullEmbeddings} to resume pulling
+ * from the current checkpoint.
+ *
+ * Returns undefined if nothing more is left to pull.
+ */
+const pullEmbeddings = async (
+    model: EmbeddingModel,
+    sinceTime: number | undefined,
+    limit: number,
+) => {
+    getIndexedFiles(model)
+};
+
 /** A single entry in the response of {@link getIndexedFiles}. */
 const IndexedFile = z.object({
     fileID: z.number(),
@@ -321,23 +352,10 @@ type IndexedFile = z.infer<typeof IndexedFile>;
  * Fetch the file ids for {@link model} embeddings that have been created or
  * updated since the given {@link sinceTime}.
  *
- * This allows a client to perform a quick "diff" and get the list of files that
- * has changed since the last time it checked. It can then fetch those
- * corresponding embeddings using the regular fetch API, this speeding up the
- * initial sync on a new client.
+ * See {@link pullEmbeddings} for details about the parameters.
  *
- * @param model The {@link EmbeddingModel} which we want.
- *
- * @param sinceTime Epoch milliseconds. Ask remote to provide us embeddings
- * whose {@link updatedAt} is more than the given value.
- *
- * @param limit The maximum number of files to provide in the response.
- *
- * @returns a list of {@link RemoteEmbedding} for the files which had embeddings
- * (and thatt remote was able to successfully retrieve). The order of this list
- * is arbitrary, and the caller should use the {@link fileID} present within the
- * {@link RemoteEmbedding} to associate an item in the result back to a file
- * instead of relying on the order or count of items in the result.
+ * @returns an array of file ids, each with an associated timestamp when the
+ * embedding for that file was last changed.
  */
 const getIndexedFiles = async (
     model: EmbeddingModel,
