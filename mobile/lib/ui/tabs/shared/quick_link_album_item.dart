@@ -145,13 +145,13 @@ class QuickLinkAlbumItem extends StatelessWidget {
               switchOutCurve: Curves.easeIn,
               child: isSelected
                   ? IconButtonWidget(
-                      key: ValueKey(isSelected),
+                      key: const ValueKey("selected"),
                       icon: Icons.check_circle_rounded,
                       iconButtonType: IconButtonType.secondary,
                       iconColor: colorScheme.blurStrokeBase,
                     )
-                  : IconButtonWidget(
-                      key: ValueKey(isSelected),
+                  : const IconButtonWidget(
+                      key: ValueKey("unselected"),
                       icon: Icons.chevron_right_outlined,
                       iconButtonType: IconButtonType.secondary,
                     ),
