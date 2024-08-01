@@ -1,4 +1,6 @@
-import { Stack } from "@mui/material";
+import { FluidContainer } from "@ente/shared/components/Container";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import { Button, ButtonProps, Stack } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
@@ -15,7 +17,6 @@ import {
     manageFamilyMethod,
     updatePaymentMethod,
 } from "utils/billing";
-import ManageSubscriptionButton from "./button";
 
 interface Iprops {
     subscription: Subscription;
@@ -135,3 +136,9 @@ function StripeSubscriptionOptions({
         </>
     );
 }
+
+const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
+    <Button size="large" endIcon={<ChevronRight />} {...props}>
+        <FluidContainer>{children}</FluidContainer>
+    </Button>
+);
