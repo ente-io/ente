@@ -3,7 +3,6 @@ import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import Done from "@mui/icons-material/Done";
 import { Box, Button, ButtonProps, Typography, styled } from "@mui/material";
-import { Badge } from "components/Badge";
 import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { Plan, Subscription } from "types/billing";
@@ -101,3 +100,13 @@ export function PlanRow({
         </PlanRowContainer>
     );
 }
+
+const Badge = styled(Box)(({ theme }) => ({
+    borderRadius: theme.shape.borderRadius,
+    padding: "2px 4px",
+    backgroundColor: theme.colors.black.muted,
+    backdropFilter: `blur(${theme.colors.blur.muted})`,
+    color: theme.colors.white.base,
+    textTransform: "uppercase",
+    ...theme.typography.mini,
+}));
