@@ -350,7 +350,31 @@ const pullEmbeddings = async (
     sinceTime: number | undefined,
     limit: number,
 ): Promise<PullEmbeddingsResult | undefined> => {
-    return undefined;
+    // If since time is not provided, start at 0 (the beginning).
+    let latestUpdatedAt = sinceTime ?? 0;
+
+    // See if anything changed since then.
+    const indexedFiles = await getIndexedFiles(
+        "derived",
+        latestUpdatedAt,
+        limit,
+    );
+
+    // Nope. Nothing more is left to do.
+    if (!indexedFiles.length) return undefined;
+
+    // Find the latest from amongst the given updatedAt. This'll serve as our
+    // checkpoint for the next pull.
+    latestUpdatedAt = indexedFiles.reduce(
+        (max, { updatedAt }) => Math.max(max, updatedAt),
+        latestUpdatedAt,
+    );
+
+    // Fetch the embeddings for these guys. In rare cases, remote might return a
+    // partial response, but that will not have any lasting impact since we
+    // anyways refetch the derived data before attempting indexing.
+    const items = await fetchDerivedData()
+
     // getIndexedFiles(model)
 };
 
