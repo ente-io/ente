@@ -62,8 +62,8 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
     if (selectedQuickLinks.isEmpty) {
       await showErrorDialog(
         context,
-        "No quick links selected",
-        "Please select quick links to remove",
+        S.of(context).noQuickLinksSelected,
+        S.of(context).pleaseSelectQuickLinksToRemove,
       );
       return true;
     }
@@ -97,8 +97,8 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
           labelText: S.of(context).cancel,
         ),
       ],
-      title: "Remove public links",
-      body: "This will remove public links of all selected quick links.",
+      title: S.of(context).removePublicLinks,
+      body: S.of(context).thisWillRemovePublicLinksOfAllSelectedQuickLinks,
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

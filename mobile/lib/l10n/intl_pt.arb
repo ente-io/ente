@@ -1286,5 +1286,9 @@
   "hideContent": "Ocultar conteúdo",
   "hideContentDescriptionAndroid": "Oculta o conteúdo do app no seletor de apps e desativa as capturas de tela",
   "hideContentDescriptionIos": "Oculta o conteúdo do seletor de apps",
-  "passwordStrengthInfo": "Força da senha é calculada considerando o comprimento da senha, caracteres usados, e se a senha aparece ou não nas 10.000 senhas mais usadas"
+  "passwordStrengthInfo": "Força da senha é calculada considerando o comprimento da senha, caracteres usados, e se a senha aparece ou não nas 10.000 senhas mais usadas",
+  "noQuickLinksSelected": "No quick links selected",
+  "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
+  "removePublicLinks": "Remove public links",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
 }
