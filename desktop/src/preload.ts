@@ -62,6 +62,7 @@ import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
 // needed when compiling and will not be needed or looked around for at runtime.
+import type { IpcRendererEvent } from "electron";
 import type {
     AppUpdate,
     CollectionMapping,
@@ -199,13 +200,15 @@ const ffmpegExec = (
 // - ML
 
 const createMLWorker = () => {
-    ipcRenderer.send("createMLWorker");
-    ipcRenderer.on("createMLWorker/port", (event) => {
+    const l = (event: IpcRendererEvent) => {
         void windowLoaded.then(() => {
             // "*"" is the origin to send to.
             window.postMessage("createMLWorker/port", "*", event.ports);
+            ipcRenderer.off("createMLWorker/port", l);
         });
-    });
+    };
+    ipcRenderer.on("createMLWorker/port", l);
+    ipcRenderer.send("createMLWorker");
 };
 
 // - Watch
