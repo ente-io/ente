@@ -174,7 +174,12 @@ class FFProbeProps {
           result._codecHeight = stream[key].toString();
           parsedData[key] = result._codecHeight;
         } else if (key == FFProbeKeys.sideDataList) {
-          result._rotation = stream[key][0][FFProbeKeys.rotation];
+          for (Map sideData in stream[key]) {
+            if (sideData[FFProbeKeys.sideDataType] ==
+                SideDataType.displayMatrix.getString()) {
+              result._rotation = sideData[FFProbeKeys.rotation];
+            }
+          }
         }
       }
     }
