@@ -83,7 +83,7 @@ interface IndexableItem {
 export class MLWorker {
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private state: "idle" | "pull" | "indexing" = "idle";
+    private state: "idle" | "waking" | "pull" | "indexing" = "idle";
     private shouldPull = false;
     private havePulledAtLeastOnce = false;
     private liveQ: IndexableItem[] = [];
@@ -154,9 +154,13 @@ export class MLWorker {
     /** Invoked in response to external events. */
     private wakeUp() {
         if (this.state == "idle") {
-            // Currently paused. Get back to work.
+            // We are currently paused. Get back to work.
             if (this.idleTimeout) clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
+            // Change state so that multiple calls to `wakeUp` don't cause
+            // multiple calls to `tick`.
+            this.state = "waking";
+            // Enqueue a tick.
             void this.tick();
         } else {
             // In the middle of a task. Do nothing, `this.tick` will
