@@ -5,41 +5,6 @@ import (
 	"github.com/ente-io/museum/ente"
 )
 
-type PutFileDataRequest struct {
-	FileID           int64           `json:"fileID" binding:"required"`
-	Type             ente.ObjectType `json:"type" binding:"required"`
-	EncryptedData    *string         `json:"encryptedData"`
-	DecryptionHeader *string         `json:"decryptionHeader"`
-	// ObjectKey is the key of the object in the S3 bucket. This is needed while putting the object in the S3 bucket.
-	ObjectKey *string `json:"objectKey"`
-	// size of the object that is being uploaded. This helps in checking the size of the object that is being uploaded.
-	Size *int64 `json:"size" `
-}
-
-func (r PutFileDataRequest) Validate() error {
-	switch r.Type {
-	case ente.PreviewVideo:
-		if r.EncryptedData == nil || r.DecryptionHeader == nil || *r.EncryptedData == "" || *r.DecryptionHeader == "" {
-			// the video playlist is uploaded as part of encrypted data and decryption header
-			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader are required for preview video")
-		}
-		if r.Size == nil || r.ObjectKey == nil {
-			return ente.NewBadRequestWithMessage("size and objectKey are required for preview video")
-		}
-	case ente.PreviewImage:
-		if r.Size == nil || r.ObjectKey == nil {
-			return ente.NewBadRequestWithMessage("size and objectKey are required for preview image")
-		}
-	case ente.DerivedMeta:
-		if r.EncryptedData == nil || r.DecryptionHeader == nil || *r.EncryptedData == "" || *r.DecryptionHeader == "" {
-			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader are required for derived meta")
-		}
-	default:
-		return ente.NewBadRequestWithMessage(fmt.Sprintf("invalid object type %s", r.Type))
-	}
-	return nil
-}
-
 // GetFilesData should only be used for getting the preview video playlist and derived metadata.
 type GetFilesData struct {
 	FileIDs []int64         `form:"fileIDs" binding:"required"`
@@ -49,6 +14,12 @@ type GetFilesData struct {
 func (g *GetFilesData) Validate() error {
 	if g.Type != ente.PreviewVideo && g.Type != ente.DerivedMeta {
 		return ente.NewBadRequestWithMessage(fmt.Sprintf("unsupported object type %s", g.Type))
+	}
+	if len(g.FileIDs) == 0 {
+		return ente.NewBadRequestWithMessage("fileIDs are required")
+	}
+	if len(g.FileIDs) > 200 {
+		return ente.NewBadRequestWithMessage("fileIDs should be less than or equal to 200")
 	}
 	return nil
 }
@@ -60,8 +31,43 @@ type Entity struct {
 	DecryptionHeader string          `json:"decryptionHeader"`
 }
 
+// Row represents the data that is stored in the file_data table.
+type Row struct {
+	FileID            int64
+	UserID            int64
+	Type              ente.ObjectType
+	Size              int64
+	LatestBucket      string
+	ReplicatedBuckets []string
+	DeleteFromBuckets []string
+	PendingSync       bool
+	IsDeleted         bool
+	LastSyncTime      int64
+	CreatedAt         int64
+	UpdatedAt         int64
+}
+
+func (r Row) S3FileMetadataObjectKey() string {
+	if r.Type == ente.DerivedMeta {
+		return derivedMetaPath(r.FileID, r.UserID)
+	}
+	if r.Type == ente.PreviewVideo {
+		return previewVideoPlaylist(r.FileID, r.UserID)
+	}
+	panic(fmt.Sprintf("S3FileMetadata should not be written for %s type", r.Type))
+}
+
 type GetFilesDataResponse struct {
 	Data                []Entity `json:"data"`
 	PendingIndexFileIDs []int64  `json:"pendingIndexFileIDs"`
 	ErrFileIDs          []int64  `json:"errFileIDs"`
+}
+
+// S3FileMetadata stuck represents the metadata that is stored in the S3 bucket for non-file type metadata
+// that is stored in the S3 bucket.
+type S3FileMetadata struct {
+	Version          int    `json:"v"`
+	EncryptedData    string `json:"encryptedData"`
+	DecryptionHeader string `json:"header"`
+	Client           string `json:"client"`
 }
