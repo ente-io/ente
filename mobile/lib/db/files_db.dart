@@ -703,7 +703,6 @@ class FilesDB {
 
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(query, args);
-    _logger.info("message");
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
@@ -1178,7 +1177,7 @@ class FilesDB {
       omitCollectionId: true,
     );
     await db.execute(
-      'UPDATE $filesTable'
+      'UPDATE $filesTable '
       'SET $updateAssignments WHERE $columnUploadedFileID = ?',
       parameterSet,
     );
