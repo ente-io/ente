@@ -25,6 +25,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
     final bool isSelected = selectedQuickLinks.contains(c);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+
     return AnimatedContainer(
       curve: Curves.easeOut,
       duration: const Duration(milliseconds: 200),
