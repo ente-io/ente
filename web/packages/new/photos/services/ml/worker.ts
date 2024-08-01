@@ -64,15 +64,16 @@ interface IndexableItem {
  *
  *     ext. event      state           then state
  *    ------------- --------------- --------------
+ *     sync         -> "pull"       -> "idle"
  *     sync         -> "backfillq"  -> "idle"
  *     upload       -> "liveq"      -> "idle"
  *     idleTimeout  -> "backfillq"  -> "idle"
  *
  * where:
  *
+ * -   "pull": pull existing embeddings from remote.
  * -   "liveq": indexing items that are being uploaded,
- * -   "backfillq": fetching remote embeddings of unindexed items, and then
- *     indexing them if needed,
+ * -   "backfillq": index unindexed items otherwise.
  * -   "idle": in between state transitions.
  *
  * In addition, MLWorker can also be invoked for interactive tasks: in
@@ -81,7 +82,9 @@ interface IndexableItem {
 export class MLWorker {
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private state: "idle" | "indexing" = "idle";
+    private state: "idle" | "pull" | "indexing" = "idle";
+    private shouldPull = false;
+    private havePulledAtLeastOnce = false;
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -127,14 +130,23 @@ export class MLWorker {
     }
 
     /**
-     * Start backfilling if needed.
+     * Pull embeddings from remote, and start backfilling if needed.
      *
-     * This function enqueues a backfill attempt and returns immediately without
-     * waiting for it complete. During a backfill, it will first attempt to
-     * fetch embeddings for files which don't have that data locally. If we
-     * fetch and find what we need, we save it locally. Otherwise we index them.
+     * This function enqueues a pull and returns immediately without waiting for
+     * the pull to complete.
+     *
+     * Once the pull is done, it then schedules a backfill. So calling this also
+     * implicitly triggers a backfill (which is why we call it a less-precise
+     * "sync" instead of "pull").
+     *
+     * During a backfill we will first attempt to fetch embeddings for files
+     * which don't have that data locally. If we fetch and find what we need, we
+     * save it locally. Otherwise we index them. This the pull upfront is not
+     * necessary, but it helps a new client get up to speed faster since it can
+     * fetch all existing embeddings first before getting down to the indexing.
      */
     sync() {
+        this.shouldPull = true;
         this.wakeUp();
     }
 
@@ -200,18 +212,49 @@ export class MLWorker {
             {
                 state: this.state,
                 liveQ: this.liveQ,
+                shouldPull: this.shouldPull,
                 idleDuration: this.idleDuration,
             },
         ]);
 
         const scheduleTick = () => void setTimeout(() => this.tick(), 0);
 
+        // If we've been asked to pull, do that first (before indexing).
+        if (this.shouldPull) {
+            // Allow this flag to be reset while we're pulling (triggering
+            // another pull when we tick next).
+            this.shouldPull = false;
+            this.state = "pull";
+            try {
+                const didPull = await pull();
+                // Mark that we completed one attempt at pulling successfully
+                // (irrespective of whether or not that got us some data).
+                this.havePulledAtLeastOnce = true;
+                // Reset the idle duration if we did pull something.
+                if (didPull) this.idleDuration = idleDurationStart;
+            } catch (e) {
+                log.error("Failed to pull embeddings", e);
+            }
+            // Tick again, even if we got an error.
+            //
+            // While the backfillQ won't be processed until at least a pull has
+            // happened once (`havePulledAtLeastOnce`), the liveQ can still be
+            // processed since these are new files without remote embeddings.
+            scheduleTick();
+            return;
+        }
+
         const liveQ = this.liveQ;
         this.liveQ = [];
         this.state = "indexing";
 
-        // Use the liveQ if present, otherwise get the next batch to backfill.
-        const items = liveQ.length > 0 ? liveQ : await this.backfillQ();
+        // Use the liveQ if present, otherwise get the next batch to backfill,
+        // but only after we've pulled once from remote successfully.
+        const items = liveQ.length
+            ? liveQ
+            : this.havePulledAtLeastOnce
+              ? await this.backfillQ()
+              : [];
 
         const allSuccess = await indexNextBatch(
             items,
@@ -262,6 +305,11 @@ export class MLWorker {
 }
 
 expose(MLWorker);
+
+// eslint-disable-next-line @typescript-eslint/require-await
+const pull = async () => {
+    return "";
+};
 
 /**
  * Find out files which need to be indexed. Then index the next batch of them.
