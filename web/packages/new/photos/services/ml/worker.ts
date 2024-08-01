@@ -314,7 +314,11 @@ expose(MLWorker);
  */
 const pull = async () => {
     // If we've never pulled before, start at the beginning (0).
-    return pullSince((await latestDerivedDataUpdatedAt()) ?? 0);
+    const sinceTime = (await latestDerivedDataUpdatedAt()) ?? 0;
+    // Start fetching, starting the fetched count at 0.
+    const fetchedCount = await pullSince(sinceTime, 0);
+    // Return true if something got fetched.
+    return fetchedCount > 0;
 };
 
 const latestDerivedDataUpdatedAt = () => getKVN("latestDerivedDataUpdatedAt");
@@ -322,12 +326,12 @@ const latestDerivedDataUpdatedAt = () => getKVN("latestDerivedDataUpdatedAt");
 const setLatestDerivedDataUpdatedAt = (n: number) =>
     setKV("latestDerivedDataUpdatedAt", n);
 
-const pullSince = async (sinceTime: number) => {
+const pullSince = async (sinceTime: number, fetchedCount: number) => {
     // See if anything has changed since `sinceTime`.
     const indexedFiles = await getIndexedDerivedDataFiles(sinceTime, 200);
 
-    // Nope. Nothing more is left to do.
-    if (!indexedFiles.length) return undefined;
+    // Nothing more is left. Return the previous fetch count we got.
+    if (!indexedFiles.length) return fetchedCount;
 
     // Find the latest from amongst all the updatedAt we got back. This'll serve
     // as our checkpoint for the next pull.
@@ -342,14 +346,30 @@ const pullSince = async (sinceTime: number) => {
     // have any lasting impact since we anyways refetch the derived data before
     // attempting indexing.
 
-    
+    const localFiles = await getAllLocalFiles();
+    const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
+    const filesByID = new Map(
+        indexedFiles
+            .map(({ fileID }) => localFilesByID.get(fileID))
+            .filter((x) => x !== undefined)
+            .map((f) => [f.id, f]),
+    );
 
-    const items = await fetchDerivedData();
+    const items = await fetchDerivedData(filesByID);
 
-    // getIndexedFiles(model)
+    // TODO: Save items
 
-    return "";
+    // Save the checkpoint.
+    await setLatestDerivedDataUpdatedAt(latestUpdatedAt);
+
+    // Fetch subsequent items. As a safety valve, ensure we don't get into an
+    // infinite loop by checking that the sinceTime has advanced.
+
+    if (latestUpdatedAt == sinceTime)
+        throw new Error(`Since time ${sinceTime} did not advance after a pull`);
+
+    return pullSince(latestUpdatedAt, fetchedCount + items.size);
 };
 
 /**
