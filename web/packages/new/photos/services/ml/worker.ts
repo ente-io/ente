@@ -306,6 +306,11 @@ export class MLWorker {
 
 expose(MLWorker);
 
+/**
+ * Pull embeddings from remote.
+ *
+ * Return true atleast one embedding was pulled.
+ */
 // eslint-disable-next-line @typescript-eslint/require-await
 const pull = async () => {
     return "";

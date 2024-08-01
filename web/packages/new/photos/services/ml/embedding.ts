@@ -235,7 +235,7 @@ const remoteDerivedDataFromJSONString = (jsonString: string) => {
  * @param fileIDs The ids of the files for which we want the embeddings.
  *
  * @returns a list of {@link RemoteEmbedding} for the files which had embeddings
- * (and thatt remote was able to successfully retrieve). The order of this list
+ * (and that remote was able to successfully retrieve). The order of this list
  * is arbitrary, and the caller should use the {@link fileID} present within the
  * {@link RemoteEmbedding} to associate an item in the result back to a file
  * instead of relying on the order or count of items in the result.
@@ -307,4 +307,53 @@ const putEmbedding = async (
         }),
     });
     ensureOk(res);
+};
+
+/** A single entry in the response of {@link getIndexedFiles}. */
+const IndexedFile = z.object({
+    fileID: z.number(),
+    updatedAt: z.number(),
+});
+
+type IndexedFile = z.infer<typeof IndexedFile>;
+
+/**
+ * Fetch the file ids for {@link model} embeddings that have been created or
+ * updated since the given {@link sinceTime}.
+ *
+ * This allows a client to perform a quick "diff" and get the list of files that
+ * has changed since the last time it checked. It can then fetch those
+ * corresponding embeddings using the regular fetch API, this speeding up the
+ * initial sync on a new client.
+ *
+ * @param model The {@link EmbeddingModel} which we want.
+ *
+ * @param sinceTime Epoch milliseconds. Ask remote to provide us embeddings
+ * whose {@link updatedAt} is more than the given value.
+ *
+ * @param limit The maximum number of files to provide in the response.
+ *
+ * @returns a list of {@link RemoteEmbedding} for the files which had embeddings
+ * (and thatt remote was able to successfully retrieve). The order of this list
+ * is arbitrary, and the caller should use the {@link fileID} present within the
+ * {@link RemoteEmbedding} to associate an item in the result back to a file
+ * instead of relying on the order or count of items in the result.
+ */
+const getIndexedFiles = async (
+    model: EmbeddingModel,
+    sinceTime: number,
+    limit: number,
+): Promise<IndexedFile[]> => {
+    const params = new URLSearchParams({
+        model,
+        sinceTime: sinceTime.toString(),
+        limit: limit.toString(),
+    });
+    const url = await apiURL("/embeddings/indexed-files");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z.object({ diff: z.array(IndexedFile) }).parse(await res.json())
+        .diff;
 };
