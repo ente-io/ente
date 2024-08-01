@@ -28,7 +28,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           color: selectedQuickLinks.contains(c)
-              ? colorScheme.primary300
+              ? colorScheme.strokeMuted
               : colorScheme.strokeFainter,
         ),
         borderRadius: const BorderRadius.all(
@@ -134,11 +134,22 @@ class QuickLinkAlbumItem extends StatelessWidget {
               ],
             ),
           ),
-          const Flexible(
+          Flexible(
             flex: 1,
-            child: IconButtonWidget(
-              icon: Icons.chevron_right_outlined,
-              iconButtonType: IconButtonType.secondary,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 210),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: selectedQuickLinks.contains(c)
+                  ? IconButtonWidget(
+                      icon: Icons.check_circle_rounded,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokeBase,
+                    )
+                  : const IconButtonWidget(
+                      icon: Icons.chevron_right_outlined,
+                      iconButtonType: IconButtonType.secondary,
+                    ),
             ),
           ),
         ],

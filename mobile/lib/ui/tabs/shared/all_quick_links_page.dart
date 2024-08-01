@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -44,10 +46,11 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
     routeToPage(context, page);
   }
 
-  void _toggleQuickLinkSelection(Collection c) {
+  Future<void> _toggleQuickLinkSelection(Collection c) async {
     if (selectedQuickLinks.contains(c)) {
       selectedQuickLinks.remove(c);
     } else {
+      selectedQuickLinks.isEmpty ? await HapticFeedback.vibrate() : null;
       selectedQuickLinks.add(c);
     }
     setState(() {
@@ -112,6 +115,7 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 48,
@@ -129,7 +133,10 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
             onPressed: () async {
               await _removeQuickLink();
             },
-            icon: const Icon(Icons.remove_circle_outline_outlined),
+            icon: Icon(
+              Icons.remove_circle_outline_outlined,
+              color: colorScheme.blurStrokeBase,
+            ),
           ),
         ],
       ),
