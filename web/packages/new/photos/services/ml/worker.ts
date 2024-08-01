@@ -611,7 +611,6 @@ const index = async (
     // this function don't care what's inside it and can just treat it as an
     // opaque blob.
     const existingExif = remoteDerivedData?.raw.exif;
-    const hasExistingExif = existingExif !== undefined && existingExif !== null;
 
     let existingFaceIndex: FaceIndex | undefined;
     if (
@@ -633,10 +632,10 @@ const index = async (
         existingCLIPIndex = { embedding };
     }
 
-    // See if we already have all the derived data fields that we need. If so,
-    // just update our local db and return.
+    // See if we already have all the mandatory derived data fields. If so, just
+    // update our local db and return.
 
-    if (existingFaceIndex && existingCLIPIndex && hasExistingExif) {
+    if (existingFaceIndex && existingCLIPIndex) {
         try {
             await saveIndexes(
                 { fileID, ...existingFaceIndex },
@@ -705,7 +704,7 @@ const index = async (
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            if (!hasExistingExif && originalImageBlob) msg.push("exif");
+            if (!existingExif && originalImageBlob) msg.push("exif");
             return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
