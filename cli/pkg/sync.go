@@ -7,12 +7,13 @@ import (
 	"github.com/ente-io/cli/internal"
 	"github.com/ente-io/cli/internal/api"
 	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/pkg/model/export"
 	bolt "go.etcd.io/bbolt"
 	"log"
 	"time"
 )
 
-func (c *ClICtrl) Export() error {
+func (c *ClICtrl) Export(filters export.Filters) error {
 	accounts, err := c.GetAccounts(context.Background())
 	if err != nil {
 		return err
