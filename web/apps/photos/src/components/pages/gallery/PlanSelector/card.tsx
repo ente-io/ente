@@ -1,8 +1,19 @@
 import log from "@/base/log";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import {
+    FluidContainer,
+    SpaceBetweenFlex,
+} from "@ente/shared/components/Container";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import Close from "@mui/icons-material/Close";
-import { IconButton, Link, Stack, styled } from "@mui/material";
+import {
+    Button,
+    ButtonProps,
+    IconButton,
+    Link,
+    Stack,
+    styled,
+} from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { PLAN_PERIOD } from "constants/gallery";
@@ -12,9 +23,12 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import billingService, { type PlansResponse } from "services/billingService";
-import { Plan } from "types/billing";
+import { Plan, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
+import { BonusData } from "types/user";
 import {
+    activateSubscription,
+    cancelSubscription,
     getLocalUserSubscription,
     hasAddOnBonus,
     hasMobileSubscription,
@@ -24,12 +38,13 @@ import {
     isSubscriptionActive,
     isSubscriptionCancelled,
     isUserSubscribedPlan,
+    manageFamilyMethod,
     planForSubscription,
+    updatePaymentMethod,
     updateSubscription,
 } from "utils/billing";
 import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
-import { ManageSubscription } from "./manageSubscription";
 import { PeriodToggler } from "./periodToggler";
 import Plans from "./plans";
 
@@ -390,3 +405,128 @@ const AddOnRowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
         backgroundColor: "rgba(255,255,255,0.08)",
     },
 }));
+
+interface ManageSubscriptionProps {
+    subscription: Subscription;
+    bonusData?: BonusData;
+    closeModal: () => void;
+    setLoading: SetLoading;
+}
+
+function ManageSubscription({
+    subscription,
+    bonusData,
+    closeModal,
+    setLoading,
+}: ManageSubscriptionProps) {
+    const appContext = useContext(AppContext);
+    const openFamilyPortal = () =>
+        manageFamilyMethod(appContext.setDialogMessage, setLoading);
+
+    return (
+        <Stack spacing={1}>
+            {hasStripeSubscription(subscription) && (
+                <StripeSubscriptionOptions
+                    subscription={subscription}
+                    bonusData={bonusData}
+                    closeModal={closeModal}
+                    setLoading={setLoading}
+                />
+            )}
+            <ManageSubscriptionButton
+                color="secondary"
+                onClick={openFamilyPortal}
+            >
+                {t("MANAGE_FAMILY_PORTAL")}
+            </ManageSubscriptionButton>
+        </Stack>
+    );
+}
+
+function StripeSubscriptionOptions({
+    subscription,
+    bonusData,
+    setLoading,
+    closeModal,
+}: ManageSubscriptionProps) {
+    const appContext = useContext(AppContext);
+
+    const confirmReactivation = () =>
+        appContext.setDialogMessage({
+            title: t("REACTIVATE_SUBSCRIPTION"),
+            content: t("REACTIVATE_SUBSCRIPTION_MESSAGE", {
+                date: subscription.expiryTime,
+            }),
+            proceed: {
+                text: t("REACTIVATE_SUBSCRIPTION"),
+                action: activateSubscription.bind(
+                    null,
+                    appContext.setDialogMessage,
+                    closeModal,
+                    setLoading,
+                ),
+                variant: "accent",
+            },
+            close: {
+                text: t("cancel"),
+            },
+        });
+    const confirmCancel = () =>
+        appContext.setDialogMessage({
+            title: t("CANCEL_SUBSCRIPTION"),
+            content: hasAddOnBonus(bonusData) ? (
+                <Trans i18nKey={"CANCEL_SUBSCRIPTION_WITH_ADDON_MESSAGE"} />
+            ) : (
+                <Trans i18nKey={"CANCEL_SUBSCRIPTION_MESSAGE"} />
+            ),
+            proceed: {
+                text: t("CANCEL_SUBSCRIPTION"),
+                action: cancelSubscription.bind(
+                    null,
+                    appContext.setDialogMessage,
+                    closeModal,
+                    setLoading,
+                ),
+                variant: "critical",
+            },
+            close: {
+                text: t("NEVERMIND"),
+            },
+        });
+    const openManagementPortal = updatePaymentMethod.bind(
+        null,
+        appContext.setDialogMessage,
+        setLoading,
+    );
+    return (
+        <>
+            {isSubscriptionCancelled(subscription) ? (
+                <ManageSubscriptionButton
+                    color="secondary"
+                    onClick={confirmReactivation}
+                >
+                    {t("REACTIVATE_SUBSCRIPTION")}
+                </ManageSubscriptionButton>
+            ) : (
+                <ManageSubscriptionButton
+                    color="secondary"
+                    onClick={confirmCancel}
+                >
+                    {t("CANCEL_SUBSCRIPTION")}
+                </ManageSubscriptionButton>
+            )}
+            <ManageSubscriptionButton
+                color="secondary"
+                onClick={openManagementPortal}
+            >
+                {t("MANAGEMENT_PORTAL")}
+            </ManageSubscriptionButton>
+        </>
+    );
+}
+
+const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
+    <Button size="large" endIcon={<ChevronRight />} {...props}>
+        <FluidContainer>{children}</FluidContainer>
+    </Button>
+);
