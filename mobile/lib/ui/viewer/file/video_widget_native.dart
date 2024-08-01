@@ -20,6 +20,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -250,9 +251,24 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       setState(() {
         _filePath = url;
       });
-      // setAspectRatioFromVideoProps().then((_) {
-      //   setState(() {});
-      // });
+      _setAspectRatioFromVideoProps().then((_) {
+        setState(() {});
+      });
+    }
+  }
+
+  Future<void> _setAspectRatioFromVideoProps() async {
+    final videoProps = await getVideoPropsAsync(File(_filePath!));
+    if (videoProps != null) {
+      if (videoProps.width != null && videoProps.height != null) {
+        aspectRatio = videoProps.width! / videoProps.height!;
+      } else {
+        _logger.info("Video props width and height are null");
+        aspectRatio = 1;
+      }
+    } else {
+      _logger.info("Video props are null");
+      aspectRatio = 1;
     }
   }
 }
