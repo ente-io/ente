@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/ui/viewer/file/video_widget.dart";
-import "package:photos/ui/viewer/file/video_widget_new.dart";
+import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
 class FileWidget extends StatelessWidget {
@@ -51,7 +51,7 @@ class FileWidget extends StatelessWidget {
           playbackCallback: playbackCallback,
         );
       }
-      return VideoWidgetNew(
+      return VideoWidgetMediaKit(
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,

@@ -22,11 +22,11 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/toast_util.dart";
 
-class VideoWidgetNew extends StatefulWidget {
+class VideoWidgetMediaKit extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
-  const VideoWidgetNew(
+  const VideoWidgetMediaKit(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
@@ -34,10 +34,10 @@ class VideoWidgetNew extends StatefulWidget {
   });
 
   @override
-  State<VideoWidgetNew> createState() => _VideoWidgetNewState();
+  State<VideoWidgetMediaKit> createState() => _VideoWidgetMediaKitState();
 }
 
-class _VideoWidgetNewState extends State<VideoWidgetNew>
+class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     with WidgetsBindingObserver {
   final Logger _logger = Logger("VideoWidgetNew");
   static const verticalMargin = 72.0;
