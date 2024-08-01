@@ -1,8 +1,8 @@
 import log from "@/base/log";
-import { bytesInGB } from "@/new/photos/utils/units";
+import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
-import { IconButton, Link, Stack } from "@mui/material";
+import { IconButton, Link, Stack, styled } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { PLAN_PERIOD } from "constants/gallery";
@@ -32,7 +32,6 @@ import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 import { ManageSubscription } from "./manageSubscription";
 import { PeriodToggler } from "./periodToggler";
 import Plans from "./plans";
-import { BFAddOnRow } from "./plans/BfAddOnRow";
 
 interface Props {
     closeModal: any;
@@ -353,3 +352,41 @@ function PaidSubscriptionPlanSelectorCard({
         </>
     );
 }
+
+function BFAddOnRow({ bonusData, closeModal }) {
+    return (
+        <>
+            {bonusData.storageBonuses.map((bonus) => {
+                if (bonus.type.startsWith("ADD_ON")) {
+                    return (
+                        <AddOnRowContainer key={bonus.id} onClick={closeModal}>
+                            <Box>
+                                <Typography color="text.muted">
+                                    <Trans
+                                        i18nKey={"add_on_valid_till"}
+                                        values={{
+                                            storage: formattedStorageByteSize(
+                                                bonus.storage,
+                                            ),
+                                            date: bonus.validTill,
+                                        }}
+                                    />
+                                </Typography>
+                            </Box>
+                        </AddOnRowContainer>
+                    );
+                }
+                return null;
+            })}
+        </>
+    );
+}
+
+const AddOnRowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
+    // gap: theme.spacing(1.5),
+    padding: theme.spacing(1, 0),
+    cursor: "pointer",
+    "&:hover .endIcon": {
+        backgroundColor: "rgba(255,255,255,0.08)",
+    },
+}));
