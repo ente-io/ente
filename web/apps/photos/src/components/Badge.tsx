@@ -1,5 +1,4 @@
 import { Box, styled } from "@mui/material";
-import { CSSProperties } from "@mui/material/styles/createTypography";
 
 export const Badge = styled(Box)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
@@ -8,5 +7,5 @@ export const Badge = styled(Box)(({ theme }) => ({
     backdropFilter: `blur(${theme.colors.blur.muted})`,
     color: theme.colors.white.base,
     textTransform: "uppercase",
-    ...(theme.typography.tiny as CSSProperties),
+    ...theme.typography.mini,
 }));
