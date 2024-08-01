@@ -22,14 +22,16 @@ class QuickLinkAlbumItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSelected = selectedQuickLinks.contains(c);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    return Container(
+    return AnimatedContainer(
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         border: Border.all(
-          color: selectedQuickLinks.contains(c)
-              ? colorScheme.strokeMuted
-              : colorScheme.strokeFainter,
+          color:
+              isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
         ),
         borderRadius: const BorderRadius.all(
           Radius.circular(2),
@@ -137,16 +139,18 @@ class QuickLinkAlbumItem extends StatelessWidget {
           Flexible(
             flex: 1,
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 210),
+              duration: const Duration(milliseconds: 200),
               switchInCurve: Curves.easeOut,
               switchOutCurve: Curves.easeIn,
-              child: selectedQuickLinks.contains(c)
+              child: isSelected
                   ? IconButtonWidget(
+                      key: ValueKey(isSelected),
                       icon: Icons.check_circle_rounded,
                       iconButtonType: IconButtonType.secondary,
                       iconColor: colorScheme.blurStrokeBase,
                     )
-                  : const IconButtonWidget(
+                  : IconButtonWidget(
+                      key: ValueKey(isSelected),
                       icon: Icons.chevron_right_outlined,
                       iconButtonType: IconButtonType.secondary,
                     ),

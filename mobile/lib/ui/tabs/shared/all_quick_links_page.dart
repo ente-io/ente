@@ -58,7 +58,7 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
     });
   }
 
-  Future<bool> _removeQuickLink() async {
+  Future<bool> _removeQuickLinks() async {
     if (selectedQuickLinks.isEmpty) {
       await showErrorDialog(
         context,
@@ -131,7 +131,7 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
         actions: [
           IconButton(
             onPressed: () async {
-              await _removeQuickLink();
+              await _removeQuickLinks();
             },
             icon: Icon(
               Icons.remove_circle_outline_outlined,
