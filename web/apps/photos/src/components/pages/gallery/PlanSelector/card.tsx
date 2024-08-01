@@ -49,12 +49,12 @@ import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 import Plans from "./plans";
 
-interface Props {
+interface PlanSelectorCardProps {
     closeModal: any;
     setLoading: SetLoading;
 }
 
-function PlanSelectorCard(props: Props) {
+function PlanSelectorCard(props: PlanSelectorCardProps) {
     const subscription = useMemo(() => getLocalUserSubscription(), []);
     const [plansResponse, setPlansResponse] = useState<
         PlansResponse | undefined

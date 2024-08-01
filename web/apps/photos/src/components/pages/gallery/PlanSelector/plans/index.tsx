@@ -27,7 +27,7 @@ import {
     isUserSubscribedPlan,
 } from "utils/billing";
 
-interface Iprops {
+interface PlansProps {
     plansResponse: PlansResponse | undefined;
     planPeriod: PLAN_PERIOD;
     subscription: Subscription;
@@ -43,7 +43,7 @@ const Plans = ({
     bonusData,
     onPlanSelect,
     closeModal,
-}: Iprops) => {
+}: PlansProps) => {
     const { freePlan, plans } = plansResponse ?? {};
     return (
         <Stack spacing={2}>

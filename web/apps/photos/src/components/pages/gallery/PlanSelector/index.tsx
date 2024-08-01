@@ -2,13 +2,13 @@ import { Dialog, useMediaQuery, useTheme } from "@mui/material";
 import { SetLoading } from "types/gallery";
 import PlanSelectorCard from "./card";
 
-interface Props {
+interface PlanSelectorProps {
     modalView: boolean;
     closeModal: any;
     setLoading: SetLoading;
 }
 
-function PlanSelector(props: Props) {
+function PlanSelector(props: PlanSelectorProps) {
     const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
     if (!props.modalView) {
