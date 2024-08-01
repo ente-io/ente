@@ -74,6 +74,7 @@ var (
 	dcWasabiEuropeCentral_v3          string = "wasabi-eu-central-2-v3"
 	dcSCWEuropeFrance_v3              string = "scw-eu-fr-v3"
 	dcWasabiEuropeCentralDerived      string = "wasabi-eu-central-2-derived"
+	bucket5                           string = "b5"
 )
 
 // Number of days that the wasabi bucket is configured to retain objects.
@@ -89,9 +90,9 @@ func NewS3Config() *S3Config {
 }
 
 func (config *S3Config) initialize() {
-	dcs := [6]string{
+	dcs := [7]string{
 		dcB2EuropeCentral, dcSCWEuropeFranceLockedDeprecated, dcWasabiEuropeCentralDeprecated,
-		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3, dcWasabiEuropeCentralDerived}
+		dcWasabiEuropeCentral_v3, dcSCWEuropeFrance_v3, dcWasabiEuropeCentralDerived, bucket5}
 
 	config.hotDC = dcB2EuropeCentral
 	config.secondaryHotDC = dcWasabiEuropeCentral_v3
