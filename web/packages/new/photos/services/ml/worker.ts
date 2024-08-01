@@ -358,7 +358,22 @@ const pullSince = async (sinceTime: number, fetchedCount: number) => {
 
     const items = await fetchDerivedData(filesByID);
 
-    // TODO: Save items
+    const save = async ([id, data]: [number, RemoteDerivedData]) => {
+        try {
+            await saveDerivedData(id, data);
+        } catch (e) {
+            // Ignore errors during saving individual items, let the rest of the
+            // pull proceed. Failures will not have a lasting impact since the
+            // file will anyways get revisited as part of a backfill.
+            log.warn(
+                `Ignoring error when saving pulled derived data for file id ${id}`,
+                e,
+            );
+        }
+    };
+
+    // Save items.
+    await Promise.all([...items.entries()].map(save));
 
     // Save the checkpoint.
     await setLatestDerivedDataUpdatedAt(latestUpdatedAt);
@@ -370,6 +385,57 @@ const pullSince = async (sinceTime: number, fetchedCount: number) => {
         throw new Error(`Since time ${sinceTime} did not advance after a pull`);
 
     return pullSince(latestUpdatedAt, fetchedCount + items.size);
+};
+
+/**
+ * Save the given {@link remoteDerivedData} for {@link fileID}.
+ *
+ * This as subset of the save sequence during {@link index}. This one is meant
+ * to be used during a {@link pull}.
+ */
+const saveDerivedData = async (
+    fileID: number,
+    remoteDerivedData: RemoteDerivedData,
+) => {
+    // Discard any existing data that is made by an older indexing pipelines.
+    // See: [Note: Embedding versions]
+
+    const existingRemoteFaceIndex = remoteDerivedData.parsed?.face;
+    const existingRemoteCLIPIndex = remoteDerivedData.parsed?.clip;
+
+    let existingFaceIndex: FaceIndex | undefined;
+    if (
+        existingRemoteFaceIndex &&
+        existingRemoteFaceIndex.version >= faceIndexingVersion
+    ) {
+        const { width, height, faces } = existingRemoteFaceIndex;
+        existingFaceIndex = { width, height, faces };
+    }
+
+    let existingCLIPIndex: CLIPIndex | undefined;
+    if (
+        existingRemoteCLIPIndex &&
+        existingRemoteCLIPIndex.version >= clipIndexingVersion
+    ) {
+        const { embedding } = existingRemoteCLIPIndex;
+        existingCLIPIndex = { embedding };
+    }
+
+    // If we have all the required embedding types, then save them, marking a
+    // file as indexed.
+    //
+    // In particular, this means that there might be files which we've marked
+    // indexed but still don't have the optional derived data types like exif.
+    // This is fine, we wish to compute the optional type of derived data when
+    // we can, but by themselves they're not reason enough for us to download
+    // and index the original.
+
+    if (existingFaceIndex && existingCLIPIndex) {
+        await saveIndexes(
+            { fileID, ...existingFaceIndex },
+            { fileID, ...existingCLIPIndex },
+        );
+    }
 };
 
 /**
@@ -545,6 +611,8 @@ const index = async (
         existingRemoteFaceIndex &&
         existingRemoteFaceIndex.version >= faceIndexingVersion
     ) {
+        // Destructure the data we got from remote so that we only retain the
+        // fields we're interested in the object that gets put into indexed db.
         const { width, height, faces } = existingRemoteFaceIndex;
         existingFaceIndex = { width, height, faces };
     }
