@@ -500,6 +500,9 @@ const indexNextBatch = async (
         await wait(0);
     }
 
+    // Wait for the pending tasks to drain out.
+    await Promise.all(tasks);
+
     // Return true if nothing failed.
     return allSuccess;
 };
