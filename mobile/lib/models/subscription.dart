@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 const freeProductID = "free";
+const popularProductIDs = ["200gb_yearly", "200gb_monthly"];
 const stripe = "stripe";
 const appStore = "appstore";
 const playStore = "playstore";
@@ -45,6 +46,10 @@ class Subscription {
 
   bool isYearlyPlan() {
     return 'year' == period;
+  }
+
+  bool isFreePlan() {
+    return productID == freeProductID;
   }
 
   static fromMap(Map<String, dynamic>? map) {

@@ -235,7 +235,7 @@ const remoteDerivedDataFromJSONString = (jsonString: string) => {
  * @param fileIDs The ids of the files for which we want the embeddings.
  *
  * @returns a list of {@link RemoteEmbedding} for the files which had embeddings
- * (and thatt remote was able to successfully retrieve). The order of this list
+ * (and that remote was able to successfully retrieve). The order of this list
  * is arbitrary, and the caller should use the {@link fileID} present within the
  * {@link RemoteEmbedding} to associate an item in the result back to a file
  * instead of relying on the order or count of items in the result.

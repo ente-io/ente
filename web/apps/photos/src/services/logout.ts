@@ -22,7 +22,7 @@ export const photosLogout = async () => {
     // See: [Note: Caching IDB instances in separate execution contexts].
 
     try {
-        terminateMLWorker();
+        await terminateMLWorker();
     } catch (e) {
         ignoreError("face", e);
     }

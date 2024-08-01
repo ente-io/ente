@@ -85,14 +85,9 @@ export default function Preferences({ open, onClose, onRootClose }) {
                                     <EnteMenuItem
                                         endIcon={<ChevronRight />}
                                         onClick={() => setOpenMLSettings(true)}
-                                        label={pt("ML search")}
+                                        label={pt("Face and magic search")}
                                     />
                                 </MenuItemGroup>
-                                <MenuSectionTitle
-                                    title={pt(
-                                        "Face recognition, magic search and more",
-                                    )}
-                                />
                             </Box>
                         )}
                     </Stack>
