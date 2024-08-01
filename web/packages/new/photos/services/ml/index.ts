@@ -6,17 +6,20 @@ import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
+import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
-import { proxy } from "comlink";
+import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
+import type { CLIPMatches } from "./worker-types";
 
 /**
  * In-memory flag that tracks if ML is enabled.
@@ -33,7 +36,7 @@ import { MLWorker } from "./worker";
 let _isMLEnabled = false;
 
 /** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
-let _comlinkWorker: ComlinkWorker<typeof MLWorker> | undefined;
+let _comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
 
 /**
  * Subscriptions to {@link MLStatus}.
@@ -50,29 +53,28 @@ let _mlStatusListeners: (() => void)[] = [];
 let _mlStatusSnapshot: MLStatus | undefined;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
-const worker = async () => {
-    if (!_comlinkWorker) _comlinkWorker = await createComlinkWorker();
-    return _comlinkWorker.remote;
-};
+const worker = () =>
+    (_comlinkWorker ??= createComlinkWorker()).then((cw) => cw.remote);
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const mlWorkerElectron = {
-        detectFaces: electron.detectFaces,
-        computeFaceEmbeddings: electron.computeFaceEmbeddings,
-        computeCLIPImageEmbedding: electron.computeCLIPImageEmbedding,
-    };
     const delegate = {
         workerDidProcessFile,
     };
+
+    // Obtain a message port from the Electron layer.
+    const messagePort = await createMLWorker(electron);
 
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ML",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
+
     await cw.remote.then((w) =>
-        w.init(proxy(mlWorkerElectron), proxy(delegate)),
+        // Forward the port to the web worker.
+        w.init(transfer(messagePort, [messagePort]), proxy(delegate)),
     );
+
     return cw;
 };
 
@@ -85,11 +87,38 @@ const createComlinkWorker = async () => {
  *
  * It is also called when the user pauses or disables ML.
  */
-export const terminateMLWorker = () => {
+export const terminateMLWorker = async () => {
     if (_comlinkWorker) {
-        _comlinkWorker.terminate();
+        await _comlinkWorker.then((cw) => cw.terminate());
         _comlinkWorker = undefined;
     }
+};
+
+/**
+ * Obtain a port from the Node.js layer that can be used to communicate with the
+ * ML worker process.
+ */
+const createMLWorker = (electron: Electron): Promise<MessagePort> => {
+    // The main process will do its thing, and send back the port it created to
+    // us by sending an message on the "createMLWorker/port" channel via the
+    // postMessage API. This roundabout way is needed because MessagePorts
+    // cannot be transferred via the usual send/invoke pattern.
+
+    const port = new Promise<MessagePort>((resolve) => {
+        const l = ({ source, data, ports }: MessageEvent) => {
+            // The source check verifies that the message is coming from our own
+            // preload script. The data is the message that was posted.
+            if (source == window && data == "createMLWorker/port") {
+                window.removeEventListener("message", l);
+                resolve(ensure(ports[0]));
+            }
+        };
+        window.addEventListener("message", l);
+    });
+
+    electron.createMLWorker();
+
+    return port;
 };
 
 /**
@@ -163,7 +192,7 @@ export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
     setIsMLEnabledLocal(false);
     _isMLEnabled = false;
-    terminateMLWorker();
+    await terminateMLWorker();
     triggerStatusUpdate();
 };
 
@@ -368,6 +397,22 @@ const setInterimScheduledStatus = () => {
 };
 
 const workerDidProcessFile = throttled(updateMLStatusSnapshot, 2000);
+
+/**
+ * Use CLIP to perform a natural language search over image embeddings.
+ *
+ * @param searchPhrase The text entered by the user in the search box.
+ *
+ * It returns file (IDs) that should be shown in the search results, along with
+ * their scores.
+ *
+ * The result can also be `undefined`, which indicates that the download for the
+ * ML model is still in progress (trying again later should succeed).
+ */
+export const clipMatches = (
+    searchPhrase: string,
+): Promise<CLIPMatches | undefined> =>
+    worker().then((w) => w.clipMatches(searchPhrase));
 
 /**
  * Return the IDs of all the faces in the given {@link enteFile} that are not

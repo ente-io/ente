@@ -28,7 +28,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
     /** The class (T) exposed by the web worker */
     public remote: Promise<Remote<InstanceType<T>>>;
     /** The web worker */
-    private worker: Worker;
+    public worker: Worker;
     /** An arbitrary name associated with this ComlinkWorker for debugging. */
     private name: string;
 

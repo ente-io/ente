@@ -1,77 +1,185 @@
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
-import "package:photos/generated/l10n.dart";
+import "package:flutter/scheduler.dart";
+import "package:flutter_animate/flutter_animate.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/data_util.dart';
 
-class SubscriptionPlanWidget extends StatelessWidget {
+class SubscriptionPlanWidget extends StatefulWidget {
   const SubscriptionPlanWidget({
-    Key? key,
+    super.key,
     required this.storage,
     required this.price,
     required this.period,
+    required this.isOnboarding,
     this.isActive = false,
-  }) : super(key: key);
+    this.isPopular = false,
+  });
 
   final int storage;
   final String price;
   final String period;
   final bool isActive;
+  final bool isPopular;
+  final bool isOnboarding;
 
-  String _displayPrice(BuildContext context) {
-    // todo: l10n pricing part
-    final result = price + (period.isNotEmpty ? " / " + period : "");
-    return price.isNotEmpty ? result : S.of(context).freeTrial;
+  @override
+  State<SubscriptionPlanWidget> createState() => _SubscriptionPlanWidgetState();
+}
+
+class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
+  late final PlatformDispatcher _platformDispatcher;
+
+  @override
+  void initState() {
+    super.initState();
+    _platformDispatcher = SchedulerBinding.instance.platformDispatcher;
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color textColor = isActive ? Colors.white : Colors.black;
-    return Container(
-      width: double.infinity,
-      color: Theme.of(context).colorScheme.onPrimary,
-      padding: EdgeInsets.symmetric(horizontal: isActive ? 8 : 16, vertical: 4),
+    final brightness = _platformDispatcher.platformBrightness;
+    final numAndUnit = convertBytesToNumberAndUnit(widget.storage);
+    final String storageValue = numAndUnit.$1.toString();
+    final String storageUnit = numAndUnit.$2;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Container(
         decoration: BoxDecoration(
-          color: isActive
-              ? const Color(0xFF22763F)
-              : const Color.fromRGBO(240, 240, 240, 1.0),
-          gradient: isActive
-              ? const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF2CD267),
-                    Color(0xFF1DB954),
-                  ],
+          color: backgroundElevated2Light,
+          borderRadius: BorderRadius.circular(8),
+          border: widget.isActive
+              ? Border.all(
+                  color: getEnteColorScheme(context).primary700,
+                  width: brightness == Brightness.dark ? 1.5 : 1,
+                  strokeAlign: BorderSide.strokeAlignInside,
                 )
               : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              offset: const Offset(0, 4),
+              blurRadius: 4,
+            ),
+          ],
         ),
-        // color: Colors.yellow,
-        padding:
-            EdgeInsets.symmetric(horizontal: isActive ? 22 : 20, vertical: 18),
-        child: Column(
+        child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  convertBytesToReadableFormat(storage),
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(color: textColor),
-                ),
-                Text(
-                  _displayPrice(context),
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: textColor,
-                        fontWeight: FontWeight.normal,
+            widget.isActive && !widget.isOnboarding
+                ? Positioned(
+                    top: 0,
+                    right: 0,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(8),
                       ),
-                ),
-              ],
+                      child: Image.asset(
+                        "assets/active_subscription.png",
+                      ),
+                    ),
+                  )
+                : widget.isPopular
+                    ? ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                        ),
+                        child: Image.asset(
+                          "assets/popular_subscription.png",
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: storageValue,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w600,
+                            color: textBaseLight,
+                          ),
+                        ),
+                        WidgetSpan(
+                          child: Transform.translate(
+                            offset: const Offset(2, -16),
+                            child: Text(
+                              storageUnit,
+                              style: getEnteTextTheme(context).h3.copyWith(
+                                    color: textMutedLight,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _Price(price: widget.price, period: widget.period),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _Price extends StatelessWidget {
+  final String price;
+  final String period;
+  const _Price({required this.price, required this.period});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    if (price.isEmpty) {
+      return Text(
+        "Free",
+        style: textTheme.largeBold.copyWith(color: textBaseLight),
+      );
+    }
+    if (period == "month") {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            price + ' / ' + 'month',
+            style: textTheme.largeBold.copyWith(color: textBaseLight),
+          )
+              .animate(delay: const Duration(milliseconds: 100))
+              .fadeIn(duration: const Duration(milliseconds: 250)),
+        ],
+      );
+    } else if (period == "year") {
+      final currencySymbol = price[0];
+      final priceWithoutCurrency = price.substring(1);
+      final priceDouble = double.parse(priceWithoutCurrency);
+      final pricePerMonth = priceDouble / 12;
+      final pricePerMonthString = pricePerMonth.toStringAsFixed(2);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            currencySymbol + pricePerMonthString + ' / ' + 'month',
+            style: textTheme.largeBold.copyWith(color: textBaseLight),
+          ),
+          Text(
+            price + " / " + "yr",
+            style: textTheme.small.copyWith(color: textFaintLight),
+          ),
+        ],
+      )
+          .animate(delay: const Duration(milliseconds: 100))
+          .fadeIn(duration: const Duration(milliseconds: 250));
+    } else {
+      assert(false, "Invalid period: $period");
+      return const Text("");
+    }
   }
 }
