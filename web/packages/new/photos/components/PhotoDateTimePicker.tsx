@@ -51,11 +51,9 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     onClose,
 }) => {
     const [open, setOpen] = useState(true);
-    const [value, setValue] = useState<Date | Dayjs | null>(
-        dayjs(initialValue),
-    );
+    const [value, setValue] = useState<Dayjs | null>(dayjs(initialValue));
 
-    const handleAccept = (d: Date | Dayjs | null) => {
+    const handleAccept = (d: Dayjs | null) => {
         if (!dayjs.isDayjs(d))
             throw new Error(`Unexpected non-dayjs result ${typeof d}`);
         onAccept(parseMetadataDateFromDayjs(d));
@@ -70,7 +68,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <MobileDateTimePicker
                 value={value}
-                onChange={setValue}
+                onChange={(d) => setValue(d)}
                 open={open}
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
