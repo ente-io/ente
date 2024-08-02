@@ -7,7 +7,7 @@
         "@/utils": "*",
         "@ente/shared": "*",
         "@mui/x-date-pickers": "^5.0.20",
-        "date-fns": "^2",
+        "dayjs": "^1.11.12",
         "formik": "^2.4",
         "idb": "^8",
         "zod": "^3"

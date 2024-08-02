@@ -2,7 +2,7 @@ import {
     LocalizationProvider,
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import React, { useState } from "react";
 
 interface PhotoDateTimePickerProps {
@@ -51,7 +51,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     };
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
             <MobileDateTimePicker
                 value={value}
                 onChange={setValue}
@@ -61,6 +61,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 disabled={disabled}
                 minDateTime={new Date(1800, 0, 1)}
                 disableFuture={true}
+                // timezone={"UTC"}
                 onAccept={handleAccept}
                 DialogProps={{
                     sx: {
