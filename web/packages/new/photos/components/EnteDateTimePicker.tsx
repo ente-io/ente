@@ -27,6 +27,9 @@ interface EnteDateTimePickerProps {
     onClose?: () => void;
 }
 
+/**
+ * A customized version of MUI DateTimePicker.
+ */
 export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
     initialValue,
     disabled,
@@ -34,7 +37,7 @@ export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
     onClose,
 }) => {
     const [open, setOpen] = useState(true);
-    const [value, setValue] = useState(initialValue ?? new Date());
+    const [value, setValue] = useState<Date | null>(initialValue ?? new Date());
 
     const handleAccept = (date: Date | null) => date && onAccept(date);
 
