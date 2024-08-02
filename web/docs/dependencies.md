@@ -148,6 +148,15 @@ specifying the import map as mentioned
 but that disables the SWC integration altogether, so we live with this
 infelicity for now.
 
+### Date pickers
+
+[@mui/x-date-pickers](https://mui.com/x/react-date-pickers/getting-started/) is
+used to get a date/time picker component. This is the community version of the
+DateTimePicker component provided by MUI.
+
+For using `@mui/x-date-pickers`, we also need to choose and install a date
+library that it will internally use to manipulate dates. For this end, we use [date-fns](https://github.com/date-fns/date-fns).
+
 ### Translations
 
 For showing the app's UI in multiple languages, we use the
