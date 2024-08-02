@@ -1,3 +1,4 @@
+import type { ParsedMetadataDate } from "@/media/file-metadata";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import DialogBox from "@ente/shared/components/DialogBox/";
@@ -31,13 +32,8 @@ export type FixOption =
 
 interface FormValues {
     option: FixOption;
-    /**
-     * Date.toISOString()
-     *
-     * Formik doesn't have native support for JS dates, so we instead keep the
-     * corresponding date's ISO string representation as the form state.
-     */
-    customTimeString: string;
+    /* Only valid when {@link option} is "custom-time". */
+    customDate: ParsedMetadataDate | undefined;
 }
 
 interface FixCreationTimeProps {
@@ -69,7 +65,7 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = (props) => {
         const completedWithErrors = await updateCreationTimeWithExif(
             props.attributes.files,
             values.option,
-            new Date(values.customTimeString),
+            values.customDate,
             setProgressTracker,
         );
         setStep(completedWithErrors ? "completed-with-errors" : "completed");
@@ -135,10 +131,10 @@ interface OptionsFormProps {
 }
 
 const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
-    const { values, handleChange, handleSubmit } = useFormik({
+    const { values, handleChange, setValues, handleSubmit } = useFormik<FormValues>({
         initialValues: {
             option: "date-time-original",
-            customTimeString: new Date().toISOString(),
+            customDate: undefined,
         },
         validateOnBlur: false,
         onSubmit,
@@ -178,10 +174,11 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
                         </RadioGroup>
                         {values.option === "custom-time" && (
                             <PhotoDateTimePicker
-                                onAccept={(d: Date) =>
-                                    handleChange("customTimeString")(
-                                        d.toISOString(),
-                                    )
+                                onAccept={(customDate) =>
+                                    setValues({
+                                        option: "custom-time",
+                                        customDate,
+                                    })
                                 }
                             />
                         )}
