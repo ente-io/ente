@@ -6,23 +6,37 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import React, { useState } from "react";
 
 interface EnteDateTimePickerProps {
+    /**
+     * The initial date to preselect in the date/time picker.
+     *
+     * If not provided, the current date/time is used.
+     */
     initialValue?: Date;
     /**
-     * If true, then the picker shows the date/time but doesn't allow editing.
+     * If true, then the picker shows provided date/time but doesn't allow
+     * editing it.
      */
     disabled?: boolean;
-    onSubmit: (date: Date) => void;
+    /**
+     * Callback invoked when the user makes and confirms a date/time.
+     */
+    onAccept: (date: Date) => void;
+    /**
+     * Optional callback invoked when the picker has been closed.
+     */
     onClose?: () => void;
 }
 
 export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
     initialValue,
     disabled,
-    onSubmit,
+    onAccept,
     onClose,
 }) => {
     const [open, setOpen] = useState(true);
     const [value, setValue] = useState(initialValue ?? new Date());
+
+    const handleAccept = (date: Date | null) => date && onAccept(date);
 
     const handleClose = () => {
         setOpen(false);
@@ -37,10 +51,10 @@ export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
                 open={open}
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
+                disabled={disabled}
                 minDateTime={new Date(1800, 0, 1)}
                 disableFuture={true}
-                disabled={disabled}
-                onAccept={onSubmit}
+                onAccept={handleAccept}
                 DialogProps={{
                     sx: {
                         zIndex: "1502",

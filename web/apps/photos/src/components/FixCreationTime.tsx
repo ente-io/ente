@@ -1,3 +1,4 @@
+import { EnteDateTimePicker } from "@/new/photos/components/EnteDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
@@ -15,7 +16,6 @@ import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
 import { updateCreationTimeWithExif } from "services/fix-exif";
-import { EnteDateTimePicker } from "@/new/photos/components/EnteDateTimePicker";
 
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
@@ -178,7 +178,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
                         </RadioGroup>
                         {values.option === "custom-time" && (
                             <EnteDateTimePicker
-                                onSubmit={(d: Date) =>
+                                onAccept={(d: Date) =>
                                     handleChange("customTimeString")(
                                         d.toISOString(),
                                     )

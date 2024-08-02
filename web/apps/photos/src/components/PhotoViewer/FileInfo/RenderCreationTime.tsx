@@ -66,7 +66,7 @@ export function RenderCreationTime({
                     <EnteDateTimePicker
                         initialValue={originalCreationTime}
                         disabled={loading}
-                        onSubmit={saveEdits}
+                        onAccept={saveEdits}
                         onClose={closeEditMode}
                     />
                 )}
