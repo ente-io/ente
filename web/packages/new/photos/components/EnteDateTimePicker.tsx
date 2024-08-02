@@ -11,7 +11,6 @@ interface EnteDateTimePickerProps {
      * If true, then the picker shows the date/time but doesn't allow editing.
      */
     disabled?: boolean;
-    label?: string;
     onSubmit: (date: Date) => void;
     onClose?: () => void;
 }
