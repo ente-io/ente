@@ -1,28 +1,27 @@
-import { useState } from "react";
-
 import {
     LocalizationProvider,
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import React, { useState } from "react";
 
-const MIN_EDITED_CREATION_TIME = new Date(1800, 0, 1);
-const MAX_EDITED_CREATION_TIME = new Date();
-
-interface Props {
+interface EnteDateTimePickerProps {
     initialValue?: Date;
+    /**
+     * If true, then the picker shows the date/time but doesn't allow editing.
+     */
     disabled?: boolean;
     label?: string;
     onSubmit: (date: Date) => void;
     onClose?: () => void;
 }
 
-const EnteDateTimePicker = ({
+const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
     initialValue,
     disabled,
     onSubmit,
     onClose,
-}: Props) => {
+}) => {
     const [open, setOpen] = useState(true);
     const [value, setValue] = useState(initialValue ?? new Date());
 
@@ -30,6 +29,7 @@ const EnteDateTimePicker = ({
         setOpen(false);
         onClose?.();
     };
+
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <MobileDateTimePicker
@@ -38,8 +38,8 @@ const EnteDateTimePicker = ({
                 open={open}
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
-                maxDateTime={MAX_EDITED_CREATION_TIME}
-                minDateTime={MIN_EDITED_CREATION_TIME}
+                minDateTime={new Date(1800, 0, 1)}
+                maxDateTime={new Date()}
                 disabled={disabled}
                 onAccept={onSubmit}
                 DialogProps={{
