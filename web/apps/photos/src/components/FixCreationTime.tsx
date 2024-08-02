@@ -1,5 +1,6 @@
 import type { ParsedMetadataDate } from "@/media/file-metadata";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
+import { updateCreationTimeWithExif } from "@/new/photos/services/fix-exif";
 import { EnteFile } from "@/new/photos/types/file";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
@@ -16,7 +17,6 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
-import { updateCreationTimeWithExif } from "services/fix-exif";
 
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
@@ -131,14 +131,15 @@ interface OptionsFormProps {
 }
 
 const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
-    const { values, handleChange, setValues, handleSubmit } = useFormik<FormValues>({
-        initialValues: {
-            option: "date-time-original",
-            customDate: undefined,
-        },
-        validateOnBlur: false,
-        onSubmit,
-    });
+    const { values, handleChange, setValues, handleSubmit } =
+        useFormik<FormValues>({
+            initialValues: {
+                option: "date-time-original",
+                customDate: undefined,
+            },
+            validateOnBlur: false,
+            onSubmit,
+        });
 
     return (
         <>
