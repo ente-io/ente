@@ -1,11 +1,11 @@
 import log from "@/base/log";
+import type { ParsedMetadataDate } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import { getParsedExifData } from "@ente/shared/utils/exif-old";
-import type { FixOption } from "components/FixCreationTime";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
@@ -26,10 +26,16 @@ export type SetProgressTracker = React.Dispatch<
     }>
 >;
 
-export async function updateCreationTimeWithExif(
+export type FixOption =
+    | "date-time-original"
+    | "date-time-digitized"
+    | "metadata-date"
+    | "custom";
+
+export async function updateDateTimeOfEnteFiles(
     filesToBeUpdated: EnteFile[],
     fixOption: FixOption,
-    customTime: Date,
+    customDate: ParsedMetadataDate,
     setProgressTracker: SetProgressTracker,
 ) {
     let completedWithError = false;
@@ -42,7 +48,7 @@ export async function updateCreationTimeWithExif(
             try {
                 let correctCreationTime: number;
                 if (fixOption === "custom-time") {
-                    correctCreationTime = customTime.getTime() * 1000;
+                    correctCreationTime = customDate.getTime() * 1000;
                 } else {
                     if (file.metadata.fileType !== FileType.image) {
                         continue;
