@@ -57,10 +57,10 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
         dayjs(),
     );
 
-    const handleAccept = (date: Date | Dayjs | null) => {
-        if (!(date instanceof Dayjs))
-            throw new Error(`Unexpected non-Dayjs result ${typeof date}`);
-        onAccept(parseMetadataDateFromDayjs(date));
+    const handleAccept = (d: Date | Dayjs | null) => {
+        if (!dayjs.isDayjs(d))
+            throw new Error(`Unexpected non-dayjs result ${typeof d}`);
+        onAccept(parseMetadataDateFromDayjs(d));
     };
 
     const handleClose = () => {
