@@ -1,4 +1,5 @@
 import log from "@/base/log";
+import type { ParsedMetadataDate } from "@/media/file-metadata";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -27,11 +28,11 @@ export function RenderCreationTime({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const saveEdits = async (pickedTime: Date) => {
+    const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
             if (isInEditMode && file) {
-                const unixTimeInMicroSec = pickedTime.getTime() * 1000;
+                const unixTimeInMicroSec = pickedTime.timestamp;
                 if (unixTimeInMicroSec === file?.metadata.creationTime) {
                     closeEditMode();
                     return;
