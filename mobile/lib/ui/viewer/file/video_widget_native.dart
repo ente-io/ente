@@ -81,11 +81,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
         } else {
           // ignore: unawaited_futures
-          asset.getMediaUrl().then((url) {
-            _setFilePathForNativePlayer(
-              url ??
-                  'https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4',
-            );
+          getFile(widget.file, isOrigin: true).then((file) {
+            _setFilePathForNativePlayer(file!.path);
+            file.delete();
           });
         }
       });
@@ -261,7 +259,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
       if (videoProps.width != null && videoProps.height != null) {
-        aspectRatio = videoProps.width! / videoProps.height!;
+        if (videoProps.width != null && videoProps.height != 0) {
+          aspectRatio = videoProps.width! / videoProps.height!;
+        } else {
+          _logger.info("Video props height or width is 0");
+          aspectRatio = 1;
+        }
       } else {
         _logger.info("Video props width and height are null");
         aspectRatio = 1;
