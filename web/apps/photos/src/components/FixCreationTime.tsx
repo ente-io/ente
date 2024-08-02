@@ -1,4 +1,4 @@
-import { EnteDateTimePicker } from "@/new/photos/components/EnteDateTimePicker";
+import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
@@ -177,7 +177,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
                             />
                         </RadioGroup>
                         {values.option === "custom-time" && (
-                            <EnteDateTimePicker
+                            <PhotoDateTimePicker
                                 onAccept={(d: Date) =>
                                     handleChange("customTimeString")(
                                         d.toISOString(),

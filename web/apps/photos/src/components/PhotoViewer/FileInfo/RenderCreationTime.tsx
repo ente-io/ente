@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { EnteDateTimePicker } from "@/new/photos/components/EnteDateTimePicker";
+import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, formatTime } from "@ente/shared/time/format";
@@ -63,7 +63,7 @@ export function RenderCreationTime({
                     hideEditOption={shouldDisableEdits || isInEditMode}
                 />
                 {isInEditMode && (
-                    <EnteDateTimePicker
+                    <PhotoDateTimePicker
                         initialValue={originalCreationTime}
                         disabled={loading}
                         onAccept={saveEdits}

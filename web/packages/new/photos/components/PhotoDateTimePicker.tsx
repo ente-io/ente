@@ -5,7 +5,7 @@ import {
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import React, { useState } from "react";
 
-interface EnteDateTimePickerProps {
+interface PhotoDateTimePickerProps {
     /**
      * The initial date to preselect in the date/time picker.
      *
@@ -28,9 +28,10 @@ interface EnteDateTimePickerProps {
 }
 
 /**
- * A customized version of MUI DateTimePicker.
+ * A customized version of MUI DateTimePicker suitable for use in selecting and
+ * modifying the date/time for a photo.
  */
-export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
+export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     initialValue,
     disabled,
     onAccept,
@@ -39,7 +40,10 @@ export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
     const [open, setOpen] = useState(true);
     const [value, setValue] = useState<Date | null>(initialValue ?? new Date());
 
-    const handleAccept = (date: Date | null) => date && onAccept(date);
+    const handleAccept = (date: Date | null) => {
+        console.log({ date });
+        date && onAccept(date);
+    };
 
     const handleClose = () => {
         setOpen(false);
