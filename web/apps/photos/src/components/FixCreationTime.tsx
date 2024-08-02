@@ -70,7 +70,6 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     }, [isOpen]);
 
     const onSubmit = async (values: FormValues) => {
-        console.log({ values });
         setStatus("running");
         const completedWithErrors = await updateFiles(
             attributes.files,
