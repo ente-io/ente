@@ -185,7 +185,11 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
                                 {t("UPDATE_CREATION_TIME_NOT_STARTED")}
                             </FormLabel>
                         </FormControl>
-                        <RadioGroup name={"option"} onChange={handleChange}>
+                        <RadioGroup
+                            name={"option"}
+                            value={values.option}
+                            onChange={handleChange}
+                        >
                             <FormControlLabel
                                 value={"date-time-original"}
                                 control={<Radio size="small" />}
