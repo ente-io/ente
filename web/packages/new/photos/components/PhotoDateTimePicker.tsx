@@ -51,10 +51,8 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     onClose,
 }) => {
     const [open, setOpen] = useState(true);
-    console.log({ initialValue, onAccept });
     const [value, setValue] = useState<Date | Dayjs | null>(
-        // null,
-        dayjs(),
+        dayjs(initialValue),
     );
 
     const handleAccept = (d: Date | Dayjs | null) => {
