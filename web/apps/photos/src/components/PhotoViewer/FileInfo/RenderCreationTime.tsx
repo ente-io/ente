@@ -1,9 +1,9 @@
 import log from "@/base/log";
+import { EnteDateTimePicker } from "@/new/photos/components/EnteDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import EnteDateTimePicker from "components/EnteDateTimePicker";
 import { useState } from "react";
 import {
     changeFileCreationTime,

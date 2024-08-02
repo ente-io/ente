@@ -16,7 +16,7 @@ interface EnteDateTimePickerProps {
     onClose?: () => void;
 }
 
-const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
+export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
     initialValue,
     disabled,
     onSubmit,
@@ -63,5 +63,3 @@ const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
         </LocalizationProvider>
     );
 };
-
-export default EnteDateTimePicker;

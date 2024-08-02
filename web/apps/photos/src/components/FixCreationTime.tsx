@@ -15,7 +15,7 @@ import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
 import { updateCreationTimeWithExif } from "services/fix-exif";
-import EnteDateTimePicker from "./EnteDateTimePicker";
+import { EnteDateTimePicker } from "@/new/photos/components/EnteDateTimePicker";
 
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
