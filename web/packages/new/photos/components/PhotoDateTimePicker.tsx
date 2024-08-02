@@ -3,6 +3,8 @@ import {
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import React, { useState } from "react";
 
 interface PhotoDateTimePickerProps {
@@ -27,6 +29,11 @@ interface PhotoDateTimePickerProps {
     onClose?: () => void;
 }
 
+// [Note: Obtaining UTC dates from MUI's x-date-picker]
+//
+// See: https://mui.com/x/react-date-pickers/timezone/
+dayjs.extend(utc);
+
 /**
  * A customized version of MUI DateTimePicker suitable for use in selecting and
  * modifying the date/time for a photo.
@@ -38,7 +45,9 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     onClose,
 }) => {
     const [open, setOpen] = useState(true);
-    const [value, setValue] = useState<Date | null>(initialValue ?? new Date());
+    const [value, setValue] = useState<Date | null>(
+        initialValue ?? dayjs.utc(),
+    );
 
     const handleAccept = (date: Date | null) => {
         console.log({ date });
@@ -61,7 +70,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 disabled={disabled}
                 minDateTime={new Date(1800, 0, 1)}
                 disableFuture={true}
-                // timezone={"UTC"}
+                timezone={"UTC"}
                 onAccept={handleAccept}
                 DialogProps={{
                     sx: {
