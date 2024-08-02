@@ -1,3 +1,4 @@
+import log from "@/base/log";
 import type { ParsedMetadataDate } from "@/media/file-metadata";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import {
@@ -5,6 +6,7 @@ import {
     type FixOption,
 } from "@/new/photos/services/fix-exif";
 import { EnteFile } from "@/new/photos/types/file";
+import { fileLogID } from "@/new/photos/utils/file";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
     Button,
@@ -251,4 +253,32 @@ const Footer = ({ step, startFix, ...props }) => {
             </div>
         )
     );
+};
+
+type SetProgressTracker = React.Dispatch<
+    React.SetStateAction<{
+        current: number;
+        total: number;
+    }>
+>;
+
+const updateFiles = async (
+    enteFiles: EnteFile[],
+    fixOption: FixOption,
+    customDate: ParsedMetadataDate,
+    setProgressTracker: SetProgressTracker,
+) => {
+    setProgressTracker({ current: 0, total: enteFiles.length });
+    let hadErrors = false;
+    for (const [i, enteFile] of enteFiles.entries()) {
+        try {
+            await updateEnteFileDate(enteFile, fixOption, customDate);
+        } catch (e) {
+            log.error(`Failed to update date of ${fileLogID(enteFile)}`, e);
+            hadErrors = true;
+        } finally {
+            setProgressTracker({ current: i + 1, total: enteFiles.length });
+        }
+    }
+    return hadErrors;
 };
