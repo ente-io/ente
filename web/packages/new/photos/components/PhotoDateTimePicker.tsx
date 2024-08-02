@@ -1,10 +1,10 @@
+import type { ParsedMetadataDate } from "@/media/file-metadata";
 import {
     LocalizationProvider,
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
 
 interface PhotoDateTimePickerProps {
@@ -22,21 +22,27 @@ interface PhotoDateTimePickerProps {
     /**
      * Callback invoked when the user makes and confirms a date/time.
      */
-    onAccept: (date: Date) => void;
+    onAccept: (date: ParsedMetadataDate) => void;
     /**
      * Optional callback invoked when the picker has been closed.
      */
     onClose?: () => void;
 }
 
-// [Note: Obtaining UTC dates from MUI's x-date-picker]
-//
-// See: https://mui.com/x/react-date-pickers/timezone/
-dayjs.extend(utc);
-
 /**
  * A customized version of MUI DateTimePicker suitable for use in selecting and
  * modifying the date/time for a photo.
+ *
+ * On success, it returns a {@link ParsedMetadataDate} which contains the a
+ * local date/time string representation of the selected date, the current UTC
+ * offset, and an epoch timestamp. The idea is that the user is picking a
+ * date/time in the hypothetical timezone of where the photo was taken.
+ *
+ * We return local (current) UTC offset, but this might be different from what
+ * the user is imagining when they're picking a date. So it should be taken as
+ * an advisory, and only used if the photo does not already have an associated
+ * UTC offset. For more discussion of the caveats and nuances around this, see
+ * [Note: Photos are always in local date/time].
  */
 export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     initialValue,
@@ -45,13 +51,16 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
     onClose,
 }) => {
     const [open, setOpen] = useState(true);
-    const [value, setValue] = useState<Date | null>(
-        initialValue ?? dayjs.utc(),
+    console.log({ initialValue, onAccept });
+    const [value, setValue] = useState<Date | Dayjs | null>(
+        // null,
+        dayjs(),
     );
 
-    const handleAccept = (date: Date | null) => {
-        console.log({ date });
-        date && onAccept(date);
+    const handleAccept = (date: Date | Dayjs | null) => {
+        if (!(date instanceof Dayjs))
+            throw new Error(`Unexpected non-Dayjs result ${typeof date}`);
+        onAccept(parseMetadataDateFromDayjs(date));
     };
 
     const handleClose = () => {
@@ -68,9 +77,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
                 disabled={disabled}
-                minDateTime={new Date(1800, 0, 1)}
                 disableFuture={true}
-                timezone={"UTC"}
                 onAccept={handleAccept}
                 DialogProps={{
                     sx: {
@@ -92,4 +99,45 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
             />
         </LocalizationProvider>
     );
+};
+
+/**
+ * A variant of {@link parseMetadataDate} that does the same thing, but for
+ * {@link Dayjs} instances.
+ */
+const parseMetadataDateFromDayjs = (d: Dayjs): ParsedMetadataDate => {
+    // `Dayjs.format` returns an ISO 8601 string of the form
+    // 2020-04-02T08:02:17-05:00'.
+    //
+    // https://day.js.org/docs/en/display/format
+    //
+    // This is different from the JavaScript `Date.toISOString` which also
+    // returns an ISO 8601 string, but with the time zone descriptor always set
+    // to UTC Zulu ("Z").
+    //
+    // The behaviour of Dayjs.format is more convenient for us, since it does
+    // both things we wish for:
+    // - Display the date in the local timezone
+    // - Include the timezone offset.
+
+    const s = d.format();
+
+    let dateTime: string;
+    let offsetTime: string | undefined;
+
+    // Check to see if there is a time-zone descriptor of the form "Z" or
+    // "±05:30" or "±0530" at the end of s.
+    const m = s.match(/Z|[+-]\d\d:?\d\d$/);
+    if (m?.index) {
+        dateTime = s.substring(0, m.index);
+        offsetTime = s.substring(m.index);
+    } else {
+        throw new Error(
+            `Dayjs.format returned a string "${s}" without a timezone offset`,
+        );
+    }
+
+    const timestamp = d.valueOf() * 1000;
+
+    return { dateTime, offsetTime, timestamp };
 };
