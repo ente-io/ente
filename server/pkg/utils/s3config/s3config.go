@@ -152,6 +152,10 @@ func (config *S3Config) GetBucket(dc string) *string {
 	return &bucket
 }
 
+func (config *S3Config) IsBucketActive(dc string) bool {
+	return config.buckets[dc] != ""
+}
+
 func (config *S3Config) GetS3Config(dc string) *aws.Config {
 	return config.s3Configs[dc]
 }

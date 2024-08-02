@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/file_copy"
+	"github.com/ente-io/museum/pkg/controller/filedata"
 	"net/http"
 	"os"
 	"strconv"
@@ -24,6 +25,7 @@ import (
 type FileHandler struct {
 	Controller   *controller.FileController
 	FileCopyCtrl *file_copy.FileCopyController
+	FileDataCtrl *filedata.Controller
 }
 
 // DefaultMaxBatchSize is the default maximum API batch size unless specified otherwise

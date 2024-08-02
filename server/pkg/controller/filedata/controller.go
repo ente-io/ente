@@ -185,7 +185,8 @@ func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row, dc string)
 			defer func() { <-globalFileFetchSemaphore }() // Release back to global semaphore
 			s3FileMetadata, err := c.fetchS3FileMetadata(context.Background(), row, dc)
 			if err != nil {
-				log.Error("error fetching embedding object: "+row.S3FileMetadataObjectKey(), err)
+				log.WithField("bucket", row.LatestBucket).
+					Error("error fetching embedding object: "+row.S3FileMetadataObjectKey(), err)
 				embeddingObjects[i] = bulkS3MetaFetchResult{
 					err:     err,
 					dbEntry: row,
@@ -203,10 +204,10 @@ func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row, dc string)
 	return embeddingObjects, nil
 }
 
-func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, dc string) (*fileData.S3FileMetadata, error) {
+func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, _ string) (*fileData.S3FileMetadata, error) {
 	opt := _defaultFetchConfig
 	objectKey := row.S3FileMetadataObjectKey()
-	ctxLogger := log.WithField("objectKey", objectKey).WithField("dc", dc)
+	ctxLogger := log.WithField("objectKey", objectKey).WithField("dc", row.LatestBucket)
 	totalAttempts := opt.RetryCount + 1
 	timeout := opt.InitialTimeout
 	for i := 0; i < totalAttempts; i++ {
@@ -222,7 +223,7 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 			cancel()
 			return nil, stacktrace.Propagate(ctx.Err(), "")
 		default:
-			obj, err := c.downloadObject(fetchCtx, objectKey, dc)
+			obj, err := c.downloadObject(fetchCtx, objectKey, row.LatestBucket)
 			cancel() // Ensure cancel is called to release resources
 			if err == nil {
 				if i > 0 {
