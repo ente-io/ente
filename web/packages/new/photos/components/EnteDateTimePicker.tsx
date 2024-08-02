@@ -39,7 +39,7 @@ export const EnteDateTimePicker: React.FC<EnteDateTimePickerProps> = ({
                 onClose={handleClose}
                 onOpen={() => setOpen(true)}
                 minDateTime={new Date(1800, 0, 1)}
-                maxDateTime={new Date()}
+                disableFuture={true}
                 disabled={disabled}
                 onAccept={onSubmit}
                 DialogProps={{
