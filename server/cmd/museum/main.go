@@ -621,6 +621,7 @@ func main() {
 		DiscordController:       discordController,
 		HashingKey:              hashingKeyBytes,
 		PasskeyController:       passkeyCtrl,
+		StorageBonusCtl:         storageBonusCtrl,
 	}
 	adminAPI.POST("/mail", adminHandler.SendMail)
 	adminAPI.POST("/mail/subscribe", adminHandler.SubscribeMail)
@@ -628,6 +629,7 @@ func main() {
 	adminAPI.GET("/users", adminHandler.GetUsers)
 	adminAPI.GET("/user", adminHandler.GetUser)
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
+	adminAPI.POST("/user/update-referral", adminHandler.UpdateReferral)
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)
 	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)

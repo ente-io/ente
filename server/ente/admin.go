@@ -18,6 +18,11 @@ type DisableTwoFactorRequest struct {
 	UserID int64 `json:"userID" binding:"required"`
 }
 
+type UpdateReferralCodeRequest struct {
+	UserID int64  `json:"userID" binding:"required"`
+	Code   string `json:"code" binding:"required"`
+}
+
 type AdminOpsForUserRequest struct {
 	UserID int64 `json:"userID" binding:"required"`
 }
