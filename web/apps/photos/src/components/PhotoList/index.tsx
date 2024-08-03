@@ -550,14 +550,14 @@ export function PhotoList({
                                     <Link
                                         href="https://play.google.com/store/apps/details?id=io.ente.photos"
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener"
                                     />
                                 ),
                                 b: (
                                     <Link
                                         href="https://apps.apple.com/in/app/ente-photos/id1542026904"
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener"
                                     />
                                 ),
                             }}

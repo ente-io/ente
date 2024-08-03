@@ -175,6 +175,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     <Link
                                         href={getOpenStreetMapLink(location)}
                                         target="_blank"
+                                        rel="noopener"
                                         sx={{ fontWeight: "bold" }}
                                     >
                                         {t("SHOW_ON_MAP")}
