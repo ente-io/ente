@@ -10,6 +10,7 @@ import {
 } from "@/new/photos/types/file";
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import { batch } from "@/utils/array";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -17,7 +18,6 @@ import { REQUEST_BATCH_SIZE } from "constants/api";
 import exportService from "services/export";
 import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
-import { batch } from "utils/common";
 import { decryptFile, getLatestVersionFiles, sortFiles } from "utils/file";
 import {
     getCollectionLastSyncTime,
