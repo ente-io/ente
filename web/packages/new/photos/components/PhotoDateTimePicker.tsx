@@ -103,9 +103,6 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 DialogProps={{
                     sx: {
                         zIndex: "1502",
-                        ".MuiPickersToolbar-penIconButton": {
-                            display: "none",
-                        },
                     },
                 }}
             />
