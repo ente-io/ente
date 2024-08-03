@@ -579,13 +579,22 @@ export function PhotoList({
                     span={columns}
                     hasReferral={!!publicCollectionGalleryContext.referralCode}
                 >
+                    {/* Make the entire area tappable, otherwise it is hard to
+                        get at on mobile devices. */}
                     <Box width={"100%"}>
-                        <Typography variant="small" display={"block"}>
-                            {t("SHARED_USING")}{" "}
-                            <Link target="_blank" href={"https://ente.io"}>
-                                ente.io
-                            </Link>
-                        </Typography>
+                        <Link
+                            color="text.base"
+                            sx={{ "&:hover": { color: "inherit" } }}
+                            target="_blank"
+                            href={"https://ente.io"}
+                        >
+                            <Typography variant="small" display={"block"}>
+                                {t("SHARED_USING")}{" "}
+                                <Link target="_blank" href={"https://ente.io"}>
+                                    ente.io
+                                </Link>
+                            </Typography>
+                        </Link>
                         {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography
