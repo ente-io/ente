@@ -8,10 +8,16 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
-import { Box, Dialog, Link, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    Dialog,
+    Link,
+    Stack,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { isMobileOrTable } from "utils/common/deviceDetection";
+import React, { useContext, useEffect, useState } from "react";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
@@ -49,12 +55,27 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         PublicCollectionGalleryContext,
     );
 
-    const directlyShowUploadFiles = useRef(isMobileOrTable());
+    // Directly show the file selector on mobile devices.
+    //
+    // [Note: Heuristic isMobileOrTablet check using pointer media query]
+    //
+    // The absence of fine-resolution pointing device can be taken a quick and
+    // proxy for detecting if the user is using a mobile or tablet.
+    //
+    // This is of course not going to work in all scenarios (e.g. someone
+    // connecting their mice to their tablet), but ad-hoc user agent checks are
+    // not problem free either. This media query should be accurate enough for
+    // cases where false positives will degrade gracefully.
+    //
+    // See: https://github.com/mui/mui-x/issues/10039
+    const directlyShowUploadFiles = useMediaQuery(
+        "(hover: none) and (pointer: coarse)",
+    );
 
     useEffect(() => {
         if (
             open &&
-            directlyShowUploadFiles.current &&
+            directlyShowUploadFiles &&
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
             uploadFiles();
