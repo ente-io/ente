@@ -23,4 +23,4 @@ export const useIsMobileWidth = () =>
  * See: https://github.com/mui/mui-x/issues/10039
  */
 export const useIsTouchscreen = () =>
-    useMediaQuery("(hover: none) and (pointer: coarse)");
+    useMediaQuery("(hover: none) and (pointer: coarse)", { noSsr: true });
