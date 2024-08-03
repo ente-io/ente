@@ -49,7 +49,8 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         PublicCollectionGalleryContext,
     );
 
-    // Directly show the file selector on likely mobile devices.
+    // Directly show the file selector for the public albums app on likely
+    // mobile devices.
     const directlyShowUploadFiles = useIsTouchscreen();
 
     useEffect(() => {
