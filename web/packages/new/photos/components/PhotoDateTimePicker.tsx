@@ -76,13 +76,13 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 disableFuture={true}
                 onAccept={handleAccept}
                 slots={{ field: EmptyField }}
+                slotProps={{ mobilePaper: { sx: { width: "320px" } } }}
                 DialogProps={{
                     sx: {
                         zIndex: "1502",
                         ".MuiPickersToolbar-penIconButton": {
                             display: "none",
                         },
-                        ".MuiDialog-paper": { width: "320px" },
                         ".MuiClockPicker-root": {
                             position: "relative",
                             minHeight: "292px",
