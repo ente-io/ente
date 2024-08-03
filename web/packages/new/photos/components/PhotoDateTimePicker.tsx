@@ -74,9 +74,19 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 onOpen={() => setOpen(true)}
                 disabled={disabled}
                 disableFuture={true}
+                /* The dialog grows too big on the default portrait mode with
+                   our theme customizations. So we instead use the landscape
+                   layout. This works great on desktop since we have sufficient
+                   width. MUI omits the sidebar on mobile devices (using the
+                   pointer:fine media query), so it remains functional on mobile
+                   devices too. */
+                orientation="landscape"
                 onAccept={handleAccept}
                 slots={{ field: EmptyField }}
-                slotProps={{ mobilePaper: { sx: { width: "320px" } } }}
+                slotProps={{
+                    mobilePaper: { sx: {} },
+                    // dialog: { sx: { height: "900px" } },
+                }}
                 DialogProps={{
                     sx: {
                         zIndex: "1502",
