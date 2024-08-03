@@ -1,7 +1,6 @@
+import { useIsTouchscreen } from "@/base/hooks";
 import { Button, styled } from "@mui/material";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
-import { OS, getDeviceOS } from "utils/common/deviceDetection";
 
 export const NoStyleAnchor = styled("a")`
     color: inherit;
@@ -12,20 +11,8 @@ export const NoStyleAnchor = styled("a")`
 `;
 
 function GoToEnte() {
-    const [os, setOS] = useState<OS>(OS.UNKNOWN);
-
-    useEffect(() => {
-        const os = getDeviceOS();
-        setOS(os);
-    }, []);
-
-    const getButtonText = (os: OS) => {
-        if (os === OS.ANDROID || os === OS.IOS) {
-            return t("INSTALL");
-        } else {
-            return t("SIGN_UP");
-        }
-    };
+    // Touchscreen devices are overwhemingly likely to be Android or iOS.
+    const isTouchscreen = useIsTouchscreen();
 
     return (
         <Button
@@ -33,7 +20,7 @@ function GoToEnte() {
             LinkComponent={NoStyleAnchor}
             href="https://ente.io"
         >
-            {getButtonText(os)}
+            {isTouchscreen ? t("INSTALL") : t("SIGN_UP")}
         </Button>
     );
 }
