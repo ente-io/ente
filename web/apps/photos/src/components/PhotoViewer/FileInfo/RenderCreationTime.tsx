@@ -1,9 +1,10 @@
 import log from "@/base/log";
+import type { ParsedMetadataDate } from "@/media/file-metadata";
+import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import EnteDateTimePicker from "components/EnteDateTimePicker";
 import { useState } from "react";
 import {
     changeFileCreationTime,
@@ -27,11 +28,11 @@ export function RenderCreationTime({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const saveEdits = async (pickedTime: Date) => {
+    const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
             if (isInEditMode && file) {
-                const unixTimeInMicroSec = pickedTime.getTime() * 1000;
+                const unixTimeInMicroSec = pickedTime.timestamp;
                 if (unixTimeInMicroSec === file?.metadata.creationTime) {
                     closeEditMode();
                     return;
@@ -63,10 +64,10 @@ export function RenderCreationTime({
                     hideEditOption={shouldDisableEdits || isInEditMode}
                 />
                 {isInEditMode && (
-                    <EnteDateTimePicker
+                    <PhotoDateTimePicker
                         initialValue={originalCreationTime}
                         disabled={loading}
-                        onSubmit={saveEdits}
+                        onAccept={saveEdits}
                         onClose={closeEditMode}
                     />
                 )}

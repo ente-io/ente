@@ -1066,7 +1066,6 @@ export default function Gallery() {
                 <FixCreationTime
                     isOpen={fixCreationTimeView}
                     hide={() => setFixCreationTimeView(false)}
-                    show={() => setFixCreationTimeView(true)}
                     attributes={fixCreationTimeAttributes}
                 />
                 <GalleryNavbar
