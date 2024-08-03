@@ -75,6 +75,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 disabled={disabled}
                 disableFuture={true}
                 onAccept={handleAccept}
+                slots={{ field: EmptyField }}
                 DialogProps={{
                     sx: {
                         zIndex: "1502",
@@ -91,11 +92,21 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                         },
                     },
                 }}
-                renderInput={() => <></>}
             />
         </LocalizationProvider>
     );
 };
+
+/**
+ * We don't wish to render any UI for the MUI DateTimePicker when it is closed,
+ * and instead only wish to use it as a dialog that we trigger ourselves.
+ *
+ * To achieve this we provide this nop-DOM element as the "field" slot to the
+ * date/time picker.
+ *
+ * See: https://mui.com/x/react-date-pickers/custom-field/
+ */
+const EmptyField: React.FC = () => <></>;
 
 /**
  * A variant of {@link parseMetadataDate} that does the same thing, but for
