@@ -82,7 +82,7 @@ func (c *Controller) FetchMembersForAdminID(ctx context.Context, familyAdminID i
 	if adminSubExpiryTime < time.Microseconds() {
 		adminUsableBonus = bonus.GetUsableBonus(0)
 	} else {
-		adminUsableBonus = bonus.GetUsableBonus(adminSubExpiryTime)
+		adminUsableBonus = bonus.GetUsableBonus(adminSubStorage)
 	}
 
 	return ente.FamilyMemberResponse{
