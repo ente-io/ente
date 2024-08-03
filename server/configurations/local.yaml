@@ -169,6 +169,15 @@ s3:
     # resolved, e.g. when running a local instance, or when using MinIO as a
     # production store.
     #use_path_style_urls: true
+    #
+    # file-data-storage:
+    #     derivedMetadata:
+    #         bucket:
+    #         replicas: []
+    #     img_preview:
+    #         bucket:
+    #         replicas: []
+
 
 # Key used for encrypting customer emails before storing them in DB
 #
