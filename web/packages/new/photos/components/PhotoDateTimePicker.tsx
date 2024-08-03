@@ -1,4 +1,5 @@
 import type { ParsedMetadataDate } from "@/media/file-metadata";
+import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import {
     LocalizationProvider,
     MobileDateTimePicker,
@@ -99,10 +100,13 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                             },
                         },
                     },
-                }}
-                DialogProps={{
-                    sx: {
-                        zIndex: "1502",
+                    /* We also get opened from the info drawer in the photo
+                       viewer, so give our dialog a higher z-index than both the
+                       photo viewer and the info drawer */
+                    dialog: {
+                        sx: {
+                            zIndex: photoSwipeZIndex + 2,
+                        },
                     },
                 }}
             />

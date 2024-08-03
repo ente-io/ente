@@ -4,6 +4,7 @@ import { nameAndExtension } from "@/base/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
@@ -339,7 +340,7 @@ const parseExifInfo = (
 const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
 ))({
-    zIndex: 1501,
+    zIndex: photoSwipeZIndex + 1,
     "& .MuiPaper-root": {
         padding: 8,
     },
