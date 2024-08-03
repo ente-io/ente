@@ -154,9 +154,8 @@ infelicity for now.
 used to get a date/time picker component. This is the community version of the
 DateTimePicker component provided by MUI.
 
-We also need to install a date library that that `@mui/x-date-pickers` will
-internally use to manipulate dates. For this we use
-[date-fns](https://github.com/date-fns/date-fns).
+[dayjs](https://github.com/iamkun/dayjs) is used as the date library that that
+`@mui/x-date-pickers` will internally use to manipulate dates.
 
 ### Translations
 
