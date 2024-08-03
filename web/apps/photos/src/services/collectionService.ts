@@ -8,6 +8,7 @@ import {
     UpdateMagicMetadataRequest,
     VISIBILITY_STATE,
 } from "@/new/photos/types/magicMetadata";
+import { batch } from "@/utils/array";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -62,7 +63,6 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
-import { batch } from "utils/common";
 import {
     getUniqueFiles,
     groupFilesBasedOnCollectionID,
