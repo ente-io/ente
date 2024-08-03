@@ -16,6 +16,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/discord"
+	storagebonusCtrl "github.com/ente-io/museum/pkg/controller/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/user"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -50,6 +51,7 @@ type AdminHandler struct {
 	DiscordController       *discord.DiscordController
 	HashingKey              []byte
 	PasskeyController       *controller.PasskeyController
+	StorageBonusCtl         *storagebonusCtrl.Controller
 }
 
 // Duration for which an admin's token is considered valid
@@ -230,6 +232,23 @@ func (h *AdminHandler) DisableTwoFactor(c *gin.Context) {
 		return
 	}
 	logger.Info("2FA successfully disabled")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) UpdateReferral(c *gin.Context) {
+	var request ente.UpdateReferralCodeRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request %s", err.Error()))
+		return
+	}
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) updating referral code for %d to %s", auth.GetUserID(c.Request.Header), request.UserID, request.Code))
+	err := h.StorageBonusCtl.UpdateReferralCode(c, request.UserID, request.Code)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to disable 2FA")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{})
 }
 
