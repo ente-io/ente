@@ -7,18 +7,13 @@ import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleW
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import billingService from "services/billingService";
-import { preloadImage } from "utils/common";
 import { getFamilyPlanAdmin } from "utils/user/family";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage } = useContext(AppContext);
     const fullScreen = useIsMobileWidth();
-
-    useEffect(() => {
-        preloadImage("/images/family-plan");
-    }, []);
 
     async function onLeaveFamilyClick() {
         try {
