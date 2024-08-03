@@ -2,7 +2,7 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsTouchscreen } from "@/base/hooks";
 import { FluidContainer } from "@ente/shared/components/Container";
 import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
-import { Box, Button, styled } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import UploadButton from "components/Upload/UploadButton";
 import { t } from "i18next";
 
@@ -63,20 +63,8 @@ const GoToEnte: React.FC = () => {
     const isTouchscreen = useIsTouchscreen();
 
     return (
-        <Button
-            color="accent"
-            LinkComponent={UnstyledAnchor}
-            href="https://ente.io"
-        >
+        <Button color="accent" href="https://ente.io">
             {isTouchscreen ? t("INSTALL") : t("SIGN_UP")}
         </Button>
     );
 };
-
-const UnstyledAnchor = styled("a")`
-    color: inherit;
-    text-decoration: none !important;
-    &:hover {
-        color: #fff !important;
-    }
-`;
