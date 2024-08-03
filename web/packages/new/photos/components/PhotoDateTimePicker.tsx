@@ -84,21 +84,27 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                 onAccept={handleAccept}
                 slots={{ field: EmptyField }}
                 slotProps={{
-                    mobilePaper: { sx: {} },
-                    // dialog: { sx: { height: "900px" } },
+                    /* The time picker has a smaller height than the calendar,
+                       which causes an ungainly layout shift. Prevent this by
+                       giving a minimum height to the picker.
+
+                       The constant 336px will likely change in the future when
+                       MUI gets updated, so this solution is fragile. However
+                       MUI is anyways intending to replace the TimeClock with a
+                       DigitalTimePicker that has a better UX. */
+                    layout: {
+                        sx: {
+                            ".MuiTimeClock-root": {
+                                minHeight: "336px",
+                            },
+                        },
+                    },
                 }}
                 DialogProps={{
                     sx: {
                         zIndex: "1502",
                         ".MuiPickersToolbar-penIconButton": {
                             display: "none",
-                        },
-                        ".MuiClockPicker-root": {
-                            position: "relative",
-                            minHeight: "292px",
-                        },
-                        ".PrivatePickersSlideTransition-root": {
-                            minHeight: "200px",
                         },
                     },
                 }}
