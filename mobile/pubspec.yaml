@@ -48,6 +48,7 @@ dependencies:
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
+  encrypt: ^5.0.3
   ente_cast:
     path: plugins/ente_cast
   ente_cast_normal:
@@ -167,6 +168,9 @@ dependencies:
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
   uuid: ^3.0.7
+  video_compress:
+    git:
+      url: https://github.com/RmanAkbarzadeh/VideoCompress.git
   video_editor:
       git:
         url: https://github.com/prateekmedia/video_editor.git
