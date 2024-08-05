@@ -17,12 +17,13 @@ import type { StateAddress } from "libsodium-wrappers";
  */
 export class DedicatedCryptoWorker {
     async decryptThumbnail(
-        fileData: Uint8Array,
-        header: Uint8Array,
-        key: string,
+        encryptedData: Uint8Array,
+        headerB64: string,
+        keyB64: string,
     ) {
-        return libsodium.decryptChaChaOneShot(fileData, header, key);
+        return ente.decryptThumbnail(encryptedData, headerB64, keyB64);
     }
+
     async decryptMetadata(
         encryptedDataB64: string,
         decryptionHeaderB64: string,

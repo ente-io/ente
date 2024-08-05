@@ -130,6 +130,13 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
 export const decryptAssociatedData = libsodium.decryptChaChaOneShot2;
 
 /**
+ * Decrypt the thumbnail for a file.
+ *
+ * This is just an alias for {@link decryptAssociatedData}.
+ */
+export const decryptThumbnail = decryptAssociatedData;
+
+/**
  * Decrypt the embedding associated with a file using the file's key.
  *
  * This is the sibling of {@link encryptFileEmbedding}.
