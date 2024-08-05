@@ -35,6 +35,7 @@ export interface EncryptedEnteFile {
     updationTime: number;
 }
 
+// TODO: Move into media
 export interface EnteFile
     extends Omit<
         EncryptedEnteFile,
