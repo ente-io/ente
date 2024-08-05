@@ -1,10 +1,21 @@
 /**
  * @file Higher level functions that use the ontology of Ente's types
  *
- * These are thin wrappers over the (thin-) wrappers in internal/libsodium.ts.
- * The main difference is that these functions don't talk in terms of the crypto
- * algorithms, but rather in terms the higher-level Ente specific goal we are
- * trying to accomplish.
+ * [Note: Crypto code hierarchy]
+ *
+ * The functions in this file (base/crypto/ente.ts) are are thin wrappers over
+ * the (thin-) wrappers in internal/libsodium.ts. The main difference is that
+ * these functions don't talk in terms of the crypto algorithms, but rather in
+ * terms the higher-level Ente specific goal we are trying to accomplish.
+ *
+ * Some of these are also exposed via the web worker in
+ * internal/crypto.worker.ts. The web worker variants should be used when we
+ * need to perform these operations from the main thread, so that the UI remains
+ * responsive while the potentially CPU-intensive encryption etc happens.
+ *
+ * 1. ente.ts or crypto.worker.ts (high level, Ente specific).
+ * 2. internal/libsodium.ts (wrappers over libsodium)
+ * 3. libsodium (JS bindings).
  */
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 
@@ -32,7 +43,6 @@ export const encryptFileAssociatedData = (data: Uint8Array, keyB64: string) =>
  * It is useful in cases where the (encrypted) associated data needs to
  * transferred as the HTTP POST body.
  */
-//export const encryptFileMetadata = async (
 export const encryptFileAssociatedDataToB64 = async (
     data: Uint8Array,
     keyB64: string,
