@@ -133,7 +133,7 @@ const getCollectionWithSecrets = async (
     if (collection.magicMetadata?.data) {
         collectionMagicMetadata = {
             ...collection.magicMetadata,
-            data: await cryptoWorker.decryptMetadata(
+            data: await cryptoWorker.decryptMetadata2(
                 collection.magicMetadata.data,
                 collection.magicMetadata.header,
                 collectionKey,
@@ -144,7 +144,7 @@ const getCollectionWithSecrets = async (
     if (collection.pubMagicMetadata?.data) {
         collectionPublicMagicMetadata = {
             ...collection.pubMagicMetadata,
-            data: await cryptoWorker.decryptMetadata(
+            data: await cryptoWorker.decryptMetadata2(
                 collection.pubMagicMetadata.data,
                 collection.pubMagicMetadata.header,
                 collectionKey,
@@ -156,7 +156,7 @@ const getCollectionWithSecrets = async (
     if (collection.sharedMagicMetadata?.data) {
         collectionShareeMagicMetadata = {
             ...collection.sharedMagicMetadata,
-            data: await cryptoWorker.decryptMetadata(
+            data: await cryptoWorker.decryptMetadata2(
                 collection.sharedMagicMetadata.data,
                 collection.sharedMagicMetadata.header,
                 collectionKey,

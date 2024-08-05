@@ -56,7 +56,8 @@ export async function updateMagicMetadata<T>(
     }
 
     if (typeof originalMagicMetadata?.data === "string") {
-        originalMagicMetadata.data = await cryptoWorker.decryptMetadata(
+        // @ts-expect-error TODO: Need to use zod here.
+        originalMagicMetadata.data = await cryptoWorker.decryptMetadata2(
             originalMagicMetadata.data,
             originalMagicMetadata.header,
             decryptionKey,
