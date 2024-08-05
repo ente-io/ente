@@ -175,11 +175,11 @@ s3:
     #
     # file-data-storage:
     #     derivedMetadata:
-    #         bucket:
-    #         replicas: []
+    #         primaryBucket:
+    #         replicaBuckets: []
     #     img_preview:
-    #         bucket:
-    #         replicas: []
+    #         primaryBucket:
+    #         replicaBuckets: []
 
 
 # Key used for encrypting customer emails before storing them in DB

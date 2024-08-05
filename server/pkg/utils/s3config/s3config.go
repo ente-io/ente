@@ -1,10 +1,12 @@
 package s3config
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/ente-io/museum/ente"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
@@ -39,10 +41,18 @@ type S3Config struct {
 	// Indicates if local minio buckets are being used. Enables various
 	// debugging workarounds; not tested/intended for production.
 	areLocalBuckets bool
+
+	// FileDataConfig is the configuration for various file data.
+	// If for particular object type, the bucket is not specified, it will
+	// default to hotDC as the bucket with no replicas. Initially, this config won't support
+	// existing objectType (file, thumbnail) and will be used for new objectTypes. In the future,
+	// we can migrate existing objectTypes to this config.
+	fileDataConfig FileDataConfig
 }
 
 // # Datacenters
-//
+// Note: We are now renaming datacenter names to bucketID. Till the migration is completed, you will see usage of both
+// terminology.
 // Below are some high level details about the three replicas ("data centers")
 // that are in use. There are a few other legacy ones too.
 //
@@ -78,7 +88,6 @@ var (
 )
 
 // Number of days that the wasabi bucket is configured to retain objects.
-//
 // We must wait at least these many days after removing the conditional hold
 // before we can delete the object.
 const WasabiObjectConditionalHoldDays = 21
@@ -120,7 +129,6 @@ func (config *S3Config) initialize() {
 
 	for _, dc := range dcs {
 		config.buckets[dc] = viper.GetString("s3." + dc + ".bucket")
-		config.buckets[dc] = viper.GetString("s3." + dc + ".bucket")
 		s3Config := aws.Config{
 			Credentials: credentials.NewStaticCredentials(viper.GetString("s3."+dc+".key"),
 				viper.GetString("s3."+dc+".secret"), ""),
@@ -145,23 +153,40 @@ func (config *S3Config) initialize() {
 			config.isWasabiComplianceEnabled = viper.GetBool("s3." + dc + ".compliance")
 		}
 	}
+
+	if err := viper.Sub("s3").Unmarshal(&config.fileDataConfig); err != nil {
+		log.Fatal("Unable to decode into struct: %v\n", err)
+		return
+	}
+
 }
 
-func (config *S3Config) GetBucket(dc string) *string {
-	bucket := config.buckets[dc]
+func (config *S3Config) GetBucket(dcOrBucketID string) *string {
+	bucket := config.buckets[dcOrBucketID]
 	return &bucket
 }
 
-func (config *S3Config) IsBucketActive(dc string) bool {
-	return config.buckets[dc] != ""
+// GetBucketID returns the bucket ID for the given object type. Note: existing dc are renamed as bucketID
+func (config *S3Config) GetBucketID(oType ente.ObjectType) string {
+	if config.fileDataConfig.HasConfig(oType) {
+		return config.fileDataConfig.GetPrimaryBucketID(oType)
+	}
+	if oType == ente.DerivedMeta || oType == ente.PreviewVideo || oType == ente.PreviewImage {
+		return config.derivedStorageDC
+	}
+	panic(fmt.Sprintf("No bucket for object type: %s", oType))
 }
 
-func (config *S3Config) GetS3Config(dc string) *aws.Config {
-	return config.s3Configs[dc]
+func (config *S3Config) IsBucketActive(bucketID string) bool {
+	return config.buckets[bucketID] != ""
 }
 
-func (config *S3Config) GetS3Client(dc string) s3.S3 {
-	return config.s3Clients[dc]
+func (config *S3Config) GetS3Config(dcOrBucketID string) *aws.Config {
+	return config.s3Configs[dcOrBucketID]
+}
+
+func (config *S3Config) GetS3Client(dcOrBucketID string) s3.S3 {
+	return config.s3Clients[dcOrBucketID]
 }
 
 func (config *S3Config) GetHotDataCenter() string {
