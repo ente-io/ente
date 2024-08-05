@@ -27,21 +27,6 @@ export class DedicatedCryptoWorker {
         return libsodium.decryptChaChaOneShot(fileData, header, key);
     }
 
-    async decryptEmbedding(
-        encryptedEmbedding: string,
-        header: string,
-        key: string,
-    ) {
-        const encodedEmbedding = await libsodium.decryptChaChaOneShot(
-            await libsodium.fromB64(encryptedEmbedding),
-            await libsodium.fromB64(header),
-            key,
-        );
-        return Float32Array.from(
-            JSON.parse(textDecoder.decode(encodedEmbedding)),
-        );
-    }
-
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
     }
