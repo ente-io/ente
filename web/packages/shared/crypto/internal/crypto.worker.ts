@@ -20,7 +20,7 @@ export class DedicatedCryptoWorker {
         return ente.encryptMetadata(metadata, keyB64);
     }
 
-    async decryptMetadata2(
+    async decryptMetadata(
         encryptedDataB64: string,
         decryptionHeaderB64: string,
         keyB64: string,

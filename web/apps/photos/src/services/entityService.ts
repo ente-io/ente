@@ -153,7 +153,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
                     }
                     const { encryptedData, header, ...rest } = entity;
                     const worker = await ComlinkCryptoWorker.getInstance();
-                    const decryptedData = await worker.decryptMetadata2(
+                    const decryptedData = await worker.decryptMetadata(
                         encryptedData,
                         header,
                         entityKey.data,

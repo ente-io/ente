@@ -147,7 +147,7 @@ export async function decryptFile(
             keyDecryptionNonce,
             collectionKey,
         );
-        const fileMetadata = await worker.decryptMetadata2(
+        const fileMetadata = await worker.decryptMetadata(
             metadata.encryptedData,
             metadata.decryptionHeader,
             fileKey,
@@ -157,7 +157,7 @@ export async function decryptFile(
         if (magicMetadata?.data) {
             fileMagicMetadata = {
                 ...file.magicMetadata,
-                data: await worker.decryptMetadata2(
+                data: await worker.decryptMetadata(
                     magicMetadata.data,
                     magicMetadata.header,
                     fileKey,
@@ -167,7 +167,7 @@ export async function decryptFile(
         if (pubMagicMetadata?.data) {
             filePubMagicMetadata = {
                 ...pubMagicMetadata,
-                data: await worker.decryptMetadata2(
+                data: await worker.decryptMetadata(
                     pubMagicMetadata.data,
                     pubMagicMetadata.header,
                     fileKey,
