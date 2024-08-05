@@ -11,15 +11,6 @@ export class DedicatedCryptoWorker {
     ) {
         return libsodium.decryptChaChaOneShot(fileData, header, key);
     }
-
-    async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
-        return libsodium.decryptChaCha(fileData, header, key);
-    }
-
-    async encryptMetadata(metadata: unknown, keyB64: string) {
-        return ente.encryptMetadata(metadata, keyB64);
-    }
-
     async decryptMetadata(
         encryptedDataB64: string,
         decryptionHeaderB64: string,
@@ -32,8 +23,16 @@ export class DedicatedCryptoWorker {
         );
     }
 
+    async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
+        return libsodium.decryptChaCha(fileData, header, key);
+    }
+
     async encryptThumbnail(data: Uint8Array, keyB64: string) {
         return ente.encryptThumbnail(data, keyB64);
+    }
+
+    async encryptMetadata(metadata: unknown, keyB64: string) {
+        return ente.encryptMetadata(metadata, keyB64);
     }
 
     async encryptFile(fileData: Uint8Array) {
