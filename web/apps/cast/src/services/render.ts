@@ -212,6 +212,7 @@ const decryptEnteFile = async (
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
+            // @ts-expect-error TODO: Need to use zod here.
             data: await worker.decryptMetadata(
                 magicMetadata.data,
                 magicMetadata.header,
@@ -222,6 +223,7 @@ const decryptEnteFile = async (
     if (pubMagicMetadata?.data) {
         filePubMagicMetadata = {
             ...pubMagicMetadata,
+            // @ts-expect-error TODO: Need to use zod here.
             data: await worker.decryptMetadata(
                 pubMagicMetadata.data,
                 pubMagicMetadata.header,
@@ -237,9 +239,11 @@ const decryptEnteFile = async (
         pubMagicMetadata: filePubMagicMetadata,
     };
     if (file.pubMagicMetadata?.data.editedTime) {
+        // @ts-expect-error TODO: Need to use zod here.
         file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
     }
     if (file.pubMagicMetadata?.data.editedName) {
+        // @ts-expect-error TODO: Need to use zod here.
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
     // @ts-expect-error TODO: The core types need to be updated to allow the
