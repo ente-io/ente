@@ -110,6 +110,14 @@ export interface FileWithUpdatedPublicMagicMetadata {
 }
 
 export interface FileMagicMetadataProps {
+    /**
+     * The visibility of the file
+     *
+     * The file's visibility is user specific attribute, and thus we keep it in
+     * the private magic metadata. This allows the file's owner to share a file
+     * and edit its visibility without making revealing their visibility
+     * preference to the people with whom they have shared the file.
+     */
     visibility?: FileVisibility;
     filePaths?: string[];
 }

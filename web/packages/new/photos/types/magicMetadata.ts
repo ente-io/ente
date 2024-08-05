@@ -7,6 +7,9 @@ export interface MagicMetadataCore<T> {
 
 export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
+/**
+ * The visibility of an {@link EnteFile}.
+ */
 export enum FileVisibility {
     VISIBLE = 0,
     ARCHIVED = 1,
