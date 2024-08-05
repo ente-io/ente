@@ -1,4 +1,4 @@
-Ente to prosta aplikacja do tworzenia kopii zapasowej Twoich zdjęć i filmów.
+Ente to prosta aplikacja do tworzenia kopii zapasowych i udostępniania Twoich zdjęć i wideo.
 
 Jeśli szukałeś/aś przyjaznej dla prywatności alternatywy do Google Photos to dotarłeś/aś do właściwego miejsca. Dzięki Ente są one przechowywane w pełni zaszyfrowane (e2ee). Oznacza to, że tylko Ty możesz je oglądać.
 
@@ -6,7 +6,7 @@ Mamy otwarto-źródłowe aplikacje na wszystkich platformach, a Twoje zdjęcia b
 
 Ente sprawia, że udostępnianie twoich albumów swoim bliskim również jest proste, nawet jeśli nie są w Ente. Możesz udostępniać publicznie widoczne linki, gdzie mogą oglądać twój album i współpracować, dodając do niego zdjęcia, nawet bez konta lub aplikacji.
 
-Twoje zaszyfrowane dane są przechowywane w wielu lokalizacjach, między innymi w schronie przeciwatomowym w Paryżu. Poważnie podchodzimy do kwestii zachowania pamięci i ułatwiamy zadbanie o to, by wspomnienia przetrwały dłużej niż ty sam.
+Twoje zaszyfrowane dane są przechowywane w wielu lokalizacjach, między innymi w schronie przeciwatomowym w Paryżu. Poważnie podchodzimy do kwestii zachowania pamięci i ułatwiamy zadbanie o to, by Twoje wspomnienia przetrwały dłużej niż ty sam/a.
 
 Jesteśmy tutaj, aby zrobić najbezpieczniejszą aplikację na zdjęcia, dołącz do naszej podróży!
 

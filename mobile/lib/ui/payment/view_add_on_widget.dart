@@ -20,7 +20,7 @@ class ViewAddOnButton extends StatelessWidget {
     }
     final EnteColorScheme colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
       child: MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).viewAddOnButton,

@@ -145,6 +145,7 @@ export const getMapEnableConfirmationDialog = (
                 a: (
                     <Link
                         target="_blank"
+                        rel="noopener"
                         href="https://www.openstreetmap.org/"
                     />
                 ),

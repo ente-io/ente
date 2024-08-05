@@ -174,6 +174,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                                 a: (
                                     <Link
                                         target="_blank"
+                                        rel="noopener"
                                         href="https://www.openstreetmap.org/"
                                     />
                                 ),

@@ -18,6 +18,31 @@ import "package:photos/utils/email_util.dart";
 typedef DialogBuilder = DialogWidget Function(BuildContext context);
 
 ///Will return null if dismissed by tapping outside
+Future<ButtonResult?> showInfoDialog(
+  BuildContext context, {
+  String title = "",
+  String? body,
+  IconData icon = Icons.info_outline_rounded,
+  bool isDismissable = true,
+}) async {
+  return showDialogWidget(
+    context: context,
+    title: title,
+    body: body,
+    icon: icon,
+    isDismissible: isDismissable,
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: S.of(context).ok,
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+      ),
+    ],
+  );
+}
+
+///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showErrorDialog(
   BuildContext context,
   String title,

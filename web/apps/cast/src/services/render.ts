@@ -8,7 +8,7 @@
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
@@ -268,7 +268,7 @@ const isFileEligible = (file: EnteFile) => {
 
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
-    return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
+    return fileType == FileType.image || fileType == FileType.livePhoto;
 };
 
 /**
@@ -289,7 +289,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
 
     let fileName = file.metadata.title;
-    if (!shouldUseThumbnail && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
+    if (!shouldUseThumbnail && file.metadata.fileType == FileType.livePhoto) {
         const { imageData, imageFileName } = await decodeLivePhoto(
             fileName,
             blob,

@@ -1,4 +1,4 @@
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
 import { tryToParseDateTime } from "services/upload/date";
@@ -234,7 +234,7 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
 async function livePhotoClubbingCheck(expectedState) {
     const files = await getLocalFiles();
     const livePhotos = files.filter(
-        (file) => file.metadata.fileType === FILE_TYPE.LIVE_PHOTO,
+        (file) => file.metadata.fileType === FileType.livePhoto,
     );
 
     const fileIDSet = new Set();

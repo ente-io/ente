@@ -82,7 +82,8 @@ export const register = async (): Promise<Registration> => {
 
     // Register keypair with museum to get a pairing code.
     let pairingCode: string | undefined;
-    // TODO: eslint has fixed this spurious warning, but we're not on the latest
+    // [TODO: spurious while(true) eslint warning].
+    // eslint has fixed this spurious warning, but we're not on the latest
     // version yet, so add a disable.
     // https://github.com/eslint/eslint/pull/18286
     /* eslint-disable no-constant-condition */

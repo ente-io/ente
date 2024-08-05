@@ -263,6 +263,8 @@
   "exportLogs": "Günlüğü dışa aktar",
   "enterYourRecoveryKey": "Kurtarma anahtarınızı girin",
   "tempErrorContactSupportIfPersists": "Bir şeyler ters gitmiş gibi görünüyor. Lütfen bir süre sonra tekrar deneyin. Hata devam ederse, lütfen destek ekibimizle iletişime geçin.",
+  "networkHostLookUpErr": "Ente'ye bağlanılamıyor, lütfen ağ ayarlarınızı kontrol edin ve hata devam ederse desteğe başvurun.",
+  "networkConnectionRefusedErr": "Ente'ye bağlanılamıyor, lütfen daha sonra tekrar deneyin. Hata devam ederse, lütfen desteğe başvurun.",
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Bir şeyler ters gitmiş gibi görünüyor. Lütfen bir süre sonra tekrar deneyin. Hata devam ederse, lütfen destek ekibimizle iletişime geçin.",
   "about": "Hakkında",
   "weAreOpenSource": "Biz açık kaynağız!",
@@ -440,5 +442,8 @@
   "deleteTagTitle": "Etiket silinsin mi?",
   "deleteTagMessage": "Bu etiketi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
   "somethingWentWrongParsingCode": "{x} kodu ayrıştıramadık.",
-  "updateNotAvailable": "Güncelleme mevcut değil"
+  "updateNotAvailable": "Güncelleme mevcut değil",
+  "viewRawCodes": "Ham kodları gör",
+  "rawCodes": "Ham kodlar",
+  "rawCodeData": "Ham kod verisi"
 }

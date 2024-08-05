@@ -373,11 +373,10 @@ func (c *FileController) GetCastFileUrl(ctx *gin.Context, fileID int64, objType 
 	return c.getSignedURLForType(ctx, fileID, objType)
 }
 
-func (c *FileController) getSignedURLForType(_ *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
-	// todo:(neeraj) enable it back after wasabi changes
-	//if isCliRequest(ctx) {
-	//	return c.getWasabiSignedUrlIfAvailable(fileID, objType)
-	//}
+func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
+	if isCliRequest(ctx) {
+		return c.getWasabiSignedUrlIfAvailable(fileID, objType)
+	}
 	s3Object, err := c.ObjectRepo.GetObject(fileID, objType)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
@@ -385,10 +384,14 @@ func (c *FileController) getSignedURLForType(_ *gin.Context, fileID int64, objTy
 	return c.getHotDcSignedUrl(s3Object.ObjectKey)
 }
 
+// ignore lint unused inspection
 func isCliRequest(ctx *gin.Context) bool {
+	// todo: (neeraj) remove this short-circuit after wasabi migration
+	return false
 	// check if user-agent contains go-resty
-	userAgent := ctx.Request.Header.Get("User-Agent")
-	return strings.Contains(userAgent, "go-resty")
+	//userAgent := ctx.Request.Header.Get("User-Agent")
+	//return strings.Contains(userAgent, "go-resty")
+
 }
 
 // getWasabiSignedUrlIfAvailable returns a signed URL for the given fileID and objectType. It prefers wasabi over b2

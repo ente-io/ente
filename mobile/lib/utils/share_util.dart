@@ -8,13 +8,18 @@ import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/db/files_db.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import "package:screenshot/screenshot.dart";
 import 'package:share_plus/share_plus.dart';
 import "package:uuid/uuid.dart";
 
@@ -248,6 +253,49 @@ Future<void> shareImageAndUrl(
   );
 }
 
+Future<void> shareAlbumLinkWithPlaceholder(
+  BuildContext context,
+  Collection collection,
+  String url,
+  GlobalKey key,
+) async {
+  final ScreenshotController screenshotController = ScreenshotController();
+  final List<EnteFile> filesInCollection =
+      (await FilesDB.instance.getFilesInCollection(
+    collection.id,
+    galleryLoadStartTime,
+    galleryLoadEndTime,
+  ))
+          .files;
+
+  final dialog = createProgressDialog(
+    context,
+    S.of(context).creatingLink,
+    isDismissible: true,
+  );
+  await dialog.show();
+
+  if (filesInCollection.isEmpty) {
+    await dialog.hide();
+    await shareText(url);
+    return;
+  } else {
+    final placeholderBytes = await _createAlbumPlaceholder(
+      filesInCollection,
+      screenshotController,
+      context,
+    );
+    await dialog.hide();
+
+    await shareImageAndUrl(
+      placeholderBytes,
+      url,
+      context: context,
+      key: key,
+    );
+  }
+}
+
 /// required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
 /// This returns the position of the share button if context and key are not null
 /// and if not, it returns a default position so that the share sheet on iPad has
@@ -260,4 +308,22 @@ Rect _sharePosOrigin(BuildContext? context, GlobalKey? key) {
     rect = const Offset(20.0, 20.0) & const Size(10, 10);
   }
   return rect;
+}
+
+Future<Uint8List> _createAlbumPlaceholder(
+  List<EnteFile> files,
+  ScreenshotController screenshotController,
+  BuildContext context,
+) async {
+  final Widget imageWidget = LinkPlaceholder(
+    files: files,
+  );
+  final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
+  final bytesOfImageToWidget = await screenshotController.captureFromWidget(
+    imageWidget,
+    pixelRatio: pixelRatio,
+    targetSize: MediaQuery.sizeOf(context),
+    delay: const Duration(milliseconds: 300),
+  );
+  return bytesOfImageToWidget;
 }

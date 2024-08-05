@@ -1,4 +1,4 @@
-import type { Metadata } from "./types/file";
+import type { Metadata } from "./file-metadata";
 
 export const hasFileHash = (file: Metadata) =>
     !!file.hash || (!!file.imageHash && !!file.videoHash);

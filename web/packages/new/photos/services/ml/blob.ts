@@ -1,5 +1,6 @@
 import { basename } from "@/base/file";
-import { FILE_TYPE } from "@/media/file-type";
+import type { ElectronMLWorker } from "@/base/types/ipc";
+import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
@@ -7,7 +8,6 @@ import { renderableImageBlob } from "../../utils/file";
 import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
-import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * A pair of blobs - the original, and a possibly converted "renderable" one -
@@ -22,7 +22,7 @@ export interface IndexableBlobs {
      * -   For live photos it will the (original) image component of the live
      *     photo.
      */
-    originalBlob: Blob | undefined;
+    originalImageBlob: Blob | undefined;
     /**
      * The original (if the browser possibly supports rendering this type of
      * images) or otherwise a converted JPEG blob.
@@ -103,13 +103,14 @@ export const imageBitmapAndData = async (
  * be set to the {@link UploadItem} that was uploaded. This way, we can directly
  * use the on-disk file instead of needing to download the original from remote.
  *
- * @param electron The {@link MLWorkerElectron} instance that allows us to call
- * our Node.js layer for various functionality.
+ * @param electron The {@link ElectronMLWorker} instance that stands as a
+ * witness that we're actually running in our desktop app (and thus can safely
+ * call our Node.js layer for various functionality).
  */
 export const indexableBlobs = async (
     enteFile: EnteFile,
     uploadItem: UploadItem | undefined,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<IndexableBlobs> =>
     uploadItem
         ? await indexableUploadItemBlobs(enteFile, uploadItem, electron)
@@ -118,22 +119,22 @@ export const indexableBlobs = async (
 const indexableUploadItemBlobs = async (
     enteFile: EnteFile,
     uploadItem: UploadItem,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ) => {
     const fileType = enteFile.metadata.fileType;
-    let originalBlob: Blob | undefined;
+    let originalImageBlob: Blob | undefined;
     let renderableBlob: Blob;
-    if (fileType == FILE_TYPE.VIDEO) {
+    if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         renderableBlob = new Blob([ensure(thumbnailData)]);
     } else {
-        originalBlob = await readNonVideoUploadItem(uploadItem, electron);
+        originalImageBlob = await readNonVideoUploadItem(uploadItem, electron);
         renderableBlob = await renderableImageBlob(
             enteFile.metadata.title,
-            originalBlob,
+            originalImageBlob,
         );
     }
-    return { originalBlob, renderableBlob };
+    return { originalImageBlob, renderableBlob };
 };
 
 /**
@@ -149,7 +150,7 @@ const indexableUploadItemBlobs = async (
  */
 const readNonVideoUploadItem = async (
     uploadItem: UploadItem,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<File> => {
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         const { response, lastModifiedMs } = await readStream(
@@ -182,36 +183,36 @@ export const indexableEnteFileBlobs = async (
     enteFile: EnteFile,
 ): Promise<IndexableBlobs> => {
     const fileType = enteFile.metadata.fileType;
-    if (fileType == FILE_TYPE.VIDEO) {
+    if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(enteFile);
         return {
-            originalBlob: undefined,
+            originalImageBlob: undefined,
             renderableBlob: new Blob([ensure(thumbnailData)]),
         };
     }
 
     const fileStream = await DownloadManager.getFile(enteFile);
-    const originalBlob = await new Response(fileStream).blob();
+    const originalImageBlob = await new Response(fileStream).blob();
 
     let renderableBlob: Blob;
-    if (fileType == FILE_TYPE.LIVE_PHOTO) {
+    if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             enteFile.metadata.title,
-            originalBlob,
+            originalImageBlob,
         );
         renderableBlob = await renderableImageBlob(
             imageFileName,
             new Blob([imageData]),
         );
-    } else if (fileType == FILE_TYPE.IMAGE) {
+    } else if (fileType == FileType.image) {
         renderableBlob = await renderableImageBlob(
             enteFile.metadata.title,
-            originalBlob,
+            originalImageBlob,
         );
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);
     }
 
-    return { originalBlob, renderableBlob };
+    return { originalImageBlob, renderableBlob };
 };

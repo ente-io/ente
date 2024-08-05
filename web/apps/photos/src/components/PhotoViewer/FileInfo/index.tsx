@@ -1,8 +1,14 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
+import { nameAndExtension } from "@/base/file";
+import type { ParsedMetadata } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
+import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
+import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -11,72 +17,55 @@ import BackupOutlined from "@mui/icons-material/BackupOutlined";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
+import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
-import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
+import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
+import {
+    Box,
+    DialogProps,
+    Link,
+    Stack,
+    styled,
+    Typography,
+} from "@mui/material";
 import { Chip } from "components/Chip";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { getEXIFLocation } from "services/exif";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
     getMapDisableConfirmationDialog,
     getMapEnableConfirmationDialog,
 } from "utils/ui";
-import { ExifData } from "./ExifData";
+import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
 import { RenderCaption } from "./RenderCaption";
 import { RenderCreationTime } from "./RenderCreationTime";
-import { RenderFileName } from "./RenderFileName";
 
-export const FileInfoSidebar = styled((props: DialogProps) => (
-    <EnteDrawer {...props} anchor="right" />
-))({
-    zIndex: 1501,
-    "& .MuiPaper-root": {
-        padding: 8,
-    },
-});
+export interface FileInfoExif {
+    tags: RawExifTags | undefined;
+    parsed: ParsedMetadata | undefined;
+}
 
-interface Iprops {
-    shouldDisableEdits?: boolean;
+interface FileInfoProps {
     showInfo: boolean;
     handleCloseInfo: () => void;
-    file: EnteFile;
-    exif: any;
+    closePhotoViewer: () => void;
+    file: EnteFile | undefined;
+    exif: FileInfoExif | undefined;
+    shouldDisableEdits?: boolean;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
-    closePhotoViewer: () => void;
 }
 
-function BasicDeviceCamera({
-    parsedExifData,
-}: {
-    parsedExifData: Record<string, any>;
-}) {
-    return (
-        <FlexWrapper gap={1}>
-            <Box>{parsedExifData["fNumber"]}</Box>
-            <Box>{parsedExifData["exposureTime"]}</Box>
-            <Box>{parsedExifData["ISO"]}</Box>
-        </FlexWrapper>
-    );
-}
-
-function getOpenStreetMapLink(location: {
-    latitude: number;
-    longitude: number;
-}) {
-    return `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
-}
-
-export function FileInfo({
+export const FileInfo: React.FC<FileInfoProps> = ({
     shouldDisableEdits,
     showInfo,
     handleCloseInfo,
@@ -88,18 +77,16 @@ export function FileInfo({
     collectionNameMap,
     showCollectionChips,
     closePhotoViewer,
-}: Iprops) {
-    const appContext = useContext(AppContext);
+}) => {
+    const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
+        useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
 
-    const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
-    const [showExif, setShowExif] = useState(false);
-
-    const openExif = () => setShowExif(true);
-    const closeExif = () => setShowExif(false);
+    const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
+    const [openRawExif, setOpenRawExif] = useState(false);
 
     const location = useMemo(() => {
         if (file && file.metadata) {
@@ -113,60 +100,17 @@ export function FileInfo({
                 };
             }
         }
-        if (exif) {
-            const exifLocation = getEXIFLocation(exif);
-            if (
-                (exifLocation.latitude || exifLocation.latitude === 0) &&
-                !(exifLocation.longitude === 0 && exifLocation.latitude === 0)
-            ) {
-                return exifLocation;
-            }
-        }
-        return null;
+        return exif?.parsed?.location;
     }, [file, exif]);
 
     useEffect(() => {
-        if (!exif) {
-            setParsedExifData({});
-            return;
-        }
-        const parsedExifData = {};
-        if (exif["fNumber"]) {
-            parsedExifData["fNumber"] = `f/${Math.ceil(exif["FNumber"])}`;
-        } else if (exif["ApertureValue"] && exif["FocalLength"]) {
-            parsedExifData["fNumber"] = `f/${Math.ceil(
-                exif["FocalLength"] / exif["ApertureValue"],
-            )}`;
-        }
-        const imageWidth = exif["ImageWidth"] ?? exif["ExifImageWidth"];
-        const imageHeight = exif["ImageHeight"] ?? exif["ExifImageHeight"];
-        if (imageWidth && imageHeight) {
-            parsedExifData["resolution"] = `${imageWidth} x ${imageHeight}`;
-            const megaPixels = Math.round((imageWidth * imageHeight) / 1000000);
-            if (megaPixels) {
-                parsedExifData["megaPixels"] = `${Math.round(
-                    (imageWidth * imageHeight) / 1000000,
-                )}MP`;
-            }
-        }
-        if (exif["Make"] && exif["Model"]) {
-            parsedExifData["takenOnDevice"] =
-                `${exif["Make"]} ${exif["Model"]}`;
-        }
-        if (exif["ExposureTime"]) {
-            parsedExifData["exposureTime"] = `1/${
-                1 / parseFloat(exif["ExposureTime"])
-            }`;
-        }
-        if (exif["ISO"]) {
-            parsedExifData["ISO"] = `ISO${exif["ISO"]}`;
-        }
-        setParsedExifData(parsedExifData);
+        setExifInfo(parseExifInfo(exif));
     }, [exif]);
 
     if (!file) {
         return <></>;
     }
+
     const onCollectionChipClick = (collectionID) => {
         galleryContext.setActiveCollectionID(collectionID);
         galleryContext.setIsInSearchMode(false);
@@ -174,17 +118,13 @@ export function FileInfo({
     };
 
     const openEnableMapConfirmationDialog = () =>
-        appContext.setDialogBoxAttributesV2(
-            getMapEnableConfirmationDialog(() =>
-                appContext.updateMapEnabled(true),
-            ),
+        setDialogBoxAttributesV2(
+            getMapEnableConfirmationDialog(() => updateMapEnabled(true)),
         );
 
     const openDisableMapConfirmationDialog = () =>
-        appContext.setDialogBoxAttributesV2(
-            getMapDisableConfirmationDialog(() =>
-                appContext.updateMapEnabled(false),
-            ),
+        setDialogBoxAttributesV2(
+            getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
         );
 
     return (
@@ -192,32 +132,33 @@ export function FileInfo({
             <Titlebar onClose={handleCloseInfo} title={t("INFO")} backIsClose />
             <Stack pt={1} pb={3} spacing={"20px"}>
                 <RenderCaption
-                    shouldDisableEdits={shouldDisableEdits}
-                    file={file}
-                    scheduleUpdate={scheduleUpdate}
-                    refreshPhotoswipe={refreshPhotoswipe}
+                    {...{
+                        file,
+                        shouldDisableEdits,
+                        scheduleUpdate,
+                        refreshPhotoswipe,
+                    }}
                 />
 
                 <RenderCreationTime
-                    shouldDisableEdits={shouldDisableEdits}
-                    file={file}
-                    scheduleUpdate={scheduleUpdate}
+                    {...{ file, shouldDisableEdits, scheduleUpdate }}
                 />
 
                 <RenderFileName
-                    parsedExifData={parsedExifData}
-                    shouldDisableEdits={shouldDisableEdits}
-                    file={file}
-                    scheduleUpdate={scheduleUpdate}
+                    {...{
+                        file,
+                        exifInfo: exifInfo,
+                        shouldDisableEdits,
+                        scheduleUpdate,
+                    }}
                 />
-                {parsedExifData && parsedExifData["takenOnDevice"] && (
+
+                {exifInfo?.takenOnDevice && (
                     <InfoItem
                         icon={<CameraOutlined />}
-                        title={parsedExifData["takenOnDevice"]}
+                        title={exifInfo?.takenOnDevice}
                         caption={
-                            <BasicDeviceCamera
-                                parsedExifData={parsedExifData}
-                            />
+                            <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
                         }
                         hideEditOption
                     />
@@ -229,11 +170,12 @@ export function FileInfo({
                             icon={<LocationOnOutlined />}
                             title={t("LOCATION")}
                             caption={
-                                !appContext.mapEnabled ||
+                                !mapEnabled ||
                                 publicCollectionGalleryContext.accessedThroughSharedURL ? (
                                     <Link
                                         href={getOpenStreetMapLink(location)}
                                         target="_blank"
+                                        rel="noopener"
                                         sx={{ fontWeight: "bold" }}
                                     >
                                         {t("SHOW_ON_MAP")}
@@ -264,7 +206,7 @@ export function FileInfo({
                         {!publicCollectionGalleryContext.accessedThroughSharedURL && (
                             <MapBox
                                 location={location}
-                                mapEnabled={appContext.mapEnabled}
+                                mapEnabled={mapEnabled}
                                 openUpdateMapConfirmationDialog={
                                     openEnableMapConfirmationDialog
                                 }
@@ -276,11 +218,13 @@ export function FileInfo({
                     icon={<TextSnippetOutlined />}
                     title={t("DETAILS")}
                     caption={
-                        typeof exif === "undefined" ? (
-                            <EnteSpinner size={11.33} />
-                        ) : exif !== null ? (
+                        !exif ? (
+                            <EnteSpinner size={12} />
+                        ) : !exif.tags ? (
+                            t("no_exif")
+                        ) : (
                             <LinkButton
-                                onClick={openExif}
+                                onClick={() => setOpenRawExif(true)}
                                 sx={{
                                     textDecoration: "none",
                                     color: "text.muted",
@@ -289,8 +233,6 @@ export function FileInfo({
                             >
                                 {t("view_exif")}
                             </LinkButton>
-                        ) : (
-                            t("no_exif")
                         )
                     }
                     hideEditOption
@@ -336,13 +278,275 @@ export function FileInfo({
                     </>
                 )}
             </Stack>
-            <ExifData
-                exif={exif}
-                open={showExif}
-                onClose={closeExif}
+
+            <RawExif
+                open={openRawExif}
+                onClose={() => setOpenRawExif(false)}
                 onInfoClose={handleCloseInfo}
-                filename={file.metadata.title}
+                tags={exif?.tags}
+                fileName={file.metadata.title}
             />
         </FileInfoSidebar>
     );
+};
+
+/**
+ * Some immediate fields of interest, in the form that we want to display on the
+ * info panel for a file.
+ */
+type ExifInfo = Required<FileInfoExif> & {
+    resolution?: string;
+    megaPixels?: string;
+    takenOnDevice?: string;
+    fNumber?: string;
+    exposureTime?: string;
+    iso?: string;
+};
+
+const parseExifInfo = (
+    fileInfoExif: FileInfoExif | undefined,
+): ExifInfo | undefined => {
+    if (!fileInfoExif || !fileInfoExif.tags || !fileInfoExif.parsed)
+        return undefined;
+
+    const info: ExifInfo = { ...fileInfoExif };
+
+    const { width, height } = fileInfoExif.parsed;
+    if (width && height) {
+        info.resolution = `${width} x ${height}`;
+        const mp = Math.round((width * height) / 1000000);
+        if (mp) info.megaPixels = `${mp}MP`;
+    }
+
+    const { tags } = fileInfoExif;
+    const { exif } = tags;
+
+    if (exif) {
+        if (exif.Make && exif.Model)
+            info["takenOnDevice"] =
+                `${exif.Make.description} ${exif.Model.description}`;
+
+        if (exif.FNumber)
+            info.fNumber = exif.FNumber.description; /* e.g. "f/16" */
+
+        if (exif.ExposureTime)
+            info["exposureTime"] = exif.ExposureTime.description; /* "1/10" */
+
+        if (exif.ISOSpeedRatings)
+            info.iso = `ISO${tagNumericValue(exif.ISOSpeedRatings)}`;
+    }
+    return info;
+};
+
+const FileInfoSidebar = styled((props: DialogProps) => (
+    <EnteDrawer {...props} anchor="right" />
+))({
+    zIndex: photoSwipeZIndex + 1,
+    "& .MuiPaper-root": {
+        padding: 8,
+    },
+});
+
+interface RenderFileNameProps {
+    file: EnteFile;
+    shouldDisableEdits: boolean;
+    exifInfo: ExifInfo | undefined;
+    scheduleUpdate: () => void;
 }
+
+const RenderFileName: React.FC<RenderFileNameProps> = ({
+    file,
+    shouldDisableEdits,
+    exifInfo,
+    scheduleUpdate,
+}) => {
+    const [isInEditMode, setIsInEditMode] = useState(false);
+    const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
+    const [fileName, setFileName] = useState<string>();
+    const [extension, setExtension] = useState<string>();
+
+    useEffect(() => {
+        const [filename, extension] = nameAndExtension(file.metadata.title);
+        setFileName(filename);
+        setExtension(extension);
+    }, [file]);
+
+    const saveEdits = async (newFilename: string) => {
+        if (!file) return;
+        if (fileName === newFilename) {
+            closeEditMode();
+            return;
+        }
+        setFileName(newFilename);
+        const newTitle = [newFilename, extension].join(".");
+        const updatedFile = await changeFileName(file, newTitle);
+        updateExistingFilePubMetadata(file, updatedFile);
+        scheduleUpdate();
+    };
+
+    return (
+        <>
+            <InfoItem
+                icon={
+                    file.metadata.fileType === FileType.video ? (
+                        <VideocamOutlined />
+                    ) : (
+                        <PhotoOutlined />
+                    )
+                }
+                title={[fileName, extension].join(".")}
+                caption={getCaption(file, exifInfo)}
+                openEditor={openEditMode}
+                hideEditOption={shouldDisableEdits || isInEditMode}
+            />
+            <FileNameEditDialog
+                isInEditMode={isInEditMode}
+                closeEditMode={closeEditMode}
+                filename={fileName}
+                extension={extension}
+                saveEdits={saveEdits}
+            />
+        </>
+    );
+};
+
+const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
+    const megaPixels = exifInfo?.megaPixels;
+    const resolution = exifInfo?.resolution;
+    const fileSize = file.info?.fileSize;
+
+    const captionParts = [];
+    if (megaPixels) {
+        captionParts.push(megaPixels);
+    }
+    if (resolution) {
+        captionParts.push(resolution);
+    }
+    if (fileSize) {
+        captionParts.push(formattedByteSize(fileSize));
+    }
+    return (
+        <FlexWrapper gap={1}>
+            {captionParts.map((caption) => (
+                <Box key={caption}> {caption}</Box>
+            ))}
+        </FlexWrapper>
+    );
+};
+
+const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
+    parsedExif,
+}) => {
+    return (
+        <FlexWrapper gap={1}>
+            <Box>{parsedExif.fNumber}</Box>
+            <Box>{parsedExif.exposureTime}</Box>
+            <Box>{parsedExif.iso}</Box>
+        </FlexWrapper>
+    );
+};
+
+const getOpenStreetMapLink = (location: {
+    latitude: number;
+    longitude: number;
+}) =>
+    `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
+
+interface RawExifProps {
+    open: boolean;
+    onClose: () => void;
+    onInfoClose: () => void;
+    tags: RawExifTags | undefined;
+    fileName: string;
+}
+
+const RawExif: React.FC<RawExifProps> = ({
+    open,
+    onClose,
+    onInfoClose,
+    tags,
+    fileName,
+}) => {
+    if (!tags) {
+        return <></>;
+    }
+
+    const handleRootClose = () => {
+        onClose();
+        onInfoClose();
+    };
+
+    const items: (readonly [string, string, string, string])[] = Object.entries(
+        tags,
+    )
+        .map(([namespace, namespaceTags]) => {
+            return Object.entries(namespaceTags).map(([tagName, tag]) => {
+                const key = `${namespace}:${tagName}`;
+                let description = "<...>";
+                if (typeof tag == "string") {
+                    description = tag;
+                } else if (typeof tag == "number") {
+                    description = `${tag}`;
+                } else if (
+                    tag &&
+                    typeof tag == "object" &&
+                    "description" in tag
+                ) {
+                    description = tag.description;
+                }
+                return [key, namespace, tagName, description] as const;
+            });
+        })
+        .flat()
+        .filter(([, , , description]) => description);
+
+    return (
+        <FileInfoSidebar open={open} onClose={onClose}>
+            <Titlebar
+                onClose={onClose}
+                title={t("exif")}
+                caption={fileName}
+                onRootClose={handleRootClose}
+                actionButton={
+                    <CopyButton
+                        code={JSON.stringify(tags)}
+                        color={"secondary"}
+                    />
+                }
+            />
+            <Stack py={3} px={1} spacing={2}>
+                {items.map(([key, namespace, tagName, description]) => (
+                    <ExifItem key={key}>
+                        <Stack direction={"row"} gap={1}>
+                            <Typography variant="small" color={"text.muted"}>
+                                {tagName}
+                            </Typography>
+                            <Typography variant="tiny" color={"text.faint"}>
+                                {namespace}
+                            </Typography>
+                        </Stack>
+                        <Typography
+                            sx={{
+                                width: "100%",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                            }}
+                        >
+                            {description}
+                        </Typography>
+                    </ExifItem>
+                ))}
+            </Stack>
+        </FileInfoSidebar>
+    );
+};
+
+const ExifItem = styled(Box)`
+    padding-left: 8px;
+    padding-right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+`;

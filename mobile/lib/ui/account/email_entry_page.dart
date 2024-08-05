@@ -9,12 +9,13 @@ import 'package:photos/services/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({Key? key}) : super(key: key);
+  const EmailEntryPage({super.key});
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -49,18 +50,25 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   @override
   void initState() {
-    _email = _config.getEmail();
-    _password1FocusNode.addListener(() {
-      setState(() {
-        _password1InFocus = _password1FocusNode.hasFocus;
-      });
-    });
-    _password2FocusNode.addListener(() {
-      setState(() {
-        _password2InFocus = _password2FocusNode.hasFocus;
-      });
-    });
     super.initState();
+    _email = _config.getEmail();
+    _password1FocusNode.addListener(
+      _password1FocusListener,
+    );
+    _password2FocusNode.addListener(
+      _password2FocusListener,
+    );
+  }
+
+  @override
+  void dispose() {
+    _password1FocusNode.removeListener(_password1FocusListener);
+    _password2FocusNode.removeListener(_password2FocusListener);
+    _password1FocusNode.dispose();
+    _password2FocusNode.dispose();
+    _passwordController1.dispose();
+    _passwordController2.dispose();
+    super.dispose();
   }
 
   @override
@@ -164,7 +172,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       suffixIcon: _emailIsValid
                           ? Icon(
                               Icons.check,
-                              size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
                                   .focusedBorder!
@@ -309,7 +316,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     onChanged: (cnfPassword) {
                       setState(() {
                         _cnfPassword = cnfPassword;
-                        if (_password != null || _password != '') {
+                        if (_password != null && _password != '') {
                           _passwordsMatch = _password == _cnfPassword;
                         }
                       });
@@ -317,16 +324,38 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                 ),
                 Opacity(
-                  opacity: (_password != '') && _password1InFocus ? 1 : 0,
+                  opacity: (_password != null && _password != '') ? 1 : 0,
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                    child: Text(
-                      S.of(context).passwordStrength(passwordStrengthText),
-                      style: TextStyle(
-                        color: passwordStrengthColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        showInfoDialog(
+                          context,
+                          body: S.of(context).passwordStrengthInfo,
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Text(
+                            S
+                                .of(context)
+                                .passwordStrength(passwordStrengthText),
+                            style: TextStyle(
+                              color: passwordStrengthColor,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: getEnteColorScheme(context).fillStrong,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -521,6 +550,18 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         ],
       ),
     );
+  }
+
+  void _password1FocusListener() {
+    setState(() {
+      _password1InFocus = _password1FocusNode.hasFocus;
+    });
+  }
+
+  void _password2FocusListener() {
+    setState(() {
+      _password2InFocus = _password2FocusNode.hasFocus;
+    });
   }
 
   bool _isFormValid() {
