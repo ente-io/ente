@@ -1,6 +1,6 @@
 import type { Metadata } from "@/media/file-metadata";
 import {
-    FileVisibility,
+    ItemVisibility,
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
 } from "./magicMetadata";
@@ -118,7 +118,7 @@ export interface FileMagicMetadataProps {
      * and edit its visibility without making revealing their visibility
      * preference to the people with whom they have shared the file.
      */
-    visibility?: FileVisibility;
+    visibility?: ItemVisibility;
     filePaths?: string[];
 }
 

@@ -1,6 +1,6 @@
 import { EnteFile } from "@/new/photos/types/file";
 import {
-    FileVisibility,
+    ItemVisibility,
     MagicMetadataCore,
 } from "@/new/photos/types/magicMetadata";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -10,7 +10,7 @@ export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {
         return false;
     }
-    return item.magicMetadata.data.visibility === FileVisibility.archived;
+    return item.magicMetadata.data.visibility === ItemVisibility.archived;
 }
 
 export function isArchivedCollection(item: Collection): boolean {
@@ -19,12 +19,12 @@ export function isArchivedCollection(item: Collection): boolean {
     }
 
     if (item.magicMetadata && item.magicMetadata.data) {
-        return item.magicMetadata.data.visibility === FileVisibility.archived;
+        return item.magicMetadata.data.visibility === ItemVisibility.archived;
     }
 
     if (item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
         return (
-            item.sharedMagicMetadata.data.visibility === FileVisibility.archived
+            item.sharedMagicMetadata.data.visibility === ItemVisibility.archived
         );
     }
     return false;

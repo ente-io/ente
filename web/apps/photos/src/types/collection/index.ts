@@ -1,7 +1,7 @@
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
-    FileVisibility,
+    ItemVisibility,
     MagicMetadataCore,
     SUB_TYPE,
 } from "@/new/photos/types/magicMetadata";
@@ -119,7 +119,7 @@ export interface RemoveFromCollectionRequest {
 }
 
 export interface CollectionMagicMetadataProps {
-    visibility?: FileVisibility;
+    visibility?: ItemVisibility;
     subType?: SUB_TYPE;
     order?: number;
 }
@@ -128,7 +128,7 @@ export type CollectionMagicMetadata =
     MagicMetadataCore<CollectionMagicMetadataProps>;
 
 export interface CollectionShareeMetadataProps {
-    visibility?: FileVisibility;
+    visibility?: ItemVisibility;
 }
 export type CollectionShareeMagicMetadata =
     MagicMetadataCore<CollectionShareeMetadataProps>;

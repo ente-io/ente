@@ -4,7 +4,7 @@ import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
-    FileVisibility,
+    ItemVisibility,
     SUB_TYPE,
     UpdateMagicMetadataRequest,
 } from "@/new/photos/types/magicMetadata";
@@ -1375,7 +1375,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 export function createHiddenCollection() {
     return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
         subType: SUB_TYPE.DEFAULT_HIDDEN,
-        visibility: FileVisibility.hidden,
+        visibility: ItemVisibility.hidden,
     });
 }
 
