@@ -236,18 +236,18 @@ export const updateFilePublicMagicMetadata = async (
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const {
         file,
-        updatedPublicMagicMetadata: updatePublicMagicMetadata,
+        updatedPublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
             await cryptoWorker.encryptMetadata(
-                updatePublicMagicMetadata.data,
+                updatedPublicMagicMetadata.data,
                 file.key,
             );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
-                version: updatePublicMagicMetadata.version,
-                count: updatePublicMagicMetadata.count,
+                version: updatedPublicMagicMetadata.version,
+                count: updatedPublicMagicMetadata.count,
                 data: encryptedDataB64,
                 header: decryptionHeaderB64,
             },

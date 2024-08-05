@@ -1,3 +1,7 @@
+import { encryptMetadata } from "@/base/crypto/ente";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { apiURL } from "@/base/origins";
+import { type EnteFile } from "@/new/photos/types/file";
 import { FileType } from "./file-type";
 
 /**
@@ -82,6 +86,219 @@ export interface Metadata {
     version?: number;
     deviceFolder?: string;
 }
+
+/**
+ * Mutable private metadata associated with an {@link EnteFile}.
+ *
+ * -   Unlike {@link Metadata}, this can change after the file has been
+ *     uploaded.
+ *
+ * -   Unlike {@link PublicMagicMetadata}, this is only available to the owner
+ *     of the file.
+ *
+ * For historical reasons, the unqualified phrase "magic metadata" in various
+ * APIs refers to the (this) private metadata, even though the mutable public
+ * metadata is the much more frequently used of the two. See: [Note: Metadatum].
+ */
+export interface PrivateMagicMetadata {
+    /**
+     * The visibility of the file.
+     *
+     * The file's visibility is user specific attribute, and thus we keep it in
+     * the private magic metadata. This allows the file's owner to share a file
+     * and independently edit its visibility without revealing their visibility
+     * preference to the other people with whom they have shared the file.
+     */
+    visibility?: ItemVisibility;
+}
+
+/**
+ * The visibility of an Ente file or collection.
+ */
+export enum ItemVisibility {
+    /** The normal state - The item is visible. */
+    visible = 0,
+    /** The item has been archived. */
+    archived = 1,
+    /** The item has been hidden. */
+    hidden = 2,
+}
+
+/**
+ * Mutable public metadata associated with an {@link EnteFile}.
+ *
+ * -   Unlike {@link Metadata}, this can change after the file has been
+ *     uploaded.
+ *
+ * -   Unlike {@link PrivateMagicMetadata}, this is available to all the people
+ *     with whom the file has been shared.
+ *
+ * For more details, see [Note: Metadatum].
+ */
+export interface PublicMagicMetadata {
+    /**
+     * Modified value of the date time associated with an {@link EnteFile}.
+     *
+     * Epoch microseconds.
+     *
+     * This field stores edits to the {@link creationTime} {@link Metadata}
+     * field.
+     */
+    editedTime?: number;
+    /**
+     * Modified name of the {@link EnteFile}.
+     *
+     * This field stores edits to the {@link title} {@link Metadata} field.
+     */
+    editedName?: string;
+    /**
+     * An arbitrary caption / description string that the user has added to the
+     * file.
+     *
+     * The length of this field is capped to some arbitrary maximum by client
+     * side checks.
+     */
+    caption?: string;
+    uploaderName?: string;
+    w?: number;
+    h?: number;
+}
+
+/**
+ * Magic metadata, either public and private, as persisted and used by remote.
+ *
+ * This is the encrypted magic metadata as persisted on remote, and this is what
+ * clients get back when they sync with remote. Alongwith the encrypted blob and
+ * decryption header, it also contains a few properties useful for clients to
+ * track changes and ensure that they have the latest metadata synced locally.
+ *
+ * Both public and private magic metadata fields use the same structure.
+ */
+interface RemoteMagicMetadata {
+    /**
+     * Monotonically increasing iteration of this metadata object.
+     *
+     * The version starts at 1. Each time a client updates the underlying magic
+     * metadata JSONs for a file, it increments this version number.
+     */
+    version: number;
+    /**
+     * The number of keys with non-null (and non-undefined) values in the
+     * encrypted JSON object that the encrypted metadata blob contains.
+     *
+     * During edits and updates, this number should be greater than or equal to
+     * the previous version.
+     *
+     * > Clients are expected to retain the magic metadata verbatim so that they
+     * > don't accidentally overwrite fields that they might not understand.
+     */
+    count: number;
+    /**
+     * The encrypted data.
+     *
+     * This is a base64 string representing the bytes obtained by encrypting the
+     * string representation of the underlying magic metadata JSON object.
+     */
+    data: string;
+    /**
+     * The base64 encoded decryption header that will be needed for the client
+     * for decrypting {@link data}.
+     */
+    header: string;
+}
+
+/**
+ * The shape of the JSON body payload expected by the APIs that update the
+ * public and private magic metadata fields associated with a file.
+ */
+interface UpdateMagicMetadataRequest {
+    /** The list of (file id, new magic metadata) pairs to update */
+    metadataList: {
+        /** File ID */
+        id: number;
+        /** The new metadata to use */
+        magicMetadata: RemoteMagicMetadata;
+    }[];
+}
+
+/**
+ * A function that can be used to encrypt the contents of a metadata field
+ * associated with a file.
+ *
+ * This is parameterized to allow us to use either the regular
+ * {@link encryptMetadata} or the web worker wrapper for it.
+ */
+export type EncryptMetadataF = typeof encryptMetadata;
+
+/**
+ * Construct an remote update request payload from the public or private magic
+ * metadata JSON object for an {@link enteFile}, using the provided
+ * {@link encryptMetadataF} function to encrypt the JSON.
+ */
+export const updateMagicMetadataRequest = async (
+    enteFile: EnteFile,
+    metadata: PrivateMagicMetadata | PublicMagicMetadata,
+    metadataVersion: number,
+    encryptMetadataF: EncryptMetadataF,
+): Promise<UpdateMagicMetadataRequest> => {
+    // Drop all null or undefined values to obtain the syncable entries.
+    const validEntries = Object.entries(metadata).filter(
+        ([, v]) => v !== null && v !== undefined,
+    );
+
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataF(
+        Object.fromEntries(validEntries),
+        enteFile.key,
+    );
+
+    return {
+        metadataList: [
+            {
+                id: enteFile.id,
+                magicMetadata: {
+                    version: metadataVersion,
+                    count: validEntries.length,
+                    data: encryptedDataB64,
+                    header: decryptionHeaderB64,
+                },
+            },
+        ],
+    };
+};
+
+/**
+ * Update the magic metadata for a list of files.
+ *
+ * @param request The list of file ids and the updated encrypted magic metadata
+ * associated with each of them.
+ */
+export const putFilesMagicMetadata = async (
+    request: UpdateMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/files/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(request),
+        }),
+    );
+
+/**
+ * Update the public magic metadata for a list of files.
+ *
+ * @param request The list of file ids and the updated encrypted magic metadata
+ * associated with each of them.
+ */
+export const putFilesPublicMagicMetadata = async (
+    request: UpdateMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/files/public-magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(request),
+        }),
+    );
 
 /**
  * Metadata about a file extracted from various sources (like Exif) when

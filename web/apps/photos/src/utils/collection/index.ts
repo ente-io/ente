@@ -1,8 +1,9 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import { ItemVisibility } from "@/media/file-metadata";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
-import { SUB_TYPE, VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
+import { SUB_TYPE } from "@/new/photos/types/magicMetadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -229,7 +230,7 @@ export const shareExpiryOptions = () => [
 
 export const changeCollectionVisibility = async (
     collection: Collection,
-    visibility: VISIBILITY_STATE,
+    visibility: ItemVisibility,
 ) => {
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
@@ -418,7 +419,7 @@ export const isDefaultHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
 
 export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN;
+    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
