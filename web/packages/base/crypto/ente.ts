@@ -35,8 +35,8 @@ export const encryptFileAssociatedData = (data: Uint8Array, keyB64: string) =>
     libsodium.encryptChaChaOneShot(data, keyB64);
 
 /**
- * A variant of {@link encryptFileAssociatedData} that Base64 encodes the
- * encrypted data.
+ * A variant of {@link encryptFileAssociatedData} that returns the Base64
+ * encoded encrypted data instead of its raw bytes.
  *
  * This is the sibling of {@link decryptFileAssociatedDataFromB64}.
  *
@@ -81,3 +81,28 @@ export const decryptFileAssociatedDataFromB64 = async (
         await libsodium.fromB64(decryptionHeaderB64),
         keyB64,
     );
+
+/**
+ * A variant of {@link encryptFileAssociatedData} tailored for encrypting the
+ * various metadata fields associated with a file.
+ *
+ * Instead of raw bytes, it takes as input an arbitrary JSON object which it
+ * encodes into a string, and encrypts that. Also, instead of returning the raw
+ * encrypted bytes, it returns their Base64 encoded string representation.
+ */
+export const encryptFileMetadata = async (
+    // Arbitrary JSON really, but since TypeScript doesn't have a native JSON
+    // type use a string Record as a standin replacement.
+    metadata: Record<string, unknown>,
+    keyB64: string,
+) => {
+    const textEncoder = new TextEncoder();
+    const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
+
+    const { encryptedData, decryptionHeaderB64 } =
+        await encryptFileAssociatedData(encodedMetadata, keyB64);
+    return {
+        encryptedData: await libsodium.toB64(encryptedData),
+        decryptionHeaderB64,
+    };
+};
