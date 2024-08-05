@@ -58,24 +58,24 @@ export const encryptFileEmbedding = async (
 };
 
 /**
- * Encrypt the metadata associated with a file using the file's key.
+ * Encrypt the metadata associated with a file or a collection using the file's
+ * or the collection's key, respectively.
  *
  * This is a variant of {@link encryptFileAssociatedData} tailored for
  * encrypting any of the metadata fields (See: [Note: Metadatum]) associated
- * with a file. Instead of raw bytes, it takes as input an arbitrary JSON object
- * which it encodes into a string, and encrypts that. And instead of returning
- * the raw encrypted bytes, it returns their Base64 string representation.
+ * with a file or a collection.
  *
- * Use {@link decryptFileMetadata} to decrypt the result.
+ * Instead of raw bytes, it takes as input an arbitrary JSON object which it
+ * encodes into a string, and encrypts that. And instead of returning the raw
+ * encrypted bytes, it returns their Base64 string representation.
+ *
+ * Use {@link decryptMetadata} to decrypt the result.
  *
  * @param metadata The JSON value to encrypt. It can be an arbitrary JSON value,
  * but since TypeScript currently doesn't have a native JSON type, it is typed
- * as a `Record<string, unknown>` (which is also what metadata fields are).
+ * as an unknown.
  */
-export const encryptFileMetadata = async (
-    metadata: Record<string, unknown>,
-    keyB64: string,
-) => {
+export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
     const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
 
     const { encryptedData, decryptionHeaderB64 } =
@@ -133,9 +133,10 @@ export const decryptFileEmbedding = async (
     );
 
 /**
- * Decrypt the metadata associated with a file using the file's key.
+ * Decrypt the metadata associated with a file or a collection using the file's
+ * key or the collection's key, respectively.
  *
- * This is the sibling of {@link decryptFileMetadata}.
+ * This is the sibling of {@link decryptMetadata}.
  *
  * @param encryptedDataB64 Base64 encoded string containing the encrypted data.
  *
@@ -150,7 +151,7 @@ export const decryptFileEmbedding = async (
  * JSON type, we need to return it as an `unknown`.
  */
 
-export const decryptFileMetadata = async (
+export const decryptMetadata = async (
     encryptedDataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,
