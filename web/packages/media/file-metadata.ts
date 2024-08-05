@@ -1,4 +1,6 @@
 import { FileType } from "./file-type";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { apiURL } from "@/base/origins";
 
 /**
  * Information about the file that never changes post upload.
@@ -122,6 +124,67 @@ export interface PublicMagicMetadata {
     w?: number;
     h?: number;
 }
+
+/**
+ * Magic metadata, both public and private, as persisted and used by remote.
+ *
+ * This is the encrypted magic metadata as persisted on remote, and this is what
+ * clients get back when they sync with remote. Alongwith the encrypted blob and
+ * decryption header, it also contains a few properties useful for clients to
+ * track changes and ensure that they have the latest metadata synced locally.
+ */
+interface RemoteMagicMetadata {
+    /**
+     * Monotonically increasing iteration of this metadata object.
+     *
+     * Each time a client updates the underlying magic metadata JSONs for a
+     * file, it increments this version number.
+     */
+    version: number;
+    /**
+     * The number of keys in the encrypted JSON object that the encrypted
+     * metadata blob contains.
+     *
+     * During edits and updates, this number should be greater than or equal to
+     * the previous version. Clients are expected to retain the magic metadata
+     * verbatim so that they don't accidentally overwrite fields that they might
+     * not understand.
+     */
+    count: number;
+    /**
+     * The encrypted data.
+     *
+     * This is a base64 string representing the bytes obtained by encrypting the
+     * string representation of the underlying magic metadata JSON object.
+     */
+    data: string;
+    /**
+     * The base64 encoded decryption header that will be needed for the client
+     * for decrypting {@link data}.
+     */
+    header: string;
+}
+
+export const putFilesPublicMagicMetadata = () => {
+    /*
+    const { encryptedDataB64, decryptionHeaderB64 } =
+    await encryptFileEmbedding(embedding, enteFile.key);
+
+const metadataList = [];
+
+const res = await fetch(await apiURL("/files/public-magic-metadata"), {
+    method: "PUT",
+    headers: await authenticatedRequestHeaders(),
+    body: JSON.stringify({
+        metadataList
+        MetadataList []UpdateMagicMetadata `json:"metadataList" binding:"required"`
+        SkipVersion  *bool                 `json:"skipVersion"`
+
+    }),
+});
+ensureOk(res);
+*/
+};
 
 /**
  * Metadata about a file extracted from various sources (like Exif) when
