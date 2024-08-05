@@ -3,22 +3,7 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import * as Comlink from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
 
-const textDecoder = new TextDecoder();
-
 export class DedicatedCryptoWorker {
-    async decryptMetadata(
-        encryptedMetadata: string,
-        header: string,
-        key: string,
-    ) {
-        const encodedMetadata = await libsodium.decryptChaChaOneShot(
-            await libsodium.fromB64(encryptedMetadata),
-            await libsodium.fromB64(header),
-            key,
-        );
-        return JSON.parse(textDecoder.decode(encodedMetadata));
-    }
-
     async decryptThumbnail(
         fileData: Uint8Array,
         header: Uint8Array,
