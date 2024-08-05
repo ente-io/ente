@@ -283,24 +283,6 @@ export const decryptChaChaOneShot2 = async (
     return pullResult.message;
 };
 
-export const decryptChaChaOneShot = async (
-    data: Uint8Array,
-    header: Uint8Array,
-    keyB64: string,
-) => {
-    await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        await fromB64(keyB64),
-    );
-    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
-        pullState,
-        data,
-        null,
-    );
-    return pullResult.message;
-};
-
 export const decryptChaCha = async (
     data: Uint8Array,
     header: Uint8Array,
