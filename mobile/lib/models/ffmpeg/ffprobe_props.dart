@@ -12,7 +12,7 @@ import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
 
 class FFProbeProps {
-  Map<String, dynamic>? prodData;
+  Map<String, dynamic>? propData;
   Location? location;
   DateTime? creationTimeUTC;
   String? bitrate;
@@ -72,8 +72,8 @@ class FFProbeProps {
   @override
   String toString() {
     final buffer = StringBuffer();
-    for (final key in prodData!.keys) {
-      final value = prodData![key];
+    for (final key in propData!.keys) {
+      final value = propData![key];
       if (value != null) {
         buffer.writeln('$key: $value');
       }
@@ -169,33 +169,33 @@ class FFProbeProps {
           parsedData[key] = result.fps;
         } else if (key == FFProbeKeys.codedWidth) {
           final width = stream[key];
-          if (width != null || width != "0") {
+          if (width != null && width != 0) {
             result._width = width.toString();
             parsedData[key] = result._width;
           }
         } else if (key == FFProbeKeys.codedHeight) {
           final height = stream[key];
-          if (height != null && height != "0") {
+          if (height != null && height != 0) {
             result._height = height.toString();
             parsedData[key] = result._height;
           }
         } else if (key == FFProbeKeys.width) {
           final width = stream[key];
-          if (width != null || width != "0") {
+          if (width != null && width != 0) {
             result._width = width.toString();
             parsedData[FFProbeKeys.width] = result._width;
           }
         } else if (key == FFProbeKeys.height) {
           final height = stream[key];
-          if (height != null && height != "0") {
+          if (height != null && height != 0) {
             result._height = height.toString();
-            parsedData[FFProbeKeys.width] = result._height;
+            parsedData[FFProbeKeys.height] = result._height;
           }
         } else if (key == FFProbeKeys.sideDataList) {
-          // result._rotation = stream[key][0][FFProbeKeys.rotation];
           for (Map sideData in stream[key]) {
             if (sideData["side_data_type"] == "Display Matrix") {
               result._rotation = sideData[FFProbeKeys.rotation];
+              parsedData[FFProbeKeys.rotation] = result._rotation;
             }
           }
         }
@@ -205,7 +205,7 @@ class FFProbeProps {
       newStreams.add(metadata);
     }
     parsedData["streams"] = newStreams;
-    result.prodData = parsedData;
+    result.propData = parsedData;
     return result;
   }
 
