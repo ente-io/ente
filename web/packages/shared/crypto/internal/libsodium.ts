@@ -115,8 +115,11 @@ export async function fromHex(input: string) {
  *
  * This uses the same stream encryption algorithm pair (XChaCha20 stream cipher
  * with Poly1305 MAC authentication) that we use for encrypting, well, other
- * streams, like the file's contents. The difference here is that this function
- * does a one shot instead of a streaming encryption.
+ * streams, like the file's contents.
+ *
+ * The difference here is that this function does a one shot instead of a
+ * streaming encryption. As such, this is only meant to be used for relatively
+ * small amounts of data.
  *
  * Ref: https://doc.libsodium.org/secret-key_cryptography/secretstream
  *
@@ -126,13 +129,17 @@ export async function fromHex(input: string) {
  * @param keyB64 Base64 encoded string containing the encryption key. This is
  * usually be the key associated with a file to which {@link data} relates to.
  *
- * @returns The encrypted data and decryption header pair. Both these values are
- * needed to decrypt the data. The header does not need to be secret.
+ * @returns The encrypted data (bytes) and decryption header pair (Base64
+ * encoded string). Both these values are needed to decrypt the data. The header
+ * does not need to be secret.
  */
-export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
+export const encryptChaChaOneShot = async (
+    data: Uint8Array,
+    keyB64: string,
+) => {
     await sodium.ready;
 
-    const uintkey: Uint8Array = await fromB64(key);
+    const uintkey: Uint8Array = await fromB64(keyB64);
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
@@ -145,9 +152,9 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     );
     return {
         encryptedData: pushResult,
-        decryptionHeader: await toB64(header),
+        decryptionHeaderB64: await toB64(header),
     };
-}
+};
 
 export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
 

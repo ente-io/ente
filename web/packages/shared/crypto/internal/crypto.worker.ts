@@ -49,40 +49,34 @@ export class DedicatedCryptoWorker {
     async encryptMetadata(metadata: Object, key: string) {
         const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
 
-        const encryptedMetadata = await libsodium.encryptChaChaOneShot(
-            encodedMetadata,
-            key,
-        );
-        const { encryptedData, ...other } = encryptedMetadata;
+        const { encryptedData, decryptionHeaderB64 } =
+            await libsodium.encryptChaChaOneShot(encodedMetadata, key);
         return {
             file: {
                 encryptedData: await libsodium.toB64(encryptedData),
-                ...other,
+                // TODO:
+                decryptionHeader: decryptionHeaderB64,
             },
             key,
         };
     }
 
-    async encryptThumbnail(fileData: Uint8Array, key: string) {
-        return libsodium.encryptChaChaOneShot(fileData, key);
-    }
-
-    async encryptEmbedding(embedding: Float32Array, key: string) {
-        const encodedEmbedding = textEncoder.encode(
-            JSON.stringify(Array.from(embedding)),
-        );
-        const encryptEmbedding = await libsodium.encryptChaChaOneShot(
-            encodedEmbedding,
-            key,
-        );
-        const { encryptedData, ...other } = encryptEmbedding;
-        return {
-            file: {
-                encryptedData: await libsodium.toB64(encryptedData),
-                ...other,
-            },
-            key,
-        };
+    /**
+     * Encrypt the thumbnail associated with a file.
+     *
+     * This defers to {@link encryptChaChaOneShot}.
+     *
+     * @param data The thumbnail's data.
+     *
+     * @param keyB64 The key associated with the file whose thumbnail this is.
+     *
+     * @returns The encrypted thumbnail, and the associated decryption header
+     * (Base64 encoded).
+     */
+    async encryptThumbnail(data: Uint8Array, keyB64: string) {
+        const { encryptedData, decryptionHeaderB64: decryptionHeader } =
+            await libsodium.encryptChaChaOneShot(data, keyB64);
+        return { encryptedData, decryptionHeader };
     }
 
     async encryptFile(fileData: Uint8Array) {
