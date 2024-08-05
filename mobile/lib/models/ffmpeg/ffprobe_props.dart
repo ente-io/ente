@@ -187,13 +187,13 @@ class FFProbeProps {
           final width = stream[key];
           if (width != null && width != 0) {
             result._width = width.toString();
-            parsedData[FFProbeKeys.width] = result._width;
+            parsedData[key] = result._width;
           }
         } else if (key == FFProbeKeys.height) {
           final height = stream[key];
           if (height != null && height != 0) {
             result._height = height.toString();
-            parsedData[FFProbeKeys.height] = result._height;
+            parsedData[key] = result._height;
           }
         } else if (key == FFProbeKeys.sideDataList) {
           for (Map sideData in stream[key]) {

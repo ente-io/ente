@@ -146,7 +146,8 @@ class VideoExifDialog extends StatelessWidget {
       }
 
       if (value == null) {
-        return const SizedBox.shrink();
+        return const SizedBox
+            .shrink(); // Return an empty container if there's no data for the key.
       }
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
