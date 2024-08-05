@@ -9,49 +9,65 @@
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 
 /**
- * Encrypt arbitrary metadata associated with a file using the file's key.
+ * Encrypt arbitrary data associated with a file using the file's key.
  *
- * @param metadata The metadata (bytes) to encrypt.
+ * See {@link encryptChaChaOneShot} for the implementation details.
  *
- * @param keyB64 Base64 encoded string containing the encryption key (this'll
- * generally be the file's key).
+ * @param data The data (bytes) to encrypt.
  *
- * @returns Base64 encoded strings containing the encrypted data and the
- * decryption header.
+ * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * expected to the key of the file with which {@link data} is associated.
+ *
+ * @returns The encrypted data and the (Base64 encoded) decryption header.
  */
-export const encryptFileMetadata = async (
-    metadata: Uint8Array,
+export const encryptFileAssociatedData = (data: Uint8Array, keyB64: string) =>
+    libsodium.encryptChaChaOneShot(data, keyB64);
+
+/**
+ * A variant of {@link encryptFileAssociatedData} that Base64 encodes the
+ * encrypted data.
+ *
+ * This is the sibling of {@link decryptFileAssociatedDataFromB64}.
+ *
+ * It is useful in cases where the (encrypted) associated data needs to
+ * transferred as the HTTP POST body.
+ */
+//export const encryptFileMetadata = async (
+export const encryptFileAssociatedDataToB64 = async (
+    data: Uint8Array,
     keyB64: string,
 ) => {
     const { encryptedData, decryptionHeaderB64 } =
-        await libsodium.encryptChaChaOneShot(metadata, keyB64);
+        await encryptFileAssociatedData(data, keyB64);
     return {
-        encryptedMetadataB64: await libsodium.toB64(encryptedData),
+        encryptedDataB64: await libsodium.toB64(encryptedData),
         decryptionHeaderB64,
     };
 };
 
 /**
- * Decrypt arbitrary metadata associated with a file using the file's key.
+ * Decrypt arbitrary data associated with a file using the file's key.
  *
- * @param encryptedMetadataB64 Base64 encoded string containing the encrypted
- * data.
+ * This is the sibling of {@link encryptFileAssociatedDataToB64}.
+ *
+ * @param encryptedDataB64 Base64 encoded string containing the encrypted data.
  *
  * @param headerB64 Base64 encoded string containing the decryption header
  * produced during encryption.
  *
- * @param keyB64 Base64 encoded string containing the encryption key. This will
- * generally the key of the file whose metadata this is.
+ * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * expected to be the key of the file with which {@link encryptedDataB64} is
+ * associated.
  *
  * @returns The decrypted metadata bytes.
  */
-export const decryptFileMetadata = async (
-    encryptedMetadataB64: string,
+export const decryptFileAssociatedDataFromB64 = async (
+    encryptedDataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,
 ) =>
     libsodium.decryptChaChaOneShot(
-        await libsodium.fromB64(encryptedMetadataB64),
+        await libsodium.fromB64(encryptedDataB64),
         await libsodium.fromB64(decryptionHeaderB64),
         keyB64,
     );
