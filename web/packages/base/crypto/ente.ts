@@ -23,7 +23,7 @@ export const encryptFileMetadata = async (
     metadata: Uint8Array,
     keyB64: string,
 ) => {
-    const { file } = await libsodium.encryptChaChaOneShot(metadata, keyB64);
+    const file = await libsodium.encryptChaChaOneShot(metadata, keyB64);
     return {
         encryptedMetadataB64: await libsodium.toB64(file.encryptedData),
         decryptionHeaderB64: file.decryptionHeader,

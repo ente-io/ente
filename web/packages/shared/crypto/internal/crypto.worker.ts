@@ -49,8 +49,10 @@ export class DedicatedCryptoWorker {
     async encryptMetadata(metadata: Object, key: string) {
         const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
 
-        const { file: encryptedMetadata } =
-            await libsodium.encryptChaChaOneShot(encodedMetadata, key);
+        const encryptedMetadata = await libsodium.encryptChaChaOneShot(
+            encodedMetadata,
+            key,
+        );
         const { encryptedData, ...other } = encryptedMetadata;
         return {
             file: {
@@ -69,7 +71,7 @@ export class DedicatedCryptoWorker {
         const encodedEmbedding = textEncoder.encode(
             JSON.stringify(Array.from(embedding)),
         );
-        const { file: encryptEmbedding } = await libsodium.encryptChaChaOneShot(
+        const encryptEmbedding = await libsodium.encryptChaChaOneShot(
             encodedEmbedding,
             key,
         );

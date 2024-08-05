@@ -144,11 +144,8 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
         sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL,
     );
     return {
-        key: await toB64(uintkey),
-        file: {
-            encryptedData: pushResult,
-            decryptionHeader: await toB64(header),
-        },
+        encryptedData: pushResult,
+        decryptionHeader: await toB64(header),
     };
 }
 
