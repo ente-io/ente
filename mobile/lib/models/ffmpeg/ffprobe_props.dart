@@ -167,7 +167,11 @@ class FFProbeProps {
         if (key == FFProbeKeys.rFrameRate) {
           result.fps = _formatFPS(stream[key]);
           parsedData[key] = result.fps;
-        } else if (key == FFProbeKeys.codedWidth) {
+        }
+        //TODO: Use `height` and `width` instead of `codedHeight` and `codedWidth`
+        //for better accuracy. `height' and `width` will give the video's "visual"
+        //height and width.
+        else if (key == FFProbeKeys.codedWidth) {
           final width = stream[key];
           if (width != null && width != 0) {
             result._width = width.toString();
