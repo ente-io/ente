@@ -84,6 +84,46 @@ export interface Metadata {
 }
 
 /**
+ * Mutable metadata associated with an {@link EnteFile}.
+ *
+ * -   Unlike {@link Metadata}, this can change after the file has been
+ *     uploaded.
+ *
+ * -   Unlike {@link MagicMetadata}, this is available to all the people with
+ *     whom the file has been shared.
+ *
+ * For more details, see [Note: Metadatum].
+ */
+export interface PublicMagicMetadata {
+    /**
+     * Modified value of the date time associated with an {@link EnteFile}.
+     *
+     * Epoch microseconds.
+     *
+     * This field stores edits to the {@link creationTime} {@link Metadata}
+     * field.
+     */
+    editedTime?: number;
+    /**
+     * Modified name of the {@link EnteFile}.
+     *
+     * This field stores edits to the {@link title} {@link Metadata} field.
+     */
+    editedName?: string;
+    /**
+     * An arbitrary caption / description string that the user has added to the
+     * file.
+     *
+     * The length of this field is capped to some arbitrary maximum by client
+     * side checks.
+     */
+    caption?: string;
+    uploaderName?: string;
+    w?: number;
+    h?: number;
+}
+
+/**
  * Metadata about a file extracted from various sources (like Exif) when
  * uploading it into Ente.
  *
