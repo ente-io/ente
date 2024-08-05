@@ -30,7 +30,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                     if (!entity.header) return undefined;
                     try {
                         const decryptedCode =
-                            await cryptoWorker.decryptMetadata2(
+                            await cryptoWorker.decryptMetadata(
                                 entity.encryptedData,
                                 entity.header,
                                 authenticatorKey,

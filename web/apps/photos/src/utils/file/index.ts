@@ -177,6 +177,7 @@ export async function decryptFile(
         return {
             ...restFileProps,
             key: fileKey,
+            // @ts-expect-error TODO: Need to use zod here.
             metadata: fileMetadata,
             magicMetadata: fileMagicMetadata,
             pubMagicMetadata: filePubMagicMetadata,
