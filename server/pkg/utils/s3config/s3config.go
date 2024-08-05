@@ -142,11 +142,11 @@ func (config *S3Config) initialize() {
 			s3Config.DisableSSL = aws.Bool(true)
 			s3Config.S3ForcePathStyle = aws.Bool(true)
 		}
-		session, err := session.NewSession(&s3Config)
+		s3Session, err := session.NewSession(&s3Config)
 		if err != nil {
 			log.Fatal("Could not create session for " + dc)
 		}
-		s3Client := *s3.New(session)
+		s3Client := *s3.New(s3Session)
 		config.s3Configs[dc] = &s3Config
 		config.s3Clients[dc] = s3Client
 		if dc == dcWasabiEuropeCentral_v3 {
