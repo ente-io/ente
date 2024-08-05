@@ -113,6 +113,10 @@ export async function fromHex(input: string) {
 /**
  * Encrypt the given {@link data} using the given (Base64 encoded) key.
  *
+ * Use {@link decryptChaChaOneShot} to decrypt the result.
+ *
+ * [Note: Salsa and ChaCha]
+ *
  * This uses the same stream encryption algorithm (XChaCha20 stream cipher with
  * Poly1305 MAC authentication) that we use for encrypting other streams, in
  * particular the actual file's contents.
@@ -126,6 +130,9 @@ export async function fromHex(input: string) {
  * Libsodium also provides the `crypto_secretbox_easy` APIs for one shot
  * encryption, which we do use in other places where we need to one shot
  * encryption of independent bits of data.
+ *
+ * These secretbox APIs use XSalsa20 with Poly1305. XSalsa20 is a minor variant
+ * (predecessor in fact) of XChaCha20.
  *
  * See: https://doc.libsodium.org/secret-key_cryptography/secretbox
  *
@@ -242,15 +249,48 @@ export async function encryptFileChunk(
     return pushResult;
 }
 
-export async function decryptChaChaOneShot(
+/**
+ * Decrypt the result of {@link encryptChaChaOneShot}.
+ *
+ * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
+ *
+ * @param header A Base64 string containing the bytes of the decryption header
+ * that was produced during encryption.
+ *
+ * @param keyB64 The Base64 string containing the key that was used to encrypt
+ * the data.
+ *
+ * @returns The decrypted bytes.
+ *
+ * @returns The decrypted metadata bytes.
+ */
+export const decryptChaChaOneShot2 = async (
+    encryptedData: Uint8Array,
+    headerB64: string,
+    keyB64: string,
+) => {
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        await fromB64(headerB64),
+        await fromB64(keyB64),
+    );
+    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+        pullState,
+        encryptedData,
+        null,
+    );
+    return pullResult.message;
+};
+
+export const decryptChaChaOneShot = async (
     data: Uint8Array,
     header: Uint8Array,
-    key: string,
-) {
+    keyB64: string,
+) => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         header,
-        await fromB64(key),
+        await fromB64(keyB64),
     );
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
@@ -258,7 +298,7 @@ export async function decryptChaChaOneShot(
         null,
     );
     return pullResult.message;
-}
+};
 
 export const decryptChaCha = async (
     data: Uint8Array,
