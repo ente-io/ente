@@ -209,11 +209,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const archiveCollection = () => {
-        changeCollectionVisibility(activeCollection, FileVisibility.ARCHIVED);
+        changeCollectionVisibility(activeCollection, FileVisibility.archived);
     };
 
     const unArchiveCollection = () => {
-        changeCollectionVisibility(activeCollection, FileVisibility.VISIBLE);
+        changeCollectionVisibility(activeCollection, FileVisibility.visible);
     };
 
     const downloadCollection = () => {
@@ -335,14 +335,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const hideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
-            FileVisibility.HIDDEN,
+            FileVisibility.hidden,
         );
         setActiveCollectionID(ALL_SECTION);
     };
     const unHideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
-            FileVisibility.VISIBLE,
+            FileVisibility.visible,
         );
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };

@@ -658,10 +658,10 @@ export const handleFileOps = async (
             fixTimeHelper(files, setFixCreationTimeAttributes);
             break;
         case FILE_OPS_TYPE.ARCHIVE:
-            await changeFilesVisibility(files, FileVisibility.ARCHIVED);
+            await changeFilesVisibility(files, FileVisibility.archived);
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
-            await changeFilesVisibility(files, FileVisibility.VISIBLE);
+            await changeFilesVisibility(files, FileVisibility.visible);
             break;
     }
 };

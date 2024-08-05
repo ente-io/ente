@@ -10,7 +10,7 @@ export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {
         return false;
     }
-    return item.magicMetadata.data.visibility === FileVisibility.ARCHIVED;
+    return item.magicMetadata.data.visibility === FileVisibility.archived;
 }
 
 export function isArchivedCollection(item: Collection): boolean {
@@ -19,12 +19,12 @@ export function isArchivedCollection(item: Collection): boolean {
     }
 
     if (item.magicMetadata && item.magicMetadata.data) {
-        return item.magicMetadata.data.visibility === FileVisibility.ARCHIVED;
+        return item.magicMetadata.data.visibility === FileVisibility.archived;
     }
 
     if (item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
         return (
-            item.sharedMagicMetadata.data.visibility === FileVisibility.ARCHIVED
+            item.sharedMagicMetadata.data.visibility === FileVisibility.archived
         );
     }
     return false;

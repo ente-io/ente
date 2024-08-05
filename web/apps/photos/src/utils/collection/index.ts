@@ -418,7 +418,7 @@ export const isDefaultHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
 
 export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === FileVisibility.HIDDEN;
+    collection.magicMetadata?.data.visibility === FileVisibility.hidden;
 
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;

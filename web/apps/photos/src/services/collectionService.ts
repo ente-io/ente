@@ -1375,7 +1375,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 export function createHiddenCollection() {
     return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
         subType: SUB_TYPE.DEFAULT_HIDDEN,
-        visibility: FileVisibility.HIDDEN,
+        visibility: FileVisibility.hidden,
     });
 }
 

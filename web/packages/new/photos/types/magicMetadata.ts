@@ -11,9 +11,12 @@ export type EncryptedMagicMetadata = MagicMetadataCore<string>;
  * The visibility of an {@link EnteFile}.
  */
 export enum FileVisibility {
-    VISIBLE = 0,
-    ARCHIVED = 1,
-    HIDDEN = 2,
+    /** The normal state - The file is visible. */
+    visible = 0,
+    /** The file has been archived. */
+    archived = 1,
+    /** The file has been hidden. */
+    hidden = 2,
 }
 
 export enum SUB_TYPE {
