@@ -1,3 +1,4 @@
+import * as ente from "@/base/crypto/ente";
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import * as Comlink from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
@@ -29,6 +30,25 @@ export class DedicatedCryptoWorker {
 
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
+    }
+
+    async encryptFileMetadata(
+        metadata: Record<string, unknown>,
+        keyB64: string,
+    ) {
+        return ente.encryptFileMetadata(metadata, keyB64);
+    }
+
+    async decryptFileMetadata(
+        encryptedDataB64: string,
+        decryptionHeaderB64: string,
+        keyB64: string,
+    ) {
+        return ente.decryptFileMetadata(
+            encryptedDataB64,
+            decryptionHeaderB64,
+            keyB64,
+        );
     }
 
     async encryptMetadata(metadata: Object, key: string) {
