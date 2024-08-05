@@ -217,6 +217,64 @@ func (config *S3Config) GetDerivedStorageBucket() *string {
 	return config.GetBucket(config.derivedStorageDC)
 }
 
+func (config *S3Config) EmptyB5Bucket(userID int64) {
+	bucket := config.GetBucket("b5")
+	prefix := fmt.Sprintf("%d/", userID)
+	// Create an S3 client
+	s3Client := config.GetS3Client("b5")
+
+	// List objects with the specified prefix
+	listObjectsInput := &s3.ListObjectsV2Input{
+		Bucket: aws.String(*bucket),
+		Prefix: aws.String(prefix),
+	}
+
+	for {
+		// Get the list of objects
+		listObjectsOutput, err := s3Client.ListObjectsV2(listObjectsInput)
+		if err != nil {
+			log.Fatalf("unable to list objects, %v", err)
+		}
+
+		if len(listObjectsOutput.Contents) == 0 {
+			fmt.Println("No objects found with the specified prefix.")
+			break
+		}
+
+		// Create a slice of object identifiers to delete
+		var objectIdentifiers []*s3.ObjectIdentifier
+		for _, object := range listObjectsOutput.Contents {
+			objectIdentifiers = append(objectIdentifiers, &s3.ObjectIdentifier{
+				Key: object.Key,
+			})
+		}
+
+		// Delete the objects
+		deleteObjectsInput := &s3.DeleteObjectsInput{
+			Bucket: aws.String(*bucket),
+			Delete: &s3.Delete{
+				Objects: objectIdentifiers,
+				Quiet:   aws.Bool(true),
+			},
+		}
+
+		_, err = s3Client.DeleteObjects(deleteObjectsInput)
+		if err != nil {
+			log.Fatalf("unable to delete objects, %v", err)
+		}
+
+		fmt.Printf("Deleted %d objects.\n", len(objectIdentifiers))
+
+		// If there are more objects to list, set the continuation token for the next request
+		if *listObjectsOutput.IsTruncated {
+			listObjectsInput.ContinuationToken = listObjectsOutput.NextContinuationToken
+		} else {
+			break
+		}
+	}
+	fmt.Println("All objects with the specified prefix have been deleted.")
+}
+
 func (config *S3Config) GetDerivedStorageS3Client() *s3.S3 {
 	s3Client := config.GetS3Client(config.derivedStorageDC)
 	return &s3Client

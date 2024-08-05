@@ -134,6 +134,7 @@ func main() {
 	}, []string{"method"})
 
 	s3Config := s3config.NewS3Config()
+	//s3Config.EmptyB5Bucket(1580559962386453)
 
 	passkeysRepo, err := passkey.NewRepository(db)
 	if err != nil {
