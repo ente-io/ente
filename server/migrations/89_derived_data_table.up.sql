@@ -1,5 +1,5 @@
 -- Create the derived table
-CREATE TABLE file_data
+CREATE TABLE IF NOT EXISTS file_data
 (
     file_id             BIGINT      NOT NULL,
     user_id             BIGINT      NOT NULL,
