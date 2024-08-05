@@ -38,6 +38,20 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 export const encryptAssociatedData = libsodium.encryptChaChaOneShot;
 
 /**
+ * Encrypt the thumbnail for a file.
+ *
+ * This is just an alias for {@link encryptAssociatedData}.
+ *
+ * @param data The thumbnail's data.
+ *
+ * @param keyB64 The key associated with the file whose thumbnail this is.
+ *
+ * @returns The encrypted thumbnail, and the associated decryption header
+ * (Base64 encoded).
+ */
+export const encryptThumbnail = encryptAssociatedData;
+
+/**
  * Encrypted the embedding associated with a file using the file's key.
  *
  * This as a variant of {@link encryptAssociatedData} tailored for

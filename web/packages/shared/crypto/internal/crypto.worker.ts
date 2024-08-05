@@ -32,22 +32,8 @@ export class DedicatedCryptoWorker {
         );
     }
 
-    /**
-     * Encrypt the thumbnail associated with a file.
-     *
-     * This defers to {@link encryptChaChaOneShot}.
-     *
-     * @param data The thumbnail's data.
-     *
-     * @param keyB64 The key associated with the file whose thumbnail this is.
-     *
-     * @returns The encrypted thumbnail, and the associated decryption header
-     * (Base64 encoded).
-     */
     async encryptThumbnail(data: Uint8Array, keyB64: string) {
-        const { encryptedData, decryptionHeaderB64: decryptionHeader } =
-            await libsodium.encryptChaChaOneShot(data, keyB64);
-        return { encryptedData, decryptionHeader };
+        return ente.encryptThumbnail(data, keyB64);
     }
 
     async encryptFile(fileData: Uint8Array) {
