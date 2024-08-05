@@ -4,7 +4,6 @@ import * as Comlink from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
 
 const textDecoder = new TextDecoder();
-const textEncoder = new TextEncoder();
 
 export class DedicatedCryptoWorker {
     async decryptMetadata(

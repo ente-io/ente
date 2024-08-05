@@ -58,12 +58,12 @@ export const encryptFileEmbedding = async (
 };
 
 /**
- * Encrypt the metadata associated with a file or a collection using the file's
- * or the collection's key, respectively.
+ * Encrypt the metadata associated with an Ente object (file, collection or
+ * entity) using that object's key.
  *
  * This is a variant of {@link encryptFileAssociatedData} tailored for
  * encrypting any of the metadata fields (See: [Note: Metadatum]) associated
- * with a file or a collection.
+ * with a file, collection or entity.
  *
  * Instead of raw bytes, it takes as input an arbitrary JSON object which it
  * encodes into a string, and encrypts that. And instead of returning the raw
@@ -135,8 +135,8 @@ export const decryptFileEmbedding = async (
     );
 
 /**
- * Decrypt the metadata associated with a file or a collection using the file's
- * key or the collection's key, respectively.
+ * Decrypt the metadata associated with an Ente object (file, collection or
+ * entity) using that object's key.
  *
  * This is the sibling of {@link decryptMetadata}.
  *
