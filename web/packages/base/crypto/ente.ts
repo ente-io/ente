@@ -58,16 +58,21 @@ export const encryptFileEmbedding = async (
 };
 
 /**
- * A variant of {@link encryptFileAssociatedData} tailored for encrypting the
- * various metadata fields associated with a file.
+ * Encrypt the metadata associated with a file using the file's key.
  *
- * Instead of raw bytes, it takes as input an arbitrary JSON object which it
- * encodes into a string, and encrypts that. Also, instead of returning the raw
- * encrypted bytes, it returns their Base64 encoded string representation.
+ * This is a variant of {@link encryptFileAssociatedData} tailored for
+ * encrypting any of the metadata fields (See: [Note: Metadatum]) associated
+ * with a file. Instead of raw bytes, it takes as input an arbitrary JSON object
+ * which it encodes into a string, and encrypts that. And instead of returning
+ * the raw encrypted bytes, it returns their Base64 string representation.
+ *
+ * Use {@link decryptFileMetadata} to decrypt the result.
+ *
+ * @param metadata The JSON value to encrypt. It can be an arbitrary JSON value,
+ * but since TypeScript currently doesn't have a native JSON type, it is typed
+ * as a `Record<string, unknown>` (which is also what metadata fields are).
  */
 export const encryptFileMetadata = async (
-    // Arbitrary JSON really, but since TypeScript doesn't have a native JSON
-    // type use a string Record as a standin replacement.
     metadata: Record<string, unknown>,
     keyB64: string,
 ) => {
