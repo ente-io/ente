@@ -3,6 +3,18 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import * as Comlink from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
 
+/**
+ * A web worker that exposes some of the functions defined in either the Ente
+ * specific layer (base/crypto/ente.ts) or the internal libsodium layer
+ * (internal/libsodium.ts).
+ *
+ * Running these in a web worker allows us to use potentially CPU-intensive
+ * crypto operations from the main thread without stalling the UI.
+ *
+ * See: [Note: Crypto code hierarchy].
+ *
+ * Note: Keep these methods logic free. They should just act as trivial proxies.
+ */
 export class DedicatedCryptoWorker {
     async decryptThumbnail(
         fileData: Uint8Array,
