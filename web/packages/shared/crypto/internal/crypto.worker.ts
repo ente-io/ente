@@ -48,21 +48,6 @@ export class DedicatedCryptoWorker {
         );
     }
 
-    async encryptMetadata(metadata: Object, key: string) {
-        const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
-
-        const { encryptedData, decryptionHeaderB64 } =
-            await libsodium.encryptChaChaOneShot(encodedMetadata, key);
-        return {
-            file: {
-                encryptedData: await libsodium.toB64(encryptedData),
-                // TODO:
-                decryptionHeader: decryptionHeaderB64,
-            },
-            key,
-        };
-    }
-
     /**
      * Encrypt the thumbnail associated with a file.
      *
