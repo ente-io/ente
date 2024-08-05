@@ -141,8 +141,8 @@ interface RemoteMagicMetadata {
     /**
      * Monotonically increasing iteration of this metadata object.
      *
-     * Each time a client updates the underlying magic metadata JSONs for a
-     * file, it increments this version number.
+     * The version starts at 1. Each time a client updates the underlying magic
+     * metadata JSONs for a file, it increments this version number.
      */
     version: number;
     /**
@@ -206,7 +206,7 @@ export const updateMagicMetadataRequest = async (
 ): Promise<UpdateMagicMetadataRequest> => {
     // Drop all null or undefined values to obtain the syncable entries.
     const validEntries = Object.entries(metadata).filter(
-        ([_, v]) => v !== null && v !== undefined,
+        ([, v]) => v !== null && v !== undefined,
     );
 
     const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataF(
