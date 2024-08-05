@@ -3,9 +3,10 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
-import { FILE_TYPE, type FileTypeInfo } from "@/media/file-type";
+import type { Metadata } from "@/media/file-metadata";
+import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
-import type { Metadata } from "@/media/types/file";
+import { cmpNewLib, extractExif, wipNewLib } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
@@ -30,9 +31,9 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError, handleUploadError } from "@ente/shared/error";
+import { parseImageMetadata } from "@ente/shared/utils/exif-old";
 import type { Remote } from "comlink";
 import { addToCollection } from "services/collectionService";
-import { parseImageMetadata } from "services/exif";
 import {
     PublicUploadProps,
     type LivePhotoAssets,
@@ -244,6 +245,11 @@ interface LocalFileAttributes<
     decryptionHeader: string;
 }
 
+interface EncryptedMetadata {
+    encryptedDataB64: string;
+    decryptionHeaderB64: string;
+}
+
 interface EncryptionResult<
     T extends string | Uint8Array | EncryptedFileStream,
 > {
@@ -254,7 +260,7 @@ interface EncryptionResult<
 interface ProcessedFile {
     file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
-    metadata: LocalFileAttributes<string>;
+    metadata: EncryptedMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -614,7 +620,7 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
 
     return {
         fileTypeInfo: {
-            fileType: FILE_TYPE.LIVE_PHOTO,
+            fileType: FileType.livePhoto,
             extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
             imageType: img.fileTypeInfo.extension,
             videoType: vid.fileTypeInfo.extension,
@@ -703,7 +709,7 @@ const extractLivePhotoMetadata = async (
     worker: Remote<DedicatedCryptoWorker>,
 ) => {
     const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FILE_TYPE.IMAGE,
+        fileType: FileType.image,
         extension: fileTypeInfo.imageType,
     };
     const { metadata: imageMetadata, publicMagicMetadata } =
@@ -722,7 +728,7 @@ const extractLivePhotoMetadata = async (
         metadata: {
             ...imageMetadata,
             title: uploadItemFileName(livePhotoAssets.image),
-            fileType: FILE_TYPE.LIVE_PHOTO,
+            fileType: FileType.livePhoto,
             imageHash: imageMetadata.hash,
             videoHash: videoHash,
             hash: undefined,
@@ -743,14 +749,14 @@ const extractImageOrVideoMetadata = async (
     const { fileType } = fileTypeInfo;
 
     let extractedMetadata: ParsedExtractedMetadata;
-    if (fileType === FILE_TYPE.IMAGE) {
+    if (fileType === FileType.image) {
         extractedMetadata =
             (await tryExtractImageMetadata(
                 uploadItem,
                 fileTypeInfo,
                 lastModifiedMs,
             )) ?? NULL_EXTRACTED_METADATA;
-    } else if (fileType === FILE_TYPE.VIDEO) {
+    } else if (fileType === FileType.video) {
         extractedMetadata =
             (await tryExtractVideoMetadata(uploadItem)) ??
             NULL_EXTRACTED_METADATA;
@@ -808,9 +814,9 @@ async function tryExtractImageMetadata(
 ): Promise<ParsedExtractedMetadata> {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        // The library we use for extracting Exif from images, exifr, doesn't
-        // support streams. But unlike videos, for images it is reasonable to
-        // read the entire stream into memory here.
+        // The library we use for extracting Exif from images, ExifReader,
+        // doesn't support streams. But unlike videos, for images it is
+        // reasonable to read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);
         const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
         file = new File([await response.arrayBuffer()], basename(path), {
@@ -823,7 +829,12 @@ async function tryExtractImageMetadata(
     }
 
     try {
-        return await parseImageMetadata(file, fileTypeInfo);
+        const oldLib = await parseImageMetadata(file, fileTypeInfo);
+        if (await wipNewLib()) {
+            const newLib = await extractExif(file);
+            cmpNewLib(oldLib, newLib);
+        }
+        return oldLib;
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;
@@ -874,7 +885,7 @@ const areFilesSameHash = (f: Metadata, g: Metadata) => {
     if (f.fileType !== g.fileType || f.title !== g.title) {
         return false;
     }
-    if (f.fileType === FILE_TYPE.LIVE_PHOTO) {
+    if (f.fileType === FileType.livePhoto) {
         return f.imageHash === g.imageHash && f.videoHash === g.videoHash;
     } else {
         return f.hash === g.hash;
@@ -930,7 +941,7 @@ const readLivePhoto = async (
         livePhotoAssets.image,
         {
             extension: fileTypeInfo.imageType,
-            fileType: FILE_TYPE.IMAGE,
+            fileType: FileType.image,
         },
         await readUploadItem(livePhotoAssets.image),
     );
@@ -1009,7 +1020,7 @@ const withThumbnail = async (
 
     const electron = globalThis.electron;
     const notAvailable =
-        fileTypeInfo.fileType == FILE_TYPE.IMAGE &&
+        fileTypeInfo.fileType == FileType.image &&
         moduleState.isNativeImageThumbnailGenerationNotAvailable;
 
     // 1. Native thumbnail generation using items's (effective) path.
@@ -1056,7 +1067,7 @@ const withThumbnail = async (
             // go (i.e. not in a streaming manner). This is risky for videos of
             // unbounded sizes, so we can only apply this fallback for images.
 
-            if (fileTypeInfo.fileType == FILE_TYPE.IMAGE) {
+            if (fileTypeInfo.fileType == FileType.image) {
                 const data = await readEntireStream(fileStream.stream);
                 blob = new Blob([data]);
 
@@ -1113,25 +1124,31 @@ const encryptFile = async (
         worker,
     );
 
-    const { file: encryptedThumbnail } = await worker.encryptThumbnail(
-        file.thumbnail,
-        fileKey,
-    );
+    const {
+        encryptedData: thumbEncryptedData,
+        decryptionHeaderB64: thumbDecryptionHeader,
+    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
+    const encryptedThumbnail = {
+        encryptedData: thumbEncryptedData,
+        decryptionHeader: thumbDecryptionHeader,
+    };
 
-    const { file: encryptedMetadata } = await worker.encryptMetadata(
+    const encryptedMetadata = await worker.encryptMetadata(
         file.metadata,
         fileKey,
     );
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     if (file.pubMagicMetadata) {
-        const { file: encryptedPubMagicMetadataData } =
-            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
+        const encryptedPubMagicMetadataData = await worker.encryptMetadata(
+            file.pubMagicMetadata.data,
+            fileKey,
+        );
         encryptedPubMagicMetadata = {
             version: file.pubMagicMetadata.version,
             count: file.pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedData,
-            header: encryptedPubMagicMetadataData.decryptionHeader,
+            data: encryptedPubMagicMetadataData.encryptedDataB64,
+            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
         };
     }
 
@@ -1261,7 +1278,10 @@ const uploadToBucket = async (
                 decryptionHeader: file.thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
             },
-            metadata: file.metadata,
+            metadata: {
+                encryptedData: file.metadata.encryptedDataB64,
+                decryptionHeader: file.metadata.decryptionHeaderB64,
+            },
             pubMagicMetadata: file.pubMagicMetadata,
         };
         return backupedFile;

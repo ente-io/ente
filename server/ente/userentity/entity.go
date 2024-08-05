@@ -9,6 +9,8 @@ type EntityType string
 const (
 	Location EntityType = "location"
 	Person   EntityType = "person"
+	// PersonV2 is a new version of Person entity, where the data is gzipped before encryption
+	PersonV2 EntityType = "person_v2"
 )
 
 type EntityKey struct {

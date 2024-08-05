@@ -1,6 +1,7 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { FILE_TYPE } from "@/media/file-type";
+import { ItemVisibility } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
@@ -13,7 +14,6 @@ import {
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
 } from "@/new/photos/types/file";
-import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
@@ -53,7 +53,7 @@ export async function downloadFile(file: EnteFile) {
         let fileBlob = await new Response(
             await DownloadManager.getFile(file),
         ).blob();
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(file.metadata.title, fileBlob);
             const image = new File([imageData], imageFileName);
@@ -177,6 +177,7 @@ export async function decryptFile(
         return {
             ...restFileProps,
             key: fileKey,
+            // @ts-expect-error TODO: Need to use zod here.
             metadata: fileMetadata,
             magicMetadata: fileMagicMetadata,
             pubMagicMetadata: filePubMagicMetadata,
@@ -189,7 +190,7 @@ export async function decryptFile(
 
 export async function changeFilesVisibility(
     files: EnteFile[],
-    visibility: VISIBILITY_STATE,
+    visibility: ItemVisibility,
 ): Promise<EnteFile[]> {
     const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
@@ -450,7 +451,7 @@ async function downloadFileDesktop(
     const stream = await DownloadManager.getFile(file);
     const updatedStream = await updateExifIfNeededAndPossible(file, stream);
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+    if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(updatedStream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(file.metadata.title, fileBlob);
@@ -495,8 +496,8 @@ async function downloadFileDesktop(
     }
 }
 
-export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+export const isImageOrVideo = (fileType: FileType) =>
+    [FileType.image, FileType.video].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);
@@ -657,10 +658,10 @@ export const handleFileOps = async (
             fixTimeHelper(files, setFixCreationTimeAttributes);
             break;
         case FILE_OPS_TYPE.ARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.ARCHIVED);
+            await changeFilesVisibility(files, ItemVisibility.archived);
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.VISIBLE);
+            await changeFilesVisibility(files, ItemVisibility.visible);
             break;
     }
 };

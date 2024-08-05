@@ -1,11 +1,11 @@
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { Overlay } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
 
 interface Iprops {
-    fileType: FILE_TYPE;
+    fileType: FileType;
 }
 
 const CenteredOverlay = styled(Overlay)`
@@ -29,7 +29,7 @@ export const StaticThumbnail = (props: Iprops) => {
                 },
             })}
         >
-            {props.fileType !== FILE_TYPE.VIDEO ? (
+            {props.fileType !== FileType.video ? (
                 <PhotoOutlined />
             ) : (
                 <PlayCircleOutlineOutlined />

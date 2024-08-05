@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
+import { ItemVisibility } from "@/media/file-metadata";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
@@ -209,11 +209,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const archiveCollection = () => {
-        changeCollectionVisibility(activeCollection, VISIBILITY_STATE.ARCHIVED);
+        changeCollectionVisibility(activeCollection, ItemVisibility.archived);
     };
 
     const unArchiveCollection = () => {
-        changeCollectionVisibility(activeCollection, VISIBILITY_STATE.VISIBLE);
+        changeCollectionVisibility(activeCollection, ItemVisibility.visible);
     };
 
     const downloadCollection = () => {
@@ -335,14 +335,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const hideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
-            VISIBILITY_STATE.HIDDEN,
+            ItemVisibility.hidden,
         );
         setActiveCollectionID(ALL_SECTION);
     };
     const unHideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
-            VISIBILITY_STATE.VISIBLE,
+            ItemVisibility.visible,
         );
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };

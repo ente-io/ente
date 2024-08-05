@@ -28,7 +28,7 @@ class FFProbeKeys {
   static const date = 'date';
   static const disposition = 'disposition';
   static const duration = 'duration';
-  static const quickTimeLocation  ="com.apple.quicktime.location.ISO6709";
+  static const quickTimeLocation = "com.apple.quicktime.location.ISO6709";
   static const durationMicros = 'duration_us';
   static const encoder = 'encoder';
   static const extraDataSize = 'extradata_size';
@@ -70,6 +70,8 @@ class FFProbeKeys {
   static const vendorId = 'vendor_id';
   static const width = 'width';
   static const xiaomiSlowMoment = 'com.xiaomi.slow_moment';
+  static const sideDataList = 'side_data_list';
+  static const rotation = 'rotation';
 }
 
 class MediaStreamTypes {

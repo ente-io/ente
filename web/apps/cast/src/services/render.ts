@@ -8,7 +8,7 @@
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
@@ -212,6 +212,7 @@ const decryptEnteFile = async (
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
+            // @ts-expect-error TODO: Need to use zod here.
             data: await worker.decryptMetadata(
                 magicMetadata.data,
                 magicMetadata.header,
@@ -222,6 +223,7 @@ const decryptEnteFile = async (
     if (pubMagicMetadata?.data) {
         filePubMagicMetadata = {
             ...pubMagicMetadata,
+            // @ts-expect-error TODO: Need to use zod here.
             data: await worker.decryptMetadata(
                 pubMagicMetadata.data,
                 pubMagicMetadata.header,
@@ -237,9 +239,11 @@ const decryptEnteFile = async (
         pubMagicMetadata: filePubMagicMetadata,
     };
     if (file.pubMagicMetadata?.data.editedTime) {
+        // @ts-expect-error TODO: Need to use zod here.
         file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
     }
     if (file.pubMagicMetadata?.data.editedName) {
+        // @ts-expect-error TODO: Need to use zod here.
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
     // @ts-expect-error TODO: The core types need to be updated to allow the
@@ -268,7 +272,7 @@ const isFileEligible = (file: EnteFile) => {
 
 const isImageOrLivePhoto = (file: EnteFile) => {
     const fileType = file.metadata.fileType;
-    return fileType == FILE_TYPE.IMAGE || fileType == FILE_TYPE.LIVE_PHOTO;
+    return fileType == FileType.image || fileType == FileType.livePhoto;
 };
 
 /**
@@ -289,7 +293,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
 
     let fileName = file.metadata.title;
-    if (!shouldUseThumbnail && file.metadata.fileType == FILE_TYPE.LIVE_PHOTO) {
+    if (!shouldUseThumbnail && file.metadata.fileType == FileType.livePhoto) {
         const { imageData, imageFileName } = await decodeLivePhoto(
             fileName,
             blob,

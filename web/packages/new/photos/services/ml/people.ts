@@ -5,8 +5,7 @@ export interface Person {
     displayFaceId: string;
 }
 
-// TODO-ML(MR): Forced disable clustering. It doesn't currently work,
-// need to finalize it before we move out of beta.
+// Forced disable clustering. It doesn't currently work.
 //
 // > Error: Failed to execute 'transferToImageBitmap' on
 // > 'OffscreenCanvas': ImageBitmap construction failed

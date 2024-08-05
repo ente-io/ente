@@ -143,6 +143,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
             }
 
             const entityKey = await getEntityKey(type);
+            // @ts-expect-error TODO: Need to use zod here.
             const newDecryptedEntities: Array<Entity<T>> = await Promise.all(
                 response.diff.map(async (entity: EncryptedEntity) => {
                     if (entity.isDeleted) {

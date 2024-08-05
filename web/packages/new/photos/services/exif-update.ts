@@ -1,6 +1,6 @@
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import piexif from "piexifjs";
 import type { EnteFile } from "../types/file";
 
@@ -30,7 +30,7 @@ export const updateExifIfNeededAndPossible = async (
     stream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> => {
     // Not needed: Not an image.
-    if (enteFile.metadata.fileType != FILE_TYPE.IMAGE) return stream;
+    if (enteFile.metadata.fileType != FileType.image) return stream;
 
     // Not needed: Time was not edited.
     // TODO: Until the types reflect reality
@@ -121,9 +121,18 @@ const dataURLToBlob = (dataURI: string) =>
  * DateTimeOriginal tag.
  *
  * See: [Note: Exif dates]
+ *
+ * ---
+ *
+ * TODO: This functionality is deprecated. The library we use here is
+ * unmaintained and there are no comprehensive other JS libs.
+ *
+ * Instead of doing this in this selective way, we should provide a CLI tool
+ * with better format support and more comprehensive handling of Exif and other
+ * metadata fields (like captions) that can be used by the user to modify their
+ * original from the Ente sidecar if they so wish.
  */
 const convertToExifDateFormat = (date: Date) => {
-    // TODO: Exif - Handle offsettime if present
     const YYYY = zeroPad(date.getFullYear(), 4);
     // JavaScript getMonth is zero-indexed, we want one-indexed.
     const MM = zeroPad(date.getMonth() + 1, 2);

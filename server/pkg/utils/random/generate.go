@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
+	"unicode"
 )
 
 func GenerateSixDigitOtp() (string, error) {
@@ -39,4 +40,13 @@ func GenerateAlphaNumString(length int) (string, error) {
 		result[i] = alphaNum[ri]
 	}
 	return string(result), nil
+}
+
+func IsAlphanumeric(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }
