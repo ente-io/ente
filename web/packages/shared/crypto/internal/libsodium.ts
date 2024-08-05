@@ -113,15 +113,27 @@ export async function fromHex(input: string) {
 /**
  * Encrypt the given {@link data} using the given (Base64 encoded) key.
  *
- * This uses the same stream encryption algorithm pair (XChaCha20 stream cipher
- * with Poly1305 MAC authentication) that we use for encrypting, well, other
- * streams, like the file's contents.
+ * This uses the same stream encryption algorithm (XChaCha20 stream cipher with
+ * Poly1305 MAC authentication) that we use for encrypting other streams, in
+ * particular the actual file's contents.
  *
  * The difference here is that this function does a one shot instead of a
- * streaming encryption. As such, this is only meant to be used for relatively
- * small amounts of data.
+ * streaming encryption. This is only meant to be used for relatively small
+ * amounts of data (few MBs).
  *
- * Ref: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ *
+ * Libsodium also provides the `crypto_secretbox_easy` APIs for one shot
+ * encryption, which we do use in other places where we need to one shot
+ * encryption of independent bits of data.
+ *
+ * See: https://doc.libsodium.org/secret-key_cryptography/secretbox
+ *
+ * The difference here is that this function is meant to used for data
+ * associated with a file. There is no technical reason to do it that way, just
+ * that all data associated with a file, including its actual contents, use the
+ * same underlying (streaming) libsodium APIs. While other independent free
+ * standing encryption needs are covered using the secretbox APIs.
  *
  * @param data A {@link Uint8Array} containing the bytes that we want to
  * encrypt.

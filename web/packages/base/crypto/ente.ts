@@ -22,6 +22,8 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 /**
  * Encrypt arbitrary data associated with a file using the file's key.
  *
+ * Use {@link decryptFileAssociatedData} to decrypt the result.
+ *
  * See {@link encryptChaChaOneShot} for the implementation details.
  *
  * @param data The data (bytes) to encrypt.
@@ -33,6 +35,34 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
  */
 export const encryptFileAssociatedData = (data: Uint8Array, keyB64: string) =>
     libsodium.encryptChaChaOneShot(data, keyB64);
+
+/**
+ * Decrypt arbitrary data associated with a file using the file's key.
+ *
+ * This is the sibling of {@link encryptFileAssociatedData}.
+ *
+ * @param encryptedData A {@link Base64 encoded string containing the encrypted data.
+ *
+ * @param headerB64 Base64 encoded string containing the decryption header
+ * produced during encryption.
+ *
+ * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * expected to be the key of the file with which {@link encryptedDataB64} is
+ * associated.
+ *
+ * @returns The decrypted metadata bytes.
+ */
+export const decryptFileAssociatedDataFromB64 = async (
+    encryptedDataB64: string,
+    decryptionHeaderB64: string,
+    keyB64: string,
+) =>
+    libsodium.decryptChaChaOneShot(
+        await libsodium.fromB64(encryptedDataB64),
+        await libsodium.fromB64(decryptionHeaderB64),
+        keyB64,
+    );
+
 
 /**
  * A variant of {@link encryptFileAssociatedData} that returns the Base64
