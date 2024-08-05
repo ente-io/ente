@@ -13,7 +13,7 @@ import {
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
 } from "@/new/photos/types/file";
-import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
+import { FileVisibility } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
@@ -190,7 +190,7 @@ export async function decryptFile(
 
 export async function changeFilesVisibility(
     files: EnteFile[],
-    visibility: VISIBILITY_STATE,
+    visibility: FileVisibility,
 ): Promise<EnteFile[]> {
     const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
@@ -658,10 +658,10 @@ export const handleFileOps = async (
             fixTimeHelper(files, setFixCreationTimeAttributes);
             break;
         case FILE_OPS_TYPE.ARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.ARCHIVED);
+            await changeFilesVisibility(files, FileVisibility.ARCHIVED);
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.VISIBLE);
+            await changeFilesVisibility(files, FileVisibility.VISIBLE);
             break;
     }
 };

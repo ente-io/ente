@@ -1,6 +1,6 @@
 import type { Metadata } from "@/media/file-metadata";
 import {
-    VISIBILITY_STATE,
+    FileVisibility,
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
 } from "./magicMetadata";
@@ -110,7 +110,7 @@ export interface FileWithUpdatedPublicMagicMetadata {
 }
 
 export interface FileMagicMetadataProps {
-    visibility?: VISIBILITY_STATE;
+    visibility?: FileVisibility;
     filePaths?: string[];
 }
 

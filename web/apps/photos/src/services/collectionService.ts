@@ -4,9 +4,9 @@ import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
+    FileVisibility,
     SUB_TYPE,
     UpdateMagicMetadataRequest,
-    VISIBILITY_STATE,
 } from "@/new/photos/types/magicMetadata";
 import { batch } from "@/utils/array";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
@@ -1375,7 +1375,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 export function createHiddenCollection() {
     return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
         subType: SUB_TYPE.DEFAULT_HIDDEN,
-        visibility: VISIBILITY_STATE.HIDDEN,
+        visibility: FileVisibility.HIDDEN,
     });
 }
 

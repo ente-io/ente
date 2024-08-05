@@ -7,7 +7,7 @@ export interface MagicMetadataCore<T> {
 
 export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
-export enum VISIBILITY_STATE {
+export enum FileVisibility {
     VISIBLE = 0,
     ARCHIVED = 1,
     HIDDEN = 2,
