@@ -88,13 +88,50 @@ export interface Metadata {
 }
 
 /**
- * Mutable metadata associated with an {@link EnteFile}.
+ * Mutable private metadata associated with an {@link EnteFile}.
  *
  * -   Unlike {@link Metadata}, this can change after the file has been
  *     uploaded.
  *
- * -   Unlike {@link MagicMetadata}, this is available to all the people with
- *     whom the file has been shared.
+ * -   Unlike {@link PublicMagicMetadata}, this is only available to the owner
+ *     of the file.
+ *
+ * For historical reasons, the unqualified phrase "magic metadata" in various
+ * APIs refers to the (this) private metadata, even though the mutable public
+ * metadata is the much more frequently used of the two. See: [Note: Metadatum].
+ */
+export interface PrivateMagicMetadata {
+    /**
+     * The visibility of the file.
+     *
+     * The file's visibility is user specific attribute, and thus we keep it in
+     * the private magic metadata. This allows the file's owner to share a file
+     * and independently edit its visibility without revealing their visibility
+     * preference to the other people with whom they have shared the file.
+     */
+    visibility?: ItemVisibility;
+}
+
+/**
+ * The visibility of an Ente file or collection.
+ */
+export enum ItemVisibility {
+    /** The normal state - The item is visible. */
+    visible = 0,
+    /** The item has been archived. */
+    archived = 1,
+    /** The item has been hidden. */
+    hidden = 2,
+}
+
+/**
+ * Mutable public metadata associated with an {@link EnteFile}.
+ *
+ * -   Unlike {@link Metadata}, this can change after the file has been
+ *     uploaded.
+ *
+ * -   Unlike {@link PrivateMagicMetadata}, this is available to all the people
+ *     with whom the file has been shared.
  *
  * For more details, see [Note: Metadatum].
  */
@@ -200,7 +237,7 @@ export type EncryptMetadataF = typeof encryptMetadata;
  */
 export const updateMagicMetadataRequest = async (
     enteFile: EnteFile,
-    metadata: PublicMagicMetadata,
+    metadata: PrivateMagicMetadata | PublicMagicMetadata,
     metadataVersion: number,
     encryptMetadataF: EncryptMetadataF,
 ): Promise<UpdateMagicMetadataRequest> => {

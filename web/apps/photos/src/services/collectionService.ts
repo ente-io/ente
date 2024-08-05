@@ -4,10 +4,10 @@ import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
-    ItemVisibility,
     SUB_TYPE,
     UpdateMagicMetadataRequest,
 } from "@/new/photos/types/magicMetadata";
+import { ItemVisibility } from "@/media/file-metadata";
 import { batch } from "@/utils/array";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError } from "@ente/shared/error";

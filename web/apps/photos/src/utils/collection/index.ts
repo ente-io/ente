@@ -1,8 +1,9 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import { ItemVisibility } from "@/media/file-metadata";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
-import { ItemVisibility, SUB_TYPE } from "@/new/photos/types/magicMetadata";
+import { SUB_TYPE } from "@/new/photos/types/magicMetadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";

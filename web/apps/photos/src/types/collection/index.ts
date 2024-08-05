@@ -1,7 +1,7 @@
+import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
-    ItemVisibility,
     MagicMetadataCore,
     SUB_TYPE,
 } from "@/new/photos/types/magicMetadata";

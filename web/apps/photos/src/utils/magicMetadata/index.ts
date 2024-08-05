@@ -1,8 +1,6 @@
+import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
-import {
-    ItemVisibility,
-    MagicMetadataCore,
-} from "@/new/photos/types/magicMetadata";
+import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Collection } from "types/collection";
 

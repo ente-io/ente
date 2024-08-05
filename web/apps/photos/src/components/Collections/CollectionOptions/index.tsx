@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { ItemVisibility } from "@/new/photos/types/magicMetadata";
+import { ItemVisibility } from "@/media/file-metadata";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";

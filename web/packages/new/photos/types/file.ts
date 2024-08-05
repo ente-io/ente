@@ -1,6 +1,5 @@
-import type { Metadata } from "@/media/file-metadata";
+import { type Metadata, ItemVisibility } from "@/media/file-metadata";
 import {
-    ItemVisibility,
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
 } from "./magicMetadata";
