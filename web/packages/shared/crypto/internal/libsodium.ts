@@ -110,6 +110,25 @@ export async function fromHex(input: string) {
     return await toB64(sodium.from_hex(input));
 }
 
+/**
+ * Encrypt the given {@link data} using the given (Base64 encoded) key.
+ *
+ * This uses the same stream encryption algorithm pair (XChaCha20 stream cipher
+ * with Poly1305 MAC authentication) that we use for encrypting, well, other
+ * streams, like the file's contents. The difference here is that this function
+ * does a one shot instead of a streaming encryption.
+ *
+ * Ref: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ *
+ * @param data A {@link Uint8Array} containing the bytes that we want to
+ * encrypt.
+ *
+ * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * usually be the key associated with a file to which {@link data} relates to.
+ *
+ * @returns The encrypted data and decryption header pair. Both these values are
+ * needed to decrypt the data. The header does not need to be secret.
+ */
 export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     await sodium.ready;
 

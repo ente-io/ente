@@ -39,8 +39,8 @@ export const encryptFileMetadata = async (
  * @param headerB64 Base64 encoded string containing the decryption header
  * produced during encryption.
  *
- * @param keyB64 Base64 encoded string containing the encryption key (this'll
- * generally be the file's key).
+ * @param keyB64 Base64 encoded string containing the encryption key. This will
+ * generally the key of the file whose metadata this is.
  *
  * @returns The decrypted metadata bytes.
  */
