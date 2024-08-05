@@ -1,7 +1,7 @@
 import { encryptMetadata } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { EnteFile } from "@/new/photos/types/file";
+import { type EnteFile } from "@/new/photos/types/file";
 import { FileType } from "./file-type";
 
 /**
@@ -229,6 +229,29 @@ export const updateMagicMetadataRequest = async (
     };
 };
 
+/**
+ * Update the magic metadata for a list of files.
+ *
+ * @param request The list of file ids and the updated encrypted magic metadata
+ * associated with each of them.
+ */
+export const putFilesMagicMetadata = async (
+    request: UpdateMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/files/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(request),
+        }),
+    );
+
+/**
+ * Update the public magic metadata for a list of files.
+ *
+ * @param request The list of file ids and the updated encrypted magic metadata
+ * associated with each of them.
+ */
 export const putFilesPublicMagicMetadata = async (
     request: UpdateMagicMetadataRequest,
 ) =>
