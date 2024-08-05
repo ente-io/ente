@@ -245,6 +245,11 @@ interface LocalFileAttributes<
     decryptionHeader: string;
 }
 
+interface EncryptedMetadata {
+    encryptedDataB64: string;
+    decryptionHeaderB64: string;
+}
+
 interface EncryptionResult<
     T extends string | Uint8Array | EncryptedFileStream,
 > {
@@ -255,7 +260,7 @@ interface EncryptionResult<
 interface ProcessedFile {
     file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
-    metadata: LocalFileAttributes<string>;
+    metadata: EncryptedMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -1124,20 +1129,22 @@ const encryptFile = async (
         fileKey,
     );
 
-    const { file: encryptedMetadata } = await worker.encryptMetadata(
+    const encryptedMetadata = await worker.encryptMetadata2(
         file.metadata,
         fileKey,
     );
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     if (file.pubMagicMetadata) {
-        const { file: encryptedPubMagicMetadataData } =
-            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
+        const encryptedPubMagicMetadataData = await worker.encryptMetadata2(
+            file.pubMagicMetadata.data,
+            fileKey,
+        );
         encryptedPubMagicMetadata = {
             version: file.pubMagicMetadata.version,
             count: file.pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedData,
-            header: encryptedPubMagicMetadataData.decryptionHeader,
+            data: encryptedPubMagicMetadataData.encryptedDataB64,
+            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
         };
     }
 
@@ -1267,7 +1274,10 @@ const uploadToBucket = async (
                 decryptionHeader: file.thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
             },
-            metadata: file.metadata,
+            metadata: {
+                encryptedData: file.metadata.encryptedDataB64,
+                decryptionHeader: file.metadata.decryptionHeaderB64,
+            },
             pubMagicMetadata: file.pubMagicMetadata,
         };
         return backupedFile;
