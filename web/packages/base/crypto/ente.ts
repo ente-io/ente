@@ -76,8 +76,7 @@ export const encryptFileMetadata = async (
     metadata: Record<string, unknown>,
     keyB64: string,
 ) => {
-    const textEncoder = new TextEncoder();
-    const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
+    const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
 
     const { encryptedData, decryptionHeaderB64 } =
         await encryptFileAssociatedData(encodedMetadata, keyB64);
@@ -96,10 +95,10 @@ export const encryptFileMetadata = async (
  *
  * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
  *
- * @param header A Base64 string containing the bytes of the decryption header
- * that was produced during encryption.
+ * @param headerB64 A Base64 string containing the decryption header that was
+ * produced during encryption.
  *
- * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * @param keyB64 A Base64 encoded string containing the encryption key. This is
  * expected to be the key of the file with which {@link encryptedDataB64} is
  * associated.
  *
@@ -112,16 +111,15 @@ export const decryptFileAssociatedData = libsodium.decryptChaChaOneShot2;
  *
  * This is the sibling of {@link encryptFileEmbedding}.
  *
- * @param encryptedDataB64 Base64 encoded string containing the encrypted data.
+ * @param encryptedDataB64 A Base64 string containing the encrypted embedding.
  *
- * @param headerB64 Base64 encoded string containing the decryption header
- * produced during encryption.
+ * @param headerB64 A Base64 string containing the decryption header produced
+ * during encryption.
  *
- * @param keyB64 Base64 encoded string containing the encryption key. This is
- * expected to be the key of the file with which {@link encryptedDataB64} is
- * associated.
+ * @param keyB64 A Base64 string containing the encryption key. This is expected
+ * to be the key of the file with which {@link encryptedDataB64} is associated.
  *
- * @returns The decrypted metadata bytes.
+ * @returns The decrypted metadata JSON object.
  */
 export const decryptFileEmbedding = async (
     encryptedDataB64: string,
@@ -133,3 +131,36 @@ export const decryptFileEmbedding = async (
         decryptionHeaderB64,
         keyB64,
     );
+
+/**
+ * Decrypt the metadata associated with a file using the file's key.
+ *
+ * This is the sibling of {@link decryptFileMetadata}.
+ *
+ * @param encryptedDataB64 Base64 encoded string containing the encrypted data.
+ *
+ * @param headerB64 Base64 encoded string containing the decryption header
+ * produced during encryption.
+ *
+ * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * expected to be the key of the file with which {@link encryptedDataB64} is
+ * associated.
+ *
+ * @returns The decrypted JSON value. Since TypeScript does not have a native
+ * JSON type, we need to return it as an `unknown`.
+ */
+
+export const decryptFileMetadata = async (
+    encryptedDataB64: string,
+    decryptionHeaderB64: string,
+    keyB64: string,
+) =>
+    JSON.parse(
+        new TextDecoder().decode(
+            await decryptFileAssociatedData(
+                await libsodium.fromB64(encryptedDataB64),
+                decryptionHeaderB64,
+                keyB64,
+            ),
+        ),
+    ) as unknown;
