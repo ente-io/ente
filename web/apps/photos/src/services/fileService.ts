@@ -192,7 +192,7 @@ export const updateFileMagicMetadata = async (
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
-            await cryptoWorker.encryptMetadata2(
+            await cryptoWorker.encryptMetadata(
                 updatedMagicMetadata.data,
                 file.key,
             );
@@ -239,7 +239,7 @@ export const updateFilePublicMagicMetadata = async (
         updatedPublicMagicMetadata: updatePublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
-            await cryptoWorker.encryptMetadata2(
+            await cryptoWorker.encryptMetadata(
                 updatePublicMagicMetadata.data,
                 file.key,
             );

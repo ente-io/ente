@@ -16,7 +16,7 @@ export class DedicatedCryptoWorker {
         return libsodium.decryptChaCha(fileData, header, key);
     }
 
-    async encryptMetadata2(metadata: unknown, keyB64: string) {
+    async encryptMetadata(metadata: unknown, keyB64: string) {
         return ente.encryptMetadata(metadata, keyB64);
     }
 

@@ -1133,14 +1133,14 @@ const encryptFile = async (
         decryptionHeader: thumbDecryptionHeader,
     };
 
-    const encryptedMetadata = await worker.encryptMetadata2(
+    const encryptedMetadata = await worker.encryptMetadata(
         file.metadata,
         fileKey,
     );
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     if (file.pubMagicMetadata) {
-        const encryptedPubMagicMetadataData = await worker.encryptMetadata2(
+        const encryptedPubMagicMetadataData = await worker.encryptMetadata(
             file.pubMagicMetadata.data,
             fileKey,
         );

@@ -427,7 +427,7 @@ const createCollection = async (
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
             const encryptedMagicMetadataProps =
-                await cryptoWorker.encryptMetadata2(
+                await cryptoWorker.encryptMetadata(
                     magicMetadataProps,
                     collectionKey,
                 );
@@ -800,7 +800,7 @@ export const updateCollectionMagicMetadata = async (
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await cryptoWorker.encryptMetadata2(
+        await cryptoWorker.encryptMetadata(
             updatedMagicMetadata.data,
             collection.key,
         );
@@ -845,7 +845,7 @@ export const updateSharedCollectionMagicMetadata = async (
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await cryptoWorker.encryptMetadata2(
+        await cryptoWorker.encryptMetadata(
             updatedMagicMetadata.data,
             collection.key,
         );
@@ -890,7 +890,7 @@ export const updatePublicCollectionMagicMetadata = async (
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await cryptoWorker.encryptMetadata2(
+        await cryptoWorker.encryptMetadata(
             updatedPublicMagicMetadata.data,
             collection.key,
         );
