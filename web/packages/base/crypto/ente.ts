@@ -20,25 +20,27 @@
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 
 /**
- * Encrypt arbitrary data associated with a file using the file's key.
+ * Encrypt arbitrary data associated with an Ente object (file, collection,
+ * entity) using the object's key.
  *
- * Use {@link decryptFileAssociatedData} to decrypt the result.
+ * Use {@link decryptAssociatedData} to decrypt the result.
  *
  * See {@link encryptChaChaOneShot} for the implementation details.
  *
  * @param data A {@link Uint8Array} containing the bytes to encrypt.
  *
- * @param keyB64 Base64 encoded string containing the encryption key. This is
- * expected to the key of the file with which {@link data} is associated.
+ * @param keyB64 Base64 string containing the encryption key. This is expected
+ * to the key of the object with which {@link data} is associated. For example,
+ * if this is data associated with a file, then this will be the file's key.
  *
  * @returns The encrypted data and the (Base64 encoded) decryption header.
  */
-export const encryptFileAssociatedData = libsodium.encryptChaChaOneShot;
+export const encryptAssociatedData = libsodium.encryptChaChaOneShot;
 
 /**
  * Encrypted the embedding associated with a file using the file's key.
  *
- * This as a variant of {@link encryptFileAssociatedData} tailored for
+ * This as a variant of {@link encryptAssociatedData} tailored for
  * encrypting the embeddings (a.k.a. derived data) associated with a file. In
  * particular, it returns the encrypted data in the result as a Base64 string
  * instead of its bytes.
@@ -49,8 +51,10 @@ export const encryptFileEmbedding = async (
     data: Uint8Array,
     keyB64: string,
 ) => {
-    const { encryptedData, decryptionHeaderB64 } =
-        await encryptFileAssociatedData(data, keyB64);
+    const { encryptedData, decryptionHeaderB64 } = await encryptAssociatedData(
+        data,
+        keyB64,
+    );
     return {
         encryptedDataB64: await libsodium.toB64(encryptedData),
         decryptionHeaderB64,
@@ -59,11 +63,12 @@ export const encryptFileEmbedding = async (
 
 /**
  * Encrypt the metadata associated with an Ente object (file, collection or
- * entity) using that object's key.
+ * entity) using the object's key.
  *
- * This is a variant of {@link encryptFileAssociatedData} tailored for
- * encrypting any of the metadata fields (See: [Note: Metadatum]) associated
- * with a file, collection or entity.
+ * This is a variant of {@link encryptAssociatedData} tailored for encrypting
+ * any arbitrary metadata associated with an Ente object. For example, it is
+ * used for encrypting the various metadata fields (See: [Note: Metadatum])
+ * associated with a file, using that file's key.
  *
  * Instead of raw bytes, it takes as input an arbitrary JSON object which it
  * encodes into a string, and encrypts that. And instead of returning the raw
@@ -80,8 +85,10 @@ export const encryptFileEmbedding = async (
 export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
     const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
 
-    const { encryptedData, decryptionHeaderB64 } =
-        await encryptFileAssociatedData(encodedMetadata, keyB64);
+    const { encryptedData, decryptionHeaderB64 } = await encryptAssociatedData(
+        encodedMetadata,
+        keyB64,
+    );
     return {
         encryptedDataB64: await libsodium.toB64(encryptedData),
         decryptionHeaderB64,
@@ -89,9 +96,10 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
 };
 
 /**
- * Decrypt arbitrary data associated with a file using the file's key.
+ * Decrypt arbitrary data associated with an Ente object (file, collection or
+ * entity) using the object's key.
  *
- * This is the sibling of {@link encryptFileAssociatedData}.
+ * This is the sibling of {@link encryptAssociatedData}.
  *
  * See {@link decryptChaChaOneShot2} for the implementation details.
  *
@@ -106,7 +114,7 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
  *
  * @returns The decrypted bytes.
  */
-export const decryptFileAssociatedData = libsodium.decryptChaChaOneShot2;
+export const decryptAssociatedData = libsodium.decryptChaChaOneShot2;
 
 /**
  * Decrypt the embedding associated with a file using the file's key.
@@ -128,7 +136,7 @@ export const decryptFileEmbedding = async (
     decryptionHeaderB64: string,
     keyB64: string,
 ) =>
-    decryptFileAssociatedData(
+    decryptAssociatedData(
         await libsodium.fromB64(encryptedDataB64),
         decryptionHeaderB64,
         keyB64,
@@ -136,7 +144,7 @@ export const decryptFileEmbedding = async (
 
 /**
  * Decrypt the metadata associated with an Ente object (file, collection or
- * entity) using that object's key.
+ * entity) using the object's key.
  *
  * This is the sibling of {@link decryptMetadata}.
  *
@@ -146,7 +154,7 @@ export const decryptFileEmbedding = async (
  * produced during encryption.
  *
  * @param keyB64 Base64 encoded string containing the encryption key. This is
- * expected to be the key of the file with which {@link encryptedDataB64} is
+ * expected to be the key of the object with which {@link encryptedDataB64} is
  * associated.
  *
  * @returns The decrypted JSON value. Since TypeScript does not have a native
@@ -160,7 +168,7 @@ export const decryptMetadata = async (
 ) =>
     JSON.parse(
         new TextDecoder().decode(
-            await decryptFileAssociatedData(
+            await decryptAssociatedData(
                 await libsodium.fromB64(encryptedDataB64),
                 decryptionHeaderB64,
                 keyB64,
