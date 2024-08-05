@@ -29,11 +29,11 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
  *
  * @param data A {@link Uint8Array} containing the bytes to encrypt.
  *
- * @param keyB64 Base64 string containing the encryption key. This is expected
+ * @param keyB64 base64 string containing the encryption key. This is expected
  * to the key of the object with which {@link data} is associated. For example,
  * if this is data associated with a file, then this will be the file's key.
  *
- * @returns The encrypted data and the (Base64 encoded) decryption header.
+ * @returns The encrypted data and the (base64 encoded) decryption header.
  */
 export const encryptAssociatedData = libsodium.encryptChaChaOneShot;
 
@@ -47,7 +47,7 @@ export const encryptAssociatedData = libsodium.encryptChaChaOneShot;
  * @param keyB64 The key associated with the file whose thumbnail this is.
  *
  * @returns The encrypted thumbnail, and the associated decryption header
- * (Base64 encoded).
+ * (base64 encoded).
  */
 export const encryptThumbnail = encryptAssociatedData;
 
@@ -56,7 +56,7 @@ export const encryptThumbnail = encryptAssociatedData;
  *
  * This as a variant of {@link encryptAssociatedData} tailored for
  * encrypting the embeddings (a.k.a. derived data) associated with a file. In
- * particular, it returns the encrypted data in the result as a Base64 string
+ * particular, it returns the encrypted data in the result as a base64 string
  * instead of its bytes.
  *
  * Use {@link decryptFileEmbedding} to decrypt the result.
@@ -86,7 +86,7 @@ export const encryptFileEmbedding = async (
  *
  * Instead of raw bytes, it takes as input an arbitrary JSON object which it
  * encodes into a string, and encrypts that. And instead of returning the raw
- * encrypted bytes, it returns their Base64 string representation.
+ * encrypted bytes, it returns their base64 string representation.
  *
  * Use {@link decryptMetadata} to decrypt the result.
  *
@@ -94,7 +94,7 @@ export const encryptFileEmbedding = async (
  * but since TypeScript currently doesn't have a native JSON type, it is typed
  * as an unknown.
  *
- * @returns The encrypted data and decryption header, both as Base64 strings.
+ * @returns The encrypted data and decryption header, both as base64 strings.
  */
 export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
     const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
@@ -119,12 +119,11 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
  *
  * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
  *
- * @param headerB64 A Base64 string containing the decryption header that was
+ * @param headerB64 A base64 string containing the decryption header that was
  * produced during encryption.
  *
- * @param keyB64 A Base64 encoded string containing the encryption key. This is
- * expected to be the key of the file with which {@link encryptedDataB64} is
- * associated.
+ * @param keyB64 A base64 string containing the encryption key. This is expected
+ * to be the key of the object to which {@link encryptedDataB64} is associated.
  *
  * @returns The decrypted bytes.
  */
@@ -135,12 +134,12 @@ export const decryptAssociatedData = libsodium.decryptChaChaOneShot2;
  *
  * This is the sibling of {@link encryptFileEmbedding}.
  *
- * @param encryptedDataB64 A Base64 string containing the encrypted embedding.
+ * @param encryptedDataB64 A base64 string containing the encrypted embedding.
  *
- * @param headerB64 A Base64 string containing the decryption header produced
+ * @param headerB64 A base64 string containing the decryption header produced
  * during encryption.
  *
- * @param keyB64 A Base64 string containing the encryption key. This is expected
+ * @param keyB64 A base64 string containing the encryption key. This is expected
  * to be the key of the file with which {@link encryptedDataB64} is associated.
  *
  * @returns The decrypted metadata JSON object.
@@ -162,12 +161,12 @@ export const decryptFileEmbedding = async (
  *
  * This is the sibling of {@link decryptMetadata}.
  *
- * @param encryptedDataB64 Base64 encoded string containing the encrypted data.
+ * @param encryptedDataB64 base64 encoded string containing the encrypted data.
  *
- * @param headerB64 Base64 encoded string containing the decryption header
+ * @param headerB64 base64 encoded string containing the decryption header
  * produced during encryption.
  *
- * @param keyB64 Base64 encoded string containing the encryption key. This is
+ * @param keyB64 base64 encoded string containing the encryption key. This is
  * expected to be the key of the object with which {@link encryptedDataB64} is
  * associated.
  *

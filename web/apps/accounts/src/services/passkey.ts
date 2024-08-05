@@ -169,7 +169,7 @@ const beginPasskeyRegistration = async (token: string) => {
     // binary data.
     //
     // Binary data in the returned `PublicKeyCredentialCreationOptions` are
-    // serialized as a "URLEncodedBase64", which is a URL-encoded Base64 string
+    // serialized as a "URLEncodedBase64", which is a URL-encoded base64 string
     // without any padding. The library is following the WebAuthn recommendation
     // when it does this:
     //

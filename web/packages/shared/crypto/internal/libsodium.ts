@@ -11,7 +11,7 @@ import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 
 /**
- * Convert a {@link Uint8Array} to a Base64 encoded string.
+ * Convert bytes ({@link Uint8Array}) to a base64 string.
  *
  * See also {@link toB64URLSafe} and {@link toB64URLSafeNoPadding}.
  */
@@ -21,7 +21,7 @@ export const toB64 = async (input: Uint8Array) => {
 };
 
 /**
- * Convert a Base64 encoded string to a {@link Uint8Array}.
+ * Convert a base64 string to bytes ({@link Uint8Array}).
  *
  * This is the converse of {@link toBase64}.
  */
@@ -31,7 +31,7 @@ export const fromB64 = async (input: string) => {
 };
 
 /**
- * Convert a {@link Uint8Array} to a URL-safe Base64 encoded string.
+ * Convert bytes ({@link Uint8Array}) to a URL-safe base64 string.
  *
  * See also {@link toB64URLSafe} and {@link toB64URLSafeNoPadding}.
  */
@@ -41,7 +41,7 @@ export const toB64URLSafe = async (input: Uint8Array) => {
 };
 
 /**
- * Convert a {@link Uint8Array} to a unpadded URL-safe Base64 encoded string.
+ * Convert bytes ({@link Uint8Array}) to a unpadded URL-safe base64 string.
  *
  * This differs from {@link toB64URLSafe} in that it does not append any
  * trailing padding character(s) "=" to make the resultant string's length be an
@@ -62,7 +62,7 @@ export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
 };
 
 /**
- * Convert a unpadded URL-safe Base64 encoded string to a {@link Uint8Array}.
+ * Convert a unpadded URL-safe base64 string to  bytes ({@link Uint8Array}).
  *
  * This is the converse of {@link toB64URLSafeNoPadding}, and does not expect
  * its input string's length to be a an integer multiple of 4.
@@ -111,7 +111,7 @@ export async function fromHex(input: string) {
 }
 
 /**
- * Encrypt the given {@link data} using the given (Base64 encoded) key.
+ * Encrypt the given {@link data} using the given (base64 encoded) key.
  *
  * Use {@link decryptChaChaOneShot} to decrypt the result.
  *
@@ -137,18 +137,19 @@ export async function fromHex(input: string) {
  * See: https://doc.libsodium.org/secret-key_cryptography/secretbox
  *
  * The difference here is that this function is meant to used for data
- * associated with a file. There is no technical reason to do it that way, just
- * that all data associated with a file, including its actual contents, use the
- * same underlying (streaming) libsodium APIs. While other independent free
- * standing encryption needs are covered using the secretbox APIs.
+ * associated with a file (or some other Ente object, like a collection or an
+ * entity). There is no technical reason to do it that way, just this way all
+ * data associated with a file, including its actual contents, use the same
+ * underlying (streaming) libsodium APIs. In other cases, where we have free
+ * standing independent data, we continue using the secretbox APIs for one shot
+ * encryption and decryption.
  *
  * @param data A {@link Uint8Array} containing the bytes that we want to
  * encrypt.
  *
- * @param keyB64 Base64 encoded string containing the encryption key. This is
- * usually be the key associated with a file to which {@link data} relates to.
+ * @param keyB64 A base64 string containing the encryption key.
  *
- * @returns The encrypted data (bytes) and decryption header pair (Base64
+ * @returns The encrypted data (bytes) and decryption header pair (base64
  * encoded string). Both these values are needed to decrypt the data. The header
  * does not need to be secret.
  */
@@ -254,10 +255,10 @@ export async function encryptFileChunk(
  *
  * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
  *
- * @param header A Base64 string containing the bytes of the decryption header
+ * @param header A base64 string containing the bytes of the decryption header
  * that was produced during encryption.
  *
- * @param keyB64 The Base64 string containing the key that was used to encrypt
+ * @param keyB64 The base64 string containing the key that was used to encrypt
  * the data.
  *
  * @returns The decrypted bytes.
@@ -528,7 +529,7 @@ export async function generateSaltToDeriveKey() {
 }
 
 /**
- * Generate a new public/private keypair, and return their Base64
+ * Generate a new public/private keypair, and return their base64
  * representations.
  */
 export const generateKeyPair = async () => {
