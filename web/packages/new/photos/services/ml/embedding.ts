@@ -1,7 +1,4 @@
-import {
-    decryptFileAssociatedDataFromB64,
-    encryptFileAssociatedDataToB64,
-} from "@/base/crypto/ente";
+import { decryptFileEmbedding, encryptFileEmbedding } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
@@ -198,7 +195,7 @@ export const fetchDerivedData = async (
         }
 
         try {
-            const decryptedBytes = await decryptFileAssociatedDataFromB64(
+            const decryptedBytes = await decryptFileEmbedding(
                 remoteEmbedding.encryptedEmbedding,
                 remoteEmbedding.decryptionHeader,
                 file.key,
@@ -297,7 +294,7 @@ const putEmbedding = async (
     embedding: Uint8Array,
 ) => {
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await encryptFileAssociatedDataToB64(embedding, enteFile.key);
+        await encryptFileEmbedding(embedding, enteFile.key);
 
     const res = await fetch(await apiURL("/embeddings"), {
         method: "PUT",

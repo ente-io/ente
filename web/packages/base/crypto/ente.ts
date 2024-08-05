@@ -36,15 +36,16 @@ import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 export const encryptFileAssociatedData = libsodium.encryptChaChaOneShot;
 
 /**
- * A variant of {@link encryptFileAssociatedData} that returns the Base64
- * encoded encrypted data instead of its raw bytes.
+ * Encrypted the embedding associated with a file using the file's key.
  *
- * This is the sibling of {@link decryptFileAssociatedDataFromB64}.
+ * This as a variant of {@link encryptFileAssociatedData} tailored for
+ * encrypting the embeddings (a.k.a. derived data) associated with a file. In
+ * particular, it returns the encrypted data in the result as a Base64 string
+ * instead of its bytes.
  *
- * It is useful in cases where the (encrypted) associated data needs to
- * transferred as the HTTP POST body.
+ * Use {@link decryptFileEmbedding} to decrypt the result.
  */
-export const encryptFileAssociatedDataToB64 = async (
+export const encryptFileEmbedding = async (
     data: Uint8Array,
     keyB64: string,
 ) => {
@@ -102,9 +103,9 @@ export const encryptFileMetadata = async (
 export const decryptFileAssociatedData = libsodium.decryptChaChaOneShot2;
 
 /**
- * Decrypt arbitrary data associated with a file using the file's key.
+ * Decrypt the embedding associated with a file using the file's key.
  *
- * This is the sibling of {@link encryptFileAssociatedDataToB64}.
+ * This is the sibling of {@link encryptFileEmbedding}.
  *
  * @param encryptedDataB64 Base64 encoded string containing the encrypted data.
  *
@@ -117,13 +118,13 @@ export const decryptFileAssociatedData = libsodium.decryptChaChaOneShot2;
  *
  * @returns The decrypted metadata bytes.
  */
-export const decryptFileAssociatedDataFromB64 = async (
+export const decryptFileEmbedding = async (
     encryptedDataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,
 ) =>
-    libsodium.decryptChaChaOneShot(
+    decryptFileAssociatedData(
         await libsodium.fromB64(encryptedDataB64),
-        await libsodium.fromB64(decryptionHeaderB64),
+        decryptionHeaderB64,
         keyB64,
     );
