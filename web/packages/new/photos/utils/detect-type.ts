@@ -1,12 +1,12 @@
 import { lowercaseExtension } from "@/base/file";
 import {
-    FILE_TYPE,
+    FileType,
     KnownFileTypeInfos,
     KnownNonMediaFileExtensions,
     type FileTypeInfo,
 } from "@/media/file-type";
 import { CustomError } from "@ente/shared/error";
-import FileType from "file-type";
+import FileTypeDetect from "file-type";
 
 /**
  * Read the file's initial contents or use the file's name to detect its type.
@@ -57,11 +57,11 @@ export const detectFileTypeInfoFromChunk = async (
 
         const mimeType = typeResult.mime;
 
-        let fileType: FILE_TYPE;
+        let fileType: FileType;
         if (mimeType.startsWith("image/")) {
-            fileType = FILE_TYPE.IMAGE;
+            fileType = FileType.image;
         } else if (mimeType.startsWith("video/")) {
-            fileType = FILE_TYPE.VIDEO;
+            fileType = FileType.video;
         } else {
             throw new Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
@@ -92,7 +92,7 @@ const readInitialChunkOfFile = async (file: File) => {
 };
 
 const detectFileTypeFromBuffer = async (buffer: Uint8Array) => {
-    const result = await FileType.fromBuffer(buffer);
+    const result = await FileTypeDetect.fromBuffer(buffer);
     if (!result)
         throw Error("Could not deduce file type from the file's contents");
     return result;

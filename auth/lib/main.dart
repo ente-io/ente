@@ -23,17 +23,15 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:privacy_screen/privacy_screen.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -85,7 +83,6 @@ void main() async {
   }
 
   await _runInForeground();
-  await _setupPrivacyScreen();
   if (Platform.isAndroid) {
     FlutterDisplayMode.setHighRefreshRate().ignore();
   }
@@ -115,7 +112,7 @@ Future<void> _runInForeground() async {
       AppLock(
         builder: (args) => App(locale: locale),
         lockScreen: const LockScreen(),
-        enabled: Configuration.instance.shouldShowLockScreen(),
+        enabled: await Configuration.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
@@ -174,24 +171,5 @@ Future<void> _init(bool bool, {String? via}) async {
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
-}
-
-Future<void> _setupPrivacyScreen() async {
-  if (!PlatformUtil.isMobile() || kDebugMode) return;
-  final brightness =
-      SchedulerBinding.instance.platformDispatcher.platformBrightness;
-  bool isInDarkMode = brightness == Brightness.dark;
-  await PrivacyScreen.instance.enable(
-    iosOptions: const PrivacyIosOptions(
-      enablePrivacy: true,
-      privacyImageName: "LaunchImage",
-      lockTrigger: IosLockTrigger.didEnterBackground,
-    ),
-    androidOptions: const PrivacyAndroidOptions(
-      enableSecure: true,
-    ),
-    backgroundColor: isInDarkMode ? Colors.black : Colors.white,
-    blurEffect:
-        isInDarkMode ? PrivacyBlurEffect.dark : PrivacyBlurEffect.extraLight,
-  );
+  await LockScreenSettings.instance.init();
 }

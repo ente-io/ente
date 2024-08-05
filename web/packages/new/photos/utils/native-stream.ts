@@ -6,8 +6,7 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron, ZipItem } from "@/base/types/ipc";
-import type { MLWorkerElectron } from "../services/ml/worker-types";
+import type { Electron, ElectronMLWorker, ZipItem } from "@/base/types/ipc";
 
 /**
  * Stream the given file or zip entry from the user's local file system.
@@ -18,7 +17,7 @@ import type { MLWorkerElectron } from "../services/ml/worker-types";
  *
  * To avoid accidentally invoking it in a non-desktop app context, it requires
  * the {@link Electron} (or a functionally similar) object as a parameter (even
- * though it doesn't use it).
+ * though it doesn't need or use it).
  *
  * @param pathOrZipItem Either the path on the file on the user's local file
  * system whose contents we want to stream. Or a tuple containing the path to a
@@ -36,7 +35,7 @@ import type { MLWorkerElectron } from "../services/ml/worker-types";
  *   reading, expressed as epoch milliseconds.
  */
 export const readStream = async (
-    _: Electron | MLWorkerElectron,
+    _: Electron | ElectronMLWorker,
     pathOrZipItem: string | ZipItem,
 ): Promise<{ response: Response; size: number; lastModifiedMs: number }> => {
     let url: URL;

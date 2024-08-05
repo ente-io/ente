@@ -5,7 +5,7 @@ client app. This is where Ente started. This is what had the [first
 commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5d276e37).
 
     commit a8cdc811fd20ca4289d8e779c97f08ef5d276e37
-    Author: Vishnu Mohandas <vishnumohandas@gmail.com>
+    Author: Vishnu Mohandas <v****@****.***>
     Date:   Wed Mar 25 01:29:36 2020 +0530
 
         Hello world

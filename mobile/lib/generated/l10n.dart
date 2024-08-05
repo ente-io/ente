@@ -5157,10 +5157,10 @@ class S {
     );
   }
 
-  /// `Remove from favorite`
+  /// `Remove from favorites`
   String get removeFromFavorite {
     return Intl.message(
-      'Remove from favorite',
+      'Remove from favorites',
       name: 'removeFromFavorite',
       desc: '',
       args: [],
@@ -9125,21 +9125,21 @@ class S {
     );
   }
 
-  /// `Auto lock`
-  String get autoLock {
-    return Intl.message(
-      'Auto lock',
-      name: 'autoLock',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
   String get swipeLockEnablePreSteps {
     return Intl.message(
       'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
       name: 'swipeLockEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto lock`
+  String get autoLock {
+    return Intl.message(
+      'Auto lock',
+      name: 'autoLock',
       desc: '',
       args: [],
     );
@@ -9160,6 +9160,86 @@ class S {
     return Intl.message(
       'Time after which the app locks after being put in the background',
       name: 'autoLockFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide content`
+  String get hideContent {
+    return Intl.message(
+      'Hide content',
+      name: 'hideContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides app content in the app switcher and disables screenshots`
+  String get hideContentDescriptionAndroid {
+    return Intl.message(
+      'Hides app content in the app switcher and disables screenshots',
+      name: 'hideContentDescriptionAndroid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hides app content in the app switcher`
+  String get hideContentDescriptionIos {
+    return Intl.message(
+      'Hides app content in the app switcher',
+      name: 'hideContentDescriptionIos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords`
+  String get passwordStrengthInfo {
+    return Intl.message(
+      'Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords',
+      name: 'passwordStrengthInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No quick links selected`
+  String get noQuickLinksSelected {
+    return Intl.message(
+      'No quick links selected',
+      name: 'noQuickLinksSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please select quick links to remove`
+  String get pleaseSelectQuickLinksToRemove {
+    return Intl.message(
+      'Please select quick links to remove',
+      name: 'pleaseSelectQuickLinksToRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove public links`
+  String get removePublicLinks {
+    return Intl.message(
+      'Remove public links',
+      name: 'removePublicLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove public links of all selected quick links.`
+  String get thisWillRemovePublicLinksOfAllSelectedQuickLinks {
+    return Intl.message(
+      'This will remove public links of all selected quick links.',
+      name: 'thisWillRemovePublicLinksOfAllSelectedQuickLinks',
       desc: '',
       args: [],
     );

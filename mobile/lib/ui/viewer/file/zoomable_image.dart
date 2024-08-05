@@ -14,8 +14,6 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/models/metadata/file_magic.dart";
-import "package:photos/services/file_magic_service.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
@@ -31,12 +29,12 @@ class ZoomableImage extends StatefulWidget {
 
   const ZoomableImage(
     this.photo, {
-    Key? key,
+    super.key,
     this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
     this.shouldCover = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ZoomableImage> createState() => _ZoomableImageState();
@@ -358,29 +356,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
     // forcefully get finalImageInfo is dimensions are not available in metadata
     if (finalImageInfo == null && canUpdateMetadata && !_photo.hasDimensions) {
       finalImageInfo = await getImageInfo(finalImageProvider);
-    }
-    if (finalImageInfo != null && canUpdateMetadata) {
-      _updateAspectRatioIfNeeded(_photo, finalImageInfo).ignore();
-    }
-  }
-
-  // Fallback logic to finish back fill and update aspect
-  // ratio if needed.
-  Future<void> _updateAspectRatioIfNeeded(
-    EnteFile enteFile,
-    ImageInfo imageInfo,
-  ) async {
-    final int h = imageInfo.image.height, w = imageInfo.image.width;
-    if (h != enteFile.height || w != enteFile.width) {
-      final logMessage =
-          'Updating aspect ratio for from ${enteFile.height}x${enteFile.width} to ${h}x$w';
-      _logger.info(logMessage);
-      await FileMagicService.instance.updatePublicMagicMetadata([
-        enteFile,
-      ], {
-        heightKey: h,
-        widthKey: w,
-      });
     }
   }
 

@@ -163,5 +163,16 @@
   },
   "noInternetConnection": "Ingen internetanslutning",
   "pleaseCheckYourInternetConnectionAndTryAgain": "Kontrollera din internetanslutning och försök igen.",
-  "loginSessionExpiredDetails": "Din session har upphört. Logga in igen."
+  "loginSessionExpiredDetails": "Din session har upphört. Logga in igen.",
+  "immediately": "Omedelbart",
+  "reEnterPassword": "Ange lösenord igen",
+  "reEnterPin": "Ange PIN-kod igen",
+  "next": "Nästa",
+  "tooManyIncorrectAttempts": "För många felaktiga försök",
+  "tapToUnlock": "Tryck för att låsa upp",
+  "setNewPassword": "Ange nytt lösenord",
+  "deviceLock": "Enhetslås",
+  "hideContent": "Dölj innehåll",
+  "enterPin": "Ange PIN-kod",
+  "setNewPin": "Ange ny PIN-kod"
 }

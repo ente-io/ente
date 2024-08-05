@@ -26,6 +26,7 @@ class EnteColorScheme {
   final Color fillMuted;
   final Color fillFaint;
   final Color fillFaintPressed;
+  final Color fillBaseGrey;
 
   // Stroke Colors
   final Color strokeBase;
@@ -74,6 +75,7 @@ class EnteColorScheme {
     this.fillMuted,
     this.fillFaint,
     this.fillFaintPressed,
+    this.fillBaseGrey,
     this.strokeBase,
     this.strokeMuted,
     this.strokeFaint,
@@ -114,6 +116,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   fillMutedLight,
   fillFaintLight,
   fillFaintPressedLight,
+  fillBaseGreyLight,
   strokeBaseLight,
   strokeMutedLight,
   strokeFaintLight,
@@ -142,6 +145,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   fillMutedDark,
   fillFaintDark,
   fillFaintPressedDark,
+  fillBaseGreyDark,
   strokeBaseDark,
   strokeMutedDark,
   strokeFaintDark,
@@ -189,6 +193,7 @@ const Color fillStrongLight = Color.fromRGBO(0, 0, 0, 0.24);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
 const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
+const Color fillBaseGreyLight = Color.fromRGBO(242, 242, 242, 1);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillBasePressedDark = Color.fromRGBO(255, 255, 255, 0.9);
@@ -196,6 +201,7 @@ const Color fillStrongDark = Color.fromRGBO(255, 255, 255, 0.32);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
+const Color fillBaseGreyDark = Color.fromRGBO(66, 66, 66, 1);
 
 // Stroke Colors
 const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
@@ -216,7 +222,6 @@ const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
 // Other colors
 const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);
-
 const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
 
 // Fixed Colors

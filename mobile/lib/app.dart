@@ -32,8 +32,8 @@ class EnteApp extends StatefulWidget {
     this.killBackgroundTask,
     this.locale,
     this.savedThemeMode, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   static void setLocale(BuildContext context, Locale newLocale) {
     final state = context.findAncestorStateOfType<_EnteAppState>()!;

@@ -1,13 +1,12 @@
 import { isDesktop } from "@/base/app";
-import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import {
+    clipMatches,
     isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
 } from "@/new/photos/services/ml";
-import { clipMatches } from "@/new/photos/services/ml/clip";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
@@ -95,17 +94,17 @@ function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
             label: t("IMAGE"),
-            value: FILE_TYPE.IMAGE,
+            value: FileType.image,
             type: SuggestionType.FILE_TYPE,
         },
         {
             label: t("VIDEO"),
-            value: FILE_TYPE.VIDEO,
+            value: FileType.video,
             type: SuggestionType.FILE_TYPE,
         },
         {
             label: t("LIVE_PHOTO"),
-            value: FILE_TYPE.LIVE_PHOTO,
+            value: FileType.livePhoto,
             type: SuggestionType.FILE_TYPE,
         },
     ].filter((suggestion) =>
@@ -374,7 +373,7 @@ const searchClip = async (
     searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
     if (!isMLEnabled()) return undefined;
-    const matches = await clipMatches(searchPhrase, ensureElectron());
+    const matches = await clipMatches(searchPhrase);
     log.debug(() => ["clip/scores", matches]);
     return matches;
 };
@@ -407,7 +406,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { person: option.value as Person };
 
         case SuggestionType.FILE_TYPE:
-            return { fileType: option.value as FILE_TYPE };
+            return { fileType: option.value as FileType };
 
         case SuggestionType.CLIP:
             return { clip: option.value as ClipSearchScores };

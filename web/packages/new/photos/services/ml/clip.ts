@@ -1,9 +1,9 @@
-import type { Electron } from "@/base/types/ipc";
+import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBicubic } from "./image";
 import { dotProduct, norm } from "./math";
-import type { MLWorkerElectron } from "./worker-types";
+import type { CLIPMatches } from "./worker-types";
 
 /**
  * The version of the CLIP indexing pipeline implemented by the current client.
@@ -98,19 +98,19 @@ export type LocalCLIPIndex = CLIPIndex & {
  * be set to the {@link UploadItem} that was uploaded. This way, we can directly
  * use the on-disk file instead of needing to download the original from remote.
  *
- * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * @param electron The {@link ElectronMLWorker} instance that allows us to call
  * our Node.js layer to run the ONNX inference.
  */
 export const indexCLIP = async (
     image: ImageBitmapAndData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<CLIPIndex> => ({
     embedding: await computeEmbedding(image.data, electron),
 });
 
 const computeEmbedding = async (
     imageData: ImageData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<number[]> => {
     const clipInput = convertToCLIPInput(imageData);
     return normalized(await electron.computeCLIPImageEmbedding(clipInput));
@@ -167,26 +167,15 @@ const normalized = (embedding: Float32Array) => {
 };
 
 /**
- * Use CLIP to perform a natural language search over image embeddings.
- *
- * @param searchPhrase The text entered by the user in the search box.
- *
- * @param electron The {@link Electron} instance to use to communicate with the
- * native code running in our desktop app (the embedding happens in the native
- * layer).
- *
- * It returns file (IDs) that should be shown in the search results. They're
- * returned as a map from fileIDs to the scores they got (higher is better).
- * This map will only contains entries whose score was above our minimum
- * threshold.
+ * Find the files whose CLIP embedding "matches" the given {@link searchPhrase}.
  *
  * The result can also be `undefined`, which indicates that the download for the
  * ML model is still in progress (trying again later should succeed).
  */
 export const clipMatches = async (
     searchPhrase: string,
-    electron: Electron,
-): Promise<Map<number, number> | undefined> => {
+    electron: ElectronMLWorker,
+): Promise<CLIPMatches | undefined> => {
     const t = await electron.computeCLIPTextEmbeddingIfAvailable(searchPhrase);
     if (!t) return undefined;
 

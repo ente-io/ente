@@ -160,6 +160,10 @@ export const sidebar = [
                         text: "Enteception",
                         link: "/auth/faq/enteception/",
                     },
+                    {
+                        text: "Privacy disclosure",
+                        link: "/auth/faq/privacy-disclosure/",
+                    },
                 ],
             },
             {
