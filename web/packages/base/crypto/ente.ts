@@ -74,6 +74,8 @@ export const encryptFileEmbedding = async (
  * @param metadata The JSON value to encrypt. It can be an arbitrary JSON value,
  * but since TypeScript currently doesn't have a native JSON type, it is typed
  * as an unknown.
+ *
+ * @returns The encrypted data and decryption header, both as Base64 strings.
  */
 export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
     const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
@@ -81,7 +83,7 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
     const { encryptedData, decryptionHeaderB64 } =
         await encryptFileAssociatedData(encodedMetadata, keyB64);
     return {
-        encryptedData: await libsodium.toB64(encryptedData),
+        encryptedDataB64: await libsodium.toB64(encryptedData),
         decryptionHeaderB64,
     };
 };
