@@ -265,7 +265,7 @@ export async function encryptFileChunk(
  *
  * @returns The decrypted metadata bytes.
  */
-export const decryptChaChaOneShot2 = async (
+export const decryptChaChaOneShot = async (
     encryptedData: Uint8Array,
     headerB64: string,
     keyB64: string,

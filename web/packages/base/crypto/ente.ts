@@ -127,7 +127,7 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
  *
  * @returns The decrypted bytes.
  */
-export const decryptAssociatedData = libsodium.decryptChaChaOneShot2;
+export const decryptAssociatedData = libsodium.decryptChaChaOneShot;
 
 /**
  * Decrypt the thumbnail for a file.
