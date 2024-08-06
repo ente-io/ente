@@ -182,7 +182,15 @@ export interface PublicMagicMetadata {
  * client might not we aware of, and we don't want to overwrite them.
  */
 const PublicMagicMetadata = z.object({
-    editedTime: z.number().nullish().transform(nullToUndefined),
+    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    //
+    // Using `optional` is accurate here. The key is optional, but the value
+    // itself is not optional. Zod doesn't work with
+    // `exactOptionalPropertyTypes` yet, but it seems to be on the roadmap so we
+    // suppress these mismatches.
+    //
+    // See: https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+    editedTime: z.number().optional(),
 }).passthrough();
 
 /**
@@ -228,8 +236,10 @@ export const decryptPublicMagicMetadata = async (enteFile: EnteFile, decryptMeta
     const jsonValue = typeof envelope.data == "string" ? decryptMetadataF(envelope.data, envelope.header, enteFile.key) : envelope.data;
     const result = PublicMagicMetadata.parse(withoutNullAndUndefinedValues(jsonValue));
 
+    // @ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
     envelope.data = result;
 
+    // @ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
     return result;
 }
 
@@ -237,7 +247,6 @@ const withoutNullAndUndefinedValues = (o: {}) =>
     Object.fromEntries(Object.entries(o).filter(
         ([, v]) => v !== null && v !== undefined,
     ));
-
 
 /**
  * Update the public magic metadata associated with a file on remote.
