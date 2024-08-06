@@ -47,7 +47,7 @@ export function RenderCreationTime({
 
                 /* TODO(MR): Exif */
                 // eslint-disable-next-line no-constant-condition
-                if (false) {
+                if (true) {
                     const updatedFile = await changeFileCreationTime(
                         file,
                         editedTime,
@@ -55,7 +55,7 @@ export function RenderCreationTime({
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
                 // eslint-disable-next-line no-constant-condition
-                if (true) {
+                if (false) {
                     const cryptoWorker =
                         await ComlinkCryptoWorker.getInstance();
                     await updateRemotePublicMagicMetadata(

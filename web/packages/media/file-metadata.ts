@@ -137,6 +137,24 @@ export enum ItemVisibility {
  *     with whom the file has been shared.
  *
  * For more details, see [Note: Metadatum].
+ *
+ * ---
+ *
+ * [Note: Optional magic metadata keys]
+ *
+ * Remote does not support nullish (`undefined` or `null`) values for the keys
+ * in the magic metadata associated with a file. All of the keys themselves are
+ * optional though.
+ *
+ * That is, all magic metadata properties are of the form:
+ *
+ *     foo?: T
+ *
+ * And never like:
+ *
+ *     foo: T | undefined
+ *
+ * Also see: [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet].
  */
 export interface PublicMagicMetadata {
     /**
@@ -398,6 +416,7 @@ export const updateMagicMetadataRequest = async (
     encryptMetadataF: EncryptMetadataF,
 ): Promise<UpdateMagicMetadataRequest> => {
     // Drop all null or undefined values to obtain the syncable entries.
+    // See: [Note: Optional magic metadata keys].
     const validEntries = Object.entries(metadata).filter(
         ([, v]) => v !== null && v !== undefined,
     );
