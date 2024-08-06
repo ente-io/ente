@@ -290,7 +290,8 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       if (resultFaces.isEmpty) {
         result.faces = <FaceResult>[];
       } else {
-      result.faces = resultFaces;
+        result.faces = resultFaces;
+      }
     }
 
     if (runClip) {
