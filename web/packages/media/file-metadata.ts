@@ -165,6 +165,31 @@ export interface PublicMagicMetadata {
 }
 
 /**
+ * Update the public magic metadata associated with a file on remote.
+ *
+ * This function updates the public magic metadata on remote, and also returns a
+ * new {@link EnteFile} object with the updated values, but it does not update
+ * the state of the local databases. The caller needs to ensure that we
+ * subsequently sync with remote to fetch the updates as part of the diff and
+ * update the {@link EnteFile} that is persisted in our local database.
+ *
+ * @param enteFile The {@link EnteFile} whose public magic metadata we want to
+ * update.
+ *
+ * @param updatedMetadata A subset of {@link PublicMagicMetadata} containing the
+ * fields that we want to add or update.
+ *
+ * @param encryptMetadataF A function that is used to encrypt the metadata.
+ *
+ * @returns A {@link EnteFile} object with the updated public magic metadata.
+ */
+export const updateRemotePublicMagicMetadata = async (
+    enteFile: EnteFile,
+    updatedMetadata: Partial<PublicMagicMetadata>,
+    encryptMetadataF: EncryptMetadataF,
+) => {};
+
+/**
  * Magic metadata, either public and private, as persisted and used by remote.
  *
  * This is the encrypted magic metadata as persisted on remote, and this is what
