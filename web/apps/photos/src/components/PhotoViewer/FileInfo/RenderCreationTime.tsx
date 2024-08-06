@@ -32,7 +32,7 @@ export function RenderCreationTime({
         try {
             setLoading(true);
             if (isInEditMode && file) {
-                const { dateTime, dateTimeOffset, timestamp } = pickedTime;
+                const { dateTime, offset, timestamp } = pickedTime;
                 if (timestamp == file?.metadata.creationTime) {
                     // Same as before.
                     closeEditMode();
@@ -44,7 +44,7 @@ export function RenderCreationTime({
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 await updateRemotePublicMagicMetadata(
                     file,
-                    { dateTime, dateTimeOffset, editedTime: timestamp },
+                    { dateTime, dateTimeOffset: offset, editedTime: timestamp },
                     cryptoWorker.encryptMetadata,
                     cryptoWorker.decryptMetadata,
                 );

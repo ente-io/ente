@@ -303,11 +303,13 @@ const withoutNullAndUndefinedValues = (o: object) =>
 /**
  * Update the public magic metadata associated with a file on remote.
  *
- * This function updates the public magic metadata on remote, and also modifies
- * the provided {@link EnteFile} object with the updated values in place, but it
- * does not update the state of the local databases. The caller needs to ensure
- * that we subsequently sync with remote to fetch the updates as part of the
- * diff and update the {@link EnteFile} that is persisted in our local db.
+ * This function updates the public magic metadata on remote, and as a
+ * convenience also modifies the provided {@link EnteFile} object in place with
+ * the updated values, but it does not update the state of the local databases.
+ *
+ * The caller needs to ensure that we subsequently sync with remote to fetch the
+ * updates as part of the diff and update the {@link EnteFile} that is persisted
+ * in our local db.
  *
  * @param enteFile The {@link EnteFile} whose public magic metadata we want to
  * update.
@@ -349,17 +351,17 @@ export const updateRemotePublicMagicMetadata = async (
 
     await putFilesPublicMagicMetadata(updateRequest);
 
-    // Modify the in-memory object. TODO: This is hacky, and we should find a
-    // better way, I'm just retaining the existing behaviour.
-    //
-    // Also, we need a cast since the underlying pubMagicMetadata type is
-    // imprecise.
+    // Modify the in-memory object to use the updated envelope. This steps are
+    // quite ad-hoc, as is the concept of updating the object in place.
     enteFile.pubMagicMetadata =
         updatedEnvelope as typeof enteFile.pubMagicMetadata;
-    // If the above is hacky, this is even worse. TODO, or at least move to a
-    // more visible place.
+    // The correct version will come in the updated EnteFile we get in the
+    // response of the /diff. Temporarily bump it for the in place edits.
     enteFile.pubMagicMetadata.version = enteFile.pubMagicMetadata.version + 1;
-    enteFile.pubMagicMetadata.data = updatedMetadata;
+    // Re-read the data.
+    await decryptPublicMagicMetadata(enteFile, decryptMetadataF);
+    // Re-jig the other bits of EnteFile that depend on its public magic
+    // metadata.
     mergeMetadata1(enteFile);
 };
 
@@ -425,7 +427,7 @@ interface UpdateMagicMetadataRequest {
  * metadata JSON object for an {@link enteFile}, using the provided
  * {@link encryptMetadataF} function to encrypt the JSON.
  */
-export const updateMagicMetadataRequest = async (
+const updateMagicMetadataRequest = async (
     enteFile: EnteFile,
     metadata: PrivateMagicMetadata | PublicMagicMetadata,
     metadataVersion: number,
@@ -463,6 +465,7 @@ export const updateMagicMetadataRequest = async (
  * @param request The list of file ids and the updated encrypted magic metadata
  * associated with each of them.
  */
+// TODO: Remove export once this is used.
 export const putFilesMagicMetadata = async (
     request: UpdateMagicMetadataRequest,
 ) =>
@@ -480,7 +483,7 @@ export const putFilesMagicMetadata = async (
  * @param request The list of file ids and the updated encrypted magic metadata
  * associated with each of them.
  */
-export const putFilesPublicMagicMetadata = async (
+const putFilesPublicMagicMetadata = async (
     request: UpdateMagicMetadataRequest,
 ) =>
     ensureOk(
