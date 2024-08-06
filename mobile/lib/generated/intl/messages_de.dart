@@ -136,7 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bitte kontaktiere den Support von ${providerName}, falls etwas abgebucht wurde";
 
   static String m40(endDate) =>
-      "Kostenlose Testversion gültig bis ${endDate}.\nSie können anschließend ein bezahltes Paket auswählen.";
+      "Kostenlose Testversion gültig bis ${endDate}.\nDu kannst anschließend ein bezahltes Paket auswählen.";
 
   static String m41(toEmail) => "Bitte sende uns eine E-Mail an ${toEmail}";
 
@@ -191,7 +191,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m60(id) =>
       "Dein ${id} ist bereits mit einem anderen Ente-Konto verknüpft.\nWenn du deine ${id} mit diesem Konto verwenden möchtest, kontaktiere bitte unseren Support";
 
-  static String m61(endDate) => "Ihr Abo endet am ${endDate}";
+  static String m61(endDate) => "Dein Abo endet am ${endDate}";
 
   static String m62(completed, total) =>
       "${completed}/${total} Erinnerungsstücke gesichert";
@@ -343,12 +343,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Was ist der Hauptgrund für die Löschung deines Kontos?"),
         "askYourLovedOnesToShare": MessageLookupByLibrary.simpleMessage(
-            "Bitte deine Liebsten ums teilen"),
+            "Bitte deine Liebsten ums Teilen"),
         "atAFalloutShelter": MessageLookupByLibrary.simpleMessage(
             "in einem ehemaligen Luftschutzbunker"),
         "authToChangeEmailVerificationSetting":
             MessageLookupByLibrary.simpleMessage(
-                "Bitte Authentifizieren um die E-Mail Bestätigung zu ändern"),
+                "Bitte authentifizieren, um die E-Mail-Bestätigung zu ändern"),
         "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
             "Bitte authentifizieren, um die Sperrbildschirm-Einstellung zu ändern"),
         "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
@@ -383,7 +383,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Zeit, nach der die App gesperrt wird, nachdem sie in den Hintergrund verschoben wurde"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
-            "Aufgrund technischer Störungen wurden Sie abgemeldet. Wir entschuldigen uns für die Unannehmlichkeiten."),
+            "Du wurdest aufgrund technischer Störungen abgemeldet. Wir entschuldigen uns für die Unannehmlichkeiten."),
         "autoPair":
             MessageLookupByLibrary.simpleMessage("Automatisch verbinden"),
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
@@ -1052,8 +1052,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Momentan werden keine Fotos gesichert"),
         "noPhotosFoundHere":
             MessageLookupByLibrary.simpleMessage("Keine Fotos gefunden"),
-        "noQuickLinksSelected":
-            MessageLookupByLibrary.simpleMessage("No quick links selected"),
+        "noQuickLinksSelected": MessageLookupByLibrary.simpleMessage(
+            "Keine schnellen Links ausgewählt"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Kein Wiederherstellungs-Schlüssel?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1085,7 +1085,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "openstreetmapContributors":
             MessageLookupByLibrary.simpleMessage("OpenStreetMap-Beitragende"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
-            "Bei Bedarf auch so kurz wie Sie wollen..."),
+            "Bei Bedarf auch so kurz wie du willst..."),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
             "Oder eine vorherige auswählen"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppeln"),
@@ -1160,7 +1160,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Bitte logge dich erneut ein"),
         "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
-            "Please select quick links to remove"),
+            "Bitte wähle die zu entfernenden schnellen Links"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Bitte versuche es erneut"),
@@ -1268,7 +1268,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Öffentlichen Link entfernen"),
         "removePublicLinks":
-            MessageLookupByLibrary.simpleMessage("Remove public links"),
+            MessageLookupByLibrary.simpleMessage("Öffentliche Links entfernen"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Einige der Elemente, die du entfernst, wurden von anderen Nutzern hinzugefügt und du wirst den Zugriff auf sie verlieren"),
         "removeWithQuestionMark":
@@ -1515,7 +1515,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Verbesserung vorschlagen"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
         "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Um das Sperren beim Wischen zu aktivieren, richte bitte einen Gerätepasscode oder eine Bildschirmsperre in den Systemeinstellungen ein."),
+            "Um die Sperre für die Wischfunktion zu aktivieren, richte bitte einen Gerätepasscode oder eine Bildschirmsperre in den Systemeinstellungen ein."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisierung angehalten"),
@@ -1573,7 +1573,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Dadurch wirst du von diesem Gerät abgemeldet!"),
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
-                "This will remove public links of all selected quick links."),
+                "Hiermit werden die öffentlichen Links aller ausgewählten schnellen Links entfernt."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen."),
@@ -1638,7 +1638,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useAsCover":
             MessageLookupByLibrary.simpleMessage("Als Titelbild festlegen"),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
-            "Verwenden Sie öffentliche Links für Personen, die kein Ente-Konto haben"),
+            "Verwende öffentliche Links für Personen, die kein Ente-Konto haben"),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wiederherstellungs-Schlüssel verwenden"),
         "useSelectedPhoto":
@@ -1718,12 +1718,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "* Du kannst deinen Speicher maximal verdoppeln"),
         "youCanManageYourLinksInTheShareTab":
             MessageLookupByLibrary.simpleMessage(
-                "Sie können Ihre Links im \"Teilen\"-Tab verwalten."),
+                "Du kannst deine Links im \"Teilen\"-Tab verwalten."),
         "youCanTrySearchingForADifferentQuery":
             MessageLookupByLibrary.simpleMessage(
                 "Sie können versuchen, nach einer anderen Abfrage suchen."),
         "youCannotDowngradeToThisPlan": MessageLookupByLibrary.simpleMessage(
-            "Sie können nicht auf diesen Tarif wechseln"),
+            "Du kannst nicht auf diesen Tarif wechseln"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
             "Du kannst nicht mit dir selbst teilen"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
@@ -1734,11 +1734,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "yourMap": MessageLookupByLibrary.simpleMessage("Deine Karte"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
-                "Ihr Tarif wurde erfolgreich heruntergestuft"),
+                "Dein Tarif wurde erfolgreich heruntergestuft"),
         "yourPlanWasSuccessfullyUpgraded": MessageLookupByLibrary.simpleMessage(
-            "Ihr Abo wurde erfolgreich aufgestuft"),
+            "Dein Abo wurde erfolgreich hochgestuft"),
         "yourPurchaseWasSuccessful": MessageLookupByLibrary.simpleMessage(
-            "Ihr Einkauf war erfolgreich!"),
+            "Dein Einkauf war erfolgreich"),
         "yourStorageDetailsCouldNotBeFetched":
             MessageLookupByLibrary.simpleMessage(
                 "Details zum Speicherplatz konnten nicht abgerufen werden"),
