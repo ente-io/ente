@@ -269,11 +269,11 @@ const withoutNullAndUndefinedValues = (o: object) =>
 /**
  * Update the public magic metadata associated with a file on remote.
  *
- * This function updates the public magic metadata on remote, and also returns a
- * new {@link EnteFile} object with the updated values, but it does not update
- * the state of the local databases. The caller needs to ensure that we
- * subsequently sync with remote to fetch the updates as part of the diff and
- * update the {@link EnteFile} that is persisted in our local db.
+ * This function updates the public magic metadata on remote, and also modifies
+ * the provided {@link EnteFile} object with the updated values in place, but it
+ * does not update the state of the local databases. The caller needs to ensure
+ * that we subsequently sync with remote to fetch the updates as part of the
+ * diff and update the {@link EnteFile} that is persisted in our local db.
  *
  * @param enteFile The {@link EnteFile} whose public magic metadata we want to
  * update.
@@ -286,8 +286,6 @@ const withoutNullAndUndefinedValues = (o: object) =>
  *
  * @param decryptMetadataF A function that is used to decrypt the existing
  * metadata.
- *
- * @returns A {@link EnteFile} object with the updated public magic metadata.
  */
 export const updateRemotePublicMagicMetadata = async (
     enteFile: EnteFile,
@@ -315,16 +313,16 @@ export const updateRemotePublicMagicMetadata = async (
 
     const updatedEnvelope = ensure(updateRequest.metadataList[0]).magicMetadata;
 
-    await putFilesMagicMetadata(updateRequest);
+    await putFilesPublicMagicMetadata(updateRequest);
 
-    // Modify the in-memory object.
+    // Modify the in-memory object. TODO: This is hacky, and we should find a
+    // better way, I'm just retaining the existing behaviour.
     //
-    // TODO: This is hacky, and we should find a better way, I'm just retaining
-    // the existing behaviour. Also, we need a cast since the underlying
-    // pubMagicMetadata type is imprecise.
+    // Also, we need a cast since the underlying pubMagicMetadata type is
+    // imprecise.
     enteFile.pubMagicMetadata =
         updatedEnvelope as typeof enteFile.pubMagicMetadata;
-    return mergeMetadata1(enteFile);
+    mergeMetadata1(enteFile);
 };
 
 /**

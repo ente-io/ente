@@ -1,15 +1,15 @@
 import log from "@/base/log";
-import type { ParsedMetadataDate } from "@/media/file-metadata";
+import {
+    updateRemotePublicMagicMetadata,
+    type ParsedMetadataDate,
+} from "@/media/file-metadata";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useState } from "react";
-import {
-    changeFileCreationTime,
-    updateExistingFilePubMetadata,
-} from "utils/file";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import InfoItem from "./InfoItem";
 
 export function RenderCreationTime({
@@ -37,11 +37,22 @@ export function RenderCreationTime({
                     closeEditMode();
                     return;
                 }
+                const editedTime = unixTimeInMicroSec;
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+                /* TODO(MR): Exif
                 const updatedFile = await changeFileCreationTime(
                     file,
                     unixTimeInMicroSec,
                 );
                 updateExistingFilePubMetadata(file, updatedFile);
+                */
+                updateRemotePublicMagicMetadata(
+                    file,
+                    { editedTime },
+                    cryptoWorker.encryptMetadata,
+                    cryptoWorker.decryptMetadata,
+                );
                 scheduleUpdate();
             }
         } catch (e) {
