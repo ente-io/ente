@@ -158,6 +158,22 @@ export enum ItemVisibility {
  */
 export interface PublicMagicMetadata {
     /**
+     * A ISO 8601 date time string without a timezone, indicating the local time
+     * where the photo was taken.
+     *
+     * e.g. "2022-01-26T13:08:20".
+     *
+     * See: [Note: Photos are always in local date/time].
+     */
+    dateTime?: string;
+    /**
+     * When available, a "±HH:mm" string indicating the UTC offset for
+     * {@link dateTime}.
+     *
+     * e.g. "+02:00".
+     */
+    dateTimeOffset?: string;
+    /**
      * Modified value of the date time associated with an {@link EnteFile}.
      *
      * Epoch microseconds.
@@ -575,13 +591,13 @@ export interface ParsedMetadataDate {
      * This is an optional UTC offset string of the form "±HH:mm" or "Z",
      * specifying the timezone offset for {@link dateTime} when available.
      */
-    offsetTime: string | undefined;
+    offset: string | undefined;
     /**
      * UTC epoch microseconds derived from {@link dateTime} and
-     * {@link offsetTime}.
+     * {@link offset}.
      *
-     * When the {@link offsetTime} is present, this will accurately reflect a
-     * UTC timestamp. When the {@link offsetTime} is not present it convert to a
+     * When the {@link offset} is present, this will accurately reflect a
+     * UTC timestamp. When the {@link offset} is not present it convert to a
      * UTC timestamp by assuming that the given {@link dateTime} is in the local
      * time where this code is running. This is a good assumption but not always
      * correct (e.g. vacation photos).
@@ -626,7 +642,7 @@ export const parseMetadataDate = (
     // Now we try to massage s into two parts - the local date/time string, and
     // an UTC offset string.
 
-    let offsetTime: string | undefined;
+    let offset: string | undefined;
     let sWithoutOffset: string;
 
     // Check to see if there is a time-zone descriptor of the form "Z" or
@@ -634,7 +650,7 @@ export const parseMetadataDate = (
     const m = s.match(/Z|[+-]\d\d:?\d\d$/);
     if (m?.index) {
         sWithoutOffset = s.substring(0, m.index);
-        offsetTime = s.substring(m.index);
+        offset = s.substring(m.index);
     } else {
         sWithoutOffset = s;
     }
@@ -674,7 +690,7 @@ export const parseMetadataDate = (
     // any time zone descriptor.
     const dateTime = dropLast(date.toISOString());
 
-    return { dateTime, offsetTime, timestamp };
+    return { dateTime, offset, timestamp };
 };
 
 const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);

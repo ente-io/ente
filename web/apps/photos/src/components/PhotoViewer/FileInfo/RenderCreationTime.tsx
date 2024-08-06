@@ -10,10 +10,6 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useState } from "react";
-import {
-    changeFileCreationTime,
-    updateExistingFilePubMetadata,
-} from "utils/file";
 import InfoItem from "./InfoItem";
 
 export function RenderCreationTime({
@@ -36,35 +32,22 @@ export function RenderCreationTime({
         try {
             setLoading(true);
             if (isInEditMode && file) {
-                const unixTimeInMicroSec = pickedTime.timestamp;
-                if (unixTimeInMicroSec === file?.metadata.creationTime) {
+                const { dateTime, dateTimeOffset, timestamp } = pickedTime;
+                if (timestamp == file?.metadata.creationTime) {
+                    // Same as before.
                     closeEditMode();
                     return;
                 }
-                const editedTime = unixTimeInMicroSec;
 
                 log.debug(() => ["before", file.pubMagicMetadata]);
 
-                /* TODO(MR): Exif */
-                // eslint-disable-next-line no-constant-condition
-                if (true) {
-                    const updatedFile = await changeFileCreationTime(
-                        file,
-                        editedTime,
-                    );
-                    updateExistingFilePubMetadata(file, updatedFile);
-                }
-                // eslint-disable-next-line no-constant-condition
-                if (false) {
-                    const cryptoWorker =
-                        await ComlinkCryptoWorker.getInstance();
-                    await updateRemotePublicMagicMetadata(
-                        file,
-                        { editedTime },
-                        cryptoWorker.encryptMetadata,
-                        cryptoWorker.decryptMetadata,
-                    );
-                }
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                await updateRemotePublicMagicMetadata(
+                    file,
+                    { dateTime, dateTimeOffset, editedTime: timestamp },
+                    cryptoWorker.encryptMetadata,
+                    cryptoWorker.decryptMetadata,
+                );
 
                 log.debug(() => ["after", file.pubMagicMetadata]);
 
