@@ -314,15 +314,23 @@ class PlayPauseButton extends StatefulWidget {
 }
 
 class _PlayPauseButtonState extends State<PlayPauseButton> {
+  bool _isPlaying = true;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        _playbackStatus == PlaybackStatus.playing
-            ? widget.controller?.pause()
-            : widget.controller?.play();
-        setState(() {});
+        if (_playbackStatus == PlaybackStatus.playing) {
+          widget.controller?.pause();
+          setState(() {
+            _isPlaying = false;
+          });
+        } else {
+          widget.controller?.play();
+          setState(() {
+            _isPlaying = true;
+          });
+        }
       },
       child: Container(
         width: 54,
@@ -338,7 +346,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
           },
           switchInCurve: Curves.easeInOutQuart,
           switchOutCurve: Curves.easeInOutQuart,
-          child: _playbackStatus == PlaybackStatus.playing
+          child: _isPlaying
               ? const Icon(
                   Icons.pause,
                   size: 32,
