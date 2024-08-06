@@ -4,19 +4,15 @@ import "dart:io";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:media_kit/media_kit.dart";
-import "package:media_kit_video/media_kit_video.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_swipe_lock_event.dart";
-import "package:photos/events/pause_video_event.dart";
+// import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/files_service.dart";
-import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -43,18 +39,20 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     with WidgetsBindingObserver {
   final Logger _logger = Logger("VideoWidgetNew");
   static const verticalMargin = 72.0;
-  late final player = Player();
-  VideoController? controller;
+  // late final player = Player();
+  // VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
-  late StreamSubscription<bool> playingStreamSubscription;
+  // late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
-  late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
+  // late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool _isFileSwipeLocked = false;
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
 
+  NativeVideoPlayerController? _controller;
   String? _filePath;
   double? aspectRatio;
+  final _isControllerInitialized = ValueNotifier(false);
 
   @override
   void initState() {
@@ -88,15 +86,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         }
       });
     }
-    playingStreamSubscription = player.stream.playing.listen((event) {
-      if (widget.playbackCallback != null && mounted) {
-        widget.playbackCallback!(event);
-      }
-    });
+    // playingStreamSubscription = player.stream.playing.listen((event) {
+    //   if (widget.playbackCallback != null && mounted) {
+    //     widget.playbackCallback!(event);
+    //   }
+    // });
 
-    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
-      player.pause();
-    });
+    // pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+    //   player.pause();
+    // });
     _fileSwipeLockEventSubscription =
         Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
@@ -117,12 +115,14 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   @override
   void dispose() {
     _fileSwipeLockEventSubscription.cancel();
-    pauseVideoSubscription.cancel();
+    // pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    playingStreamSubscription.cancel();
-    player.dispose();
+    // playingStreamSubscription.cancel();
+    // player.dispose();
+
+    _controller?.onPlaybackEnded.removeListener(_onPlaybackEnded);
     super.dispose();
   }
 
@@ -145,23 +145,52 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                 },
         child: _filePath == null
             ? _getLoadingWidget()
-            : Center(
-                child: AspectRatio(
-                  aspectRatio: aspectRatio ?? 1,
-                  child: NativeVideoPlayerView(
-                    onViewReady: (controller) async {
-                      final videoSource = await VideoSource.init(
-                        path: _filePath!,
-                        type: VideoSourceType.file,
-                      );
-                      await controller.loadVideoSource(videoSource);
-                      await controller.play();
-                    },
+            : Stack(
+                children: [
+                  Center(
+                    child: AspectRatio(
+                      aspectRatio: aspectRatio ?? 1,
+                      child: NativeVideoPlayerView(
+                        onViewReady: _initializeController,
+                      ),
+                    ),
                   ),
-                ),
+                  Positioned.fill(
+                    child: Center(
+                      child: ValueListenableBuilder(
+                        builder: (BuildContext context, bool value, _) {
+                          return value
+                              ? PlayPauseButton(_controller)
+                              : const SizedBox();
+                        },
+                        valueListenable: _isControllerInitialized,
+                      ),
+                    ),
+                  ),
+                ],
               ),
       ),
     );
+  }
+
+  Future<void> _initializeController(
+    NativeVideoPlayerController controller,
+  ) async {
+    _controller = controller;
+
+    controller.onPlaybackEnded.addListener(_onPlaybackEnded);
+
+    final videoSource = await VideoSource.init(
+      path: _filePath!,
+      type: VideoSourceType.file,
+    );
+    await controller.loadVideoSource(videoSource);
+    await controller.play();
+    _isControllerInitialized.value = true;
+  }
+
+  void _onPlaybackEnded() {
+    _controller?.play();
   }
 
   void _loadNetworkVideo() {
@@ -276,93 +305,55 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 }
 
-class PausePlayAndDuration extends StatefulWidget {
-  final Player? player;
-  const PausePlayAndDuration(this.player, {super.key});
+class PlayPauseButton extends StatefulWidget {
+  final NativeVideoPlayerController? controller;
+  const PlayPauseButton(this.controller, {super.key});
 
   @override
-  State<PausePlayAndDuration> createState() => _PausePlayAndDurationState();
+  State<PlayPauseButton> createState() => _PlayPauseButtonState();
 }
 
-class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
-  Color backgroundColor = fillStrongLight;
+class _PlayPauseButtonState extends State<PlayPauseButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (details) {
-        setState(() {
-          backgroundColor = fillMutedDark;
-        });
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        _playbackStatus == PlaybackStatus.playing
+            ? widget.controller?.pause()
+            : widget.controller?.play();
+        setState(() {});
       },
-      onTapUp: (details) {
-        Future.delayed(const Duration(milliseconds: 175), () {
-          if (mounted) {
-            setState(() {
-              backgroundColor = fillStrongLight;
-            });
-          }
-        });
-      },
-      onTapCancel: () {
-        Future.delayed(const Duration(milliseconds: 175), () {
-          if (mounted) {
-            setState(() {
-              backgroundColor = fillStrongLight;
-            });
-          }
-        });
-      },
-      onTap: () => widget.player!.playOrPause(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInBack,
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Container(
+        width: 54,
+        height: 54,
         decoration: BoxDecoration(
-          color: backgroundColor,
-          border: Border.all(
-            color: strokeFaintDark,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(24),
+          color: Colors.black.withOpacity(0.3),
+          shape: BoxShape.circle,
         ),
-        child: AnimatedSize(
-          duration: const Duration(seconds: 2),
-          curve: Curves.easeInOutExpo,
-          child: Row(
-            children: [
-              StreamBuilder(
-                builder: (context, snapshot) {
-                  final bool isPlaying = snapshot.data ?? false;
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 350),
-                    switchInCurve: Curves.easeInOutCirc,
-                    switchOutCurve: Curves.easeInOutCirc,
-                    child: Icon(
-                      key: ValueKey(
-                        isPlaying ? "pause_button" : "play_button",
-                      ),
-                      isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      color: backdropBaseLight,
-                      size: 24,
-                    ),
-                  );
-                },
-                initialData: widget.player?.state.playing,
-                stream: widget.player?.stream.playing,
-              ),
-              const SizedBox(width: 8),
-              MaterialPositionIndicator(
-                style: getEnteTextTheme(context).tiny.copyWith(
-                      color: textBaseDark,
-                    ),
-              ),
-              const SizedBox(width: 10),
-            ],
-          ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return ScaleTransition(scale: animation, child: child);
+          },
+          switchInCurve: Curves.easeInOutQuart,
+          switchOutCurve: Curves.easeInOutQuart,
+          child: _playbackStatus == PlaybackStatus.playing
+              ? const Icon(
+                  Icons.pause,
+                  size: 32,
+                  key: ValueKey("pause"),
+                )
+              : const Icon(
+                  Icons.play_arrow,
+                  size: 36,
+                  key: ValueKey("play"),
+                ),
         ),
       ),
     );
   }
+
+  PlaybackStatus? get _playbackStatus =>
+      widget.controller?.playbackInfo?.status;
 }
