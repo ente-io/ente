@@ -1,9 +1,15 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { nameAndExtension } from "@/base/file";
+import log from "@/base/log";
 import type { ParsedMetadata } from "@/media/file-metadata";
+import {
+    updateRemotePublicMagicMetadata,
+    type ParsedMetadataDate,
+} from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import { isMLEnabled } from "@/new/photos/services/ml";
@@ -12,8 +18,10 @@ import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import BackupOutlined from "@mui/icons-material/BackupOutlined";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
@@ -44,7 +52,6 @@ import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
 import { RenderCaption } from "./RenderCaption";
-import { RenderCreationTime } from "./RenderCreationTime";
 
 export interface FileInfoExif {
     tags: RawExifTags | undefined;
@@ -140,7 +147,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     }}
                 />
 
-                <RenderCreationTime
+                <CreationTime
                     {...{ file, shouldDisableEdits, scheduleUpdate }}
                 />
 
@@ -346,6 +353,85 @@ const FileInfoSidebar = styled((props: DialogProps) => (
         padding: 8,
     },
 });
+
+interface CreationTimeProps {
+    file: EnteFile;
+    shouldDisableEdits: boolean;
+    scheduleUpdate: () => void;
+}
+
+export const CreationTime: React.FC<CreationTimeProps> = ({
+    file,
+    shouldDisableEdits,
+    scheduleUpdate,
+}) => {
+    const [loading, setLoading] = useState(false);
+    const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
+    const [isInEditMode, setIsInEditMode] = useState(false);
+
+    const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => setIsInEditMode(false);
+
+    const saveEdits = async (pickedTime: ParsedMetadataDate) => {
+        try {
+            setLoading(true);
+            if (isInEditMode && file) {
+                // Use the updated date time (both in its canonical dateTime
+                // form, and also as the legacy timestamp). But don't use the
+                // offset. The offset here will be the offset of the computer
+                // where this user is making this edit, not the offset of the
+                // place where the photo was taken. In a future iteration of the
+                // date time editor, we can provide functionality for the user
+                // to edit the associated offset, but right now it is not even
+                // surfaced, so don't also potentially overwrite it.
+                const { dateTime, timestamp } = pickedTime;
+                if (timestamp == file?.metadata.creationTime) {
+                    // Same as before.
+                    closeEditMode();
+                    return;
+                }
+
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                await updateRemotePublicMagicMetadata(
+                    file,
+                    { dateTime, editedTime: timestamp },
+                    cryptoWorker.encryptMetadata,
+                    cryptoWorker.decryptMetadata,
+                );
+
+                scheduleUpdate();
+            }
+        } catch (e) {
+            log.error("failed to update creationTime", e);
+        } finally {
+            closeEditMode();
+            setLoading(false);
+        }
+    };
+
+    return (
+        <>
+            <FlexWrapper>
+                <InfoItem
+                    icon={<CalendarTodayIcon />}
+                    title={formatDate(originalCreationTime)}
+                    caption={formatTime(originalCreationTime)}
+                    openEditor={openEditMode}
+                    loading={loading}
+                    hideEditOption={shouldDisableEdits || isInEditMode}
+                />
+                {isInEditMode && (
+                    <PhotoDateTimePicker
+                        initialValue={originalCreationTime}
+                        disabled={loading}
+                        onAccept={saveEdits}
+                        onClose={closeEditMode}
+                    />
+                )}
+            </FlexWrapper>
+        </>
+    );
+};
 
 interface RenderFileNameProps {
     file: EnteFile;
