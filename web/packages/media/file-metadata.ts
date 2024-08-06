@@ -2,9 +2,10 @@ import { encryptMetadata, type decryptMetadata } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata1 } from "@/new/photos/utils/file";
+import { ensure } from "@/utils/ensure";
+import { z } from "zod";
 import { FileType } from "./file-type";
-import { z} from 'zod';
-import { nullToUndefined } from "@/utils/transform";
 
 /**
  * Information about the file that never changes post upload.
@@ -181,17 +182,19 @@ export interface PublicMagicMetadata {
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-const PublicMagicMetadata = z.object({
-    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-    //
-    // Using `optional` is accurate here. The key is optional, but the value
-    // itself is not optional. Zod doesn't work with
-    // `exactOptionalPropertyTypes` yet, but it seems to be on the roadmap so we
-    // suppress these mismatches.
-    //
-    // See: https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-    editedTime: z.number().optional(),
-}).passthrough();
+const PublicMagicMetadata = z
+    .object({
+        // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+        //
+        // Using `optional` is accurate here. The key is optional, but the value
+        // itself is not optional. Zod doesn't work with
+        // `exactOptionalPropertyTypes` yet, but it seems to be on the roadmap so we
+        // suppress these mismatches.
+        //
+        // See: https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+        editedTime: z.number().optional(),
+    })
+    .passthrough();
 
 /**
  * A function that can be used to encrypt the contents of a metadata field
@@ -223,8 +226,13 @@ export type DecryptMetadataF = typeof decryptMetadata;
  * If the file doesn't have any public magic metadata attached to it, return
  * `undefined`.
  */
-export const decryptPublicMagicMetadata = async (enteFile: EnteFile, decryptMetadataF: DecryptMetadataF): Promise<PublicMagicMetadata | undefined> => {
+export const decryptPublicMagicMetadata = async (
+    enteFile: EnteFile,
+    decryptMetadataF: DecryptMetadataF,
+): Promise<PublicMagicMetadata | undefined> => {
     const envelope = enteFile.pubMagicMetadata;
+    // TODO: The underlying types need auditing.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!envelope) return undefined;
 
     // TODO: This function can be optimized to directly return the cached value
@@ -233,20 +241,30 @@ export const decryptPublicMagicMetadata = async (enteFile: EnteFile, decryptMeta
     // data there, so that it is in a known good state (currently we exist in
     // parallel with other functions that do the similar things).
 
-    const jsonValue = typeof envelope.data == "string" ? decryptMetadataF(envelope.data, envelope.header, enteFile.key) : envelope.data;
-    const result = PublicMagicMetadata.parse(withoutNullAndUndefinedValues(jsonValue));
+    const jsonValue =
+        typeof envelope.data == "string"
+            ? await decryptMetadataF(
+                  envelope.data,
+                  envelope.header,
+                  enteFile.key,
+              )
+            : envelope.data;
+    const result = PublicMagicMetadata.parse(
+        // TODO: Can we avoid this cast?
+        withoutNullAndUndefinedValues(jsonValue as object),
+    );
 
     // @ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
     envelope.data = result;
 
     // @ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
     return result;
-}
+};
 
-const withoutNullAndUndefinedValues = (o: {}) =>
-    Object.fromEntries(Object.entries(o).filter(
-        ([, v]) => v !== null && v !== undefined,
-    ));
+const withoutNullAndUndefinedValues = (o: object) =>
+    Object.fromEntries(
+        Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
+    );
 
 /**
  * Update the public magic metadata associated with a file on remote.
@@ -263,7 +281,11 @@ const withoutNullAndUndefinedValues = (o: {}) =>
  * @param metadataUpdates A subset of {@link PublicMagicMetadata} containing the
  * fields that we want to add or update.
  *
- * @param encryptMetadataF A function that is used to encrypt the metadata.
+ * @param encryptMetadataF A function that is used to encrypt the updated
+ * metadata.
+ *
+ * @param decryptMetadataF A function that is used to decrypt the existing
+ * metadata.
  *
  * @returns A {@link EnteFile} object with the updated public magic metadata.
  */
@@ -271,10 +293,38 @@ export const updateRemotePublicMagicMetadata = async (
     enteFile: EnteFile,
     metadataUpdates: Partial<PublicMagicMetadata>,
     encryptMetadataF: EncryptMetadataF,
+    decryptMetadataF: DecryptMetadataF,
 ) => {
-    const updatedMetadata = {
-        ...file.
-    }
+    const existingMetadata = await decryptPublicMagicMetadata(
+        enteFile,
+        decryptMetadataF,
+    );
+
+    const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
+
+    // The underlying types of enteFile.pubMagicMetadata are incorrect
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const metadataVersion = enteFile.pubMagicMetadata?.version ?? 1;
+
+    const updateRequest = await updateMagicMetadataRequest(
+        enteFile,
+        updatedMetadata,
+        metadataVersion,
+        encryptMetadataF,
+    );
+
+    const updatedEnvelope = ensure(updateRequest.metadataList[0]).magicMetadata;
+
+    await putFilesMagicMetadata(updateRequest);
+
+    // Modify the in-memory object.
+    //
+    // TODO: This is hacky, and we should find a better way, I'm just retaining
+    // the existing behaviour. Also, we need a cast since the underlying
+    // pubMagicMetadata type is imprecise.
+    enteFile.pubMagicMetadata =
+        updatedEnvelope as typeof enteFile.pubMagicMetadata;
+    return mergeMetadata1(enteFile);
 };
 
 /**

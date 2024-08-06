@@ -46,8 +46,18 @@ export interface EnteFile
     > {
     metadata: Metadata;
     magicMetadata: FileMagicMetadata;
+    /**
+     * The envelope containing the public magic metadata associated with this
+     * file.
+     */
     pubMagicMetadata: FilePublicMagicMetadata;
     isTrashed?: boolean;
+    /**
+     * The base64 encoded encryption key associated with this file.
+     *
+     * This key is used to encrypt both the file's contents, and any associated
+     * data (e.g., metadatum, thumbnail) for the file.
+     */
     key: string;
     src?: string;
     srcURLs?: SourceURLs;
