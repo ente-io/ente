@@ -1,8 +1,10 @@
-import { encryptMetadata } from "@/base/crypto/ente";
+import { encryptMetadata, type decryptMetadata } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type EnteFile } from "@/new/photos/types/file";
 import { FileType } from "./file-type";
+import { z} from 'zod';
+import { nullToUndefined } from "@/utils/transform";
 
 /**
  * Information about the file that never changes post upload.
@@ -165,18 +167,91 @@ export interface PublicMagicMetadata {
 }
 
 /**
+ * Zod schema for the {@link PublicMagicMetadata} type.
+ *
+ * See: [Note: Duplicated Zod schema and TypeScript type]
+ *
+ * ---
+ *
+ * [Note: Use passthrough for metadata Zod schemas]
+ *
+ * It is important to (recursively) use the {@link passthrough} option when
+ * definining Zod schemas for the various metadata types (the plaintext JSON
+ * objects) because we want to retain all the fields we get from remote. There
+ * might be other, newer, clients out there adding fields that the current
+ * client might not we aware of, and we don't want to overwrite them.
+ */
+const PublicMagicMetadata = z.object({
+    editedTime: z.number().nullish().transform(nullToUndefined),
+}).passthrough();
+
+/**
+ * A function that can be used to encrypt the contents of a metadata field
+ * associated with a file.
+ *
+ * This is parameterized to allow us to use either the regular
+ * {@link encryptMetadata} (if we're already running in a web worker) or its web
+ * worker wrapper (if we're running on the main thread).
+ */
+export type EncryptMetadataF = typeof encryptMetadata;
+
+/**
+ * A function that can be used to decrypt the contents of a metadata field
+ * associated with a file.
+ *
+ * This is parameterized to allow us to use either the regular
+ * {@link encryptMetadata} (if we're already running in a web worker) or its web
+ * worker wrapper (if we're running on the main thread).
+ */
+export type DecryptMetadataF = typeof decryptMetadata;
+
+/**
+ * Return the public magic metadata for the given {@link enteFile}.
+ *
+ * The file we persist in our local db has the metadata in the encrypted form
+ * that we get it from remote. We decrypt when we read it, and also hang the
+ * decrypted version to the in-memory {@link EnteFile} as a cache.
+ *
+ * If the file doesn't have any public magic metadata attached to it, return
+ * `undefined`.
+ */
+export const decryptPublicMagicMetadata = async (enteFile: EnteFile, decryptMetadataF: DecryptMetadataF): Promise<PublicMagicMetadata | undefined> => {
+    const envelope = enteFile.pubMagicMetadata;
+    if (!envelope) return undefined;
+
+    // TODO: This function can be optimized to directly return the cached value
+    // instead of reparsing it using Zod. But that requires us (a) first fix the
+    // types, and (b) guarantee that we're the only ones putting that parsed
+    // data there, so that it is in a known good state (currently we exist in
+    // parallel with other functions that do the similar things).
+
+    const jsonValue = typeof envelope.data == "string" ? decryptMetadataF(envelope.data, envelope.header, enteFile.key) : envelope.data;
+    const result = PublicMagicMetadata.parse(withoutNullAndUndefinedValues(jsonValue));
+
+    envelope.data = result;
+
+    return result;
+}
+
+const withoutNullAndUndefinedValues = (o: {}) =>
+    Object.fromEntries(Object.entries(o).filter(
+        ([, v]) => v !== null && v !== undefined,
+    ));
+
+
+/**
  * Update the public magic metadata associated with a file on remote.
  *
  * This function updates the public magic metadata on remote, and also returns a
  * new {@link EnteFile} object with the updated values, but it does not update
  * the state of the local databases. The caller needs to ensure that we
  * subsequently sync with remote to fetch the updates as part of the diff and
- * update the {@link EnteFile} that is persisted in our local database.
+ * update the {@link EnteFile} that is persisted in our local db.
  *
  * @param enteFile The {@link EnteFile} whose public magic metadata we want to
  * update.
  *
- * @param updatedMetadata A subset of {@link PublicMagicMetadata} containing the
+ * @param metadataUpdates A subset of {@link PublicMagicMetadata} containing the
  * fields that we want to add or update.
  *
  * @param encryptMetadataF A function that is used to encrypt the metadata.
@@ -185,9 +260,13 @@ export interface PublicMagicMetadata {
  */
 export const updateRemotePublicMagicMetadata = async (
     enteFile: EnteFile,
-    updatedMetadata: Partial<PublicMagicMetadata>,
+    metadataUpdates: Partial<PublicMagicMetadata>,
     encryptMetadataF: EncryptMetadataF,
-) => {};
+) => {
+    const updatedMetadata = {
+        ...file.
+    }
+};
 
 /**
  * Magic metadata, either public and private, as persisted and used by remote.
@@ -245,15 +324,6 @@ interface UpdateMagicMetadataRequest {
         magicMetadata: RemoteMagicMetadata;
     }[];
 }
-
-/**
- * A function that can be used to encrypt the contents of a metadata field
- * associated with a file.
- *
- * This is parameterized to allow us to use either the regular
- * {@link encryptMetadata} or the web worker wrapper for it.
- */
-export type EncryptMetadataF = typeof encryptMetadata;
 
 /**
  * Construct an remote update request payload from the public or private magic
