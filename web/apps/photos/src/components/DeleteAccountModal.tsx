@@ -7,10 +7,9 @@ import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
-import { preloadImage } from "utils/common";
 import { decryptDeleteAccountChallenge } from "utils/crypto";
 import * as Yup from "yup";
 import { CheckboxInput } from "./CheckboxInput";
@@ -38,10 +37,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
 
     const isMobile = useMediaQuery("(max-width: 428px)");
-
-    useEffect(() => {
-        preloadImage("/images/delete-account");
-    }, []);
 
     const somethingWentWrong = () =>
         setDialogBoxAttributesV2({

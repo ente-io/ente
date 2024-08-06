@@ -91,6 +91,9 @@ db:
     # as ENTE_DB_USER and ENTE_DB_PASSWORD.
     user:
     password:
+    # This can be used to provide parameters that are appended verbatim to the
+    # generated DSN used for connecting to the DB.
+    # extra:
 
 # Map of data centers
 #

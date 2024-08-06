@@ -1286,5 +1286,9 @@
   "hideContent": "Inhoud verbergen",
   "hideContentDescriptionAndroid": "Verbergt app-inhoud in de app-schakelaar en schakelt schermopnamen uit",
   "hideContentDescriptionIos": "Verbergt de inhoud van de app in de app-schakelaar",
-  "passwordStrengthInfo": "De wachtwoordsterkte wordt berekend aan de hand van de lengte van het wachtwoord, de gebruikte tekens en of het wachtwoord al dan niet in de top 10.000 van meest gebruikte wachtwoorden staat"
+  "passwordStrengthInfo": "De wachtwoordsterkte wordt berekend aan de hand van de lengte van het wachtwoord, de gebruikte tekens en of het wachtwoord al dan niet in de top 10.000 van meest gebruikte wachtwoorden staat",
+  "noQuickLinksSelected": "No quick links selected",
+  "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
+  "removePublicLinks": "Remove public links",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
 }

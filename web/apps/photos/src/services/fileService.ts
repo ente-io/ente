@@ -10,6 +10,7 @@ import {
 } from "@/new/photos/types/file";
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import { batch } from "@/utils/array";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -17,7 +18,6 @@ import { REQUEST_BATCH_SIZE } from "constants/api";
 import exportService from "services/export";
 import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
-import { batch } from "utils/common";
 import { decryptFile, getLatestVersionFiles, sortFiles } from "utils/file";
 import {
     getCollectionLastSyncTime,
@@ -191,7 +191,7 @@ export const updateFileMagicMetadata = async (
         file,
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
-        const { file: encryptedMagicMetadata } =
+        const { encryptedDataB64, decryptionHeaderB64 } =
             await cryptoWorker.encryptMetadata(
                 updatedMagicMetadata.data,
                 file.key,
@@ -201,8 +201,8 @@ export const updateFileMagicMetadata = async (
             magicMetadata: {
                 version: updatedMagicMetadata.version,
                 count: updatedMagicMetadata.count,
-                data: encryptedMagicMetadata.encryptedData,
-                header: encryptedMagicMetadata.decryptionHeader,
+                data: encryptedDataB64,
+                header: decryptionHeaderB64,
             },
         });
     }
@@ -236,20 +236,20 @@ export const updateFilePublicMagicMetadata = async (
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const {
         file,
-        updatedPublicMagicMetadata: updatePublicMagicMetadata,
+        updatedPublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
-        const { file: encryptedPubMagicMetadata } =
+        const { encryptedDataB64, decryptionHeaderB64 } =
             await cryptoWorker.encryptMetadata(
-                updatePublicMagicMetadata.data,
+                updatedPublicMagicMetadata.data,
                 file.key,
             );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
-                version: updatePublicMagicMetadata.version,
-                count: updatePublicMagicMetadata.count,
-                data: encryptedPubMagicMetadata.encryptedData,
-                header: encryptedPubMagicMetadata.decryptionHeader,
+                version: updatedPublicMagicMetadata.version,
+                count: updatedPublicMagicMetadata.count,
+                data: encryptedDataB64,
+                header: decryptionHeaderB64,
             },
         });
     }

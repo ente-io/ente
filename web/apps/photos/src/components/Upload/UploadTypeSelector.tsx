@@ -1,3 +1,4 @@
+import { useIsTouchscreen } from "@/base/hooks";
 import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
 import DialogTitleWithCloseButton, {
     DialogTitleWithCloseButtonSm,
@@ -10,8 +11,7 @@ import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
 import { Box, Dialog, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { isMobileOrTable } from "utils/common/deviceDetection";
+import React, { useContext, useEffect, useState } from "react";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
@@ -49,12 +49,14 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
         PublicCollectionGalleryContext,
     );
 
-    const directlyShowUploadFiles = useRef(isMobileOrTable());
+    // Directly show the file selector for the public albums app on likely
+    // mobile devices.
+    const directlyShowUploadFiles = useIsTouchscreen();
 
     useEffect(() => {
         if (
             open &&
-            directlyShowUploadFiles.current &&
+            directlyShowUploadFiles &&
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
             uploadFiles();

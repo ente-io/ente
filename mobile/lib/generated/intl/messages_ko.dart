@@ -79,17 +79,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "next": MessageLookupByLibrary.simpleMessage("Next"),
+        "noQuickLinksSelected":
+            MessageLookupByLibrary.simpleMessage("No quick links selected"),
         "noSystemLockFound":
             MessageLookupByLibrary.simpleMessage("No system lock found"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
         "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
             "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Please select quick links to remove"),
         "reenterPassword":
             MessageLookupByLibrary.simpleMessage("Re-enter password"),
         "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Remove person label"),
+        "removePublicLinks":
+            MessageLookupByLibrary.simpleMessage("Remove public links"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),
@@ -101,6 +107,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage(
+                "This will remove public links of all selected quick links."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "To enable app lock, please setup device passcode or screen lock in your system settings."),
