@@ -1282,6 +1282,7 @@
       }
     }
   },
+  "panorama": "Panorama",
   "reenterPassword": "Wachtwoord opnieuw invoeren",
   "reenterPin": "PIN opnieuw invoeren",
   "deviceLock": "Apparaat vergrendeld",
@@ -1295,9 +1296,18 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "tapToUnlock": "Tik om te ontgrendelen",
   "tooManyIncorrectAttempts": "Te veel onjuiste pogingen",
-  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
-  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
-  "autoLock": "Auto lock",
-  "immediately": "Immediately",
-  "autoLockFeatureDescription": "Time after which the app locks after being put in the background"
+  "videoInfo": "Video-info",
+  "appLockDescription": "Kies tussen het standaard vergrendelingsscherm van uw apparaat en een aangepast vergrendelingsscherm met een pincode of wachtwoord.",
+  "swipeLockEnablePreSteps": "Om swipe-vergrendeling in te schakelen, stelt u de toegangscode van het apparaat of schermvergrendeling in uw systeeminstellingen in.",
+  "autoLock": "Automatische vergrendeling",
+  "immediately": "Onmiddellijk",
+  "autoLockFeatureDescription": "Tijd waarna de app wordt vergrendeld wanneer deze in achtergrond-modus is gezet",
+  "hideContent": "Inhoud verbergen",
+  "hideContentDescriptionAndroid": "Verbergt app-inhoud in de app-schakelaar en schakelt schermopnamen uit",
+  "hideContentDescriptionIos": "Verbergt de inhoud van de app in de app-schakelaar",
+  "passwordStrengthInfo": "De wachtwoordsterkte wordt berekend aan de hand van de lengte van het wachtwoord, de gebruikte tekens en of het wachtwoord al dan niet in de top 10.000 van meest gebruikte wachtwoorden staat",
+  "noQuickLinksSelected": "No quick links selected",
+  "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
+  "removePublicLinks": "Remove public links",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
 }

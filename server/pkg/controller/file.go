@@ -341,7 +341,6 @@ func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64)
 	err = c.TrashRepository.CleanUpDeletedFilesFromCollection(context.Background(), fileIDs, userID)
 	if err != nil {
 		logger.WithError(err).Error("Failed to clean up stale files from collection")
-
 	}
 
 }
@@ -383,10 +382,14 @@ func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, obj
 	return c.getHotDcSignedUrl(s3Object.ObjectKey)
 }
 
+// ignore lint unused inspection
 func isCliRequest(ctx *gin.Context) bool {
+	// todo: (neeraj) remove this short-circuit after wasabi migration
+	return false
 	// check if user-agent contains go-resty
-	userAgent := ctx.Request.Header.Get("User-Agent")
-	return strings.Contains(userAgent, "go-resty")
+	//userAgent := ctx.Request.Header.Get("User-Agent")
+	//return strings.Contains(userAgent, "go-resty")
+
 }
 
 // getWasabiSignedUrlIfAvailable returns a signed URL for the given fileID and objectType. It prefers wasabi over b2

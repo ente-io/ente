@@ -26,7 +26,7 @@ import 'package:photos/utils/toast_util.dart';
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
 
-  const ShareCollectionPage(this.collection, {Key? key}) : super(key: key);
+  const ShareCollectionPage(this.collection, {super.key});
 
   @override
   State<ShareCollectionPage> createState() => _ShareCollectionPageState();
@@ -36,6 +36,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   late List<User?> _sharees;
   final CollectionActions collectionActions =
       CollectionActions(CollectionsService.instance);
+  final GlobalKey sendLinkButtonKey = GlobalKey();
 
   Future<void> _navigateToManageUser() async {
     if (_sharees.length == 1) {
@@ -186,6 +187,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               bgColor: getEnteColorScheme(context).fillFaint,
             ),
             MenuItemWidget(
+              key: sendLinkButtonKey,
               captionedTextWidget: CaptionedTextWidget(
                 title: S.of(context).sendLink,
                 makeTextBold: true,
@@ -194,7 +196,12 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               menuItemColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
                 // ignore: unawaited_futures
-                shareText(url);
+                await shareAlbumLinkWithPlaceholder(
+                  context,
+                  widget.collection,
+                  url,
+                  sendLinkButtonKey,
+                );
               },
               isTopBorderRadiusRemoved: true,
               isBottomBorderRadiusRemoved: true,

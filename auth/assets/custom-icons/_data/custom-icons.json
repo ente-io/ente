@@ -1,8 +1,6 @@
 {
   "icons": [
-    { "title": "1xBet",
-      "altNames": ["1x", "1x bet", "1x-bet"
-      ]
+    { "title": "1xBet"
     },
     {
       "title": "3Commas"
@@ -32,7 +30,12 @@
       "title": "bitget"
     },
     {
-      "title": "Bitmart"
+      "titile":"bitget wallet",
+      "slug":"bitget_wallet"
+    },
+    {
+      "title": "Bitmart",
+      "hex":"000000"
     },
     {
       "title": "BitMEX"
@@ -107,8 +110,7 @@
       "title": "Crowdpear"
     },
     {
-      "title": "crypto.com",
-      "altNames": ["crypto"]
+      "title": "crypto"
     },
     {
       "title": "DCS",
@@ -140,6 +142,10 @@
       "slug": "dusnet"
     },
     {
+      "title":"ecitizen kenya",
+      "slug":"ecitizen_kenya"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
@@ -164,7 +170,7 @@
     },
     {
       "title": "GitHub",
-      "hex": "858585"
+      "hex": "000000"
     },
     {
       "title": "GitLab"
@@ -353,7 +359,7 @@
       "title": "Odido"
     },
     { "title": "okx",
-      "hex": "858585" },
+      "hex": "000000" },
     {
       "title": "Parsec"
     },

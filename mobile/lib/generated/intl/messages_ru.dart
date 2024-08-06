@@ -818,6 +818,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("помощь"),
         "hidden": MessageLookupByLibrary.simpleMessage("Скрыто"),
         "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher and disables screenshots"),
+        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
+            "Hides app content in the app switcher"),
         "hiding": MessageLookupByLibrary.simpleMessage("Скрытие..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Размещено на OSM France"),
@@ -1037,6 +1042,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "На данный момент резервных копий нет"),
         "noPhotosFoundHere":
             MessageLookupByLibrary.simpleMessage("Здесь нет фотографий"),
+        "noQuickLinksSelected":
+            MessageLookupByLibrary.simpleMessage("No quick links selected"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Нет ключа восстановления?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1085,6 +1092,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Блокировка паролем"),
         "passwordStrength": m38,
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Мы не храним этот пароль, поэтому если вы забудете его, <underline>мы не сможем расшифровать ваши данные</underline>"),
         "paymentDetails":
@@ -1138,6 +1147,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Предоставьте разрешение"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Пожалуйста, войдите снова"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Please select quick links to remove"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, попробуйте ещё раз"),
@@ -1242,6 +1253,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить метку человека"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Удалить публичную ссылку"),
+        "removePublicLinks":
+            MessageLookupByLibrary.simpleMessage("Remove public links"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Некоторые элементы, которые вы удаляете, были добавлены другими людьми, и вы потеряете к ним доступ"),
         "removeWithQuestionMark":
@@ -1545,6 +1558,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Вы выйдете из списка следующих устройств:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Совершив это действие, Вы выйдете из своей учетной записи!"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage(
+                "This will remove public links of all selected quick links."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "To enable app lock, please setup device passcode or screen lock in your system settings."),

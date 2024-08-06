@@ -1,44 +1,38 @@
+import * as ente from "@/base/crypto/ente";
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import * as Comlink from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
 
-const textDecoder = new TextDecoder();
-const textEncoder = new TextEncoder();
-
+/**
+ * A web worker that exposes some of the functions defined in either the Ente
+ * specific layer (base/crypto/ente.ts) or the internal libsodium layer
+ * (internal/libsodium.ts).
+ *
+ * Running these in a web worker allows us to use potentially CPU-intensive
+ * crypto operations from the main thread without stalling the UI.
+ *
+ * See: [Note: Crypto code hierarchy].
+ *
+ * Note: Keep these methods logic free. They should just act as trivial proxies.
+ */
 export class DedicatedCryptoWorker {
-    async decryptMetadata(
-        encryptedMetadata: string,
-        header: string,
-        key: string,
-    ) {
-        const encodedMetadata = await libsodium.decryptChaChaOneShot(
-            await libsodium.fromB64(encryptedMetadata),
-            await libsodium.fromB64(header),
-            key,
-        );
-        return JSON.parse(textDecoder.decode(encodedMetadata));
-    }
-
     async decryptThumbnail(
-        fileData: Uint8Array,
-        header: Uint8Array,
-        key: string,
+        encryptedData: Uint8Array,
+        headerB64: string,
+        keyB64: string,
     ) {
-        return libsodium.decryptChaChaOneShot(fileData, header, key);
+        return ente.decryptThumbnail(encryptedData, headerB64, keyB64);
     }
 
-    async decryptEmbedding(
-        encryptedEmbedding: string,
-        header: string,
-        key: string,
+    async decryptMetadata(
+        encryptedDataB64: string,
+        decryptionHeaderB64: string,
+        keyB64: string,
     ) {
-        const encodedEmbedding = await libsodium.decryptChaChaOneShot(
-            await libsodium.fromB64(encryptedEmbedding),
-            await libsodium.fromB64(header),
-            key,
-        );
-        return Float32Array.from(
-            JSON.parse(textDecoder.decode(encodedEmbedding)),
+        return ente.decryptMetadata(
+            encryptedDataB64,
+            decryptionHeaderB64,
+            keyB64,
         );
     }
 
@@ -46,41 +40,12 @@ export class DedicatedCryptoWorker {
         return libsodium.decryptChaCha(fileData, header, key);
     }
 
-    async encryptMetadata(metadata: Object, key: string) {
-        const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
-
-        const { file: encryptedMetadata } =
-            await libsodium.encryptChaChaOneShot(encodedMetadata, key);
-        const { encryptedData, ...other } = encryptedMetadata;
-        return {
-            file: {
-                encryptedData: await libsodium.toB64(encryptedData),
-                ...other,
-            },
-            key,
-        };
+    async encryptThumbnail(data: Uint8Array, keyB64: string) {
+        return ente.encryptThumbnail(data, keyB64);
     }
 
-    async encryptThumbnail(fileData: Uint8Array, key: string) {
-        return libsodium.encryptChaChaOneShot(fileData, key);
-    }
-
-    async encryptEmbedding(embedding: Float32Array, key: string) {
-        const encodedEmbedding = textEncoder.encode(
-            JSON.stringify(Array.from(embedding)),
-        );
-        const { file: encryptEmbedding } = await libsodium.encryptChaChaOneShot(
-            encodedEmbedding,
-            key,
-        );
-        const { encryptedData, ...other } = encryptEmbedding;
-        return {
-            file: {
-                encryptedData: await libsodium.toB64(encryptedData),
-                ...other,
-            },
-            key,
-        };
+    async encryptMetadata(metadata: unknown, keyB64: string) {
+        return ente.encryptMetadata(metadata, keyB64);
     }
 
     async encryptFile(fileData: Uint8Array) {

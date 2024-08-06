@@ -55,6 +55,9 @@ const (
 	OnnxClip Model = "onnx-clip"
 	GgmlClip Model = "ggml-clip"
 
+	// Derived inference from a file, including metadata are stored as this type
+	Derived = "derived"
+
 	// FileMlClipFace is a model for face embeddings, it is used in request validation.
 	FileMlClipFace Model = "file-ml-clip-face"
 )

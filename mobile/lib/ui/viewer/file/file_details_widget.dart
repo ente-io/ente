@@ -127,7 +127,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _videoMetadataNotifier.value = properties;
     if (kDebugMode) {
       log("videoCustomProps ${properties.toString()}");
-      log("PropData ${properties?.prodData.toString()}");
+      log("PropData ${properties?.propData.toString()}");
     }
     setState(() {});
   }

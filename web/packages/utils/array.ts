@@ -46,3 +46,16 @@ export const mergeUint8Arrays = (as: Uint8Array[]) => {
     as.reduce((n, xs) => (result.set(xs, n), n + xs.length), 0);
     return result;
 };
+
+/**
+ * Break an array into batches of size {@link chunkSize}.
+ *
+ * @returns An array of the resultant batches.
+ */
+export const batch = <T>(xs: T[], batchSize: number): T[][] => {
+    const batches: T[][] = [];
+    for (let i = 0; i < xs.length; i += batchSize) {
+        batches.push(xs.slice(i, i + batchSize));
+    }
+    return batches;
+};
