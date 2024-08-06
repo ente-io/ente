@@ -343,8 +343,8 @@ interface RemoteMagicMetadata {
     /**
      * Monotonically increasing iteration of this metadata object.
      *
-     * The version starts at 1. Each time a client updates the underlying magic
-     * metadata JSONs for a file, it increments this version number.
+     * The version starts at 1. Remote increments this version number each time
+     * a client updates the corresponding magic metadata field for the file.
      */
     version: number;
     /**
