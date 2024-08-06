@@ -18,6 +18,11 @@ func (f *FileHandler) PutFileData(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
+	reqInt := &req
+	if reqInt.Version == nil {
+		version := 1
+		reqInt.Version = &version
+	}
 	err := f.FileDataCtrl.InsertOrUpdate(ctx, &req)
 	if err != nil {
 		handler.Error(ctx, err)

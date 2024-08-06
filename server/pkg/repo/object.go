@@ -148,8 +148,17 @@ func (repo *ObjectRepository) MarkObjectsAsDeletedForFileIDs(ctx context.Context
 	for _, fileID := range fileIDs {
 		embeddingsToBeDeleted = append(embeddingsToBeDeleted, strconv.FormatInt(fileID, 10))
 	}
+	_, err = tx.ExecContext(ctx, `UPDATE file_data SET is_deleted = TRUE WHERE file_id = ANY($1)`, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 
 	err = repo.QueueRepo.AddItems(ctx, tx, DeleteEmbeddingsQueue, embeddingsToBeDeleted)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+
+	err = repo.QueueRepo.AddItems(ctx, tx, DeleteFileDataQueue, embeddingsToBeDeleted)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

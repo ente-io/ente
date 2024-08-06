@@ -1,3 +1,5 @@
+ALTER TYPE OBJECT_TYPE ADD VALUE 'derivedMeta';
+ALTER TYPE s3region ADD VALUE 'b5';
 -- Create the derived table
 CREATE TABLE IF NOT EXISTS file_data
 (

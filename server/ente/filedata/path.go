@@ -5,13 +5,13 @@ import (
 	"github.com/ente-io/museum/ente"
 )
 
-// basePrefix returns the base prefix for all objects related to a file. To check if the file data is deleted,
+// BasePrefix returns the base prefix for all objects related to a file. To check if the file data is deleted,
 // ensure that there's no file in the S3 bucket with this prefix.
-func basePrefix(fileID int64, ownerID int64) string {
+func BasePrefix(fileID int64, ownerID int64) string {
 	return fmt.Sprintf("%d/file-data/%d/", ownerID, fileID)
 }
 
-func allObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
+func AllObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
 	switch oType {
 	case ente.PreviewVideo:
 		return []string{previewVideoPath(fileID, ownerID), previewVideoPlaylist(fileID, ownerID)}
@@ -26,7 +26,7 @@ func allObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
 }
 
 func previewVideoPath(fileID int64, ownerID int64) string {
-	return fmt.Sprintf("%s%s", basePrefix(fileID, ownerID), string(ente.PreviewVideo))
+	return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(ente.PreviewVideo))
 }
 
 func previewVideoPlaylist(fileID int64, ownerID int64) string {
@@ -34,9 +34,9 @@ func previewVideoPlaylist(fileID int64, ownerID int64) string {
 }
 
 func previewImagePath(fileID int64, ownerID int64) string {
-	return fmt.Sprintf("%s%s", basePrefix(fileID, ownerID), string(ente.PreviewImage))
+	return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(ente.PreviewImage))
 }
 
 func derivedMetaPath(fileID int64, ownerID int64) string {
-	return fmt.Sprintf("%s%s", basePrefix(fileID, ownerID), string(ente.DerivedMeta))
+	return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(ente.DerivedMeta))
 }

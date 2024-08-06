@@ -23,6 +23,7 @@ var itemDeletionDelayInMinMap = map[string]int64{
 	DropFileEncMedataQueue:    -1 * 24 * 60, // -ve value to ensure attributes are immediately removed
 	DeleteObjectQueue:         45 * 24 * 60, // 45 days in minutes
 	DeleteEmbeddingsQueue:     -1 * 24 * 60, // -ve value to ensure embeddings are immediately removed
+	DeleteFileDataQueue:       -1 * 24 * 60, // -ve value to ensure file-data is immediately removed
 	TrashCollectionQueueV3:    -1 * 24 * 60, // -ve value to ensure collections are immediately marked as trashed
 	TrashEmptyQueue:           -1 * 24 * 60, // -ve value to ensure empty trash request are processed in next cron run
 	RemoveComplianceHoldQueue: -1 * 24 * 60, // -ve value to ensure compliance hold is removed in next cron run
@@ -32,6 +33,7 @@ const (
 	DropFileEncMedataQueue string = "dropFileEncMetata"
 	DeleteObjectQueue      string = "deleteObject"
 	DeleteEmbeddingsQueue  string = "deleteEmbedding"
+	DeleteFileDataQueue    string = "deleteFileData"
 	OutdatedObjectsQueue   string = "outdatedObject"
 	// Deprecated: Keeping it till we clean up items from the queue DB.
 	TrashCollectionQueue      string = "trashCollection"
