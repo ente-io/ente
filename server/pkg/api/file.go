@@ -122,54 +122,6 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 	})
 }
 
-func (h *FileHandler) GetVideoUploadURL(c *gin.Context) {
-	enteApp := auth.GetApp(c)
-	userID, fileID := getUserAndFileIDs(c)
-	urls, err := h.Controller.GetVideoUploadUrl(c, userID, fileID, enteApp)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, urls)
-}
-
-func (h *FileHandler) GetVideoPreviewUrl(c *gin.Context) {
-	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetPreviewUrl(c, userID, fileID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": url,
-	})
-}
-
-func (h *FileHandler) ReportVideoPlayList(c *gin.Context) {
-	var request ente.InsertOrUpdateEmbeddingRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
-		return
-	}
-	err := h.Controller.ReportVideoPreview(c, request)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
-func (h *FileHandler) GetVideoPlaylist(c *gin.Context) {
-	fileID, _ := strconv.ParseInt(c.Param("fileID"), 10, 64)
-	response, err := h.Controller.GetPlaylist(c, fileID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, response)
-}
-
 // GetMultipartUploadURLs returns an array of PartUpload PresignedURLs
 func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 	enteApp := auth.GetApp(c)

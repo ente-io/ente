@@ -202,7 +202,7 @@ type TempObject struct {
 	ObjectKey   string
 	IsMultipart bool
 	UploadID    string
-	DataCenter  string
+	BucketId    string
 }
 
 // DuplicateFiles represents duplicate files

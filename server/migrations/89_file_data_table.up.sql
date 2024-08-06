@@ -1,3 +1,4 @@
+ALTER TABLE temp_objects ADD COLUMN IF NOT EXISTS bucket_id s3region;
 ALTER TYPE OBJECT_TYPE ADD VALUE 'derivedMeta';
 ALTER TYPE s3region ADD VALUE 'b5';
 -- Create the derived table
