@@ -453,7 +453,7 @@ class MLService {
           await RemoteFileMLService.instance.putFileEmbedding(
             instruction.file,
             instruction.existingRemoteFileML ??
-                RemoteFileML.empty(
+                RemoteFileDerivedData.empty(
                   instruction.file.uploadedFileID!,
                 ),
             faceEmbedding: result.facesRan

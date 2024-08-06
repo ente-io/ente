@@ -37,7 +37,7 @@ class FileMLInstruction {
   final EnteFile file;
   bool shouldRunFaces;
   bool shouldRunClip;
-  RemoteFileML? existingRemoteFileML;
+  RemoteFileDerivedData? existingRemoteFileML;
 
   FileMLInstruction({
     required this.file,
@@ -131,11 +131,10 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info(
     "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
-
   return sortedBylocalID;
 }
 
-bool shouldDiscardRemoteEmbedding(RemoteFileML fileML) {
+bool shouldDiscardRemoteEmbedding(RemoteFileDerivedData fileML) {
   final fileID = fileML.fileID;
   final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
   if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {

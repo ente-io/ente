@@ -1,37 +1,30 @@
 import "dart:convert";
 
-class RemoteEmbedding {
+class FileDataEntity {
   final int fileID;
-  final String model;
-  final String encryptedEmbedding;
+  final String type;
+  final String encryptedData;
   final String decryptionHeader;
   final int updatedAt;
 
-  RemoteEmbedding({
+  FileDataEntity({
     required this.fileID,
-    required this.model,
-    required this.encryptedEmbedding,
+    required this.type,
+    required this.encryptedData,
     required this.decryptionHeader,
     required this.updatedAt,
   });
 
-  factory RemoteEmbedding.fromMap(Map<String, dynamic> map) {
-    return RemoteEmbedding(
+  factory FileDataEntity.fromMap(Map<String, dynamic> map) {
+    return FileDataEntity(
       fileID: map['fileID']?.toInt() ?? 0,
-      model: map['model'] ?? '',
-      encryptedEmbedding: map['encryptedEmbedding'] ?? '',
+      type: map['type'] ?? '',
+      encryptedData: map['encryptedData'] ?? '',
       decryptionHeader: map['decryptionHeader'] ?? '',
       updatedAt: map['updatedAt']?.toInt() ?? 0,
     );
   }
 
-  factory RemoteEmbedding.fromJson(String source) =>
-      RemoteEmbedding.fromMap(json.decode(source));
-}
-
-class RemoteEmbeddings {
-  final List<RemoteEmbedding> embeddings;
-  final bool hasMore;
-
-  RemoteEmbeddings(this.embeddings, this.hasMore);
+  factory FileDataEntity.fromJson(String source) =>
+      FileDataEntity.fromMap(json.decode(source));
 }

@@ -3,25 +3,37 @@ import "package:photos/face/model/face.dart";
 const _faceKey = 'face';
 const _clipKey = 'clip';
 
-class RemoteFileML {
+class RemoteFileDerivedData {
   final int fileID;
   final Map<String, dynamic> remoteRawData;
 
-  RemoteFileML(
+  RemoteFileDerivedData(
     this.fileID,
     this.remoteRawData,
   );
 
-  factory RemoteFileML.fromRemote(int fileID, Map<String, dynamic> json) {
-    return RemoteFileML(
+  void putSanityCheck() {
+    if (remoteRawData[_faceKey] == null) {
+      throw Exception('Face embedding is null');
+    }
+    if (remoteRawData[_clipKey] == null) {
+      throw Exception('Clip embedding is null');
+    }
+  }
+
+  factory RemoteFileDerivedData.fromRemote(
+    int fileID,
+    Map<String, dynamic> json,
+  ) {
+    return RemoteFileDerivedData(
       fileID,
       json,
     );
   }
 
-  static RemoteFileML empty(int i) {
+  static RemoteFileDerivedData empty(int i) {
     final Map<String, dynamic> json = {};
-    return RemoteFileML(i, json);
+    return RemoteFileDerivedData(i, json);
   }
 
   void putFaceIfNotNull(RemoteFaceEmbedding? faceEmbedding) {
