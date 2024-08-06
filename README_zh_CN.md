@@ -4,6 +4,7 @@
 
 一款完全开源的端到端加密照片、身份验证器等的项目。
 
+[English](README.md) | **[中文](README.zh-CN.md)**
 </div>
 
 # Ente
