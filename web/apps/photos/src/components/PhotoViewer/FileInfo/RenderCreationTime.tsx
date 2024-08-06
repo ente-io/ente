@@ -32,7 +32,15 @@ export function RenderCreationTime({
         try {
             setLoading(true);
             if (isInEditMode && file) {
-                const { dateTime, offset, timestamp } = pickedTime;
+                // Use the updated date time (both in its canonical dateTime
+                // form, and also as the legacy timestamp). But don't use the
+                // offset. The offset here will be the offset of the computer
+                // where this user is making this edit, not the offset of the
+                // place where the photo was taken. In a future iteration of the
+                // date time editor, we can provide functionality for the user
+                // to edit the associated offset, but right now it is not even
+                // surfaced, so don't also potentially overwrite it.
+                const { dateTime, timestamp } = pickedTime;
                 if (timestamp == file?.metadata.creationTime) {
                     // Same as before.
                     closeEditMode();
@@ -44,7 +52,7 @@ export function RenderCreationTime({
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 await updateRemotePublicMagicMetadata(
                     file,
-                    { dateTime, dateTimeOffset: offset, editedTime: timestamp },
+                    { dateTime, editedTime: timestamp },
                     cryptoWorker.encryptMetadata,
                     cryptoWorker.decryptMetadata,
                 );

@@ -167,12 +167,12 @@ export interface PublicMagicMetadata {
      */
     dateTime?: string;
     /**
-     * When available, a "±HH:mm" string indicating the UTC offset for
-     * {@link dateTime}.
+     * When available, a "±HH:mm" string indicating the UTC offset of the place
+     * where the photo was taken.
      *
      * e.g. "+02:00".
      */
-    dateTimeOffset?: string;
+    offsetTime?: string;
     /**
      * Modified value of the date time associated with an {@link EnteFile}.
      *
