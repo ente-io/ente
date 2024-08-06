@@ -58,7 +58,7 @@ export function RenderCreationTime({
                 if (false) {
                     const cryptoWorker =
                         await ComlinkCryptoWorker.getInstance();
-                    updateRemotePublicMagicMetadata(
+                    await updateRemotePublicMagicMetadata(
                         file,
                         { editedTime },
                         cryptoWorker.encryptMetadata,
