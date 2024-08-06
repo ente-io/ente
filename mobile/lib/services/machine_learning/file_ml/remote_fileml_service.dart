@@ -15,7 +15,7 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class RemoteFileMLService {
   RemoteFileMLService._privateConstructor();
-  static const String _derivedModelKey = "derived";
+  static const String _derivedDataType = "derivedMeta";
 
   static final Computer _computer = Computer.shared();
 
@@ -41,11 +41,11 @@ class RemoteFileMLService {
     );
     try {
       final _ = await _dio.put(
-        "/embeddings",
+        "/files/data/",
         data: {
           "fileID": file.uploadedFileID!,
-          "model": _derivedModelKey,
-          "encryptedEmbedding": encryptionResult.encData,
+          "type": _derivedDataType,
+          "encryptedData": encryptionResult.encData,
           "decryptionHeader": encryptionResult.header,
         },
       );
@@ -60,10 +60,10 @@ class RemoteFileMLService {
   ) async {
     try {
       final res = await _dio.post(
-        "/embeddings/files",
+        "/files/fetch-data/",
         data: {
           "fileIDs": fileIds.toList(),
-          "model": _derivedModelKey,
+          "type": _derivedDataType,
         },
       );
       final remoteEmb = res.data['embeddings'] as List;
