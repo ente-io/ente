@@ -322,6 +322,9 @@ export const updateRemotePublicMagicMetadata = async (
     // imprecise.
     enteFile.pubMagicMetadata =
         updatedEnvelope as typeof enteFile.pubMagicMetadata;
+    // If the above is hacky, this is even worse. TODO, or at least move to a
+    // more visible place.
+    enteFile.pubMagicMetadata.version = enteFile.pubMagicMetadata.version + 1;
     mergeMetadata1(enteFile);
 };
 

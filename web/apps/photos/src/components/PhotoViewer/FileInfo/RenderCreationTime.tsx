@@ -6,10 +6,14 @@ import {
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useState } from "react";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import {
+    changeFileCreationTime,
+    updateExistingFilePubMetadata,
+} from "utils/file";
 import InfoItem from "./InfoItem";
 
 export function RenderCreationTime({
@@ -38,21 +42,32 @@ export function RenderCreationTime({
                     return;
                 }
                 const editedTime = unixTimeInMicroSec;
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
-                /* TODO(MR): Exif
-                const updatedFile = await changeFileCreationTime(
-                    file,
-                    unixTimeInMicroSec,
-                );
-                updateExistingFilePubMetadata(file, updatedFile);
-                */
-                updateRemotePublicMagicMetadata(
-                    file,
-                    { editedTime },
-                    cryptoWorker.encryptMetadata,
-                    cryptoWorker.decryptMetadata,
-                );
+                log.debug(() => ["before", file.pubMagicMetadata]);
+
+                /* TODO(MR): Exif */
+                // eslint-disable-next-line no-constant-condition
+                if (true) {
+                    const updatedFile = await changeFileCreationTime(
+                        file,
+                        editedTime,
+                    );
+                    updateExistingFilePubMetadata(file, updatedFile);
+                }
+                // eslint-disable-next-line no-constant-condition
+                if (false) {
+                    const cryptoWorker =
+                        await ComlinkCryptoWorker.getInstance();
+                    updateRemotePublicMagicMetadata(
+                        file,
+                        { editedTime },
+                        cryptoWorker.encryptMetadata,
+                        cryptoWorker.decryptMetadata,
+                    );
+                }
+
+                log.debug(() => ["after", file.pubMagicMetadata]);
+
                 scheduleUpdate();
             }
         } catch (e) {
