@@ -288,8 +288,8 @@ Future<MLResult> analyzeImageStatic(Map args) async {
         faceEmbeddingAddress,
       );
       if (resultFaces.isEmpty) {
-        return result..noFaceDetected();
-      }
+        result.faces = <FaceResult>[];
+      } else {
       result.faces = resultFaces;
     }
 
