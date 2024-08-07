@@ -51,6 +51,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   NativeVideoPlayerController? _controller;
   String? _filePath;
+
+  ///Duration in seconds
+  int? duration;
   double? aspectRatio;
   final _isControllerInitialized = ValueNotifier(false);
 
@@ -167,10 +170,47 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                     ),
                   ),
+                  Positioned(
+                    bottom: verticalMargin,
+                    right: 0,
+                    left: 0,
+                    child: ValueListenableBuilder(
+                      builder: (BuildContext context, bool value, _) {
+                        return value
+                            ? _SeekBar(_controller!, duration)
+                            : const SizedBox();
+                      },
+                      valueListenable: _isControllerInitialized,
+                    ),
+                  ),
                 ],
               ),
       ),
     );
+  }
+
+  int? _durationToSeconds(String? duration) {
+    if (duration == null) {
+      _logger.warning("Duration is null");
+      return null;
+    }
+    final parts = duration.split(':');
+    int seconds = 0;
+
+    if (parts.length == 3) {
+      // Format: "h:mm:ss"
+      seconds += int.parse(parts[0]) * 3600; // Hours to seconds
+      seconds += int.parse(parts[1]) * 60; // Minutes to seconds
+      seconds += int.parse(parts[2]); // Seconds
+    } else if (parts.length == 2) {
+      // Format: "m:ss"
+      seconds += int.parse(parts[0]) * 60; // Minutes to seconds
+      seconds += int.parse(parts[1]); // Seconds
+    } else {
+      throw FormatException('Invalid duration format: $duration');
+    }
+
+    return seconds;
   }
 
   Future<void> _initializeController(
@@ -287,6 +327,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _setAspectRatioFromVideoProps() async {
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
+      duration = _durationToSeconds(videoProps.propData?["duration"]);
+
       if (videoProps.width != null && videoProps.height != null) {
         if (videoProps.width != null && videoProps.height != 0) {
           aspectRatio = videoProps.width! / videoProps.height!;
@@ -364,4 +406,149 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
 
   PlaybackStatus? get _playbackStatus =>
       widget.controller?.playbackInfo?.status;
+}
+
+class _SeekBar extends StatefulWidget {
+  final NativeVideoPlayerController controller;
+  final int? duration;
+  const _SeekBar(this.controller, this.duration);
+
+  @override
+  State<_SeekBar> createState() => _SeekBarState();
+}
+
+class _SeekBarState extends State<_SeekBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animationController;
+  double _prevPositionFraction = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      value: 0,
+    );
+
+    widget.controller.onPlaybackStatusChanged.addListener(
+      _onPlaybackStatusChanged,
+    );
+    widget.controller.onPlaybackPositionChanged.addListener(
+      _onPlaybackPositionChanged,
+    );
+
+    _startMovingSeekbar();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    widget.controller.onPlaybackStatusChanged.removeListener(
+      _onPlaybackStatusChanged,
+    );
+    widget.controller.onPlaybackPositionChanged.removeListener(
+      _onPlaybackPositionChanged,
+    );
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (_, __) {
+        return SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 2.0,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
+            activeTrackColor: Colors.red,
+            inactiveTrackColor: Colors.grey,
+            thumbColor: Colors.red,
+            overlayColor: Colors.red.withOpacity(0.4),
+          ),
+          child: Slider(
+            min: 0.0,
+            max: 1.0,
+            value: _animationController.value,
+            onChanged: (value) {
+              // setState(() {
+
+              // });
+              // widget.controller?.seekTo(value.toInt());
+            },
+            onChangeEnd: (value) {
+              // widget.onSeek(Duration(milliseconds: value.round()));
+            },
+            allowedInteraction: SliderInteraction.tapAndSlide,
+          ),
+        );
+      },
+    );
+  }
+
+  void _startMovingSeekbar() {
+    //Video starts playing after a slight delay. This delay is to ensure that
+    //the seek bar animation starts after the video starts playing.
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (widget.duration != null) {
+        unawaited(
+          _animationController.animateTo(
+            (1 / widget.duration!),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      } else {
+        unawaited(
+          _animationController.animateTo(
+            0,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
+    });
+  }
+
+  void _onPlaybackStatusChanged() {
+    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused) {
+      _animationController.stop();
+    }
+  }
+
+  void _onPlaybackPositionChanged() async {
+    final target = widget.controller.playbackInfo?.positionFraction ?? 0;
+
+    //To immediately set the position to 0 when the ends when playing in loop
+    if (_prevPositionFraction == 1.0 && target == 0.0) {
+      unawaited(
+        _animationController.animateTo(0, duration: const Duration(seconds: 0)),
+      );
+    }
+
+    //There is a slight delay (around 350 ms) for the event being listened to
+    //by this listener on the next target (target that comes after 0). Adding
+    //this buffer to keep the seek bar animation smooth.
+    if (target == 0) {
+      await Future.delayed(const Duration(milliseconds: 450));
+    }
+
+    if (widget.duration != null) {
+      unawaited(
+        _animationController.animateTo(
+          target + (1 / widget.duration!),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } else {
+      unawaited(
+        _animationController.animateTo(
+          target,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+
+    _prevPositionFraction = target;
+  }
 }
