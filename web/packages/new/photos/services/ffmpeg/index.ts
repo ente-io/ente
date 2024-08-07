@@ -2,7 +2,7 @@ import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { ParsedMetadata } from "@/media/file-metadata";
+import { parseMetadataDate, type ParsedMetadata } from "@/media/file-metadata";
 import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
@@ -13,7 +13,6 @@ import {
     readConvertToMP4Stream,
     writeConvertToMP4Stream,
 } from "@/new/photos/utils/native-stream";
-import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { Remote } from "comlink";
 import {
     ffmpegPathPlaceholder,
@@ -180,14 +179,15 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
 
     const result: ParsedMetadata = {};
 
-    const location = parseMetadataLocation(
-        kv.get("com.apple.quicktime.location.ISO6709") ?? kv.get("location"),
-    );
+    const location =
+        parseFFMetadataLocation(
+            kv.get("com.apple.quicktime.location.ISO6709"),
+        ) ?? parseFFMetadataLocation(kv.get("location"));
     if (location) result.location = location;
 
-    const creationDate = parseMetadataCreationDate(
-        kv.get("com.apple.quicktime.creationdate") ?? kv.get("creation_time"),
-    );
+    const creationDate =
+        parseFFMetadataDate(kv.get("com.apple.quicktime.creationdate")) ??
+        parseFFMetadataDate(kv.get("creation_time"));
     if (creationDate) result.creationDate = creationDate;
 
     return result;
@@ -199,7 +199,7 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
  * This is meant to parse either the "com.apple.quicktime.location.ISO6709"
  * (preferable) or the "location" key (fallback).
  */
-const parseMetadataLocation = (s: string | undefined) => {
+const parseFFMetadataLocation = (s: string | undefined) => {
     if (!s) return undefined;
 
     const m = s.match(/(\+|-)\d+\.*\d+/g);
@@ -210,7 +210,7 @@ const parseMetadataLocation = (s: string | undefined) => {
 
     const [latitude, longitude] = m.map(parseFloat);
     if (!latitude || !longitude) {
-        log.warn(`Ignoring unparseable location string "${s}"`);
+        log.warn(`Ignoring unparseable video metadata location string "${s}"`);
         return undefined;
     }
 
@@ -223,35 +223,26 @@ const parseMetadataLocation = (s: string | undefined) => {
  * This is meant to parse either the "com.apple.quicktime.creationdate"
  * (preferable) or the "creation_time" key (fallback).
  *
- * Both of them are expected to be ISO 8601 date/time strings, but in particular
- * the quicktime.creationdate includes the time zone offset.
+ * Both of these are expected to be ISO 8601 date/time strings, but we prefer
+ * "com.apple.quicktime.creationdate" since it includes the time zone offset.
  */
-const parseMetadataCreationDate = (s: string | undefined) => {
+const parseFFMetadataDate = (s: string | undefined) => {
     if (!s) return undefined;
 
-    const m = s.match(/(\+|-)\d+\.*\d+/g);
-    if (!m) {
-        log.warn(`Ignoring unparseable location string "${s}"`);
+    const d = parseMetadataDate(s);
+    if (!d) {
+        log.warn(`Ignoring unparseable video metadata date string "${s}"`);
         return undefined;
     }
 
-    const [latitude, longitude] = m.map(parseFloat);
-    if (!latitude || !longitude) {
-        log.warn(`Ignoring unparseable location string "${s}"`);
+    // While not strictly required, we retain the same behaviour as the image
+    // Exif parser of ignoring dates whose epoch is 0.
+    if (!d.timestamp) {
+        log.warn(`Ignoring zero video metadata date string "${s}"`);
         return undefined;
     }
 
-    return { latitude, longitude };
-};
-
-const parseCreationTime = (creationTime: string | undefined) => {
-    let dateTime = null;
-    if (creationTime) {
-        dateTime = validateAndGetCreationUnixTimeInMicroSeconds(
-            new Date(creationTime),
-        );
-    }
-    return dateTime;
+    return d;
 };
 
 /**
