@@ -150,15 +150,6 @@ const extractVideoMetadataCommand = [
     outputPathPlaceholder,
 ];
 
-enum MetadataTags {
-    CREATION_TIME = "creation_time",
-    APPLE_CONTENT_IDENTIFIER = "com.apple.quicktime.content.identifier",
-    APPLE_LIVE_PHOTO_IDENTIFIER = "com.apple.quicktime.live-photo.auto",
-    APPLE_CREATION_DATE = "com.apple.quicktime.creationdate",
-    APPLE_LOCATION_ISO = "com.apple.quicktime.location.ISO6709",
-    LOCATION = "location",
-}
-
 /**
  * Convert the output produced by running the FFmpeg
  * {@link extractVideoMetadataCommand} into a {@link ParsedMetadata}.
@@ -179,16 +170,16 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
 
     const result: ParsedMetadata = {};
 
+    const creationDate =
+        parseFFMetadataDate(kv.get("com.apple.quicktime.creationdate")) ??
+        parseFFMetadataDate(kv.get("creation_time"));
+    if (creationDate) result.creationDate = creationDate;
+
     const location =
         parseFFMetadataLocation(
             kv.get("com.apple.quicktime.location.ISO6709"),
         ) ?? parseFFMetadataLocation(kv.get("location"));
     if (location) result.location = location;
-
-    const creationDate =
-        parseFFMetadataDate(kv.get("com.apple.quicktime.creationdate")) ??
-        parseFFMetadataDate(kv.get("creation_time"));
-    if (creationDate) result.creationDate = creationDate;
 
     return result;
 };

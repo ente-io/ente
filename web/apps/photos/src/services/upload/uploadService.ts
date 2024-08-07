@@ -10,7 +10,6 @@ import { extractExif } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
-    NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
@@ -23,7 +22,6 @@ import {
     type FilePublicMagicMetadataProps,
 } from "@/new/photos/types/file";
 import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
-import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { ensure } from "@/utils/ensure";
@@ -747,18 +745,14 @@ const extractImageOrVideoMetadata = async (
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
-    let extractedMetadata: ParsedExtractedMetadata;
-    if (fileType === FileType.image) {
-        extractedMetadata =
-            (await tryExtractImageMetadata(
-                uploadItem,
-                fileTypeInfo,
-                lastModifiedMs,
-            )) ?? NULL_EXTRACTED_METADATA;
-    } else if (fileType === FileType.video) {
-        extractedMetadata =
-            (await tryExtractVideoMetadata(uploadItem)) ??
-            NULL_EXTRACTED_METADATA;
+    let parsedMetadata: ParsedMetadata;
+    if (fileType == FileType.image) {
+        parsedMetadata = await tryExtractImageMetadata(
+            uploadItem,
+            lastModifiedMs,
+        );
+    } else if (fileType == FileType.video) {
+        parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
         throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
     }
@@ -767,7 +761,7 @@ const extractImageOrVideoMetadata = async (
 
     const modificationTime = lastModifiedMs * 1000;
     const creationTime =
-        extractedMetadata.creationTime ??
+        parsedMetadata.creationTime ??
         tryParseEpochMicrosecondsFromFileName(fileName) ??
         modificationTime;
 
@@ -775,15 +769,15 @@ const extractImageOrVideoMetadata = async (
         title: fileName,
         creationTime,
         modificationTime,
-        latitude: extractedMetadata.location.latitude,
-        longitude: extractedMetadata.location.longitude,
+        latitude: parsedMetadata.location.latitude,
+        longitude: parsedMetadata.location.longitude,
         fileType,
         hash,
     };
 
     const publicMagicMetadata: FilePublicMagicMetadataProps = {
-        w: extractedMetadata.width,
-        h: extractedMetadata.height,
+        w: parsedMetadata.width,
+        h: parsedMetadata.height,
     };
 
     const takeoutMetadata = matchTakeoutMetadata(
@@ -797,13 +791,6 @@ const extractImageOrVideoMetadata = async (
             if (value) metadata[key] = value;
 
     return { metadata, publicMagicMetadata };
-};
-
-const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
-    location: { ...NULL_LOCATION },
-    creationTime: null,
-    width: null,
-    height: null,
 };
 
 const tryExtractImageMetadata = async (
