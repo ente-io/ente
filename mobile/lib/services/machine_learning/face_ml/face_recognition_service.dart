@@ -14,12 +14,12 @@ import "package:photos/face/model/face.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/file_ml/file_ml.dart";
-import "package:photos/services/machine_learning/file_ml/remote_fileml_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/image_ml_util.dart";
@@ -102,11 +102,11 @@ class FaceRecognitionService {
         pendingIndex[instruction.file.uploadedFileID!] = instruction;
       }
       _logger.info("fetching embeddings for ${ids.length} files");
-      final res = await RemoteFileMLService.instance.getFileEmbeddings(ids);
+      final res = await FileDataService.instance.getFilesData(ids);
       _logger.info("embeddingResponse ${res.debugLog()}");
       final List<Face> faces = [];
       final List<ClipEmbedding> clipEmbeddings = [];
-      for (RemoteFileDerivedData fileMl in res.mlData.values) {
+      for (FileDataEntity fileMl in res.data.values) {
         final existingInstruction = pendingIndex[fileMl.fileID]!;
         final facesFromRemoteEmbedding = _getFacesFromRemoteEmbedding(fileMl);
         //Note: Always do null check, empty value means no face was found.
@@ -155,7 +155,7 @@ class FaceRecognitionService {
 
   // Returns a list of faces from the given remote fileML. null if the version is less than the current version
   // or if the remote faceEmbedding is null.
-  List<Face>? _getFacesFromRemoteEmbedding(RemoteFileDerivedData fileMl) {
+  List<Face>? _getFacesFromRemoteEmbedding(FileDataEntity fileMl) {
     final RemoteFaceEmbedding? remoteFaceEmbedding = fileMl.faceEmbedding;
     if (shouldDiscardRemoteEmbedding(fileMl)) {
       return null;
@@ -163,9 +163,7 @@ class FaceRecognitionService {
     final List<Face> faces = [];
     if (remoteFaceEmbedding!.faces.isEmpty) {
       faces.add(
-        Face.empty(
-          fileMl.fileID,
-        ),
+        Face.empty(fileMl.fileID),
       );
     } else {
       for (final f in remoteFaceEmbedding.faces) {

@@ -28,12 +28,12 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
+import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
@@ -269,7 +269,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     StorageBonusService.instance.init(preferences);
-    RemoteFileMLService.instance.init(preferences);
+    FileDataService.instance.init(preferences);
     _logger.info("RemoteFileMLService done");
     if (!isBackground &&
         Platform.isAndroid &&

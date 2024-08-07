@@ -3,11 +3,11 @@ import "package:photos/face/model/face.dart";
 const _faceKey = 'face';
 const _clipKey = 'clip';
 
-class RemoteFileDerivedData {
+class FileDataEntity {
   final int fileID;
   final Map<String, dynamic> remoteRawData;
 
-  RemoteFileDerivedData(
+  FileDataEntity(
     this.fileID,
     this.remoteRawData,
   );
@@ -21,19 +21,19 @@ class RemoteFileDerivedData {
     }
   }
 
-  factory RemoteFileDerivedData.fromRemote(
+  factory FileDataEntity.fromRemote(
     int fileID,
     Map<String, dynamic> json,
   ) {
-    return RemoteFileDerivedData(
+    return FileDataEntity(
       fileID,
       json,
     );
   }
 
-  static RemoteFileDerivedData empty(int i) {
+  static FileDataEntity empty(int i) {
     final Map<String, dynamic> json = {};
-    return RemoteFileDerivedData(i, json);
+    return FileDataEntity(i, json);
   }
 
   void putFaceIfNotNull(RemoteFaceEmbedding? faceEmbedding) {

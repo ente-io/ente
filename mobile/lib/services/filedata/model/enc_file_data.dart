@@ -1,30 +1,27 @@
 import "dart:convert";
 
-class FileDataEntity {
+class EncryptedFileData {
   final int fileID;
   final String type;
   final String encryptedData;
   final String decryptionHeader;
-  final int updatedAt;
 
-  FileDataEntity({
+  EncryptedFileData({
     required this.fileID,
     required this.type,
     required this.encryptedData,
     required this.decryptionHeader,
-    required this.updatedAt,
   });
 
-  factory FileDataEntity.fromMap(Map<String, dynamic> map) {
-    return FileDataEntity(
+  factory EncryptedFileData.fromMap(Map<String, dynamic> map) {
+    return EncryptedFileData(
       fileID: map['fileID']?.toInt() ?? 0,
       type: map['type'] ?? '',
       encryptedData: map['encryptedData'] ?? '',
       decryptionHeader: map['decryptionHeader'] ?? '',
-      updatedAt: map['updatedAt']?.toInt() ?? 0,
     );
   }
 
-  factory FileDataEntity.fromJson(String source) =>
-      FileDataEntity.fromMap(json.decode(source));
+  factory EncryptedFileData.fromJson(String source) =>
+      EncryptedFileData.fromMap(json.decode(source));
 }

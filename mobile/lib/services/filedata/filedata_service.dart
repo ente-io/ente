@@ -6,30 +6,29 @@ import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
-import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
-import "package:photos/services/machine_learning/file_ml/files_ml_data_response.dart";
-import "package:photos/services/machine_learning/file_ml/remote_embedding.dart";
+import "package:photos/services/filedata/model/enc_file_data.dart";
+import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/filedata/model/response.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
-class RemoteFileMLService {
-  RemoteFileMLService._privateConstructor();
+class FileDataService {
+  FileDataService._privateConstructor();
   static const String _derivedDataType = "derivedMeta";
 
   static final Computer _computer = Computer.shared();
 
-  static final RemoteFileMLService instance =
-      RemoteFileMLService._privateConstructor();
+  static final FileDataService instance = FileDataService._privateConstructor();
 
-  final _logger = Logger("RemoteFileMLService");
+  final _logger = Logger("FileDataService");
   final _dio = NetworkClient.instance.enteDio;
 
   void init(SharedPreferences prefs) {}
 
-  Future<void> putFileEmbedding(
+  Future<void> putDerivedMetaData(
     EnteFile file,
-    RemoteFileDerivedData fileML, {
+    FileDataEntity fileML, {
     RemoteClipEmbedding? clipEmbedding,
     RemoteFaceEmbedding? faceEmbedding,
   }) async {
@@ -52,12 +51,12 @@ class RemoteFileMLService {
         },
       );
     } catch (e, s) {
-      _logger.severe("Failed to put embedding", e, s);
+      _logger.severe("putDerivedMetaData failed", e, s);
       rethrow;
     }
   }
 
-  Future<FilesMLDataResponse> getFileEmbeddings(
+  Future<FileDataResponse> getFilesData(
     Set<int> fileIds,
   ) async {
     try {
@@ -72,14 +71,14 @@ class RemoteFileMLService {
       final pendingIndexFiles = res.data['pendingIndexFileIDs'] as List;
       final errFileIds = res.data['errFileIDs'] as List;
 
-      final List<FileDataEntity> encFileData = <FileDataEntity>[];
+      final List<EncryptedFileData> encFileData = <EncryptedFileData>[];
       for (var entry in remoteEntries) {
-        encFileData.add(FileDataEntity.fromMap(entry));
+        encFileData.add(EncryptedFileData.fromMap(entry));
       }
 
-      final fileIDToFileMl = await decryptFileMLData(encFileData);
-      return FilesMLDataResponse(
-        fileIDToFileMl,
+      final fileIdToDataMap = await decryptRemoteFileData(encFileData);
+      return FileDataResponse(
+        fileIdToDataMap,
         fetchErrorFileIDs: Set<int>.from(errFileIds.map((x) => x as int)),
         pendingIndexFileIDs:
             Set<int>.from(pendingIndexFiles.map((x) => x as int)),
@@ -90,27 +89,26 @@ class RemoteFileMLService {
     }
   }
 
-  Future<Map<int, RemoteFileDerivedData>> decryptFileMLData(
-    List<FileDataEntity> remoteEmbeddings,
+  Future<Map<int, FileDataEntity>> decryptRemoteFileData(
+    List<EncryptedFileData> remoteData,
   ) async {
-    final result = <int, RemoteFileDerivedData>{};
-    if (remoteEmbeddings.isEmpty) {
+    final result = <int, FileDataEntity>{};
+    if (remoteData.isEmpty) {
       return result;
     }
-    final inputs = <EmbeddingsDecoderInput>[];
+    final inputs = <_DecoderInput>[];
     final fileMap = await FilesDB.instance
-        .getFilesFromIDs(remoteEmbeddings.map((e) => e.fileID).toList());
-    for (final embedding in remoteEmbeddings) {
+        .getFilesFromIDs(remoteData.map((e) => e.fileID).toList());
+    for (final embedding in remoteData) {
       final file = fileMap[embedding.fileID];
       if (file == null) {
         continue;
       }
       final fileKey = getFileKey(file);
-      final input = EmbeddingsDecoderInput(embedding, fileKey);
+      final input = _DecoderInput(embedding, fileKey);
       inputs.add(input);
     }
-    return _computer
-        .compute<Map<String, dynamic>, Map<int, RemoteFileDerivedData>>(
+    return _computer.compute<Map<String, dynamic>, Map<int, FileDataEntity>>(
       _decryptFileMLComputer,
       param: {
         "inputs": inputs,
@@ -119,18 +117,18 @@ class RemoteFileMLService {
   }
 }
 
-Future<Map<int, RemoteFileDerivedData>> _decryptFileMLComputer(
+Future<Map<int, FileDataEntity>> _decryptFileMLComputer(
   Map<String, dynamic> args,
 ) async {
-  final result = <int, RemoteFileDerivedData>{};
-  final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
+  final result = <int, FileDataEntity>{};
+  final inputs = args["inputs"] as List<_DecoderInput>;
   for (final input in inputs) {
     final decodedJson = decryptAndUnzipJsonSync(
       input.decryptionKey,
       encryptedData: input.data.encryptedData,
       header: input.data.decryptionHeader,
     );
-    result[input.data.fileID] = RemoteFileDerivedData.fromRemote(
+    result[input.data.fileID] = FileDataEntity.fromRemote(
       input.data.fileID,
       decodedJson,
     );
@@ -138,9 +136,9 @@ Future<Map<int, RemoteFileDerivedData>> _decryptFileMLComputer(
   return result;
 }
 
-class EmbeddingsDecoderInput {
-  final FileDataEntity data;
+class _DecoderInput {
+  final EncryptedFileData data;
   final Uint8List decryptionKey;
 
-  EmbeddingsDecoderInput(this.data, this.decryptionKey);
+  _DecoderInput(this.data, this.decryptionKey);
 }

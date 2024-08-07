@@ -16,6 +16,8 @@ import "package:photos/face/model/detection.dart" as face_detection;
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/landmark.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
@@ -23,8 +25,6 @@ import 'package:photos/services/machine_learning/face_ml/face_embedding/face_emb
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/file_ml/file_ml.dart";
-import "package:photos/services/machine_learning/file_ml/remote_fileml_service.dart";
 import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -450,10 +450,10 @@ class MLService {
         }
         _logger.info("inserting ${faces.length} faces for ${result.fileId}");
         if (!result.errorOccured) {
-          await RemoteFileMLService.instance.putFileEmbedding(
+          await FileDataService.instance.putDerivedMetaData(
             instruction.file,
             instruction.existingRemoteFileML ??
-                RemoteFileDerivedData.empty(
+                FileDataEntity.empty(
                   instruction.file.uploadedFileID!,
                 ),
             faceEmbedding: result.facesRan
