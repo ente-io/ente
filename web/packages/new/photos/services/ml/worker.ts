@@ -351,19 +351,8 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
 /**
  * Index file, save the persist the results locally, and put them on remote.
  *
- * [Note: ML indexing does more ML]
- *
- * Nominally, and primarily, indexing a file involves computing its various ML
- * embeddings: faces and CLIP. However, since this is a occasion where we have
- * the original file in memory, it is a great time to also compute other derived
- * data related to the file (instead of re-downloading it again).
- *
- * So this function also does things that are not related to ML and/or indexing:
- *
- * -   Extracting Exif.
- * -   Saving face crops.
- *
- * ---
+ * Indexing a file involves computing its various ML embeddings: faces and CLIP.
+ * Since we have the original file in memory, we also save the face crops.
  *
  * [Note: Transient and permanent indexing failures]
  *
@@ -413,11 +402,6 @@ const index = async (
     const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
     const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
 
-    // exif is expected to be a JSON object in the shape of RawExifTags, but
-    // this function don't care what's inside it and can just treat it as an
-    // opaque blob.
-    const existingExif = remoteDerivedData?.raw.exif;
-
     let existingFaceIndex: FaceIndex | undefined;
     if (
         existingRemoteFaceIndex &&
@@ -438,8 +422,8 @@ const index = async (
         existingCLIPIndex = { embedding };
     }
 
-    // See if we already have all the mandatory derived data fields. If so, just
-    // update our local db and return.
+    // If we already have all the derived data fields then just update our local
+    // db and return.
 
     if (existingFaceIndex && existingCLIPIndex) {
         try {
@@ -456,8 +440,7 @@ const index = async (
 
     // There is at least one derived data type that still needs to be indexed.
 
-    // Videos will not have an original blob whilst having a renderable blob.
-    const { originalImageBlob, renderableBlob } = await indexableBlobs(
+    const { renderableBlob } = await indexableBlobs(
         enteFile,
         uploadItem,
         electron,
@@ -481,15 +464,13 @@ const index = async (
     try {
         let faceIndex: FaceIndex;
         let clipIndex: CLIPIndex;
-        let exif: unknown;
 
         const startTime = Date.now();
 
         try {
-            [faceIndex, clipIndex, exif] = await Promise.all([
+            [faceIndex, clipIndex] = await Promise.all([
                 existingFaceIndex ?? indexFaces(enteFile, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
-                existingExif ?? tryExtractExif(originalImageBlob, f),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
@@ -503,7 +484,6 @@ const index = async (
             const msg = [];
             if (!existingFaceIndex) msg.push(`${faceIndex.faces.length} faces`);
             if (!existingCLIPIndex) msg.push("clip");
-            if (!existingExif && originalImageBlob) msg.push("exif");
             return `Indexed ${msg.join(" and ")} in ${f} (${ms} ms)`;
         });
 
@@ -528,23 +508,17 @@ const index = async (
             ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
-            ...(exif ? { exif } : {}),
         };
 
-        if (existingFaceIndex && existingCLIPIndex && !exif) {
-            // If we were indexing just for exif, but exif generation didn't
-            // happen, there is no need to upload.
-        } else {
-            log.debug(() => ["Uploading derived data", rawDerivedData]);
+        log.debug(() => ["Uploading derived data", rawDerivedData]);
 
-            try {
-                await putDerivedData(enteFile, rawDerivedData);
-            } catch (e) {
-                // See: [Note: Transient and permanent indexing failures]
-                log.error(`Failed to put derived data for ${f}`, e);
-                if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
-                throw e;
-            }
+        try {
+            await putDerivedData(enteFile, rawDerivedData);
+        } catch (e) {
+            // See: [Note: Transient and permanent indexing failures]
+            log.error(`Failed to put derived data for ${f}`, e);
+            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+            throw e;
         }
 
         try {
@@ -555,7 +529,8 @@ const index = async (
         } catch (e) {
             // Not sure if DB failures should be considered permanent or
             // transient. There isn't a known case where writing to the local
-            // indexedDB would fail.
+            // indexedDB should systematically fail. It could fail if there was
+            // no space on device, but that's eminently retriable.
             log.error(`Failed to save indexes for ${f}`, e);
             throw e;
         }
@@ -573,36 +548,5 @@ const index = async (
         }
     } finally {
         image.bitmap.close();
-    }
-};
-
-/**
- * A helper function that tries to extract the raw Exif, but returns `undefined`
- * if something goes wrong (or it isn't possible) instead of throwing.
- *
- * Exif extraction is not a critical item, we don't want the actual indexing to
- * fail because we were unable to extract Exif. This is not rare: one scenario
- * is if we were trying to index a file in an exotic format. The ML indexing
- * will succeed (because we convert it to a renderable blob), but the Exif
- * extraction will fail (since it needs the original blob, but the original blob
- * can be an arbitrary format).
- *
- * @param originalImageBlob A {@link Blob} containing the original data for the
- * image (or the image component of a live photo) whose Exif we're trying to
- * extract. If this is not available, we skip the extraction and return
- * `undefined`.
- *
- * @param f The {@link fileLogID} for the file this blob corresponds to.
- */
-export const tryExtractExif = async (
-    originalImageBlob: Blob | undefined,
-    f: string,
-): Promise<RawExifTags | undefined> => {
-    if (!originalImageBlob) return undefined;
-    try {
-        return await extractRawExif(originalImageBlob);
-    } catch (e) {
-        log.warn(`Ignoring error during Exif extraction for ${f}`, e);
-        return undefined;
     }
 };
