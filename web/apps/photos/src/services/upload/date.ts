@@ -1,5 +1,4 @@
 import log from "@/base/log";
-import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 
 /**
  * Try to extract a date (as epoch microseconds) from a file name by matching it
@@ -40,6 +39,21 @@ export const tryParseEpochMicrosecondsFromFileName = (
         return undefined;
     }
 };
+
+export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
+    if (!dateTime || isNaN(dateTime.getTime())) {
+        return null;
+    }
+    const unixTime = dateTime.getTime() * 1000;
+    //ignoring dateTimeString = "0000:00:00 00:00:00"
+    if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0) || unixTime === 0) {
+        return null;
+    } else if (unixTime > Date.now() * 1000) {
+        return null;
+    } else {
+        return unixTime;
+    }
+}
 
 interface DateComponent<T = number> {
     year: T;

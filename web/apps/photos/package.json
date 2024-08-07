@@ -15,7 +15,6 @@
         "bs58": "^5.0.0",
         "chrono-node": "^2.2.6",
         "debounce": "^2.0.0",
-        "exifr": "^7.1.3",
         "exifreader": "^4",
         "fast-srp-hap": "^2.0.4",
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",

@@ -11,7 +11,7 @@ import { wait } from "@/utils/promise";
 import { DOMParser } from "@xmldom/xmldom";
 import { expose, wrap } from "comlink";
 import downloadManager from "../download";
-import { cmpNewLib2, extractRawExif, type RawExifTags } from "../exif";
+import { extractRawExif, type RawExifTags } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -516,13 +516,6 @@ const index = async (
             log.error(`Failed to index ${f}`, e);
             await markIndexingFailed(enteFile.id);
             throw e;
-        }
-
-        try {
-            if (originalImageBlob && exif)
-                await cmpNewLib2(enteFile, originalImageBlob, exif);
-        } catch (e) {
-            log.warn(`Skipping exif cmp for ${f}`, e);
         }
 
         log.debug(() => {
