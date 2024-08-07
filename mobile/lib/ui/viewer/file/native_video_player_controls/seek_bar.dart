@@ -2,6 +2,8 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/debouncer.dart";
 
 class SeekBar extends StatefulWidget {
@@ -53,17 +55,18 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return AnimatedBuilder(
       animation: _animationController,
       builder: (_, __) {
         return SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            trackHeight: 2.0,
+            trackHeight: 1.0,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
-            activeTrackColor: Colors.red,
-            inactiveTrackColor: Colors.grey,
-            thumbColor: Colors.red,
+            activeTrackColor: colorScheme.primary300,
+            inactiveTrackColor: fillMutedDark,
+            thumbColor: backgroundElevatedLight,
             overlayColor: Colors.red.withOpacity(0.4),
           ),
           child: Slider(
