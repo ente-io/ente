@@ -13,8 +13,8 @@ type PutFileDataRequest struct {
 	// ObjectKey is the key of the object in the S3 bucket. This is needed while putting the object in the S3 bucket.
 	ObjectKey *string `json:"objectKey,omitempty"`
 	// size of the object that is being uploaded. This helps in checking the size of the object that is being uploaded.
-	Size    *int64 `json:"size,omitempty"`
-	Version *int   `json:"version,omitempty"`
+	ObjectSize *int64 `json:"objectSize,omitempty"`
+	Version    *int   `json:"version,omitempty"`
 }
 
 func (r PutFileDataRequest) Validate() error {
@@ -24,11 +24,11 @@ func (r PutFileDataRequest) Validate() error {
 			// the video playlist is uploaded as part of encrypted data and decryption header
 			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader are required for preview video")
 		}
-		if r.Size == nil || r.ObjectKey == nil {
+		if r.ObjectSize == nil || r.ObjectKey == nil {
 			return ente.NewBadRequestWithMessage("size and objectKey are required for preview video")
 		}
 	case ente.PreviewImage:
-		if r.Size == nil || r.ObjectKey == nil {
+		if r.ObjectSize == nil || r.ObjectKey == nil {
 			return ente.NewBadRequestWithMessage("size and objectKey are required for preview image")
 		}
 	case ente.DerivedMeta:
