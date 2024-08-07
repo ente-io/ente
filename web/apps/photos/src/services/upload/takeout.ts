@@ -1,18 +1,22 @@
-/** @file Dealing with the JSON metadata in Google Takeouts */
+/** @file Dealing with the JSON metadata sidecar files */
 
 import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { UploadItem } from "@/new/photos/services/upload/types";
-import { NULL_LOCATION } from "@/new/photos/services/upload/types";
-import type { Location } from "@/new/photos/types/metadata";
 import { readStream } from "@/new/photos/utils/native-stream";
 
+/**
+ * The data we read from the JSON metadata sidecar files.
+ *
+ * Originally these were used to read the JSON metadata sidecar files present in
+ * a Google Takeout. However, during our own export, we also write out files
+ * with a similar structure.
+ */
 export interface ParsedMetadataJSON {
-    creationTime: number;
-    modificationTime: number;
-    latitude: number;
-    longitude: number;
+    creationTime?: number;
+    modificationTime?: number;
+    location?: { latitude: number; longitude: number };
 }
 
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
@@ -100,58 +104,58 @@ const uploadItemText = async (uploadItem: UploadItem) => {
     }
 };
 
-const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
-    creationTime: null,
-    modificationTime: null,
-    ...NULL_LOCATION,
-};
-
 const parseMetadataJSONText = (text: string) => {
     const metadataJSON: object = JSON.parse(text);
     if (!metadataJSON) {
         return undefined;
     }
 
-    const parsedMetadataJSON = { ...NULL_PARSED_METADATA_JSON };
+    const parsedMetadataJSON: ParsedMetadataJSON = {};
 
+    // The metadata provided by Google does not include the time zone where the
+    // photo was taken, it only has an epoch seconds value.
     if (
         metadataJSON["photoTakenTime"] &&
         metadataJSON["photoTakenTime"]["timestamp"]
     ) {
         parsedMetadataJSON.creationTime =
-            metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
+            metadataJSON["photoTakenTime"]["timestamp"] * 1e6;
     } else if (
         metadataJSON["creationTime"] &&
         metadataJSON["creationTime"]["timestamp"]
     ) {
         parsedMetadataJSON.creationTime =
-            metadataJSON["creationTime"]["timestamp"] * 1000000;
+            metadataJSON["creationTime"]["timestamp"] * 1e6;
     }
+
     if (
         metadataJSON["modificationTime"] &&
         metadataJSON["modificationTime"]["timestamp"]
     ) {
         parsedMetadataJSON.modificationTime =
-            metadataJSON["modificationTime"]["timestamp"] * 1000000;
+            metadataJSON["modificationTime"]["timestamp"] * 1e6;
     }
-    let locationData: Location = { ...NULL_LOCATION };
+
     if (
         metadataJSON["geoData"] &&
         (metadataJSON["geoData"]["latitude"] !== 0.0 ||
             metadataJSON["geoData"]["longitude"] !== 0.0)
     ) {
-        locationData = metadataJSON["geoData"];
+        parsedMetadataJSON.location = {
+            latitude: metadataJSON["geoData"]["latitude"],
+            longitude: metadataJSON["geoData"]["longitude"],
+        };
     } else if (
         metadataJSON["geoDataExif"] &&
         (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
             metadataJSON["geoDataExif"]["longitude"] !== 0.0)
     ) {
-        locationData = metadataJSON["geoDataExif"];
+        parsedMetadataJSON.location = {
+            latitude: metadataJSON["geoDataExif"]["latitude"],
+            longitude: metadataJSON["geoDataExif"]["longitude"],
+        };
     }
-    if (locationData !== null) {
-        parsedMetadataJSON.latitude = locationData.latitude;
-        parsedMetadataJSON.longitude = locationData.longitude;
-    }
+
     return parsedMetadataJSON;
 };
 

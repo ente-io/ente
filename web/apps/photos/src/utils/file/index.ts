@@ -210,25 +210,6 @@ export async function changeFilesVisibility(
     return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
 }
 
-export async function changeFileCreationTime(
-    file: EnteFile,
-    editedTime: number,
-): Promise<EnteFile> {
-    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
-        editedTime,
-    };
-    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
-        await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            file.pubMagicMetadata,
-            file.key,
-        );
-    const updateResult = await updateFilePublicMagicMetadata([
-        { file, updatedPublicMagicMetadata },
-    ]);
-    return updateResult[0];
-}
-
 export async function changeFileName(
     file: EnteFile,
     editedName: string,

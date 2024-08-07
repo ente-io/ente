@@ -2,7 +2,7 @@ display_name: Auth
 package_name: auth
 maintainer:
   name: Ente.io Developers
-  email: human@ente.io
+  email: auth@ente.io
 priority: optional
 section: x11
 essential: false

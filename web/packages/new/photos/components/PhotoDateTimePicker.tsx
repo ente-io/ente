@@ -147,14 +147,14 @@ const parseMetadataDateFromDayjs = (d: Dayjs): ParsedMetadataDate => {
     const s = d.format();
 
     let dateTime: string;
-    let offsetTime: string | undefined;
+    let offset: string | undefined;
 
     // Check to see if there is a time-zone descriptor of the form "Z" or
     // "±05:30" or "±0530" at the end of s.
     const m = s.match(/Z|[+-]\d\d:?\d\d$/);
     if (m?.index) {
         dateTime = s.substring(0, m.index);
-        offsetTime = s.substring(m.index);
+        offset = s.substring(m.index);
     } else {
         throw new Error(
             `Dayjs.format returned a string "${s}" without a timezone offset`,
@@ -163,5 +163,5 @@ const parseMetadataDateFromDayjs = (d: Dayjs): ParsedMetadataDate => {
 
     const timestamp = d.valueOf() * 1000;
 
-    return { dateTime, offsetTime, timestamp };
+    return { dateTime, offset, timestamp };
 };
