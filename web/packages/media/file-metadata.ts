@@ -307,6 +307,21 @@ const withoutNullAndUndefinedValues = (o: object) =>
     );
 
 /**
+ * Return the file's creation date in a form suitable for using in the UI.
+ *
+ * For all the details and nuance, see {@link toUIDate}.
+ */
+export const getUICreationDate = (
+    enteFile: EnteFile,
+    publicMagicMetadata: PublicMagicMetadata,
+) =>
+    toUIDate(
+        publicMagicMetadata.dateTime ??
+            publicMagicMetadata.editedTime ??
+            enteFile.metadata.creationTime,
+    );
+
+/**
  * Update the public magic metadata associated with a file on remote.
  *
  * This function updates the public magic metadata on remote, and as a
