@@ -178,25 +178,19 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
 
     const kv = new Map(kvPairs);
 
+    const result: ParsedMetadata = {};
+
     const location = parseMetadataLocation(
         kv.get("com.apple.quicktime.location.ISO6709") ?? kv.get("location"),
     );
+    if (location) result.location = location;
 
-    return { location };
-    // const creationTime = parseCreationTime(
-    //     kv.get(MetadataTags.APPLE_CREATION_DATE) ??
-    //         kv.get(MetadataTags.CREATION_TIME),
-    // );
-    // const parsedMetadata: ParsedExtractedMetadata = {
-    //     creationTime,
-    //     location: {
-    //         latitude: location.latitude,
-    //         longitude: location.longitude,
-    //     },
-    //     width: null,
-    //     height: null,
-    // };
-    // return parsedMetadata;
+    const creationDate = parseMetadataCreationDate(
+        kv.get("com.apple.quicktime.creationdate") ?? kv.get("creation_time"),
+    );
+    if (creationDate) result.creationDate = creationDate;
+
+    return result;
 };
 
 /**
@@ -206,6 +200,33 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
  * (preferable) or the "location" key (fallback).
  */
 const parseMetadataLocation = (s: string | undefined) => {
+    if (!s) return undefined;
+
+    const m = s.match(/(\+|-)\d+\.*\d+/g);
+    if (!m) {
+        log.warn(`Ignoring unparseable location string "${s}"`);
+        return undefined;
+    }
+
+    const [latitude, longitude] = m.map(parseFloat);
+    if (!latitude || !longitude) {
+        log.warn(`Ignoring unparseable location string "${s}"`);
+        return undefined;
+    }
+
+    return { latitude, longitude };
+};
+
+/**
+ * Parse a date/time string found in the FFmpeg metadata attributes.
+ *
+ * This is meant to parse either the "com.apple.quicktime.creationdate"
+ * (preferable) or the "creation_time" key (fallback).
+ *
+ * Both of them are expected to be ISO 8601 date/time strings, but in particular
+ * the quicktime.creationdate includes the time zone offset.
+ */
+const parseMetadataCreationDate = (s: string | undefined) => {
     if (!s) return undefined;
 
     const m = s.match(/(\+|-)\d+\.*\d+/g);
