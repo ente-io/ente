@@ -763,13 +763,19 @@ const extractImageOrVideoMetadata = async (
 
     const hash = await computeHash(uploadItem, worker);
 
-    const modificationTime = lastModifiedMs * 1000;
+    const parsedMetadataJSON = matchTakeoutMetadata(
+        fileName,
+        collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    const modificationTime =
+        parsedMetadataJSON.modificationTime ?? lastModifiedMs * 1000;
     const creationTime =
+        parsedMetadataJSON.creationTime ??
         parsedMetadata.creationTime ??
         tryParseEpochMicrosecondsFromFileName(fileName) ??
         modificationTime;
-
-    const { width: w, height: h, location } = parsedMetadata;
 
     const metadata: Metadata = {
         fileType,
@@ -778,24 +784,18 @@ const extractImageOrVideoMetadata = async (
         modificationTime,
         hash,
     };
+
+    const location = parsedMetadataJSON.location ?? parsedMetadata.location;
     if (location) {
         metadata.latitude = location.latitude;
         metadata.longitude = location.longitude;
     }
 
+    const { width: w, height: h } = parsedMetadata;
+
     const publicMagicMetadata: PublicMagicMetadata = {};
     if (w) publicMagicMetadata.w = w;
     if (h) publicMagicMetadata.h = h;
-
-    const takeoutMetadata = matchTakeoutMetadata(
-        fileName,
-        collectionID,
-        parsedMetadataJSONMap,
-    );
-
-    if (takeoutMetadata)
-        for (const [key, value] of Object.entries(takeoutMetadata))
-            if (value) metadata[key] = value;
 
     return { metadata, publicMagicMetadata };
 };
