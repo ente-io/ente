@@ -1,3 +1,4 @@
+import { inWorker } from "@/base/env";
 import log from "@/base/log";
 import {
     parseMetadataDate,
@@ -477,6 +478,17 @@ export type RawExifTags = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
  * to know about ExifReader specifically.
  */
 export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
+    // The browser's DOMParser is not available in web workers. So if this
+    // function gets called in from a web worker, then it would not be able to
+    // parse XMP tags.
+    //
+    // There is a way around this problem, by also installing ExifReader's
+    // optional peer dependency "@xmldom/xmldom". But since we currently have no
+    // use case for calling this code in a web worker, we just abort immediately
+    // to let future us know that we need to install it.
+    if (inWorker())
+        throw new Error("DOMParser is not available in web workers");
+
     const tags = await ExifReader.load(await blob.arrayBuffer(), {
         async: true,
         expanded: true,

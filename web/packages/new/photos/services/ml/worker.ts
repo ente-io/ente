@@ -8,10 +8,8 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { DOMParser } from "@xmldom/xmldom";
 import { expose, wrap } from "comlink";
 import downloadManager from "../download";
-import { extractRawExif, type RawExifTags } from "../exif";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
@@ -105,24 +103,6 @@ export class MLWorker {
         // Initialize the downloadManager running in the web worker with the
         // user's token. It'll be used to download files to index if needed.
         await downloadManager.init(await ensureAuthToken());
-
-        // Normally, DOMParser is available to web code, so our Exif library
-        // (ExifReader) has an optional dependency on the the non-browser
-        // alternative DOMParser provided by @xmldom/xmldom.
-        //
-        // But window.DOMParser is not available to web workers.
-        //
-        // So we need to get ExifReader to use the @xmldom/xmldom version.
-        // ExifReader references it using the following code:
-        //
-        //     __non_webpack_require__('@xmldom/xmldom')
-        //
-        // So we need to explicitly reference it to ensure that it does not get
-        // tree shaken by webpack. But ensuring it is part of the bundle does
-        // not seem to work (for reasons I don't yet understand), so we also
-        // need to monkey patch it (This also ensures that it is not tree
-        // shaken).
-        globalThis.DOMParser = DOMParser;
     }
 
     /**
