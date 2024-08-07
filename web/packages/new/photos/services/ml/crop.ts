@@ -1,7 +1,7 @@
 import { blobCache } from "@/base/blob-cache";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
-import { indexableEnteFileBlobs } from "./blob";
+import { fetchRenderableEnteFileBlob } from "./blob";
 import { type Box, type FaceIndex } from "./face";
 import { clamp } from "./math";
 
@@ -26,7 +26,7 @@ export const regenerateFaceCrops = async (
     enteFile: EnteFile,
     faceIndex: FaceIndex,
 ) => {
-    const { renderableBlob } = await indexableEnteFileBlobs(enteFile);
+    const renderableBlob = await fetchRenderableEnteFileBlob(enteFile);
     const imageBitmap = await createImageBitmap(renderableBlob);
 
     try {

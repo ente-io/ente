@@ -1,5 +1,3 @@
-import { Location } from "@/new/photos/types/metadata";
-
 export enum EntityType {
     LOCATION_TAG = "location",
 }
@@ -25,6 +23,11 @@ export interface EncryptedEntity {
     createdAt: number;
     updatedAt: number;
     userID: number;
+}
+
+export interface Location {
+    latitude: number | null;
+    longitude: number | null;
 }
 
 export interface LocationTagData {
