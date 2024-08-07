@@ -47,7 +47,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
   late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
-  bool _isFileSwipeLocked = false;
+  bool isGuestView = false;
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
 
@@ -97,7 +97,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
     _fileSwipeLockEventSubscription =
         Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
       });
     });
   }
@@ -159,7 +159,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
         ),
         fullscreen: const MaterialVideoControlsThemeData(),
         child: GestureDetector(
-          onVerticalDragUpdate: _isFileSwipeLocked
+          onVerticalDragUpdate: isGuestView
               ? null
               : (d) => {
                     if (d.delta.dy > dragSensitivity)

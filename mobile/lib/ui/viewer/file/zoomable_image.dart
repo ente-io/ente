@@ -54,7 +54,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
-  bool _isFileSwipeLocked = false;
+  bool isGuestView = false;
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
 
@@ -75,7 +75,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _fileSwipeLockEventSubscription =
         Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
       });
     });
   }
@@ -159,7 +159,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     final GestureDragUpdateCallback? verticalDragCallback =
-        _isZooming || _isFileSwipeLocked
+        _isZooming || isGuestView
             ? null
             : (d) => {
                   if (!_isZooming)

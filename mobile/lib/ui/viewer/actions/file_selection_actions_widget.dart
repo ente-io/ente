@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
@@ -32,9 +33,9 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-// import 'package:photos/ui/sharing/manage_links_widget.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
@@ -271,7 +272,13 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
-
+    items.add(
+      SelectionActionButton(
+        icon: Icons.lock,
+        labelText: "Guest view",
+        onTap: _onGuestViewClick,
+      ),
+    );
     items.add(
       SelectionActionButton(
         icon: Icons.grid_view_outlined,
@@ -557,6 +564,23 @@ class _FileSelectionActionsWidgetState
     if (result) {
       widget.selectedFiles.clearAll();
     }
+  }
+
+  Future<void> _onGuestViewClick() async {
+    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
+    final page = DetailPage(
+      DetailPageConfiguration(
+        selectedFiles,
+        null,
+        0,
+        "guest_view",
+      ),
+    );
+    routeToPage(context, page, forceCustomPageRoute: true).ignore();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Bus.instance.fire(FileSwipeLockEvent(true, false));
+    });
+    widget.selectedFiles.clearAll();
   }
 
   Future<void> _onArchiveClick() async {

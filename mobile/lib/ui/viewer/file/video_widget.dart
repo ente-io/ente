@@ -48,7 +48,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   final _progressNotifier = ValueNotifier<double?>(null);
   bool _isPlaying = false;
   final EnteWakeLock _wakeLock = EnteWakeLock();
-  bool _isFileSwipeLocked = false;
+  bool isGuestView = false;
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
 
@@ -83,7 +83,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     _fileSwipeLockEventSubscription =
         Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
       });
     });
   }
@@ -188,7 +188,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         ? _getVideoPlayer()
         : _getLoadingWidget();
     final contentWithDetector = GestureDetector(
-      onVerticalDragUpdate: _isFileSwipeLocked
+      onVerticalDragUpdate: isGuestView
           ? null
           : (d) => {
                 if (d.delta.dy > dragSensitivity)

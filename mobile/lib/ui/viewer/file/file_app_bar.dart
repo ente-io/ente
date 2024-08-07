@@ -53,7 +53,7 @@ class FileAppBarState extends State<FileAppBar> {
   final List<Widget> _actions = [];
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
-  bool _isFileSwipeLocked = false;
+  bool isGuestView = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -69,7 +69,7 @@ class FileAppBarState extends State<FileAppBar> {
     _fileSwipeLockEventSubscription =
         Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
       });
     });
   }
@@ -124,19 +124,19 @@ class FileAppBarState extends State<FileAppBar> {
             switchOutCurve: Curves.easeInOut,
             child: AppBar(
               clipBehavior: Clip.none,
-              key: ValueKey(_isFileSwipeLocked),
+              key: ValueKey(isGuestView),
               iconTheme: const IconThemeData(
                 color: Colors.white,
               ), //same for both themes
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  _isFileSwipeLocked
+                  isGuestView
                       ? _requestAuthentication()
                       : Navigator.of(context).pop();
                 },
               ),
-              actions: shouldShowActions && !_isFileSwipeLocked ? _actions : [],
+              actions: shouldShowActions && !isGuestView ? _actions : [],
               elevation: 0,
               backgroundColor: const Color(0x00000000),
             ),
@@ -306,7 +306,7 @@ class FileAppBarState extends State<FileAppBar> {
             const Padding(
               padding: EdgeInsets.all(8),
             ),
-            const Text("Swipe lock"),
+            const Text("Guest view"),
           ],
         ),
       ),
@@ -329,7 +329,7 @@ class FileAppBarState extends State<FileAppBar> {
             } else if (value == 5) {
               await _handleUnHideRequest(context);
             } else if (value == 6) {
-              await _onSwipeLock();
+              await _onTapGuestView();
             }
           },
         ),
@@ -413,9 +413,9 @@ class FileAppBarState extends State<FileAppBar> {
     }
   }
 
-  Future<void> _onSwipeLock() async {
+  Future<void> _onTapGuestView() async {
     if (await LocalAuthentication().isDeviceSupported()) {
-      Bus.instance.fire(FileSwipeLockEvent(!_isFileSwipeLocked));
+      Bus.instance.fire(FileSwipeLockEvent(!isGuestView, true));
     } else {
       await showErrorDialog(
         context,
@@ -432,7 +432,7 @@ class FileAppBarState extends State<FileAppBar> {
       "Please authenticate to view more photos and videos.",
     );
     if (hasAuthenticated) {
-      Bus.instance.fire(FileSwipeLockEvent(false));
+      Bus.instance.fire(FileSwipeLockEvent(false, false));
     }
   }
 }
