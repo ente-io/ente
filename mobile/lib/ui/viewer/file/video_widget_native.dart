@@ -13,6 +13,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
@@ -54,8 +56,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   NativeVideoPlayerController? _controller;
   String? _filePath;
 
-  ///Duration in seconds
-  int? duration;
+  String? duration;
   double? aspectRatio;
   final _isControllerInitialized = ValueNotifier(false);
 
@@ -179,7 +180,59 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                     child: ValueListenableBuilder(
                       builder: (BuildContext context, bool value, _) {
                         return value
-                            ? SeekBar(_controller!, duration)
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: Container(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.3),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      AnimatedSize(
+                                        duration: const Duration(seconds: 5),
+                                        child: ValueListenableBuilder(
+                                          valueListenable: _controller!
+                                              .onPlaybackPositionChanged,
+                                          builder: (
+                                            BuildContext context,
+                                            int value,
+                                            _,
+                                          ) {
+                                            return Text(
+                                              secondsToDuration(value),
+                                              style: getEnteTextTheme(context)
+                                                  .mini
+                                                  .copyWith(
+                                                    color: textBaseDark,
+                                                  ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: SeekBar(
+                                          _controller!,
+                                          _durationToSeconds(duration),
+                                        ),
+                                      ),
+                                      Text(
+                                        duration ?? "0:00",
+                                        style: getEnteTextTheme(context)
+                                            .mini
+                                            .copyWith(
+                                              color: textBaseDark,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
                             : const SizedBox();
                       },
                       valueListenable: _isControllerInitialized,
@@ -189,6 +242,18 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
               ),
       ),
     );
+  }
+
+  String secondsToDuration(int totalSeconds) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
   }
 
   int? _durationToSeconds(String? duration) {
@@ -329,7 +394,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _setAspectRatioFromVideoProps() async {
     final videoProps = await getVideoPropsAsync(File(_filePath!));
     if (videoProps != null) {
-      duration = _durationToSeconds(videoProps.propData?["duration"]);
+      duration = videoProps.propData?["duration"];
 
       if (videoProps.width != null && videoProps.height != null) {
         if (videoProps.width != null && videoProps.height != 0) {
