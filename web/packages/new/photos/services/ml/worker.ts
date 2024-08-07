@@ -13,8 +13,8 @@ import downloadManager from "../download";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import type { UploadItem } from "../upload/types";
 import {
-    imageBitmapAndData,
-    indexableBlobs,
+    createImageBitmapAndData,
+    fetchRenderableBlob,
     type ImageBitmapAndData,
 } from "./blob";
 import {
@@ -440,7 +440,7 @@ const index = async (
 
     // There is at least one derived data type that still needs to be indexed.
 
-    const { renderableBlob } = await indexableBlobs(
+    const renderableBlob = await fetchRenderableBlob(
         enteFile,
         uploadItem,
         electron,
@@ -448,7 +448,7 @@ const index = async (
 
     let image: ImageBitmapAndData;
     try {
-        image = await imageBitmapAndData(renderableBlob);
+        image = await createImageBitmapAndData(renderableBlob);
     } catch (e) {
         // If we cannot get the raw image data for the file, then retrying again
         // won't help (if in the future we enhance the underlying code for
