@@ -703,3 +703,40 @@ export const parseMetadataDate = (
 };
 
 const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);
+
+/**
+ * Return a date that can be used on the UI from a {@link ParsedMetadataDate},
+ * or its {@link dateTime} component, or the legacy epoch timestamps.
+ *
+ * These dates are all hypothetically in the timezone of the place where the
+ * photo was taken. Different photos might've been taken in different timezones,
+ * which is why it is hypothetical, so concretely these are all mapped to the
+ * current timezone.
+ *
+ * The difference is subtle, but we should not think of these as absolute points
+ * on the UTC timeline. They are instead better thought of as dates without an
+ * associated timezone. For the purpose of mapping them all to a comparable
+ * dimension them we all contingently use the current timezone - this makes it
+ * easy to use JavaScript Date constructor which assumes that any date/time
+ * string without an associated timezone is in the current timezone.
+ *
+ * Whenever we're surfacing them in the UI, or using them for grouping (say by
+ * day), we should use their current timezone representation, not the UTC one.
+ *
+ * See also: [Note: Photos are always in local date/time].
+ */
+export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
+    switch (typeof dateLike) {
+        case "object":
+            // A ISO 8601 string without a timezone. The Date constructor will
+            // assume the timezone to be the current timezone.
+            return new Date(dateLike.dateTime);
+        case "string":
+            // This is expected to be a string with the same meaning as
+            // `ParsedMetadataDate.dateTime`.
+            return new Date(dateLike);
+        case "number":
+            // A legacy epoch microseconds value.
+            return new Date(dateLike / 1000);
+    }
+};
