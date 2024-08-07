@@ -1,12 +1,12 @@
+import { decryptMetadata } from "@/base/crypto/ente";
+import { isDevBuild } from "@/base/env";
 import {
     decryptPublicMagicMetadata,
     type PublicMagicMetadata,
 } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
+import { fileLogID } from "@/new/photos/utils/file";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { decryptMetadata } from "packages/base/crypto/ente";
-import { isDevBuild } from "packages/base/env";
-import { fileLogID } from "packages/new/photos/utils/file";
 
 /**
  * On-demand decrypt the public magic metadata for an {@link EnteFile} for code

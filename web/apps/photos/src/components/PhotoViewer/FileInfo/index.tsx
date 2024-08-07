@@ -4,6 +4,7 @@ import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
+    getUICreationDate,
     updateRemotePublicMagicMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
@@ -19,6 +20,7 @@ import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { getPublicMagicMetadataMTSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import BackupOutlined from "@mui/icons-material/BackupOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -148,7 +150,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
 
                 <CreationTime
-                    {...{ file, shouldDisableEdits, scheduleUpdate }}
+                    {...{ enteFile: file, shouldDisableEdits, scheduleUpdate }}
                 />
 
                 <RenderFileName
@@ -355,27 +357,29 @@ const FileInfoSidebar = styled((props: DialogProps) => (
 });
 
 interface CreationTimeProps {
-    file: EnteFile;
+    enteFile: EnteFile;
     shouldDisableEdits: boolean;
     scheduleUpdate: () => void;
 }
 
 export const CreationTime: React.FC<CreationTimeProps> = ({
-    file,
+    enteFile,
     shouldDisableEdits,
     scheduleUpdate,
 }) => {
     const [loading, setLoading] = useState(false);
-    const originalCreationTime = new Date(file?.metadata.creationTime / 1000);
     const [isInEditMode, setIsInEditMode] = useState(false);
 
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
+    const publicMagicMetadata = getPublicMagicMetadataMTSync(enteFile);
+    const originalDate = getUICreationDate(enteFile, publicMagicMetadata);
+
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
-            if (isInEditMode && file) {
+            if (isInEditMode && enteFile) {
                 // Use the updated date time (both in its canonical dateTime
                 // form, and also as the legacy timestamp). But don't use the
                 // offset. The offset here will be the offset of the computer
@@ -385,7 +389,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                 // to edit the associated offset, but right now it is not even
                 // surfaced, so don't also potentially overwrite it.
                 const { dateTime, timestamp } = pickedTime;
-                if (timestamp == file?.metadata.creationTime) {
+                if (timestamp == originalDate.getTime()) {
                     // Same as before.
                     closeEditMode();
                     return;
@@ -393,7 +397,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
 
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 await updateRemotePublicMagicMetadata(
-                    file,
+                    enteFile,
                     { dateTime, editedTime: timestamp },
                     cryptoWorker.encryptMetadata,
                     cryptoWorker.decryptMetadata,
@@ -414,15 +418,15 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
             <FlexWrapper>
                 <InfoItem
                     icon={<CalendarTodayIcon />}
-                    title={formatDate(originalCreationTime)}
-                    caption={formatTime(originalCreationTime)}
+                    title={formatDate(originalDate)}
+                    caption={formatTime(originalDate)}
                     openEditor={openEditMode}
                     loading={loading}
                     hideEditOption={shouldDisableEdits || isInEditMode}
                 />
                 {isInEditMode && (
                     <PhotoDateTimePicker
-                        initialValue={originalCreationTime}
+                        initialValue={originalDate}
                         disabled={loading}
                         onAccept={saveEdits}
                         onClose={closeEditMode}
