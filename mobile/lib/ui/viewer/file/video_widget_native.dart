@@ -298,6 +298,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       type: VideoSourceType.file,
     );
     await controller.loadVideoSource(videoSource);
+    unawaited(controller.setVolume(1));
     await controller.play();
     _isControllerInitialized.value = true;
   }
