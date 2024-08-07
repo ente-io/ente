@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/utils/debouncer.dart";
 
 class SeekBar extends StatefulWidget {
   final NativeVideoPlayerController controller;
@@ -15,7 +16,10 @@ class SeekBar extends StatefulWidget {
 class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   double _prevPositionFraction = 0.0;
-
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 100),
+    executionInterval: const Duration(milliseconds: 325),
+  );
   @override
   void initState() {
     super.initState();
@@ -66,20 +70,32 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
             min: 0.0,
             max: 1.0,
             value: _animationController.value,
-            onChanged: (value) {},
+            onChanged: (value) {
+              setState(() {
+                _animationController.value = value;
+              });
+              _seekTo(value);
+            },
             divisions: 4500,
             onChangeEnd: (value) {
-              widget.controller.seekTo((value * widget.duration!).round());
-              _animationController.animateTo(
-                value,
-                duration: const Duration(microseconds: 0),
-              );
+              setState(() {
+                _animationController.value = value;
+              });
+              _seekTo(value);
             },
             allowedInteraction: SliderInteraction.tapAndSlide,
           ),
         );
       },
     );
+  }
+
+  void _seekTo(double value) {
+    _debouncer.run(() async {
+      unawaited(
+        widget.controller.seekTo((value * widget.duration!).round()),
+      );
+    });
   }
 
   void _startMovingSeekbar() {
@@ -119,7 +135,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     //To immediately set the position to 0 when the ends when playing in loop
     if (_prevPositionFraction == 1.0 && target == 0.0) {
       unawaited(
-        _animationController.animateTo(0, duration: const Duration(seconds: 0)),
+        _animationController.animateTo(0, duration: Duration.zero),
       );
     }
 
