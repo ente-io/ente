@@ -3,7 +3,7 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
-import type { Metadata, ParsedMetadata } from "@/media/file-metadata";
+import type { Metadata, ParsedMetadata, PublicMagicMetadata } from "@/media/file-metadata";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { extractExif } from "@/new/photos/services/exif";
@@ -766,16 +766,16 @@ const extractImageOrVideoMetadata = async (
         modificationTime;
 
     const metadata: Metadata = {
+        fileType,
         title: fileName,
         creationTime,
         modificationTime,
         latitude: parsedMetadata.location.latitude,
         longitude: parsedMetadata.location.longitude,
-        fileType,
         hash,
     };
 
-    const publicMagicMetadata: FilePublicMagicMetadataProps = {
+    const publicMagicMetadata: PublicMagicMetadata = {
         w: parsedMetadata.width,
         h: parsedMetadata.height,
     };

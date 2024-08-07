@@ -72,12 +72,17 @@ export interface Metadata {
     /**
      * The time when this file was created (epoch microseconds).
      *
-     * For photos (and images in general), this is our best attempt (using Exif
-     * and other metadata, or deducing it from file name for screenshots without
-     * any embedded metadata) at detecting the time when the photo was taken.
+     * This is our best attempt at detecting the time when the photo or live
+     * photo or video was taken.
      *
-     * If nothing can be found, then it is set to the current time at the time
-     * of the upload.
+     * -   We first try to obtain this from metadata, using Exif and other
+     *     metadata for images and FFmpeg-extracted metadata for video.
+     *
+     * -   If no suitable metadata is available, then we try to deduce it from
+     *     file name (e.g. for screenshots without any embedded metadata).
+     *
+     * -   If nothing can be found, then it is set to the current time at the
+     *     time of the upload.
      */
     creationTime: number;
     /**
@@ -85,20 +90,29 @@ export interface Metadata {
      */
     modificationTime: number;
     /**
-     * The latitude where the image or video was taken.
+     * The latitude where the file was taken.
      */
     latitude: number;
     /**
-     * The longitude where the image or video was taken.
+     * The longitude where the file was taken.
      */
     longitude: number;
     /**
      * A hash of the file's contents.
+     *
+     * It is only valid for images and videos. For live photos, see
+     * {@link imageHash} and {@link videoHash}.
      */
     hash?: string;
-    hasStaticThumbnail?: boolean;
+    /**
+     * The hash of the image component of a live photo.
+     */
     imageHash?: string;
+    /**
+     * The hash of the video component of a live photo.
+     */
     videoHash?: string;
+    hasStaticThumbnail?: boolean;
     localID?: number;
     version?: number;
     deviceFolder?: string;
