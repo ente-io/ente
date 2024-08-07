@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS file_data
     replicated_buckets  s3region[]  NOT NULL DEFAULT '{}',
 --  following field contains list of buckets from where we need to delete the data as the given data_type will not longer be persisted in that dc
     delete_from_buckets s3region[]  NOT NULL DEFAULT '{}',
+    inflight_rep_buckets s3region[] NOT NULL DEFAULT '{}',
     pending_sync        BOOLEAN     NOT NULL DEFAULT false,
     is_deleted          BOOLEAN     NOT NULL DEFAULT false,
     last_sync_time      BIGINT      NOT NULL DEFAULT 0,
@@ -20,29 +21,28 @@ CREATE TABLE IF NOT EXISTS file_data
     PRIMARY KEY (file_id, data_type)
 );
 
-
 -- Add index for user_id and data_type for efficient querying
 CREATE INDEX idx_file_data_user_type_deleted ON file_data (user_id, data_type, is_deleted) INCLUDE (file_id, size);
 
 CREATE OR REPLACE FUNCTION ensure_no_common_entries()
     RETURNS TRIGGER AS $$
+DECLARE
+    all_buckets s3region[];
+    duplicate_buckets s3region[];
 BEGIN
-    -- Check for common entries between latest_bucket and replicated_buckets
-    IF NEW.latest_bucket = ANY(NEW.replicated_buckets) THEN
-        RAISE EXCEPTION 'latest_bucket and replicated_buckets have common entries';
-    END IF;
+    -- Combine all bucket IDs into a single array
+    all_buckets := ARRAY[NEW.latest_bucket] || NEW.replicated_buckets || NEW.delete_from_buckets || NEW.inflight_rep_buckets;
 
-    -- Check for common entries between latest_bucket and delete_from_buckets
-    IF NEW.latest_bucket = ANY(NEW.delete_from_buckets) THEN
-        RAISE EXCEPTION 'latest_bucket and delete_from_buckets have common entries';
-    END IF;
+    -- Find duplicate bucket IDs
+    SELECT ARRAY_AGG(DISTINCT bucket) INTO duplicate_buckets
+    FROM unnest(all_buckets) bucket
+    GROUP BY bucket
+    HAVING COUNT(*) > 1;
 
-    -- Check for common entries between replicated_buckets and delete_from_buckets
-    IF EXISTS (
-            SELECT 1 FROM unnest(NEW.replicated_buckets) AS rb
-            WHERE rb = ANY(NEW.delete_from_buckets)
-        ) THEN
-        RAISE EXCEPTION 'replicated_buckets and delete_from_buckets have common entries';
+    -- If duplicates exist, raise an exception with details
+    IF ARRAY_LENGTH(duplicate_buckets, 1) > 0 THEN
+        RAISE EXCEPTION 'Duplicate bucket IDs found: %. Latest: %, Replicated: %, To Delete: %, Inflight: %',
+            duplicate_buckets, NEW.latest_bucket, NEW.replicated_buckets, NEW.delete_from_buckets, NEW.inflight_rep_buckets;
     END IF;
 
     RETURN NEW;
