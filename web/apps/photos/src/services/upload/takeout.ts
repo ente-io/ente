@@ -114,26 +114,29 @@ const parseMetadataJSONText = (text: string) => {
 
     const parsedMetadataJSON = { ...NULL_PARSED_METADATA_JSON };
 
+    // The metadata provided by Google does not include the time zone where the
+    // photo was taken, it only has an epoch seconds value.
     if (
         metadataJSON["photoTakenTime"] &&
         metadataJSON["photoTakenTime"]["timestamp"]
     ) {
         parsedMetadataJSON.creationTime =
-            metadataJSON["photoTakenTime"]["timestamp"] * 1000000;
+            metadataJSON["photoTakenTime"]["timestamp"] * 1e6;
     } else if (
         metadataJSON["creationTime"] &&
         metadataJSON["creationTime"]["timestamp"]
     ) {
         parsedMetadataJSON.creationTime =
-            metadataJSON["creationTime"]["timestamp"] * 1000000;
+            metadataJSON["creationTime"]["timestamp"] * 1e6;
     }
     if (
         metadataJSON["modificationTime"] &&
         metadataJSON["modificationTime"]["timestamp"]
     ) {
         parsedMetadataJSON.modificationTime =
-            metadataJSON["modificationTime"]["timestamp"] * 1000000;
+            metadataJSON["modificationTime"]["timestamp"] * 1e6;
     }
+
     let locationData: Location = { ...NULL_LOCATION };
     if (
         metadataJSON["geoData"] &&

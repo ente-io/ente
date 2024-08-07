@@ -636,10 +636,11 @@ export interface ParsedMetadata {
  * offset, its siblings photos might not. The only way to retain their
  * comparability is to treat them all the "time zone where the photo was taken".
  *
- * Finally, while this is all great, we still have existing code that deals with
- * UTC timestamps. So we also retain the existing `creationTime` UTC timestamp,
- * but this should be considered deprecated, and over time we should move
- * towards using the `dateTime` string.
+ * All this is good, but we still need to retain the existing `creationTime` UTC
+ * epoch timestamp because in some cases when importing photos from other
+ * providers, that's all we get. We could try and convert that to a date/time
+ * string too, but since we anyways need to handle existing code that deals with
+ * epoch timestamps, we retain them as they were provided.
  */
 export interface ParsedMetadataDate {
     /**
@@ -760,8 +761,9 @@ export const parseMetadataDate = (
 const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);
 
 /**
- * Return a date that can be used on the UI from a {@link ParsedMetadataDate},
- * or its {@link dateTime} component, or the legacy epoch timestamps.
+ * Return a date that can be used on the UI by constructing it from a
+ * {@link ParsedMetadataDate}, or its {@link dateTime} component, or a UTC epoch
+ * timestamp.
  *
  * These dates are all hypothetically in the timezone of the place where the
  * photo was taken. Different photos might've been taken in different timezones,
@@ -791,7 +793,7 @@ export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
             // `ParsedMetadataDate.dateTime`.
             return new Date(dateLike);
         case "number":
-            // A legacy epoch microseconds value.
+            // A UTC epoch microseconds value.
             return new Date(dateLike / 1000);
     }
 };
