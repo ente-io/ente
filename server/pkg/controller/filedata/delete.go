@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/repo"
+	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	"github.com/ente-io/museum/pkg/utils/time"
 	log "github.com/sirupsen/logrus"
 	"strconv"
@@ -70,7 +71,7 @@ func (c *Controller) deleteFileData(qItem repo.QueueItem) {
 					return
 				}
 			}
-			dbErr := c.Repo.RemoveBucketFromDeletedBuckets(fileDataRow, bucketID)
+			dbErr := c.Repo.RemoveBucket(fileDataRow, bucketID, fileDataRepo.DeletionColumn)
 			if dbErr != nil {
 				ctxLogger.WithError(dbErr).Error("Failed to remove from db")
 				return
@@ -86,7 +87,7 @@ func (c *Controller) deleteFileData(qItem repo.QueueItem) {
 					return
 				}
 			}
-			dbErr := c.Repo.RemoveBucketFromReplicatedBuckets(fileDataRow, bucketID)
+			dbErr := c.Repo.RemoveBucket(fileDataRow, bucketID, fileDataRepo.ReplicationColumn)
 			if dbErr != nil {
 				ctxLogger.WithError(dbErr).Error("Failed to remove from db")
 				return
@@ -100,7 +101,7 @@ func (c *Controller) deleteFileData(qItem repo.QueueItem) {
 				return
 			}
 		}
-		dbErr := c.Repo.DeleteFileData(context.Background(), fileDataRow.FileID, fileDataRow.Type, fileDataRow.LatestBucket)
+		dbErr := c.Repo.DeleteFileData(context.Background(), fileDataRow)
 		if dbErr != nil {
 			ctxLogger.WithError(dbErr).Error("Failed to remove from db")
 			return

@@ -40,6 +40,7 @@ type Row struct {
 	LatestBucket      string
 	ReplicatedBuckets []string
 	DeleteFromBuckets []string
+	InflightReplicas  []string
 	PendingSync       bool
 	IsDeleted         bool
 	LastSyncTime      int64
