@@ -1,5 +1,4 @@
 import { inWorker } from "@/base/env";
-import log from "@/base/log";
 import {
     parseMetadataDate,
     type ParsedMetadata,
@@ -110,8 +109,6 @@ const parseDates = (tags: RawExifTags) => {
     const exif = parseExifDates(tags);
     const iptc = parseIPTCDates(tags);
     const xmp = parseXMPDates(tags);
-
-    log.debug(() => ["exif/dates", { exif, iptc, xmp }]);
 
     return {
         DateTimeOriginal:
