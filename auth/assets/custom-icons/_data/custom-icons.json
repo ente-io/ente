@@ -61,6 +61,14 @@
       ]
     },
     {
+      "title": "Blockchain.com",
+      "altNames": [
+        "blockchain.com Wallet",
+        "blockchain.com Exchange"
+      ],
+      "slug": "blockchain"
+    },
+    {
       "title": "BorgBase",
       "altNames": [
         "borg"
