@@ -22,6 +22,7 @@ import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/share_util.dart';
+import "package:photos/utils/thumbnail_util.dart";
 
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
@@ -296,10 +297,14 @@ class FileBottomBarState extends State<FileBottomBar> {
     if (fetchedFile == null) {
       return;
     }
+    final fetchedThumbnail = await getThumbnail(file);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) {
-          return PanoramaViewerScreen(file: fetchedFile);
+          return PanoramaViewerScreen(
+            file: fetchedFile,
+            thumbnail: fetchedThumbnail,
+          );
         },
       ),
     ).ignore();

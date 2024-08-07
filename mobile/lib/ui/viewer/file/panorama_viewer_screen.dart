@@ -11,9 +11,11 @@ class PanoramaViewerScreen extends StatefulWidget {
   const PanoramaViewerScreen({
     super.key,
     required this.file,
+    required this.thumbnail,
   });
 
   final File file;
+  final Uint8List? thumbnail;
 
   @override
   State<PanoramaViewerScreen> createState() => _PanoramaViewerScreenState();
@@ -139,6 +141,9 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
             croppedFullWidth: width,
             croppedFullHeight: height,
             sensorControl: control,
+            background: widget.thumbnail != null
+                ? Image.memory(widget.thumbnail!)
+                : null,
             child: Image.file(
               widget.file,
             ),
