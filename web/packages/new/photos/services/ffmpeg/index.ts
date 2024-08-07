@@ -1,6 +1,7 @@
 import { ensureElectron } from "@/base/electron";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     NULL_LOCATION,
     toDataOrPathOrZipEntry,
@@ -97,7 +98,7 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  *
  * When we're running in the context of our desktop app _and_ we're passed a
  * file path , this uses the native FFmpeg bundled with our desktop app.
- * Otherwise it uses a wasm FFmpeg running in a web worker.
+ * Otherwise it uses a wasm build of FFmpeg running in a web worker.
  *
  * This function is called during upload, when we need to extract the metadata
  * of videos that the user is uploading.
@@ -108,34 +109,36 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  */
 export const extractVideoMetadata = async (
     uploadItem: UploadItem,
-): Promise<ParsedExtractedMetadata> => {
+): Promise<ParsedMetadata> => {
     const command = extractVideoMetadataCommand;
-    const outputData =
+    return parseFFmpegExtractedMetadata(
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await ensureElectron().ffmpegExec(
                   command,
                   toDataOrPathOrZipEntry(uploadItem),
                   "txt",
-              );
-
-    return parseFFmpegExtractedMetadata(outputData);
+              ),
+    );
 };
 
-// Options:
-//
-// - `-c [short for codex] copy`
-// - copy is the [stream_specifier](ffmpeg.org/ffmpeg.html#Stream-specifiers)
-// - copies all the stream without re-encoding
-//
-// - `-map_metadata`
-// - http://ffmpeg.org/ffmpeg.html#Advanced-options (search for map_metadata)
-// - copies all stream metadata to the output
-//
-// - `-f ffmetadata`
-// - https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
-// - dump metadata from media files into a simple INI-like utf-8 text file
-//
+/**
+ * The FFmpeg command to use to extract metadata from videos.
+ *
+ * Options:
+ *
+ * - `-c [short for codex] copy`
+ * - copy is the [stream_specifier](ffmpeg.org/ffmpeg.html#Stream-specifiers)
+ * - copies all the stream without re-encoding
+ *
+ * - `-map_metadata`
+ * - http://ffmpeg.org/ffmpeg.html#Advanced-options (search for map_metadata)
+ * - copies all stream metadata to the output
+ *
+ * - `-f ffmetadata`
+ * - https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+ * - dump metadata from media files into a simple INI-like utf-8 text file
+ */
 const extractVideoMetadataCommand = [
     ffmpegPathPlaceholder,
     "-i",
@@ -158,8 +161,14 @@ enum MetadataTags {
     LOCATION = "location",
 }
 
-function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
-    const metadataString = new TextDecoder().decode(encodedMetadata);
+/**
+ * Convert the output produced by running the FFmpeg
+ * {@link extractVideoMetadataCommand} into a {@link ParsedMetadata}.
+ *
+ * @param ffmpegOutput The bytes containing the output of the FFmpeg command.
+ */
+const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
+    const metadataString = new TextDecoder().decode(ffmpegOutput);
     const metadataPropertyArray = metadataString.split("\n");
     const metadataKeyValueArray = metadataPropertyArray.map((property) =>
         property.split("="),
@@ -189,7 +198,7 @@ function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
         height: null,
     };
     return parsedMetadata;
-}
+};
 
 const parseAppleISOLocation = (isoLocation: string | undefined) => {
     let location = { ...NULL_LOCATION };
