@@ -380,6 +380,8 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
         try {
             setLoading(true);
             if (isInEditMode && enteFile) {
+                // [Note: Don't modify offsetTime when editing date via picker]
+                //
                 // Use the updated date time (both in its canonical dateTime
                 // form, and also as the legacy timestamp). But don't use the
                 // offset. The offset here will be the offset of the computer
