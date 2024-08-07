@@ -92,11 +92,11 @@ export interface Metadata {
     /**
      * The latitude where the file was taken.
      */
-    latitude: number;
+    latitude?: number;
     /**
      * The longitude where the file was taken.
      */
-    longitude: number;
+    longitude?: number;
     /**
      * A hash of the file's contents.
      *
