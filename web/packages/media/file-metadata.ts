@@ -59,10 +59,12 @@ import { FileType } from "./file-type";
  * unchanged.
  */
 export interface Metadata {
-    /** The "Ente" file type - image, video or live photo. */
+    /**
+     * The "Ente" file type - image, video or live photo.
+     */
     fileType: FileType;
     /**
-     * The file name.
+     * The name of the file (including its extension).
      *
      * See: [Note: File name for local EnteFile objects]
      */
@@ -78,11 +80,23 @@ export interface Metadata {
      * of the upload.
      */
     creationTime: number;
+    /**
+     * The last modification time of the file (epoch microseconds).
+     */
     modificationTime: number;
+    /**
+     * The latitude where the image or video was taken.
+     */
     latitude: number;
+    /**
+     * The longitude where the image or video was taken.
+     */
     longitude: number;
-    hasStaticThumbnail?: boolean;
+    /**
+     * A hash of the file's contents.
+     */
     hash?: string;
+    hasStaticThumbnail?: boolean;
     imageHash?: string;
     videoHash?: string;
     localID?: number;
@@ -159,7 +173,7 @@ export enum ItemVisibility {
 export interface PublicMagicMetadata {
     /**
      * A ISO 8601 date time string without a timezone, indicating the local time
-     * where the photo was taken.
+     * where the photo (or video) was taken.
      *
      * e.g. "2022-01-26T13:08:20".
      *
@@ -189,6 +203,18 @@ export interface PublicMagicMetadata {
      */
     editedName?: string;
     /**
+     * The width of the photo (or video) in pixels.
+     *
+     * While this should usually be present, it is not guaranteed to be.
+     */
+    w?: number;
+    /**
+     * The height of the photo (or video) in pixels, if available.
+     *
+     * While this should usually be present, it is not guaranteed to be.
+     */
+    h?: number;
+    /**
      * An arbitrary caption / description string that the user has added to the
      * file.
      *
@@ -197,8 +223,6 @@ export interface PublicMagicMetadata {
      */
     caption?: string;
     uploaderName?: string;
-    w?: number;
-    h?: number;
 }
 
 /**
