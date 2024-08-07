@@ -67,7 +67,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
             activeTrackColor: colorScheme.primary300,
             inactiveTrackColor: fillMutedDark,
             thumbColor: backgroundElevatedLight,
-            overlayColor: Colors.red.withOpacity(0.4),
+            overlayColor: fillMutedDark,
           ),
           child: Slider(
             min: 0.0,

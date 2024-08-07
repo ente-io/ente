@@ -191,11 +191,17 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                     borderRadius: const BorderRadius.all(
                                       Radius.circular(8),
                                     ),
+                                    border: Border.all(
+                                      color: getEnteColorScheme(context)
+                                          .strokeFaint,
+                                      width: 1,
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
                                       AnimatedSize(
                                         duration: const Duration(seconds: 5),
+                                        curve: Curves.easeInOut,
                                         child: ValueListenableBuilder(
                                           valueListenable: _controller!
                                               .onPlaybackPositionChanged,

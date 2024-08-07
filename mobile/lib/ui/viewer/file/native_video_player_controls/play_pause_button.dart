@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/theme/ente_theme.dart";
 
 class PlayPauseButton extends StatefulWidget {
   final NativeVideoPlayerController? controller;
@@ -34,6 +35,10 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
         decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.3),
           shape: BoxShape.circle,
+          border: Border.all(
+            color: getEnteColorScheme(context).strokeFaint,
+            width: 1,
+          ),
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
