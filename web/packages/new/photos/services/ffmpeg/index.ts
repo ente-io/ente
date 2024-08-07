@@ -136,7 +136,7 @@ export const extractVideoMetadata = async (
  * - copies all stream metadata to the output
  *
  * - `-f ffmetadata`
- * - https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
+ * - https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
  * - dump metadata from media files into a simple INI-like utf-8 text file
  */
 const extractVideoMetadataCommand = [
@@ -168,25 +168,25 @@ enum MetadataTags {
  * @param ffmpegOutput The bytes containing the output of the FFmpeg command.
  */
 const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
-    const metadataString = new TextDecoder().decode(ffmpegOutput);
-    const metadataPropertyArray = metadataString.split("\n");
-    const metadataKeyValueArray = metadataPropertyArray.map((property) =>
-        property.split("="),
-    );
-    const validKeyValuePairs = metadataKeyValueArray.filter(
-        (keyValueArray) => keyValueArray.length == 2,
-    ) as [string, string][];
+    // The output is a utf8 INI-like text file with key=value pairs interspersed
+    // with comments and newlines.
+    //
+    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
 
-    const metadataMap = Object.fromEntries(validKeyValuePairs);
+    const lines = new TextDecoder().decode(ffmpegOutput).split("\n");
+    const isPair = (xs: string[]): xs is [string, string] => xs.length == 2;
+    const kvPairs = lines.map((property) => property.split("=")).filter(isPair);
+
+    const kv = new Map(kvPairs);
 
     const location = parseAppleISOLocation(
-        metadataMap[MetadataTags.APPLE_LOCATION_ISO] ??
-            metadataMap[MetadataTags.LOCATION],
+        kv.get(MetadataTags.APPLE_LOCATION_ISO) ??
+            kv.get(MetadataTags.LOCATION),
     );
 
     const creationTime = parseCreationTime(
-        metadataMap[MetadataTags.APPLE_CREATION_DATE] ??
-            metadataMap[MetadataTags.CREATION_TIME],
+        kv.get(MetadataTags.APPLE_CREATION_DATE) ??
+            kv.get(MetadataTags.CREATION_TIME),
     );
     const parsedMetadata: ParsedExtractedMetadata = {
         creationTime,
