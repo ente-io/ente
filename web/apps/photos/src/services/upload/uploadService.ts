@@ -3,10 +3,10 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
-import type { Metadata } from "@/media/file-metadata";
+import type { Metadata, ParsedMetadata } from "@/media/file-metadata";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
-import { cmpNewLib, extractExif, wipNewLib } from "@/new/photos/services/exif";
+import { extractExif } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
@@ -31,7 +31,6 @@ import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worke
 import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { parseImageMetadata } from "@ente/shared/utils/exif-old";
 import type { Remote } from "comlink";
 import { addToCollection } from "services/collectionService";
 import {
@@ -807,11 +806,10 @@ const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     height: null,
 };
 
-async function tryExtractImageMetadata(
+const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
-): Promise<ParsedExtractedMetadata> {
+): Promise<ParsedMetadata> => {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         // The library we use for extracting Exif from images, ExifReader,
@@ -829,17 +827,12 @@ async function tryExtractImageMetadata(
     }
 
     try {
-        const oldLib = await parseImageMetadata(file, fileTypeInfo);
-        if (await wipNewLib()) {
-            const newLib = await extractExif(file);
-            cmpNewLib(oldLib, newLib);
-        }
-        return oldLib;
+        return extractExif(file);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;
     }
-}
+};
 
 const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
