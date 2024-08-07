@@ -1,14 +1,13 @@
 import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
-    NULL_LOCATION,
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
     type UploadItem,
 } from "@/new/photos/services/upload/types";
-import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import {
     readConvertToMP4Done,
     readConvertToMP4Stream,
@@ -179,37 +178,49 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
 
     const kv = new Map(kvPairs);
 
-    const location = parseAppleISOLocation(
-        kv.get(MetadataTags.APPLE_LOCATION_ISO) ??
-            kv.get(MetadataTags.LOCATION),
+    const location = parseMetadataLocation(
+        kv.get("com.apple.quicktime.location.ISO6709") ?? kv.get("location"),
     );
 
-    const creationTime = parseCreationTime(
-        kv.get(MetadataTags.APPLE_CREATION_DATE) ??
-            kv.get(MetadataTags.CREATION_TIME),
-    );
-    const parsedMetadata: ParsedExtractedMetadata = {
-        creationTime,
-        location: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-        },
-        width: null,
-        height: null,
-    };
-    return parsedMetadata;
+    return { location };
+    // const creationTime = parseCreationTime(
+    //     kv.get(MetadataTags.APPLE_CREATION_DATE) ??
+    //         kv.get(MetadataTags.CREATION_TIME),
+    // );
+    // const parsedMetadata: ParsedExtractedMetadata = {
+    //     creationTime,
+    //     location: {
+    //         latitude: location.latitude,
+    //         longitude: location.longitude,
+    //     },
+    //     width: null,
+    //     height: null,
+    // };
+    // return parsedMetadata;
 };
 
-const parseAppleISOLocation = (isoLocation: string | undefined) => {
-    let location = { ...NULL_LOCATION };
-    if (isoLocation) {
-        const m = isoLocation
-            .match(/(\+|-)\d+\.*\d+/g)
-            ?.map((x) => parseFloat(x));
+/**
+ * Parse a location string found in the FFmpeg metadata attributes.
+ *
+ * This is meant to parse either the "com.apple.quicktime.location.ISO6709"
+ * (preferable) or the "location" key (fallback).
+ */
+const parseMetadataLocation = (s: string | undefined) => {
+    if (!s) return undefined;
 
-        location = { latitude: m?.at(0) ?? null, longitude: m?.at(1) ?? null };
+    const m = s.match(/(\+|-)\d+\.*\d+/g);
+    if (!m) {
+        log.warn(`Ignoring unparseable location string "${s}"`);
+        return undefined;
     }
-    return location;
+
+    const [latitude, longitude] = m.map(parseFloat);
+    if (!latitude || !longitude) {
+        log.warn(`Ignoring unparseable location string "${s}"`);
+        return undefined;
+    }
+
+    return { latitude, longitude };
 };
 
 const parseCreationTime = (creationTime: string | undefined) => {
