@@ -288,10 +288,16 @@ export const decryptPublicMagicMetadata = async (
         withoutNullAndUndefinedValues(jsonValue as object),
     );
 
-    // @ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    // We can't use -@ts-expect-error since this code is also included in the
+    // packages which don't have strict mode enabled (and thus don't error).
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
     envelope.data = result;
 
-    // @ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
     return result;
 };
 
