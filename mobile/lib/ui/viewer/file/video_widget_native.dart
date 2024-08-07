@@ -517,6 +517,9 @@ class _SeekBarState extends State<_SeekBar>
   }
 
   void _onPlaybackPositionChanged() async {
+    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused) {
+      return;
+    }
     final target = widget.controller.playbackInfo?.positionFraction ?? 0;
 
     //To immediately set the position to 0 when the ends when playing in loop
