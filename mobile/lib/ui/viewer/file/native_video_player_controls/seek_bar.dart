@@ -134,9 +134,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
     //To immediately set the position to 0 when the ends when playing in loop
     if (_prevPositionFraction == 1.0 && target == 0.0) {
-      unawaited(
-        _animationController.animateTo(0, duration: Duration.zero),
-      );
+      setState(() {
+        _animationController.value = 0;
+      });
     }
 
     //There is a slight delay (around 350 ms) for the event being listened to
