@@ -59,10 +59,12 @@ import { FileType } from "./file-type";
  * unchanged.
  */
 export interface Metadata {
-    /** The "Ente" file type - image, video or live photo. */
+    /**
+     * The "Ente" file type - image, video or live photo.
+     */
     fileType: FileType;
     /**
-     * The file name.
+     * The name of the file (including its extension).
      *
      * See: [Note: File name for local EnteFile objects]
      */
@@ -70,21 +72,47 @@ export interface Metadata {
     /**
      * The time when this file was created (epoch microseconds).
      *
-     * For photos (and images in general), this is our best attempt (using Exif
-     * and other metadata, or deducing it from file name for screenshots without
-     * any embedded metadata) at detecting the time when the photo was taken.
+     * This is our best attempt at detecting the time when the photo or live
+     * photo or video was taken.
      *
-     * If nothing can be found, then it is set to the current time at the time
-     * of the upload.
+     * -   We first try to obtain this from metadata, using Exif and other
+     *     metadata for images and FFmpeg-extracted metadata for video.
+     *
+     * -   If no suitable metadata is available, then we try to deduce it from
+     *     file name (e.g. for screenshots without any embedded metadata).
+     *
+     * -   If nothing can be found, then it is set to the current time at the
+     *     time of the upload.
      */
     creationTime: number;
+    /**
+     * The last modification time of the file (epoch microseconds).
+     */
     modificationTime: number;
-    latitude: number;
-    longitude: number;
-    hasStaticThumbnail?: boolean;
+    /**
+     * The latitude where the file was taken.
+     */
+    latitude?: number;
+    /**
+     * The longitude where the file was taken.
+     */
+    longitude?: number;
+    /**
+     * A hash of the file's contents.
+     *
+     * It is only valid for images and videos. For live photos, see
+     * {@link imageHash} and {@link videoHash}.
+     */
     hash?: string;
+    /**
+     * The hash of the image component of a live photo.
+     */
     imageHash?: string;
+    /**
+     * The hash of the video component of a live photo.
+     */
     videoHash?: string;
+    hasStaticThumbnail?: boolean;
     localID?: number;
     version?: number;
     deviceFolder?: string;
@@ -159,7 +187,7 @@ export enum ItemVisibility {
 export interface PublicMagicMetadata {
     /**
      * A ISO 8601 date time string without a timezone, indicating the local time
-     * where the photo was taken.
+     * where the photo (or video) was taken.
      *
      * e.g. "2022-01-26T13:08:20".
      *
@@ -189,6 +217,18 @@ export interface PublicMagicMetadata {
      */
     editedName?: string;
     /**
+     * The width of the photo (or video) in pixels.
+     *
+     * While this should usually be present, it is not guaranteed to be.
+     */
+    w?: number;
+    /**
+     * The height of the photo (or video) in pixels, if available.
+     *
+     * While this should usually be present, it is not guaranteed to be.
+     */
+    h?: number;
+    /**
      * An arbitrary caption / description string that the user has added to the
      * file.
      *
@@ -197,8 +237,6 @@ export interface PublicMagicMetadata {
      */
     caption?: string;
     uploaderName?: string;
-    w?: number;
-    h?: number;
 }
 
 /**
@@ -220,12 +258,14 @@ const PublicMagicMetadata = z
     .object({
         // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
         //
-        // Using `optional` is accurate here. The key is optional, but the value
-        // itself is not optional. Zod doesn't work with
-        // `exactOptionalPropertyTypes` yet, but it seems to be on the roadmap so we
-        // suppress these mismatches.
+        // Using `optional` is not accurate here. The key is optional, but the
+        // value itself is not optional.
         //
-        // See: https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+        // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
+        // to be on the roadmap so we suppress these mismatches.
+        //
+        // See:
+        // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
         editedTime: z.number().optional(),
     })
     .passthrough();
@@ -596,10 +636,11 @@ export interface ParsedMetadata {
  * offset, its siblings photos might not. The only way to retain their
  * comparability is to treat them all the "time zone where the photo was taken".
  *
- * Finally, while this is all great, we still have existing code that deals with
- * UTC timestamps. So we also retain the existing `creationTime` UTC timestamp,
- * but this should be considered deprecated, and over time we should move
- * towards using the `dateTime` string.
+ * All this is good, but we still need to retain the existing `creationTime` UTC
+ * epoch timestamp because in some cases when importing photos from other
+ * providers, that's all we get. We could try and convert that to a date/time
+ * string too, but since we anyways need to handle existing code that deals with
+ * epoch timestamps, we retain them as they were provided.
  */
 export interface ParsedMetadataDate {
     /**
@@ -720,8 +761,9 @@ export const parseMetadataDate = (
 const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);
 
 /**
- * Return a date that can be used on the UI from a {@link ParsedMetadataDate},
- * or its {@link dateTime} component, or the legacy epoch timestamps.
+ * Return a date that can be used on the UI by constructing it from a
+ * {@link ParsedMetadataDate}, or its {@link dateTime} component, or a UTC epoch
+ * timestamp.
  *
  * These dates are all hypothetically in the timezone of the place where the
  * photo was taken. Different photos might've been taken in different timezones,
@@ -751,7 +793,7 @@ export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
             // `ParsedMetadataDate.dateTime`.
             return new Date(dateLike);
         case "number":
-            // A legacy epoch microseconds value.
+            // A UTC epoch microseconds value.
             return new Date(dateLike / 1000);
     }
 };

@@ -1,4 +1,3 @@
-import { isDevBuild } from "@/base/env";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import {
@@ -11,10 +10,6 @@ import { parseImageMetadata } from "@ente/shared/utils/exif-old";
 import ExifReader from "exifreader";
 import type { EnteFile } from "../types/file";
 import type { ParsedExtractedMetadata } from "../types/metadata";
-import { isInternalUser } from "./feature-flags";
-
-// TODO: Exif: WIP flag to inspect the migration from old to new lib.
-export const wipNewLib = async () => isDevBuild && (await isInternalUser());
 
 const cmpTsEq = (a: number | undefined | null, b: number | undefined) => {
     if (!a && !b) return true;

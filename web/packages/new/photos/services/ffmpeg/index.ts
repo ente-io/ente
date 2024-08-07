@@ -1,19 +1,18 @@
 import { ensureElectron } from "@/base/electron";
+import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { parseMetadataDate, type ParsedMetadata } from "@/media/file-metadata";
 import {
-    NULL_LOCATION,
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
     type UploadItem,
 } from "@/new/photos/services/upload/types";
-import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import {
     readConvertToMP4Done,
     readConvertToMP4Stream,
     writeConvertToMP4Stream,
 } from "@/new/photos/utils/native-stream";
-import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
 import type { Remote } from "comlink";
 import {
     ffmpegPathPlaceholder,
@@ -97,7 +96,7 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  *
  * When we're running in the context of our desktop app _and_ we're passed a
  * file path , this uses the native FFmpeg bundled with our desktop app.
- * Otherwise it uses a wasm FFmpeg running in a web worker.
+ * Otherwise it uses a wasm build of FFmpeg running in a web worker.
  *
  * This function is called during upload, when we need to extract the metadata
  * of videos that the user is uploading.
@@ -108,34 +107,36 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  */
 export const extractVideoMetadata = async (
     uploadItem: UploadItem,
-): Promise<ParsedExtractedMetadata> => {
+): Promise<ParsedMetadata> => {
     const command = extractVideoMetadataCommand;
-    const outputData =
+    return parseFFmpegExtractedMetadata(
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await ensureElectron().ffmpegExec(
                   command,
                   toDataOrPathOrZipEntry(uploadItem),
                   "txt",
-              );
-
-    return parseFFmpegExtractedMetadata(outputData);
+              ),
+    );
 };
 
-// Options:
-//
-// - `-c [short for codex] copy`
-// - copy is the [stream_specifier](ffmpeg.org/ffmpeg.html#Stream-specifiers)
-// - copies all the stream without re-encoding
-//
-// - `-map_metadata`
-// - http://ffmpeg.org/ffmpeg.html#Advanced-options (search for map_metadata)
-// - copies all stream metadata to the output
-//
-// - `-f ffmetadata`
-// - https://ffmpeg.org/ffmpeg-formats.html#Metadata-1
-// - dump metadata from media files into a simple INI-like utf-8 text file
-//
+/**
+ * The FFmpeg command to use to extract metadata from videos.
+ *
+ * Options:
+ *
+ * - `-c [short for codex] copy`
+ * - copy is the [stream_specifier](ffmpeg.org/ffmpeg.html#Stream-specifiers)
+ * - copies all the stream without re-encoding
+ *
+ * - `-map_metadata`
+ * - http://ffmpeg.org/ffmpeg.html#Advanced-options (search for map_metadata)
+ * - copies all stream metadata to the output
+ *
+ * - `-f ffmetadata`
+ * - https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
+ * - dump metadata from media files into a simple INI-like utf-8 text file
+ */
 const extractVideoMetadataCommand = [
     ffmpegPathPlaceholder,
     "-i",
@@ -149,68 +150,90 @@ const extractVideoMetadataCommand = [
     outputPathPlaceholder,
 ];
 
-enum MetadataTags {
-    CREATION_TIME = "creation_time",
-    APPLE_CONTENT_IDENTIFIER = "com.apple.quicktime.content.identifier",
-    APPLE_LIVE_PHOTO_IDENTIFIER = "com.apple.quicktime.live-photo.auto",
-    APPLE_CREATION_DATE = "com.apple.quicktime.creationdate",
-    APPLE_LOCATION_ISO = "com.apple.quicktime.location.ISO6709",
-    LOCATION = "location",
-}
+/**
+ * Convert the output produced by running the FFmpeg
+ * {@link extractVideoMetadataCommand} into a {@link ParsedMetadata}.
+ *
+ * @param ffmpegOutput The bytes containing the output of the FFmpeg command.
+ */
+const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
+    // The output is a utf8 INI-like text file with key=value pairs interspersed
+    // with comments and newlines.
+    //
+    // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
 
-function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
-    const metadataString = new TextDecoder().decode(encodedMetadata);
-    const metadataPropertyArray = metadataString.split("\n");
-    const metadataKeyValueArray = metadataPropertyArray.map((property) =>
-        property.split("="),
-    );
-    const validKeyValuePairs = metadataKeyValueArray.filter(
-        (keyValueArray) => keyValueArray.length == 2,
-    ) as [string, string][];
+    const lines = new TextDecoder().decode(ffmpegOutput).split("\n");
+    const isPair = (xs: string[]): xs is [string, string] => xs.length == 2;
+    const kvPairs = lines.map((property) => property.split("=")).filter(isPair);
 
-    const metadataMap = Object.fromEntries(validKeyValuePairs);
+    const kv = new Map(kvPairs);
 
-    const location = parseAppleISOLocation(
-        metadataMap[MetadataTags.APPLE_LOCATION_ISO] ??
-            metadataMap[MetadataTags.LOCATION],
-    );
+    const result: ParsedMetadata = {};
 
-    const creationTime = parseCreationTime(
-        metadataMap[MetadataTags.APPLE_CREATION_DATE] ??
-            metadataMap[MetadataTags.CREATION_TIME],
-    );
-    const parsedMetadata: ParsedExtractedMetadata = {
-        creationTime,
-        location: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-        },
-        width: null,
-        height: null,
-    };
-    return parsedMetadata;
-}
+    const creationDate =
+        parseFFMetadataDate(kv.get("com.apple.quicktime.creationdate")) ??
+        parseFFMetadataDate(kv.get("creation_time"));
+    if (creationDate) result.creationDate = creationDate;
 
-const parseAppleISOLocation = (isoLocation: string | undefined) => {
-    let location = { ...NULL_LOCATION };
-    if (isoLocation) {
-        const m = isoLocation
-            .match(/(\+|-)\d+\.*\d+/g)
-            ?.map((x) => parseFloat(x));
+    const location =
+        parseFFMetadataLocation(
+            kv.get("com.apple.quicktime.location.ISO6709"),
+        ) ?? parseFFMetadataLocation(kv.get("location"));
+    if (location) result.location = location;
 
-        location = { latitude: m?.at(0) ?? null, longitude: m?.at(1) ?? null };
-    }
-    return location;
+    return result;
 };
 
-const parseCreationTime = (creationTime: string | undefined) => {
-    let dateTime = null;
-    if (creationTime) {
-        dateTime = validateAndGetCreationUnixTimeInMicroSeconds(
-            new Date(creationTime),
-        );
+/**
+ * Parse a location string found in the FFmpeg metadata attributes.
+ *
+ * This is meant to parse either the "com.apple.quicktime.location.ISO6709"
+ * (preferable) or the "location" key (fallback).
+ */
+const parseFFMetadataLocation = (s: string | undefined) => {
+    if (!s) return undefined;
+
+    const m = s.match(/(\+|-)\d+\.*\d+/g);
+    if (!m) {
+        log.warn(`Ignoring unparseable location string "${s}"`);
+        return undefined;
     }
-    return dateTime;
+
+    const [latitude, longitude] = m.map(parseFloat);
+    if (!latitude || !longitude) {
+        log.warn(`Ignoring unparseable video metadata location string "${s}"`);
+        return undefined;
+    }
+
+    return { latitude, longitude };
+};
+
+/**
+ * Parse a date/time string found in the FFmpeg metadata attributes.
+ *
+ * This is meant to parse either the "com.apple.quicktime.creationdate"
+ * (preferable) or the "creation_time" key (fallback).
+ *
+ * Both of these are expected to be ISO 8601 date/time strings, but we prefer
+ * "com.apple.quicktime.creationdate" since it includes the time zone offset.
+ */
+const parseFFMetadataDate = (s: string | undefined) => {
+    if (!s) return undefined;
+
+    const d = parseMetadataDate(s);
+    if (!d) {
+        log.warn(`Ignoring unparseable video metadata date string "${s}"`);
+        return undefined;
+    }
+
+    // While not strictly required, we retain the same behaviour as the image
+    // Exif parser of ignoring dates whose epoch is 0.
+    if (!d.timestamp) {
+        log.warn(`Ignoring zero video metadata date string "${s}"`);
+        return undefined;
+    }
+
+    return d;
 };
 
 /**
