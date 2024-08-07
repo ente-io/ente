@@ -39,20 +39,22 @@ export const fileLogID = (enteFile: EnteFile) =>
  * its filename.
  */
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => {
-        // TODO: Until the types reflect reality
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (file.pubMagicMetadata?.data.editedTime) {
-            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-        }
-        // TODO: Until the types reflect reality
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (file.pubMagicMetadata?.data.editedName) {
-            file.metadata.title = file.pubMagicMetadata.data.editedName;
-        }
+    return files.map((file) => mergeMetadata1(file));
+}
 
-        return file;
-    });
+export function mergeMetadata1(file: EnteFile): EnteFile {
+    // TODO: Until the types reflect reality
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (file.pubMagicMetadata?.data.editedTime) {
+        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+    }
+    // TODO: Until the types reflect reality
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (file.pubMagicMetadata?.data.editedName) {
+        file.metadata.title = file.pubMagicMetadata.data.editedName;
+    }
+
+    return file;
 }
 
 /**

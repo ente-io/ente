@@ -8,12 +8,16 @@ import type { StateAddress } from "libsodium-wrappers";
  * specific layer (base/crypto/ente.ts) or the internal libsodium layer
  * (internal/libsodium.ts).
  *
- * Running these in a web worker allows us to use potentially CPU-intensive
- * crypto operations from the main thread without stalling the UI.
+ * Use these when running on the main thread, since running these in a web
+ * worker allows us to use potentially CPU-intensive crypto operations from the
+ * main thread without stalling the UI.
+ *
+ * If the code that needs this functionality is already running in the context
+ * of a web worker, then use the underlying functions directly.
  *
  * See: [Note: Crypto code hierarchy].
  *
- * Note: Keep these methods logic free. They should just act as trivial proxies.
+ * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class DedicatedCryptoWorker {
     async decryptThumbnail(
