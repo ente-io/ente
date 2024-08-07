@@ -472,14 +472,14 @@ class _SeekBarState extends State<_SeekBar>
             min: 0.0,
             max: 1.0,
             value: _animationController.value,
-            onChanged: (value) {
-              // setState(() {
-
-              // });
-              // widget.controller?.seekTo(value.toInt());
-            },
+            onChanged: (value) {},
+            divisions: 4500,
             onChangeEnd: (value) {
-              // widget.onSeek(Duration(milliseconds: value.round()));
+              widget.controller.seekTo((value * widget.duration!).round());
+              _animationController.animateTo(
+                value,
+                duration: const Duration(microseconds: 0),
+              );
             },
             allowedInteraction: SliderInteraction.tapAndSlide,
           ),
