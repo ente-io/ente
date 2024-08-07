@@ -769,13 +769,23 @@ const extractImageOrVideoMetadata = async (
         parsedMetadataJSONMap,
     );
 
+    const publicMagicMetadata: PublicMagicMetadata = {};
+
     const modificationTime =
-        parsedMetadataJSON.modificationTime ?? lastModifiedMs * 1000;
-    const creationTime =
-        parsedMetadataJSON.creationTime ??
-        parsedMetadata.creationTime ??
-        tryParseEpochMicrosecondsFromFileName(fileName) ??
-        modificationTime;
+        parsedMetadataJSON?.modificationTime ?? lastModifiedMs * 1000;
+
+    let creationTime: number;
+    if (parsedMetadataJSON?.creationTime) {
+        creationTime = parsedMetadataJSON.creationTime;
+    } else if (parsedMetadata.creationDate) {
+        const { dateTime, offset, timestamp } = parsedMetadata.creationDate;
+        creationTime = timestamp;
+        publicMagicMetadata.dateTime = dateTime;
+        if (offset) publicMagicMetadata.offsetTime = offset;
+    } else {
+        creationTime =
+            tryParseEpochMicrosecondsFromFileName(fileName) ?? modificationTime;
+    }
 
     const metadata: Metadata = {
         fileType,
@@ -785,15 +795,13 @@ const extractImageOrVideoMetadata = async (
         hash,
     };
 
-    const location = parsedMetadataJSON.location ?? parsedMetadata.location;
+    const location = parsedMetadataJSON?.location ?? parsedMetadata.location;
     if (location) {
         metadata.latitude = location.latitude;
         metadata.longitude = location.longitude;
     }
 
     const { width: w, height: h } = parsedMetadata;
-
-    const publicMagicMetadata: PublicMagicMetadata = {};
     if (w) publicMagicMetadata.w = w;
     if (h) publicMagicMetadata.h = h;
 
