@@ -8,6 +8,7 @@ import (
 	"github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
+	"time"
 )
 
 // Repository defines the methods for inserting, updating, and retrieving file data.
@@ -155,6 +156,42 @@ func (r *Repository) MoveBetweenBuckets(row filedata.Row, bucketID string, sourc
 		return stacktrace.NewError("bucket not moved from " + sourceColumn + " to " + destColumn)
 	}
 	return nil
+}
+
+// GetPendingSyncDataAndExtendLock in a transaction gets single file data row that has been deleted and pending sync is true and sync_lock_till is less than now_utc_micro_seconds() and extends the lock till newSyncLockTime
+// This is used to lock the file data row for deletion and extend
+func (r *Repository) GetPendingSyncDataAndExtendLock(ctx context.Context, newSyncLockTime int64, forDeletion bool) (*filedata.Row, error) {
+	// ensure newSyncLockTime is in the future
+	if newSyncLockTime < time.Now().Add(5*time.Minute).UnixMicro() {
+		return nil, stacktrace.NewError("newSyncLockTime should be at least 5min in the future")
+	}
+	tx, err := r.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer tx.Rollback()
+	row := tx.QueryRow(`SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at
+		FROM file_data
+		where pending_sync = true and is_deleted = $1 and sync_locked_till < now_utc_micro_seconds()
+		LIMIT 1
+		FOR UPDATE SKIP LOCKED`, forDeletion)
+	var fileData filedata.Row
+	err = row.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if fileData.SyncLockedTill > newSyncLockTime {
+		return nil, stacktrace.NewError(fmt.Sprintf("newSyncLockTime (%d) is less than existing SyncLockedTill(%d), newSync", newSyncLockTime, fileData.SyncLockedTill))
+	}
+	_, err = tx.Exec(`UPDATE file_data SET sync_locked_till = $1 WHERE file_id = $2 AND data_type = $3 AND user_id = $4`, newSyncLockTime, fileData.FileID, string(fileData.Type), fileData.UserID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	err = tx.Commit()
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &fileData, nil
 }
 
 func (r *Repository) DeleteFileData(ctx context.Context, row filedata.Row) error {
