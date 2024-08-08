@@ -84,7 +84,12 @@
     },
     {
       "title": "Brave Creators",
-      "slug": "brave_creators"
+      "slug": "brave_creators",
+      "altNames":[
+        "Brave",
+        "Brave Rewards",
+        "Brave Browser"
+      ]
     },
     {
       "title": "Bybit"
