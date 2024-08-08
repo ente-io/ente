@@ -59,9 +59,10 @@ export interface Person {
  * [Note: Face clustering algorithm]
  *
  * 1.  clusters = []
- * 2.  For each face, find its nearest neighbour in the embedding space. If no
- *     such neighbour is found within our threshold, create a new cluster.
- * 3.  Otherwise assign this face to the same cluster as its nearest neighbour.
+ * 2.  For each face, find its nearest neighbour in the embedding space from
+ *     amongst the faces that have already been clustered.
+ * 3.  If no such neighbour is found within our threshold, create a new cluster.
+ * 4.  Otherwise assign this face to the same cluster as its nearest neighbour.
  *
  * [Note: Face clustering feedback]
  *
@@ -79,35 +80,35 @@ export const clusterFaces = (faceIndexes: FaceIndex[]) => {
 
     const clusters: Cluster[] = [];
     const clusterIndexByFaceID = new Map<string, number>();
-    for (const [i, fi] of faces.entries()) {
-        let j = i + 1;
-        for (; j < faces.length; j++) {
+    for (const [i, { faceID, embedding }] of faces.entries()) {
+        let j = 0;
+        for (; j < i; j++) {
             // Can't find a better way for avoiding the null assertion.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const fj = faces[j]!;
+            const n = faces[j]!;
 
             // TODO-ML: The distance metric and the thresholds are placeholders.
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
-            const csim = dotProduct(fi.embedding, fj.embedding);
+            const csim = dotProduct(embedding, n.embedding);
             if (csim > 0.5) {
                 // Found a neighbour near enough. Add this face to the
                 // neighbour's cluster and call it a day.
-                const ci = ensure(clusterIndexByFaceID.get(fj.faceID));
-                clusters[ci]?.faceIDs.push(fi.faceID);
-                clusterIndexByFaceID.set(fi.faceID, ci);
+                const ci = ensure(clusterIndexByFaceID.get(n.faceID));
+                clusters[ci]?.faceIDs.push(faceID);
+                clusterIndexByFaceID.set(faceID, ci);
                 break;
             }
         }
-        if (j == faces.length) {
+        if (j == i) {
             // We didn't find a neighbour. Create a new cluster with this face.
             const cluster = {
                 id: newNonSecureID("cluster_"),
-                faceIDs: [fi.faceID],
+                faceIDs: [faceID],
             };
             clusters.push(cluster);
-            clusterIndexByFaceID.set(fi.faceID, clusters.length);
+            clusterIndexByFaceID.set(faceID, clusters.length);
         }
     }
 

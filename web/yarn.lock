@@ -3374,7 +3374,7 @@ libsodium-wrappers@0.7.9:
   dependencies:
     libsodium "^0.7.0"
 
-libsodium@^0.7.0:
+libsodium@0.7.9, libsodium@^0.7.0:
   version "0.7.9"
   resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.9.tgz#4bb7bcbf662ddd920d8795c227ae25bbbfa3821b"
   integrity sha512-gfeADtR4D/CM0oRUviKBViMGXZDgnFdMKMzHsvBdqLBHd9ySi6EtYnmuhHVDDYgYpAO8eU8hEY+F8vIUAPh08A==
