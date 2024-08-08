@@ -7,7 +7,9 @@ import type { FaceIndex } from "./face";
  * Each cluster has an id so that a Person (a set of clusters) can refer to it.
  */
 export interface Cluster {
-    /** A unique nanoid to identify this cluster. */
+    /**
+     * A randomly generated ID to uniquely identify this cluster.
+     */
     id: string;
     /**
      * An unordered set of ids of the faces that belong to the cluster.
@@ -31,7 +33,9 @@ export interface Cluster {
  * That is, it has the clusters embedded within itself.
  */
 export interface Person {
-    /** A unique nanoid to identify this person. */
+    /**
+     * A randomly generated ID to uniquely identify this person.
+     */
     id: string;
     /**
      * An optional name assigned by the user to this person.
@@ -67,5 +71,6 @@ export interface Person {
  */
 export const clusterFaces = (faceIndices: FaceIndex[]) => {
     log.debug(() => ["Clustering", faceIndices]);
+    const clusters: Cluster = []
     return undefined;
 };

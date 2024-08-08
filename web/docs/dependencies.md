@@ -193,6 +193,9 @@ For more details, see [translations.md](translations.md).
 -   [zod](https://github.com/colinhacks/zod) is used for runtime typechecking
     (e.g. verifying that API responses match the expected TypeScript shape).
 
+-   [nanoid](https://github.com/ai/nanoid) is used for generating unique
+    identifiers.
+
 -   [debounce](https://github.com/sindresorhus/debounce) and its
     promise-supporting sibling
     [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
