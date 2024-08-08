@@ -484,6 +484,14 @@
       "title": "Skinport"
     },
     {
+      "title": "SMSPool",
+      "slug": "sms_pool_net",
+      "altNames": [
+        "smspool.net",
+        "smspool net"
+      ]
+    },
+    {
       "title": "SMTP2GO",
       "slug": "smtp2go"
     },
