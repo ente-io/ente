@@ -72,3 +72,15 @@ type S3FileMetadata struct {
 	DecryptionHeader string `json:"header"`
 	Client           string `json:"client"`
 }
+
+type GetPreviewUrlRequest struct {
+	FileID int64           `form:"fileID" binding:"required"`
+	Type   ente.ObjectType `form:"type" binding:"required"`
+}
+
+func (g *GetPreviewUrlRequest) Validate() error {
+	if g.Type != ente.PreviewVideo && g.Type != ente.PreviewImage {
+		return ente.NewBadRequestWithMessage(fmt.Sprintf("unsupported object type %s", g.Type))
+	}
+	return nil
+}

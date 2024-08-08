@@ -25,6 +25,17 @@ func AllObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
 	}
 }
 
+func PreviewUrl(fileID int64, ownerID int64, oType ente.ObjectType) string {
+	switch oType {
+	case ente.PreviewVideo:
+		return previewVideoPath(fileID, ownerID)
+	case ente.PreviewImage:
+		return previewImagePath(fileID, ownerID)
+	default:
+		panic(fmt.Sprintf("object type %s is not supported", oType))
+	}
+}
+
 func previewVideoPath(fileID int64, ownerID int64) string {
 	return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(ente.PreviewVideo))
 }
