@@ -46,7 +46,7 @@ Future<void> guardedCheckPanorama(EnteFile file) async {
   final result = await checkIfPanorama(file);
 
   // Update the metadata if it is not updated
-  if (file.isPanorama() == null && file.canEditMetaInfo) {
+  if (file.canEditMetaInfo && file.isPanorama() == null) {
     int? mediaType = file.pubMagicMetadata?.mediaType;
     mediaType ??= 0;
 
