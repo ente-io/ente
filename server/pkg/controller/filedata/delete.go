@@ -64,20 +64,6 @@ func (c *Controller) tryDelete() error {
 	}
 	return nil
 }
-func (c *Controller) DeleteFileData(fileID int64) error {
-	rows, err := c.Repo.GetFileData(context.Background(), fileID)
-	if err != nil {
-		return err
-	}
-	for i := range rows {
-		fileDataRow := rows[i]
-		err = c.DeleteFileRow(fileDataRow)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 func (c *Controller) DeleteFileRow(fileDataRow filedata.Row) error {
 	if !fileDataRow.IsDeleted {

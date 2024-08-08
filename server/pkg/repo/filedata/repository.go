@@ -196,8 +196,9 @@ func (r *Repository) GetPendingSyncDataAndExtendLock(ctx context.Context, newSyn
 
 func (r *Repository) DeleteFileData(ctx context.Context, row filedata.Row) error {
 	query := `
-DELETE FROM file_data
-WHERE file_id = $1 AND data_type = $2 AND latest_bucket = $3 AND user_id = $4 AND replicated_buckets = ARRAY[]::s3region[] AND delete_from_buckets = ARRAY[]::s3region[]`
+	DELETE FROM file_data
+	WHERE file_id = $1 AND data_type = $2 AND latest_bucket = $3 AND user_id = $4 
+  	AND replicated_buckets = ARRAY[]::s3region[] AND delete_from_buckets = ARRAY[]::s3region[] and inflight_rep_buckets = ARRAY[]::s3region[] and is_deleted=True`
 	res, err := r.DB.ExecContext(ctx, query, row.FileID, string(row.Type), row.LatestBucket, row.UserID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
