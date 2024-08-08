@@ -6,7 +6,7 @@ import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -51,8 +51,7 @@ class FileAppBar extends StatefulWidget {
 class FileAppBarState extends State<FileAppBar> {
   final _logger = Logger("FadingAppBar");
   final List<Widget> _actions = [];
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool isGuestView = false;
 
   @override
@@ -66,8 +65,8 @@ class FileAppBarState extends State<FileAppBar> {
   @override
   void initState() {
     super.initState();
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
         isGuestView = event.isGuestView;
       });
@@ -76,7 +75,7 @@ class FileAppBarState extends State<FileAppBar> {
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     super.dispose();
   }
 
@@ -415,7 +414,7 @@ class FileAppBarState extends State<FileAppBar> {
 
   Future<void> _onTapGuestView() async {
     if (await LocalAuthentication().isDeviceSupported()) {
-      Bus.instance.fire(FileSwipeLockEvent(!isGuestView, true));
+      Bus.instance.fire(GuestViewEvent(true, true));
     } else {
       await showErrorDialog(
         context,
@@ -432,7 +431,7 @@ class FileAppBarState extends State<FileAppBar> {
       "Please authenticate to view more photos and videos.",
     );
     if (hasAuthenticated) {
-      Bus.instance.fire(FileSwipeLockEvent(false, false));
+      Bus.instance.fire(GuestViewEvent(false, false));
     }
   }
 }

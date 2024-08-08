@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -49,8 +49,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   bool _isPlaying = false;
   final EnteWakeLock _wakeLock = EnteWakeLock();
   bool isGuestView = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
 
   @override
   void initState() {
@@ -80,8 +79,8 @@ class _VideoWidgetState extends State<VideoWidget> {
         }
       });
     }
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
         isGuestView = event.isGuestView;
       });
@@ -132,7 +131,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     removeCallBack(widget.file);
     _videoPlayerController?.dispose();
     _chewieController?.dispose();

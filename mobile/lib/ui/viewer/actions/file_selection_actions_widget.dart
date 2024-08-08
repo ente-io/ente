@@ -8,7 +8,7 @@ import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
@@ -578,7 +578,7 @@ class _FileSelectionActionsWidgetState
     );
     routeToPage(context, page, forceCustomPageRoute: true).ignore();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Bus.instance.fire(FileSwipeLockEvent(true, false));
+      Bus.instance.fire(GuestViewEvent(true, false));
     });
     widget.selectedFiles.clearAll();
   }

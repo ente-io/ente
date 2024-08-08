@@ -10,7 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
@@ -88,8 +88,7 @@ class _DetailPageState extends State<DetailPage> {
   bool _isFirstOpened = true;
   bool isGuestView = false;
   bool swipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
 
   @override
   void initState() {
@@ -100,8 +99,8 @@ class _DetailPageState extends State<DetailPage> {
     _selectedIndexNotifier.value = widget.config.selectedIndex;
     _preloadEntries();
     _pageController = PageController(initialPage: _selectedIndexNotifier.value);
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
         isGuestView = event.isGuestView;
         swipeLocked = event.swipeLocked;
@@ -111,7 +110,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _enableFullScreenNotifier.dispose();
     _selectedIndexNotifier.dispose();
@@ -145,7 +144,7 @@ class _DetailPageState extends State<DetailPage> {
         if (isGuestView) {
           final authenticated = await _requestAuthentication();
           if (authenticated) {
-            Bus.instance.fire(FileSwipeLockEvent(false, false));
+            Bus.instance.fire(GuestViewEvent(false, false));
           }
         }
       },
@@ -237,13 +236,11 @@ class _DetailPageState extends State<DetailPage> {
         } else {
           _selectedIndexNotifier.value = index;
         }
-        Bus.instance.fire(FileSwipeLockEvent(isGuestView, swipeLocked));
+        Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _preloadEntries();
       },
-      physics: _shouldDisableScroll || isGuestView
-          ? swipeLocked
-              ? const NeverScrollableScrollPhysics()
-              : const FastScrollPhysics(speedFactor: 4.0)
+      physics: _shouldDisableScroll || swipeLocked
+          ? const NeverScrollableScrollPhysics()
           : const FastScrollPhysics(speedFactor: 4.0),
       controller: _pageController,
       itemCount: _files!.length,
