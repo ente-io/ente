@@ -57,7 +57,7 @@ func (c *Controller) tryDelete() error {
 		}
 		return err
 	}
-	err = c.DeleteFileRow(*row)
+	err = c.deleteFileRow(*row)
 	if err != nil {
 		log.Errorf("Could not delete file data: %s", err)
 		return err
@@ -65,7 +65,7 @@ func (c *Controller) tryDelete() error {
 	return nil
 }
 
-func (c *Controller) DeleteFileRow(fileDataRow filedata.Row) error {
+func (c *Controller) deleteFileRow(fileDataRow filedata.Row) error {
 	if !fileDataRow.IsDeleted {
 		return fmt.Errorf("file %d is not marked as deleted", fileDataRow.FileID)
 	}
