@@ -125,7 +125,13 @@
       "title": "Crowdpear"
     },
     {
-      "title": "crypto"
+      "title": "Crypto.com",
+      "slug": "crypto",
+      "altNames": [
+        "crypto",
+        "Crypto.com",
+        "Crypto com"
+      ]
     },
     {
       "title": "DCS",
