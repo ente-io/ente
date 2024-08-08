@@ -1,5 +1,6 @@
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
+import { ensure } from "@/utils/ensure";
 import type { FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
@@ -80,10 +81,10 @@ export const clusterFaces = (faceIndices: FaceIndex[]) => {
     const clusterIndexByFaceID = new Map<string, number>();
     for (const [i, fi] of faces.entries()) {
         let j = i + 1;
-        while (j < faces.length) {
+        for (; j < faces.length; j++) {
             // Can't find a better way for avoiding the null assertion.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const fj = faces[j++]!;
+            const fj = faces[j]!;
 
             // TODO-ML: The distance metric and the thresholds are placeholders.
 
@@ -93,6 +94,10 @@ export const clusterFaces = (faceIndices: FaceIndex[]) => {
             if (csim > 0.5) {
                 // Found a neighbour near enough. Add this face to the
                 // neighbour's cluster and call it a day.
+                const ci = ensure(clusterIndexByFaceID.get(fj.faceID));
+                clusters[ci]?.faceIDs.push(fi.faceID);
+                clusterIndexByFaceID.set(fi.faceID, ci);
+                break;
             }
         }
         if (j == faces.length) {
