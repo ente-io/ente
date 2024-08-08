@@ -13,8 +13,6 @@ import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 
 const PAYMENT_PROVIDER_STRIPE = "stripe";
-const PAYMENT_PROVIDER_APPSTORE = "appstore";
-const PAYMENT_PROVIDER_PLAYSTORE = "playstore";
 const FREE_PLAN = "free";
 const THIRTY_DAYS_IN_MICROSECONDS = 30 * 24 * 60 * 60 * 1000 * 1000;
 
@@ -134,15 +132,6 @@ export function hasStripeSubscription(subscription: Subscription) {
     return (
         subscription.paymentProvider.length > 0 &&
         subscription.paymentProvider === PAYMENT_PROVIDER_STRIPE
-    );
-}
-
-export function hasMobileSubscription(subscription: Subscription) {
-    return (
-        hasPaidSubscription(subscription) &&
-        subscription.paymentProvider.length > 0 &&
-        (subscription.paymentProvider === PAYMENT_PROVIDER_APPSTORE ||
-            subscription.paymentProvider === PAYMENT_PROVIDER_PLAYSTORE)
     );
 }
 
