@@ -387,14 +387,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.10"
-  dchs_motion_sensors:
-    dependency: transitive
-    description:
-      name: dchs_motion_sensors
-      sha256: "0f1cac6cd876fad2afff47405a963913f39a67221cbfc4f00aa04da2845bab0a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   defer_pointer:
     dependency: "direct main"
     description:
@@ -1581,6 +1573,15 @@ packages:
       url: "https://github.com/ente-io/motion_photo.git"
     source: git
     version: "0.0.6"
+  motion_sensors:
+    dependency: transitive
+    description:
+      path: "."
+      ref: aves
+      resolved-ref: "4b11d59f4bda152627f701070272f657f8358e67"
+      url: "https://github.com/deckerst/aves_panorama_motion_sensors.git"
+    source: git
+    version: "0.1.0"
   motionphoto:
     dependency: "direct main"
     description:
@@ -1687,15 +1688,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  panorama_viewer:
+  panorama:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "26ad55b2aa29dde14d640d6f1e17ce132a87910a"
-      url: "https://github.com/prateekmedia/panorama_viewer.git"
+      ref: blur
+      resolved-ref: "362f0295ba4ed42486577c9f9724c462107080f8"
+      url: "https://github.com/ente-io/panorama_blur.git"
     source: git
-    version: "1.0.5"
+    version: "0.4.1"
   password_strength:
     dependency: "direct main"
     description:

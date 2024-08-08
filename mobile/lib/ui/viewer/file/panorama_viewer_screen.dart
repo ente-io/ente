@@ -4,7 +4,7 @@ import "dart:io";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:motion_photos/src/xmp_extractor.dart";
-import "package:panorama_viewer/panorama_viewer.dart";
+import "package:panorama/panorama.dart";
 import "package:photos/generated/l10n.dart";
 
 class PanoramaViewerScreen extends StatefulWidget {
@@ -123,7 +123,7 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          PanoramaViewer(
+          Panorama(
             onTap: (_, __, ___) {
               setState(() {
                 if (isVisible) {
