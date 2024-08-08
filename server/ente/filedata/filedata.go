@@ -43,7 +43,7 @@ type Row struct {
 	InflightReplicas  []string
 	PendingSync       bool
 	IsDeleted         bool
-	LastSyncTime      int64
+	SyncLockedTill    int64
 	CreatedAt         int64
 	UpdatedAt         int64
 }

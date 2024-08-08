@@ -1,5 +1,6 @@
 
 DROP INDEX IF EXISTS idx_file_data_user_type_deleted;
+DROP INDEX IF EXISTS idx_file_data_last_sync_time;
 
 DROP TABLE IF EXISTS file_data;
 

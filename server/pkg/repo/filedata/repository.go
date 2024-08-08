@@ -52,7 +52,7 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) erro
 }
 
 func (r *Repository) GetFilesData(ctx context.Context, oType ente.ObjectType, fileIDs []int64) ([]filedata.Row, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, last_sync_time, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at
 										FROM file_data
 										WHERE data_type = $1 AND file_id = ANY($2)`, string(oType), pq.Array(fileIDs))
 	if err != nil {
@@ -62,7 +62,7 @@ func (r *Repository) GetFilesData(ctx context.Context, oType ente.ObjectType, fi
 }
 
 func (r *Repository) GetFileData(ctx context.Context, fileIDs int64) ([]filedata.Row, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets,inflight_rep_buckets, pending_sync, is_deleted, last_sync_time, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets,inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at
 										FROM file_data
 										WHERE file_id = $1`, fileIDs)
 	if err != nil {
@@ -96,17 +96,17 @@ func (r *Repository) AddBucket(row filedata.Row, bucketID string, columnName str
 
 func (r *Repository) RemoveBucket(row filedata.Row, bucketID string, columnName string) error {
 	query := fmt.Sprintf(`
-  UPDATE file_data
-  SET %s = array(
-   SELECT DISTINCT elem FROM unnest(
-    array_remove(
-     file_data.%s,
-     $1
-    )
-   ) AS elem
-   WHERE elem IS NOT NULL
-  )
-  WHERE file_id = $2 AND data_type = $3 and user_id = $4`, columnName, columnName)
+        UPDATE file_data
+        SET %s = array(
+            SELECT DISTINCT elem FROM unnest(
+                array_remove(
+                    file_data.%s,
+                    $1
+                )
+            ) AS elem
+            WHERE elem IS NOT NULL
+        )
+        WHERE file_id = $2 AND data_type = $3 and user_id = $4`, columnName, columnName)
 	result, err := r.DB.Exec(query, bucketID, row.FileID, string(row.Type), row.UserID)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to remove bucket from "+columnName)
@@ -173,14 +173,13 @@ WHERE file_id = $1 AND data_type = $2 AND latest_bucket = $3 AND user_id = $4 AN
 		return stacktrace.NewError("file data not deleted")
 	}
 	return nil
-
 }
 
 func convertRowsToFilesData(rows *sql.Rows) ([]filedata.Row, error) {
 	var filesData []filedata.Row
 	for rows.Next() {
 		var fileData filedata.Row
-		err := rows.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.LastSyncTime, &fileData.CreatedAt, &fileData.UpdatedAt)
+		err := rows.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
