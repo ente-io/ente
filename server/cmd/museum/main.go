@@ -706,11 +706,11 @@ func main() {
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
 
 	setKnownAPIs(server.Routes())
-	setupAndStartBackgroundJobs(objectCleanupController, replicationController3)
+	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl,
-		embeddingController, fileDataCtrl, healthCheckHandler, kexCtrl, castDb)
+		embeddingController, healthCheckHandler, kexCtrl, castDb)
 
 	// Create a new collector, the name will be used as a label on the metrics
 	collector := sqlstats.NewStatsCollector("prod_db", db)
@@ -816,6 +816,7 @@ func setupDatabase() *sql.DB {
 func setupAndStartBackgroundJobs(
 	objectCleanupController *controller.ObjectCleanupController,
 	replicationController3 *controller.ReplicationController3,
+	fileDataCtrl *filedata.Controller,
 ) {
 	isReplicationEnabled := viper.GetBool("replication.enabled")
 	if isReplicationEnabled {
@@ -823,9 +824,14 @@ func setupAndStartBackgroundJobs(
 		if err != nil {
 			log.Warnf("Could not start replication v3: %s", err)
 		}
+		err = fileDataCtrl.StartReplication()
+		if err != nil {
+			log.Warnf("Could not start fileData replication: %s", err)
+		}
 	} else {
 		log.Info("Skipping Replication as replication is disabled")
 	}
+	fileDataCtrl.StartDataDeletion() // Start data deletion for file data;
 
 	objectCleanupController.StartRemovingUnreportedObjects()
 	objectCleanupController.StartClearingOrphanObjects()
@@ -839,7 +845,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	dataCleanupCtrl *dataCleanupCtrl.DeleteUserCleanupController,
 	storageBonusCtrl *storagebonus.Controller,
 	embeddingCtrl *embeddingCtrl.Controller,
-	fileDataCtrl *filedata.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
 	kexCtrl *kexCtrl.Controller,
 	castDb castRepo.Repository) {
@@ -883,10 +888,8 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	schedule(c, "@every 2m", func() {
 		fileController.CleanupDeletedFiles()
 	})
-	fileDataCtrl.CleanUpDeletedFileData()
 	schedule(c, "@every 101s", func() {
 		embeddingCtrl.CleanupDeletedEmbeddings()
-		fileDataCtrl.CleanUpDeletedFileData()
 	})
 
 	schedule(c, "@every 10m", func() {

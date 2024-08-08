@@ -4,93 +4,58 @@ import (
 	"context"
 	"fmt"
 	"github.com/ente-io/museum/ente/filedata"
-	"github.com/ente-io/museum/pkg/repo"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
-	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 )
 
-// CleanUpDeletedFileData clears associated file data from the object store
-func (c *Controller) CleanUpDeletedFileData() {
+// StartDataDeletion clears associated file data from the object store
+func (c *Controller) StartDataDeletion() {
 	log.Info("Cleaning up deleted file data")
-	if c.cleanupCronRunning {
-		log.Info("Skipping CleanUpDeletedFileData cron run as another instance is still running")
-		return
-	}
-	c.cleanupCronRunning = true
-	defer func() {
-		c.cleanupCronRunning = false
-	}()
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteFileDataQueue, 200)
-	if err != nil {
-		log.WithError(err).Error("Failed to fetch items from queue")
-		return
-	}
-	for _, i := range items {
-		c.deleteFileData(i)
-	}
+	// todo: start goroutine workers to delete data
+
 }
 
-func (c *Controller) deleteFileData(qItem repo.QueueItem) {
-	lockName := fmt.Sprintf("FileDataDelete:%s", qItem.Item)
-	lockStatus, err := c.TaskLockingRepo.AcquireLock(lockName, time.MicrosecondsAfterHours(1), c.HostName)
-	ctxLogger := log.WithField("item", qItem.Item).WithField("queue_id", qItem.Id)
-	if err != nil || !lockStatus {
-		ctxLogger.Warn("unable to acquire lock")
-		return
-	}
-	defer func() {
-		err = c.TaskLockingRepo.ReleaseLock(lockName)
-		if err != nil {
-			ctxLogger.Errorf("Error while releasing lock %s", err)
-		}
-	}()
-	ctxLogger.Debug("Deleting all file data")
-	fileID, _ := strconv.ParseInt(qItem.Item, 10, 64)
+func (c *Controller) DeleteFileData(fileID int64) error {
 	ownerID, err := c.FileRepo.GetOwnerID(fileID)
 	if err != nil {
-		ctxLogger.WithError(err).Error("Failed to fetch ownerID")
-		return
+		return err
 	}
 	rows, err := c.Repo.GetFileData(context.Background(), fileID)
 	if err != nil {
-		ctxLogger.WithError(err).Error("Failed to fetch datacenters")
-		return
+		return err
 	}
 	for i := range rows {
 		fileDataRow := rows[i]
+		ctxLogger := log.WithField("file_id", fileDataRow.DeleteFromBuckets).WithField("type", fileDataRow.Type).WithField("user_id", fileDataRow.UserID)
 		objectKeys := filedata.AllObjects(fileID, ownerID, fileDataRow.Type)
-		// Delete from delete/stale buckets
-		for j := range fileDataRow.DeleteFromBuckets {
-			bucketID := fileDataRow.DeleteFromBuckets[j]
-			for k := range objectKeys {
-				err = c.ObjectCleanupController.DeleteObjectFromDataCenter(objectKeys[k], bucketID)
-				if err != nil {
-					ctxLogger.WithError(err).Error("Failed to delete object from datacenter")
-					return
-				}
-			}
-			dbErr := c.Repo.RemoveBucket(fileDataRow, bucketID, fileDataRepo.DeletionColumn)
-			if dbErr != nil {
-				ctxLogger.WithError(dbErr).Error("Failed to remove from db")
-				return
-			}
+		bucketColumnMap := make(map[string]string)
+		bucketColumnMap, err = getMapOfbucketItToColumn(fileDataRow)
+		if err != nil {
+			ctxLogger.WithError(err).Error("Failed to get bucketColumnMap")
+			return err
 		}
-		// Delete from replicated buckets
-		for j := range fileDataRow.ReplicatedBuckets {
-			bucketID := fileDataRow.ReplicatedBuckets[j]
-			for k := range objectKeys {
-				err = c.ObjectCleanupController.DeleteObjectFromDataCenter(objectKeys[k], bucketID)
+		// Delete objects and remove buckets
+		for bucketID, columnName := range bucketColumnMap {
+			for _, objectKey := range objectKeys {
+				err := c.ObjectCleanupController.DeleteObjectFromDataCenter(objectKey, bucketID)
 				if err != nil {
-					ctxLogger.WithError(err).Error("Failed to delete object from datacenter")
-					return
+					ctxLogger.WithError(err).WithFields(logrus.Fields{
+						"bucketID":  bucketID,
+						"column":    columnName,
+						"objectKey": objectKey,
+					}).Error("Failed to delete object from datacenter")
+					return err
 				}
 			}
-			dbErr := c.Repo.RemoveBucket(fileDataRow, bucketID, fileDataRepo.ReplicationColumn)
+			dbErr := c.Repo.RemoveBucket(fileDataRow, bucketID, columnName)
 			if dbErr != nil {
-				ctxLogger.WithError(dbErr).Error("Failed to remove from db")
-				return
+				ctxLogger.WithError(dbErr).WithFields(logrus.Fields{
+					"bucketID": bucketID,
+					"column":   columnName,
+				}).Error("Failed to remove bucket from db")
+				return dbErr
+
 			}
 		}
 		// Delete from Latest bucket
@@ -98,23 +63,37 @@ func (c *Controller) deleteFileData(qItem repo.QueueItem) {
 			err = c.ObjectCleanupController.DeleteObjectFromDataCenter(objectKeys[k], fileDataRow.LatestBucket)
 			if err != nil {
 				ctxLogger.WithError(err).Error("Failed to delete object from datacenter")
-				return
+				return err
 			}
 		}
 		dbErr := c.Repo.DeleteFileData(context.Background(), fileDataRow)
 		if dbErr != nil {
 			ctxLogger.WithError(dbErr).Error("Failed to remove from db")
-			return
+			return err
 		}
 	}
-	if err != nil {
-		ctxLogger.WithError(err).Error("Failed delete data")
-		return
+	return nil
+}
+
+func getMapOfbucketItToColumn(row filedata.Row) (map[string]string, error) {
+	bucketColumnMap := make(map[string]string)
+	for _, bucketID := range row.DeleteFromBuckets {
+		if existingColumn, exists := bucketColumnMap[bucketID]; exists {
+			return nil, fmt.Errorf("Duplicate DeleteFromBuckets ID found: %s in column %s", bucketID, existingColumn)
+		}
+		bucketColumnMap[bucketID] = fileDataRepo.DeletionColumn
 	}
-	err = c.QueueRepo.DeleteItem(repo.DeleteFileDataQueue, qItem.Item)
-	if err != nil {
-		ctxLogger.WithError(err).Error("Failed to remove item from the queue")
-		return
+	for _, bucketID := range row.ReplicatedBuckets {
+		if existingColumn, exists := bucketColumnMap[bucketID]; exists {
+			return nil, fmt.Errorf("Duplicate ReplicatedBuckets ID found: %s in column %s", bucketID, existingColumn)
+		}
+		bucketColumnMap[bucketID] = fileDataRepo.ReplicationColumn
 	}
-	ctxLogger.Info("Successfully deleted all file data")
+	for _, bucketID := range row.InflightReplicas {
+		if existingColumn, exists := bucketColumnMap[bucketID]; exists {
+			return nil, fmt.Errorf("Duplicate InFlightBucketID found: %s in column %s", bucketID, existingColumn)
+		}
+		bucketColumnMap[bucketID] = fileDataRepo.InflightRepColumn
+	}
+	return bucketColumnMap, nil
 }
