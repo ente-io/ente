@@ -379,6 +379,14 @@
     {
       "title": "Odido"
     },
+    {
+      "titile": "OpenObserve",
+      "slug": "open_observe",
+      "altNames":[
+        "openobserve.ai",
+        "openobserve ai"
+      ]
+    },
     { "title": "okx",
       "hex": "000000" },
     {
