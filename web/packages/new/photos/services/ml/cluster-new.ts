@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import type { FaceIndex } from "./face";
+import { dotProduct } from "./math";
 
 /**
  * A cluster is an set of faces.
@@ -71,6 +72,37 @@ export interface Person {
  */
 export const clusterFaces = (faceIndices: FaceIndex[]) => {
     log.debug(() => ["Clustering", faceIndices]);
-    const clusters: Cluster = []
+
+    const faces = [...faceIDAndEmbeddings(faceIndices)];
+
+    const clusters: Cluster = [];
+    for (const [i, fi] of faces.entries()) {
+        for (let j = i + 1; j < faces.length; j++) {
+            // Can't find a better way for avoiding the null assertion.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const fj = faces[j]!;
+
+            // TODO: The distance metric, the thresholds are placeholders.
+
+            // The vectors are already normalized, so we can directly use their
+            // dot product as their cosine similarity.
+            const csim = dotProduct(fi.embedding, fj.embedding);
+            if (csim > 0.5) {
+                
+            }
+        }
+    }
     return undefined;
 };
+
+/**
+ * A generator function that returns a stream of {faceID, embedding} values,
+ * flattening all the all the faces present in the given {@link faceIndices}.
+ */
+function* faceIDAndEmbeddings(faceIndices: FaceIndex[]) {
+    for (const fi of faceIndices) {
+        for (const f of fi.faces) {
+            yield { faceID: f.faceID, embedding: f.embedding };
+        }
+    }
+}
