@@ -183,13 +183,15 @@ class EnteFile {
           }
           mediaUploadData.isPanorama = checkPanoramaFromEXIF(null, exifData);
 
-          try {
-            final xmpData = XMPExtractor()
-                .extract(mediaUploadData.sourceFile!.readAsBytesSync());
-            mediaUploadData.isPanorama = checkPanoramaFromXMP(xmpData);
-          } catch (_) {}
+          if (mediaUploadData.isPanorama != true) {
+            try {
+              final xmpData = XMPExtractor()
+                  .extract(mediaUploadData.sourceFile!.readAsBytesSync());
+              mediaUploadData.isPanorama = checkPanoramaFromXMP(xmpData);
+            } catch (_) {}
 
-          mediaUploadData.isPanorama ??= false;
+            mediaUploadData.isPanorama ??= false;
+          }
         }
         if (Platform.isAndroid) {
           //Fix for missing location data in lower android versions.
