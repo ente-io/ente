@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { ensureString } from "@/utils/ensure";
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -34,7 +35,10 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                                 entity.header,
                                 authenticatorKey,
                             );
-                        return codeFromURIString(entity.id, decryptedCode);
+                        return codeFromURIString(
+                            entity.id,
+                            ensureString(decryptedCode),
+                        );
                     } catch (e) {
                         log.error(`Failed to parse codeID ${entity.id}`, e);
                         return undefined;

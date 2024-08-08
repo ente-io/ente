@@ -22,7 +22,6 @@ PopupMenuButton<dynamic> reportBugPopupMenu(BuildContext context) {
         await sendLogs(
           context,
           "Contact support",
-          "support@ente.io",
           postShare: () {},
         );
       }

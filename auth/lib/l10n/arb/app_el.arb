@@ -445,5 +445,15 @@
   "updateNotAvailable": "Μη διαθέσιμη ενημέρωση",
   "viewRawCodes": "Προβολή ακατέργαστων κωδικών",
   "rawCodes": "Ακατέργαστοι κωδικοί",
-  "rawCodeData": "Δεδομένα ακατέργαστων κωδικών"
+  "rawCodeData": "Δεδομένα ακατέργαστων κωδικών",
+  "appLock": "Κλείδωμα εφαρμογής",
+  "noSystemLockFound": "Δεν βρέθηκε κλείδωμα συστήματος",
+  "autoLock": "Αυτόματο κλείδωμα",
+  "immediately": "Άμεσα",
+  "next": "Επόμενο",
+  "tooManyIncorrectAttempts": "Πάρα πολλές εσφαλμένες προσπάθειες",
+  "tapToUnlock": "Πατήστε για ξεκλείδωμα",
+  "setNewPassword": "Ορίστε νέο κωδικό πρόσβασης",
+  "hideContent": "Απόκρυψη περιεχομένου",
+  "setNewPin": "Ορίστε νέο PIN"
 }

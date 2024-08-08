@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
     <application android:name="${applicationName}"
-                 android:label="Auth"
+                 android:label="Ente Auth"
                  android:icon="@mipmap/launcher_icon"
                  android:usesCleartextTraffic="true"
                  android:requestLegacyExternalStorage="true"

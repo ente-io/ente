@@ -119,7 +119,6 @@ import {
     splitNormalAndHiddenCollections,
 } from "utils/collection";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
-import { preloadImage } from "utils/common";
 import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
@@ -1066,7 +1065,6 @@ export default function Gallery() {
                 <FixCreationTime
                     isOpen={fixCreationTimeView}
                     hide={() => setFixCreationTimeView(false)}
-                    show={() => setFixCreationTimeView(true)}
                     attributes={fixCreationTimeAttributes}
                 />
                 <GalleryNavbar
@@ -1263,6 +1261,15 @@ function useEffectSingleThreaded(
         main(deps);
     }, deps);
 }
+
+/**
+ * Preload all three variants of a responsive image.
+ */
+const preloadImage = (imgBasePath: string) => {
+    const srcset = [];
+    for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
+    new Image().srcset = srcset.join(",");
+};
 
 const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
     const mergedMap = new Map<K, V>(map1);

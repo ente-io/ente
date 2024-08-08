@@ -41,6 +41,9 @@
       "title": "BitMEX"
     },
     {
+      "title": "BitOasis"
+    },
+    {
       "title": "BitSkins"
     },
     {
@@ -61,11 +64,23 @@
       ]
     },
     {
+      "title": "Blockchain.com",
+      "altNames": [
+        "blockchain.com Wallet",
+        "blockchain.com Exchange"
+      ],
+      "slug": "blockchain"
+    },
+    {
       "title": "BorgBase",
       "altNames": [
         "borg"
       ],
       "slug": "BorgBase"
+    },
+    {
+      "title": "Booking.com",
+      "slug": "booking"
     },
     {
       "title": "Brave Creators",

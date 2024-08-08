@@ -127,7 +127,7 @@ class DownloadManagerImpl {
         const encrypted = await downloadClient.downloadThumbnail(file);
         const decrypted = await cryptoWorker.decryptThumbnail(
             encrypted,
-            await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+            file.thumbnail.decryptionHeader,
             file.key,
         );
         return decrypted;

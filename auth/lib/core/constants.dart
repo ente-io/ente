@@ -32,8 +32,6 @@ const mnemonicKeyWordCount = 24;
 // https://stackoverflow.com/a/61162219
 const dragSensitivity = 8;
 
-const supportEmail = 'support@ente.io';
-
 // Default values for various feature flags
 class FFDefault {
   static const bool enableStripe = true;

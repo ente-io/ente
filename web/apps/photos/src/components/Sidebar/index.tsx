@@ -40,7 +40,6 @@ import DeleteAccountModal from "components/DeleteAccountModal";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
-import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
 import {
     ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
@@ -607,11 +606,7 @@ const HelpSection: React.FC = () => {
             <EnteMenuItem
                 onClick={contactSupport}
                 labelComponent={
-                    <NoStyleAnchor href="mailto:support@ente.io">
-                        <Typography fontWeight={"bold"}>
-                            {t("SUPPORT")}
-                        </Typography>
-                    </NoStyleAnchor>
+                    <span title="support@ente.io">{t("SUPPORT")}</span>
                 }
                 variant="secondary"
             />

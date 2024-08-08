@@ -36,5 +36,5 @@ file, that adheres to the above format.
 
 SUPPORT
 
-If you need help, please reach out to support@ente.io, and a human will get in touch with you.
+If you need help, please visit @ https://github.com/ente-io/ente/discussions/new?category=q-a, and someone will get in touch with you.
 If you have feature requests, please create an issue @ https://github.com/ente-io/ente

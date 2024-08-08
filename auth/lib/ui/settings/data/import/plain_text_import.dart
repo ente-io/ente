@@ -144,7 +144,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      context.l10n.importFailureDesc,
+      context.l10n.importFailureDescNew,
     );
   }
 }

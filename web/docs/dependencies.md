@@ -148,6 +148,15 @@ specifying the import map as mentioned
 but that disables the SWC integration altogether, so we live with this
 infelicity for now.
 
+### Date pickers
+
+[@mui/x-date-pickers](https://mui.com/x/react-date-pickers/getting-started/) is
+used to get a date/time picker component. This is the community version of the
+DateTimePicker component provided by MUI.
+
+[dayjs](https://github.com/iamkun/dayjs) is used as the date library that that
+`@mui/x-date-pickers` will internally use to manipulate dates.
+
 ### Translations
 
 For showing the app's UI in multiple languages, we use the
@@ -192,11 +201,8 @@ For more details, see [translations.md](translations.md).
 ## Media
 
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
-    parsing. We also need its optional peer dependency
-    [@xmldom/xmldom](https://github.com/xmldom/xmldom) since the browser's
-    DOMParser is not available in web workers.
-    [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing back
-    Exif (only supports JPEG).
+    parsing. [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing
+    back Exif (only supports JPEG).
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
     web code (Live photos are zip files under the hood). Note that the desktop

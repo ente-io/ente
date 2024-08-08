@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
+import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
@@ -13,7 +14,6 @@ import {
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
 } from "@/new/photos/types/file";
-import { VISIBILITY_STATE } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
@@ -177,6 +177,7 @@ export async function decryptFile(
         return {
             ...restFileProps,
             key: fileKey,
+            // @ts-expect-error TODO: Need to use zod here.
             metadata: fileMetadata,
             magicMetadata: fileMagicMetadata,
             pubMagicMetadata: filePubMagicMetadata,
@@ -189,7 +190,7 @@ export async function decryptFile(
 
 export async function changeFilesVisibility(
     files: EnteFile[],
-    visibility: VISIBILITY_STATE,
+    visibility: ItemVisibility,
 ): Promise<EnteFile[]> {
     const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
@@ -207,25 +208,6 @@ export async function changeFilesVisibility(
         });
     }
     return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
-}
-
-export async function changeFileCreationTime(
-    file: EnteFile,
-    editedTime: number,
-): Promise<EnteFile> {
-    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
-        editedTime,
-    };
-    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
-        await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            file.pubMagicMetadata,
-            file.key,
-        );
-    const updateResult = await updateFilePublicMagicMetadata([
-        { file, updatedPublicMagicMetadata },
-    ]);
-    return updateResult[0];
 }
 
 export async function changeFileName(
@@ -657,10 +639,10 @@ export const handleFileOps = async (
             fixTimeHelper(files, setFixCreationTimeAttributes);
             break;
         case FILE_OPS_TYPE.ARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.ARCHIVED);
+            await changeFilesVisibility(files, ItemVisibility.archived);
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.VISIBLE);
+            await changeFilesVisibility(files, ItemVisibility.visible);
             break;
     }
 };

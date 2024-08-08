@@ -1,5 +1,4 @@
 import type { ZipItem } from "@/base/types/ipc";
-import type { Location } from "../../types/metadata";
 
 /**
  * An item to upload is one of the following:
@@ -58,8 +57,6 @@ export const toDataOrPathOrZipEntry = (desktopUploadItem: DesktopUploadItem) =>
         : desktopUploadItem.path;
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
-
-export const NULL_LOCATION: Location = { latitude: null, longitude: null };
 
 export enum UPLOAD_STAGES {
     START,
