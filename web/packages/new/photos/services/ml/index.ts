@@ -17,11 +17,16 @@ import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
+import { clusterFaces } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, faceIndex, faceIndexes, indexableAndIndexedCounts } from "./db";
+import {
+    clearMLDB,
+    faceIndex,
+    faceIndexes,
+    indexableAndIndexedCounts,
+} from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
-import { clusterFaces } from "./cluster-new";
 
 /**
  * In-memory flag that tracks if ML is enabled.
@@ -257,6 +262,8 @@ const mlSync = async () => {
     triggerStatusUpdate();
 
     if (_isMLEnabled) void worker().then((w) => w.sync());
+    // TODO-ML
+    if (_isMLEnabled) void wipCluster();
 };
 
 /**
