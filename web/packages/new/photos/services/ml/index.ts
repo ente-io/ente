@@ -5,6 +5,7 @@
 import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
+import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -17,9 +18,10 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import { clearMLDB, faceIndex, faceIndexes, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
+import { clusterFaces } from "./cluster-new";
 
 /**
  * In-memory flag that tracks if ML is enabled.
@@ -277,6 +279,16 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     if (enteFile.metadata.fileType !== FileType.image) return;
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
+};
+
+/**
+ * WIP! Don't enable, dragon eggs are hatching here.
+ */
+export const wipCluster = async () => {
+    if (!isDevBuild || !(await isInternalUser())) return;
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
+
+    clusterFaces(await faceIndexes());
 };
 
 export type MLStatus =

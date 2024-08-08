@@ -72,10 +72,10 @@ export interface Person {
  * 2.  Break a cluster.
  *
  */
-export const clusterFaces = (faceIndices: FaceIndex[]) => {
+export const clusterFaces = (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
-    const faces = [...faceIDAndEmbeddings(faceIndices)];
+    const faces = [...faceIDAndEmbeddings(faceIndexes)];
 
     const clusters: Cluster[] = [];
     const clusterIndexByFaceID = new Map<string, number>();

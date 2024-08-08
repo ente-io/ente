@@ -232,6 +232,14 @@ export const faceIndex = async (fileID: number) => {
 };
 
 /**
+ * Return all face indexes present locally.
+ */
+export const faceIndexes = async () => {
+    const db = await mlDB();
+    return await db.getAll("face-index");
+};
+
+/**
  * Return all CLIP indexes present locally.
  */
 export const clipIndexes = async () => {
