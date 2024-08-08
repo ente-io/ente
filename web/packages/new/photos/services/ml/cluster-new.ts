@@ -1,3 +1,4 @@
+import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import type { FaceIndex } from "./face";
 import { dotProduct } from "./math";
@@ -71,27 +72,46 @@ export interface Person {
  *
  */
 export const clusterFaces = (faceIndices: FaceIndex[]) => {
-    log.debug(() => ["Clustering", faceIndices]);
+    const t = Date.now();
 
     const faces = [...faceIDAndEmbeddings(faceIndices)];
 
-    const clusters: Cluster = [];
+    const clusters: Cluster[] = [];
+    const clusterIndexByFaceID = new Map<string, number>();
     for (const [i, fi] of faces.entries()) {
-        for (let j = i + 1; j < faces.length; j++) {
+        let j = i + 1;
+        while (j < faces.length) {
             // Can't find a better way for avoiding the null assertion.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const fj = faces[j]!;
+            const fj = faces[j++]!;
 
-            // TODO: The distance metric, the thresholds are placeholders.
+            // TODO-ML: The distance metric and the thresholds are placeholders.
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(fi.embedding, fj.embedding);
             if (csim > 0.5) {
-                
+                // Found a neighbour near enough. Add this face to the
+                // neighbour's cluster and call it a day.
             }
         }
+        if (j == faces.length) {
+            // We didn't find a neighbour. Create a new cluster with this face.
+            const cluster = {
+                id: newNonSecureID("cluster_"),
+                faceIDs: [fi.faceID],
+            };
+            clusters.push(cluster);
+            clusterIndexByFaceID.set(fi.faceID, clusters.length);
+        }
     }
+
+    log.debug(() => ["ml/cluster", { faces, clusters, clusterIndexByFaceID }]);
+    log.debug(
+        () =>
+            `Clustered ${faces.length} faces into ${clusters.length} clusters (${Date.now() - t} ms)`,
+    );
+
     return undefined;
 };
 
