@@ -1,8 +1,4 @@
-import { blobCache } from "@/base/blob-cache";
-import {
-    regenerateFaceCropsIfNeeded,
-    unidentifiedFaceIDs,
-} from "@/new/photos/services/ml";
+import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
@@ -80,7 +76,6 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
     enteFile,
 }) => {
     const [faceIDs, setFaceIDs] = useState<string[]>([]);
-    const [didRegen, setDidRegen] = useState(false);
 
     useEffect(() => {
         let didCancel = false;
@@ -88,13 +83,6 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
         const go = async () => {
             const faceIDs = await unidentifiedFaceIDs(enteFile);
             !didCancel && setFaceIDs(faceIDs);
-            // Don't block for the regeneration to happen. If anything got
-            // regenerated, the result will be true, in response to which we'll
-            // change the key of the face list and cause it to be rerendered
-            // (fetching the regenerated crops).
-            void regenerateFaceCropsIfNeeded(enteFile).then((r) =>
-                setDidRegen(r),
-            );
         };
 
         void go();
@@ -111,10 +99,10 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             <Typography variant="large" p={1}>
                 {t("UNIDENTIFIED_FACES")}
             </Typography>
-            <FaceChipContainer key={didRegen ? 1 : 0}>
+            <FaceChipContainer>
                 {faceIDs.map((faceID) => (
                     <FaceChip key={faceID}>
-                        <FaceCropImageView {...{ faceID }} />
+                        <FaceCropImageView {...{ enteFile, faceID }} />
                     </FaceChip>
                 ))}
             </FaceChipContainer>
@@ -123,30 +111,33 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
 };
 
 interface FaceCropImageViewProps {
+    /** The {@link EnteFile} which contains this face. */
+    enteFile: EnteFile;
+    /** The ID of the face to display. */
     faceID: string;
 }
 
 /**
- * An image view showing the face crop for the given {@link faceID}.
+ * An image view showing the face crop for the given face.
  *
- * The image is read from the "face-crops" {@link BlobCache}. While the image is
- * being fetched, or if it doesn't exist, a placeholder is shown.
+ * The image is read from the "face-crops" {@link BlobCache}, regenerating it if
+ * needed (which is why also need to pass the associated file).
+ *
+ * While the image is being fetched, or if it doesn't exist, a placeholder is
+ * shown.
  */
-const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+    enteFile,
+    faceID,
+}) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
         let didCancel = false;
-        if (faceID) {
-            void blobCache("face-crops")
-                .then((cache) => cache.get(faceID))
-                .then((data) => {
-                    if (data) {
-                        const blob = new Blob([data]);
-                        if (!didCancel) setObjectURL(URL.createObjectURL(blob));
-                    }
-                });
-        } else setObjectURL(undefined);
+
+        void faceCrop(faceID, enteFile).then((blob) => {
+            if (blob && !didCancel) setObjectURL(URL.createObjectURL(blob));
+        });
 
         return () => {
             didCancel = true;
