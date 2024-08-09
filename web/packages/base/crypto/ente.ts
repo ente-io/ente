@@ -115,7 +115,7 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
  *
  * This is the sibling of {@link encryptAssociatedData}.
  *
- * See {@link decryptChaChaOneShot2} for the implementation details.
+ * See {@link decryptChaChaOneShot} for the implementation details.
  *
  * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
  *
@@ -166,7 +166,7 @@ export const decryptFileEmbedding = async (
  * Decrypt the metadata associated with an Ente object (file, collection or
  * entity) using the object's key.
  *
- * This is the sibling of {@link decryptMetadata}.
+ * This is the sibling of {@link encryptMetadata}.
  *
  * @param encryptedDataB64 base64 encoded string containing the encrypted data.
  *
@@ -180,7 +180,6 @@ export const decryptFileEmbedding = async (
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-
 export const decryptMetadata = async (
     encryptedDataB64: string,
     decryptionHeaderB64: string,
@@ -188,10 +187,26 @@ export const decryptMetadata = async (
 ) =>
     JSON.parse(
         new TextDecoder().decode(
-            await decryptAssociatedData(
-                await libsodium.fromB64(encryptedDataB64),
+            await decryptMetadataBytes(
+                encryptedDataB64,
                 decryptionHeaderB64,
                 keyB64,
             ),
         ),
     ) as unknown;
+
+/**
+ * A variant of {@link decryptMetadata} that does not attempt to parse the
+ * decrypted data as a JSON string and instead just returns the raw decrypted
+ * bytes that we got.
+ */
+export const decryptMetadataBytes = async (
+    encryptedDataB64: string,
+    decryptionHeaderB64: string,
+    keyB64: string,
+) =>
+    await decryptAssociatedData(
+        await libsodium.fromB64(encryptedDataB64),
+        decryptionHeaderB64,
+        keyB64,
+    );

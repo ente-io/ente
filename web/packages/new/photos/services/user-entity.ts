@@ -1,3 +1,4 @@
+import { decryptMetadataBytes } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
@@ -69,7 +70,7 @@ const RemoteUserEntity = z.object({
     header: z.string(),
     isDeleted: z.boolean(),
     updatedAt: z.number(),
-}
+});
 
 /**
  * Fetch all user entities of the given type that have been created or updated
@@ -81,13 +82,17 @@ const RemoteUserEntity = z.object({
  * only entities whose {@link updatedAt} is more than the given value. Set this
  * to zero to start from the beginning.
  *
- * @param entityKey The key to use for decrypting the encrypted contents of the
- * user entity.
+ * @param entityKeyB64 The base64 encoded key to use for decrypting the
+ * encrypted contents of the user entity.
  */
 export const userEntityDiff = async (
     type: EntityType,
     sinceTime: number,
-): Promise<RemoteUserEntity[]> => {
+    entityKeyB64: string,
+): Promise<UserEntity[]> => {
+    const decrypt = (dataB64: string, headerB64: string) =>
+        decryptMetadataBytes(dataB64, headerB64, entityKeyB64);
+
     const params = new URLSearchParams({
         type,
         sinceTime: sinceTime.toString(),
@@ -98,4 +103,17 @@ export const userEntityDiff = async (
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
+    const entities = z
+        .object({ diff: z.array(RemoteUserEntity) })
+        .parse(await res.json()).diff;
+    return Promise.all(
+        entities.map(
+            async ({ encryptedData, header, isDeleted, updatedAt }) => ({
+                data: isDeleted
+                    ? undefined
+                    : await decrypt(encryptedData, header),
+                updatedAt,
+            }),
+        ),
+    );
 };
