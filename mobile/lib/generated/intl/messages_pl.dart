@@ -819,6 +819,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Grupuj pobliskie zdjęcia"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Nie śledzimy instalacji aplikacji. Pomogłyby nam, gdybyś powiedział/a nam, gdzie nas znalazłeś/aś!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1504,8 +1506,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Zaproponuj funkcje"),
         "support": MessageLookupByLibrary.simpleMessage("Wsparcie techniczne"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Aby włączyć blokadę aplikacji, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronizacja zatrzymana"),

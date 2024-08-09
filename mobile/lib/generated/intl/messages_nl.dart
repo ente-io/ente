@@ -829,6 +829,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Groep foto\'s in de buurt"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1511,8 +1513,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Features voorstellen"),
         "support": MessageLookupByLibrary.simpleMessage("Ondersteuning"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "Om swipe-vergrendeling in te schakelen, stelt u de toegangscode van het apparaat of schermvergrendeling in uw systeeminstellingen in."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisatie gestopt"),

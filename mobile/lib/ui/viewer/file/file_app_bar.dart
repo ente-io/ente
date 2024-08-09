@@ -419,7 +419,7 @@ class FileAppBarState extends State<FileAppBar> {
       await showErrorDialog(
         context,
         S.of(context).noSystemLockFound,
-        S.of(context).swipeLockEnablePreSteps,
+        S.of(context).guestViewEnablePreSteps,
       );
     }
   }

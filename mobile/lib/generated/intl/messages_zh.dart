@@ -670,6 +670,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission": MessageLookupByLibrary.simpleMessage("授予权限"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"),
         "hearUsWhereTitle":
@@ -1212,8 +1214,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "successfullyUnhid": MessageLookupByLibrary.simpleMessage("已成功取消隐藏"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("建议新功能"),
         "support": MessageLookupByLibrary.simpleMessage("支持"),
-        "swipeLockEnablePreSteps":
-            MessageLookupByLibrary.simpleMessage("要启用滑动锁定，请在系统设置中设置设备密码或屏幕锁。"),
         "syncProgress": m62,
         "syncStopped": MessageLookupByLibrary.simpleMessage("同步已停止"),
         "syncing": MessageLookupByLibrary.simpleMessage("正在同步···"),

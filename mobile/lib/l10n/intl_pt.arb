@@ -1291,5 +1291,6 @@
   "pleaseSelectQuickLinksToRemove": "Selecione links rápidos para remover",
   "removePublicLinks": "Remover link público",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Isto removerá links públicos de todos os links rápidos selecionados.",
-  "guestView": "Guest view"
+  "guestView": "Guest view",
+  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
 }

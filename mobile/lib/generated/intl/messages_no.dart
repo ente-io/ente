@@ -79,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
         "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
             "Hides app content in the app switcher and disables screenshots"),
@@ -127,8 +129,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "setNewPassword":
             MessageLookupByLibrary.simpleMessage("Set new password"),
         "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
