@@ -24,7 +24,10 @@ export const PeopleList: React.FC<PeopleListProps> = ({
                     clickable={!!onSelect}
                     onClick={() => onSelect && onSelect(person, index)}
                 >
-                    <FaceCropImageView faceID={person.displayFaceId} />
+                    <FaceCropImageView
+                        faceID={person.displayFaceID}
+                        enteFile={person.displayFaceFile}
+                    />
                 </FaceChip>
             ))}
         </FaceChipContainer>

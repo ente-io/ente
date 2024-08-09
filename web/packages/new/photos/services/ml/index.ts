@@ -3,8 +3,8 @@
  */
 
 import { isDesktop } from "@/base/app";
-import { blobCache } from "@/base/blob-cache";
 import { assertionFailed } from "@/base/assert";
+import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
@@ -16,6 +16,7 @@ import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
+import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { clusterFaces } from "./cluster-new";
@@ -321,15 +322,25 @@ export const wipCluster = async () => {
 
     const clusters = clusterFaces(await faceIndexes());
 
+    const localFiles = await getAllLocalFiles();
+    const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+
     const people: Person[] = []; // await mlIDbStorage.getAllPeople();
     for (const cluster of clusters) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const dfID = cluster.faceIDs[0]!;
+        const dfFile = localFilesByID.get(fileIDFromFaceID(dfID) ?? 0);
+        if (!dfFile) {
+            assertionFailed(`Face ID ${dfID} without local file`);
+            continue;
+        }
         people.push({
             id: Math.random(), //cluster.id,
             name: "test",
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             files: cluster.faceIDs.map((s) => parseInt(s.split("_")[0]!)),
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            displayFaceId: cluster.faceIDs[0]!,
+            displayFaceID: dfID,
+            displayFaceFile: dfFile,
         });
     }
 
@@ -491,7 +502,7 @@ export const unidentifiedFaceIDs = async (
 /**
  * Extract the ID of the {@link EnteFile} to which a face belongs from its ID.
  */
-export const fileIDFromFaceID = (faceID: string) => {
+const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
