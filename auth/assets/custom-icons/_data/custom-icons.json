@@ -608,6 +608,15 @@
       ],
       "slug": "ynab",
       "hex": "3B5EDA"
+    },
+    {
+      "title": "Shakepay",
+      "slug": "shakepay"
+    },
+    {
+      "title": "Newton",
+      "altNames": ["Newton Crypto"],
+      "slug": "newton"
     }
   ]
 }
