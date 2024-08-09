@@ -2,7 +2,6 @@ import { decryptMetadataBytes } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
-import { gunzip } from "./gzip";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
@@ -11,11 +10,12 @@ import { gunzip } from "./gzip";
  * e.g. location tags, people in their photos.
  */
 export type EntityType =
+    | "person"
     /**
      * A new version of the Person entity where the data is gzipped before
      * encryption.
      */
-    "person_v2";
+    | "person_v2";
 
 /**
  * The maximum number of items to fetch in a single diff
@@ -124,11 +124,12 @@ export const userEntityDiff = async (
  * time we checked.
  */
 export const personDiff = async (entityKeyB64: string) => {
-    const entities = await userEntityDiff("person_v2", 0, entityKeyB64);
+    const entities = await userEntityDiff("person", 0, entityKeyB64);
     return Promise.all(
         entities.map(async ({ data }) => {
             if (!data) return undefined;
-            return JSON.parse(await gunzip(data)) as unknown;
+            // return JSON.parse(await gunzip(data)) as unknown;
+            return JSON.parse(new TextDecoder().decode(data)) as unknown;
         }),
     );
 };
