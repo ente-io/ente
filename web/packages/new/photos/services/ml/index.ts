@@ -4,6 +4,7 @@
 
 import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
+import { assertionFailed } from "@/base/assert";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
@@ -485,6 +486,18 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
     return index?.faces.map((f) => f.faceID) ?? [];
+};
+
+/**
+ * Extract the ID of the {@link EnteFile} to which a face belongs from its ID.
+ */
+export const fileIDFromFaceID = (faceID: string) => {
+    const fileID = parseInt(faceID.split("_")[0] ?? "");
+    if (isNaN(fileID)) {
+        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
+        return undefined;
+    }
+    return fileID;
 };
 
 /**

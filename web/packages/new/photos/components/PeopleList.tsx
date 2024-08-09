@@ -111,10 +111,10 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
 };
 
 interface FaceCropImageViewProps {
-    /** The {@link EnteFile} which contains this face. */
-    enteFile: EnteFile;
     /** The ID of the face to display. */
     faceID: string;
+    /** The {@link EnteFile} which contains this face. */
+    enteFile: EnteFile;
 }
 
 /**
@@ -123,30 +123,29 @@ interface FaceCropImageViewProps {
  * The image is read from the "face-crops" {@link BlobCache}, regenerating it if
  * needed (which is why also need to pass the associated file).
  *
- * While the image is being fetched, or if it doesn't exist, a placeholder is
- * shown.
+ * While the image is being fetched or regenerated, or if it doesn't exist, a
+ * placeholder is shown.
  */
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    enteFile,
     faceID,
+    enteFile,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
         let didCancel = false;
+        let thisObjectURL: string | undefined;
 
         void faceCrop(faceID, enteFile).then((blob) => {
-            if (blob && !didCancel) setObjectURL(URL.createObjectURL(blob));
+            if (blob && !didCancel)
+                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
         });
 
         return () => {
             didCancel = true;
-            if (objectURL) URL.revokeObjectURL(objectURL);
+            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
         };
-        // TODO: The linter warning is actually correct, objectURL should be a
-        // dependency, but adding that require reworking this code first.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [faceID]);
+    }, [faceID, enteFile]);
 
     return objectURL ? (
         <img style={{ objectFit: "cover" }} src={objectURL} />
