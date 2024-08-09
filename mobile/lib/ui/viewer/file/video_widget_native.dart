@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
@@ -60,6 +61,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _isPlaybackReady = ValueNotifier(false);
   bool _shouldClearCache = false;
   bool _isCompletelyVisible = false;
+  final _showControls = ValueNotifier(true);
 
   @override
   void initState() {
@@ -140,6 +142,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _controller?.onPlaybackStatusChanged
         .removeListener(_onPlaybackStatusChanged);
     _isPlaybackReady.dispose();
+    _showControls.dispose();
     super.dispose();
   }
 
@@ -192,12 +195,38 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                           ),
                         ),
                       ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          _showControls.value = !_showControls.value;
+                          if (Platform.isIOS) {
+                            widget.playbackCallback!(!_showControls.value);
+                          }
+                        },
+                        child: Container(
+                          constraints: const BoxConstraints.expand(),
+                        ),
+                      ),
                       Positioned.fill(
                         child: Center(
                           child: ValueListenableBuilder(
                             builder: (BuildContext context, bool value, _) {
                               return value
-                                  ? PlayPauseButton(_controller)
+                                  ? ValueListenableBuilder(
+                                      builder: (context, bool value, _) {
+                                        return AnimatedOpacity(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          opacity: value ? 1 : 0,
+                                          curve: Curves.easeInOutQuad,
+                                          child: IgnorePointer(
+                                            ignoring: !value,
+                                            child: PlayPauseButton(_controller),
+                                          ),
+                                        );
+                                      },
+                                      valueListenable: _showControls,
+                                    )
                                   : const SizedBox();
                             },
                             valueListenable: _isPlaybackReady,
@@ -211,70 +240,96 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         child: ValueListenableBuilder(
                           builder: (BuildContext context, bool value, _) {
                             return value
-                                ? Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        16,
-                                        4,
-                                        16,
-                                        4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.3),
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(8),
+                                ? ValueListenableBuilder(
+                                    valueListenable: _showControls,
+                                    builder:
+                                        (BuildContext context, bool value, _) {
+                                      return AnimatedOpacity(
+                                        duration: const Duration(
+                                          milliseconds: 200,
                                         ),
-                                        border: Border.all(
-                                          color: strokeFaintDark,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          AnimatedSize(
-                                            duration:
-                                                const Duration(seconds: 5),
-                                            curve: Curves.easeInOut,
-                                            child: ValueListenableBuilder(
-                                              valueListenable: _controller!
-                                                  .onPlaybackPositionChanged,
-                                              builder: (
-                                                BuildContext context,
-                                                int value,
-                                                _,
-                                              ) {
-                                                return Text(
-                                                  secondsToDuration(value),
-                                                  style:
-                                                      getEnteTextTheme(context)
-                                                          .mini
-                                                          .copyWith(
-                                                            color: textBaseDark,
-                                                          ),
-                                                );
-                                              },
+                                        curve: Curves.easeInQuad,
+                                        opacity: value ? 1 : 0,
+                                        child: IgnorePointer(
+                                          ignoring: !value,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: SeekBar(
-                                              _controller!,
-                                              _durationToSeconds(duration),
-                                            ),
-                                          ),
-                                          Text(
-                                            duration ?? "0:00",
-                                            style: getEnteTextTheme(context)
-                                                .mini
-                                                .copyWith(
-                                                  color: textBaseDark,
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                16,
+                                                4,
+                                                16,
+                                                4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black
+                                                    .withOpacity(0.3),
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                  Radius.circular(8),
                                                 ),
+                                                border: Border.all(
+                                                  color: strokeFaintDark,
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  AnimatedSize(
+                                                    duration: const Duration(
+                                                      seconds: 5,
+                                                    ),
+                                                    curve: Curves.easeInOut,
+                                                    child:
+                                                        ValueListenableBuilder(
+                                                      valueListenable: _controller!
+                                                          .onPlaybackPositionChanged,
+                                                      builder: (
+                                                        BuildContext context,
+                                                        int value,
+                                                        _,
+                                                      ) {
+                                                        return Text(
+                                                          secondsToDuration(
+                                                            value,
+                                                          ),
+                                                          style:
+                                                              getEnteTextTheme(
+                                                            context,
+                                                          ).mini.copyWith(
+                                                                    color:
+                                                                        textBaseDark,
+                                                                  ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: SeekBar(
+                                                      _controller!,
+                                                      _durationToSeconds(
+                                                        duration,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    duration ?? "0:00",
+                                                    style: getEnteTextTheme(
+                                                      context,
+                                                    ).mini.copyWith(
+                                                          color: textBaseDark,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        ],
-                                      ),
-                                    ),
+                                        ),
+                                      );
+                                    },
                                   )
                                 : const SizedBox();
                           },
@@ -350,7 +405,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void _onPlaybackStatusChanged() {
     if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
       if (widget.playbackCallback != null && mounted) {
-        widget.playbackCallback!(true);
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            _showControls.value = false;
+            widget.playbackCallback!(true);
+          }
+        });
       }
     } else {
       if (widget.playbackCallback != null && mounted) {
