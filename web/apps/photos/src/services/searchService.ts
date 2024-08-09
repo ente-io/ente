@@ -419,13 +419,14 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 async function getAllPeople(limit: number = undefined) {
     if (!(await wipClusterEnable())) return [];
 
-    if (Math.random() < 0.01) {
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
         const entityKey = await getEntityKey("person" as EntityType);
         const peopleR = await personDiff(entityKey.data);
         const r = peopleR.length;
         log.debug(() => ["people", peopleR]);
 
         if (r) return [];
+        return [];
     }
 
     let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
