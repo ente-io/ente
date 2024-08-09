@@ -8,7 +8,7 @@ import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -47,9 +47,8 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
   late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
-  bool _isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  bool isGuestView = false;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
 
   @override
   void initState() {
@@ -94,10 +93,10 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       player.pause();
     });
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
       });
     });
   }
@@ -113,7 +112,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
@@ -159,7 +158,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
         ),
         fullscreen: const MaterialVideoControlsThemeData(),
         child: GestureDetector(
-          onVerticalDragUpdate: _isFileSwipeLocked
+          onVerticalDragUpdate: isGuestView
               ? null
               : (d) => {
                     if (d.delta.dy > dragSensitivity)

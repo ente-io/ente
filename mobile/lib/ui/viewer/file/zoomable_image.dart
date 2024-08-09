@@ -9,8 +9,7 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import "package:photos/events/file_swipe_lock_event.dart";
-import 'package:photos/events/files_updated_event.dart';
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -26,6 +25,7 @@ class ZoomableImage extends StatefulWidget {
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
   final bool shouldCover;
+  final bool isGuestView;
 
   const ZoomableImage(
     this.photo, {
@@ -34,6 +34,7 @@ class ZoomableImage extends StatefulWidget {
     required this.tagPrefix,
     this.backgroundDecoration,
     this.shouldCover = false,
+    this.isGuestView = false,
   });
 
   @override
@@ -54,9 +55,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
-  bool _isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
 
   @override
   void initState() {
@@ -72,17 +70,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
-      setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
-      });
-    });
   }
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
     _photoViewController.dispose();
     _scaleStateController.dispose();
     super.dispose();
@@ -159,7 +150,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     final GestureDragUpdateCallback? verticalDragCallback =
-        _isZooming || _isFileSwipeLocked
+        _isZooming || widget.isGuestView
             ? null
             : (d) => {
                   if (!_isZooming)

@@ -39,7 +39,6 @@ import {
     cancelSubscription,
     getLocalUserSubscription,
     hasAddOnBonus,
-    hasMobileSubscription,
     hasPaidSubscription,
     hasStripeSubscription,
     isOnFreePlan,
@@ -49,6 +48,7 @@ import {
     isUserSubscribedPlan,
     manageFamilyMethod,
     planForSubscription,
+    planSelectionOutcome,
     updatePaymentMethod,
     updateSubscription,
 } from "utils/billing";
@@ -177,58 +177,63 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
     }, []);
 
     async function onPlanSelect(plan: Plan) {
-        if (
-            !hasPaidSubscription(subscription) &&
-            !isSubscriptionCancelled(subscription)
-        ) {
-            try {
-                props.setLoading(true);
-                await billingService.buySubscription(plan.stripeID);
-            } catch (e) {
-                props.setLoading(false);
+        switch (planSelectionOutcome(subscription)) {
+            case "buyPlan":
+                try {
+                    props.setLoading(true);
+                    await billingService.buySubscription(plan.stripeID);
+                } catch (e) {
+                    props.setLoading(false);
+                    appContext.setDialogMessage({
+                        title: t("ERROR"),
+                        content: t("SUBSCRIPTION_PURCHASE_FAILED"),
+                        close: { variant: "critical" },
+                    });
+                }
+                break;
+
+            case "updateSubscriptionToPlan":
                 appContext.setDialogMessage({
-                    title: t("ERROR"),
-                    content: t("SUBSCRIPTION_PURCHASE_FAILED"),
-                    close: { variant: "critical" },
+                    title: t("update_subscription_title"),
+                    content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
+                    proceed: {
+                        text: t("UPDATE_SUBSCRIPTION"),
+                        action: updateSubscription.bind(
+                            null,
+                            plan,
+                            appContext.setDialogMessage,
+                            props.setLoading,
+                            props.closeModal,
+                        ),
+                        variant: "accent",
+                    },
+                    close: { text: t("cancel") },
                 });
-            }
-        } else if (hasStripeSubscription(subscription)) {
-            appContext.setDialogMessage({
-                title: t("update_subscription_title"),
-                content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
-                proceed: {
-                    text: t("UPDATE_SUBSCRIPTION"),
-                    action: updateSubscription.bind(
-                        null,
-                        plan,
-                        appContext.setDialogMessage,
-                        props.setLoading,
-                        props.closeModal,
+                break;
+
+            case "cancelOnMobile":
+                appContext.setDialogMessage({
+                    title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
+                    content: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
+                    close: { variant: "secondary" },
+                });
+                break;
+
+            case "contactSupport":
+                appContext.setDialogMessage({
+                    title: t("MANAGE_PLAN"),
+                    content: (
+                        <Trans
+                            i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
+                            components={{
+                                a: <Link href="mailto:support@ente.io" />,
+                            }}
+                            values={{ emailID: "support@ente.io" }}
+                        />
                     ),
-                    variant: "accent",
-                },
-                close: { text: t("cancel") },
-            });
-        } else if (hasMobileSubscription(subscription)) {
-            appContext.setDialogMessage({
-                title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
-                content: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
-                close: { variant: "secondary" },
-            });
-        } else {
-            appContext.setDialogMessage({
-                title: t("MANAGE_PLAN"),
-                content: (
-                    <Trans
-                        i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
-                        components={{
-                            a: <Link href="mailto:support@ente.io" />,
-                        }}
-                        values={{ emailID: "support@ente.io" }}
-                    />
-                ),
-                close: { variant: "secondary" },
-            });
+                    close: { variant: "secondary" },
+                });
+                break;
         }
     }
 
