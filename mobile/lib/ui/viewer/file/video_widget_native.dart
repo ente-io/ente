@@ -177,6 +177,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             duration: const Duration(milliseconds: 750),
             switchOutCurve: Curves.easeOutExpo,
             switchInCurve: Curves.easeInExpo,
+            //Loading two high-res potrait videos together causes one to
+            //go blank. So only loading video when it is completely visible.
             child: !_isCompletelyVisible || _filePath == null
                 ? _getLoadingWidget()
                 : Stack(
