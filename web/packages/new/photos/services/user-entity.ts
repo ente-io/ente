@@ -2,8 +2,8 @@ import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 
 /**
- * Entities are predefined lists of otherwise arbitrary data that the user can
- * store for their account.
+ * User entities are predefined lists of otherwise arbitrary data that the user
+ * can store for their account.
  *
  * e.g. location tags, people in their photos.
  */
@@ -41,8 +41,8 @@ export type EntityType =
 const defaultDiffLimit = 500;
 
 /**
- * Fetch all entities of the given type that have been created or updated since
- * the given time.
+ * Fetch all user entities of the given type that have been created or updated
+ * since the given time.
  *
  * For each batch of fetched entities, call a provided function that can ingest
  * them. This function is also provided the latest timestamp from amongst all of
@@ -55,7 +55,7 @@ const defaultDiffLimit = 500;
  * only entities whose {@link updatedAt} is more than the given value. Set this
  * to zero to start from the beginning.
  */
-export const entityDiff = async (
+export const userEntityDiff = async (
     type: EntityType,
     sinceTime: number,
     onFetch: (entities: unknown[], latestUpdatedAt: number) => Promise<void>,
