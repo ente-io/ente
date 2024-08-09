@@ -59,6 +59,5 @@ If you run into any issues during this migration, please reach out to
 > JSON files and stich them together with corresponding files. However, one case
 > this will not work is when Google has split the export into multiple parts,
 > and did not put the JSON file associated with an image in the same exported
-> zip.
-
->So the best move is to unzip all of the items into a single root folder, and drop that folder into our desktop app. That way we have the complete picture, and can stitch together metadata with the correct files.
+> zip. So the best move is to unzip all of the items into a single folder, and
+> to drop that folder into our desktop app.
