@@ -50,7 +50,6 @@ By default, you only need to configure the endpoint for the first bucket.
 > `hot_bucket` option if you'd like to set one of the other predefined buckets
 > as the "first" bucket.
 
-
 The `endpoint` for the first bucket in the starter `credentials.yaml` is
 `localhost:3200`. The way this works then is that both museum (`2`) and minio
 (`3`) are running within the same Docker compose cluster, so are able to reach
