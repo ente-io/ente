@@ -3,7 +3,6 @@
  */
 
 import { isDesktop } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
@@ -72,9 +71,10 @@ class MLState {
     mlStatusSnapshot: MLStatus | undefined;
 
     /**
-     * IDs files for which we are currently regenerating face crops.
+     * In flight face crop regeneration promises indexed by the IDs of the files
+     * whose faces we are regenerating.
      */
-    inFlightFaceCropRegenFileIDs = new Set<number>();
+    inFlightFaceCropRegens = new Map<number, Promise<void>>();
 }
 
 /** State shared by the functions in this module. See {@link MLState}. */
@@ -491,43 +491,36 @@ export const unidentifiedFaceIDs = async (
  * Return the cached face crop for the given face, regenerating it if needed.
  *
  * @param faceID The id of the face whose face crop we want.
+ *
+ * @param enteFile The {@link EnteFile} that contains this face.
  */
-export const faceCrop = (faceID: string) => {
-    const fileID = fileIDFromFaceID(faceID);
-};
+export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
+    let inFlight = _state.inFlightFaceCropRegens.get(enteFile.id);
 
-/**
- * Extract the ID of the {@link EnteFile} to which this face belongs from the
- * given {@link faceID}.
- */
-const fileIDFromFaceID = (faceID: string) => {
-    const fileID = parseInt(faceID.split("_")[0] ?? "");
-    if (isNaN(fileID)) {
-        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
-        return undefined;
+    if (!inFlight) {
+        inFlight = regenerateFaceCropsIfNeeded(enteFile);
+        _state.inFlightFaceCropRegens.set(enteFile.id, inFlight);
     }
-    return fileID;
+
+    await inFlight;
+
+    const cache = await blobCache("face-crops");
+    return cache.get(faceID);
 };
 
 /**
  * Check to see if any of the faces in the given file do not have a face crop
  * present locally. If so, then regenerate the face crops for all the faces in
  * the file (updating the "face-crops" {@link BlobCache}).
- *
- * @returns true if one or more face crops were regenerated; false otherwise.
  */
-export const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
+const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
     const index = await faceIndex(enteFile.id);
-    if (!index) return false;
+    if (!index) return;
 
-    const faceIDs = index.faces.map((f) => f.faceID);
     const cache = await blobCache("face-crops");
-    for (const id of faceIDs) {
-        if (!(await cache.has(id))) {
-            await regenerateFaceCrops(enteFile, index);
-            return true;
-        }
-    }
+    const faceIDs = index.faces.map((f) => f.faceID);
+    let needsRegen = false;
+    for (const id of faceIDs) if (!(await cache.has(id))) needsRegen = true;
 
-    return false;
+    if (needsRegen) await regenerateFaceCrops(enteFile, index);
 };
