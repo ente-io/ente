@@ -238,8 +238,9 @@
       "title": "INWX"
     },
     {
-      "title": "Itch.io",
-      "slug": "itch_io"
+      "title": "Itch",
+      "slug": "itch_io",
+      "hex": "e7685e"
     },
     {
       "title": "IVPN",
