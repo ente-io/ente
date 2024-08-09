@@ -3,6 +3,7 @@
  */
 
 import { isDesktop } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
@@ -69,6 +70,11 @@ class MLState {
      * See {@link mlStatusSnapshot}.
      */
     mlStatusSnapshot: MLStatus | undefined;
+
+    /**
+     * IDs files for which we are currently regenerating face crops.
+     */
+    inFlightFaceCropRegenFileIDs = new Set<number>();
 }
 
 /** State shared by the functions in this module. See {@link MLState}. */
@@ -479,6 +485,28 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await faceIndex(enteFile.id);
     return index?.faces.map((f) => f.faceID) ?? [];
+};
+
+/**
+ * Return the cached face crop for the given face, regenerating it if needed.
+ *
+ * @param faceID The id of the face whose face crop we want.
+ */
+export const faceCrop = (faceID: string) => {
+    const fileID = fileIDFromFaceID(faceID);
+};
+
+/**
+ * Extract the ID of the {@link EnteFile} to which this face belongs from the
+ * given {@link faceID}.
+ */
+const fileIDFromFaceID = (faceID: string) => {
+    const fileID = parseInt(faceID.split("_")[0] ?? "");
+    if (isNaN(fileID)) {
+        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
+        return undefined;
+    }
+    return fileID;
 };
 
 /**
