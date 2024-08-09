@@ -142,6 +142,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     _controller?.onPlaybackEnded.removeListener(_onPlaybackEnded);
     _controller?.onPlaybackReady.removeListener(_onPlaybackReady);
+    _controller?.onError.removeListener(_onError);
     _isPlaybackReady.dispose();
     super.dispose();
   }
@@ -304,6 +305,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   ) async {
     _logger.info("initializing native video player controller");
     _controller = controller;
+    _controller!.onError.addListener(_onError);
 
     controller.onPlaybackEnded.addListener(_onPlaybackEnded);
 
@@ -316,6 +318,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       type: VideoSourceType.file,
     );
     await controller.loadVideoSource(videoSource);
+  }
+
+  void _onError() {
+    //This doesn't work all the time
+    _logger.severe("Error in native video player controller");
+    _logger.severe(_controller!.onError.value);
   }
 
   Future<void> _onPlaybackReady() async {
