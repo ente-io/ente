@@ -66,5 +66,6 @@
   "noQuickLinksSelected": "No quick links selected",
   "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
   "removePublicLinks": "Remove public links",
-  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
+  "guestView": "Guest view"
 }

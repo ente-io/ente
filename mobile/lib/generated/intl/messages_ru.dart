@@ -811,6 +811,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Предоставить разрешение"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Группировать фотографии рядом"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Будет полезно, если вы укажете, где нашли нас, так как мы не отслеживаем установки приложения!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(

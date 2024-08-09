@@ -827,6 +827,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Conceder permiso"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Agrupar fotos cercanas"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "No rastreamos las aplicaciones instaladas. ¡Nos ayudarías si nos dijeras dónde nos encontraste!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(

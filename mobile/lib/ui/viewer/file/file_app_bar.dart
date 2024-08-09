@@ -305,7 +305,7 @@ class FileAppBarState extends State<FileAppBar> {
             const Padding(
               padding: EdgeInsets.all(8),
             ),
-            const Text("Guest view"),
+            Text(S.of(context).guestView),
           ],
         ),
       ),

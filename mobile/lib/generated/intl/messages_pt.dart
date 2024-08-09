@@ -817,6 +817,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Conceder permissão"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Agrupar fotos próximas"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1041,8 +1042,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "No momento não há backup de fotos sendo feito"),
         "noPhotosFoundHere": MessageLookupByLibrary.simpleMessage(
             "Nenhuma foto encontrada aqui"),
-        "noQuickLinksSelected":
-            MessageLookupByLibrary.simpleMessage("No quick links selected"),
+        "noQuickLinksSelected": MessageLookupByLibrary.simpleMessage(
+            "Nenhum link rápido selecionado"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Nenhuma chave de recuperação?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1148,7 +1149,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage(
             "Por favor, inicie sessão novamente"),
         "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
-            "Please select quick links to remove"),
+            "Selecione links rápidos para remover"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Por favor, tente novamente"),
@@ -1253,7 +1254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remover link público"),
         "removePublicLinks":
-            MessageLookupByLibrary.simpleMessage("Remove public links"),
+            MessageLookupByLibrary.simpleMessage("Remover link público"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Alguns dos itens que você está removendo foram adicionados por outras pessoas, e você perderá o acesso a eles"),
         "removeWithQuestionMark":
@@ -1562,7 +1563,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Isso fará com que você saia deste dispositivo!"),
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
-                "This will remove public links of all selected quick links."),
+                "Isto removerá links públicos de todos os links rápidos selecionados."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "Para ativar o bloqueio de app, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),

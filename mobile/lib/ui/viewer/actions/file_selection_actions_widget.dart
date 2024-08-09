@@ -275,7 +275,7 @@ class _FileSelectionActionsWidgetState
     items.add(
       SelectionActionButton(
         icon: Icons.people_outline_rounded,
-        labelText: "Guest view",
+        labelText: S.of(context).guestView,
         onTap: _onGuestViewClick,
       ),
     );

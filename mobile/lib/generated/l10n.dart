@@ -9244,6 +9244,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Guest view`
+  String get guestView {
+    return Intl.message(
+      'Guest view',
+      name: 'guestView',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

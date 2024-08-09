@@ -78,6 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Found faces"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
         "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
         "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
             "Hides app content in the app switcher and disables screenshots"),
