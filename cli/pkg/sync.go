@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (c *ClICtrl) Export() error {
+func (c *ClICtrl) Export(filter model.Filter) error {
 	accounts, err := c.GetAccounts(context.Background())
 	if err != nil {
 		return err
@@ -21,8 +21,13 @@ func (c *ClICtrl) Export() error {
 		fmt.Printf("No accounts to sync\n Add account using `account add` cmd\n")
 		return nil
 	}
+
 	for _, account := range accounts {
 		log.SetPrefix(fmt.Sprintf("[%s-%s] ", account.App, account.Email))
+		if filter.SkipAccount(account.Email) {
+			log.Printf("Skip account %s: account is excluded by filter", account.Email)
+			continue
+		}
 		if account.ExportDir == "" {
 			log.Printf("Skip account %s: no export directory configured", account.Email)
 			continue
@@ -39,7 +44,7 @@ func (c *ClICtrl) Export() error {
 		log.Println("start sync")
 		retryCount := 0
 		for {
-			err = c.SyncAccount(account)
+			err = c.SyncAccount(account, filter)
 			if err != nil {
 				if model.ShouldRetrySync(err) && retryCount < 20 {
 					retryCount = retryCount + 1
@@ -60,12 +65,12 @@ func (c *ClICtrl) Export() error {
 	return nil
 }
 
-func (c *ClICtrl) SyncAccount(account model.Account) error {
+func (c *ClICtrl) SyncAccount(account model.Account, filters model.Filter) error {
 	secretInfo, err := c.KeyHolder.LoadSecrets(account)
 	if err != nil {
 		return err
 	}
-	ctx := c.buildRequestContext(context.Background(), account)
+	ctx := c.buildRequestContext(context.Background(), account, filters)
 	err = createDataBuckets(c.DB, account)
 	if err != nil {
 		return err
@@ -94,10 +99,13 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	return nil
 }
 
-func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account) context.Context {
+func (c *ClICtrl) buildRequestContext(ctx context.Context,
+	account model.Account,
+	filter model.Filter) context.Context {
 	ctx = context.WithValue(ctx, "app", string(account.App))
 	ctx = context.WithValue(ctx, "account_key", account.AccountKey())
 	ctx = context.WithValue(ctx, "user_id", account.UserID)
+	ctx = context.WithValue(ctx, model.FilterKey, filter)
 	return ctx
 }
 

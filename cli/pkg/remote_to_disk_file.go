@@ -24,6 +24,17 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	if err != nil {
 		return err
 	}
+	albumsToSkip := make(map[int64]bool)
+	filter := ctx.Value(model.FilterKey).(model.Filter)
+	remoteAlbums, readAlbumErr := c.getRemoteAlbums(ctx)
+	if readAlbumErr != nil {
+		return readAlbumErr
+	}
+	for _, album := range remoteAlbums {
+		if !album.IsDeleted && filter.SkipAlbum(album, false) {
+			albumsToSkip[album.ID] = true
+		}
+	}
 	entries, err := c.getRemoteAlbumEntries(ctx)
 	if err != nil {
 		return err
@@ -34,6 +45,9 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	var albumDiskInfo *albumDiskInfo
 	for i, albumFileEntry := range entries {
 		if albumFileEntry.SyncedLocally {
+			continue
+		}
+		if _, ok := albumsToSkip[albumFileEntry.AlbumID]; ok {
 			continue
 		}
 		albumInfo, ok := albumIDToMetaMap[albumFileEntry.AlbumID]
