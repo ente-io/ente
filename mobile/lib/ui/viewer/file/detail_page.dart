@@ -10,7 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
@@ -86,9 +86,9 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillEnd = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
   bool _isFirstOpened = true;
-  bool isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  bool isGuestView = false;
+  bool swipeLocked = false;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
 
   @override
   void initState() {
@@ -99,17 +99,18 @@ class _DetailPageState extends State<DetailPage> {
     _selectedIndexNotifier.value = widget.config.selectedIndex;
     _preloadEntries();
     _pageController = PageController(initialPage: _selectedIndexNotifier.value);
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
-        isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
+        swipeLocked = event.swipeLocked;
       });
     });
   }
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     _pageController.dispose();
     _enableFullScreenNotifier.dispose();
     _selectedIndexNotifier.dispose();
@@ -138,12 +139,12 @@ class _DetailPageState extends State<DetailPage> {
           " files .",
     );
     return PopScope(
-      canPop: !isFileSwipeLocked,
+      canPop: !isGuestView,
       onPopInvoked: (didPop) async {
-        if (isFileSwipeLocked) {
+        if (isGuestView) {
           final authenticated = await _requestAuthentication();
           if (authenticated) {
-            Bus.instance.fire(FileSwipeLockEvent(false));
+            Bus.instance.fire(GuestViewEvent(false, false));
           }
         }
       },
@@ -176,7 +177,7 @@ class _DetailPageState extends State<DetailPage> {
                     _files![selectedIndex],
                     _onEditFileRequested,
                     widget.config.mode == DetailPageMode.minimalistic &&
-                        !isFileSwipeLocked,
+                        !isGuestView,
                     onFileRemoved: _onFileRemoved,
                     userID: Configuration.instance.getUserID(),
                     enableFullScreenNotifier: _enableFullScreenNotifier,
@@ -235,9 +236,10 @@ class _DetailPageState extends State<DetailPage> {
         } else {
           _selectedIndexNotifier.value = index;
         }
+        Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
         _preloadEntries();
       },
-      physics: _shouldDisableScroll || isFileSwipeLocked
+      physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
           : const FastScrollPhysics(speedFactor: 4.0),
       controller: _pageController,

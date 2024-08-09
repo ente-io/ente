@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -47,26 +47,25 @@ class FileBottomBar extends StatefulWidget {
 
 class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
-  bool _isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  bool isGuestView = false;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool isPanorama = false;
   int? lastFileGenID;
 
   @override
   void initState() {
     super.initState();
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        isGuestView = event.isGuestView;
       });
     });
   }
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     super.dispose();
   }
 
@@ -220,9 +219,9 @@ class FileBottomBarState extends State<FileBottomBar> {
       valueListenable: widget.enableFullScreenNotifier,
       builder: (BuildContext context, bool isFullScreen, _) {
         return IgnorePointer(
-          ignoring: isFullScreen || _isFileSwipeLocked,
+          ignoring: isFullScreen || isGuestView,
           child: AnimatedOpacity(
-            opacity: isFullScreen || _isFileSwipeLocked ? 0 : 1,
+            opacity: isFullScreen || isGuestView ? 0 : 1,
             duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
             child: Align(
