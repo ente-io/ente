@@ -450,28 +450,34 @@ class MLService {
         }
         _logger.info("inserting ${faces.length} faces for ${result.fileId}");
         if (!result.errorOccured) {
-          await FileDataService.instance.putDerivedMetaData(
+          final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
+              FileDataEntity.empty(
+                instruction.file.uploadedFileID!,
+                DataType.derivedMeta,
+              );
+          if (result.facesRan) {
+            dataEntity.putFace(
+              RemoteFaceEmbedding(
+                faces,
+                result.mlVersion,
+                client: client,
+                height: result.decodedImageSize.height,
+                width: result.decodedImageSize.width,
+              ),
+            );
+          }
+          if (result.clipRan) {
+            dataEntity.putClip(
+              RemoteClipEmbedding(
+                result.clip!.embedding,
+                version: result.mlVersion,
+                client: client,
+              ),
+            );
+          }
+          await FileDataService.instance.putFileData(
             instruction.file,
-            instruction.existingRemoteFileML ??
-                FileDataEntity.empty(
-                  instruction.file.uploadedFileID!,
-                ),
-            faceEmbedding: result.facesRan
-                ? RemoteFaceEmbedding(
-                    faces,
-                    result.mlVersion,
-                    client: client,
-                    height: result.decodedImageSize.height,
-                    width: result.decodedImageSize.width,
-                  )
-                : null,
-            clipEmbedding: result.clipRan
-                ? RemoteClipEmbedding(
-                    result.clip!.embedding,
-                    version: result.mlVersion,
-                    client: client,
-                  )
-                : null,
+            dataEntity,
           );
         } else {
           _logger.warning(

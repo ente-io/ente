@@ -3,49 +3,74 @@ import "package:photos/face/model/face.dart";
 const _faceKey = 'face';
 const _clipKey = 'clip';
 
+enum DataType {
+  derivedMeta('derivedMeta');
+
+  final String value;
+  const DataType(this.value);
+
+  static DataType fromString(String type) {
+    return DataType.values.firstWhere(
+      (e) => e.value == type,
+      orElse: () {
+        throw Exception('Unknown type: $type');
+      },
+    );
+  }
+
+  String toJson() => value;
+  static DataType fromJson(String json) => DataType.fromString(json);
+}
+
 class FileDataEntity {
   final int fileID;
   final Map<String, dynamic> remoteRawData;
+  final DataType type;
 
   FileDataEntity(
     this.fileID,
     this.remoteRawData,
+    this.type,
   );
 
-  void putSanityCheck() {
-    if (remoteRawData[_faceKey] == null) {
-      throw Exception('Face embedding is null');
-    }
-    if (remoteRawData[_clipKey] == null) {
-      throw Exception('Clip embedding is null');
+  void validate() {
+    if (type == DataType.derivedMeta) {
+      if (remoteRawData[_faceKey] == null) {
+        throw Exception('Face embedding is null');
+      }
+      if (remoteRawData[_clipKey] == null) {
+        throw Exception('Clip embedding is null');
+      }
+    } else {
+      throw Exception('Invalid type ${type.value}');
     }
   }
 
   factory FileDataEntity.fromRemote(
     int fileID,
+    String type,
     Map<String, dynamic> json,
   ) {
     return FileDataEntity(
       fileID,
       json,
+      DataType.fromString(type),
     );
   }
 
-  static FileDataEntity empty(int i) {
+  static FileDataEntity empty(int fileID, DataType type) {
     final Map<String, dynamic> json = {};
-    return FileDataEntity(i, json);
+    return FileDataEntity(fileID, json, type);
   }
 
-  void putFaceIfNotNull(RemoteFaceEmbedding? faceEmbedding) {
-    if (faceEmbedding != null) {
-      remoteRawData[_faceKey] = faceEmbedding.toJson();
-    }
+  void putFace(RemoteFaceEmbedding faceEmbedding) {
+    assert(type == DataType.derivedMeta, 'Invalid type ${type.value}');
+    remoteRawData[_faceKey] = faceEmbedding.toJson();
   }
 
-  void putClipIfNotNull(RemoteClipEmbedding? clipEmbedding) {
-    if (clipEmbedding != null) {
-      remoteRawData[_clipKey] = clipEmbedding.toJson();
-    }
+  void putClip(RemoteClipEmbedding clipEmbedding) {
+    assert(type == DataType.derivedMeta, 'Invalid type ${type.value}');
+    remoteRawData[_clipKey] = clipEmbedding.toJson();
   }
 
   RemoteFaceEmbedding? get faceEmbedding => remoteRawData[_faceKey] != null

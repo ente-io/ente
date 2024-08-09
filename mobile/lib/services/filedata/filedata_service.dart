@@ -15,28 +15,18 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class FileDataService {
   FileDataService._privateConstructor();
-  static const String _derivedDataType = "derivedMeta";
 
   static final Computer _computer = Computer.shared();
-
   static final FileDataService instance = FileDataService._privateConstructor();
-
   final _logger = Logger("FileDataService");
   final _dio = NetworkClient.instance.enteDio;
 
   void init(SharedPreferences prefs) {}
 
-  Future<void> putDerivedMetaData(
-    EnteFile file,
-    FileDataEntity fileML, {
-    RemoteClipEmbedding? clipEmbedding,
-    RemoteFaceEmbedding? faceEmbedding,
-  }) async {
-    fileML.putClipIfNotNull(clipEmbedding);
-    fileML.putFaceIfNotNull(faceEmbedding);
-    fileML.putSanityCheck();
+  Future<void> putFileData(EnteFile file, FileDataEntity data) async {
+    data.validate();
     final ChaChaEncryptionResult encryptionResult = await gzipAndEncryptJson(
-      fileML.remoteRawData,
+      data.remoteRawData,
       getFileKey(file),
     );
 
@@ -45,7 +35,7 @@ class FileDataService {
         "/files/data/",
         data: {
           "fileID": file.uploadedFileID!,
-          "type": _derivedDataType,
+          "type": data.type.toJson(),
           "encryptedData": encryptionResult.encData,
           "decryptionHeader": encryptionResult.header,
         },
@@ -57,14 +47,15 @@ class FileDataService {
   }
 
   Future<FileDataResponse> getFilesData(
-    Set<int> fileIds,
-  ) async {
+    Set<int> fileIds, {
+    DataType type = DataType.derivedMeta,
+  }) async {
     try {
       final res = await _dio.post(
         "/files/fetch-data/",
         data: {
           "fileIDs": fileIds.toList(),
-          "type": _derivedDataType,
+          "type": type.toJson(),
         },
       );
       final remoteEntries = res.data['data'] as List;
@@ -75,7 +66,6 @@ class FileDataService {
       for (var entry in remoteEntries) {
         encFileData.add(EncryptedFileData.fromMap(entry));
       }
-
       final fileIdToDataMap = await decryptRemoteFileData(encFileData);
       return FileDataResponse(
         fileIdToDataMap,
@@ -99,17 +89,17 @@ class FileDataService {
     final inputs = <_DecoderInput>[];
     final fileMap = await FilesDB.instance
         .getFilesFromIDs(remoteData.map((e) => e.fileID).toList());
-    for (final embedding in remoteData) {
-      final file = fileMap[embedding.fileID];
+    for (final data in remoteData) {
+      final file = fileMap[data.fileID];
       if (file == null) {
         continue;
       }
       final fileKey = getFileKey(file);
-      final input = _DecoderInput(embedding, fileKey);
+      final input = _DecoderInput(data, fileKey);
       inputs.add(input);
     }
     return _computer.compute<Map<String, dynamic>, Map<int, FileDataEntity>>(
-      _decryptFileMLComputer,
+      _decryptFileDataComputer,
       param: {
         "inputs": inputs,
       },
@@ -117,7 +107,7 @@ class FileDataService {
   }
 }
 
-Future<Map<int, FileDataEntity>> _decryptFileMLComputer(
+Future<Map<int, FileDataEntity>> _decryptFileDataComputer(
   Map<String, dynamic> args,
 ) async {
   final result = <int, FileDataEntity>{};
@@ -130,6 +120,7 @@ Future<Map<int, FileDataEntity>> _decryptFileMLComputer(
     );
     result[input.data.fileID] = FileDataEntity.fromRemote(
       input.data.fileID,
+      input.data.type,
       decodedJson,
     );
   }
