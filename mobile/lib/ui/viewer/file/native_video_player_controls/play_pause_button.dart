@@ -1,5 +1,9 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/theme/colors.dart";
 
 class PlayPauseButton extends StatefulWidget {
@@ -11,7 +15,25 @@ class PlayPauseButton extends StatefulWidget {
 }
 
 class _PlayPauseButtonState extends State<PlayPauseButton> {
+  late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool _isPlaying = true;
+
+  @override
+  void initState() {
+    super.initState();
+    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+      setState(() {
+        _isPlaying = false;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    pauseVideoSubscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

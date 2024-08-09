@@ -8,6 +8,7 @@ import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/pause_video_event.dart";
 // import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -43,12 +44,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     with WidgetsBindingObserver {
   final Logger _logger = Logger("VideoWidgetNative");
   static const verticalMargin = 72.0;
-  // late final player = Player();
-  // VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
-  // late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
-  // late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
+  late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool _isFileSwipeLocked = false;
   late final StreamSubscription<FileSwipeLockEvent>
       _fileSwipeLockEventSubscription;
@@ -95,15 +93,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         }
       });
     }
-    // playingStreamSubscription = player.stream.playing.listen((event) {
-    //   if (widget.playbackCallback != null && mounted) {
-    //     widget.playbackCallback!(event);
-    //   }
-    // });
 
-    // pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
-    //   player.pause();
-    // });
+    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+      _controller?.pause();
+    });
     _fileSwipeLockEventSubscription =
         Bus.instance.on<FileSwipeLockEvent>().listen((event) {
       setState(() {
@@ -133,16 +126,17 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       );
     }
     _fileSwipeLockEventSubscription.cancel();
-    // pauseVideoSubscription.cancel();
+    pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    // playingStreamSubscription.cancel();
     // player.dispose();
 
     _controller?.onPlaybackEnded.removeListener(_onPlaybackEnded);
     _controller?.onPlaybackReady.removeListener(_onPlaybackReady);
     _controller?.onError.removeListener(_onError);
+    _controller?.onPlaybackStatusChanged
+        .removeListener(_onPlaybackStatusChanged);
     _isPlaybackReady.dispose();
     super.dispose();
   }
@@ -306,11 +300,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     try {
       _logger.info("Initializing native video player controller");
       _controller = controller;
-      _controller!.onError.addListener(_onError);
 
+      controller.onError.addListener(_onError);
       controller.onPlaybackEnded.addListener(_onPlaybackEnded);
-
       controller.onPlaybackReady.addListener(_onPlaybackReady);
+      controller.onPlaybackStatusChanged.addListener(_onPlaybackStatusChanged);
 
       final videoSource = await VideoSource.init(
         path: _filePath!,
@@ -319,6 +313,18 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       await controller.loadVideoSource(videoSource);
     } catch (e) {
       _logger.severe("Error initializing native video player controller", e);
+    }
+  }
+
+  void _onPlaybackStatusChanged() {
+    if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
+      if (widget.playbackCallback != null && mounted) {
+        widget.playbackCallback!(true);
+      }
+    } else {
+      if (widget.playbackCallback != null && mounted) {
+        widget.playbackCallback!(false);
+      }
     }
   }
 
