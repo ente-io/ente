@@ -52,11 +52,13 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
                   Icons.pause,
                   size: 32,
                   key: ValueKey("pause"),
+                  color: Colors.white,
                 )
               : const Icon(
                   Icons.play_arrow,
                   size: 36,
                   key: ValueKey("play"),
+                  color: Colors.white,
                 ),
         ),
       ),
