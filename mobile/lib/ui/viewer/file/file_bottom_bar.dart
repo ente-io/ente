@@ -17,12 +17,9 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import 'package:photos/utils/delete_file_util.dart';
-import "package:photos/utils/file_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/share_util.dart';
-import "package:photos/utils/thumbnail_util.dart";
 
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
@@ -198,116 +195,65 @@ class FileBottomBarState extends State<FileBottomBar> {
             curve: Curves.easeInOut,
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.file.isPanorama() == true)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Tooltip(
-                        message: S.of(context).panorama,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 12,
-                            bottom: 12,
-                            right: 20,
-                          ),
-                          child: IconButton(
-                            style: IconButton.styleFrom(
-                              backgroundColor: const Color(0xFF252525),
-                              fixedSize: const Size(44, 44),
-                            ),
-                            icon: const Icon(
-                              Icons.vrpano_outlined,
-                              color: Colors.white,
-                              size: 26,
-                            ),
-                            onPressed: () async {
-                              await openPanoramaViewerPage(widget.file);
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.6),
-                          Colors.black.withOpacity(0.72),
-                        ],
-                        stops: const [0, 0.8, 1],
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          widget.file.caption?.isNotEmpty ?? false
-                              ? Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    12,
-                                    16,
-                                    0,
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: () async {
-                                      await _displayDetails(widget.file);
-                                      await Future.delayed(
-                                        const Duration(milliseconds: 500),
-                                      ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
-                                      safeRefresh();
-                                    },
-                                    child: Text(
-                                      widget.file.caption!,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: getEnteTextTheme(context)
-                                          .mini
-                                          .copyWith(color: textBaseDark),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: children,
-                          ),
-                        ],
-                      ),
-                    ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.6),
+                      Colors.black.withOpacity(0.72),
+                    ],
+                    stops: const [0, 0.8, 1],
                   ),
-                ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      widget.file.caption?.isNotEmpty ?? false
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                12,
+                                16,
+                                0,
+                              ),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await _displayDetails(widget.file);
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 500),
+                                  ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+                                  safeRefresh();
+                                },
+                                child: Text(
+                                  widget.file.caption!,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: getEnteTextTheme(context)
+                                      .mini
+                                      .copyWith(color: textBaseDark),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: children,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         );
       },
     );
-  }
-
-  Future<void> openPanoramaViewerPage(EnteFile file) async {
-    final fetchedFile = await getFile(file);
-    if (fetchedFile == null) {
-      return;
-    }
-    final fetchedThumbnail = await getThumbnail(file);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) {
-          return PanoramaViewerScreen(
-            file: fetchedFile,
-            thumbnail: fetchedThumbnail,
-          );
-        },
-      ),
-    ).ignore();
   }
 
   Future<void> _showSingleFileDeleteSheet(EnteFile file) async {
