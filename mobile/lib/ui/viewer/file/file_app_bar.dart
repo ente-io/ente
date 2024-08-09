@@ -299,7 +299,7 @@ class FileAppBarState extends State<FileAppBar> {
         child: Row(
           children: [
             Icon(
-              Icons.lock,
+              Icons.people_outline_rounded,
               color: Theme.of(context).iconTheme.color,
             ),
             const Padding(
