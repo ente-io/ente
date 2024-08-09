@@ -78,7 +78,7 @@ export const clusterFaces = (faceIndexes: FaceIndex[]) => {
 
     const faces = [...faceIDAndEmbeddings(faceIndexes)];
 
-    const clusters: FaceCluster[] = [];
+    let clusters: FaceCluster[] = [];
     const clusterIndexByFaceID = new Map<string, number>();
     for (const [i, { faceID, embedding }] of faces.entries()) {
         // Find the nearest neighbour from among the faces we have already seen.
@@ -117,6 +117,8 @@ export const clusterFaces = (faceIndexes: FaceIndex[]) => {
             clusterIndexByFaceID.set(faceID, nnClusterIndex);
         }
     }
+
+    clusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
 
     log.debug(() => ["ml/cluster", { faces, clusters, clusterIndexByFaceID }]);
     log.debug(
