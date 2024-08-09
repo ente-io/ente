@@ -30,39 +30,53 @@ import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
 /**
- * In-memory flag that tracks if ML is enabled.
+ * Internal state of the ML subsystem.
  *
- * -   On app start, this is read from local storage during {@link initML}.
+ * This are essentially cached values used by the functions of this module.
  *
- * -   It gets updated when we sync with remote (so if the user enables/disables
- *     ML on a different device, this local value will also become true/false).
- *
- * -   It gets updated when the user enables/disables ML on this device.
- *
- * -   It is cleared in {@link logoutML}.
+ * This should be cleared on logout.
  */
-let _isMLEnabled = false;
+class MLState {
+    /**
+     * In-memory flag that tracks if ML is enabled.
+     *
+     * -   On app start, this is read from local storage during {@link initML}.
+     *
+     * -   It gets updated when we sync with remote (so if the user enables/disables
+     *     ML on a different device, this local value will also become true/false).
+     *
+     * -   It gets updated when the user enables/disables ML on this device.
+     *
+     * -   It is cleared in {@link logoutML}.
+     */
+    isMLEnabled = false;
 
-/** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
-let _comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
+    /**
+     * Cached instance of the {@link ComlinkWorker} that wraps our web worker.
+     */
+    comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
 
-/**
- * Subscriptions to {@link MLStatus}.
- *
- * See {@link mlStatusSubscribe}.
- */
-let _mlStatusListeners: (() => void)[] = [];
+    /**
+     * Subscriptions to {@link MLStatus}.
+     *
+     * See {@link mlStatusSubscribe}.
+     */
+    mlStatusListeners: (() => void)[] = [];
 
-/**
- * Snapshot of {@link MLStatus}.
- *
- * See {@link mlStatusSnapshot}.
- */
-let _mlStatusSnapshot: MLStatus | undefined;
+    /**
+     * Snapshot of {@link MLStatus}.
+     *
+     * See {@link mlStatusSnapshot}.
+     */
+    mlStatusSnapshot: MLStatus | undefined;
+}
+
+/** State shared by the functions in this module. See {@link MLState}. */
+let _state = new MLState();
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = () =>
-    (_comlinkWorker ??= createComlinkWorker()).then((cw) => cw.remote);
+    (_state.comlinkWorker ??= createComlinkWorker()).then((cw) => cw.remote);
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
@@ -96,9 +110,9 @@ const createComlinkWorker = async () => {
  * It is also called when the user pauses or disables ML.
  */
 export const terminateMLWorker = async () => {
-    if (_comlinkWorker) {
-        await _comlinkWorker.then((cw) => cw.terminate());
-        _comlinkWorker = undefined;
+    if (_state.comlinkWorker) {
+        await _state.comlinkWorker.then((cw) => cw.terminate());
+        _state.comlinkWorker = undefined;
     }
 };
 
@@ -150,7 +164,7 @@ export const canEnableML = async () =>
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
-    _isMLEnabled = isMLEnabledLocal();
+    _state.isMLEnabled = isMLEnabledLocal();
 };
 
 export const logoutML = async () => {
@@ -159,9 +173,7 @@ export const logoutML = async () => {
     // execution contexts], it gets called first in the logout sequence, and
     // then this function (`logoutML`) gets called at a later point in time.
 
-    _isMLEnabled = false;
-    _mlStatusListeners = [];
-    _mlStatusSnapshot = undefined;
+    _state = new MLState();
     await clearMLDB();
 };
 
@@ -174,7 +186,7 @@ export const logoutML = async () => {
  */
 export const isMLEnabled = () =>
     // Implementation note: Keep it fast, it might be called frequently.
-    _isMLEnabled;
+    _state.isMLEnabled;
 
 /**
  * Enable ML.
@@ -184,7 +196,7 @@ export const isMLEnabled = () =>
 export const enableML = async () => {
     await updateIsMLEnabledRemote(true);
     setIsMLEnabledLocal(true);
-    _isMLEnabled = true;
+    _state.isMLEnabled = true;
     setInterimScheduledStatus();
     triggerStatusUpdate();
     triggerMLSync();
@@ -199,7 +211,7 @@ export const enableML = async () => {
 export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
     setIsMLEnabledLocal(false);
-    _isMLEnabled = false;
+    _state.isMLEnabled = false;
     await terminateMLWorker();
     triggerStatusUpdate();
 };
@@ -258,15 +270,17 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
 export const triggerMLSync = () => void mlSync();
 
 const mlSync = async () => {
-    _isMLEnabled = await getIsMLEnabledRemote();
-    setIsMLEnabledLocal(_isMLEnabled);
+    _state.isMLEnabled = await getIsMLEnabledRemote();
+    setIsMLEnabledLocal(_state.isMLEnabled);
     triggerStatusUpdate();
 
-    if (_isMLEnabled) void worker().then((w) => w.sync());
+    if (_state.isMLEnabled) void worker().then((w) => w.sync());
 };
 
 /**
  * Run indexing on a file which was uploaded from this client.
+ *
+ * Indexing only happens if ML is enabled.
  *
  * This function is called by the uploader when it uploads a new file from this
  * client, giving us the opportunity to index it live. This is only an
@@ -281,7 +295,7 @@ const mlSync = async () => {
  * image part of the live photo that was uploaded.
  */
 export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
-    if (!_isMLEnabled) return;
+    if (!isMLEnabled()) return;
     if (enteFile.metadata.fileType !== FileType.image) return;
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
@@ -354,9 +368,11 @@ export type MLStatus =
  * @returns A function that can be used to clear the subscription.
  */
 export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
-    _mlStatusListeners.push(onChange);
+    _state.mlStatusListeners.push(onChange);
     return () => {
-        _mlStatusListeners = _mlStatusListeners.filter((l) => l != onChange);
+        _state.mlStatusListeners = _state.mlStatusListeners.filter(
+            (l) => l != onChange,
+        );
     };
 };
 
@@ -370,7 +386,7 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
  * asynchronous tasks that are needed to get the status.
  */
 export const mlStatusSnapshot = (): MLStatus | undefined => {
-    const result = _mlStatusSnapshot;
+    const result = _state.mlStatusSnapshot;
     // We don't have it yet, trigger an update.
     if (!result) triggerStatusUpdate();
     return result;
@@ -387,15 +403,15 @@ const updateMLStatusSnapshot = async () =>
     setMLStatusSnapshot(await getMLStatus());
 
 const setMLStatusSnapshot = (snapshot: MLStatus) => {
-    _mlStatusSnapshot = snapshot;
-    _mlStatusListeners.forEach((l) => l());
+    _state.mlStatusSnapshot = snapshot;
+    _state.mlStatusListeners.forEach((l) => l());
 };
 
 /**
  * Compute the current state of the ML subsystem.
  */
 const getMLStatus = async (): Promise<MLStatus> => {
-    if (!_isMLEnabled) return { phase: "disabled" };
+    if (!_state.isMLEnabled) return { phase: "disabled" };
 
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
 
@@ -427,8 +443,11 @@ const getMLStatus = async (): Promise<MLStatus> => {
 const setInterimScheduledStatus = () => {
     let nSyncedFiles = 0,
         nTotalFiles = 0;
-    if (_mlStatusSnapshot && _mlStatusSnapshot.phase != "disabled") {
-        ({ nSyncedFiles, nTotalFiles } = _mlStatusSnapshot);
+    if (
+        _state.mlStatusSnapshot &&
+        _state.mlStatusSnapshot.phase != "disabled"
+    ) {
+        ({ nSyncedFiles, nTotalFiles } = _state.mlStatusSnapshot);
     }
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
