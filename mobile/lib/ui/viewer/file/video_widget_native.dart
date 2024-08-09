@@ -321,9 +321,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   Future<void> _onPlaybackReady() async {
     await _controller!.play();
-    Future.delayed(const Duration(seconds: 2), () {
-      _controller!.setVolume(1);
-    });
+    unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }
 
