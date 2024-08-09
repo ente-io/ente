@@ -206,8 +206,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                       Radius.circular(8),
                                     ),
                                     border: Border.all(
-                                      color: getEnteColorScheme(context)
-                                          .strokeFaint,
+                                      color: strokeFaintDark,
                                       width: 1,
                                     ),
                                   ),

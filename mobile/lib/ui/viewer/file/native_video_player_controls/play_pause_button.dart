@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
-import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/colors.dart";
 
 class PlayPauseButton extends StatefulWidget {
   final NativeVideoPlayerController? controller;
@@ -36,7 +36,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
           color: Colors.black.withOpacity(0.3),
           shape: BoxShape.circle,
           border: Border.all(
-            color: getEnteColorScheme(context).strokeFaint,
+            color: strokeFaintDark,
             width: 1,
           ),
         ),
