@@ -41,7 +41,7 @@ class VideoWidgetNative extends StatefulWidget {
 
 class _VideoWidgetNativeState extends State<VideoWidgetNative>
     with WidgetsBindingObserver {
-  final Logger _logger = Logger("VideoWidgetNew");
+  final Logger _logger = Logger("VideoWidgetNative");
   static const verticalMargin = 72.0;
   // late final player = Player();
   // VideoController? controller;
@@ -59,6 +59,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   String? duration;
   double? aspectRatio;
   final _isPlaybackReady = ValueNotifier(false);
+  bool _shouldClearCache = false;
 
   @override
   void initState() {
@@ -87,7 +88,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           // ignore: unawaited_futures
           getFile(widget.file, isOrigin: true).then((file) {
             _setFilePathForNativePlayer(file!.path);
-            file.delete();
+            if (Platform.isIOS) {
+              _shouldClearCache = true;
+            }
           });
         }
       });
@@ -120,6 +123,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   @override
   void dispose() {
+    //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches
+    if (_shouldClearCache) {
+      _logger.info("Clearing cache");
+      File(_filePath!).delete().then(
+        (value) {
+          _logger.info("Cache cleared");
+        },
+      );
+    }
     _fileSwipeLockEventSubscription.cancel();
     // pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
