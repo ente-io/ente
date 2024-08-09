@@ -83,9 +83,12 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 		return stacktrace.Propagate(err, "validation failed")
 	}
 	userID := auth.GetUserID(ctx.Request.Header)
-	err := c._validateInsertPermission(ctx, req.FileID, userID)
+	err := c._validatePermission(ctx, req.FileID, userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
+	}
+	if req.Type != ente.DerivedMeta {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
 	fileOwnerID := userID
 	objectKey := req.S3FileMetadataObjectKey(fileOwnerID)
@@ -113,6 +116,32 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 		return stacktrace.Propagate(err, "")
 	}
 	return nil
+}
+
+func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*fileData.Entity, error) {
+	if err := req.Validate(); err != nil {
+		return nil, stacktrace.Propagate(err, "validation failed")
+	}
+	if err := c._validatePermission(ctx, req.FileID, auth.GetUserID(ctx.Request.Header)); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	doRows, err := c.Repo.GetFilesData(ctx, req.Type, []int64{req.FileID})
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if len(doRows) == 0 || doRows[0].IsDeleted {
+		return nil, stacktrace.Propagate(ente.ErrNotFound, "")
+	}
+	s3MetaObject, err := c.fetchS3FileMetadata(context.Background(), doRows[0], doRows[0].LatestBucket)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &fileData.Entity{
+		FileID:           doRows[0].FileID,
+		Type:             doRows[0].Type,
+		EncryptedData:    s3MetaObject.EncryptedData,
+		DecryptionHeader: s3MetaObject.DecryptionHeader,
+	}, nil
 }
 
 func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (*fileData.GetFilesDataResponse, error) {
@@ -254,7 +283,7 @@ func (c *Controller) _validateGetFilesData(ctx *gin.Context, userID int64, req f
 	return nil
 }
 
-func (c *Controller) _validateInsertPermission(ctx *gin.Context, fileID int64, actorID int64) error {
+func (c *Controller) _validatePermission(ctx *gin.Context, fileID int64, actorID int64) error {
 	err := c.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
 		ActorUserId: actorID,
 		FileIDs:     []int64{fileID},

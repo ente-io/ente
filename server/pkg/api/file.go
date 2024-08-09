@@ -33,7 +33,7 @@ const DefaultMaxBatchSize = 1000
 const DefaultCopyBatchSize = 100
 
 // CreateOrUpdate creates an entry for a file
-func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
+func (f *FileHandler) CreateOrUpdate(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	var file ente.File
 	if err := c.ShouldBindJSON(&file); err != nil {
@@ -48,7 +48,7 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 	if file.ID == 0 {
 		file.OwnerID = userID
 		file.IsDeleted = false
-		file, err := h.Controller.Create(c, userID, file, c.Request.UserAgent(), enteApp)
+		file, err := f.Controller.Create(c, userID, file, c.Request.UserAgent(), enteApp)
 		if err != nil {
 			handler.Error(c, stacktrace.Propagate(err, ""))
 			return
@@ -56,7 +56,7 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 		c.JSON(http.StatusOK, file)
 		return
 	}
-	response, err := h.Controller.Update(c, userID, file, enteApp)
+	response, err := f.Controller.Update(c, userID, file, enteApp)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -65,7 +65,7 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 }
 
 // CopyFiles copies files that are owned by another user
-func (h *FileHandler) CopyFiles(c *gin.Context) {
+func (f *FileHandler) CopyFiles(c *gin.Context) {
 	var req ente.CopyFileSyncRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -75,7 +75,7 @@ func (h *FileHandler) CopyFiles(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("more than %d items", DefaultCopyBatchSize)), ""))
 		return
 	}
-	response, err := h.FileCopyCtrl.CopyFiles(c, req)
+	response, err := f.FileCopyCtrl.CopyFiles(c, req)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -84,7 +84,7 @@ func (h *FileHandler) CopyFiles(c *gin.Context) {
 }
 
 // Update updates already existing file
-func (h *FileHandler) Update(c *gin.Context) {
+func (f *FileHandler) Update(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 
 	userID := auth.GetUserID(c.Request.Header)
@@ -98,7 +98,7 @@ func (h *FileHandler) Update(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "fileID should be >0"))
 		return
 	}
-	response, err := h.Controller.Update(c, userID, file, enteApp)
+	response, err := f.Controller.Update(c, userID, file, enteApp)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -107,12 +107,12 @@ func (h *FileHandler) Update(c *gin.Context) {
 }
 
 // GetUploadURLs returns a bunch of urls where in the user can upload objects
-func (h *FileHandler) GetUploadURLs(c *gin.Context) {
+func (f *FileHandler) GetUploadURLs(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 
 	userID := auth.GetUserID(c.Request.Header)
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.Controller.GetUploadURLs(c, userID, count, enteApp, false)
+	urls, err := f.Controller.GetUploadURLs(c, userID, count, enteApp, false)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -123,12 +123,12 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 }
 
 // GetMultipartUploadURLs returns an array of PartUpload PresignedURLs
-func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
+func (f *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 
 	userID := auth.GetUserID(c.Request.Header)
 	count, _ := strconv.Atoi(c.Query("count"))
-	urls, err := h.Controller.GetMultipartUploadURLs(c, userID, count, enteApp)
+	urls, err := f.Controller.GetMultipartUploadURLs(c, userID, count, enteApp)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -139,21 +139,21 @@ func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 }
 
 // Get redirects the request to the file location
-func (h *FileHandler) Get(c *gin.Context) {
+func (f *FileHandler) Get(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetFileURL(c, userID, fileID)
+	url, err := f.Controller.GetFileURL(c, userID, fileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	h.logBadRedirect(c)
+	f.logBadRedirect(c)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 // GetV2 returns the URL of the file to client
-func (h *FileHandler) GetV2(c *gin.Context) {
+func (f *FileHandler) GetV2(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetFileURL(c, userID, fileID)
+	url, err := f.Controller.GetFileURL(c, userID, fileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -164,21 +164,21 @@ func (h *FileHandler) GetV2(c *gin.Context) {
 }
 
 // GetThumbnail redirects the request to the file's thumbnail location
-func (h *FileHandler) GetThumbnail(c *gin.Context) {
+func (f *FileHandler) GetThumbnail(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetThumbnailURL(c, userID, fileID)
+	url, err := f.Controller.GetThumbnailURL(c, userID, fileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	h.logBadRedirect(c)
+	f.logBadRedirect(c)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 // GetThumbnailV2 returns the URL of the thumbnail to the client
-func (h *FileHandler) GetThumbnailV2(c *gin.Context) {
+func (f *FileHandler) GetThumbnailV2(c *gin.Context) {
 	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetThumbnailURL(c, userID, fileID)
+	url, err := f.Controller.GetThumbnailURL(c, userID, fileID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -189,7 +189,7 @@ func (h *FileHandler) GetThumbnailV2(c *gin.Context) {
 }
 
 // Trash moves the given files to the trash bin
-func (h *FileHandler) Trash(c *gin.Context) {
+func (f *FileHandler) Trash(c *gin.Context) {
 	var request ente.TrashRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to bind"))
@@ -201,7 +201,7 @@ func (h *FileHandler) Trash(c *gin.Context) {
 	}
 	userID := auth.GetUserID(c.Request.Header)
 	request.OwnerID = userID
-	err := h.Controller.Trash(c, userID, request)
+	err := f.Controller.Trash(c, userID, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 	} else {
@@ -210,7 +210,7 @@ func (h *FileHandler) Trash(c *gin.Context) {
 }
 
 // GetSize returns the size of files indicated by fileIDs
-func (h *FileHandler) GetSize(c *gin.Context) {
+func (f *FileHandler) GetSize(c *gin.Context) {
 	var request ente.FileIDsRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -227,7 +227,7 @@ func (h *FileHandler) GetSize(c *gin.Context) {
 		return
 	}
 
-	size, err := h.Controller.GetSize(userID, request.FileIDs)
+	size, err := f.Controller.GetSize(userID, request.FileIDs)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 	} else {
@@ -238,7 +238,7 @@ func (h *FileHandler) GetSize(c *gin.Context) {
 }
 
 // GetInfo returns the FileInfo of files indicated by fileIDs
-func (h *FileHandler) GetInfo(c *gin.Context) {
+func (f *FileHandler) GetInfo(c *gin.Context) {
 	var request ente.FileIDsRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "failed to bind request"))
@@ -246,7 +246,7 @@ func (h *FileHandler) GetInfo(c *gin.Context) {
 	}
 	userID := auth.GetUserID(c.Request.Header)
 
-	response, err := h.Controller.GetFileInfo(c, userID, request.FileIDs)
+	response, err := f.Controller.GetFileInfo(c, userID, request.FileIDs)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 	} else {
@@ -295,9 +295,9 @@ func shouldRejectRequest(c *gin.Context) (bool, error) {
 }
 
 // GetDuplicates returns the list of files of the same size
-func (h *FileHandler) GetDuplicates(c *gin.Context) {
+func (f *FileHandler) GetDuplicates(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
-	dupes, err := h.Controller.GetDuplicates(userID)
+	dupes, err := f.Controller.GetDuplicates(userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -308,10 +308,10 @@ func (h *FileHandler) GetDuplicates(c *gin.Context) {
 }
 
 // GetLargeThumbnail returns the list of files whose thumbnail size is larger than threshold size
-func (h *FileHandler) GetLargeThumbnailFiles(c *gin.Context) {
+func (f *FileHandler) GetLargeThumbnailFiles(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	threshold, _ := strconv.ParseInt(c.Query("threshold"), 10, 64)
-	largeThumbnailFiles, err := h.Controller.GetLargeThumbnailFiles(userID, threshold)
+	largeThumbnailFiles, err := f.Controller.GetLargeThumbnailFiles(userID, threshold)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -322,7 +322,7 @@ func (h *FileHandler) GetLargeThumbnailFiles(c *gin.Context) {
 }
 
 // UpdateMagicMetadata updates magic metadata for a list of files.
-func (h *FileHandler) UpdateMagicMetadata(c *gin.Context) {
+func (f *FileHandler) UpdateMagicMetadata(c *gin.Context) {
 	var request ente.UpdateMultipleMagicMetadataRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -332,7 +332,7 @@ func (h *FileHandler) UpdateMagicMetadata(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBatchSizeTooLarge, ""))
 		return
 	}
-	err := h.Controller.UpdateMagicMetadata(c, request, false)
+	err := f.Controller.UpdateMagicMetadata(c, request, false)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -341,13 +341,13 @@ func (h *FileHandler) UpdateMagicMetadata(c *gin.Context) {
 }
 
 // UpdatePublicMagicMetadata updates public magic metadata for a list of files.
-func (h *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
+func (f *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
 	var request ente.UpdateMultipleMagicMetadataRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	err := h.Controller.UpdateMagicMetadata(c, request, true)
+	err := f.Controller.UpdateMagicMetadata(c, request, true)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -356,7 +356,7 @@ func (h *FileHandler) UpdatePublicMagicMetadata(c *gin.Context) {
 }
 
 // UpdateThumbnail updates thumbnail of a file
-func (h *FileHandler) UpdateThumbnail(c *gin.Context) {
+func (f *FileHandler) UpdateThumbnail(c *gin.Context) {
 	enteApp := auth.GetApp(c)
 
 	var request ente.UpdateThumbnailRequest
@@ -364,7 +364,7 @@ func (h *FileHandler) UpdateThumbnail(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	err := h.Controller.UpdateThumbnail(c, request.FileID, request.Thumbnail, enteApp)
+	err := f.Controller.UpdateThumbnail(c, request.FileID, request.Thumbnail, enteApp)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -372,8 +372,8 @@ func (h *FileHandler) UpdateThumbnail(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func (h *FileHandler) GetTotalFileCount(c *gin.Context) {
-	count, err := h.Controller.GetTotalFileCount()
+func (f *FileHandler) GetTotalFileCount(c *gin.Context) {
+	count, err := f.Controller.GetTotalFileCount()
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -390,7 +390,7 @@ func getUserAndFileIDs(c *gin.Context) (int64, int64) {
 }
 
 // logBadRedirect will log the request id if we are redirecting to another url with the auth-token in header
-func (h *FileHandler) logBadRedirect(c *gin.Context) {
+func (f *FileHandler) logBadRedirect(c *gin.Context) {
 	if len(c.GetHeader("X-Auth-Token")) != 0 && os.Getenv("ENVIRONMENT") != "" {
 		log.WithField("req_id", requestid.Get(c)).Error("critical: sending token to another service")
 	}

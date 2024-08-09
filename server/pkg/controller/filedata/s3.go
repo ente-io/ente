@@ -7,10 +7,50 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/ente-io/museum/ente"
 	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
+	stime "time"
 )
+
+const PreSignedRequestValidityDuration = 7 * 24 * stime.Hour
+
+func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL, error) {
+	s3Client := c.S3Config.GetS3Client(dc)
+	r, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: c.S3Config.GetBucket(dc),
+		Key:    &objectKey,
+	})
+	url, err := r.Presign(PreSignedRequestValidityDuration)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	err = c.ObjectCleanupController.AddTempObjectKey(objectKey, dc)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &ente.UploadURL{
+		ObjectKey: objectKey,
+		URL:       url,
+	}, nil
+}
+
+func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
+	s3Client := c.S3Config.GetS3Client(dc)
+	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: c.S3Config.GetBucket(dc),
+		Key:    &objectKey,
+	})
+	url, err := r.Presign(PreSignedRequestValidityDuration)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &ente.UploadURL{ObjectKey: objectKey, URL: url}, nil
+}
 
 func (c *Controller) downloadObject(ctx context.Context, objectKey string, dc string) (fileData.S3FileMetadata, error) {
 	var obj fileData.S3FileMetadata

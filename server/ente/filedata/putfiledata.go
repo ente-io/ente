@@ -17,23 +17,27 @@ type PutFileDataRequest struct {
 	Version    *int   `json:"version,omitempty"`
 }
 
+func (r PutFileDataRequest) isEncDataPresent() bool {
+	return r.EncryptedData != nil && r.DecryptionHeader != nil && *r.EncryptedData != "" && *r.DecryptionHeader != ""
+}
+
+func (r PutFileDataRequest) isObjectDataPresent() bool {
+	return r.ObjectKey != nil && *r.ObjectKey != "" && r.ObjectSize != nil && *r.ObjectSize > 0
+}
+
 func (r PutFileDataRequest) Validate() error {
 	switch r.Type {
 	case ente.PreviewVideo:
-		if r.EncryptedData == nil || r.DecryptionHeader == nil || *r.EncryptedData == "" || *r.DecryptionHeader == "" {
-			// the video playlist is uploaded as part of encrypted data and decryption header
-			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader are required for preview video")
-		}
-		if r.ObjectSize == nil || r.ObjectKey == nil {
-			return ente.NewBadRequestWithMessage("size and objectKey are required for preview video")
+		if !r.isEncDataPresent() || !r.isObjectDataPresent() {
+			return ente.NewBadRequestWithMessage("object and metadata are required")
 		}
 	case ente.PreviewImage:
-		if r.ObjectSize == nil || r.ObjectKey == nil {
-			return ente.NewBadRequestWithMessage("size and objectKey are required for preview image")
+		if !r.isObjectDataPresent() || r.isEncDataPresent() {
+			return ente.NewBadRequestWithMessage("object (only) data is required for preview image")
 		}
 	case ente.DerivedMeta:
-		if r.EncryptedData == nil || r.DecryptionHeader == nil || *r.EncryptedData == "" || *r.DecryptionHeader == "" {
-			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader are required for derived meta")
+		if !r.isEncDataPresent() || r.isObjectDataPresent() {
+			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader (only) are required for derived meta")
 		}
 	default:
 		return ente.NewBadRequestWithMessage(fmt.Sprintf("invalid object type %s", r.Type))

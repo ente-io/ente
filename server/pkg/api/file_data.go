@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	fileData "github.com/ente-io/museum/ente/filedata"
-	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 func (f *FileHandler) PutFileData(ctx *gin.Context) {
@@ -50,20 +48,29 @@ func (f *FileHandler) GetFilesData(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func (h *FileHandler) GetVideoUploadURL(c *gin.Context) {
-	enteApp := auth.GetApp(c)
-	userID, fileID := getUserAndFileIDs(c)
-	urls, err := h.Controller.GetVideoUploadUrl(c, userID, fileID, enteApp)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
+func (f *FileHandler) GetFileData(ctx *gin.Context) {
+	var req fileData.GetFileData
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, urls)
+	resp, err := f.FileDataCtrl.GetFileData(ctx, req)
+	if err != nil {
+		handler.Error(ctx, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": resp,
+	})
 }
 
-func (h *FileHandler) GetVideoPreviewUrl(c *gin.Context) {
-	userID, fileID := getUserAndFileIDs(c)
-	url, err := h.Controller.GetPreviewUrl(c, userID, fileID)
+func (f *FileHandler) GetPreviewUploadURL(c *gin.Context) {
+	var request fileData.PreviewUploadUrlRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		return
+	}
+	url, err := f.FileDataCtrl.PreviewUploadURL(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -73,27 +80,18 @@ func (h *FileHandler) GetVideoPreviewUrl(c *gin.Context) {
 	})
 }
 
-func (h *FileHandler) ReportVideoPlayList(c *gin.Context) {
-	var request ente.InsertOrUpdateEmbeddingRequest
+func (f *FileHandler) GetPreviewURL(c *gin.Context) {
+	var request fileData.GetPreviewURLRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c,
-			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	err := h.Controller.ReportVideoPreview(c, request)
+	url, err := f.FileDataCtrl.GetPreviewUrl(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	c.Status(http.StatusOK)
-}
-
-func (h *FileHandler) GetVideoPlaylist(c *gin.Context) {
-	fileID, _ := strconv.ParseInt(c.Param("fileID"), 10, 64)
-	response, err := h.Controller.GetPlaylist(c, fileID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, gin.H{
+		"url": url,
+	})
 }

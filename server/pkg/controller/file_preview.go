@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/ente-io/museum/ente"
@@ -21,53 +20,6 @@ import (
 const (
 	_model = "hls_video"
 )
-
-// GetUploadURLs returns a bunch of presigned URLs for uploading files
-func (c *FileController) GetVideoUploadUrl(ctx context.Context, userID int64, fileID int64, app ente.App) (*ente.UploadURL, error) {
-	err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	s3Client := c.S3Config.GetDerivedStorageS3Client()
-	dc := c.S3Config.GetDerivedStorageDataCenter()
-	bucket := c.S3Config.GetDerivedStorageBucket()
-	objectKey := strconv.FormatInt(userID, 10) + "/ml-data/" + strconv.FormatInt(fileID, 10) + "/" + _model
-	url, err := c.getObjectURL(s3Client, dc, bucket, objectKey)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	log.Infof("Got upload URL for %s", objectKey)
-	return &url, nil
-}
-
-func (c *FileController) GetPreviewUrl(ctx context.Context, userID int64, fileID int64) (string, error) {
-	err := c.verifyFileAccess(userID, fileID)
-	if err != nil {
-		return "", err
-	}
-	objectKey := strconv.FormatInt(userID, 10) + "/ml-data/" + strconv.FormatInt(fileID, 10) + "/hls_video"
-	// check if playlist exists
-	err = c.checkObjectExists(ctx, objectKey+"_playlist.m3u8", c.S3Config.GetDerivedStorageDataCenter())
-	if err != nil {
-		return "", stacktrace.Propagate(ente.NewBadRequestWithMessage("Video playlist does not exist"), fmt.Sprintf("objectKey: %s", objectKey))
-	}
-	s3Client := c.S3Config.GetDerivedStorageS3Client()
-	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: c.S3Config.GetDerivedStorageBucket(),
-		Key:    &objectKey,
-	})
-	return r.Presign(PreSignedRequestValidityDuration)
-}
-
-func (c *FileController) GetPlaylist(ctx *gin.Context, fileID int64) (ente.EmbeddingObject, error) {
-	objectKey := strconv.FormatInt(auth.GetUserID(ctx.Request.Header), 10) + "/ml-data/" + strconv.FormatInt(fileID, 10) + "/hls_video_playlist.m3u8"
-	// check if object exists
-	err := c.checkObjectExists(ctx, objectKey, c.S3Config.GetDerivedStorageDataCenter())
-	if err != nil {
-		return ente.EmbeddingObject{}, stacktrace.Propagate(ente.NewBadRequestWithMessage("Video playlist does not exist"), fmt.Sprintf("objectKey: %s", objectKey))
-	}
-	return c.downloadObject(ctx, objectKey, c.S3Config.GetDerivedStorageDataCenter())
-}
 
 func (c *FileController) ReportVideoPreview(ctx *gin.Context, req ente.InsertOrUpdateEmbeddingRequest) error {
 	userID := auth.GetUserID(ctx.Request.Header)
@@ -126,26 +78,6 @@ func (c *FileController) uploadObject(obj ente.EmbeddingObject, key string, dc s
 
 	log.Infof("Uploaded to bucket %s", result.Location)
 	return len(embeddingObj), nil
-}
-
-func (c *FileController) downloadObject(ctx context.Context, objectKey string, dc string) (ente.EmbeddingObject, error) {
-	var obj ente.EmbeddingObject
-	buff := &aws.WriteAtBuffer{}
-	bucket := c.S3Config.GetBucket(dc)
-	s3Client := c.S3Config.GetS3Client(dc)
-	downloader := s3manager.NewDownloaderWithClient(&s3Client)
-	_, err := downloader.DownloadWithContext(ctx, buff, &s3.GetObjectInput{
-		Bucket: bucket,
-		Key:    &objectKey,
-	})
-	if err != nil {
-		return obj, err
-	}
-	err = json.Unmarshal(buff.Bytes(), &obj)
-	if err != nil {
-		return obj, stacktrace.Propagate(err, "unmarshal failed")
-	}
-	return obj, nil
 }
 
 func (c *FileController) checkObjectExists(ctx context.Context, objectKey string, dc string) error {
