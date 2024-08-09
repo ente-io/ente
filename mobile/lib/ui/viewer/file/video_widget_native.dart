@@ -58,7 +58,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   String? duration;
   double? aspectRatio;
-  final _isControllerInitialized = ValueNotifier(false);
+  final _isPlaybackReady = ValueNotifier(false);
 
   @override
   void initState() {
@@ -129,6 +129,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     // player.dispose();
 
     _controller?.onPlaybackEnded.removeListener(_onPlaybackEnded);
+    _controller?.onPlaybackReady.removeListener(_onPlaybackReady);
+    _isPlaybackReady.dispose();
     super.dispose();
   }
 
@@ -169,7 +171,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               ? PlayPauseButton(_controller)
                               : const SizedBox();
                         },
-                        valueListenable: _isControllerInitialized,
+                        valueListenable: _isPlaybackReady,
                       ),
                     ),
                   ),
@@ -241,7 +243,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               )
                             : const SizedBox();
                       },
-                      valueListenable: _isControllerInitialized,
+                      valueListenable: _isPlaybackReady,
                     ),
                   ),
                 ],
@@ -289,18 +291,28 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _initializeController(
     NativeVideoPlayerController controller,
   ) async {
+    _logger.info("initializing native video player controller");
     _controller = controller;
 
     controller.onPlaybackEnded.addListener(_onPlaybackEnded);
 
+    controller.onPlaybackReady.addListener(_onPlaybackReady);
+
     final videoSource = await VideoSource.init(
       path: _filePath!,
+
+      //Check when to set this to VideoSourceType.asset
       type: VideoSourceType.file,
     );
     await controller.loadVideoSource(videoSource);
-    unawaited(controller.setVolume(1));
-    await controller.play();
-    _isControllerInitialized.value = true;
+  }
+
+  Future<void> _onPlaybackReady() async {
+    await _controller!.play();
+    Future.delayed(const Duration(seconds: 2), () {
+      _controller!.setVolume(1);
+    });
+    _isPlaybackReady.value = true;
   }
 
   void _onPlaybackEnded() {
