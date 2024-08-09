@@ -102,6 +102,12 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
   }
 }
 
+bool? checkPanoramaFromEXIF(File? file, Map<String, IfdTag>? exifData) {
+  final element = exifData?["EXIF CustomRendered"];
+  if (element?.printable == null) return null;
+  return element?.printable == "6";
+}
+
 Future<DateTime?> getCreationTimeFromEXIF(
   File? file,
   Map<String, IfdTag>? exifData,

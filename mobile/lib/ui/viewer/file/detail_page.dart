@@ -12,6 +12,7 @@ import 'package:photos/core/errors.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/services/local_authentication_service.dart";
@@ -21,10 +22,12 @@ import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
+import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/thumbnail_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 enum DetailPageMode {
@@ -185,11 +188,71 @@ class _DetailPageState extends State<DetailPage> {
                 },
                 valueListenable: _selectedIndexNotifier,
               ),
+              ValueListenableBuilder(
+                valueListenable: _selectedIndexNotifier,
+                builder: (BuildContext context, int selectedIndex, _) {
+                  if (_files![selectedIndex].isPanorama() == true) {
+                    return ValueListenableBuilder(
+                      valueListenable: _enableFullScreenNotifier,
+                      builder: (context, value, child) {
+                        return IgnorePointer(
+                          ignoring: value,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: !value ? 1.0 : 0.0,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Tooltip(
+                                message: S.of(context).panorama,
+                                child: IconButton(
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: const Color(0xAA252525),
+                                    fixedSize: const Size(44, 44),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.threesixty,
+                                    color: Colors.white,
+                                    size: 26,
+                                  ),
+                                  onPressed: () async {
+                                    await openPanoramaViewerPage(
+                                      _files![selectedIndex],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> openPanoramaViewerPage(EnteFile file) async {
+    final fetchedFile = await getFile(file);
+    if (fetchedFile == null) {
+      return;
+    }
+    final fetchedThumbnail = await getThumbnail(file);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return PanoramaViewerScreen(
+            file: fetchedFile,
+            thumbnail: fetchedThumbnail,
+          );
+        },
+      ),
+    ).ignore();
   }
 
   Widget _buildPageView(BuildContext context) {

@@ -17,9 +17,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
 import 'package:photos/utils/delete_file_util.dart';
-import "package:photos/utils/file_util.dart";
 import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/share_util.dart';
 
@@ -49,7 +47,6 @@ class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
-  bool isPanorama = false;
   int? lastFileGenID;
 
   @override
@@ -72,24 +69,14 @@ class FileBottomBarState extends State<FileBottomBar> {
   @override
   Widget build(BuildContext context) {
     if (flagService.internalUser) {
-      isPanorama = widget.file.isPanorama() ?? false;
-      _checkPanorama();
+      if (widget.file.canBePanorama()) {
+        lastFileGenID = widget.file.generatedID;
+        if (lastFileGenID != widget.file.generatedID) {
+          guardedCheckPanorama(widget.file).ignore();
+        }
+      }
     }
     return _getBottomBar();
-  }
-
-  // _checkPanorama() method is used to check if the file is a panorama image.
-  // This handles the case when the the file dims (width and height) are not available.
-  Future<void> _checkPanorama() async {
-    if (lastFileGenID == widget.file.generatedID) {
-      return;
-    }
-    lastFileGenID = widget.file.generatedID;
-    final result = await checkIfPanorama(widget.file);
-    if (mounted && isPanorama == !result) {
-      isPanorama = result;
-      setState(() {});
-    }
   }
 
   void safeRefresh() {
@@ -174,25 +161,6 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       }
 
-      if (isPanorama) {
-        children.add(
-          Tooltip(
-            message: S.of(context).panorama,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.threesixty,
-                  color: Colors.white,
-                ),
-                onPressed: () async {
-                  await openPanoramaViewerPage(widget.file);
-                },
-              ),
-            ),
-          ),
-        );
-      }
       children.add(
         Tooltip(
           message: S.of(context).share,
@@ -285,20 +253,6 @@ class FileBottomBarState extends State<FileBottomBar> {
         );
       },
     );
-  }
-
-  Future<void> openPanoramaViewerPage(EnteFile file) async {
-    final fetchedFile = await getFile(file);
-    if (fetchedFile == null) {
-      return;
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) {
-          return PanoramaViewerScreen(file: fetchedFile);
-        },
-      ),
-    ).ignore();
   }
 
   Future<void> _showSingleFileDeleteSheet(EnteFile file) async {
