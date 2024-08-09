@@ -314,9 +314,15 @@ let last: Person[] | undefined;
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
  */
+export const wipClusterEnable = async () => {
+    if (!isDevBuild || !(await isInternalUser())) return false;
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
+    if (last) return false;
+    return true;
+};
+
 export const wipCluster = async () => {
-    if (!isDevBuild || !(await isInternalUser())) return;
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
+    if (!(await wipClusterEnable())) return;
 
     if (last) return last;
 

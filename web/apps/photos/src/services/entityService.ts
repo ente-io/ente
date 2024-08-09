@@ -71,7 +71,8 @@ const getCachedEntityKey = async (type: EntityType) => {
     return entityKey;
 };
 
-const getEntityKey = async (type: EntityType) => {
+// TODO: unexport
+export const getEntityKey = async (type: EntityType) => {
     try {
         const entityKey = await getCachedEntityKey(type);
         if (entityKey) {

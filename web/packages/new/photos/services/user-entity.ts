@@ -2,6 +2,7 @@ import { decryptMetadataBytes } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
+import { gunzip } from "./gzip";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
@@ -115,5 +116,19 @@ export const userEntityDiff = async (
                 updatedAt,
             }),
         ),
+    );
+};
+
+/**
+ * Fetch all Person entities that have been created or updated since the last
+ * time we checked.
+ */
+export const personDiff = async (entityKeyB64: string) => {
+    const entities = await userEntityDiff("person_v2", 0, entityKeyB64);
+    return Promise.all(
+        entities.map(async ({ data }) => {
+            if (!data) return undefined;
+            return JSON.parse(await gunzip(data)) as unknown;
+        }),
     );
 };
