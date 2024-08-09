@@ -1,5 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import { z } from "zod";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
@@ -41,25 +42,52 @@ export type EntityType =
 const defaultDiffLimit = 500;
 
 /**
+ * A generic user entity.
+ *
+ * This is an intermediate step, usually what we really want is a version
+ * of this with the {@link data} parsed to the specific type of JSON object
+ * expected to be associated with this entity type.
+ */
+interface UserEntity {
+    /**
+     * Arbitrary data associated with the entity. The format of this data is
+     * specific to each entity type.
+     *
+     * This will not be present for entities that have been deleted on remote.
+     */
+    data: Uint8Array | undefined;
+    /**
+     * Epoch microseconds denoting when this entity was created or last updated.
+     */
+    updatedAt: number;
+}
+
+const RemoteUserEntity = z.object({
+    /** Base64 string containing the encrypted contents of the entity. */
+    encryptedData: z.string(),
+    /** Base64 string containing the decryption header. */
+    header: z.string(),
+    isDeleted: z.boolean(),
+    updatedAt: z.number(),
+}
+
+/**
  * Fetch all user entities of the given type that have been created or updated
  * since the given time.
- *
- * For each batch of fetched entities, call a provided function that can ingest
- * them. This function is also provided the latest timestamp from amongst all of
- * the entities fetched so far, which the caller can persist if needed to resume
- * future diffs fetches from the current checkpoint.
  *
  * @param type The type of the entities to fetch.
  *
  * @param sinceTime Epoch milliseconds. This is used to ask remote to provide us
  * only entities whose {@link updatedAt} is more than the given value. Set this
  * to zero to start from the beginning.
+ *
+ * @param entityKey The key to use for decrypting the encrypted contents of the
+ * user entity.
  */
 export const userEntityDiff = async (
     type: EntityType,
     sinceTime: number,
-    onFetch: (entities: unknown[], latestUpdatedAt: number) => Promise<void>,
-) => {
+): Promise<RemoteUserEntity[]> => {
     const params = new URLSearchParams({
         type,
         sinceTime: sinceTime.toString(),
