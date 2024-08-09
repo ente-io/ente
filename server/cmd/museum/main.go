@@ -831,6 +831,11 @@ func setupAndStartBackgroundJobs(
 	} else {
 		log.Info("Skipping Replication as replication is disabled")
 	}
+
+	err := fileDataCtrl.StartReplication()
+	if err != nil {
+		log.Warnf("Could not start fileData replication: %s", err)
+	}
 	fileDataCtrl.StartDataDeletion() // Start data deletion for file data;
 
 	objectCleanupController.StartRemovingUnreportedObjects()

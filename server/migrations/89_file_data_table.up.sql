@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS file_data
     delete_from_buckets  s3region[]  NOT NULL DEFAULT '{}',
     inflight_rep_buckets s3region[]  NOT NULL DEFAULT '{}',
     is_deleted           BOOLEAN     NOT NULL DEFAULT false,
-    pending_sync         BOOLEAN     NOT NULL DEFAULT false,
+    pending_sync         BOOLEAN     NOT NULL DEFAULT true,
     sync_locked_till     BIGINT      NOT NULL DEFAULT 0,
     created_at           BIGINT      NOT NULL DEFAULT now_utc_micro_seconds(),
     updated_at           BIGINT      NOT NULL DEFAULT now_utc_micro_seconds(),

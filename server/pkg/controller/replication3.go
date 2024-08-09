@@ -308,7 +308,7 @@ func (c *ReplicationController3) tryReplicate() error {
 		return commit(nil)
 	}
 
-	err = ensureSufficientSpace(ob.Size)
+	err = file.EnsureSufficientSpace(ob.Size)
 	if err != nil {
 		// We don't have free space right now, maybe because other big files are
 		// being downloaded simultanously, but we might get space later, so mark
@@ -358,25 +358,6 @@ func (c *ReplicationController3) tryReplicate() error {
 	}
 
 	return commit(err)
-}
-
-// Return an error if we risk running out of disk space if we try to download
-// and write a file of size.
-//
-// This function keeps a buffer of 1 GB free space in its calculations.
-func ensureSufficientSpace(size int64) error {
-	free, err := file.FreeSpace("/")
-	if err != nil {
-		return stacktrace.Propagate(err, "Failed to fetch free space")
-	}
-
-	gb := uint64(1024) * 1024 * 1024
-	need := uint64(size) + (2 * gb)
-	if free < need {
-		return fmt.Errorf("insufficient space on disk (need %d bytes, free %d bytes)", size, free)
-	}
-
-	return nil
 }
 
 // Create a temporary file for storing objectKey. Return both the path to the

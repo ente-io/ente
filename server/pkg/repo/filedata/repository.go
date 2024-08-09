@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
+	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 	"time"
@@ -192,6 +193,37 @@ func (r *Repository) GetPendingSyncDataAndExtendLock(ctx context.Context, newSyn
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return &fileData, nil
+}
+
+// MarkReplicationAsDone marks the pending_sync as false for the file data row
+func (r *Repository) MarkReplicationAsDone(ctx context.Context, row filedata.Row) error {
+	query := `UPDATE file_data SET pending_sync = false WHERE is_deleted=true and file_id = $1 AND data_type = $2 AND user_id = $3`
+	_, err := r.DB.ExecContext(ctx, query, row.FileID, string(row.Type), row.UserID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+func (r *Repository) RegisterReplicationAttempt(ctx context.Context, row filedata.Row, dstBucketID string) error {
+	if array.StringInList(dstBucketID, row.DeleteFromBuckets) {
+		return r.MoveBetweenBuckets(row, dstBucketID, DeletionColumn, InflightRepColumn)
+	}
+	if array.StringInList(dstBucketID, row.InflightReplicas) == false {
+		return r.AddBucket(row, dstBucketID, InflightRepColumn)
+	}
+	return nil
+}
+
+// ResetSyncLock resets the sync_locked_till to now_utc_micro_seconds() for the file data row only if pending_sync is false and
+// the input syncLockedTill is equal to the existing sync_locked_till. This is used to reset the lock after the replication is done
+func (r *Repository) ResetSyncLock(ctx context.Context, row filedata.Row, syncLockedTill int64) error {
+	query := `UPDATE file_data SET sync_locked_till = now_utc_micro_seconds() WHERE pending_sync = false and file_id = $1 AND data_type = $2 AND user_id = $3 AND sync_locked_till = $4`
+	_, err := r.DB.ExecContext(ctx, query, row.FileID, string(row.Type), row.UserID, syncLockedTill)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
 }
 
 func (r *Repository) DeleteFileData(ctx context.Context, row filedata.Row) error {

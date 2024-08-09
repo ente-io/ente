@@ -55,6 +55,9 @@ type Controller struct {
 	HostName                string
 	cleanupCronRunning      bool
 	downloadManagerCache    map[string]*s3manager.Downloader
+
+	// for downloading objects from s3 for replication
+	workerURL string
 }
 
 func New(repo *fileDataRepo.Repository,
@@ -185,8 +188,8 @@ func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row) ([]bulkS3M
 			dc := row.LatestBucket
 			s3FileMetadata, err := c.fetchS3FileMetadata(context.Background(), row, dc)
 			if err != nil {
-				log.WithField("bucket", row.LatestBucket).
-					Error("error fetching embedding object: "+row.S3FileMetadataObjectKey(), err)
+				log.WithField("bucket", dc).
+					Error("error fetching  object: "+row.S3FileMetadataObjectKey(), err)
 				embeddingObjects[i] = bulkS3MetaFetchResult{
 					err:     err,
 					dbEntry: row,
@@ -204,7 +207,7 @@ func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row) ([]bulkS3M
 	return embeddingObjects, nil
 }
 
-func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, _ string) (*fileData.S3FileMetadata, error) {
+func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, dc string) (*fileData.S3FileMetadata, error) {
 	opt := _defaultFetchConfig
 	objectKey := row.S3FileMetadataObjectKey()
 	ctxLogger := log.WithField("objectKey", objectKey).WithField("dc", row.LatestBucket)
@@ -223,7 +226,7 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 			cancel()
 			return nil, stacktrace.Propagate(ctx.Err(), "")
 		default:
-			obj, err := c.downloadObject(fetchCtx, objectKey, row.LatestBucket)
+			obj, err := c.downloadObject(fetchCtx, objectKey, dc)
 			cancel() // Ensure cancel is called to release resources
 			if err == nil {
 				if i > 0 {
