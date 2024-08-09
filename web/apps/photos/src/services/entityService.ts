@@ -25,7 +25,7 @@ import { getLatestVersionEntities } from "utils/entity";
  *
  * These diff API calls return all items whose updated at is greater
  * (non-inclusive) than the timestamp we provide. So there is no mechanism for
- * pagination of items which have the same exact updated at.
+ * pagination of items which have the exact same updated at.
  *
  * Conceptually, it may happen that there are more items than the limit we've
  * provided, but there are practical safeguards.
