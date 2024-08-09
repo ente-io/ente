@@ -303,21 +303,23 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _initializeController(
     NativeVideoPlayerController controller,
   ) async {
-    _logger.info("initializing native video player controller");
-    _controller = controller;
-    _controller!.onError.addListener(_onError);
+    try {
+      _logger.info("Initializing native video player controller");
+      _controller = controller;
+      _controller!.onError.addListener(_onError);
 
-    controller.onPlaybackEnded.addListener(_onPlaybackEnded);
+      controller.onPlaybackEnded.addListener(_onPlaybackEnded);
 
-    controller.onPlaybackReady.addListener(_onPlaybackReady);
+      controller.onPlaybackReady.addListener(_onPlaybackReady);
 
-    final videoSource = await VideoSource.init(
-      path: _filePath!,
-
-      //Check when to set this to VideoSourceType.asset
-      type: VideoSourceType.file,
-    );
-    await controller.loadVideoSource(videoSource);
+      final videoSource = await VideoSource.init(
+        path: _filePath!,
+        type: VideoSourceType.file,
+      );
+      await controller.loadVideoSource(videoSource);
+    } catch (e) {
+      _logger.severe("Error initializing native video player controller", e);
+    }
   }
 
   void _onError() {
