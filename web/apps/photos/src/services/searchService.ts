@@ -421,7 +421,9 @@ async function getAllPeople(limit: number = undefined) {
     //     people.push(person);
     // });
     people = people ?? [];
-    return people
+    const result = people
         .sort((p1, p2) => p2.files.length - p1.files.length)
         .slice(0, limit);
+    // log.debug(() => ["getAllPeople", result]);
+    return result;
 }

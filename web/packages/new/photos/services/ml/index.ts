@@ -309,7 +309,7 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-let last: Person[] = [];
+let last: Person[] | undefined;
 
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
@@ -318,7 +318,7 @@ export const wipCluster = async () => {
     if (!isDevBuild || !(await isInternalUser())) return;
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
 
-    if (last.length) return last;
+    if (last) return last;
 
     const clusters = clusterFaces(await faceIndexes());
 

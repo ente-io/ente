@@ -81,34 +81,40 @@ export const clusterFaces = (faceIndexes: FaceIndex[]) => {
     const clusters: FaceCluster[] = [];
     const clusterIndexByFaceID = new Map<string, number>();
     for (const [i, { faceID, embedding }] of faces.entries()) {
-        let j = 0;
-        for (; j < i; j++) {
-            // Can't find a better way for avoiding the null assertion.
+        // Find the nearest neighbour from among the faces we have already seen.
+        let nnIndex: number | undefined;
+        let nnCosineSimilarity = 0;
+        for (let j = 0; j < i; j++) {
+            // Can't find a way of avoiding the null assertion.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const n = faces[j]!;
-
-            // TODO-ML: The distance metric and the thresholds are placeholders.
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(embedding, n.embedding);
-            if (csim > 0.5) {
-                // Found a neighbour near enough. Add this face to the
-                // neighbour's cluster and call it a day.
-                const ci = ensure(clusterIndexByFaceID.get(n.faceID));
-                clusters[ci]?.faceIDs.push(faceID);
-                clusterIndexByFaceID.set(faceID, ci);
-                break;
+            if (csim > 0.76 && csim > nnCosineSimilarity) {
+                nnIndex = j;
+                nnCosineSimilarity = csim;
             }
         }
-        if (j == i) {
+        if (nnIndex === undefined) {
             // We didn't find a neighbour. Create a new cluster with this face.
+
             const cluster = {
                 id: newNonSecureID("cluster_"),
                 faceIDs: [faceID],
             };
             clusters.push(cluster);
             clusterIndexByFaceID.set(faceID, clusters.length);
+        } else {
+            // Found a neighbour near enough. Add this face to the neighbour's
+            // cluster.
+
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const nn = faces[nnIndex]!;
+            const nnClusterIndex = ensure(clusterIndexByFaceID.get(nn.faceID));
+            clusters[nnClusterIndex]?.faceIDs.push(faceID);
+            clusterIndexByFaceID.set(faceID, nnClusterIndex);
         }
     }
 
