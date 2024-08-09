@@ -6,6 +6,7 @@ import {
     isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
+    wipCluster,
 } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
@@ -415,6 +416,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 
 async function getAllPeople(limit: number = undefined) {
     let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
+    people = await wipCluster();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);
     // });

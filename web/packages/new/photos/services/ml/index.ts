@@ -25,6 +25,7 @@ import {
     faceIndexes,
     indexableAndIndexedCounts,
 } from "./db";
+import type { Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -262,8 +263,6 @@ const mlSync = async () => {
     triggerStatusUpdate();
 
     if (_isMLEnabled) void worker().then((w) => w.sync());
-    // TODO-ML
-    if (_isMLEnabled) void wipCluster();
 };
 
 /**
@@ -288,6 +287,8 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
+let last: Person[] = [];
+
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
  */
@@ -295,7 +296,24 @@ export const wipCluster = async () => {
     if (!isDevBuild || !(await isInternalUser())) return;
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
 
-    clusterFaces(await faceIndexes());
+    if (last.length) return last;
+
+    const clusters = clusterFaces(await faceIndexes());
+
+    const people: Person[] = []; // await mlIDbStorage.getAllPeople();
+    for (const cluster of clusters) {
+        people.push({
+            id: Math.random(), //cluster.id,
+            name: "test",
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            files: cluster.faceIDs.map((s) => parseInt(s.split("_")[0]!)),
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            displayFaceId: cluster.faceIDs[0]!,
+        });
+    }
+
+    last = people;
+    return people;
 };
 
 export type MLStatus =

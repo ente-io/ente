@@ -5,11 +5,11 @@ import type { FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
 /**
- * A cluster is an set of faces.
+ * A face cluster is an set of faces.
  *
  * Each cluster has an id so that a Person (a set of clusters) can refer to it.
  */
-export interface Cluster {
+export interface FaceCluster {
     /**
      * A randomly generated ID to uniquely identify this cluster.
      */
@@ -31,7 +31,7 @@ export interface Cluster {
  *
  * For ease of transportation, the Person entity on remote looks like
  *
- *     { name, clusters: { cluster_id, face_ids }}
+ *     { name, clusters: [{ clusterID, faceIDs }] }
  *
  * That is, it has the clusters embedded within itself.
  */
@@ -78,7 +78,7 @@ export const clusterFaces = (faceIndexes: FaceIndex[]) => {
 
     const faces = [...faceIDAndEmbeddings(faceIndexes)];
 
-    const clusters: Cluster[] = [];
+    const clusters: FaceCluster[] = [];
     const clusterIndexByFaceID = new Map<string, number>();
     for (const [i, { faceID, embedding }] of faces.entries()) {
         let j = 0;
@@ -118,7 +118,7 @@ export const clusterFaces = (faceIndexes: FaceIndex[]) => {
             `Clustered ${faces.length} faces into ${clusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return undefined;
+    return clusters;
 };
 
 /**
