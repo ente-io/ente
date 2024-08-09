@@ -1,3 +1,6 @@
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { apiURL } from "@/base/origins";
+
 /**
  * Entities are predefined lists of otherwise arbitrary data that the user can
  * store for their account.
@@ -44,17 +47,27 @@ const defaultDiffLimit = 500;
  * For each batch of fetched entities, call a provided function that can ingest
  * them. This function is also provided the latest timestamp from amongst all of
  * the entities fetched so far, which the caller can persist if needed to resume
- * future diffs from the current checkpoint.
+ * future diffs fetches from the current checkpoint.
+ *
+ * @param type The type of the entities to fetch.
+ *
+ * @param sinceTime Epoch milliseconds. This is used to ask remote to provide us
+ * only entities whose {@link updatedAt} is more than the given value. Set this
+ * to zero to start from the beginning.
  */
-export const entityDiff = async () => {
-    const sinceTime = 0;
-    const type: EntityType = "person_v2";
-    const limit = defaultDiffLimit;
-    const params = new URLSearchParams({ type, sinceTime, limit });
-    //     const url = await apiURL(`/user-entity/entity/diff`);
-    //     const res = await fetch(`${url}?${params.toString()}`, {
-    //         headers: await authenticatedRequestHeaders(),
-    //     });
-    //     ensureOk(res);
-    // };
+export const entityDiff = async (
+    type: EntityType,
+    sinceTime: number,
+    onFetch: (entities: unknown[], latestUpdatedAt: number) => Promise<void>,
+) => {
+    const params = new URLSearchParams({
+        type,
+        sinceTime: sinceTime.toString(),
+        limit: defaultDiffLimit.toString(),
+    });
+    const url = await apiURL(`/user-entity/entity/diff`);
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
 };
