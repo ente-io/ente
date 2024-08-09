@@ -174,7 +174,16 @@ func (config *S3Config) GetBucketID(oType ente.ObjectType) string {
 	if oType == ente.DerivedMeta || oType == ente.PreviewVideo || oType == ente.PreviewImage {
 		return config.derivedStorageDC
 	}
-	panic(fmt.Sprintf("No bucket for object type: %s", oType))
+	panic(fmt.Sprintf("ops not supported for type: %s", oType))
+}
+func (config *S3Config) GetReplicatedBuckets(oType ente.ObjectType) []string {
+	if config.fileDataConfig.HasConfig(oType) {
+		return config.fileDataConfig.GetReplicaBuckets(oType)
+	}
+	if oType == ente.DerivedMeta || oType == ente.PreviewVideo || oType == ente.PreviewImage {
+		return []string{}
+	}
+	panic(fmt.Sprintf("ops not supported for object type: %s", oType))
 }
 
 func (config *S3Config) IsBucketActive(bucketID string) bool {

@@ -3,6 +3,7 @@ package s3config
 import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
+	"strings"
 )
 
 type ObjectBucketConfig struct {
@@ -11,19 +12,20 @@ type ObjectBucketConfig struct {
 }
 
 type FileDataConfig struct {
-	ObjectBucketConfig map[ente.ObjectType]ObjectBucketConfig `mapstructure:"file-data-config"`
+	ObjectBucketConfig map[string]ObjectBucketConfig `mapstructure:"file-data-config"`
 }
 
 func (f FileDataConfig) HasConfig(objectType ente.ObjectType) bool {
 	if objectType == "" || objectType == ente.FILE || objectType == ente.THUMBNAIL {
 		panic(fmt.Sprintf("Invalid object type: %s", objectType))
 	}
-	_, ok := f.ObjectBucketConfig[objectType]
+
+	_, ok := f.ObjectBucketConfig[strings.ToLower(string(objectType))]
 	return ok
 }
 
 func (f FileDataConfig) GetPrimaryBucketID(objectType ente.ObjectType) string {
-	config, ok := f.ObjectBucketConfig[objectType]
+	config, ok := f.ObjectBucketConfig[strings.ToLower(string(objectType))]
 	if !ok {
 		panic(fmt.Sprintf("No config for object type: %s, use HasConfig", objectType))
 	}
@@ -31,7 +33,7 @@ func (f FileDataConfig) GetPrimaryBucketID(objectType ente.ObjectType) string {
 }
 
 func (f FileDataConfig) GetReplicaBuckets(objectType ente.ObjectType) []string {
-	config, ok := f.ObjectBucketConfig[objectType]
+	config, ok := f.ObjectBucketConfig[strings.ToLower(string(objectType))]
 	if !ok {
 		panic(fmt.Sprintf("No config for object type: %s, use HasConfig", objectType))
 	}
