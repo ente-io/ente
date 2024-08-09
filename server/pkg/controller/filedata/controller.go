@@ -48,14 +48,9 @@ type Controller struct {
 	AccessCtrl              access.Controller
 	ObjectCleanupController *controller.ObjectCleanupController
 	S3Config                *s3config.S3Config
-	QueueRepo               *repo.QueueRepository
-	TaskLockingRepo         *repo.TaskLockRepository
 	FileRepo                *repo.FileRepository
 	CollectionRepo          *repo.CollectionRepository
-	HostName                string
-	cleanupCronRunning      bool
 	downloadManagerCache    map[string]*s3manager.Downloader
-
 	// for downloading objects from s3 for replication
 	workerURL string
 }
@@ -64,11 +59,8 @@ func New(repo *fileDataRepo.Repository,
 	accessCtrl access.Controller,
 	objectCleanupController *controller.ObjectCleanupController,
 	s3Config *s3config.S3Config,
-	queueRepo *repo.QueueRepository,
-	taskLockingRepo *repo.TaskLockRepository,
 	fileRepo *repo.FileRepository,
-	collectionRepo *repo.CollectionRepository,
-	hostName string) *Controller {
+	collectionRepo *repo.CollectionRepository) *Controller {
 	embeddingDcs := []string{s3Config.GetHotBackblazeDC(), s3Config.GetHotWasabiDC(), s3Config.GetWasabiDerivedDC(), s3Config.GetDerivedStorageDataCenter(), "b5"}
 	cache := make(map[string]*s3manager.Downloader, len(embeddingDcs))
 	for i := range embeddingDcs {
@@ -80,11 +72,8 @@ func New(repo *fileDataRepo.Repository,
 		AccessCtrl:              accessCtrl,
 		ObjectCleanupController: objectCleanupController,
 		S3Config:                s3Config,
-		QueueRepo:               queueRepo,
-		TaskLockingRepo:         taskLockingRepo,
 		FileRepo:                fileRepo,
 		CollectionRepo:          collectionRepo,
-		HostName:                hostName,
 		downloadManagerCache:    cache,
 	}
 }
@@ -261,6 +250,7 @@ func (c *Controller) _validateGetFilesData(ctx *gin.Context, userID int64, req f
 	}); err != nil {
 		return stacktrace.Propagate(err, "User does not own some file(s)")
 	}
+
 	return nil
 }
 
