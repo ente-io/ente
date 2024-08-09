@@ -24,6 +24,7 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/toast_util.dart";
+import "package:visibility_detector/visibility_detector.dart";
 
 class VideoWidgetNative extends StatefulWidget {
   final EnteFile file;
@@ -58,6 +59,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   double? aspectRatio;
   final _isPlaybackReady = ValueNotifier(false);
   bool _shouldClearCache = false;
+  bool _isCompletelyVisible = false;
 
   @override
   void initState() {
@@ -145,115 +147,142 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Widget build(BuildContext context) {
     return Hero(
       tag: widget.tagPrefix! + widget.file.tag,
-      child: GestureDetector(
-        onVerticalDragUpdate: _isFileSwipeLocked
-            ? null
-            : (d) => {
-                  if (d.delta.dy > dragSensitivity)
-                    {
-                      Navigator.of(context).pop(),
-                    }
-                  else if (d.delta.dy < (dragSensitivity * -1))
-                    {
-                      showDetailsSheet(context, widget.file),
-                    },
-                },
-        child: _filePath == null
-            ? _getLoadingWidget()
-            : Stack(
-                children: [
-                  Center(
-                    child: AspectRatio(
-                      aspectRatio: aspectRatio ?? 1,
-                      child: NativeVideoPlayerView(
-                        onViewReady: _initializeController,
-                      ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: Center(
-                      child: ValueListenableBuilder(
-                        builder: (BuildContext context, bool value, _) {
-                          return value
-                              ? PlayPauseButton(_controller)
-                              : const SizedBox();
-                        },
-                        valueListenable: _isPlaybackReady,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: verticalMargin,
-                    right: 0,
-                    left: 0,
-                    child: ValueListenableBuilder(
-                      builder: (BuildContext context, bool value, _) {
-                        return value
-                            ? Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.3),
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(8),
-                                    ),
-                                    border: Border.all(
-                                      color: strokeFaintDark,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      AnimatedSize(
-                                        duration: const Duration(seconds: 5),
-                                        curve: Curves.easeInOut,
-                                        child: ValueListenableBuilder(
-                                          valueListenable: _controller!
-                                              .onPlaybackPositionChanged,
-                                          builder: (
-                                            BuildContext context,
-                                            int value,
-                                            _,
-                                          ) {
-                                            return Text(
-                                              secondsToDuration(value),
-                                              style: getEnteTextTheme(context)
-                                                  .mini
-                                                  .copyWith(
-                                                    color: textBaseDark,
-                                                  ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: SeekBar(
-                                          _controller!,
-                                          _durationToSeconds(duration),
-                                        ),
-                                      ),
-                                      Text(
-                                        duration ?? "0:00",
-                                        style: getEnteTextTheme(context)
-                                            .mini
-                                            .copyWith(
-                                              color: textBaseDark,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            : const SizedBox();
+      child: VisibilityDetector(
+        key: Key(widget.file.generatedID.toString()),
+        onVisibilityChanged: (info) {
+          if (info.visibleFraction == 1) {
+            setState(() {
+              _isCompletelyVisible = true;
+            });
+          } else {
+            setState(() {
+              _isCompletelyVisible = false;
+            });
+          }
+        },
+        child: GestureDetector(
+          onVerticalDragUpdate: _isFileSwipeLocked
+              ? null
+              : (d) => {
+                    if (d.delta.dy > dragSensitivity)
+                      {
+                        Navigator.of(context).pop(),
+                      }
+                    else if (d.delta.dy < (dragSensitivity * -1))
+                      {
+                        showDetailsSheet(context, widget.file),
                       },
-                      valueListenable: _isPlaybackReady,
-                    ),
+                  },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 750),
+            switchOutCurve: Curves.easeOutExpo,
+            switchInCurve: Curves.easeInExpo,
+            child: !_isCompletelyVisible || _filePath == null
+                ? _getLoadingWidget()
+                : Stack(
+                    key: const ValueKey("video_ready"),
+                    children: [
+                      Center(
+                        child: AspectRatio(
+                          aspectRatio: aspectRatio ?? 1,
+                          child: NativeVideoPlayerView(
+                            onViewReady: _initializeController,
+                          ),
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: Center(
+                          child: ValueListenableBuilder(
+                            builder: (BuildContext context, bool value, _) {
+                              return value
+                                  ? PlayPauseButton(_controller)
+                                  : const SizedBox();
+                            },
+                            valueListenable: _isPlaybackReady,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: verticalMargin,
+                        right: 0,
+                        left: 0,
+                        child: ValueListenableBuilder(
+                          builder: (BuildContext context, bool value, _) {
+                            return value
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: Container(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        4,
+                                        16,
+                                        4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.3),
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(8),
+                                        ),
+                                        border: Border.all(
+                                          color: strokeFaintDark,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          AnimatedSize(
+                                            duration:
+                                                const Duration(seconds: 5),
+                                            curve: Curves.easeInOut,
+                                            child: ValueListenableBuilder(
+                                              valueListenable: _controller!
+                                                  .onPlaybackPositionChanged,
+                                              builder: (
+                                                BuildContext context,
+                                                int value,
+                                                _,
+                                              ) {
+                                                return Text(
+                                                  secondsToDuration(value),
+                                                  style:
+                                                      getEnteTextTheme(context)
+                                                          .mini
+                                                          .copyWith(
+                                                            color: textBaseDark,
+                                                          ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: SeekBar(
+                                              _controller!,
+                                              _durationToSeconds(duration),
+                                            ),
+                                          ),
+                                          Text(
+                                            duration ?? "0:00",
+                                            style: getEnteTextTheme(context)
+                                                .mini
+                                                .copyWith(
+                                                  color: textBaseDark,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox();
+                          },
+                          valueListenable: _isPlaybackReady,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
   }
@@ -382,6 +411,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   Widget _getLoadingWidget() {
     return Stack(
+      key: const ValueKey("video_loading"),
       children: [
         _getThumbnail(),
         Container(
