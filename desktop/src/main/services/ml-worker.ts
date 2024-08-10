@@ -202,19 +202,19 @@ const createInferenceSession = async (modelPath: string) => {
 };
 
 const cachedCLIPImageSession = makeCachedInferenceSession(
-    "clip-image-vit-32-float32.onnx",
-    351468764 /* 335.2 MB */,
+    "mobileclip_s2_image.onnx",
+    143061211 /* 143 MB */,
 );
 
 /**
  * Compute CLIP embeddings for an image.
  *
- * The embeddings are computed using ONNX runtime, with CLIP as the model.
+ * The embeddings are computed using ONNX runtime, with MobileCLIP as the model.
  */
 export const computeCLIPImageEmbedding = async (input: Float32Array) => {
     const session = await cachedCLIPImageSession();
     const feeds = {
-        input: new ort.Tensor("float32", input, [1, 3, 224, 224]),
+        input: new ort.Tensor("float32", input, [1, 3, 256, 256]),
     };
     const t = Date.now();
     const results = await session.run(feeds);
@@ -224,8 +224,8 @@ export const computeCLIPImageEmbedding = async (input: Float32Array) => {
 };
 
 const cachedCLIPTextSession = makeCachedInferenceSession(
-    "clip-text-vit-32-uint8.onnx",
-    64173509 /* 61.2 MB */,
+    "mobileclip_s2_text_int32.onnx",
+    253895600 /* 253 MB */,
 );
 
 let _tokenizer: Tokenizer | undefined;
@@ -237,7 +237,7 @@ const getTokenizer = () => {
 /**
  * Compute CLIP embeddings for an text snippet.
  *
- * The embeddings are computed using ONNX runtime, with CLIP as the model.
+ * The embeddings are computed using ONNX runtime, with MobileCLIP as the model.
  */
 export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const sessionOrSkip = await Promise.race([
@@ -270,7 +270,7 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
 
 const cachedFaceDetectionSession = makeCachedInferenceSession(
     "yolov5s_face_640_640_dynamic.onnx",
-    30762872 /* 29.3 MB */,
+    30762872 /* 29 MB */,
 );
 
 /**
