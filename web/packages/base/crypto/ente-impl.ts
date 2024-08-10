@@ -46,9 +46,9 @@ export const _decryptMetadataBytes = async ({
         keyB64,
     });
 
-export const _decryptMetadata = async (r: DecryptB64) =>
+export const _decryptFileEmbedding = _decryptMetadataBytes;
+
+export const _decryptMetadataJSON = async (r: DecryptB64) =>
     JSON.parse(
         new TextDecoder().decode(await _decryptMetadataBytes(r)),
     ) as unknown;
-
-export const _decryptFileEmbedding = _decryptMetadataBytes;

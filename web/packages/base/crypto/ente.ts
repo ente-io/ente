@@ -96,7 +96,7 @@ export const encryptThumbnail = (r: EncryptBytes) =>
  * A variant of {@link encryptAssociatedData} that returns the encrypted data in
  * the result as a base64 string instead of its bytes.
  *
- * Use {@link decryptMetadata} to decrypt the result.
+ * Use {@link decryptMetadataBytes} to decrypt the result.
  */
 export const encryptMetadataBytes = (r: EncryptBytes) =>
     assertInWorker(ei._encryptMetadataBytes(r));
@@ -124,7 +124,7 @@ export const encryptFileEmbedding = async (r: EncryptBytes) =>
  * encodes into a string, and encrypts that. And instead of returning the raw
  * encrypted bytes, it returns their base64 string representation.
  *
- * Use {@link decryptMetadata} to decrypt the result.
+ * Use {@link decryptMetadataJSON} to decrypt the result.
  */
 export const encryptMetadataJSON = async (r: EncryptJSON) =>
     assertInWorker(ei._encryptMetadataJSON(r));
@@ -149,6 +149,16 @@ export const decryptThumbnail = (r: DecryptBytes) =>
     assertInWorker(ei._decryptThumbnail(r));
 
 /**
+ * Decrypt metadata associated with an Ente object.
+ *
+ * This is the sibling of {@link decryptMetadataBytes}.
+ */
+export const decryptMetadataBytes = (r: DecryptB64) =>
+    inWorker()
+        ? ei._decryptMetadataBytes(r)
+        : sharedCryptoWorker().then((w) => w.decryptMetadataBytes(r));
+
+/**
  * Decrypt the embedding associated with a file using the file's key.
  *
  * This is the sibling of {@link encryptFileEmbedding}.
@@ -157,25 +167,14 @@ export const decryptFileEmbedding = async (r: DecryptB64) =>
     assertInWorker(ei._decryptFileEmbedding(r));
 
 /**
- * Decrypt the metadata associated with an Ente object (file, collection or
- * entity) using the object's key.
+ * Decrypt the metadata JSON associated with an Ente object.
  *
- * This is the sibling of {@link encryptMetadata}.
+ * This is the sibling of {@link encryptMetadataJSON}.
  *
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadata = (r: DecryptB64) =>
+export const decryptMetadataJSON = (r: DecryptB64) =>
     inWorker()
-        ? ei._decryptMetadata(r)
-        : sharedCryptoWorker().then((w) => w.decryptMetadata(r));
-
-/**
- * A variant of {@link decryptMetadata} that does not attempt to parse the
- * decrypted data as a JSON string and instead just returns the raw decrypted
- * bytes that we got.
- */
-export const decryptMetadataBytes = (r: DecryptB64) =>
-    inWorker()
-        ? ei._decryptMetadataBytes(r)
-        : sharedCryptoWorker().then((w) => w.decryptMetadataBytes(r));
+        ? ei._decryptMetadataJSON(r)
+        : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));
