@@ -127,7 +127,9 @@ export const encryptFileEmbedding = async (r: EncryptBytes) =>
  * Use {@link decryptMetadataJSON} to decrypt the result.
  */
 export const encryptMetadataJSON = async (r: EncryptJSON) =>
-    assertInWorker(ei._encryptMetadataJSON(r));
+    inWorker()
+        ? ei._encryptMetadataJSON(r)
+        : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or
