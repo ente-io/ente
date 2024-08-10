@@ -39,7 +39,7 @@ it with Ente.
 8. Wait for Google to send you your data.
 
 9. Open [our desktop app](https://ente.io/download/desktop), click on "Upload",
-   select "Google takeout" and pick the ZIP file you just downloaded.
+   select "Google takeout" and pick the ZIP file you just downloaded. If you were provided with multiple ZIP files, you must extract **all** of the files, *including the JSON files*, into one folder and select "Folder" instead. 
 
     ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
@@ -54,10 +54,3 @@ will ignore already backed up files and upload just the rest.
 
 If you run into any issues during this migration, please reach out to
 [support@ente.io](mailto:support@ente.io) and we will be happy to help you!
-
-> Note: When importing a Google takeout, Ente will parse the metadata in the
-> JSON files and stich them together with corresponding files. However, one case
-> this will not work is when Google has split the export into multiple parts,
-> and did not put the JSON file associated with an image in the same exported
-> zip. So the best move is to unzip all of the items into a single folder, and
-> to drop that folder into our desktop app.
