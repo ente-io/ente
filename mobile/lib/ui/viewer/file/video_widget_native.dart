@@ -163,10 +163,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             setState(() {
               _isCompletelyVisible = true;
             });
-          } else {
-            setState(() {
-              _isCompletelyVisible = false;
-            });
           }
         },
         child: GestureDetector(
