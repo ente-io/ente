@@ -201,9 +201,15 @@ const createInferenceSession = async (modelPath: string) => {
     });
 };
 
+// TODO-ML: Remove me
+// const cachedCLIPImageSessionOAI = makeCachedInferenceSession(
+//     "clip-image-vit-32-float32.onnx",
+//     351468764 /* 335 MB */,
+// );
+
 const cachedCLIPImageSession = makeCachedInferenceSession(
-    "clip-image-vit-32-float32.onnx",
-    351468764 /* 335.2 MB */,
+    "mobileclip_s2_image.onnx",
+    143061211 /* 143 MB */,
 );
 
 /**
@@ -223,9 +229,27 @@ export const computeCLIPImageEmbedding = async (input: Float32Array) => {
     return ensure(results.output).data as Float32Array;
 };
 
+// TODO-ML: Remove me
+// const cachedCLIPTextSessionOAIQ = makeCachedInferenceSession(
+//     "clip-text-vit-32-uint8.onnx",
+//     64173509 /* 61 MB */,
+// );
+
+// TODO-ML: Remove me
+// const cachedCLIPTextSessionOAI = makeCachedInferenceSession(
+//     "clip-text-vit-32-float32-int32.onnx",
+//     254069585 /* 254 MB */,
+// );
+
+// TODO-ML: Remove me
+// const cachedCLIPTextSession = makeCachedInferenceSession(
+//     "mobileclip_s2_text.onnx",
+//     253895732 /* 253 MB */,
+// );
+
 const cachedCLIPTextSession = makeCachedInferenceSession(
-    "clip-text-vit-32-uint8.onnx",
-    64173509 /* 61.2 MB */,
+    "mobileclip_s2_text_int32.onnx",
+    253895600 /* 253 MB */,
 );
 
 let _tokenizer: Tokenizer | undefined;
