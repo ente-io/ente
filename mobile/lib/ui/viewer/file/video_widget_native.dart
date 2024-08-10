@@ -62,6 +62,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   bool _shouldClearCache = false;
   bool _isCompletelyVisible = false;
   final _showControls = ValueNotifier(true);
+  final _isSeeking = ValueNotifier(false);
 
   @override
   void initState() {
@@ -143,6 +144,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         .removeListener(_onPlaybackStatusChanged);
     _isPlaybackReady.dispose();
     _showControls.dispose();
+    _isSeeking.removeListener(_isSeekingListener);
+    _isSeeking.dispose();
     super.dispose();
   }
 
@@ -313,6 +316,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                                       _durationToSeconds(
                                                         duration,
                                                       ),
+                                                      _isSeeking,
                                                     ),
                                                   ),
                                                   Text(
@@ -391,6 +395,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       controller.onPlaybackEnded.addListener(_onPlaybackEnded);
       controller.onPlaybackReady.addListener(_onPlaybackReady);
       controller.onPlaybackStatusChanged.addListener(_onPlaybackStatusChanged);
+      _isSeeking.addListener(_isSeekingListener);
 
       final videoSource = await VideoSource.init(
         path: _filePath!,
@@ -402,7 +407,23 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
+  void _isSeekingListener() {
+    if (!_isSeeking.value &&
+        _controller?.playbackInfo?.status == PlaybackStatus.playing) {
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          _showControls.value = false;
+        }
+      });
+    }
+  }
+
+  ///Need to not execute this if the status change is coming from a video getting
+  ///played in loop.
   void _onPlaybackStatusChanged() {
+    if (_isSeeking.value || _controller?.playbackInfo?.positionFraction == 1) {
+      return;
+    }
     if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
       if (widget.playbackCallback != null && mounted) {
         Future.delayed(const Duration(milliseconds: 1500), () {

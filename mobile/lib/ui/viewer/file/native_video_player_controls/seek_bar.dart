@@ -9,7 +9,8 @@ import "package:photos/utils/debouncer.dart";
 class SeekBar extends StatefulWidget {
   final NativeVideoPlayerController controller;
   final int? duration;
-  const SeekBar(this.controller, this.duration, {super.key});
+  final ValueNotifier<bool> isSeeking;
+  const SeekBar(this.controller, this.duration, this.isSeeking, {super.key});
 
   @override
   State<SeekBar> createState() => _SeekBarState();
@@ -73,6 +74,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
             min: 0.0,
             max: 1.0,
             value: _animationController.value,
+            onChangeStart: (value) {
+              widget.isSeeking.value = true;
+            },
             onChanged: (value) {
               setState(() {
                 _animationController.value = value;
@@ -85,6 +89,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
                 _animationController.value = value;
               });
               _seekTo(value);
+              widget.isSeeking.value = false;
             },
             allowedInteraction: SliderInteraction.tapAndSlide,
           ),
