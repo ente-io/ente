@@ -2,11 +2,6 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { CryptoWorker } from "./worker";
 
 /**
- * Reexport the type for easier import in call sites.
- */
-export { CryptoWorker } from "./worker";
-
-/**
  * Cached instance of the {@link ComlinkWorker} that wraps our web worker.
  */
 let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;

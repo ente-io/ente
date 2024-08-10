@@ -1,6 +1,6 @@
 import { sendOtt } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";

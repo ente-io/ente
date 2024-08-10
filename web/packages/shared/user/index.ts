@@ -1,5 +1,5 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 import { CustomError } from "@ente/shared/error";
 import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 

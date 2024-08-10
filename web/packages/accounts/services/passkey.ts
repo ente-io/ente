@@ -1,6 +1,6 @@
 import { clientPackageName, isDesktop } from "@/base/app";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 import { clientPackageHeader, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";

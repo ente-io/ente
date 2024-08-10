@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

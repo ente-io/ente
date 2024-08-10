@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getActualKey } from "@ente/shared/user";
 

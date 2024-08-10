@@ -1,5 +1,5 @@
 import type { SRPAttributes } from "@/accounts/types/srp";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { Input, type ButtonProps } from "@mui/material";
 import { t } from "i18next";

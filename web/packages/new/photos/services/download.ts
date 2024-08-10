@@ -3,7 +3,8 @@
 
 import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
-import { type CryptoWorker, sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
+import { type CryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
 import { FileType } from "@/media/file-type";

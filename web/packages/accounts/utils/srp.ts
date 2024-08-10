@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { generateSRPSetupAttributes } from "../services/srp";

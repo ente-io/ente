@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";

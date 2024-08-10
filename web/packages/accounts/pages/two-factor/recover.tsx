@@ -5,8 +5,8 @@ import {
 } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
 import type { AccountsContextT } from "@/accounts/types/context";
+import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";

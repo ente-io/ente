@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";

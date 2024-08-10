@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";

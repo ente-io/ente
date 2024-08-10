@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { ItemVisibility } from "@/media/file-metadata";

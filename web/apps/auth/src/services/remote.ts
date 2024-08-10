@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { ensureString } from "@/utils/ensure";

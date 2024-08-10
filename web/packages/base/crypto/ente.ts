@@ -47,6 +47,7 @@
  * recommendation though (in circumstances where we create more crypto workers
  * instead of using the shared one).
  */
+import { sharedCryptoWorker } from ".";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
@@ -56,7 +57,6 @@ import type {
     EncryptBytes,
     EncryptJSON,
 } from "./types";
-import { sharedCryptoWorker } from "./worker";
 
 /**
  * Some of these functions have not yet been needed on the main thread, and for

@@ -1,5 +1,5 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import { decryptMetadataJSON } from "@/base/crypto/ente";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import HTTPService from "@ente/shared/network/HTTPService";

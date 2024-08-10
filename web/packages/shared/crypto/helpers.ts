@@ -1,5 +1,5 @@
 import { setRecoveryKey } from "@/accounts/api/user";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import {
     LS_KEYS,

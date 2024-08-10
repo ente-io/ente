@@ -1,7 +1,7 @@
 import { expose } from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
-import * as ei from "../ente-impl";
-import * as libsodium from "../libsodium";
+import * as ei from "./ente-impl";
+import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
