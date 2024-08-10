@@ -19,7 +19,6 @@ import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
@@ -35,6 +34,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 
 const Page: React.FC<PageProps> = () => {
     const [token, setToken] = useState<string>();
@@ -57,7 +57,7 @@ const Page: React.FC<PageProps> = () => {
         passphrase,
         setFieldError,
     ) => {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker = await sharedCryptoWorker();
         const key = await getActualKey();
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const kekSalt = await cryptoWorker.generateSaltToDeriveKey();

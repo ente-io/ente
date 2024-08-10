@@ -1,4 +1,5 @@
 import { decryptMetadata } from "@/base/crypto/ente";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import { isDevBuild } from "@/base/env";
 import {
     decryptPublicMagicMetadata,
@@ -6,7 +7,6 @@ import {
 } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 
 /**
  * On-demand decrypt the public magic metadata for an {@link EnteFile} for code
@@ -18,7 +18,7 @@ import ComlinkCryptoWorker from "@ente/shared/crypto";
 export const getPublicMagicMetadataMT = async (enteFile: EnteFile) =>
     decryptPublicMagicMetadata(
         enteFile,
-        (await ComlinkCryptoWorker.getInstance()).decryptMetadata,
+        (await sharedCryptoWorker()).decryptMetadata,
     );
 
 /**

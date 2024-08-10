@@ -1,3 +1,4 @@
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -19,7 +20,6 @@ import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
 import { withTimeout } from "@/utils/promise";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
@@ -133,7 +133,7 @@ export async function decryptFile(
     collectionKey: string,
 ): Promise<EnteFile> {
     try {
-        const worker = await ComlinkCryptoWorker.getInstance();
+        const worker = await sharedCryptoWorker();
         const {
             encryptedKey,
             keyDecryptionNonce,
@@ -147,31 +147,31 @@ export async function decryptFile(
             keyDecryptionNonce,
             collectionKey,
         );
-        const fileMetadata = await worker.decryptMetadata(
-            metadata.encryptedData,
-            metadata.decryptionHeader,
-            fileKey,
-        );
+        const fileMetadata = await worker.decryptMetadataJSON({
+            encryptedDataB64: metadata.encryptedData,
+            decryptionHeaderB64: metadata.decryptionHeader,
+            keyB64: fileKey,
+        });
         let fileMagicMetadata: FileMagicMetadata;
         let filePubMagicMetadata: FilePublicMagicMetadata;
         if (magicMetadata?.data) {
             fileMagicMetadata = {
                 ...file.magicMetadata,
-                data: await worker.decryptMetadata(
-                    magicMetadata.data,
-                    magicMetadata.header,
-                    fileKey,
-                ),
+                data: await worker.decryptMetadataJSON({
+                    encryptedDataB64: magicMetadata.data,
+                    decryptionHeaderB64: magicMetadata.header,
+                    keyB64: fileKey,
+                }),
             };
         }
         if (pubMagicMetadata?.data) {
             filePubMagicMetadata = {
                 ...pubMagicMetadata,
-                data: await worker.decryptMetadata(
-                    pubMagicMetadata.data,
-                    pubMagicMetadata.header,
-                    fileKey,
-                ),
+                data: await worker.decryptMetadataJSON({
+                    encryptedDataB64: pubMagicMetadata.data,
+                    decryptionHeaderB64: pubMagicMetadata.header,
+                    keyB64: fileKey,
+                }),
             };
         }
         return {

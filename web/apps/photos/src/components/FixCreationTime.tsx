@@ -1,3 +1,4 @@
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import {
     decryptPublicMagicMetadata,
@@ -13,7 +14,6 @@ import { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import DialogBox from "@ente/shared/components/DialogBox/";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import {
     Button,
     FormControl,
@@ -353,7 +353,7 @@ const updateEnteFileDate = async (
 
     if (!newDate) return;
 
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
 
     const existingUIDate = getUICreationDate(
         enteFile,

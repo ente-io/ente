@@ -10,7 +10,6 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import {
     decryptAndStoreToken,
     saveKeyInSessionStore,
@@ -24,6 +23,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 
 const bip39 = require("bip39");
 // mobile client library only supports english.
@@ -80,7 +80,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 }
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
-            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const cryptoWorker = await sharedCryptoWorker();
             const keyAttr = ensure(keyAttributes);
             const masterKey = await cryptoWorker.decryptB64(
                 keyAttr.masterKeyEncryptedWithRecoveryKey,

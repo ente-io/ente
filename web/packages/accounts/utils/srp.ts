@@ -1,15 +1,15 @@
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { generateSRPSetupAttributes } from "../services/srp";
 import type { SRPSetupAttributes } from "../types/srp";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 
 export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
     keyAttributes: KeyAttributes;
     masterKey: string;
     srpSetupAttributes: SRPSetupAttributes;
 }> {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await cryptoWorker.generateEncryptionKey();
     const recoveryKey = await cryptoWorker.generateEncryptionKey();
     const kekSalt = await cryptoWorker.generateSaltToDeriveKey();

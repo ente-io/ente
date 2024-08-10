@@ -1,3 +1,4 @@
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";
@@ -11,7 +12,6 @@ import {
 import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { batch } from "@/utils/array";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { REQUEST_BATCH_SIZE } from "constants/api";
@@ -186,16 +186,16 @@ export const updateFileMagicMetadata = async (
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     for (const {
         file,
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
-            await cryptoWorker.encryptMetadata(
-                updatedMagicMetadata.data,
-                file.key,
-            );
+            await cryptoWorker.encryptMetadataJSON({
+                jsonValue: updatedMagicMetadata.data,
+                keyB64: file.key,
+            });
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
@@ -233,16 +233,16 @@ export const updateFilePublicMagicMetadata = async (
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     for (const {
         file,
         updatedPublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
-            await cryptoWorker.encryptMetadata(
-                updatedPublicMagicMetadata.data,
-                file.key,
-            );
+            await cryptoWorker.encryptMetadataJSON({
+                jsonValue: updatedPublicMagicMetadata.data,
+                keyB64: file.key,
+            });
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {

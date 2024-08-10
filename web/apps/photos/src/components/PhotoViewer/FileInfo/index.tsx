@@ -1,5 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { ParsedMetadata } from "@/media/file-metadata";
@@ -19,7 +20,6 @@ import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getPublicMagicMetadataMTSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import BackupOutlined from "@mui/icons-material/BackupOutlined";
@@ -399,7 +399,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     return;
                 }
 
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                const cryptoWorker = await sharedCryptoWorker();
                 await updateRemotePublicMagicMetadata(
                     enteFile,
                     { dateTime, editedTime: timestamp },
