@@ -1,3 +1,8 @@
+import {
+    ENCRYPTION_CHUNK_SIZE,
+    type B64EncryptionResult,
+} from "@/base/crypto/libsodium";
+import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename } from "@/base/file";
 import log from "@/base/log";
@@ -29,11 +34,7 @@ import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { ensure } from "@/utils/ensure";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
-import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import type { Remote } from "comlink";
 import { addToCollection } from "services/collectionService";
 import {
     PublicUploadProps,
@@ -320,7 +321,7 @@ export const uploader = async (
     uploaderName: string,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
@@ -681,7 +682,7 @@ const extractAssetMetadata = async (
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ): Promise<ExtractAssetMetadataResult> =>
     isLivePhoto
         ? await extractLivePhotoMetadata(
@@ -707,7 +708,7 @@ const extractLivePhotoMetadata = async (
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ) => {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FileType.image,
@@ -744,7 +745,7 @@ const extractImageOrVideoMetadata = async (
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
@@ -845,10 +846,7 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     }
 };
 
-const computeHash = async (
-    uploadItem: UploadItem,
-    worker: Remote<DedicatedCryptoWorker>,
-) => {
+const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
     const { stream, chunkCount } = await readUploadItem(uploadItem);
     const hashState = await worker.initChunkHashing();
 
@@ -1112,7 +1110,7 @@ const constructPublicMagicMetadata = async (
 const encryptFile = async (
     file: FileWithMetadata,
     encryptionKey: string,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ): Promise<EncryptedFile> => {
     const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
         file.fileStreamOrData,
@@ -1122,23 +1120,26 @@ const encryptFile = async (
     const {
         encryptedData: thumbEncryptedData,
         decryptionHeaderB64: thumbDecryptionHeader,
-    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
+    } = await worker.encryptThumbnail({
+        data: file.thumbnail,
+        keyB64: fileKey,
+    });
     const encryptedThumbnail = {
         encryptedData: thumbEncryptedData,
         decryptionHeader: thumbDecryptionHeader,
     };
 
-    const encryptedMetadata = await worker.encryptMetadata(
-        file.metadata,
-        fileKey,
-    );
+    const encryptedMetadata = await worker.encryptMetadataJSON({
+        jsonValue: file.metadata,
+        keyB64: fileKey,
+    });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     if (file.pubMagicMetadata) {
-        const encryptedPubMagicMetadataData = await worker.encryptMetadata(
-            file.pubMagicMetadata.data,
-            fileKey,
-        );
+        const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
+            jsonValue: file.pubMagicMetadata.data,
+            keyB64: fileKey,
+        });
         encryptedPubMagicMetadata = {
             version: file.pubMagicMetadata.version,
             count: file.pubMagicMetadata.count,
@@ -1164,7 +1165,7 @@ const encryptFile = async (
 
 const encryptFiledata = async (
     fileStreamOrData: FileStream | Uint8Array,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ): Promise<EncryptionResult<Uint8Array | EncryptedFileStream>> =>
     fileStreamOrData instanceof Uint8Array
         ? await worker.encryptFile(fileStreamOrData)
@@ -1172,7 +1173,7 @@ const encryptFiledata = async (
 
 const encryptFileStream = async (
     fileData: FileStream,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ) => {
     const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();

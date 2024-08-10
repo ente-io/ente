@@ -1,3 +1,7 @@
+import {
+    createComlinkCryptoWorker,
+    type CryptoWorker,
+} from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
@@ -16,11 +20,8 @@ import {
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";
-import type { Remote } from "comlink";
 import isElectron from "is-electron";
 import {
     getLocalPublicFiles,
@@ -316,8 +317,8 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 };
 
 class UploadManager {
-    private cryptoWorkers = new Array<
-        ComlinkWorker<typeof DedicatedCryptoWorker>
+    private comlinkCryptoWorkers = new Array<
+        ComlinkWorker<typeof CryptoWorker>
     >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private itemsToBeUploaded: ClusteredUploadItem[];
@@ -448,7 +449,7 @@ class UploadManager {
             this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
             void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
-                this.cryptoWorkers[i]?.terminate();
+                this.comlinkCryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
             clearInterval(logInterval);
@@ -510,14 +511,14 @@ class UploadManager {
             i < maxConcurrentUploads && this.itemsToBeUploaded.length > 0;
             i++
         ) {
-            this.cryptoWorkers[i] = getDedicatedCryptoWorker();
-            const worker = await this.cryptoWorkers[i].remote;
+            this.comlinkCryptoWorkers[i] = createComlinkCryptoWorker();
+            const worker = await this.comlinkCryptoWorkers[i].remote;
             uploadProcesses.push(this.uploadNextItemInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextItemInQueue(worker: Remote<DedicatedCryptoWorker>) {
+    private async uploadNextItemInQueue(worker: CryptoWorker) {
         const uiService = this.uiService;
 
         while (this.itemsToBeUploaded.length > 0) {
