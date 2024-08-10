@@ -21,6 +21,7 @@ import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -63,6 +64,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   bool _isCompletelyVisible = false;
   final _showControls = ValueNotifier(true);
   final _isSeeking = ValueNotifier(false);
+  final _debouncer = Debouncer(const Duration(milliseconds: 2000));
 
   @override
   void initState() {
@@ -144,8 +146,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         .removeListener(_onPlaybackStatusChanged);
     _isPlaybackReady.dispose();
     _showControls.dispose();
-    _isSeeking.removeListener(_isSeekingListener);
+    _isSeeking.removeListener(_seekListener);
     _isSeeking.dispose();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 
@@ -395,7 +398,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       controller.onPlaybackEnded.addListener(_onPlaybackEnded);
       controller.onPlaybackReady.addListener(_onPlaybackReady);
       controller.onPlaybackStatusChanged.addListener(_onPlaybackStatusChanged);
-      _isSeeking.addListener(_isSeekingListener);
+      _isSeeking.addListener(_seekListener);
 
       final videoSource = await VideoSource.init(
         path: _filePath!,
@@ -407,12 +410,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
-  void _isSeekingListener() {
+  void _seekListener() {
     if (!_isSeeking.value &&
         _controller?.playbackInfo?.status == PlaybackStatus.playing) {
-      Future.delayed(const Duration(milliseconds: 2000), () {
+      _debouncer.run(() async {
         if (mounted) {
-          if (_isSeeking.value) return;
+          if (_isSeeking.value ||
+              _controller?.playbackInfo?.status != PlaybackStatus.playing) {
+            return;
+          }
           _showControls.value = false;
           if (Platform.isIOS) {
             widget.playbackCallback!(true);
@@ -430,9 +436,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
     if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
       if (widget.playbackCallback != null && mounted) {
-        Future.delayed(const Duration(milliseconds: 2000), () {
+        _debouncer.run(() async {
           if (mounted) {
-            if (_isSeeking.value) return;
+            if (_isSeeking.value ||
+                _controller!.playbackInfo?.status != PlaybackStatus.playing) {
+              return;
+            }
             _showControls.value = false;
             widget.playbackCallback!(true);
           }
