@@ -412,6 +412,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         _controller?.playbackInfo?.status == PlaybackStatus.playing) {
       Future.delayed(const Duration(milliseconds: 1500), () {
         if (mounted) {
+          if (_isSeeking.value) return;
           _showControls.value = false;
         }
       });
@@ -428,6 +429,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       if (widget.playbackCallback != null && mounted) {
         Future.delayed(const Duration(milliseconds: 1500), () {
           if (mounted) {
+            if (_isSeeking.value) return;
             _showControls.value = false;
             widget.playbackCallback!(true);
           }
