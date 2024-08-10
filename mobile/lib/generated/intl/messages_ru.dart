@@ -811,6 +811,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Предоставить разрешение"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Группировать фотографии рядом"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Будет полезно, если вы укажете, где нашли нас, так как мы не отслеживаем установки приложения!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1501,8 +1504,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Предложить идею"),
         "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Синхронизация остановлена"),

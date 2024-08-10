@@ -4,6 +4,7 @@ import 'package:fast_base58/fast_base58.dart';
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
@@ -274,8 +275,8 @@ class _FileSelectionActionsWidgetState
     }
     items.add(
       SelectionActionButton(
-        icon: Icons.lock,
-        labelText: "Guest view",
+        icon: Icons.people_outline_rounded,
+        labelText: S.of(context).guestView,
         onTap: _onGuestViewClick,
       ),
     );
@@ -568,18 +569,26 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _onGuestViewClick() async {
     final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
-    final page = DetailPage(
-      DetailPageConfiguration(
-        selectedFiles,
-        null,
-        0,
-        "guest_view",
-      ),
-    );
-    routeToPage(context, page, forceCustomPageRoute: true).ignore();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Bus.instance.fire(GuestViewEvent(true, false));
-    });
+    if (await LocalAuthentication().isDeviceSupported()) {
+      final page = DetailPage(
+        DetailPageConfiguration(
+          selectedFiles,
+          null,
+          0,
+          "guest_view",
+        ),
+      );
+      routeToPage(context, page, forceCustomPageRoute: true).ignore();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Bus.instance.fire(GuestViewEvent(true, false));
+      });
+    } else {
+      await showErrorDialog(
+        context,
+        S.of(context).noSystemLockFound,
+        S.of(context).guestViewEnablePreSteps,
+      );
+    }
     widget.selectedFiles.clearAll();
   }
 

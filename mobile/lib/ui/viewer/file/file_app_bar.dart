@@ -299,13 +299,13 @@ class FileAppBarState extends State<FileAppBar> {
         child: Row(
           children: [
             Icon(
-              Icons.lock,
+              Icons.people_outline_rounded,
               color: Theme.of(context).iconTheme.color,
             ),
             const Padding(
               padding: EdgeInsets.all(8),
             ),
-            const Text("Guest view"),
+            Text(S.of(context).guestView),
           ],
         ),
       ),
@@ -419,7 +419,7 @@ class FileAppBarState extends State<FileAppBar> {
       await showErrorDialog(
         context,
         S.of(context).noSystemLockFound,
-        S.of(context).swipeLockEnablePreSteps,
+        S.of(context).guestViewEnablePreSteps,
       );
     }
   }
