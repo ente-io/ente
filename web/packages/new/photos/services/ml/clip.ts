@@ -122,8 +122,10 @@ const computeEmbedding = async (
 const convertToCLIPInput = (imageData: ImageData) => {
     const [requiredWidth, requiredHeight] = [256, 256];
 
-    const mean = [0.48145466, 0.4578275, 0.40821073] as const;
-    const std = [0.26862954, 0.26130258, 0.27577711] as const;
+    // const mean = [0.48145466, 0.4578275, 0.40821073] as const;
+    const mean = [0, 0, 0] as const;
+    // const std = [0.26862954, 0.26130258, 0.27577711] as const;
+    const std = [1, 1, 1] as const;
 
     const { width, height, data: pixelData } = imageData;
 
