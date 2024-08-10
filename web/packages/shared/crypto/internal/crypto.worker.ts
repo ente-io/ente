@@ -1,19 +1,12 @@
 import * as ente from "@/base/crypto/ente";
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
-import * as Comlink from "comlink";
+import { expose } from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
  * specific layer (base/crypto/ente.ts) or the internal libsodium layer
  * (internal/libsodium.ts).
- *
- * Use these when running on the main thread, since running these in a web
- * worker allows us to use potentially CPU-intensive crypto operations from the
- * main thread without stalling the UI.
- *
- * If the code that needs this functionality is already running in the context
- * of a web worker, then use the underlying functions directly.
  *
  * See: [Note: Crypto code hierarchy].
  *
@@ -186,4 +179,4 @@ export class DedicatedCryptoWorker {
     }
 }
 
-Comlink.expose(DedicatedCryptoWorker, self);
+expose(DedicatedCryptoWorker);

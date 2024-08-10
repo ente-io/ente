@@ -3,19 +3,44 @@
  *
  * [Note: Crypto code hierarchy]
  *
- * The functions in this file (base/crypto/ente.ts) are are thin wrappers over
- * the (thin-) wrappers in internal/libsodium.ts. The main difference is that
- * these functions don't talk in terms of the crypto algorithms, but rather in
- * terms the higher-level Ente specific goal we are trying to accomplish.
+ * 1.  ente.ts or crypto.worker.ts (high level, Ente specific).
+ * 2.  internal/libsodium.ts (wrappers over libsodium)
+ * 3.  libsodium (JS bindings).
  *
- * Some of these are also exposed via the web worker in
- * internal/crypto.worker.ts. The web worker variants should be used when we
- * need to perform these operations from the main thread, so that the UI remains
- * responsive while the potentially CPU-intensive encryption etc happens.
+ * Our cryptography primitives are provided by libsodium, specifically, its
+ * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer.
  *
- * 1. ente.ts or crypto.worker.ts (high level, Ente specific).
- * 2. internal/libsodium.ts (wrappers over libsodium)
- * 3. libsodium (JS bindings).
+ * Direct usage of "libsodium-wrappers" is restricted to
+ * `crypto/internal/libsodium.ts`. This is the next higher layer, and the first
+ * one that our code should directly use. Usually the functions in this file are
+ * thin wrappers over the raw libsodium APIs, with a bit of massaging or
+ * book-keeping. They also ensure that sodium.ready has been called before
+ * accessing libsodium's APIs, thus all the functions it exposes are async.
+ *
+ * The final layer is this file, `crypto/ente.ts`. These are usually thin
+ * wrappers themselves over functions exposed by `internal/libsodium.ts`, but
+ * the difference is that the functions in ente.ts don't talk in terms of the
+ * crypto algorithms, but rather in terms the higher-level Ente specific goal we
+ * are trying to accomplish.
+ *
+ * There is an additional actor in the play. Cryptographic operations are CPU
+ * intensive and would cause the UI to stutter if used directly on the main
+ * thread. To keep the UI smooth, we instead want to run them in a web worker.
+ * However, sometimes we already _are_ running in a web worker, and delegating
+ * to another worker is wasteful.
+ *
+ * To handle both these scenario, each function in this file is split into the
+ * external API, and the underlying implementation (denoted by an "I" suffix).
+ * The external API functions check to see if we're already in a web worker, and
+ * if so directly invoke the implementation. Otherwise the call the sibling
+ * function in a shared "crypto" web worker (which then invokes the
+ * implementation, but this time in the context of a web worker).
+ *
+ * Some older code directly calls the functions in the shared crypto.worker.ts,
+ * but that should be avoided since it makes the code not behave the way we want
+ * when we're already in a web worker. There are exceptions to this
+ * recommendation though (in circumstances where we create more crypto workers
+ * instead of using the shared one).
  */
 import ComlinkCryptoWorker from "@ente/shared/crypto";
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";

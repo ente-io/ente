@@ -4,7 +4,9 @@
  *
  * All functions are stateless, async, and safe to use in Web Workers.
  *
- * Docs for the JS library: https://github.com/jedisct1/libsodium.js
+ * Docs for the JS library: https://github.com/jedisct1/libsodium.js.
+ *
+ * To see where this code fits, see [Note: Crypto code hierarchy].
  */
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
