@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -89,4 +90,23 @@ func (c *Controller) uploadObject(obj fileData.S3FileMetadata, objectKey string,
 	}
 	log.Infof("Uploaded to bucket %s", result.Location)
 	return int64(len(embeddingObj)), nil
+}
+
+// copyObject copies the object from srcObjectKey to destObjectKey in the same bucket and returns the object size
+func (c *Controller) copyObject(srcObjectKey string, destObjectKey string, bucketID string) error {
+	bucket := c.S3Config.GetBucket(bucketID)
+	s3Client := c.S3Config.GetS3Client(bucketID)
+	copySource := fmt.Sprintf("%s/%s", *bucket, srcObjectKey)
+	copyInput := &s3.CopyObjectInput{
+		Bucket:     bucket,
+		CopySource: &copySource,
+		Key:        aws.String(destObjectKey),
+	}
+
+	_, err := s3Client.CopyObject(copyInput)
+	if err != nil {
+		return fmt.Errorf("failed to copy (%s) from %s to %s: %v", bucketID, srcObjectKey, destObjectKey, err)
+	}
+	log.Infof("Copied (%s) from %s to %s", bucketID, srcObjectKey, destObjectKey)
+	return nil
 }

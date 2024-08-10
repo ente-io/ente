@@ -19,6 +19,7 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"sync"
 	gTime "time"
 )
@@ -87,10 +88,21 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if req.Type != ente.DerivedMeta {
+	if req.Type != ente.DerivedMeta && req.Type != ente.PreviewVideo {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
 	fileOwnerID := userID
+	bucketID := c.S3Config.GetBucketID(req.Type)
+	if req.Type == ente.PreviewVideo {
+		fileObjectKey := req.S3FileObjectKey(fileOwnerID)
+		if !strings.Contains(*req.ObjectKey, fileObjectKey) {
+			return stacktrace.Propagate(ente.NewBadRequestWithMessage("objectKey should contain the file object key"), "")
+		}
+		err = c.copyObject(*req.ObjectKey, fileObjectKey, bucketID)
+		if err != nil {
+			return err
+		}
+	}
 	objectKey := req.S3FileMetadataObjectKey(fileOwnerID)
 	obj := fileData.S3FileMetadata{
 		Version:          *req.Version,
@@ -98,12 +110,13 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 		DecryptionHeader: *req.DecryptionHeader,
 		Client:           network.GetClientInfo(ctx),
 	}
-	bucketID := c.S3Config.GetBucketID(req.Type)
+
 	size, uploadErr := c.uploadObject(obj, objectKey, bucketID)
 	if uploadErr != nil {
 		log.Error(uploadErr)
 		return stacktrace.Propagate(uploadErr, "")
 	}
+
 	row := fileData.Row{
 		FileID:       req.FileID,
 		Type:         req.Type,
