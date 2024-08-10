@@ -1,27 +1,17 @@
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { Remote } from "comlink";
-import { type DedicatedCryptoWorker } from "./worker";
+import type { CryptoWorker } from "./worker";
 
-class ComlinkCryptoWorker {
-    private comlinkWorkerInstance:
-        | Promise<Remote<DedicatedCryptoWorker>>
-        | undefined;
+/** Cached instance of the {@link ComlinkWorker} that wraps our web worker. */
+let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;
 
-    async getInstance() {
-        if (!this.comlinkWorkerInstance) {
-            const comlinkWorker = getDedicatedCryptoWorker();
-            this.comlinkWorkerInstance = comlinkWorker.remote;
-        }
-        return this.comlinkWorkerInstance;
-    }
-}
+/**
+ * Lazily created, cached, instance of a CryptoWorker web worker.
+ */
+export const sharedCryptoWorker = async () =>
+    (_comlinkWorker ??= createComlinkWorker()).remote;
 
-export const getDedicatedCryptoWorker = () => {
-    const cryptoComlinkWorker = new ComlinkWorker<typeof DedicatedCryptoWorker>(
+const createComlinkWorker = () =>
+    new ComlinkWorker<typeof CryptoWorker>(
         "Crypto",
-        new Worker(new URL("./worker.ts", import.meta.url)),
+        new Worker(new URL("worker.ts", import.meta.url)),
     );
-    return cryptoComlinkWorker;
-};
-
-export default new ComlinkCryptoWorker();

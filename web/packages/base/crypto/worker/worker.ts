@@ -5,14 +5,15 @@ import * as libsodium from "../libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (base/crypto/ente.ts) or the internal libsodium layer
- * (internal/libsodium.ts).
+ * specific layer (crypto/ente.ts) or the libsodium layer (crypto/libsodium.ts).
  *
  * See: [Note: Crypto code hierarchy].
  *
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
-export class DedicatedCryptoWorker {
+export class CryptoWorker {
+    // TODO: -- AUDIT BELOW --
+
     async decryptThumbnail(
         encryptedData: Uint8Array,
         headerB64: string,
@@ -179,4 +180,4 @@ export class DedicatedCryptoWorker {
     }
 }
 
-expose(DedicatedCryptoWorker);
+expose(CryptoWorker);

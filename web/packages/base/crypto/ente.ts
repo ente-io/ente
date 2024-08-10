@@ -18,7 +18,7 @@
  * functions it exposes are async.
  *
  * The final layer is this file, `crypto/ente.ts`. These are usually thin
- * wrappers themselves over functions exposed by `crypto/libsodium.ts`, but the
+ * compositions of functionality exposed by `crypto/libsodium.ts`, but the
  * difference is that the functions in ente.ts don't talk in terms of the crypto
  * algorithms, but rather in terms the higher-level Ente specific goal we are
  * trying to accomplish.
@@ -44,9 +44,7 @@
  */
 import { inWorker } from "../env";
 import * as libsodium from "./libsodium";
-import ComlinkCryptoWorker from "./worker";
-
-const cryptoWorker = () => ComlinkCryptoWorker.getInstance();
+import { sharedCryptoWorker } from "./worker";
 
 /**
  * Encrypt arbitrary data associated with an Ente object (file, collection,
@@ -236,7 +234,7 @@ export const decryptMetadataBytes = (
 ) =>
     inWorker()
         ? decryptMetadataBytesI(encryptedDataB64, decryptionHeaderB64, keyB64)
-        : cryptoWorker().then((cw) =>
+        : sharedCryptoWorker().then((cw) =>
               cw.decryptMetadataBytes(
                   encryptedDataB64,
                   decryptionHeaderB64,
