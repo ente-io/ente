@@ -12,25 +12,11 @@ import * as libsodium from "../libsodium";
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
-    async encryptThumbnail(a: Uint8Array, b: string) {
-        return ei.encryptThumbnailI(a, b);
-    }
-
-    async encryptMetadata(a: unknown, b: string) {
-        return ei.encryptMetadataI(a, b);
-    }
-
-    async decryptThumbnail(a: Uint8Array, b: string, c: string) {
-        return ei.decryptThumbnailI(a, b, c);
-    }
-
-    async decryptMetadata(a: string, b: string, c: string) {
-        return ei.decryptMetadataI(a, b, c);
-    }
-
-    async decryptMetadataBytes(a: string, b: string, c: string) {
-        return ei.decryptMetadataBytesI(a, b, c);
-    }
+    encryptThumbnail = ei._encryptThumbnail;
+    encryptMetadata = ei._encryptMetadata;
+    decryptThumbnail = ei._decryptThumbnail;
+    decryptMetadata = ei._decryptMetadata;
+    decryptMetadataBytes = ei._decryptMetadataBytes;
 
     // TODO: -- AUDIT BELOW --
 
