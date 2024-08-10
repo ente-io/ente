@@ -1,6 +1,6 @@
 import { expose } from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
-import * as ente from "../ente";
+import * as ei from "../ente-impl";
 import * as libsodium from "../libsodium";
 
 /**
@@ -12,42 +12,30 @@ import * as libsodium from "../libsodium";
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
-    // TODO: -- AUDIT BELOW --
-
-    async decryptThumbnail(
-        encryptedData: Uint8Array,
-        headerB64: string,
-        keyB64: string,
-    ) {
-        return ente.decryptThumbnail(encryptedData, headerB64, keyB64);
+    async encryptThumbnail(a: Uint8Array, b: string) {
+        return ei.encryptThumbnailI(a, b);
     }
 
-    async decryptMetadata(
-        encryptedDataB64: string,
-        decryptionHeaderB64: string,
-        keyB64: string,
-    ) {
-        return ente.decryptMetadata(
-            encryptedDataB64,
-            decryptionHeaderB64,
-            keyB64,
-        );
+    async encryptMetadata(a: unknown, b: string) {
+        return ei.encryptMetadataI(a, b);
+    }
+
+    async decryptThumbnail(a: Uint8Array, b: string, c: string) {
+        return ei.decryptThumbnailI(a, b, c);
+    }
+
+    async decryptMetadata(a: string, b: string, c: string) {
+        return ei.decryptMetadataI(a, b, c);
     }
 
     async decryptMetadataBytes(a: string, b: string, c: string) {
-        return ente.decryptMetadataBytesI(a, b, c);
+        return ei.decryptMetadataBytesI(a, b, c);
     }
+
+    // TODO: -- AUDIT BELOW --
 
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
-    }
-
-    async encryptThumbnail(data: Uint8Array, keyB64: string) {
-        return ente.encryptThumbnail(data, keyB64);
-    }
-
-    async encryptMetadata(metadata: unknown, keyB64: string) {
-        return ente.encryptMetadata(metadata, keyB64);
     }
 
     async encryptFile(fileData: Uint8Array) {

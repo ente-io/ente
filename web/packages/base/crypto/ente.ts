@@ -36,13 +36,20 @@
  * function in a shared "crypto" web worker (which then invokes the
  * implementation, but this time in the context of a web worker).
  *
+ * To avoid a circular dependency during webpack imports, we need to keep the
+ * implementation functions in a separate file (ente-impl.ts). This is a bit
+ * unfortunate, since it makes them harder to read and reason about (since their
+ * documentation and parameter names are all in ente.ts).
+ *
  * Some older code directly calls the functions in the shared crypto.worker.ts,
  * but that should be avoided since it makes the code not behave the way we want
  * when we're already in a web worker. There are exceptions to this
  * recommendation though (in circumstances where we create more crypto workers
  * instead of using the shared one).
  */
+import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
+import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
 import { sharedCryptoWorker } from "./worker";
 
@@ -182,12 +189,14 @@ export const decryptFileEmbedding = async (
     encryptedDataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,
-) =>
-    decryptAssociatedData(
-        await libsodium.fromB64(encryptedDataB64),
+) => {
+    if (!inWorker()) assertionFailed("Only implemented for use in web workers");
+    return ei.decryptFileEmbeddingI(
+        encryptedDataB64,
         decryptionHeaderB64,
         keyB64,
     );
+};
 
 /**
  * Decrypt the metadata associated with an Ente object (file, collection or
@@ -212,15 +221,11 @@ export const decryptMetadata = async (
     decryptionHeaderB64: string,
     keyB64: string,
 ) =>
-    JSON.parse(
-        new TextDecoder().decode(
-            await decryptMetadataBytes(
-                encryptedDataB64,
-                decryptionHeaderB64,
-                keyB64,
-            ),
-        ),
-    ) as unknown;
+    inWorker()
+        ? ei.decryptMetadataI(encryptedDataB64, decryptionHeaderB64, keyB64)
+        : sharedCryptoWorker().then((w) =>
+              w.decryptMetadata(encryptedDataB64, decryptionHeaderB64, keyB64),
+          );
 
 /**
  * A variant of {@link decryptMetadata} that does not attempt to parse the
@@ -233,22 +238,15 @@ export const decryptMetadataBytes = (
     keyB64: string,
 ) =>
     inWorker()
-        ? decryptMetadataBytesI(encryptedDataB64, decryptionHeaderB64, keyB64)
-        : sharedCryptoWorker().then((cw) =>
-              cw.decryptMetadataBytes(
+        ? ei.decryptMetadataBytesI(
+              encryptedDataB64,
+              decryptionHeaderB64,
+              keyB64,
+          )
+        : sharedCryptoWorker().then((w) =>
+              w.decryptMetadataBytes(
                   encryptedDataB64,
                   decryptionHeaderB64,
                   keyB64,
               ),
           );
-
-export const decryptMetadataBytesI = async (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
-    await decryptAssociatedData(
-        await libsodium.fromB64(encryptedDataB64),
-        decryptionHeaderB64,
-        keyB64,
-    );
