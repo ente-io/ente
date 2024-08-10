@@ -6,8 +6,11 @@ import {
     isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
+    wipCluster,
+    wipClusterEnable,
 } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
+import { personDiff } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -24,7 +27,7 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
-import { getLatestEntities } from "./entityService";
+import { getEntityKey, getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -414,12 +417,28 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 }
 
 async function getAllPeople(limit: number = undefined) {
+    if (!(await wipClusterEnable())) return [];
+
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
+        const entityKey = await getEntityKey("person" as EntityType);
+        const peopleR = await personDiff(entityKey.data);
+        const r = peopleR.length;
+        log.debug(() => ["people", peopleR]);
+
+        if (r) return [];
+        return [];
+    }
+
     let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
+    people = await wipCluster();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);
     // });
     people = people ?? [];
-    return people
+    const result = people
         .sort((p1, p2) => p2.files.length - p1.files.length)
         .slice(0, limit);
+    // log.debug(() => ["getAllPeople", result]);
+
+    return result;
 }
