@@ -1,7 +1,7 @@
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
-import { pixelRGBBicubic } from "./image";
+import { pixelRGBBilinear } from "./image";
 import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
@@ -145,7 +145,7 @@ const convertToCLIPInput = (imageData: ImageData) => {
     const cOffsetB = 2 * requiredHeight * requiredWidth; // ChannelOffsetBlue
     for (let h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
         for (let w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-            const { r, g, b } = pixelRGBBicubic(
+            const { r, g, b } = pixelRGBBilinear(
                 w / scale,
                 h / scale,
                 pixelData,
