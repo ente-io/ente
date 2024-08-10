@@ -215,6 +215,7 @@ class _DetailPageState extends State<DetailPage> {
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
+          isFromMemories: false,
         );
         return GestureDetector(
           onTap: () {

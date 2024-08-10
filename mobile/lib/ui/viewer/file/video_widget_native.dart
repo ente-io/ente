@@ -32,10 +32,12 @@ class VideoWidgetNative extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final bool isFromMemories;
   const VideoWidgetNative(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.isFromMemories = false,
     super.key,
   });
 
@@ -239,104 +241,114 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         bottom: verticalMargin,
                         right: 0,
                         left: 0,
-                        child: ValueListenableBuilder(
-                          builder: (BuildContext context, bool value, _) {
-                            return value
-                                ? ValueListenableBuilder(
-                                    valueListenable: _showControls,
-                                    builder:
-                                        (BuildContext context, bool value, _) {
-                                      return AnimatedOpacity(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        curve: Curves.easeInQuad,
-                                        opacity: value ? 1 : 0,
-                                        child: IgnorePointer(
-                                          ignoring: !value,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                            ),
-                                            child: Container(
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            bottom: widget.isFromMemories ? 0 : 32,
+                          ),
+                          child: ValueListenableBuilder(
+                            builder: (BuildContext context, bool value, _) {
+                              return value
+                                  ? ValueListenableBuilder(
+                                      valueListenable: _showControls,
+                                      builder: (
+                                        BuildContext context,
+                                        bool value,
+                                        _,
+                                      ) {
+                                        return AnimatedOpacity(
+                                          duration: const Duration(
+                                            milliseconds: 200,
+                                          ),
+                                          curve: Curves.easeInQuad,
+                                          opacity: value ? 1 : 0,
+                                          child: IgnorePointer(
+                                            ignoring: !value,
+                                            child: Padding(
                                               padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                16,
-                                                4,
-                                                16,
-                                                4,
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 8,
                                               ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black
-                                                    .withOpacity(0.3),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                  Radius.circular(8),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                  16,
+                                                  4,
+                                                  16,
+                                                  4,
                                                 ),
-                                                border: Border.all(
-                                                  color: strokeFaintDark,
-                                                  width: 1,
-                                                ),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  AnimatedSize(
-                                                    duration: const Duration(
-                                                      seconds: 5,
-                                                    ),
-                                                    curve: Curves.easeInOut,
-                                                    child:
-                                                        ValueListenableBuilder(
-                                                      valueListenable: _controller!
-                                                          .onPlaybackPositionChanged,
-                                                      builder: (
-                                                        BuildContext context,
-                                                        int value,
-                                                        _,
-                                                      ) {
-                                                        return Text(
-                                                          secondsToDuration(
-                                                            value,
-                                                          ),
-                                                          style:
-                                                              getEnteTextTheme(
-                                                            context,
-                                                          ).mini.copyWith(
-                                                                    color:
-                                                                        textBaseDark,
-                                                                  ),
-                                                        );
-                                                      },
-                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withOpacity(0.3),
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                    Radius.circular(8),
                                                   ),
-                                                  Expanded(
-                                                    child: SeekBar(
-                                                      _controller!,
-                                                      _durationToSeconds(
-                                                        duration,
+                                                  border: Border.all(
+                                                    color: strokeFaintDark,
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    AnimatedSize(
+                                                      duration: const Duration(
+                                                        seconds: 5,
                                                       ),
-                                                      _isSeeking,
+                                                      curve: Curves.easeInOut,
+                                                      child:
+                                                          ValueListenableBuilder(
+                                                        valueListenable:
+                                                            _controller!
+                                                                .onPlaybackPositionChanged,
+                                                        builder: (
+                                                          BuildContext context,
+                                                          int value,
+                                                          _,
+                                                        ) {
+                                                          return Text(
+                                                            secondsToDuration(
+                                                              value,
+                                                            ),
+                                                            style:
+                                                                getEnteTextTheme(
+                                                              context,
+                                                            ).mini.copyWith(
+                                                                      color:
+                                                                          textBaseDark,
+                                                                    ),
+                                                          );
+                                                        },
+                                                      ),
                                                     ),
-                                                  ),
-                                                  Text(
-                                                    duration ?? "0:00",
-                                                    style: getEnteTextTheme(
-                                                      context,
-                                                    ).mini.copyWith(
-                                                          color: textBaseDark,
+                                                    Expanded(
+                                                      child: SeekBar(
+                                                        _controller!,
+                                                        _durationToSeconds(
+                                                          duration,
                                                         ),
-                                                  ),
-                                                ],
+                                                        _isSeeking,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      duration ?? "0:00",
+                                                      style: getEnteTextTheme(
+                                                        context,
+                                                      ).mini.copyWith(
+                                                            color: textBaseDark,
+                                                          ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : const SizedBox();
-                          },
-                          valueListenable: _isPlaybackReady,
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox();
+                            },
+                            valueListenable: _isPlaybackReady,
+                          ),
                         ),
                       ),
                     ],
