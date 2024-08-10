@@ -20,13 +20,16 @@ export const _encryptAssociatedData = libsodium.encryptChaChaOneShot;
 
 export const _encryptThumbnail = _encryptAssociatedData;
 
-export const _encryptFileEmbedding = (r: EncryptBytes) =>
+export const _encryptMetadataBytes = (r: EncryptBytes) =>
     _encryptAssociatedData(r).then(EncryptedBytesToB64);
 
-export const _encryptMetadata = async ({ jsonValue, keyB64 }: EncryptJSON) => {
-    const data = new TextEncoder().encode(JSON.stringify(jsonValue));
-    return EncryptedBytesToB64(await _encryptAssociatedData({ data, keyB64 }));
-};
+export const _encryptFileEmbedding = _encryptMetadataBytes;
+
+export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
+    _encryptMetadataBytes({
+        data: new TextEncoder().encode(JSON.stringify(jsonValue)),
+        keyB64,
+    });
 
 export const _decryptAssociatedData = libsodium.decryptChaChaOneShot;
 

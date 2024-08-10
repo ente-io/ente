@@ -86,17 +86,25 @@ export const encryptAssociatedData = (r: EncryptBytes) =>
  * Encrypt the thumbnail for a file.
  *
  * This is just an alias for {@link encryptAssociatedData}.
+ *
+ * Use {@link decryptFileEmbedding} to decrypt the result.
  */
 export const encryptThumbnail = (r: EncryptBytes) =>
     assertInWorker(ei._encryptThumbnail(r));
 
 /**
+ * A variant of {@link encryptAssociatedData} that returns the encrypted data in
+ * the result as a base64 string instead of its bytes.
+ *
+ * Use {@link decryptMetadata} to decrypt the result.
+ */
+export const encryptMetadataBytes = (r: EncryptBytes) =>
+    assertInWorker(ei._encryptMetadataBytes(r));
+
+/**
  * Encrypted the embedding associated with a file using the file's key.
  *
- * This as a variant of {@link encryptAssociatedData} tailored for
- * encrypting the embeddings (a.k.a. derived data) associated with a file. In
- * particular, it returns the encrypted data in the result as a base64 string
- * instead of its bytes.
+ * This is just an alias for {@link encryptMetadataBytes}.
  *
  * Use {@link decryptFileEmbedding} to decrypt the result.
  */
@@ -104,7 +112,7 @@ export const encryptFileEmbedding = async (r: EncryptBytes) =>
     assertInWorker(ei._encryptFileEmbedding(r));
 
 /**
- * Encrypt the metadata associated with an Ente object (file, collection or
+ * Encrypt the JSON metadata associated with an Ente object (file, collection or
  * entity) using the object's key.
  *
  * This is a variant of {@link encryptAssociatedData} tailored for encrypting
@@ -118,8 +126,8 @@ export const encryptFileEmbedding = async (r: EncryptBytes) =>
  *
  * Use {@link decryptMetadata} to decrypt the result.
  */
-export const encryptMetadata = async (r: EncryptJSON) =>
-    assertInWorker(ei._encryptMetadata(r));
+export const encryptMetadataJSON = async (r: EncryptJSON) =>
+    assertInWorker(ei._encryptMetadataJSON(r));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or
