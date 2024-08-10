@@ -190,5 +190,5 @@ export const clipMatches = async (
             // This code is on the hot path, so these optimizations help.
             [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
-    return new Map(items.filter(([, score]) => score >= 0.23));
+    return new Map(items.filter(([, score]) => score >= 0.2));
 };
