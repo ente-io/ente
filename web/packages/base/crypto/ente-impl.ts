@@ -1,6 +1,6 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
-import type { EncryptBytes, EncryptJSON } from "./types";
+import type { DecryptB64, EncryptBytes, EncryptJSON } from "./types";
 
 export const _encryptAssociatedData = libsodium.encryptChaChaOneShot;
 
@@ -29,41 +29,31 @@ export const _encryptMetadata = async ({ jsonValue, keyB64 }: EncryptJSON) => {
 
 export const _decryptAssociatedData = libsodium.decryptChaChaOneShot;
 
-export const decryptThumbnailI = decryptAssociatedDataI;
+export const _decryptThumbnail = _decryptAssociatedData;
 
-export const decryptFileEmbeddingI = async (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
-    decryptAssociatedDataI(
-        await libsodium.fromB64(encryptedDataB64),
+export const _decryptFileEmbedding = async ({
+    encryptedDataB64,
+    decryptionHeaderB64,
+    keyB64,
+}: DecryptB64) =>
+    _decryptAssociatedData({
+        encryptedData: await libsodium.fromB64(encryptedDataB64),
         decryptionHeaderB64,
         keyB64,
-    );
+    });
 
-export const decryptMetadataI = async (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
+export const _decryptMetadata = async (r: DecryptB64) =>
     JSON.parse(
-        new TextDecoder().decode(
-            await decryptMetadataBytesI(
-                encryptedDataB64,
-                decryptionHeaderB64,
-                keyB64,
-            ),
-        ),
+        new TextDecoder().decode(await _decryptMetadataBytes(r)),
     ) as unknown;
 
-export const decryptMetadataBytesI = async (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
-    await decryptAssociatedDataI(
-        await libsodium.fromB64(encryptedDataB64),
+export const _decryptMetadataBytes = async ({
+    encryptedDataB64,
+    decryptionHeaderB64,
+    keyB64,
+}: DecryptB64) =>
+    await _decryptAssociatedData({
+        encryptedData: await libsodium.fromB64(encryptedDataB64),
         decryptionHeaderB64,
         keyB64,
-    );
+    });

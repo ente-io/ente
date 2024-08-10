@@ -69,13 +69,13 @@ export interface EncryptedB64 {
 }
 
 /**
- * A decryption request with the encrypted data as a base64 encoded string.
+ * A decryption request with the encrypted data as bytes.
  */
-export interface DecryptB64 {
+export interface DecryptBytes {
     /**
-     * A base64 string containing the data to decrypt.
+     * A {@link Uint8Array} containing the bytes to decrypt.
      */
-    encryptedDataB64: string;
+    encryptedData: Uint8Array;
     /**
      * A base64 string containing the decryption header that was produced during
      * encryption.
@@ -91,13 +91,13 @@ export interface DecryptB64 {
 }
 
 /**
- * A decryption request with the encrypted data as bytes.
+ * A decryption request with the encrypted data as a base64 encoded string.
  */
-export interface DecryptBytes {
+export interface DecryptB64 {
     /**
-     * A {@link Uint8Array} containing the bytes to decrypt.
+     * A base64 string containing the data to decrypt.
      */
-    encryptedData: Uint8Array;
+    encryptedDataB64: string;
     /**
      * A base64 string containing the decryption header that was produced during
      * encryption.

@@ -50,8 +50,12 @@
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import * as libsodium from "./libsodium";
-import type { EncryptBytes } from "./types";
+import type {
+    DecryptB64,
+    DecryptBytes,
+    EncryptBytes,
+    EncryptJSON,
+} from "./types";
 import { sharedCryptoWorker } from "./worker";
 
 /**
@@ -96,8 +100,8 @@ export const encryptThumbnail = (r: EncryptBytes) =>
  *
  * Use {@link decryptFileEmbedding} to decrypt the result.
  */
-export const encryptFileEmbedding = async (data: Uint8Array, keyB64: string) =>
-    assertInWorker(ei.encryptFileEmbeddingI(data, keyB64));
+export const encryptFileEmbedding = async (r: EncryptBytes) =>
+    assertInWorker(ei._encryptFileEmbedding(r));
 
 /**
  * Encrypt the metadata associated with an Ente object (file, collection or
@@ -113,15 +117,9 @@ export const encryptFileEmbedding = async (data: Uint8Array, keyB64: string) =>
  * encrypted bytes, it returns their base64 string representation.
  *
  * Use {@link decryptMetadata} to decrypt the result.
- *
- * @param metadata The JSON value to encrypt. It can be an arbitrary JSON value,
- * but since TypeScript currently doesn't have a native JSON type, it is typed
- * as an unknown.
- *
- * @returns The encrypted data and decryption header, both as base64 strings.
  */
-export const encryptMetadata = async (metadata: unknown, keyB64: string) =>
-    assertInWorker(ei.encryptMetadataI(metadata, keyB64));
+export const encryptMetadata = async (r: EncryptJSON) =>
+    assertInWorker(ei._encryptMetadata(r));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or
@@ -130,53 +128,25 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) =>
  * This is the sibling of {@link encryptAssociatedData}.
  *
  * See {@link decryptChaChaOneShot} for the implementation details.
- *
- * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
- *
- * @param headerB64 A base64 string containing the decryption header that was
- * produced during encryption.
- *
- * @param keyB64 A base64 string containing the encryption key. This is expected
- * to be the key of the object to which {@link encryptedDataB64} is associated.
- *
- * @returns The decrypted bytes.
  */
-export const decryptAssociatedData = (
-    encryptedData: Uint8Array,
-    headerB64: string,
-    keyB64: string,
-) => libsodium.decryptChaChaOneShot;
+export const decryptAssociatedData = (r: DecryptBytes) =>
+    assertInWorker(ei._decryptAssociatedData(r));
 
 /**
  * Decrypt the thumbnail for a file.
  *
- * This is just an alias for {@link decryptAssociatedData}.
+ * This is the sibling of {@link encryptThumbnail}.
  */
-export const decryptThumbnail = decryptAssociatedData;
+export const decryptThumbnail = (r: DecryptBytes) =>
+    assertInWorker(ei._decryptThumbnail(r));
 
 /**
  * Decrypt the embedding associated with a file using the file's key.
  *
  * This is the sibling of {@link encryptFileEmbedding}.
- *
- * @param encryptedDataB64 A base64 string containing the encrypted embedding.
- *
- * @param headerB64 A base64 string containing the decryption header produced
- * during encryption.
- *
- * @param keyB64 A base64 string containing the encryption key. This is expected
- * to be the key of the file with which {@link encryptedDataB64} is associated.
- *
- * @returns The decrypted metadata JSON object.
  */
-export const decryptFileEmbedding = async (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
-    assertInWorker(
-        ei.decryptFileEmbeddingI(encryptedDataB64, decryptionHeaderB64, keyB64),
-    );
+export const decryptFileEmbedding = async (r: DecryptB64) =>
+    assertInWorker(ei._decryptFileEmbedding(r));
 
 /**
  * Decrypt the metadata associated with an Ente object (file, collection or
@@ -184,49 +154,20 @@ export const decryptFileEmbedding = async (
  *
  * This is the sibling of {@link encryptMetadata}.
  *
- * @param encryptedDataB64 base64 encoded string containing the encrypted data.
- *
- * @param headerB64 base64 encoded string containing the decryption header
- * produced during encryption.
- *
- * @param keyB64 base64 encoded string containing the encryption key. This is
- * expected to be the key of the object with which {@link encryptedDataB64} is
- * associated.
- *
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadata = async (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
+export const decryptMetadata = (r: DecryptB64) =>
     inWorker()
-        ? ei.decryptMetadataI(encryptedDataB64, decryptionHeaderB64, keyB64)
-        : sharedCryptoWorker().then((w) =>
-              w.decryptMetadata(encryptedDataB64, decryptionHeaderB64, keyB64),
-          );
+        ? ei._decryptMetadata(r)
+        : sharedCryptoWorker().then((w) => w.decryptMetadata(r));
 
 /**
  * A variant of {@link decryptMetadata} that does not attempt to parse the
  * decrypted data as a JSON string and instead just returns the raw decrypted
  * bytes that we got.
  */
-export const decryptMetadataBytes = (
-    encryptedDataB64: string,
-    decryptionHeaderB64: string,
-    keyB64: string,
-) =>
+export const decryptMetadataBytes = (r: DecryptB64) =>
     inWorker()
-        ? ei.decryptMetadataBytesI(
-              encryptedDataB64,
-              decryptionHeaderB64,
-              keyB64,
-          )
-        : sharedCryptoWorker().then((w) =>
-              w.decryptMetadataBytes(
-                  encryptedDataB64,
-                  decryptionHeaderB64,
-                  keyB64,
-              ),
-          );
+        ? ei._decryptMetadataBytes(r)
+        : sharedCryptoWorker().then((w) => w.decryptMetadataBytes(r));
