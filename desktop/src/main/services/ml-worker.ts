@@ -209,7 +209,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
 /**
  * Compute CLIP embeddings for an image.
  *
- * The embeddings are computed using ONNX runtime, with CLIP as the model.
+ * The embeddings are computed using ONNX runtime, with MobileCLIP as the model.
  */
 export const computeCLIPImageEmbedding = async (input: Float32Array) => {
     const session = await cachedCLIPImageSession();
@@ -237,7 +237,7 @@ const getTokenizer = () => {
 /**
  * Compute CLIP embeddings for an text snippet.
  *
- * The embeddings are computed using ONNX runtime, with CLIP as the model.
+ * The embeddings are computed using ONNX runtime, with MobileCLIP as the model.
  */
 export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const sessionOrSkip = await Promise.race([

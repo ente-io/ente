@@ -39,8 +39,9 @@ export const clipIndexingVersion = 1;
  * initial launch of this feature using the GGML runtime.
  *
  * Since the initial launch, we've switched over to another runtime,
- * [ONNX](https://onnxruntime.ai) and have made other implementation changes,
- * but the overall gist remains the same.
+ * [ONNX](https://onnxruntime.ai), started using Apple's
+ * [MobileCLIP](https://github.com/apple/ml-mobileclip/) as the model and have
+ * made other implementation changes, but the overall gist remains the same.
  *
  * Note that we don't train the neural network - we only use one of the publicly
  * available pre-trained neural networks for inference. These neural networks
@@ -117,15 +118,10 @@ const computeEmbedding = async (
 };
 
 /**
- * Convert {@link imageData} into the format that the CLIP model expects.
+ * Convert {@link imageData} into the format that the MobileCLIP model expects.
  */
 const convertToCLIPInput = (imageData: ImageData) => {
     const [requiredWidth, requiredHeight] = [256, 256];
-
-    // const mean = [0.48145466, 0.4578275, 0.40821073] as const;
-    const mean = [0, 0, 0] as const;
-    // const std = [0.26862954, 0.26130258, 0.27577711] as const;
-    const std = [1, 1, 1] as const;
 
     const { width, height, data: pixelData } = imageData;
 
@@ -152,9 +148,9 @@ const convertToCLIPInput = (imageData: ImageData) => {
                 width,
                 height,
             );
-            clipInput[pi] = (r / 255.0 - mean[0]) / std[0];
-            clipInput[pi + cOffsetG] = (g / 255.0 - mean[1]) / std[1];
-            clipInput[pi + cOffsetB] = (b / 255.0 - mean[2]) / std[2];
+            clipInput[pi] = r / 255.0;
+            clipInput[pi + cOffsetG] = g / 255.0;
+            clipInput[pi + cOffsetB] = b / 255.0;
             pi++;
         }
     }
