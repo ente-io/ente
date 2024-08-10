@@ -1,5 +1,6 @@
 import { sendOtt } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -23,7 +24,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 
 const bip39 = require("bip39");
 // mobile client library only supports english.

@@ -13,6 +13,7 @@ import {
 } from "@/accounts/services/srp";
 import type { UpdatedKey } from "@/accounts/types/user";
 import { convertBase64ToBuffer, convertBufferToBase64 } from "@/accounts/utils";
+import { sharedCryptoWorker } from "@/base/crypto/worker";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -34,7 +35,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 
 const Page: React.FC<PageProps> = () => {
     const [token, setToken] = useState<string>();

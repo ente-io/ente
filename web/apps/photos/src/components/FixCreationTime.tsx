@@ -1,4 +1,3 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import {
     decryptPublicMagicMetadata,
@@ -353,25 +352,15 @@ const updateEnteFileDate = async (
 
     if (!newDate) return;
 
-    const cryptoWorker = await sharedCryptoWorker();
-
     const existingUIDate = getUICreationDate(
         enteFile,
-        await decryptPublicMagicMetadata(
-            enteFile,
-            cryptoWorker.decryptMetadata,
-        ),
+        await decryptPublicMagicMetadata(enteFile),
     );
     if (newDate.timestamp == existingUIDate.getTime()) return;
 
-    await updateRemotePublicMagicMetadata(
-        enteFile,
-        {
-            dateTime: newDate.dateTime,
-            offsetTime: newDate.offset,
-            editedTime: newDate.timestamp,
-        },
-        cryptoWorker.encryptMetadata,
-        cryptoWorker.decryptMetadata,
-    );
+    await updateRemotePublicMagicMetadata(enteFile, {
+        dateTime: newDate.dateTime,
+        offsetTime: newDate.offset,
+        editedTime: newDate.timestamp,
+    });
 };

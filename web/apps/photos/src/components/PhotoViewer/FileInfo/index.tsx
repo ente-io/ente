@@ -1,6 +1,5 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
-import { sharedCryptoWorker } from "@/base/crypto/worker";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { ParsedMetadata } from "@/media/file-metadata";
@@ -399,13 +398,10 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     return;
                 }
 
-                const cryptoWorker = await sharedCryptoWorker();
-                await updateRemotePublicMagicMetadata(
-                    enteFile,
-                    { dateTime, editedTime: timestamp },
-                    cryptoWorker.encryptMetadata,
-                    cryptoWorker.decryptMetadata,
-                );
+                await updateRemotePublicMagicMetadata(enteFile, {
+                    dateTime,
+                    editedTime: timestamp,
+                });
 
                 scheduleUpdate();
             }
