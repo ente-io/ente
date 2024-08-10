@@ -1290,5 +1290,7 @@
   "noQuickLinksSelected": "未选择快速链接",
   "pleaseSelectQuickLinksToRemove": "请选择要删除的快速链接",
   "removePublicLinks": "删除公开链接",
-  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "这将删除所有选定的快速链接的公共链接。"
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "这将删除所有选定的快速链接的公共链接。",
+  "guestView": "Guest view",
+  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
 }

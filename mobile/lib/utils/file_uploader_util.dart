@@ -44,6 +44,8 @@ class MediaUploadData {
   // For iOS, this value will be always null.
   final int? motionPhotoStartIndex;
 
+  bool? isPanorama;
+
   MediaUploadData(
     this.sourceFile,
     this.thumbnail,
@@ -52,6 +54,7 @@ class MediaUploadData {
     this.height,
     this.width,
     this.motionPhotoStartIndex,
+    this.isPanorama,
   });
 }
 

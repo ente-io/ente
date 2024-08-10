@@ -193,6 +193,9 @@ For more details, see [translations.md](translations.md).
 -   [zod](https://github.com/colinhacks/zod) is used for runtime typechecking
     (e.g. verifying that API responses match the expected TypeScript shape).
 
+-   [nanoid](https://github.com/ai/nanoid) is used for generating unique
+    identifiers.
+
 -   [debounce](https://github.com/sindresorhus/debounce) and its
     promise-supporting sibling
     [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
@@ -201,11 +204,8 @@ For more details, see [translations.md](translations.md).
 ## Media
 
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
-    parsing. We also need its optional peer dependency
-    [@xmldom/xmldom](https://github.com/xmldom/xmldom) since the browser's
-    DOMParser is not available in web workers.
-    [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing back
-    Exif (only supports JPEG).
+    parsing. [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing
+    back Exif (only supports JPEG).
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
     web code (Live photos are zip files under the hood). Note that the desktop
