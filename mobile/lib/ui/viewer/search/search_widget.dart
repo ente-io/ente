@@ -96,7 +96,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     focusNode.dispose();
     _tabDoubleTapEvent?.cancel();
     textController.removeListener(textControllerListener);

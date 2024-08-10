@@ -148,7 +148,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _showControls.dispose();
     _isSeeking.removeListener(_seekListener);
     _isSeeking.dispose();
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 
