@@ -54,6 +54,16 @@ import * as libsodium from "./libsodium";
 import { sharedCryptoWorker } from "./worker";
 
 /**
+ * Some functions we haven't yet needed to use on the main thread. These don't
+ * have a corresponding sharedCryptoWorker interface. This assertion will let us
+ * know when we need to implement them (in production it'll just log a warning).
+ */
+const assertInWorker = <T>(x: T): T => {
+    if (!inWorker()) assertionFailed("Currently only usable in a web worker");
+    return x;
+};
+
+/**
  * Encrypt arbitrary data associated with an Ente object (file, collection,
  * entity) using the object's key.
  *
@@ -69,7 +79,8 @@ import { sharedCryptoWorker } from "./worker";
  *
  * @returns The encrypted data and the (base64 encoded) decryption header.
  */
-export const encryptAssociatedData = libsodium.encryptChaChaOneShot;
+export const encryptAssociatedData = (data: Uint8Array, keyB64: string) =>
+    assertInWorker(ei.encryptAssociatedDataI(data, keyB64));
 
 /**
  * Encrypt the thumbnail for a file.
@@ -83,7 +94,8 @@ export const encryptAssociatedData = libsodium.encryptChaChaOneShot;
  * @returns The encrypted thumbnail, and the associated decryption header
  * (base64 encoded).
  */
-export const encryptThumbnail = encryptAssociatedData;
+export const encryptThumbnail = (data: Uint8Array, keyB64: string) =>
+    assertInWorker(ei.encryptThumbnailI(data, keyB64));
 
 /**
  * Encrypted the embedding associated with a file using the file's key.
@@ -95,19 +107,8 @@ export const encryptThumbnail = encryptAssociatedData;
  *
  * Use {@link decryptFileEmbedding} to decrypt the result.
  */
-export const encryptFileEmbedding = async (
-    data: Uint8Array,
-    keyB64: string,
-) => {
-    const { encryptedData, decryptionHeaderB64 } = await encryptAssociatedData(
-        data,
-        keyB64,
-    );
-    return {
-        encryptedDataB64: await libsodium.toB64(encryptedData),
-        decryptionHeaderB64,
-    };
-};
+export const encryptFileEmbedding = async (data: Uint8Array, keyB64: string) =>
+    assertInWorker(ei.encryptFileEmbeddingI(data, keyB64));
 
 /**
  * Encrypt the metadata associated with an Ente object (file, collection or
@@ -130,18 +131,8 @@ export const encryptFileEmbedding = async (
  *
  * @returns The encrypted data and decryption header, both as base64 strings.
  */
-export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
-    const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
-
-    const { encryptedData, decryptionHeaderB64 } = await encryptAssociatedData(
-        encodedMetadata,
-        keyB64,
-    );
-    return {
-        encryptedDataB64: await libsodium.toB64(encryptedData),
-        decryptionHeaderB64,
-    };
-};
+export const encryptMetadata = async (metadata: unknown, keyB64: string) =>
+    assertInWorker(ei.encryptMetadataI(metadata, keyB64));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or
@@ -161,7 +152,10 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) => {
  *
  * @returns The decrypted bytes.
  */
-export const decryptAssociatedData = libsodium.decryptChaChaOneShot;
+export const decryptAssociatedData = (    encryptedData: Uint8Array,
+    headerB64: string,
+    keyB64: string,
+) => libsodium.decryptChaChaOneShot;
 
 /**
  * Decrypt the thumbnail for a file.
@@ -189,14 +183,10 @@ export const decryptFileEmbedding = async (
     encryptedDataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,
-) => {
-    if (!inWorker()) assertionFailed("Only implemented for use in web workers");
-    return ei.decryptFileEmbeddingI(
-        encryptedDataB64,
-        decryptionHeaderB64,
-        keyB64,
+) =>
+    assertInWorker(
+        ei.decryptFileEmbeddingI(encryptedDataB64, decryptionHeaderB64, keyB64),
     );
-};
 
 /**
  * Decrypt the metadata associated with an Ente object (file, collection or
