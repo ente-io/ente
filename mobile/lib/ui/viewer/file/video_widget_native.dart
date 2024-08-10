@@ -410,10 +410,13 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void _isSeekingListener() {
     if (!_isSeeking.value &&
         _controller?.playbackInfo?.status == PlaybackStatus.playing) {
-      Future.delayed(const Duration(milliseconds: 1500), () {
+      Future.delayed(const Duration(milliseconds: 2000), () {
         if (mounted) {
           if (_isSeeking.value) return;
           _showControls.value = false;
+          if (Platform.isIOS) {
+            widget.playbackCallback!(true);
+          }
         }
       });
     }
@@ -427,7 +430,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
     if (_controller!.playbackInfo?.status == PlaybackStatus.playing) {
       if (widget.playbackCallback != null && mounted) {
-        Future.delayed(const Duration(milliseconds: 1500), () {
+        Future.delayed(const Duration(milliseconds: 2000), () {
           if (mounted) {
             if (_isSeeking.value) return;
             _showControls.value = false;
