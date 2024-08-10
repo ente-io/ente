@@ -18,6 +18,6 @@ export const sharedCryptoWorker = async () =>
  */
 export const createComlinkCryptoWorker = () =>
     new ComlinkWorker<typeof CryptoWorker>(
-        "Crypto",
+        "crypto",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
