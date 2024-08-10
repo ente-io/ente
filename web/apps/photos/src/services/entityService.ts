@@ -1,3 +1,4 @@
+import { decryptMetadataJSON } from "@/base/crypto/ente";
 import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
@@ -129,8 +130,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
                         return entity as unknown as Entity<T>;
                     }
                     const { encryptedData, header, ...rest } = entity;
-                    const worker = await sharedCryptoWorker();
-                    const decryptedData = await worker.decryptMetadataJSON({
+                    const decryptedData = await decryptMetadataJSON({
                         encryptedDataB64: encryptedData,
                         decryptionHeaderB64: header,
                         keyB64: entityKey.data,
