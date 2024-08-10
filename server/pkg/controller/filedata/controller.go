@@ -24,10 +24,6 @@ import (
 	gTime "time"
 )
 
-const (
-	embeddingFetchTimeout = 10 * gTime.Second
-)
-
 // _fetchConfig is the configuration for the fetching objects from S3
 type _fetchConfig struct {
 	RetryCount     int
@@ -173,7 +169,7 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 	errFileIds := make([]int64, 0)
 	for i := range doRows {
 		dbFileIds = append(dbFileIds, doRows[i].FileID)
-		if doRows[i].IsDeleted == false {
+		if !doRows[i].IsDeleted {
 			activeRows = append(activeRows, doRows[i])
 		}
 	}
@@ -209,7 +205,7 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row) ([]bulkS3MetaFetchResult, error) {
 	var wg sync.WaitGroup
 	embeddingObjects := make([]bulkS3MetaFetchResult, len(dbRows))
-	for i, _ := range dbRows {
+	for i := range dbRows {
 		dbRow := dbRows[i]
 		wg.Add(1)
 		globalFileFetchSemaphore <- struct{}{} // Acquire from global semaphore

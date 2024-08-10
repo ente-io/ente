@@ -209,7 +209,7 @@ func (r *Repository) RegisterReplicationAttempt(ctx context.Context, row filedat
 	if array.StringInList(dstBucketID, row.DeleteFromBuckets) {
 		return r.MoveBetweenBuckets(row, dstBucketID, DeletionColumn, InflightRepColumn)
 	}
-	if array.StringInList(dstBucketID, row.InflightReplicas) == false {
+	if !array.StringInList(dstBucketID, row.InflightReplicas) {
 		return r.AddBucket(row, dstBucketID, InflightRepColumn)
 	}
 	return nil

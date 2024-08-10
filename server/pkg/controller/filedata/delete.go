@@ -8,7 +8,7 @@ import (
 	"github.com/ente-io/museum/ente/filedata"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
-	"github.com/sirupsen/logrus"
+
 	log "github.com/sirupsen/logrus"
 	"time"
 )
@@ -80,8 +80,7 @@ func (c *Controller) deleteFileRow(fileDataRow filedata.Row) error {
 	}
 	ctxLogger := log.WithField("file_id", fileDataRow.DeleteFromBuckets).WithField("type", fileDataRow.Type).WithField("user_id", fileDataRow.UserID)
 	objectKeys := filedata.AllObjects(fileID, ownerID, fileDataRow.Type)
-	bucketColumnMap := make(map[string]string)
-	bucketColumnMap, err = getMapOfBucketItToColumn(fileDataRow)
+	bucketColumnMap, err := getMapOfBucketItToColumn(fileDataRow)
 	if err != nil {
 		ctxLogger.WithError(err).Error("Failed to get bucketColumnMap")
 		return err
@@ -91,7 +90,7 @@ func (c *Controller) deleteFileRow(fileDataRow filedata.Row) error {
 		for _, objectKey := range objectKeys {
 			err := c.ObjectCleanupController.DeleteObjectFromDataCenter(objectKey, bucketID)
 			if err != nil {
-				ctxLogger.WithError(err).WithFields(logrus.Fields{
+				ctxLogger.WithError(err).WithFields(log.Fields{
 					"bucketID":  bucketID,
 					"column":    columnName,
 					"objectKey": objectKey,
@@ -101,7 +100,7 @@ func (c *Controller) deleteFileRow(fileDataRow filedata.Row) error {
 		}
 		dbErr := c.Repo.RemoveBucket(fileDataRow, bucketID, columnName)
 		if dbErr != nil {
-			ctxLogger.WithError(dbErr).WithFields(logrus.Fields{
+			ctxLogger.WithError(dbErr).WithFields(log.Fields{
 				"bucketID": bucketID,
 				"column":   columnName,
 			}).Error("Failed to remove bucket from db")
