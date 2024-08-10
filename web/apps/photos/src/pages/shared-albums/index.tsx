@@ -1,3 +1,4 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
@@ -16,7 +17,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
@@ -204,7 +204,7 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             let redirectingToWebsite = false;
             try {
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                const cryptoWorker = await sharedCryptoWorker();
                 await downloadManager.init();
 
                 url.current = window.location.href;
@@ -421,7 +421,7 @@ export default function PublicCollectionGallery() {
         setFieldError,
     ) => {
         try {
-            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const cryptoWorker = await sharedCryptoWorker();
             let hashedPassword: string = null;
             try {
                 const publicUrl = publicCollection.publicURLs[0];

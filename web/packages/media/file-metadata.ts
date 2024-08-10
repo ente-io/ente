@@ -1,4 +1,4 @@
-import { encryptMetadata, type decryptMetadata } from "@/base/crypto/ente";
+import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type EnteFile } from "@/new/photos/types/file";
@@ -271,26 +271,6 @@ const PublicMagicMetadata = z
     .passthrough();
 
 /**
- * A function that can be used to encrypt the contents of a metadata field
- * associated with a file.
- *
- * This is parameterized to allow us to use either the regular
- * {@link encryptMetadata} (if we're already running in a web worker) or its web
- * worker wrapper (if we're running on the main thread).
- */
-export type EncryptMetadataF = typeof encryptMetadata;
-
-/**
- * A function that can be used to decrypt the contents of a metadata field
- * associated with a file.
- *
- * This is parameterized to allow us to use either the regular
- * {@link encryptMetadata} (if we're already running in a web worker) or its web
- * worker wrapper (if we're running on the main thread).
- */
-export type DecryptMetadataF = typeof decryptMetadata;
-
-/**
  * Return the public magic metadata for the given {@link enteFile}.
  *
  * The file we persist in our local db has the metadata in the encrypted form
@@ -302,7 +282,6 @@ export type DecryptMetadataF = typeof decryptMetadata;
  */
 export const decryptPublicMagicMetadata = async (
     enteFile: EnteFile,
-    decryptMetadataF: DecryptMetadataF,
 ): Promise<PublicMagicMetadata | undefined> => {
     const envelope = enteFile.pubMagicMetadata;
     // TODO: The underlying types need auditing.
@@ -317,11 +296,11 @@ export const decryptPublicMagicMetadata = async (
 
     const jsonValue =
         typeof envelope.data == "string"
-            ? await decryptMetadataF(
-                  envelope.data,
-                  envelope.header,
-                  enteFile.key,
-              )
+            ? await decryptMetadataJSON({
+                  encryptedDataB64: envelope.data,
+                  decryptionHeaderB64: envelope.header,
+                  keyB64: enteFile.key,
+              })
             : envelope.data;
     const result = PublicMagicMetadata.parse(
         // TODO: Can we avoid this cast?
@@ -377,23 +356,12 @@ export const getUICreationDate = (
  *
  * @param metadataUpdates A subset of {@link PublicMagicMetadata} containing the
  * fields that we want to add or update.
- *
- * @param encryptMetadataF A function that is used to encrypt the updated
- * metadata.
- *
- * @param decryptMetadataF A function that is used to decrypt the existing
- * metadata.
  */
 export const updateRemotePublicMagicMetadata = async (
     enteFile: EnteFile,
     metadataUpdates: Partial<PublicMagicMetadata>,
-    encryptMetadataF: EncryptMetadataF,
-    decryptMetadataF: DecryptMetadataF,
 ) => {
-    const existingMetadata = await decryptPublicMagicMetadata(
-        enteFile,
-        decryptMetadataF,
-    );
+    const existingMetadata = await decryptPublicMagicMetadata(enteFile);
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
 
@@ -405,7 +373,6 @@ export const updateRemotePublicMagicMetadata = async (
         enteFile,
         updatedMetadata,
         metadataVersion,
-        encryptMetadataF,
     );
 
     const updatedEnvelope = ensure(updateRequest.metadataList[0]).magicMetadata;
@@ -420,7 +387,7 @@ export const updateRemotePublicMagicMetadata = async (
     // response of the /diff. Temporarily bump it for the in place edits.
     enteFile.pubMagicMetadata.version = enteFile.pubMagicMetadata.version + 1;
     // Re-read the data.
-    await decryptPublicMagicMetadata(enteFile, decryptMetadataF);
+    await decryptPublicMagicMetadata(enteFile);
     // Re-jig the other bits of EnteFile that depend on its public magic
     // metadata.
     mergeMetadata1(enteFile);
@@ -492,7 +459,6 @@ const updateMagicMetadataRequest = async (
     enteFile: EnteFile,
     metadata: PrivateMagicMetadata | PublicMagicMetadata,
     metadataVersion: number,
-    encryptMetadataF: EncryptMetadataF,
 ): Promise<UpdateMagicMetadataRequest> => {
     // Drop all null or undefined values to obtain the syncable entries.
     // See: [Note: Optional magic metadata keys].
@@ -500,9 +466,8 @@ const updateMagicMetadataRequest = async (
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataF(
-        Object.fromEntries(validEntries),
-        enteFile.key,
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: Object.fromEntries(validEntries), keyB64: enteFile.key },
     );
 
     return {

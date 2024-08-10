@@ -4,11 +4,14 @@
  *
  * All functions are stateless, async, and safe to use in Web Workers.
  *
- * Docs for the JS library: https://github.com/jedisct1/libsodium.js
+ * Docs for the JS library: https://github.com/jedisct1/libsodium.js.
+ *
+ * To see where this code fits, see [Note: Crypto code hierarchy].
  */
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
+import type { DecryptBytes, EncryptBytes, EncryptedBytes } from "./types";
 
 /**
  * Convert bytes ({@link Uint8Array}) to a base64 string.
@@ -111,7 +114,7 @@ export async function fromHex(input: string) {
 }
 
 /**
- * Encrypt the given {@link data} using the given (base64 encoded) key.
+ * Encrypt the given data using the given (base64 encoded) key.
  *
  * Use {@link decryptChaChaOneShot} to decrypt the result.
  *
@@ -136,7 +139,7 @@ export async function fromHex(input: string) {
  *
  * See: https://doc.libsodium.org/secret-key_cryptography/secretbox
  *
- * The difference here is that this function is meant to used for data
+ * The difference to those is that this function is meant to used for data
  * associated with a file (or some other Ente object, like a collection or an
  * entity). There is no technical reason to do it that way, just this way all
  * data associated with a file, including its actual contents, use the same
@@ -153,10 +156,10 @@ export async function fromHex(input: string) {
  * encoded string). Both these values are needed to decrypt the data. The header
  * does not need to be secret.
  */
-export const encryptChaChaOneShot = async (
-    data: Uint8Array,
-    keyB64: string,
-) => {
+export const encryptChaChaOneShot = async ({
+    data,
+    keyB64,
+}: EncryptBytes): Promise<EncryptedBytes> => {
     await sodium.ready;
 
     const uintkey: Uint8Array = await fromB64(keyB64);
@@ -252,27 +255,15 @@ export async function encryptFileChunk(
 
 /**
  * Decrypt the result of {@link encryptChaChaOneShot}.
- *
- * @param encryptedData A {@link Uint8Array} containing the bytes to decrypt.
- *
- * @param header A base64 string containing the bytes of the decryption header
- * that was produced during encryption.
- *
- * @param keyB64 The base64 string containing the key that was used to encrypt
- * the data.
- *
- * @returns The decrypted bytes.
- *
- * @returns The decrypted metadata bytes.
  */
-export const decryptChaChaOneShot = async (
-    encryptedData: Uint8Array,
-    headerB64: string,
-    keyB64: string,
-) => {
+export const decryptChaChaOneShot = async ({
+    encryptedData,
+    decryptionHeaderB64,
+    keyB64,
+}: DecryptBytes): Promise<Uint8Array> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        await fromB64(headerB64),
+        await fromB64(decryptionHeaderB64),
         await fromB64(keyB64),
     );
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
@@ -309,6 +300,8 @@ export const decryptChaCha = async (
             pullState,
             buffer,
         );
+        // TODO:
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!pullResult.message) {
             throw new Error(CustomError.PROCESSING_FAILED);
         }
@@ -341,6 +334,8 @@ export async function decryptFileChunk(
         pullState,
         data,
     );
+    // TODO:
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!pullResult.message) {
         throw new Error(CustomError.PROCESSING_FAILED);
     }

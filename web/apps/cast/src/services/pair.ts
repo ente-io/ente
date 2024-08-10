@@ -1,9 +1,6 @@
+import { boxSealOpen, generateKeyPair } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { wait } from "@/utils/promise";
-import {
-    boxSealOpen,
-    generateKeyPair,
-} from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
 
 export interface Registration {

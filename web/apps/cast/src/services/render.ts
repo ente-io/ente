@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import { sharedCryptoWorker } from "@/base/crypto";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
@@ -21,7 +22,6 @@ import type {
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import type { AxiosResponse } from "axios";
@@ -188,7 +188,7 @@ const decryptEnteFile = async (
     encryptedFile: EncryptedEnteFile,
     collectionKey: string,
 ): Promise<EnteFile> => {
-    const worker = await ComlinkCryptoWorker.getInstance();
+    const worker = await sharedCryptoWorker();
     const {
         encryptedKey,
         keyDecryptionNonce,
@@ -202,11 +202,11 @@ const decryptEnteFile = async (
         keyDecryptionNonce,
         collectionKey,
     );
-    const fileMetadata = await worker.decryptMetadata(
-        metadata.encryptedData,
-        metadata.decryptionHeader,
-        fileKey,
-    );
+    const fileMetadata = await worker.decryptMetadataJSON({
+        encryptedDataB64: metadata.encryptedData,
+        decryptionHeaderB64: metadata.decryptionHeader,
+        keyB64: fileKey,
+    });
     let fileMagicMetadata: FileMagicMetadata | undefined;
     let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
@@ -351,7 +351,7 @@ const downloadFile = async (
             `Failed to fetch file with ID ${file.id}: HTTP ${res.status}`,
         );
 
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     const decrypted = await cryptoWorker.decryptFile(
         new Uint8Array(await res.arrayBuffer()),
         await cryptoWorker.fromB64(

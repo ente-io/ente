@@ -1,8 +1,8 @@
+import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { fromB64URLSafeNoPaddingString } from "@ente/shared/crypto/internal/libsodium";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,

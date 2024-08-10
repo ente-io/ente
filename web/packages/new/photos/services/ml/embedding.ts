@@ -192,11 +192,11 @@ export const fetchDerivedData = async (
         }
 
         try {
-            const decryptedBytes = await decryptFileEmbedding(
-                remoteEmbedding.encryptedEmbedding,
-                remoteEmbedding.decryptionHeader,
-                file.key,
-            );
+            const decryptedBytes = await decryptFileEmbedding({
+                encryptedDataB64: remoteEmbedding.encryptedEmbedding,
+                decryptionHeaderB64: remoteEmbedding.decryptionHeader,
+                keyB64: file.key,
+            });
             const jsonString = await gunzip(decryptedBytes);
             result.set(fileID, remoteDerivedDataFromJSONString(jsonString));
         } catch (e) {
@@ -291,7 +291,7 @@ const putEmbedding = async (
     embedding: Uint8Array,
 ) => {
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await encryptFileEmbedding(embedding, enteFile.key);
+        await encryptFileEmbedding({ data: embedding, keyB64: enteFile.key });
 
     const res = await fetch(await apiURL("/embeddings"), {
         method: "PUT",
