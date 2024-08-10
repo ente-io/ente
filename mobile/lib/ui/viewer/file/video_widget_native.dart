@@ -3,12 +3,11 @@ import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
 // import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -50,11 +49,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final Logger _logger = Logger("VideoWidgetNative");
   static const verticalMargin = 72.0;
   final _progressNotifier = ValueNotifier<double?>(null);
-  bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
-  bool _isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  bool _isGuestView = false;
+  late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
 
   NativeVideoPlayerController? _controller;
   String? _filePath;
@@ -106,21 +103,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
       _controller?.pause();
     });
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        _isGuestView = event.isGuestView;
       });
     });
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _isAppInFG = true;
-    } else {
-      _isAppInFG = false;
-    }
   }
 
   @override
@@ -134,7 +122,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         },
       );
     }
-    _fileSwipeLockEventSubscription.cancel();
+    _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
@@ -168,7 +156,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
         },
         child: GestureDetector(
-          onVerticalDragUpdate: _isFileSwipeLocked
+          onVerticalDragUpdate: _isGuestView
               ? null
               : (d) => {
                     if (d.delta.dy > dragSensitivity)
