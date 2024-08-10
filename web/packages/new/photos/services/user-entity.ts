@@ -125,11 +125,8 @@ export const userEntityDiff = async (
  */
 export const personDiff = async (entityKeyB64: string) => {
     const entities = await userEntityDiff("person", 0, entityKeyB64);
-    return Promise.all(
-        entities.map(async ({ data }) => {
-            if (!data) return undefined;
-            // return JSON.parse(await gunzip(data)) as unknown;
-            return JSON.parse(new TextDecoder().decode(data)) as unknown;
-        }),
-    );
+    return entities.map(({ data }) => {
+        if (!data) return undefined;
+        return JSON.parse(new TextDecoder().decode(data)) as unknown;
+    });
 };
