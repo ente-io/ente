@@ -201,12 +201,6 @@ const createInferenceSession = async (modelPath: string) => {
     });
 };
 
-// TODO-ML: Remove me
-// const cachedCLIPImageSessionOAI = makeCachedInferenceSession(
-//     "clip-image-vit-32-float32.onnx",
-//     351468764 /* 335 MB */,
-// );
-
 const cachedCLIPImageSession = makeCachedInferenceSession(
     "mobileclip_s2_image.onnx",
     143061211 /* 143 MB */,
@@ -228,24 +222,6 @@ export const computeCLIPImageEmbedding = async (input: Float32Array) => {
     /* Need these model specific casts to type the result */
     return ensure(results.output).data as Float32Array;
 };
-
-// TODO-ML: Remove me
-// const cachedCLIPTextSessionOAIQ = makeCachedInferenceSession(
-//     "clip-text-vit-32-uint8.onnx",
-//     64173509 /* 61 MB */,
-// );
-
-// TODO-ML: Remove me
-// const cachedCLIPTextSessionOAI = makeCachedInferenceSession(
-//     "clip-text-vit-32-float32-int32.onnx",
-//     254069585 /* 254 MB */,
-// );
-
-// TODO-ML: Remove me
-// const cachedCLIPTextSession = makeCachedInferenceSession(
-//     "mobileclip_s2_text.onnx",
-//     253895732 /* 253 MB */,
-// );
 
 const cachedCLIPTextSession = makeCachedInferenceSession(
     "mobileclip_s2_text_int32.onnx",
@@ -294,7 +270,7 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
 
 const cachedFaceDetectionSession = makeCachedInferenceSession(
     "yolov5s_face_640_640_dynamic.onnx",
-    30762872 /* 29.3 MB */,
+    30762872 /* 29 MB */,
 );
 
 /**
