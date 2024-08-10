@@ -17,7 +17,7 @@
  * sodium.ready has been called before accessing libsodium's APIs, thus all the
  * functions it exposes are async.
  *
- * The final layer is this file, `crypto/ente.ts`. These are usually thin
+ * The highest layer is this file, `crypto/ente.ts`. These are usually simple
  * compositions of functionality exposed by `crypto/libsodium.ts`, but the
  * difference is that the functions in ente.ts don't talk in terms of the crypto
  * algorithms, but rather in terms the higher-level Ente specific goal we are
@@ -30,7 +30,7 @@
  * to another worker is wasteful.
  *
  * To handle both these scenario, each function in this file is split into the
- * external API, and the underlying implementation (denoted by an "I" suffix).
+ * external API, and the underlying implementation (denoted by an "_" prefix).
  * The external API functions check to see if we're already in a web worker, and
  * if so directly invoke the implementation. Otherwise the call the sibling
  * function in a shared "crypto" web worker (which then invokes the
@@ -51,12 +51,16 @@ import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
+import type { EncryptBytes } from "./types";
 import { sharedCryptoWorker } from "./worker";
 
 /**
- * Some functions we haven't yet needed to use on the main thread. These don't
- * have a corresponding sharedCryptoWorker interface. This assertion will let us
- * know when we need to implement them (in production it'll just log a warning).
+ * Some of these functions have not yet been needed on the main thread, and for
+ * these we don't have a corresponding sharedCryptoWorker method.
+ *
+ * This assertion will let us know when we need to implement them (this'll
+ * gracefully degrade in production: the functionality will work, just that the
+ * crypto will happen on the main thread itself).
  */
 const assertInWorker = <T>(x: T): T => {
     if (!inWorker()) assertionFailed("Currently only usable in a web worker");
@@ -70,32 +74,17 @@ const assertInWorker = <T>(x: T): T => {
  * Use {@link decryptAssociatedData} to decrypt the result.
  *
  * See {@link encryptChaChaOneShot} for the implementation details.
- *
- * @param data A {@link Uint8Array} containing the bytes to encrypt.
- *
- * @param keyB64 base64 string containing the encryption key. This is expected
- * to the key of the object with which {@link data} is associated. For example,
- * if this is data associated with a file, then this will be the file's key.
- *
- * @returns The encrypted data and the (base64 encoded) decryption header.
  */
-export const encryptAssociatedData = (data: Uint8Array, keyB64: string) =>
-    assertInWorker(ei.encryptAssociatedDataI(data, keyB64));
+export const encryptAssociatedData = (r: EncryptBytes) =>
+    assertInWorker(ei._encryptAssociatedData(r));
 
 /**
  * Encrypt the thumbnail for a file.
  *
  * This is just an alias for {@link encryptAssociatedData}.
- *
- * @param data The thumbnail's data.
- *
- * @param keyB64 The key associated with the file whose thumbnail this is.
- *
- * @returns The encrypted thumbnail, and the associated decryption header
- * (base64 encoded).
  */
-export const encryptThumbnail = (data: Uint8Array, keyB64: string) =>
-    assertInWorker(ei.encryptThumbnailI(data, keyB64));
+export const encryptThumbnail = (r: EncryptBytes) =>
+    assertInWorker(ei._encryptThumbnail(r));
 
 /**
  * Encrypted the embedding associated with a file using the file's key.
@@ -152,7 +141,8 @@ export const encryptMetadata = async (metadata: unknown, keyB64: string) =>
  *
  * @returns The decrypted bytes.
  */
-export const decryptAssociatedData = (    encryptedData: Uint8Array,
+export const decryptAssociatedData = (
+    encryptedData: Uint8Array,
     headerB64: string,
     keyB64: string,
 ) => libsodium.decryptChaChaOneShot;

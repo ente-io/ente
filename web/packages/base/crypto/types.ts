@@ -30,6 +30,45 @@ export interface EncryptJSON {
 }
 
 /**
+ * The result of encryption using the stream APIs used in one-shot mode.
+ *
+ * The encrypted data (bytes) and decryption header pair (base64 encoded
+ * string). Both these values are needed to decrypt the data. The header does
+ * not need to be secret.
+ */
+export interface EncryptedBytes {
+    /**
+     * A {@link Uint8Array} containing the encrypted data.
+     */
+    encryptedData: Uint8Array;
+    /**
+     * A base64 string containing the decryption header.
+     *
+     * The header contains a random nonce and other libsodium specific metadata.
+     * It does not need to be secret, but it is required to decrypt the data.
+     */
+    decryptionHeaderB64: string;
+}
+
+/**
+ * The result of encryption using the stream APIs used in one-shot mode, with
+ * the encrypted data encoded as a base64 string.
+ */
+export interface EncryptedB64 {
+    /**
+     * A base64 string containing the encrypted data.
+     */
+    encryptedDataB64: string;
+    /**
+     * A base64 string containing the decryption header.
+     *
+     * The header contains a random nonce and other libsodium specific metadata.
+     * It does not need to be secret, but it is required to decrypt the data.
+     */
+    decryptionHeaderB64: string;
+}
+
+/**
  * A decryption request with the encrypted data as a base64 encoded string.
  */
 export interface DecryptB64 {

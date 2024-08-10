@@ -1,17 +1,25 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
+import type { EncryptBytes, EncryptJSON } from "./types";
 
-export const encryptAssociatedDataI = libsodium.encryptChaChaOneShot;
+export const _encryptAssociatedData = libsodium.encryptChaChaOneShot;
 
-export const encryptThumbnailI = encryptAssociatedDataI;
+export const _encryptThumbnail = _encryptAssociatedData;
 
-export const encryptFileEmbeddingI = async (
-    data: Uint8Array,
-    keyB64: string,
-) => {
-    const { encryptedData, decryptionHeaderB64 } = await encryptAssociatedDataI(
-        data,
-        keyB64,
+export const _encryptFileEmbedding = async (r: EncryptBytes) => {
+    const { encryptedData, decryptionHeaderB64 } =
+        await _encryptAssociatedData(r);
+    return {
+        encryptedDataB64: await libsodium.toB64(encryptedData),
+        decryptionHeaderB64,
+    };
+};
+
+export const _encryptMetadata = async ({ jsonValue, keyB64 }: EncryptJSON) => {
+    const data = new TextEncoder().encode(JSON.stringify(jsonValue));
+
+    const { encryptedData, decryptionHeaderB64 } = await _encryptAssociatedData(
+        { data, keyB64 },
     );
     return {
         encryptedDataB64: await libsodium.toB64(encryptedData),
@@ -19,20 +27,7 @@ export const encryptFileEmbeddingI = async (
     };
 };
 
-export const encryptMetadataI = async (metadata: unknown, keyB64: string) => {
-    const encodedMetadata = new TextEncoder().encode(JSON.stringify(metadata));
-
-    const { encryptedData, decryptionHeaderB64 } = await encryptAssociatedDataI(
-        encodedMetadata,
-        keyB64,
-    );
-    return {
-        encryptedDataB64: await libsodium.toB64(encryptedData),
-        decryptionHeaderB64,
-    };
-};
-
-export const decryptAssociatedDataI = libsodium.decryptChaChaOneShot;
+export const _decryptAssociatedData = libsodium.decryptChaChaOneShot;
 
 export const decryptThumbnailI = decryptAssociatedDataI;
 
