@@ -17,7 +17,11 @@
  * 2. internal/libsodium.ts (wrappers over libsodium)
  * 3. libsodium (JS bindings).
  */
+import ComlinkCryptoWorker from "@ente/shared/crypto";
 import * as libsodium from "@ente/shared/crypto/internal/libsodium";
+import { inWorker } from "../env";
+
+const cryptoWorker = () => ComlinkCryptoWorker.getInstance();
 
 /**
  * Encrypt arbitrary data associated with an Ente object (file, collection,
@@ -200,7 +204,22 @@ export const decryptMetadata = async (
  * decrypted data as a JSON string and instead just returns the raw decrypted
  * bytes that we got.
  */
-export const decryptMetadataBytes = async (
+export const decryptMetadataBytes = (
+    encryptedDataB64: string,
+    decryptionHeaderB64: string,
+    keyB64: string,
+) =>
+    inWorker()
+        ? decryptMetadataBytesI(encryptedDataB64, decryptionHeaderB64, keyB64)
+        : cryptoWorker().then((cw) =>
+              cw.decryptMetadataBytes(
+                  encryptedDataB64,
+                  decryptionHeaderB64,
+                  keyB64,
+              ),
+          );
+
+export const decryptMetadataBytesI = async (
     encryptedDataB64: string,
     decryptionHeaderB64: string,
     keyB64: string,

@@ -40,6 +40,10 @@ export class DedicatedCryptoWorker {
         );
     }
 
+    async decryptMetadataBytes(a: string, b: string, c: string) {
+        return ente.decryptMetadataBytesI(a, b, c);
+    }
+
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
     }
