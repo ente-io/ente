@@ -311,6 +311,8 @@ export const decryptChaCha = async (
             pullState,
             buffer,
         );
+        // TODO:
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!pullResult.message) {
             throw new Error(CustomError.PROCESSING_FAILED);
         }
@@ -343,6 +345,8 @@ export async function decryptFileChunk(
         pullState,
         data,
     );
+    // TODO:
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!pullResult.message) {
         throw new Error(CustomError.PROCESSING_FAILED);
     }

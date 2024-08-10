@@ -1,7 +1,7 @@
-import * as ente from "@/base/crypto/ente";
-import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import { expose } from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
+import * as ente from "../ente";
+import * as libsodium from "../libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente

@@ -1,6 +1,6 @@
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { Remote } from "comlink";
-import { type DedicatedCryptoWorker } from "./internal/crypto.worker";
+import { type DedicatedCryptoWorker } from "./worker";
 
 class ComlinkCryptoWorker {
     private comlinkWorkerInstance:
@@ -18,8 +18,8 @@ class ComlinkCryptoWorker {
 
 export const getDedicatedCryptoWorker = () => {
     const cryptoComlinkWorker = new ComlinkWorker<typeof DedicatedCryptoWorker>(
-        "ente-crypto-worker",
-        new Worker(new URL("internal/crypto.worker.ts", import.meta.url)),
+        "Crypto",
+        new Worker(new URL("./worker.ts", import.meta.url)),
     );
     return cryptoComlinkWorker;
 };

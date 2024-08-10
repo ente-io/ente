@@ -3,25 +3,25 @@
  *
  * [Note: Crypto code hierarchy]
  *
- * 1.  ente.ts or crypto.worker.ts (high level, Ente specific).
- * 2.  internal/libsodium.ts (wrappers over libsodium)
- * 3.  libsodium (JS bindings).
+ * 1.  crypto/ente.ts        (Ente specific higher level functions)
+ * 2.  crypto/libsodium.ts   (More primitive wrappers over libsodium)
+ * 3.  libsodium-wrappers    (JavaScript bindings to libsodium)
  *
  * Our cryptography primitives are provided by libsodium, specifically, its
  * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer.
  *
- * Direct usage of "libsodium-wrappers" is restricted to
- * `crypto/internal/libsodium.ts`. This is the next higher layer, and the first
- * one that our code should directly use. Usually the functions in this file are
- * thin wrappers over the raw libsodium APIs, with a bit of massaging or
- * book-keeping. They also ensure that sodium.ready has been called before
- * accessing libsodium's APIs, thus all the functions it exposes are async.
+ * Direct usage of "libsodium-wrappers" is restricted to `crypto/libsodium.ts`.
+ * This is the next higher layer, and the first one that our code should
+ * directly use. Usually the functions in this file are thin wrappers over the
+ * raw libsodium APIs, with a bit of massaging. They also ensure that
+ * sodium.ready has been called before accessing libsodium's APIs, thus all the
+ * functions it exposes are async.
  *
  * The final layer is this file, `crypto/ente.ts`. These are usually thin
- * wrappers themselves over functions exposed by `internal/libsodium.ts`, but
- * the difference is that the functions in ente.ts don't talk in terms of the
- * crypto algorithms, but rather in terms the higher-level Ente specific goal we
- * are trying to accomplish.
+ * wrappers themselves over functions exposed by `crypto/libsodium.ts`, but the
+ * difference is that the functions in ente.ts don't talk in terms of the crypto
+ * algorithms, but rather in terms the higher-level Ente specific goal we are
+ * trying to accomplish.
  *
  * There is an additional actor in the play. Cryptographic operations are CPU
  * intensive and would cause the UI to stutter if used directly on the main
@@ -42,9 +42,9 @@
  * recommendation though (in circumstances where we create more crypto workers
  * instead of using the shared one).
  */
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import * as libsodium from "@ente/shared/crypto/internal/libsodium";
 import { inWorker } from "../env";
+import * as libsodium from "./libsodium";
+import ComlinkCryptoWorker from "./worker";
 
 const cryptoWorker = () => ComlinkCryptoWorker.getInstance();
 
