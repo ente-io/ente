@@ -1,4 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto/worker";
+import { encryptMetadataJSON } from "@/base/crypto/ente";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";
@@ -186,13 +186,12 @@ export const updateFileMagicMetadata = async (
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const cryptoWorker = await sharedCryptoWorker();
     for (const {
         file,
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
-            await cryptoWorker.encryptMetadataJSON({
+            await encryptMetadataJSON({
                 jsonValue: updatedMagicMetadata.data,
                 keyB64: file.key,
             });
@@ -233,13 +232,12 @@ export const updateFilePublicMagicMetadata = async (
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const cryptoWorker = await sharedCryptoWorker();
     for (const {
         file,
         updatedPublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
         const { encryptedDataB64, decryptionHeaderB64 } =
-            await cryptoWorker.encryptMetadataJSON({
+            await encryptMetadataJSON({
                 jsonValue: updatedPublicMagicMetadata.data,
                 keyB64: file.key,
             });

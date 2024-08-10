@@ -1,3 +1,4 @@
+import { encryptMetadataJSON } from "@/base/crypto/ente";
 import { sharedCryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
@@ -797,13 +798,9 @@ export const updateCollectionMagicMetadata = async (
         return;
     }
 
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const { encryptedDataB64, decryptionHeaderB64 } =
-        await cryptoWorker.encryptMetadataJSON({
-            jsonValue: updatedMagicMetadata.data,
-            keyB64: collection.key,
-        });
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    );
 
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
@@ -842,14 +839,9 @@ export const updateSharedCollectionMagicMetadata = async (
         return;
     }
 
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const { encryptedDataB64, decryptionHeaderB64 } =
-        await cryptoWorker.encryptMetadataJSON({
-            jsonValue: updatedMagicMetadata.data,
-            keyB64: collection.key,
-        });
-
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
@@ -887,14 +879,9 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const { encryptedDataB64, decryptionHeaderB64 } =
-        await cryptoWorker.encryptMetadataJSON({
-            jsonValue: updatedPublicMagicMetadata.data,
-            keyB64: collection.key,
-        });
-
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: updatedPublicMagicMetadata.data, keyB64: collection.key },
+    );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
