@@ -220,7 +220,7 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
 export const computeCLIPImageEmbedding = async (input: Float32Array) => {
     const session = await cachedCLIPImageSession();
     const feeds = {
-        input: new ort.Tensor("float32", input, [1, 3, 224, 224]),
+        input: new ort.Tensor("float32", input, [1, 3, 256, 256]),
     };
     const t = Date.now();
     const results = await session.run(feeds);

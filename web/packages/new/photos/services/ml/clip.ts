@@ -120,8 +120,7 @@ const computeEmbedding = async (
  * Convert {@link imageData} into the format that the CLIP model expects.
  */
 const convertToCLIPInput = (imageData: ImageData) => {
-    const requiredWidth = 224;
-    const requiredHeight = 224;
+    const [requiredWidth, requiredHeight] = [256, 256];
 
     const mean = [0.48145466, 0.4578275, 0.40821073] as const;
     const std = [0.26862954, 0.26130258, 0.27577711] as const;
