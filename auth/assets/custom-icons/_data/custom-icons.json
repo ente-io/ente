@@ -64,8 +64,9 @@
       ]
     },
     {
-      "title": "Blockchain.com",
+      "title": "Blockchain",
       "altNames": [
+        "blockchain.com",
         "blockchain.com Wallet",
         "blockchain.com Exchange"
       ],
@@ -79,8 +80,11 @@
       "slug": "BorgBase"
     },
     {
-      "title": "Booking.com",
-      "slug": "booking"
+      "title": "Booking",
+      "slug": "booking",
+      "altNames":[
+        "Booking.com"
+      ]
     },
     {
       "title": "Brave Creators",
