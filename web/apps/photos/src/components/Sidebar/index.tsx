@@ -554,7 +554,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={openPreferencesOptions}
-                label={t("PREFERENCES")}
+                label={t("preferences")}
             />
             <RecoveryKey
                 show={recoverModalView}

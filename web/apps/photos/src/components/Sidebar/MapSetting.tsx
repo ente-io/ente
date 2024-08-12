@@ -189,7 +189,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                 </Box>
                 <Stack px={"8px"} spacing={"8px"}>
                     <Button color={"accent"} size="large" onClick={enableMap}>
-                        {t("ENABLE")}
+                        {t("enable")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
                         {t("cancel")}
@@ -220,7 +220,7 @@ function DisableMap({ onClose, disableMap, onRootClose }) {
                         size="large"
                         onClick={disableMap}
                     >
-                        {t("DISABLE")}
+                        {t("disable")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
                         {t("cancel")}

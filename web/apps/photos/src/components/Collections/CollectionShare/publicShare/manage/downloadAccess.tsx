@@ -34,7 +34,7 @@ export function ManageDownloadAccess({
             content: <Trans i18nKey={"DISABLE_FILE_DOWNLOAD_MESSAGE"} />,
             close: { text: t("cancel") },
             proceed: {
-                text: t("DISABLE"),
+                text: t("disable"),
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,

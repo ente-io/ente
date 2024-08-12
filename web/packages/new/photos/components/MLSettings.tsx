@@ -164,7 +164,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
             </Typography>
             <Stack spacing={"8px"}>
                 <Button color={"accent"} size="large" onClick={onEnable}>
-                    {t("ENABLE")}
+                    {t("enable")}
                 </Button>
 
                 <Button color="secondary" size="large" onClick={moreDetails}>
@@ -217,13 +217,13 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("ENABLE_FACE_SEARCH_TITLE")}
+                    title={t("enable_face_search_title")}
                     onRootClose={handleRootClose}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                     <Typography component="div" color="text.muted" px={"8px"}>
                         <Trans
-                            i18nKey={"ENABLE_FACE_SEARCH_DESCRIPTION"}
+                            i18nKey={"enable_face_search_description"}
                             components={{
                                 a: (
                                     <Link
@@ -255,7 +255,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                                     }
                                 />
                             }
-                            label={t("FACE_SEARCH_CONFIRMATION")}
+                            label={t("face_search_confirmation")}
                         />
                     </FormGroup>
                     <Stack px={"8px"} spacing={"8px"}>
@@ -265,7 +265,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                             disabled={!acceptTerms}
                             onClick={onConsent}
                         >
-                            {t("ENABLE_FACE_SEARCH")}
+                            {t("enable_face_search")}
                         </Button>
                         <Button
                             color={"secondary"}
@@ -319,7 +319,7 @@ const ManageML: React.FC<ManageMLProps> = ({
             close: { text: t("cancel") },
             proceed: {
                 variant: "critical",
-                text: t("DISABLE"),
+                text: t("disable"),
                 action: onDisableML,
             },
             buttonDirection: "row",
