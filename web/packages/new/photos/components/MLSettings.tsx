@@ -1,7 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
@@ -301,14 +300,14 @@ const ManageML: React.FC<ManageMLProps> = ({
     let status: string;
     switch (phase) {
         case "indexing":
-            status = pt("Running");
+            status = t("running");
             break;
         case "scheduled":
-            status = pt("Scheduled");
+            status = t("scheduled");
             break;
         // TODO: Clustering
         default:
-            status = pt("Done");
+            status = t("done");
             break;
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
@@ -352,7 +351,9 @@ const ManageML: React.FC<ManageMLProps> = ({
                         <Typography color="text.faint">
                             {t("indexing")}
                         </Typography>
-                        <Typography>{status}</Typography>
+                        <Typography>
+                            {t("indexing_status", { context: status })}
+                        </Typography>
                     </Stack>
                     <Divider sx={{ marginInlineStart: 2 }} />
                     <Stack

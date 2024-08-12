@@ -478,7 +478,7 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "<p>You have dragged and dropped a mixture of files and folders.</p><p>Please provide either only files, or only folders when selecting option to create separate albums</p>",
     "CHOSE_THEME": "Choose theme",
     "more_details": "More details",
-    "ml_search": "Face and magic search",
+    "face_and_magic_search": "Face and magic search",
     "ml_search_description": "Ente supports on-device machine learning for face recognition, magic search and other advanced search features",
     "ml_search_footnote": "Magic search allows to search photos by their contents, e.g. 'car', 'red car', 'Ferrari'",
     "indexing": "Indexing",
