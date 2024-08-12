@@ -50,7 +50,7 @@ import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import {
+import React, {
     MouseEventHandler,
     useContext,
     useEffect,
@@ -78,7 +78,7 @@ import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
-import Preferences from "./Preferences";
+import { Preferences } from "./Preferences";
 import SubscriptionCard from "./SubscriptionCard";
 
 interface Iprops {
