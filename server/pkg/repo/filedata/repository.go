@@ -196,9 +196,10 @@ func (r *Repository) GetPendingSyncDataAndExtendLock(ctx context.Context, newSyn
 	return &fileData, nil
 }
 
-// MarkReplicationAsDone marks the pending_sync as false for the file data row
+// MarkReplicationAsDone marks the pending_sync as false for the file data row, while
+// ensuring that the row is not deleted
 func (r *Repository) MarkReplicationAsDone(ctx context.Context, row filedata.Row) error {
-	query := `UPDATE file_data SET pending_sync = false WHERE is_deleted=true and file_id = $1 AND data_type = $2 AND user_id = $3`
+	query := `UPDATE file_data SET pending_sync = false WHERE is_deleted=false and file_id = $1 AND data_type = $2 AND user_id = $3`
 	_, err := r.DB.ExecContext(ctx, query, row.FileID, string(row.Type), row.UserID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
