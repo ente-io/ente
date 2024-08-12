@@ -33,9 +33,9 @@ import { type RemoteFaceIndex } from "./face";
  *       ... more in the future ...
  *     }
  */
-type EmbeddingModel = "mldata";
+type FileDataType = "mldata";
 
-const RemoteEmbedding = z.object({
+const RemoteFileData = z.object({
     /** The ID of the file whose embedding this is. */
     fileID: z.number(),
     /**
@@ -50,26 +50,26 @@ const RemoteEmbedding = z.object({
     decryptionHeader: z.string(),
 });
 
-type RemoteEmbedding = z.infer<typeof RemoteEmbedding>;
+type RemoteFileData = z.infer<typeof RemoteFileData>;
 
-export type RawRemoteDerivedData = Record<string, unknown>;
+export type RawRemoteMLData = Record<string, unknown>;
 
-export type ParsedRemoteDerivedData = Partial<{
+export type ParsedRemoteMLData = Partial<{
     face: RemoteFaceIndex;
     clip: RemoteCLIPIndex;
 }>;
 
 /**
- * The decrypted payload of a {@link RemoteEmbedding} for the "derived"
- * {@link EmbeddingModel}.
+ * The decrypted payload of a {@link RemoteFileData} for the "derived"
+ * {@link FileDataType}.
  *
  * [Note: Preserve unknown derived data fields]
  *
  * The remote derived data can contain arbitrary key at the top level apart from
  * the ones that the current client knows about. We need to preserve these
- * verbatim when we use {@link putDerivedData}.
+ * verbatim when we use {@link putMLData}.
  *
- * Thus we return two separate results from {@link fetchDerivedData}:
+ * Thus we return two separate results from {@link fetchMLData}:
  *
  * -   {@link RawRemoteDerivedData}: The original, unmodified JSON.
  *
@@ -81,9 +81,9 @@ export type ParsedRemoteDerivedData = Partial<{
  * client notices an embedding type that was missing), then we use the original
  * JSON as the base.
  */
-export interface RemoteDerivedData {
-    raw: RawRemoteDerivedData;
-    parsed: ParsedRemoteDerivedData | undefined;
+export interface RemoteMLData {
+    raw: RawRemoteMLData;
+    parsed: ParsedRemoteMLData | undefined;
 }
 
 /**
@@ -171,18 +171,18 @@ const ParsedRemoteDerivedData = z.object({
  *
  * @returns a map containing the (decrypted) derived data for each file for
  * which remote returned the corresponding embedding. Each entry in the map is
- * keyed by file's ID, and each value is a {@link RemoteDerivedData} that
+ * keyed by file's ID, and each value is a {@link RemoteMLData} that
  * contains both the original JSON, and parsed representation of embeddings that
  * we know about.
  */
-export const fetchDerivedData = async (
+export const fetchMLData = async (
     filesByID: Map<number, EnteFile>,
-): Promise<Map<number, RemoteDerivedData>> => {
-    const remoteEmbeddings = await fetchEmbeddings("mldata", [
+): Promise<Map<number, RemoteMLData>> => {
+    const remoteEmbeddings = await fetchFileData("mldata", [
         ...filesByID.keys(),
     ]);
 
-    const result = new Map<number, RemoteDerivedData>();
+    const result = new Map<number, RemoteMLData>();
     for (const remoteEmbedding of remoteEmbeddings) {
         const { fileID } = remoteEmbedding;
         const file = filesByID.get(fileID);
@@ -198,7 +198,7 @@ export const fetchDerivedData = async (
                 keyB64: file.key,
             });
             const jsonString = await gunzip(decryptedBytes);
-            result.set(fileID, remoteDerivedDataFromJSONString(jsonString));
+            result.set(fileID, remoteMLDataFromJSONString(jsonString));
         } catch (e) {
             // This shouldn't happen. Best guess is that some client has
             // uploaded a corrupted embedding. Ignore it so that it gets
@@ -210,7 +210,7 @@ export const fetchDerivedData = async (
     return result;
 };
 
-const remoteDerivedDataFromJSONString = (jsonString: string) => {
+const remoteMLDataFromJSONString = (jsonString: string) => {
     const raw = RawRemoteDerivedData.parse(JSON.parse(jsonString));
     const parseResult = ParsedRemoteDerivedData.safeParse(raw);
     // This code is included in apps/photos, which currently does not have the
@@ -219,7 +219,7 @@ const remoteDerivedDataFromJSONString = (jsonString: string) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
     // @ts-ignore
     const parsed = parseResult.success
-        ? (parseResult.data as ParsedRemoteDerivedData)
+        ? (parseResult.data as ParsedRemoteMLData)
         : undefined;
     return { raw, parsed };
 };
@@ -227,20 +227,20 @@ const remoteDerivedDataFromJSONString = (jsonString: string) => {
 /**
  * Fetch {@link model} embeddings for the given list of files.
  *
- * @param model The {@link EmbeddingModel} which we want.
+ * @param model The {@link FileDataType} which we want.
  *
  * @param fileIDs The ids of the files for which we want the embeddings.
  *
- * @returns a list of {@link RemoteEmbedding} for the files which had embeddings
+ * @returns a list of {@link RemoteFileData} for the files which had embeddings
  * (and that remote was able to successfully retrieve). The order of this list
  * is arbitrary, and the caller should use the {@link fileID} present within the
- * {@link RemoteEmbedding} to associate an item in the result back to a file
+ * {@link RemoteFileData} to associate an item in the result back to a file
  * instead of relying on the order or count of items in the result.
  */
-const fetchEmbeddings = async (
-    model: EmbeddingModel,
+const fetchFileData = async (
+    model: FileDataType,
     fileIDs: number[],
-): Promise<RemoteEmbedding[]> => {
+): Promise<RemoteFileData[]> => {
     const res = await fetch(await apiURL("/files/data/fetch"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
@@ -250,7 +250,7 @@ const fetchEmbeddings = async (
         }),
     });
     ensureOk(res);
-    return z.object({ data: z.array(RemoteEmbedding) }).parse(await res.json())
+    return z.object({ data: z.array(RemoteFileData) }).parse(await res.json())
         .data;
 };
 
@@ -266,27 +266,27 @@ const fetchEmbeddings = async (
  *
  * See: [Note: Preserve unknown derived data fields].
  */
-export const putDerivedData = async (
+export const putMLData = async (
     enteFile: EnteFile,
-    derivedData: RawRemoteDerivedData,
-) => putEmbedding(enteFile, "mldata", await gzip(JSON.stringify(derivedData)));
+    derivedData: RawRemoteMLData,
+) => putFileData(enteFile, "mldata", await gzip(JSON.stringify(derivedData)));
 
 /**
  * Upload an embedding to remote.
  *
  * This function will save or update the given embedding as the latest embedding
- * associated with the given {@link enteFile} for {@link model}.
+ * associated with the given {@link enteFile} for {@link type}.
  *
  * @param enteFile {@link EnteFile} to which this embedding relates to.
  *
- * @param model The {@link EmbeddingModel} which we are uploading.
+ * @param type The {@link FileDataType} which we are uploading.
  *
  * @param embedding The binary data the embedding. The exact contents of the
- * embedding are {@link model} specific.
+ * embedding are {@link type} specific.
  */
-const putEmbedding = async (
+const putFileData = async (
     enteFile: EnteFile,
-    model: EmbeddingModel,
+    type: FileDataType,
     embedding: Uint8Array,
 ) => {
     const { encryptedDataB64, decryptionHeaderB64 } =

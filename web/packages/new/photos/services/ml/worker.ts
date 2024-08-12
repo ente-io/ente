@@ -31,10 +31,10 @@ import {
     updateAssumingLocalFiles,
 } from "./db";
 import {
-    fetchDerivedData,
-    putDerivedData,
-    type RawRemoteDerivedData,
-    type RemoteDerivedData,
+    fetchMLData,
+    putMLData,
+    type RawRemoteMLData,
+    type RemoteMLData,
 } from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
@@ -48,7 +48,7 @@ interface IndexableItem {
     /** If the file was uploaded from the current client, then its contents. */
     uploadItem: UploadItem | undefined;
     /** The existing derived data on remote corresponding to this file. */
-    remoteDerivedData: RemoteDerivedData | undefined;
+    remoteDerivedData: RemoteMLData | undefined;
 }
 
 /**
@@ -236,7 +236,7 @@ export class MLWorker {
         );
         if (!filesByID.size) return [];
         // Fetch their existing derived data (if any).
-        const derivedDataByID = await fetchDerivedData(filesByID);
+        const derivedDataByID = await fetchMLData(filesByID);
         // Return files after annotating them with their existing derived data.
         return Array.from(filesByID, ([id, file]) => ({
             enteFile: file,
@@ -504,7 +504,7 @@ const index = async (
         // parts. See: [Note: Preserve unknown derived data fields].
 
         const existingRawDerivedData = remoteDerivedData?.raw ?? {};
-        const rawDerivedData: RawRemoteDerivedData = {
+        const rawDerivedData: RawRemoteMLData = {
             ...existingRawDerivedData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
@@ -513,7 +513,7 @@ const index = async (
         log.debug(() => ["Uploading derived data", rawDerivedData]);
 
         try {
-            await putDerivedData(enteFile, rawDerivedData);
+            await putMLData(enteFile, rawDerivedData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             log.error(`Failed to put derived data for ${f}`, e);
