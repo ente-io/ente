@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:typed_data";
 
+import "package:ente_auth/utils/platform_util.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:privacy_screen/privacy_screen.dart";
@@ -39,6 +40,7 @@ class LockScreenSettings {
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
+    if (PlatformUtil.isDesktop()) return;
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
