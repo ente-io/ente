@@ -231,7 +231,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         left: 0,
                         child: Padding(
                           padding: EdgeInsets.only(
-                            bottom: widget.isFromMemories ? 0 : 32,
+                            bottom: widget.isFromMemories ? 32 : 0,
                           ),
                           child: ValueListenableBuilder(
                             builder: (BuildContext context, bool value, _) {
