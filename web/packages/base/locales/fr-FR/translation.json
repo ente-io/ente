@@ -492,7 +492,7 @@
     "enable_face_search_title": "Activer la recherche faciale ?",
     "enable_face_search_description": "<p>If you enable face search, Ente will extract face geometry from your photos. This will happen on your device, and any generated biometric data will be end-to-encrypted.</p><p><a>Please click here for more details about this feature in our privacy policy</a></p>",
     "face_search_confirmation": "Je comprends, et je souhaite permettre à Ente de traiter la géométrie faciale",
-    "labs": "Labs",
+    "labs": "",
     "YOURS": "Le vôtre",
     "passphrase_strength_weak": "Sécurité du mot de passe : faible",
     "passphrase_strength_moderate": "Sécurité du mot de passe : moyenne",
