@@ -11,7 +11,7 @@ import { dotProduct } from "./math";
  */
 export interface FaceCluster {
     /**
-     * A randomly generated ID to uniquely identify this cluster.
+     * A nanoid for this cluster.
      */
     id: string;
     /**
@@ -37,7 +37,7 @@ export interface FaceCluster {
  */
 export interface Person {
     /**
-     * A randomly generated ID to uniquely identify this person.
+     * A nanoid for this person.
      */
     id: string;
     /**

@@ -160,13 +160,8 @@ export const isMLSupported = isDesktop;
 
 /**
  * TODO-ML: This will not be needed when we move to a public beta.
- * Was this someone who might've enabled the beta ML? If so, show them the
- * coming back soon banner while we finalize it.
  */
-export const canEnableML = async () =>
-    // TODO-ML: The interim condition should be
-    // isDevBuild || (await isInternalUser()) || (await isBetaUser());
-    await isInternalUser();
+export const canEnableML = async () => await isInternalUser();
 
 /**
  * Initialize the ML subsystem if the user has enabled it in preferences.
@@ -225,6 +220,11 @@ export const disableML = async () => {
 };
 
 /**
+ * Local storage key for {@link isMLEnabledLocal}.
+ */
+const mlLocalKey = "mlEnabled";
+
+/**
  * Return true if our local persistence thinks that ML is enabled.
  *
  * This setting is persisted locally (in local storage). It is not synced with
@@ -233,17 +233,15 @@ export const disableML = async () => {
  * The remote status is tracked with a separate {@link isMLEnabledRemote} flag
  * that is synced with remote.
  */
-const isMLEnabledLocal = () =>
-    // TODO-ML: Rename this flag
-    localStorage.getItem("faceIndexingEnabled") == "1";
+const isMLEnabledLocal = () => localStorage.getItem(mlLocalKey) == "1";
 
 /**
  * Update the (locally stored) value of {@link isMLEnabledLocal}.
  */
 const setIsMLEnabledLocal = (enabled: boolean) =>
     enabled
-        ? localStorage.setItem("faceIndexingEnabled", "1")
-        : localStorage.removeItem("faceIndexingEnabled");
+        ? localStorage.setItem(mlLocalKey, "1")
+        : localStorage.removeItem(mlLocalKey);
 
 /**
  * For historical reasons, this is called "faceSearchEnabled" (it started off as
