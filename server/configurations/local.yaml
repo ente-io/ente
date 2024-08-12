@@ -175,8 +175,8 @@ s3:
     #
     # Warning: For file-storage, do not specify buckets with any lock or versioning enabled.
     # The application does not handle these cases. By default, we will use the derived-storage or hot storage bucket
-    # as the primary bucket for file-data storage.
-    # file-data-storage:
+    # as the primary bucket for file-data-config.
+    # file-data-config:
     #     mldata:
     #         primaryBucket:
     #         replicaBuckets: []
