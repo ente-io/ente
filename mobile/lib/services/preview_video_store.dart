@@ -1,12 +1,12 @@
 import "dart:async";
 import "dart:convert";
 import "dart:io";
-import "dart:typed_data";
 
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart";
 import "package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter_min/return_code.dart";
+import "package:flutter/foundation.dart" hide Key;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
@@ -33,12 +33,6 @@ class PreviewVideoStore {
     final tmpDirectory = await getTemporaryDirectory();
     final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
     Directory(prefix).createSync();
-    final mediaInfo = await VideoCompress.compressVideo(
-      file.path,
-      quality: VideoQuality.Res1280x720Quality,
-      deleteOrigin: true,
-    );
-    if (mediaInfo?.path == null) return;
 
     final key = Key.fromLength(16);
     final iv = IV.fromLength(16);
@@ -52,12 +46,18 @@ class PreviewVideoStore {
       "${keyfile.path}\n"
       "${iv.base64}",
     );
-
+    final mediaInfo = await VideoCompress.compressVideo(
+      file.path,
+      quality: VideoQuality.Res1280x720Quality,
+      deleteOrigin: true,
+    );
+    if (mediaInfo!.file?.path == null) return;
+    // -hls_key_info_file ${keyinfo.path}
     await FFmpegKit.execute(
       """
-      -i "${mediaInfo!.path}"
+      -i "${mediaInfo.file!.path}"
       -c copy -f hls -hls_time 10 -hls_flags single_file
-      -hls_list_size 0 -hls_key_info_file ${keyinfo.path}
+      -hls_list_size 0
       $prefix/video.m3u8""",
     ).then((session) async {
       final returnCode = await session.getReturnCode();
@@ -71,6 +71,10 @@ class PreviewVideoStore {
         _logger.warning("FFmpeg command cancelled");
       } else {
         _logger.severe("FFmpeg command failed with return code $returnCode");
+        if (kDebugMode) {
+          final output = await session.getOutput();
+          _logger.severe(output);
+        }
       }
     });
   }
