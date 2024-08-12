@@ -69,7 +69,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("PREFERENCES")}
+                    title={t("preferences")}
                     onRootClose={handleRootClose}
                 />
                 <Box px={"8px"}>
@@ -88,7 +88,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                         {showMLSettings && (
                             <Box>
                                 <MenuSectionTitle
-                                    title={t("LABS")}
+                                    title={t("labs")}
                                     icon={<ScienceIcon />}
                                 />
                                 <MenuItemGroup>
@@ -143,7 +143,7 @@ const LanguageSelector = () => {
     return (
         <DropdownInput
             options={options}
-            label={t("LANGUAGE")}
+            label={t("language")}
             labelProps={{ color: "text.muted" }}
             selected={locale}
             setSelected={updateCurrentLocale}
