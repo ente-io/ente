@@ -176,7 +176,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
             </Stack>
             <Typography color="text.faint" variant="small">
                 {pt(
-                    'Magic search allows to search photos by their contents, e.g. "car", "red car" or even very specific things like "Ferrari".',
+                    'Magic search allows to search photos by their contents, e.g. "car", "red car", "Ferrari"',
                 )}
             </Typography>
         </Stack>
