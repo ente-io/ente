@@ -179,12 +179,9 @@ Future<Float32List> preprocessImageClip(
   Image image,
   ByteData imgByteData,
 ) async {
-  const int requiredWidth = 224;
-  const int requiredHeight = 224;
+  const int requiredWidth = 256;
+  const int requiredHeight = 256;
   const int requiredSize = 3 * requiredWidth * requiredHeight;
-  const mean = [0.48145466, 0.4578275, 0.40821073];
-  const std = [0.26862954, 0.26130258, 0.27577711];
-
   final scale = max(requiredWidth / image.width, requiredHeight / image.height);
   final scaledWidth = (image.width * scale).round();
   final scaledHeight = (image.height * scale).round();
@@ -204,9 +201,9 @@ Future<Float32List> preprocessImageClip(
         image,
         imgByteData,
       );
-      buffer[pixelIndex] = ((pixel.red / 255) - mean[0]) / std[0];
-      buffer[pixelIndex + greenOff] = ((pixel.green / 255) - mean[1]) / std[1];
-      buffer[pixelIndex + blueOff] = ((pixel.blue / 255) - mean[2]) / std[2];
+      buffer[pixelIndex] = pixel.red / 255;
+      buffer[pixelIndex + greenOff] = pixel.green / 255;
+      buffer[pixelIndex + blueOff] = pixel.blue / 255;
       pixelIndex++;
     }
   }
