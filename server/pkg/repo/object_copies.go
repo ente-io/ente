@@ -35,13 +35,6 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*ente.Object
 		}
 	}
 
-	commit := func() {
-		cerr := tx.Commit()
-		if cerr != nil {
-			log.Errorf("Ignoring error when committing transaction: %s", cerr)
-		}
-	}
-
 	row := tx.QueryRow(`
 	SELECT object_key, want_b2, b2, want_wasabi, wasabi, want_scw, scw
 	FROM object_copies
@@ -59,19 +52,23 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*ente.Object
 	err = row.Scan(&r.ObjectKey, &r.WantB2, &r.B2, &r.WantWasabi, &r.Wasabi,
 		&r.WantSCW, &r.SCW)
 
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		commit()
-		return nil, err
-	}
-
 	if err != nil {
-		rollback()
+		rollback() // Rollback transaction on any error
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, err // Return sql.ErrNoRows without committing the transaction
+		}
 		return nil, stacktrace.Propagate(err, "")
 	}
+
 	err = repo.RegisterReplicationAttempt(tx, r.ObjectKey)
 	if err != nil {
 		rollback()
 		return nil, stacktrace.Propagate(err, "failed to register replication attempt")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
 	}
 	return &r, nil
 }
