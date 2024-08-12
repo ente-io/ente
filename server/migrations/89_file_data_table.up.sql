@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS file_data
     PRIMARY KEY (file_id, data_type)
 );
 
--- Add index for user_id and data_type for efficient querying
-CREATE INDEX idx_file_data_user_type_deleted ON file_data (user_id, data_type, is_deleted) INCLUDE (file_id, size);
+-- Add index for user_id and data_type for efficient querying for size calculation
+CREATE INDEX idx_file_data_user_type_deleted ON file_data (user_id, data_type, is_deleted) INCLUDE (size);
 CREATE INDEX idx_file_data_pending_sync_locked_till ON file_data (is_deleted, sync_locked_till) where pending_sync = true;
 
 CREATE OR REPLACE FUNCTION ensure_no_common_entries()
