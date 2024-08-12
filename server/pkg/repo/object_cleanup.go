@@ -26,10 +26,10 @@ func (repo *ObjectCleanupRepository) AddTempObject(tempObject ente.TempObject, e
 	var err error
 	if tempObject.IsMultipart {
 		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time,upload_id,is_multipart, bucket_id)
-		VALUES($1, $2, $3, $4)`, tempObject.ObjectKey, expirationTime, tempObject.UploadID, tempObject.IsMultipart, tempObject.BucketId)
+		VALUES($1, $2, $3, $4, $5)`, tempObject.ObjectKey, expirationTime, tempObject.UploadID, tempObject.IsMultipart, tempObject.BucketId)
 	} else {
-		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time)
-		VALUES($1, $2)`, tempObject.ObjectKey, expirationTime)
+		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time, bucket_id)
+		VALUES($1, $2, $3)`, tempObject.ObjectKey, expirationTime, tempObject.BucketId)
 	}
 	return stacktrace.Propagate(err, "")
 }
