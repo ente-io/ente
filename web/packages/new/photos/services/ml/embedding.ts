@@ -250,9 +250,8 @@ const fetchEmbeddings = async (
         }),
     });
     ensureOk(res);
-    return z
-        .object({ embeddings: z.array(RemoteEmbedding) })
-        .parse(await res.json()).embeddings;
+    return z.object({ data: z.array(RemoteEmbedding) }).parse(await res.json())
+        .data;
 };
 
 /**
