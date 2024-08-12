@@ -114,6 +114,9 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.selectedFiles.files.isEmpty) {
+      return const SizedBox();
+    }
     final ownedFilesCount = split.ownedByCurrentUser.length;
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;

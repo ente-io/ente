@@ -1,6 +1,6 @@
 import "package:photos/face/model/detection.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import "package:photos/services/machine_learning/face_ml/face_ml_result.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 
 // FileInfo contains the image width and height of the image the face was detected in.
 class FileInfo {
@@ -18,11 +18,12 @@ class Face {
   Detection detection;
   final double score;
   final double blur;
- 
+
   ///#region Local DB fields
   // This is not stored on the server, using it for local DB row
   FileInfo? fileInfo;
   final int fileID;
+
   ///#endregion
 
   bool get isBlurry => blur < kLaplacianHardThreshold;
@@ -43,7 +44,7 @@ class Face {
 
   factory Face.empty(int fileID, {bool error = false}) {
     return Face(
-      "$fileID-0",
+      "${fileID}_0_0_0_0",
       fileID,
       <double>[],
       error ? -1.0 : 0.0,

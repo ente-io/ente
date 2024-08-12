@@ -11,6 +11,15 @@ String convertBytesToReadableFormat(int bytes) {
   return bytes.toString() + " " + storageUnits[storageUnitIndex];
 }
 
+(int, String) convertBytesToNumberAndUnit(int bytes) {
+  int storageUnitIndex = 0;
+  while (bytes >= 1024 && storageUnitIndex < storageUnits.length - 1) {
+    storageUnitIndex++;
+    bytes = (bytes / 1024).round();
+  }
+  return (bytes, storageUnits[storageUnitIndex]);
+}
+
 String formatBytes(int bytes, [int decimals = 2]) {
   if (bytes == 0) return '0 bytes';
   const k = 1024;

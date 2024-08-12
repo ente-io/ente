@@ -1,32 +1,32 @@
 import 'dart:async';
 
-import "package:flutter/cupertino.dart";
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/events/subscription_purchased_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
-import "package:photos/services/update_service.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
-import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
+import "package:photos/ui/tabs/home_widget.dart";
 import "package:photos/utils/data_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -38,8 +38,8 @@ class StripeSubscriptionPage extends StatefulWidget {
 
   const StripeSubscriptionPage({
     this.isOnboarding = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<StripeSubscriptionPage> createState() => _StripeSubscriptionPageState();
@@ -63,11 +63,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _showYearlyPlan = false;
   EnteColorScheme colorScheme = darkScheme;
   final Logger logger = Logger("StripeSubscriptionPage");
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   Future<void> _fetchSub() async {
     return _userService
@@ -128,58 +123,64 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     colorScheme = getEnteColorScheme(context);
-    final appBar = PreferredSize(
-      preferredSize: const Size(double.infinity, 60),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.background,
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: widget.isOnboarding
-            ? AppBar(
-                elevation: 0,
-                title: Hero(
-                  tag: "subscription",
-                  child: StepProgressIndicator(
-                    totalSteps: 4,
-                    currentStep: 4,
-                    selectedColor:
-                        Theme.of(context).colorScheme.greenAlternative,
-                    roundedEdges: const Radius.circular(10),
-                    unselectedColor: Theme.of(context)
-                        .colorScheme
-                        .stepProgressUnselectedColor,
-                  ),
-                ),
-              )
-            : AppBar(
-                elevation: 0,
-                title: Text("${S.of(context).subscription}${kDebugMode ? ' '
-                    'Stripe' : ''}"),
-              ),
-      ),
-    );
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
-      appBar: appBar,
-      body: Stack(
-        alignment: Alignment.bottomCenter,
+      appBar: widget.isOnboarding
+          ? AppBar(
+              scrolledUnderElevation: 0,
+              elevation: 0,
+              title: Hero(
+                tag: "subscription",
+                child: StepProgressIndicator(
+                  totalSteps: 4,
+                  currentStep: 4,
+                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  roundedEdges: const Radius.circular(10),
+                  unselectedColor:
+                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                ),
+              ),
+            )
+          : AppBar(
+              scrolledUnderElevation: 0,
+              toolbarHeight: 48,
+              leadingWidth: 48,
+              leading: GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Icon(
+                  Icons.arrow_back_outlined,
+                ),
+              ),
+            ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _getBody(),
-          const BottomShadowWidget(
-            offsetDy: 40,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TitleBarTitleWidget(
+                  title:
+                      widget.isOnboarding ? "Select your plan" : "Subscription",
+                ),
+                _isFreePlanUser() || !_hasLoadedData
+                    ? const SizedBox.shrink()
+                    : Text(
+                        convertBytesToReadableFormat(
+                          _userDetails.getTotalStorage(),
+                        ),
+                        style: textTheme.smallMuted,
+                      ),
+              ],
+            ),
           ),
+          Expanded(child: _getBody()),
         ],
       ),
     );
@@ -211,6 +212,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ),
     );
 
+    widgets.add(
+      SubscriptionToggle(
+        onToggle: (p0) {
+          _showYearlyPlan = p0;
+          _filterStripeForUI();
+        },
+      ),
+    );
+
     widgets.addAll([
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -219,8 +229,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       const Padding(padding: EdgeInsets.all(4)),
     ]);
 
-    widgets.add(_showSubscriptionToggle());
-
     if (_currentSubscription != null) {
       widgets.add(
         ValidityWidget(
@@ -228,49 +236,23 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           bonusData: _userDetails.bonusData,
         ),
       );
+      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
+      widgets.add(const SizedBox(height: 20));
+    } else {
+      widgets.add(const DividerWidget(dividerType: DividerType.bottomBar));
+      const SizedBox(height: 56);
     }
 
     if (_currentSubscription!.productID == freeProductID) {
-      if (widget.isOnboarding) {
-        widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
-      }
       widgets.add(
         SubFaqWidget(isOnboarding: widget.isOnboarding),
-      );
-    }
-
-    // only active subscription can be renewed/canceled
-    if (_hasActiveSubscription && _isStripeSubscriber) {
-      widgets.add(_stripeRenewOrCancelButton());
-    }
-
-    if (_currentSubscription!.productID != freeProductID) {
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
-          child: MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).paymentDetails,
-            ),
-            menuItemColor: colorScheme.fillFaint,
-            trailingWidget: Icon(
-              Icons.chevron_right_outlined,
-              color: colorScheme.strokeBase,
-            ),
-            singleBorderRadius: 4,
-            alignCaptionedTextToLeft: true,
-            onTap: () async {
-              _redirectToPaymentPortal();
-            },
-          ),
-        ),
       );
     }
 
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: S.of(context).manageFamily,
@@ -290,8 +272,42 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         ),
       );
       widgets.add(ViewAddOnButton(_userDetails.bonusData));
-      widgets.add(const SizedBox(height: 80));
     }
+
+    if (_currentSubscription!.productID != freeProductID) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
+          child: MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: "Manage payment method",
+            ),
+            menuItemColor: colorScheme.fillFaint,
+            trailingWidget: Icon(
+              Icons.chevron_right_outlined,
+              color: colorScheme.strokeBase,
+            ),
+            singleBorderRadius: 4,
+            alignCaptionedTextToLeft: true,
+            onTap: () async {
+              _redirectToPaymentPortal();
+            },
+          ),
+        ),
+      );
+    }
+
+    // only active subscription can be renewed/canceled
+    if (_hasActiveSubscription && _isStripeSubscriber) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          child: _stripeRenewOrCancelButton(),
+        ),
+      );
+    }
+
+    widgets.add(const SizedBox(height: 80));
 
     return SingleChildScrollView(
       child: Column(
@@ -360,16 +376,20 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     final String title = isRenewCancelled
         ? S.of(context).renewSubscription
         : S.of(context).cancelSubscription;
-    return TextButton(
-      child: Text(
-        title,
-        style: TextStyle(
-          color: (isRenewCancelled
-              ? colorScheme.primary700
-              : colorScheme.textMuted),
-        ),
+    return MenuItemWidget(
+      captionedTextWidget: CaptionedTextWidget(
+        title: title,
       ),
-      onPressed: () async {
+      alwaysShowSuccessState: false,
+      surfaceExecutionStates: false,
+      menuItemColor: colorScheme.fillFaint,
+      trailingWidget: Icon(
+        Icons.chevron_right_outlined,
+        color: colorScheme.strokeBase,
+      ),
+      singleBorderRadius: 4,
+      alignCaptionedTextToLeft: true,
+      onTap: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
           final choice = await showChoiceDialog(
@@ -452,9 +472,27 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         foundActivePlan = true;
       }
       planWidgets.add(
-        Material(
-          child: InkWell(
-            onTap: () async {
+        GestureDetector(
+          onTap: () async {
+            if (widget.isOnboarding && plan.id == freeProductID) {
+              Bus.instance.fire(SubscriptionPurchasedEvent());
+              // ignore: unawaited_futures
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const HomeWidget();
+                  },
+                ),
+                (route) => false,
+              );
+              unawaited(
+                BillingService.instance.verifySubscription(
+                  freeProductID,
+                  "",
+                  paymentProvider: "ente",
+                ),
+              );
+            } else {
               if (isActive) {
                 return;
               }
@@ -515,13 +553,15 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   },
                 ),
               ).then((value) => onWebPaymentGoBack(value));
-            },
-            child: SubscriptionPlanWidget(
-              storage: plan.storage,
-              price: plan.price,
-              period: plan.period,
-              isActive: isActive && !_hideCurrentPlanSelection,
-            ),
+            }
+          },
+          child: SubscriptionPlanWidget(
+            storage: plan.storage,
+            price: plan.price,
+            period: plan.period,
+            isActive: isActive && !_hideCurrentPlanSelection,
+            isPopular: _isPopularPlan(plan),
+            isOnboarding: widget.isOnboarding,
           ),
         ),
       );
@@ -537,67 +577,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         freeProductID == _currentSubscription!.productID;
   }
 
-  Widget _showSubscriptionToggle() {
-    return Container(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
-      margin: const EdgeInsets.only(bottom: 6),
-      child: Column(
-        children: [
-          RepaintBoundary(
-            child: SizedBox(
-              width: 250,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: SegmentedButton(
-                      style: SegmentedButton.styleFrom(
-                        selectedBackgroundColor:
-                            getEnteColorScheme(context).fillMuted,
-                        selectedForegroundColor:
-                            getEnteColorScheme(context).textBase,
-                        side: BorderSide(
-                          color: getEnteColorScheme(context).strokeMuted,
-                          width: 1,
-                        ),
-                      ),
-                      segments: <ButtonSegment<bool>>[
-                        ButtonSegment(
-                          label: Text(S.of(context).monthly),
-                          value: false,
-                        ),
-                        ButtonSegment(
-                          label: Text(S.of(context).yearly),
-                          value: true,
-                        ),
-                      ],
-                      selected: {_showYearlyPlan},
-                      onSelectionChanged: (p0) {
-                        _showYearlyPlan = p0.first;
-                        _filterStripeForUI();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _isFreePlanUser() && !UpdateService.instance.isPlayStoreFlavor()
-              ? Text(
-                  S.of(context).twoMonthsFreeOnYearlyPlans,
-                  style: getEnteTextTheme(context).miniMuted,
-                )
-              : const SizedBox.shrink(),
-          const Padding(padding: EdgeInsets.all(8)),
-        ],
-      ),
-    );
+  bool _isPopularPlan(BillingPlan plan) {
+    return popularProductIDs.contains(plan.id);
   }
 
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
     // don't add current plan if it's monthly plan but UI is showing yearly plans
     // and vice versa.
+
     if (_showYearlyPlan != _currentSubscription!.isYearlyPlan() &&
         _currentSubscription!.productID != freeProductID) {
       return;
@@ -610,15 +597,34 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
     planWidgets.insert(
       activePlanIndex,
-      Material(
-        child: InkWell(
-          onTap: () {},
-          child: SubscriptionPlanWidget(
-            storage: _currentSubscription!.storage,
-            price: _currentSubscription!.price,
-            period: _currentSubscription!.period,
-            isActive: _currentSubscription!.isValid(),
-          ),
+      GestureDetector(
+        onTap: () {
+          if (_currentSubscription!.isFreePlan() && widget.isOnboarding) {
+            Bus.instance.fire(SubscriptionPurchasedEvent());
+            // ignore: unawaited_futures
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const HomeWidget();
+                },
+              ),
+              (route) => false,
+            );
+            unawaited(
+              BillingService.instance.verifySubscription(
+                freeProductID,
+                "",
+                paymentProvider: "ente",
+              ),
+            );
+          }
+        },
+        child: SubscriptionPlanWidget(
+          storage: _currentSubscription!.storage,
+          price: _currentSubscription!.price,
+          period: _currentSubscription!.period,
+          isActive: _currentSubscription!.isValid(),
+          isOnboarding: widget.isOnboarding,
         ),
       ),
     );

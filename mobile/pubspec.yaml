@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.14+914
+version: 0.9.16+916
 publish_to: none
 
 environment:
@@ -31,8 +31,6 @@ dependencies:
     git:
       url: https://github.com/ente-io/chewie.git
       ref: forked_video_player_plus
-  clip_ggml:
-    path: plugins/clip_ggml
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -125,6 +123,8 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
+  onnx_dart:
+    path: plugins/onnx_dart
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git
@@ -246,7 +246,6 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/clip/
     - assets/video-editor/
   fonts:
     - family: Inter

@@ -5157,10 +5157,10 @@ class S {
     );
   }
 
-  /// `Remove from favorite`
+  /// `Remove from favorites`
   String get removeFromFavorite {
     return Intl.message(
-      'Remove from favorite',
+      'Remove from favorites',
       name: 'removeFromFavorite',
       desc: '',
       args: [],
@@ -8965,6 +8965,16 @@ class S {
     );
   }
 
+  /// `ML functions`
+  String get mlFunctions {
+    return Intl.message(
+      'ML functions',
+      name: 'mlFunctions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Panorama`
   String get panorama {
     return Intl.message(
@@ -9200,6 +9210,46 @@ class S {
     return Intl.message(
       'Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords',
       name: 'passwordStrengthInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No quick links selected`
+  String get noQuickLinksSelected {
+    return Intl.message(
+      'No quick links selected',
+      name: 'noQuickLinksSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please select quick links to remove`
+  String get pleaseSelectQuickLinksToRemove {
+    return Intl.message(
+      'Please select quick links to remove',
+      name: 'pleaseSelectQuickLinksToRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove public links`
+  String get removePublicLinks {
+    return Intl.message(
+      'Remove public links',
+      name: 'removePublicLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove public links of all selected quick links.`
+  String get thisWillRemovePublicLinksOfAllSelectedQuickLinks {
+    return Intl.message(
+      'This will remove public links of all selected quick links.',
+      name: 'thisWillRemovePublicLinksOfAllSelectedQuickLinks',
       desc: '',
       args: [],
     );

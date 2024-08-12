@@ -3,7 +3,7 @@ import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { FILE_TYPE } from "@/media/file-type";
+import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
@@ -865,7 +865,7 @@ const clusterLivePhotos = async (
         };
         if (await areLivePhotoAssets(fa, ga)) {
             const [image, video] =
-                fFileType == FILE_TYPE.IMAGE ? [f, g] : [g, f];
+                fFileType == FileType.image ? [f, g] : [g, f];
             result.push({
                 localID: f.localID,
                 collectionID: f.collectionID,
@@ -896,7 +896,7 @@ const clusterLivePhotos = async (
 
 interface PotentialLivePhotoAsset {
     fileName: string;
-    fileType: FILE_TYPE;
+    fileType: FileType;
     collectionID: number;
     uploadItem: UploadItem;
 }
@@ -912,7 +912,7 @@ const areLivePhotoAssets = async (
 
     let fPrunedName: string;
     let gPrunedName: string;
-    if (f.fileType == FILE_TYPE.IMAGE && g.fileType == FILE_TYPE.VIDEO) {
+    if (f.fileType == FileType.image && g.fileType == FileType.video) {
         fPrunedName = removePotentialLivePhotoSuffix(
             fName,
             // A Google Live Photo image file can have video extension appended
@@ -923,7 +923,7 @@ const areLivePhotoAssets = async (
             gExt ? `.${gExt}` : undefined,
         );
         gPrunedName = removePotentialLivePhotoSuffix(gName);
-    } else if (f.fileType == FILE_TYPE.VIDEO && g.fileType == FILE_TYPE.IMAGE) {
+    } else if (f.fileType == FileType.video && g.fileType == FileType.image) {
         fPrunedName = removePotentialLivePhotoSuffix(fName);
         gPrunedName = removePotentialLivePhotoSuffix(
             gName,

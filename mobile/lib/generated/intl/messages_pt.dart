@@ -166,7 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ei, você pode confirmar que este é seu ID de verificação do Ente.io? ${verificationID}";
 
   static String m52(referralCode, referralStorageInGB) =>
-      "Código de referência do ente: ${referralCode} \n\nAplique em Configurações → Geral → Indicações para obter ${referralStorageInGB} GB gratuitamente após a sua inscrição em um plano pago\n\nhttps://ente.io";
+      "Código de indicação do Ente: ${referralCode} \n\nAplique em Configurações → Geral → Indicações para obter ${referralStorageInGB} GB gratuitamente após a sua inscrição em um plano pago\n\nhttps://ente.io";
 
   static String m53(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Compartilhe com pessoas específicas', one: 'Compartilhado com 1 pessoa', other: 'Compartilhado com ${numberOfPeople} pessoas')}";
@@ -310,7 +310,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Autenticação necessária"),
         "appLock": MessageLookupByLibrary.simpleMessage("Bloqueio de app"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+            "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("ID da Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
@@ -376,9 +376,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Você verá dispositivos disponíveis para transmitir aqui."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "Certifique-se de que as permissões de Rede local estão ativadas para o aplicativo de Fotos Ente, em Configurações."),
-        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("Bloqueio automático"),
         "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
-            "Time after which the app locks after being put in the background"),
+            "Tempo após o qual o app bloqueia depois de ser colocado em segundo plano"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "Devido a erros técnicos, você foi desconectado. Pedimos desculpas pelo inconveniente."),
         "autoPair":
@@ -615,7 +615,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Arquivos adicionados a este álbum do dispositivo serão automaticamente enviados para o Ente."),
         "deviceLock":
-            MessageLookupByLibrary.simpleMessage("Bloqueio de dispositivo"),
+            MessageLookupByLibrary.simpleMessage("Bloqueio do dispositivo"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Desative o bloqueio de tela do dispositivo quando o Ente estiver em primeiro plano e houver um backup em andamento. Isso normalmente não é necessário, mas pode ajudar nos envios grandes e importações iniciais de grandes bibliotecas a serem concluídos mais rapidamente."),
         "deviceNotFound":
@@ -667,9 +667,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailChangedTo": m22,
         "emailNoEnteAccount": m23,
         "emailVerificationToggle":
-            MessageLookupByLibrary.simpleMessage("Verificação de e-mail"),
+            MessageLookupByLibrary.simpleMessage("Verificação por e-mail"),
         "emailYourLogs":
-            MessageLookupByLibrary.simpleMessage("Enviar por email seus logs"),
+            MessageLookupByLibrary.simpleMessage("Enviar logs por e-mail"),
         "empty": MessageLookupByLibrary.simpleMessage("Esvaziar"),
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Esvaziar a lixeira?"),
@@ -711,7 +711,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inserir nome da pessoa"),
         "enterPin": MessageLookupByLibrary.simpleMessage("Insira o PIN"),
         "enterReferralCode": MessageLookupByLibrary.simpleMessage(
-            "Insira o código de referência"),
+            "Insira o código de indicação"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Digite o código de 6 dígitos de\nseu aplicativo autenticador"),
@@ -746,7 +746,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Falha ao obter original para edição"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
-            "Não foi possível buscar os detalhes de referência. Por favor, tente novamente mais tarde."),
+            "Não foi possível buscar os detalhes de indicação. Por favor, tente novamente mais tarde."),
         "failedToLoadAlbums":
             MessageLookupByLibrary.simpleMessage("Falha ao carregar álbuns"),
         "failedToRenew":
@@ -824,11 +824,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Ajuda"),
         "hidden": MessageLookupByLibrary.simpleMessage("Oculto"),
         "hide": MessageLookupByLibrary.simpleMessage("Ocultar"),
-        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("Ocultar conteúdo"),
         "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
-            "Hides app content in the app switcher and disables screenshots"),
+            "Oculta o conteúdo do app no seletor de apps e desativa as capturas de tela"),
         "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
-            "Hides app content in the app switcher"),
+            "Oculta o conteúdo do seletor de apps"),
         "hiding": MessageLookupByLibrary.simpleMessage("Ocultando..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hospedado na OSM France"),
@@ -843,7 +843,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorar"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alguns arquivos neste álbum são ignorados do envio porque eles tinham sido anteriormente excluídos do Ente."),
-        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
+        "immediately": MessageLookupByLibrary.simpleMessage("Imediatamente"),
         "importing": MessageLookupByLibrary.simpleMessage("Importando...."),
         "incorrectCode":
             MessageLookupByLibrary.simpleMessage("Código incorreto"),
@@ -951,14 +951,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "locations": MessageLookupByLibrary.simpleMessage("Locais"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Tela de bloqueio"),
-        "logInLabel": MessageLookupByLibrary.simpleMessage("Login"),
+        "logInLabel": MessageLookupByLibrary.simpleMessage("Entrar"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Desconectando..."),
         "loginSessionExpired":
             MessageLookupByLibrary.simpleMessage("Sessão expirada"),
         "loginSessionExpiredDetails": MessageLookupByLibrary.simpleMessage(
             "Sua sessão expirou. Por favor, entre novamente."),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
-            "Ao clicar em login, eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>"),
+            "Ao clicar em entrar, eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Encerrar sessão"),
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "Isso enviará através dos logs para nos ajudar a depurar o seu problema. Por favor, note que nomes de arquivos serão incluídos para ajudar a rastrear problemas com arquivos específicos."),
@@ -990,6 +990,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m34,
         "merchandise": MessageLookupByLibrary.simpleMessage("Produtos"),
+        "mlFunctions": MessageLookupByLibrary.simpleMessage("ML functions"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Por favor, note que isso resultará em uma largura de banda maior e uso de bateria até que todos os itens sejam indexados."),
         "mobileWebDesktop":
@@ -1041,6 +1042,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "No momento não há backup de fotos sendo feito"),
         "noPhotosFoundHere": MessageLookupByLibrary.simpleMessage(
             "Nenhuma foto encontrada aqui"),
+        "noQuickLinksSelected": MessageLookupByLibrary.simpleMessage(
+            "Nenhum link rápido selecionado"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Nenhuma chave de recuperação?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1078,6 +1081,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Parear com PIN"),
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Pareamento concluído"),
+        "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "passKeyPendingVerification": MessageLookupByLibrary.simpleMessage(
             "A verificação ainda está pendente"),
         "passkey": MessageLookupByLibrary.simpleMessage("Chave de acesso"),
@@ -1087,10 +1091,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Senha alterada com sucesso"),
         "passwordLock":
-            MessageLookupByLibrary.simpleMessage("Bloqueio de senha"),
+            MessageLookupByLibrary.simpleMessage("Bloqueio por senha"),
         "passwordStrength": m38,
         "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
-            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
+            "Força da senha é calculada considerando o comprimento da senha, caracteres usados, e se a senha aparece ou não nas 10.000 senhas mais usadas"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nós não salvamos essa senha, se você esquecer <underline> nós não poderemos descriptografar seus dados</underline>"),
         "paymentDetails":
@@ -1143,7 +1147,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage(
             "Por favor, conceda as permissões"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage(
-            "Por favor, faça login novamente"),
+            "Por favor, inicie sessão novamente"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Selecione links rápidos para remover"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Por favor, tente novamente"),
@@ -1203,7 +1209,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recuperação bem sucedida!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
-            "O dispositivo atual não é poderoso o suficiente para verificar sua senha, mas podemos regenerar de uma forma que funcione com todos os dispositivos.\n\nPor favor, faça o login usando sua chave de recuperação e recrie sua senha (você pode usar o mesmo novamente se desejar)."),
+            "O dispositivo atual não é poderoso o suficiente para verificar sua senha, mas podemos regenerar de uma forma que funcione com todos os dispositivos.\n\nPor favor, inicie sessão usando sua chave de recuperação e recrie sua senha (você pode usar o mesmo novamente se desejar)."),
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Redefinir senha"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
@@ -1215,11 +1221,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "referralStep1": MessageLookupByLibrary.simpleMessage(
             "Envie esse código aos seus amigos"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
-            "2. Eles se inscreveram para um plano pago"),
+            "2. Eles se inscrevem em um plano pago"),
         "referralStep3": m44,
-        "referrals": MessageLookupByLibrary.simpleMessage("Referências"),
+        "referrals": MessageLookupByLibrary.simpleMessage("Indicações"),
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
-            "Referências estão atualmente pausadas"),
+            "Indicações estão atualmente pausadas"),
         "remindToEmptyDeviceTrash": MessageLookupByLibrary.simpleMessage(
             "Também vazio \"Excluído Recentemente\" de \"Configurações\" -> \"Armazenamento\" para reivindicar o espaço livre"),
         "remindToEmptyEnteTrash": MessageLookupByLibrary.simpleMessage(
@@ -1246,6 +1252,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Remover etiqueta da pessoa"),
         "removePublicLink":
+            MessageLookupByLibrary.simpleMessage("Remover link público"),
+        "removePublicLinks":
             MessageLookupByLibrary.simpleMessage("Remover link público"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Alguns dos itens que você está removendo foram adicionados por outras pessoas, e você perderá o acesso a eles"),
@@ -1428,7 +1436,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>"),
         "singleFileDeleteFromDevice": m55,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
-            "Será excluído de todos os álbuns."),
+            "Ele será excluído de todos os álbuns."),
         "singleFileInBothLocalAndRemote": m56,
         "singleFileInRemoteOnly": m57,
         "skip": MessageLookupByLibrary.simpleMessage("Pular"),
@@ -1458,7 +1466,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Desculpe, o código que você inseriu está incorreto"),
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
-                "Desculpe, não foi possível gerar chaves seguras neste dispositivo.\n\npor favor, faça o login com um dispositivo diferente."),
+                "Desculpe, não foi possível gerar chaves seguras neste dispositivo.\n\npor favor, inicie sessão com um dispositivo diferente."),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Ordenar por"),
         "sortNewestFirst":
             MessageLookupByLibrary.simpleMessage("Mais recentes primeiro"),
@@ -1499,7 +1507,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sugerir recurso"),
         "support": MessageLookupByLibrary.simpleMessage("Suporte"),
         "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
+            "Para ativar o bloqueio por deslizar, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Sincronização interrompida"),
@@ -1531,7 +1539,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Estes itens serão excluídos do seu dispositivo."),
         "theyAlsoGetXGb": m63,
         "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
-            "Eles(a) serão excluídos(as) de todos os álbuns."),
+            "Eles serão excluídos de todos os álbuns."),
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
             "Esta ação não pode ser desfeita"),
         "thisAlbumAlreadyHDACollaborativeLink":
@@ -1553,6 +1561,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Isso fará com que você saia do seguinte dispositivo:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Isso fará com que você saia deste dispositivo!"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage(
+                "Isto removerá links públicos de todos os links rápidos selecionados."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "Para ativar o bloqueio de app, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),
@@ -1638,6 +1649,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifying": MessageLookupByLibrary.simpleMessage("Verificando..."),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Verificando chave de recuperação..."),
+        "videoInfo":
+            MessageLookupByLibrary.simpleMessage("Informação de Vídeo"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vídeo"),
         "videos": MessageLookupByLibrary.simpleMessage("Vídeos"),
         "viewActiveSessions":

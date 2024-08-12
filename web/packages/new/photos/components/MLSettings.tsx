@@ -124,7 +124,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={pt("ML search")}
+                        title={pt("Face and magic search")}
                         onRootClose={onRootClose}
                     />
                     {component}
@@ -305,7 +305,7 @@ const ManageML: React.FC<ManageMLProps> = ({
     let status: string;
     switch (phase) {
         case "indexing":
-            status = pt("Indexing");
+            status = pt("Running");
             break;
         case "scheduled":
             status = pt("Scheduled");
@@ -319,9 +319,9 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
-            title: pt("Disable ML search"),
+            title: pt("Disable face and magic search"),
             content: pt(
-                "Do you want to disable ML search on all your devices?",
+                "Do you want to disable face and magic search on all your devices?",
             ),
             close: { text: t("cancel") },
             proceed: {
@@ -356,7 +356,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.faint">
-                            {pt("Status")}
+                            {pt("Indexing")}
                         </Typography>
                         <Typography>{status}</Typography>
                     </Stack>
