@@ -48,11 +48,11 @@ class FileDataService {
 
   Future<FileDataResponse> getFilesData(
     Set<int> fileIds, {
-    DataType type = DataType.derivedMeta,
+    DataType type = DataType.mlData,
   }) async {
     try {
       final res = await _dio.post(
-        "/files/fetch-data/",
+        "/files/data/fetch",
         data: {
           "fileIDs": fileIds.toList(),
           "type": type.toJson(),

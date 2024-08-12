@@ -453,7 +453,7 @@ class MLService {
           final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
               FileDataEntity.empty(
                 instruction.file.uploadedFileID!,
-                DataType.derivedMeta,
+                DataType.mlData,
               );
           if (result.facesRan) {
             dataEntity.putFace(

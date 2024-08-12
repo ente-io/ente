@@ -4,7 +4,7 @@ const _faceKey = 'face';
 const _clipKey = 'clip';
 
 enum DataType {
-  derivedMeta('derivedMeta');
+  mlData('mldata');
 
   final String value;
   const DataType(this.value);
@@ -34,7 +34,7 @@ class FileDataEntity {
   );
 
   void validate() {
-    if (type == DataType.derivedMeta) {
+    if (type == DataType.mlData) {
       if (remoteRawData[_faceKey] == null) {
         throw Exception('Face embedding is null');
       }
@@ -64,12 +64,12 @@ class FileDataEntity {
   }
 
   void putFace(RemoteFaceEmbedding faceEmbedding) {
-    assert(type == DataType.derivedMeta, 'Invalid type ${type.value}');
+    assert(type == DataType.mlData, 'Invalid type ${type.value}');
     remoteRawData[_faceKey] = faceEmbedding.toJson();
   }
 
   void putClip(RemoteClipEmbedding clipEmbedding) {
-    assert(type == DataType.derivedMeta, 'Invalid type ${type.value}');
+    assert(type == DataType.mlData, 'Invalid type ${type.value}');
     remoteRawData[_clipKey] = clipEmbedding.toJson();
   }
 
