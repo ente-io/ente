@@ -499,7 +499,7 @@
     "passphrase_strength_strong": "Siła hasła: Silne",
     "preferences": "Preferencje",
     "language": "Język",
-    "ADVANCED": "Zaawansowane",
+    "advanced": "Zaawansowane",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Nieprawidłowy katalog eksportu",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Wybrany katalog eksportu nie istnieje.</p><p> Proszę wybrać prawidłowy katalog.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Weryfikacja subskrypcji nie powiodła się",

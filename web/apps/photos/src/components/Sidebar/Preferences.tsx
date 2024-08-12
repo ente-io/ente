@@ -83,7 +83,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                         <EnteMenuItem
                             onClick={openAdvancedSettings}
                             endIcon={<ChevronRight />}
-                            label={t("ADVANCED")}
+                            label={t("advanced")}
                         />
                         {showMLSettings && (
                             <Box>

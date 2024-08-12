@@ -499,7 +499,7 @@
     "passphrase_strength_strong": "Sicurezza password: Forte",
     "preferences": "",
     "language": "Lingua",
-    "ADVANCED": "Avanzate",
+    "advanced": "Avanzate",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
     "SUBSCRIPTION_VERIFICATION_ERROR": "",

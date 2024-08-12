@@ -44,7 +44,7 @@ export const AdvancedSettings: React.FC<SettingsDrawerProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("ADVANCED")}
+                    title={t("advanced")}
                     onRootClose={handleRootClose}
                 />
 

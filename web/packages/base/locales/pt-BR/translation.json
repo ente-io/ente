@@ -499,7 +499,7 @@
     "passphrase_strength_strong": "Força da senha: forte",
     "preferences": "Preferências",
     "language": "Idioma",
-    "ADVANCED": "Avançado",
+    "advanced": "Avançado",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Diretório de exportação inválido",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>O diretório de exportação que você selecionou não existe.</p><p> Por favor, selecione um diretório válido.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Falha na verificação de assinatura",

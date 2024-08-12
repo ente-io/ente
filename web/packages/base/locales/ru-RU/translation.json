@@ -499,7 +499,7 @@
     "passphrase_strength_strong": "Надежность пароля: Надежный",
     "preferences": "Предпочтения",
     "language": "Язык",
-    "ADVANCED": "Передовой",
+    "advanced": "Передовой",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Недопустимый каталог экспорта",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Выбранный вами каталог экспорта не существует.</p><p> Пожалуйста, выберите правильный каталог.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Не удалось подтвердить подписку",
