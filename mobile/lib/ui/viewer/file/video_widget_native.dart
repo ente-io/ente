@@ -17,6 +17,7 @@ import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -512,21 +513,35 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           constraints: const BoxConstraints.expand(),
         ),
         Center(
-          child: SizedBox.fromSize(
-            size: const Size.square(20),
+          child: Container(
+            width: 48,
+            height: 48,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: Colors.black.withOpacity(0.3),
+              border: Border.all(
+                color: strokeFaintDark,
+                width: 1,
+              ),
+            ),
             child: ValueListenableBuilder(
               valueListenable: _progressNotifier,
               builder: (BuildContext context, double? progress, _) {
                 return progress == null || progress == 1
-                    ? const CupertinoActivityIndicator(
-                        color: Colors.white,
+                    ? const EnteLoadingWidget(
+                        size: 32,
+                        color: fillBaseDark,
+                        padding: 0,
                       )
                     : CircularProgressIndicator(
-                        backgroundColor: Colors.black,
+                        backgroundColor: Colors.transparent,
                         value: progress,
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           Color.fromRGBO(45, 194, 98, 1.0),
                         ),
+                        strokeWidth: 2,
+                        strokeCap: StrokeCap.round,
                       );
               },
             ),
@@ -543,6 +558,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       child: ThumbnailWidget(
         widget.file,
         fit: BoxFit.contain,
+        shouldShowVideoOverlayIcon: false,
       ),
     );
   }
