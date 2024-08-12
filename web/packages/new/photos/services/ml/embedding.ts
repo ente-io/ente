@@ -33,7 +33,7 @@ import { type RemoteFaceIndex } from "./face";
  *       ... more in the future ...
  *     }
  */
-type EmbeddingModel = "derived";
+type EmbeddingModel = "mldata";
 
 const RemoteEmbedding = z.object({
     /** The ID of the file whose embedding this is. */
@@ -41,11 +41,11 @@ const RemoteEmbedding = z.object({
     /**
      * Base64 representation of the encrypted (model specific) embedding JSON.
      */
-    encryptedEmbedding: z.string(),
+    encryptedData: z.string(),
     /**
      * Base64 representation of the header that should be passed when decrypting
-     * {@link encryptedEmbedding}. See the {@link decryptMetadata} function in
-     * the crypto layer.
+     * {@link encryptedData}. See the {@link decryptMetadata} function in the
+     * crypto layer.
      */
     decryptionHeader: z.string(),
 });
@@ -178,7 +178,7 @@ const ParsedRemoteDerivedData = z.object({
 export const fetchDerivedData = async (
     filesByID: Map<number, EnteFile>,
 ): Promise<Map<number, RemoteDerivedData>> => {
-    const remoteEmbeddings = await fetchEmbeddings("derived", [
+    const remoteEmbeddings = await fetchEmbeddings("mldata", [
         ...filesByID.keys(),
     ]);
 
@@ -193,7 +193,7 @@ export const fetchDerivedData = async (
 
         try {
             const decryptedBytes = await decryptFileEmbedding({
-                encryptedDataB64: remoteEmbedding.encryptedEmbedding,
+                encryptedDataB64: remoteEmbedding.encryptedData,
                 decryptionHeaderB64: remoteEmbedding.decryptionHeader,
                 keyB64: file.key,
             });
@@ -241,18 +241,17 @@ const fetchEmbeddings = async (
     model: EmbeddingModel,
     fileIDs: number[],
 ): Promise<RemoteEmbedding[]> => {
-    const res = await fetch(await apiURL("/embeddings/files"), {
+    const res = await fetch(await apiURL("/files/data/fetch"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
-            model,
+            type: "mldata",
             fileIDs,
         }),
     });
     ensureOk(res);
-    return z
-        .object({ embeddings: z.array(RemoteEmbedding) })
-        .parse(await res.json()).embeddings;
+    return z.object({ data: z.array(RemoteEmbedding) }).parse(await res.json())
+        .data;
 };
 
 /**
@@ -270,7 +269,7 @@ const fetchEmbeddings = async (
 export const putDerivedData = async (
     enteFile: EnteFile,
     derivedData: RawRemoteDerivedData,
-) => putEmbedding(enteFile, "derived", await gzip(JSON.stringify(derivedData)));
+) => putEmbedding(enteFile, "mldata", await gzip(JSON.stringify(derivedData)));
 
 /**
  * Upload an embedding to remote.
@@ -293,14 +292,14 @@ const putEmbedding = async (
     const { encryptedDataB64, decryptionHeaderB64 } =
         await encryptFileEmbedding({ data: embedding, keyB64: enteFile.key });
 
-    const res = await fetch(await apiURL("/embeddings"), {
+    const res = await fetch(await apiURL("/files/data"), {
         method: "PUT",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
             fileID: enteFile.id,
-            encryptedEmbedding: encryptedDataB64,
+            encryptedData: encryptedDataB64,
             decryptionHeader: decryptionHeaderB64,
-            model,
+            type: "mldata",
         }),
     });
     ensureOk(res);
