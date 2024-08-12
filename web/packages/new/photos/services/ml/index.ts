@@ -233,7 +233,14 @@ const mlLocalKey = "mlEnabled";
  * The remote status is tracked with a separate {@link isMLEnabledRemote} flag
  * that is synced with remote.
  */
-const isMLEnabledLocal = () => localStorage.getItem(mlLocalKey) == "1";
+const isMLEnabledLocal = () => {
+    // Delete legacy ML keys.
+    //
+    // This code was added August 2024 (v1.7.3-beta) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
+    localStorage.removeItem("faceIndexingEnabled");
+    return localStorage.getItem(mlLocalKey) == "1";
+};
 
 /**
  * Update the (locally stored) value of {@link isMLEnabledLocal}.
