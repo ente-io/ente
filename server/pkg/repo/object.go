@@ -200,8 +200,8 @@ func (repo *ObjectRepository) DoesObjectOrTempObjectExist(objectKey string) (boo
 //
 // Unknown objects (i.e. objectKeys for which there are no entries) are
 // considered as deleted.
-func (repo *ObjectRepository) GetObjectState(tx *sql.Tx, objectKey string) (ObjectState ente.ObjectState, err error) {
-	row := tx.QueryRow(`
+func (repo *ObjectRepository) GetObjectState(objectKey string) (ObjectState ente.ObjectState, err error) {
+	row := repo.DB.QueryRow(`
 	SELECT ok.is_deleted, u.encrypted_email IS NULL AS is_user_deleted, ok.size
 	FROM object_keys ok
 	JOIN files f ON ok.file_id = f.file_id
