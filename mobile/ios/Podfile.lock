@@ -3,12 +3,12 @@ PODS:
     - Flutter
   - battery_info (0.0.1):
     - Flutter
+  - blurhash_ffi (0.0.1):
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
   - dart_ui_isolate (0.0.1):
-    - Flutter
-  - dchs_motion_sensors (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
@@ -148,6 +148,8 @@ PODS:
     - Flutter
   - media_kit_video (0.0.1):
     - Flutter
+  - motion_sensors (0.0.1):
+    - Flutter
   - motionphoto (0.0.1):
     - Flutter
   - move_to_background (0.0.1):
@@ -178,6 +180,8 @@ PODS:
   - photo_manager (2.0.0):
     - Flutter
     - FlutterMacOS
+  - privacy_screen (0.0.1):
+    - Flutter
   - PromisesObjC (2.4.0)
   - receive_sharing_intent (1.6.8):
     - Flutter
@@ -201,8 +205,6 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - smart_auth (0.0.1):
-    - Flutter
   - sqflite (0.0.3):
     - Flutter
     - FlutterMacOS
@@ -240,9 +242,9 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
+  - blurhash_ffi (from `.symlinks/plugins/blurhash_ffi/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
-  - dchs_motion_sensors (from `.symlinks/plugins/dchs_motion_sensors/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_min (from `.symlinks/plugins/ffmpeg_kit_flutter_min/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -269,6 +271,7 @@ DEPENDENCIES:
   - media_kit_libs_ios_video (from `.symlinks/plugins/media_kit_libs_ios_video/ios`)
   - media_kit_native_event_loop (from `.symlinks/plugins/media_kit_native_event_loop/ios`)
   - media_kit_video (from `.symlinks/plugins/media_kit_video/ios`)
+  - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
@@ -277,12 +280,12 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
+  - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - screen_brightness_ios (from `.symlinks/plugins/screen_brightness_ios/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - smart_auth (from `.symlinks/plugins/smart_auth/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
@@ -321,12 +324,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
+  blurhash_ffi:
+    :path: ".symlinks/plugins/blurhash_ffi/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
   dart_ui_isolate:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
-  dchs_motion_sensors:
-    :path: ".symlinks/plugins/dchs_motion_sensors/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   ffmpeg_kit_flutter_min:
@@ -379,6 +382,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/media_kit_native_event_loop/ios"
   media_kit_video:
     :path: ".symlinks/plugins/media_kit_video/ios"
+  motion_sensors:
+    :path: ".symlinks/plugins/motion_sensors/ios"
   motionphoto:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
@@ -395,6 +400,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
+  privacy_screen:
+    :path: ".symlinks/plugins/privacy_screen/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
   screen_brightness_ios:
@@ -405,8 +412,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  smart_auth:
-    :path: ".symlinks/plugins/smart_auth/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/darwin"
   sqlite3_flutter_libs:
@@ -427,9 +432,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   background_fetch: 2319bf7e18237b4b269430b7f14d177c0df09c5a
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
+  blurhash_ffi: 4831b96320d4273876c9a2fd3f7d50b8a3a53509
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
-  dchs_motion_sensors: 9cef816635a39345cda9f0c4943e061f6429f453
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   ffmpeg-kit-ios-min: 4e9a088f4ee9629435960b9d68e54848975f1931
   ffmpeg_kit_flutter_min: 5eff47f4965bf9d1150e98961eb6129f5ae3f28c
@@ -466,6 +471,7 @@ SPEC CHECKSUMS:
   media_kit_libs_ios_video: a5fe24bc7875ccd6378a0978c13185e1344651c1
   media_kit_native_event_loop: e6b2ab20cf0746eb1c33be961fcf79667304fa2a
   media_kit_video: 5da63f157170e5bf303bf85453b7ef6971218a2e
+  motion_sensors: 03f55b7c637a7e365a0b5f9697a449f9059d5d91
   motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
@@ -478,6 +484,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   photo_manager: ff695c7a1dd5bc379974953a2b5c0a293f7c4c8a
+  privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 6837b01768e567fe8562182397bf43d63d8c6437
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
@@ -488,7 +495,6 @@ SPEC CHECKSUMS:
   SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
-  smart_auth: 4bedbc118723912d0e45a07e8ab34039c19e04f2
   sqflite: 673a0e54cc04b7d6dba8d24fb8095b31c3a99eec
   sqlite3: 02d1f07eaaa01f80a1c16b4b31dfcbb3345ee01a
   sqlite3_flutter_libs: af0e8fe9bce48abddd1ffdbbf839db0302d72d80
