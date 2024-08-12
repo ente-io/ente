@@ -17,25 +17,29 @@ type FileDataConfig struct {
 
 func (f FileDataConfig) HasConfig(objectType ente.ObjectType) bool {
 	if objectType == "" || objectType == ente.FILE || objectType == ente.THUMBNAIL {
-		panic(fmt.Sprintf("Invalid object type: %s", objectType))
+		panic(fmt.Sprintf("Unsupported object type: %s", objectType))
 	}
 
-	_, ok := f.ObjectBucketConfig[strings.ToLower(string(objectType))]
+	_, ok := f.ObjectBucketConfig[key(objectType)]
 	return ok
 }
 
 func (f FileDataConfig) GetPrimaryBucketID(objectType ente.ObjectType) string {
-	config, ok := f.ObjectBucketConfig[strings.ToLower(string(objectType))]
+	config, ok := f.ObjectBucketConfig[key(objectType)]
 	if !ok {
-		panic(fmt.Sprintf("No config for object type: %s, use HasConfig", objectType))
+		panic(fmt.Sprintf("No config for object type: %s, use HasConfig", key(objectType)))
 	}
 	return config.PrimaryBucket
 }
 
 func (f FileDataConfig) GetReplicaBuckets(objectType ente.ObjectType) []string {
-	config, ok := f.ObjectBucketConfig[strings.ToLower(string(objectType))]
+	config, ok := f.ObjectBucketConfig[key(objectType)]
 	if !ok {
-		panic(fmt.Sprintf("No config for object type: %s, use HasConfig", objectType))
+		panic(fmt.Sprintf("No config for object type: %s, use HasConfig", key(objectType)))
 	}
 	return config.ReplicaBuckets
+}
+
+func key(oType ente.ObjectType) string {
+	return strings.ToLower(string(oType))
 }
