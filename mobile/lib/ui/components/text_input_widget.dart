@@ -156,6 +156,8 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             keyboardType: widget.textInputType,
             textCapitalization: widget.textCapitalization!,
             autofocus: widget.autoFocus ?? false,
+            autofillHints:
+                widget.isPasswordInput ? [AutofillHints.password] : [],
             controller: _textController,
             focusNode: widget.focusNode,
             inputFormatters: widget.textInputFormatter ??
