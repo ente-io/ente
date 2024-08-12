@@ -173,6 +173,9 @@ s3:
     # production store.
     #use_path_style_urls: true
     #
+    # Warning: For file-storage, do not specify buckets with any lock or versioning enabled.
+    # The application does not handle these cases. By default, we will use the derived-storage or hot storage bucket
+    # as the primary bucket for file-data storage.
     # file-data-storage:
     #     mldata:
     #         primaryBucket:
