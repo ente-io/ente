@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func (f *FileHandler) PutFileData(ctx *gin.Context) {
+func (h *FileHandler) PutFileData(ctx *gin.Context) {
 	var req fileData.PutFileDataRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
@@ -25,7 +25,7 @@ func (f *FileHandler) PutFileData(ctx *gin.Context) {
 		version := 1
 		reqInt.Version = &version
 	}
-	err := f.FileDataCtrl.InsertOrUpdate(ctx, &req)
+	err := h.FileDataCtrl.InsertOrUpdate(ctx, &req)
 	if err != nil {
 		handler.Error(ctx, err)
 
@@ -34,13 +34,13 @@ func (f *FileHandler) PutFileData(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{})
 }
 
-func (f *FileHandler) GetFilesData(ctx *gin.Context) {
+func (h *FileHandler) GetFilesData(ctx *gin.Context) {
 	var req fileData.GetFilesData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
-	resp, err := f.FileDataCtrl.GetFilesData(ctx, req)
+	resp, err := h.FileDataCtrl.GetFilesData(ctx, req)
 	if err != nil {
 		handler.Error(ctx, err)
 		return
@@ -48,13 +48,13 @@ func (f *FileHandler) GetFilesData(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-func (f *FileHandler) GetFileData(ctx *gin.Context) {
+func (h *FileHandler) GetFileData(ctx *gin.Context) {
 	var req fileData.GetFileData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
-	resp, err := f.FileDataCtrl.GetFileData(ctx, req)
+	resp, err := h.FileDataCtrl.GetFileData(ctx, req)
 	if err != nil {
 		handler.Error(ctx, err)
 		return
@@ -64,13 +64,13 @@ func (f *FileHandler) GetFileData(ctx *gin.Context) {
 	})
 }
 
-func (f *FileHandler) GetPreviewUploadURL(c *gin.Context) {
+func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 	var request fileData.PreviewUploadUrlRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	url, err := f.FileDataCtrl.PreviewUploadURL(c, request)
+	url, err := h.FileDataCtrl.PreviewUploadURL(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -80,13 +80,13 @@ func (f *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 	})
 }
 
-func (f *FileHandler) GetPreviewURL(c *gin.Context) {
+func (h *FileHandler) GetPreviewURL(c *gin.Context) {
 	var request fileData.GetPreviewURLRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	url, err := f.FileDataCtrl.GetPreviewUrl(c, request)
+	url, err := h.FileDataCtrl.GetPreviewUrl(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
