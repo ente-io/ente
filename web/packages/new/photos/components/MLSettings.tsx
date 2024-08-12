@@ -123,7 +123,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={t("face_and_magic_search")}
+                        title={t("ml_search")}
                         onRootClose={onRootClose}
                     />
                     {component}
