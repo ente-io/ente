@@ -10,10 +10,6 @@ export const sidebar = [
                 text: "Features",
                 collapsed: true,
                 items: [
-                    {
-                        text: "Advanced search",
-                        link: "/photos/features/advanced-search",
-                    },
                     { text: "Albums", link: "/photos/features/albums" },
                     { text: "Archiving", link: "/photos/features/archive" },
                     {
@@ -46,6 +42,10 @@ export const sidebar = [
                     {
                         text: "Location tags",
                         link: "/photos/features/location-tags",
+                    },
+                    {
+                        text: "Machine learning",
+                        link: "/photos/features/machine-learning",
                     },
                     { text: "Map", link: "/photos/features/map" },
                     {

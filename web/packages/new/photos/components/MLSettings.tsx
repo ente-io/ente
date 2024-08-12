@@ -155,7 +155,7 @@ interface EnableMLProps {
 
 const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     const moreDetails = () =>
-        openURL("https://help.ente.io/photos/features/advanced-search");
+        openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
         <Stack py={"20px"} px={"16px"} spacing={"32px"}>
