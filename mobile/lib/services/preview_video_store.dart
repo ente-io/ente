@@ -5,8 +5,8 @@ import "dart:typed_data";
 
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart";
-import "package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart";
-import "package:ffmpeg_kit_flutter_min/return_code.dart";
+import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
