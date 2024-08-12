@@ -309,7 +309,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
             child: MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
+              captionedTextWidget: const CaptionedTextWidget(
                 title: "Manage payment method",
               ),
               menuItemColor: colorScheme.fillFaint,
