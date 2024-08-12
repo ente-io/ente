@@ -42,6 +42,7 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) erro
                 WHERE elem IS NOT NULL AND elem != EXCLUDED.latest_bucket
             ),
             replicated_buckets = ARRAY[]::s3region[],
+            pending_sync = true,
             latest_bucket = EXCLUDED.latest_bucket,
             updated_at = now_utc_micro_seconds()
         WHERE file_data.is_deleted = false`

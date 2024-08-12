@@ -21,7 +21,7 @@ func (c *Controller) StartReplication() error {
 	if workerURL == "" {
 		log.Infof("replication.worker-url was not defined, file data will downloaded directly during replication")
 	} else {
-		log.Infof("Worker URL to download objects for replication v3 is: %s", workerURL)
+		log.Infof("Worker URL to download objects for file-data replication is: %s", workerURL)
 	}
 	c.workerURL = workerURL
 
