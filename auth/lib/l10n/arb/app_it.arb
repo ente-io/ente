@@ -465,5 +465,6 @@
   "appLockDescription": "Scegli tra la schermata di blocco predefinita del dispositivo e una schermata di blocco personalizzata con PIN o password.",
   "pinLock": "Blocco con PIN",
   "enterPin": "Inserisci PIN",
-  "setNewPin": "Imposta un nuovo PIN"
+  "setNewPin": "Imposta un nuovo PIN",
+  "importFailureDescNew": "Impossibile elaborare il file selezionato."
 }

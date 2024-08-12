@@ -465,5 +465,6 @@
   "appLockDescription": "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha.",
   "pinLock": "Bloqueio PIN",
   "enterPin": "Insira o PIN",
-  "setNewPin": "Definir novo PIN"
+  "setNewPin": "Definir novo PIN",
+  "importFailureDescNew": "Não foi possível analisar o arquivo selecionado."
 }
