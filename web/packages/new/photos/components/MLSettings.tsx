@@ -124,7 +124,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={pt("Face and magic search")}
+                        title={t("face_and_magic_search")}
                         onRootClose={onRootClose}
                     />
                     {component}
@@ -161,9 +161,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     return (
         <Stack py={"20px"} px={"16px"} spacing={"32px"}>
             <Typography color="text.muted">
-                {pt(
-                    "Ente supports on-device machine learning for face recognition, magic search and other advanced search features",
-                )}
+                {t("ml_search_description")}
             </Typography>
             <Stack spacing={"8px"}>
                 <Button color={"accent"} size="large" onClick={onEnable}>
@@ -175,9 +173,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                 </Button>
             </Stack>
             <Typography color="text.faint" variant="small">
-                {pt(
-                    'Magic search allows to search photos by their contents, e.g. "car", "red car", "Ferrari"',
-                )}
+                {t("ml_search_footnote")}
             </Typography>
         </Stack>
     );
@@ -319,14 +315,12 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
-            title: pt("Disable face and magic search"),
-            content: pt(
-                "Do you want to disable face and magic search on all your devices?",
-            ),
+            title: t("ml_search_disable"),
+            content: t("ml_search_disable_confirm"),
             close: { text: t("cancel") },
             proceed: {
                 variant: "critical",
-                text: pt("Disable"),
+                text: t("DISABLE"),
                 action: onDisableML,
             },
             buttonDirection: "row",
@@ -338,7 +332,7 @@ const ManageML: React.FC<ManageMLProps> = ({
             <Stack gap={3}>
                 <MenuItemGroup>
                     <EnteMenuItem
-                        label={pt("Enabled")}
+                        label={t("enabled")}
                         variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
@@ -356,7 +350,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.faint">
-                            {pt("Indexing")}
+                            {t("indexing")}
                         </Typography>
                         <Typography>{status}</Typography>
                     </Stack>
@@ -370,7 +364,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.faint">
-                            {pt("Processed")}
+                            {t("processed")}
                         </Typography>
                         <Typography textAlign="right">{processed}</Typography>
                     </Stack>

@@ -4,7 +4,6 @@ import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import {
     getLocaleInUse,
-    pt,
     setLocaleInUse,
     supportedLocales,
     type SupportedLocale,
@@ -96,7 +95,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                                     <EnteMenuItem
                                         endIcon={<ChevronRight />}
                                         onClick={() => setOpenMLSettings(true)}
-                                        label={pt("Face and magic search")}
+                                        label={t("face_and_magic_search")}
                                     />
                                 </MenuItemGroup>
                             </Box>
