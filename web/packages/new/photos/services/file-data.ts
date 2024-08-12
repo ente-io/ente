@@ -78,12 +78,13 @@ export const fetchFileData = async (
 };
 
 /**
- * Upload an embedding to remote.
+ * Upload file data associated with the given file to remote.
  *
- * This function will save or update the given embedding as the latest embedding
- * associated with the given {@link enteFile} for {@link type}.
+ * This function will save or update the given data as the latest file data of
+ * {@link type} associated with the given {@link enteFile}. The data will be
+ * end-to-end encrypted using the given {@link enteFile}'s key before uploading.
  *
- * @param enteFile {@link EnteFile} to which this embedding relates to.
+ * @param enteFile {@link EnteFile} to which this data is associated with.
  *
  * @param type The {@link FileDataType} which we are uploading.
  *
@@ -105,7 +106,7 @@ export const putFileData = async (
             fileID: enteFile.id,
             encryptedData: encryptedDataB64,
             decryptionHeader: decryptionHeaderB64,
-            type: "mldata",
+            type,
         }),
     });
     ensureOk(res);
