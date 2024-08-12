@@ -19,7 +19,7 @@ type GetFilesData struct {
 }
 
 func (g *GetFilesData) Validate() error {
-	if g.Type != ente.PreviewVideo && g.Type != ente.DerivedMeta {
+	if g.Type != ente.PreviewVideo && g.Type != ente.MlData {
 		return ente.NewBadRequestWithMessage(fmt.Sprintf("unsupported object type %s", g.Type))
 	}
 	if len(g.FileIDs) == 0 {
@@ -37,7 +37,7 @@ type GetFileData struct {
 }
 
 func (g *GetFileData) Validate() error {
-	if g.Type != ente.PreviewVideo && g.Type != ente.DerivedMeta {
+	if g.Type != ente.PreviewVideo && g.Type != ente.MlData {
 		return ente.NewBadRequestWithMessage(fmt.Sprintf("unsupported object type %s", g.Type))
 	}
 	return nil
@@ -102,7 +102,7 @@ type Row struct {
 
 // S3FileMetadataObjectKey returns the object key for the metadata stored in the S3 bucket.
 func (r *Row) S3FileMetadataObjectKey() string {
-	if r.Type == ente.DerivedMeta {
+	if r.Type == ente.MlData {
 		return derivedMetaPath(r.FileID, r.UserID)
 	}
 	if r.Type == ente.PreviewVideo {

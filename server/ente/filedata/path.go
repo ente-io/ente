@@ -15,7 +15,7 @@ func AllObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
 	switch oType {
 	case ente.PreviewVideo:
 		return []string{previewVideoPath(fileID, ownerID), previewVideoPlaylist(fileID, ownerID)}
-	case ente.DerivedMeta:
+	case ente.MlData:
 		return []string{derivedMetaPath(fileID, ownerID)}
 	case ente.PreviewImage:
 		return []string{previewImagePath(fileID, ownerID)}
@@ -49,5 +49,5 @@ func previewImagePath(fileID int64, ownerID int64) string {
 }
 
 func derivedMetaPath(fileID int64, ownerID int64) string {
-	return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(ente.DerivedMeta))
+	return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(ente.MlData))
 }

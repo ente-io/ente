@@ -157,7 +157,7 @@ const (
 	THUMBNAIL    ObjectType = "thumbnail"
 	PreviewImage ObjectType = "img_preview"
 	PreviewVideo ObjectType = "vid_preview"
-	DerivedMeta  ObjectType = "derivedMeta"
+	MlData       ObjectType = "mldata"
 )
 
 // S3ObjectKey represents the s3 object key and corresponding fileID for it

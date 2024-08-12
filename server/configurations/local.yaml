@@ -174,7 +174,7 @@ s3:
     #use_path_style_urls: true
     #
     # file-data-storage:
-    #     derivedMeta:
+    #     mldata:
     #         primaryBucket:
     #         replicaBuckets: []
     #     img_preview:

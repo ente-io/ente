@@ -35,7 +35,7 @@ func (r PutFileDataRequest) Validate() error {
 		if !r.isObjectDataPresent() || r.isEncDataPresent() {
 			return ente.NewBadRequestWithMessage("object (only) data is required for preview image")
 		}
-	case ente.DerivedMeta:
+	case ente.MlData:
 		if !r.isEncDataPresent() || r.isObjectDataPresent() {
 			return ente.NewBadRequestWithMessage("encryptedData and decryptionHeader (only) are required for derived meta")
 		}
@@ -46,7 +46,7 @@ func (r PutFileDataRequest) Validate() error {
 }
 
 func (r PutFileDataRequest) S3FileMetadataObjectKey(ownerID int64) string {
-	if r.Type == ente.DerivedMeta {
+	if r.Type == ente.MlData {
 		return derivedMetaPath(r.FileID, ownerID)
 	}
 	if r.Type == ente.PreviewVideo {

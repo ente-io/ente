@@ -84,7 +84,7 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if req.Type != ente.DerivedMeta && req.Type != ente.PreviewVideo {
+	if req.Type != ente.MlData && req.Type != ente.PreviewVideo {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
 	fileOwnerID := userID
