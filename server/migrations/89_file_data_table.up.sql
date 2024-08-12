@@ -1,7 +1,7 @@
-ALTER TABLE temp_objects
-ADD COLUMN IF NOT EXISTS bucket_id s3region;
-ALTER TYPE OBJECT_TYPE ADD VALUE 'derivedMeta';
+ALTER TABLE temp_objects ADD COLUMN IF NOT EXISTS bucket_id s3region;
+ALTER TYPE OBJECT_TYPE ADD VALUE 'mldata';
 ALTER TYPE s3region ADD VALUE 'b5';
+ALTER TYPE s3region ADD VALUE 'b6';
 -- Create the file_data table
 CREATE TABLE IF NOT EXISTS file_data
 (
