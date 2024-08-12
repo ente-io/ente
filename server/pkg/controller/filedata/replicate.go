@@ -63,7 +63,7 @@ func (c *Controller) tryReplicate() error {
 	row, err := c.Repo.GetPendingSyncDataAndExtendLock(ctx, newLockTime, false)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-			log.Errorf("Could not fetch row for deletion: %s", err)
+			log.Errorf("Could not fetch row for replication: %s", err)
 		}
 		return err
 	}
