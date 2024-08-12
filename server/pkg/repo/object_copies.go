@@ -18,17 +18,14 @@ type ObjectCopiesRepository struct {
 }
 
 // GetAndLockUnreplicatedObject gets an object which is not yet replicated to
-// all the replicas. It also starts a transaction to keep the row corresponding
-// to that object in the database locked.
+// all the replicas. It also registers a replication to keep the row corresponding
+// to that object to be blocked for 24h before next replication attemp.
 //
-// Both tx and objectCopies are guaranteed to be nil if error is not nil.
-//
-// If the returned transaction is not `nil`, it must be either `Rollback`ed or
-// `Commit`ed.
-func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*sql.Tx, *ente.ObjectCopies, error) {
+// ObjectCopies is guaranteed to be nil if error is not nil.
+func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*ente.ObjectCopies, error) {
 	tx, err := repo.DB.Begin()
 	if err != nil {
-		return nil, nil, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 
 	rollback := func() {
@@ -64,15 +61,19 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*sql.Tx, *en
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		commit()
-		return nil, nil, err
+		return nil, err
 	}
 
 	if err != nil {
 		rollback()
-		return nil, nil, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-
-	return tx, &r, nil
+	err = repo.RegisterReplicationAttempt(tx, r.ObjectKey)
+	if err != nil {
+		rollback()
+		return nil, stacktrace.Propagate(err, "failed to register replication attempt")
+	}
+	return &r, nil
 }
 
 // CreateNewB2Object creates a new entry for objectKey and marks it as having
@@ -139,8 +140,8 @@ func (repo *ObjectCopiesRepository) ResetNeedsScalewayReplication(objectKey stri
 
 // UnmarkFromReplication clears the want_* flags so that this objectKey is
 // marked as not requiring further replication.
-func (repo *ObjectCopiesRepository) UnmarkFromReplication(tx *sql.Tx, objectKey string) error {
-	_, err := tx.Exec(`
+func (repo *ObjectCopiesRepository) UnmarkFromReplication(objectKey string) error {
+	_, err := repo.DB.Exec(`
 	UPDATE object_copies
 	SET want_b2 = false, want_wasabi = false, want_scw = false
 	WHERE object_key = $1
@@ -150,24 +151,24 @@ func (repo *ObjectCopiesRepository) UnmarkFromReplication(tx *sql.Tx, objectKey 
 
 // MarkObjectReplicatedB2 sets the time when `objectKey` was replicated to
 // Wasabi to the current timestamp.
-func (repo *ObjectCopiesRepository) MarkObjectReplicatedWasabi(tx *sql.Tx, objectKey string) error {
+func (repo *ObjectCopiesRepository) MarkObjectReplicatedWasabi(objectKey string) error {
 	return repo.markObjectReplicated(`
 	UPDATE object_copies SET wasabi = now_utc_micro_seconds()
 	WHERE object_key = $1
-	`, tx, objectKey)
+	`, objectKey)
 }
 
 // MarkObjectReplicatedScaleway sets the time when `objectKey` was replicated to
 // Wasabi to the current timestamp.
-func (repo *ObjectCopiesRepository) MarkObjectReplicatedScaleway(tx *sql.Tx, objectKey string) error {
+func (repo *ObjectCopiesRepository) MarkObjectReplicatedScaleway(objectKey string) error {
 	return repo.markObjectReplicated(`
 	UPDATE object_copies SET scw = now_utc_micro_seconds()
 	WHERE object_key = $1
-	`, tx, objectKey)
+	`, objectKey)
 }
 
-func (repo *ObjectCopiesRepository) markObjectReplicated(query string, tx *sql.Tx, objectKey string) error {
-	result, err := tx.Exec(query, objectKey)
+func (repo *ObjectCopiesRepository) markObjectReplicated(query string, objectKey string) error {
+	result, err := repo.DB.Exec(query, objectKey)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

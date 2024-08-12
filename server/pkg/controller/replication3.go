@@ -222,7 +222,7 @@ func (c *ReplicationController3) replicate(i int) {
 // objects left to replicate currently.
 func (c *ReplicationController3) tryReplicate() error {
 	// Fetch an object to replicate
-	tx, copies, err := c.ObjectCopiesRepo.GetAndLockUnreplicatedObject()
+	copies, err := c.ObjectCopiesRepo.GetAndLockUnreplicatedObject()
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			log.Errorf("Could not fetch an object to replicate: %s", err)
@@ -237,44 +237,16 @@ func (c *ReplicationController3) tryReplicate() error {
 		"object_key": objectKey,
 	})
 
-	commit := func(err error) error {
-		// We don't rollback the transaction even in the case of errors, and
-		// instead try to commit it after setting the last_attempt timestamp.
-		//
-		// This avoids the replication getting stuck in a loop trying (and
-		// failing) to replicate the same object. The error would still need to
-		// be resolved, but at least the replication would meanwhile move
-		// forward, ignoring this row.
-
+	done := func(err error) error {
 		if err != nil {
 			logger.Error(err)
-		}
-
-		aerr := c.ObjectCopiesRepo.RegisterReplicationAttempt(tx, objectKey)
-		if aerr != nil {
-			aerr = stacktrace.Propagate(aerr, "Failed to mark replication attempt")
-			logger.Error(aerr)
-		}
-
-		cerr := tx.Commit()
-		if cerr != nil {
-			cerr = stacktrace.Propagate(err, "Failed to commit transaction")
-			logger.Error(cerr)
-		}
-
-		if err == nil {
-			err = aerr
-		}
-		if err == nil {
-			err = cerr
 		}
 
 		if err == nil {
 			logger.Info("Replication attempt succeeded")
 		} else {
-			logger.Info("Replication attempt failed")
+			logger.WithError(err).Info("Replication attempt failed")
 		}
-
 		return err
 	}
 
@@ -282,30 +254,30 @@ func (c *ReplicationController3) tryReplicate() error {
 
 	if copies.B2 == nil {
 		err := errors.New("expected B2 copy to be in place before we start replication")
-		return commit(stacktrace.Propagate(err, "Sanity check failed"))
+		return done(stacktrace.Propagate(err, "Sanity check failed"))
 	}
 
 	if !copies.WantWasabi && !copies.WantSCW {
 		err := errors.New("expected at least one of want_wasabi and want_scw to be true when trying to replicate")
-		return commit(stacktrace.Propagate(err, "Sanity check failed"))
+		return done(stacktrace.Propagate(err, "Sanity check failed"))
 	}
 
-	ob, err := c.ObjectRepo.GetObjectState(tx, objectKey)
+	ob, err := c.ObjectRepo.GetObjectState(objectKey)
 	if err != nil {
-		return commit(stacktrace.Propagate(err, "Failed to fetch file's deleted status"))
+		return done(stacktrace.Propagate(err, "Failed to fetch file's deleted status"))
 	}
 
 	if ob.IsFileDeleted || ob.IsUserDeleted {
 		// Update the object_copies to mark this object as not requiring further
 		// replication. The row in object_copies will get deleted when the next
 		// scheduled object deletion runs.
-		err = c.ObjectCopiesRepo.UnmarkFromReplication(tx, objectKey)
+		err = c.ObjectCopiesRepo.UnmarkFromReplication(objectKey)
 		if err != nil {
-			return commit(stacktrace.Propagate(err, "Failed to mark an object not requiring further replication"))
+			return done(stacktrace.Propagate(err, "Failed to mark an object not requiring further replication"))
 		}
 		logger.Infof("Skipping replication for deleted object (isFileDeleted = %v, isUserDeleted = %v)",
 			ob.IsFileDeleted, ob.IsUserDeleted)
-		return commit(nil)
+		return done(nil)
 	}
 
 	err = ensureSufficientSpace(ob.Size)
@@ -316,19 +288,19 @@ func (c *ReplicationController3) tryReplicate() error {
 		//
 		// Log this error though, so that it gets noticed if it happens too
 		// frequently (the instance might need a bigger disk).
-		return commit(stacktrace.Propagate(err, ""))
+		return done(stacktrace.Propagate(err, ""))
 	}
 
 	filePath, file, err := c.createTemporaryFile(objectKey)
 	if err != nil {
-		return commit(stacktrace.Propagate(err, "Failed to create temporary file"))
+		return done(stacktrace.Propagate(err, "Failed to create temporary file"))
 	}
 	defer os.Remove(filePath)
 	defer file.Close()
 
 	size, err := c.downloadFromB2ViaWorker(objectKey, file, logger)
 	if err != nil {
-		return commit(stacktrace.Propagate(err, "Failed to download object from B2"))
+		return done(stacktrace.Propagate(err, "Failed to download object from B2"))
 	}
 	logger.Infof("Downloaded %d bytes to %s", size, filePath)
 
@@ -343,21 +315,20 @@ func (c *ReplicationController3) tryReplicate() error {
 
 	if copies.WantWasabi && copies.Wasabi == nil {
 		werr := c.replicateFile(in, c.wasabiDest, func() error {
-			return c.ObjectCopiesRepo.MarkObjectReplicatedWasabi(tx, objectKey)
+			return c.ObjectCopiesRepo.MarkObjectReplicatedWasabi(objectKey)
 		})
 		err = werr
 	}
 
 	if copies.WantSCW && copies.SCW == nil {
 		serr := c.replicateFile(in, c.scwDest, func() error {
-			return c.ObjectCopiesRepo.MarkObjectReplicatedScaleway(tx, objectKey)
+			return c.ObjectCopiesRepo.MarkObjectReplicatedScaleway(objectKey)
 		})
 		if err == nil {
 			err = serr
 		}
 	}
-
-	return commit(err)
+	return done(err)
 }
 
 // Return an error if we risk running out of disk space if we try to download
