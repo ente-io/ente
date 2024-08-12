@@ -31,8 +31,6 @@ dependencies:
     git:
       url: https://github.com/ente-io/chewie.git
       ref: forked_video_player_plus
-  clip_ggml:
-    path: plugins/clip_ggml
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -63,7 +61,7 @@ dependencies:
   extended_image: ^8.1.1
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
-  ffmpeg_kit_flutter_min: ^6.0.3
+  ffmpeg_kit_flutter_full_gpl: ^6.0.3
   figma_squircle: ^0.5.3
   file_saver:
     # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
@@ -125,6 +123,8 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
+  onnx_dart:
+    path: plugins/onnx_dart
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git
@@ -152,7 +152,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.5
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0
-  share_plus: ^9.0.0 
+  share_plus: ^9.0.0
   shared_preferences: ^2.0.5
   simple_cluster: ^0.3.0
   sqflite: ^2.3.0
@@ -172,8 +172,8 @@ dependencies:
     git:
       url: https://github.com/RmanAkbarzadeh/VideoCompress.git
   video_editor:
-      git:
-        url: https://github.com/prateekmedia/video_editor.git
+    git:
+      url: https://github.com/prateekmedia/video_editor.git
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
@@ -247,7 +247,6 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/clip/
     - assets/video-editor/
   fonts:
     - family: Inter

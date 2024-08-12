@@ -901,6 +901,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m34,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mlFunctions": MessageLookupByLibrary.simpleMessage("ML functions"),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Mediocre"),

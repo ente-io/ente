@@ -1,10 +1,13 @@
 import "dart:convert";
+import "dart:io" show File;
 import "dart:math";
 
 import "package:html_unescape/html_unescape.dart";
 import "package:tuple/tuple.dart";
 
-class OnnxTextTokenizer {
+class ClipTextTokenizer {
+  static const int totalTokens = 77;
+
   late String vocabulary;
   late Map<int, String> byteEncoder;
   late Map<String, int> byteDecoder;
@@ -26,12 +29,26 @@ class OnnxTextTokenizer {
   late int sot;
   late int eot;
 
-  OnnxTextTokenizer();
+  bool _isInitialized = false;
 
-  // Async method since the loadFile returns a Future and dart constructor cannot be async
-  Future<void> init(String vocabulary) async {
+  // Singleton pattern
+  ClipTextTokenizer._privateConstructor();
+  static final instance = ClipTextTokenizer._privateConstructor();
+  factory ClipTextTokenizer() => instance;
+
+  Future<List<int>> tokenize(String text) async {
+    var tokens = _encode(text);
+    tokens =
+        [sot] + tokens.sublist(0, min(totalTokens - 2, tokens.length)) + [eot];
+    return tokens + List.filled(totalTokens - tokens.length, 0);
+  }
+
+  Future<void> init(String vocabPath) async {
+    if (_isInitialized) return;
+    final vocabFile = File(vocabPath);
+    final String vocabulary = await vocabFile.readAsString();
     this.vocabulary = vocabulary;
-    byteEncoder = bytesToUnicode();
+    byteEncoder = _bytesToUnicode();
     byteDecoder = byteEncoder.map((k, v) => MapEntry(v, k));
 
     var split = vocabulary.split('\n');
@@ -58,28 +75,29 @@ class OnnxTextTokenizer {
 
     sot = encoder['<|startoftext|>']!;
     eot = encoder['<|endoftext|>']!;
+    _isInitialized = true;
   }
 
-  List<int> encode(String text) {
+  List<int> _encode(String text) {
     final List<int> bpeTokens = [];
-    text = whitespaceClean(basicClean(text)).toLowerCase();
+    text = _whitespaceClean(_basicClean(text)).toLowerCase();
     for (Match match in pat.allMatches(text)) {
       String token = match[0]!;
       token = utf8.encode(token).map((b) => byteEncoder[b]).join();
-      bpe(token)
+      _bpe(token)
           .split(' ')
           .forEach((bpeToken) => bpeTokens.add(encoder[bpeToken]!));
     }
     return bpeTokens;
   }
 
-  String bpe(String token) {
+  String _bpe(String token) {
     if (cache.containsKey(token)) {
       return cache[token]!;
     }
     var word = token.split('').map((char) => char).toList();
     word[word.length - 1] = '${word.last}</w>';
-    var pairs = getPairs(word);
+    var pairs = _getPairs(word);
     if (pairs.isEmpty) {
       return '$token</w>';
     }
@@ -123,7 +141,7 @@ class OnnxTextTokenizer {
       if (word.length == 1) {
         break;
       } else {
-        pairs = getPairs(word);
+        pairs = _getPairs(word);
       }
     }
     final wordStr = word.join(' ');
@@ -131,21 +149,7 @@ class OnnxTextTokenizer {
     return wordStr;
   }
 
-  List<int> tokenize(String text, {int nText = 76, bool pad = true}) {
-    var tokens = encode(text);
-    tokens = [sot] + tokens.sublist(0, min(nText - 1, tokens.length)) + [eot];
-    if (pad) {
-      return tokens + List.filled(nText + 1 - tokens.length, 0);
-    } else {
-      return tokens;
-    }
-  }
-
-  List<int> pad(List<int> x, int padLength) {
-    return x + List.filled(padLength - x.length, 0);
-  }
-
-  Map<int, String> bytesToUnicode() {
+  Map<int, String> _bytesToUnicode() {
     final List<int> bs = [];
     for (int i = '!'.codeUnitAt(0); i <= '~'.codeUnitAt(0); i++) {
       bs.add(i);
@@ -171,7 +175,7 @@ class OnnxTextTokenizer {
     return Map.fromIterables(bs, ds);
   }
 
-  Set<Tuple2<String, String>> getPairs(List<String> word) {
+  Set<Tuple2<String, String>> _getPairs(List<String> word) {
     final Set<Tuple2<String, String>> pairs = {};
     String prevChar = word[0];
     for (var i = 1; i < word.length; i++) {
@@ -181,13 +185,13 @@ class OnnxTextTokenizer {
     return pairs;
   }
 
-  String basicClean(String text) {
+  String _basicClean(String text) {
     final unescape = HtmlUnescape();
     text = unescape.convert(unescape.convert(text));
     return text.trim();
   }
 
-  String whitespaceClean(String text) {
+  String _whitespaceClean(String text) {
     text = text.replaceAll(RegExp(r'\s+'), ' ');
     return text.trim();
   }

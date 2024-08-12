@@ -6,60 +6,55 @@ import 'dart:typed_data' show Uint8List;
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
+import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
-enum ImageOperation {
+enum MLComputerOperation {
   generateFaceThumbnails,
+  loadModel,
+  initializeClipTokenizer,
+  runClipText,
 }
 
-class ImageIsolate {
-  final _logger = Logger('ImageIsolate');
-
-  Timer? _inactivityTimer;
-  final Duration _inactivityDuration = const Duration(seconds: 60);
-  int _activeTasks = 0;
+class MLComputer {
+  final _logger = Logger('MLComputer');
 
   final _initLock = Lock();
   final _functionLock = Lock();
+  final _initModelLock = Lock();
 
-  late DartUiIsolate _isolate;
   late ReceivePort _receivePort = ReceivePort();
   late SendPort _mainSendPort;
 
   bool isSpawned = false;
 
   // Singleton pattern
-  ImageIsolate._privateConstructor();
-  static final ImageIsolate instance = ImageIsolate._privateConstructor();
-  factory ImageIsolate() => instance;
+  MLComputer._privateConstructor();
+  static final MLComputer instance = MLComputer._privateConstructor();
+  factory MLComputer() => instance;
 
-  Future<void> init() async {
+  Future<void> _init() async {
     return _initLock.synchronized(() async {
       if (isSpawned) return;
 
       _receivePort = ReceivePort();
 
       try {
-        _isolate = await DartUiIsolate.spawn(
+        await DartUiIsolate.spawn(
           _isolateMain,
           _receivePort.sendPort,
         );
         _mainSendPort = await _receivePort.first as SendPort;
         isSpawned = true;
-
-        _resetInactivityTimer();
       } catch (e) {
         _logger.severe('Could not spawn isolate', e);
         isSpawned = false;
       }
     });
-  }
-
-  Future<void> ensureSpawned() async {
-    if (!isSpawned) {
-      await init();
-    }
   }
 
   @pragma('vm:entry-point')
@@ -69,13 +64,13 @@ class ImageIsolate {
 
     receivePort.listen((message) async {
       final functionIndex = message[0] as int;
-      final function = ImageOperation.values[functionIndex];
+      final function = MLComputerOperation.values[functionIndex];
       final args = message[1] as Map<String, dynamic>;
       final sendPort = message[2] as SendPort;
 
       try {
         switch (function) {
-          case ImageOperation.generateFaceThumbnails:
+          case MLComputerOperation.generateFaceThumbnails:
             final imagePath = args['imagePath'] as String;
             final Uint8List imageData = await File(imagePath).readAsBytes();
             final faceBoxesJson =
@@ -88,6 +83,24 @@ class ImageIsolate {
               faceBoxes,
             );
             sendPort.send(List.from(results));
+          case MLComputerOperation.loadModel:
+            final modelName = args['modelName'] as String;
+            final modelPath = args['modelPath'] as String;
+            final int address = await MlModel.loadModel(
+              modelName,
+              modelPath,
+            );
+            sendPort.send(address);
+            break;
+          case MLComputerOperation.initializeClipTokenizer:
+            final vocabPath = args["vocabPath"] as String;
+            await ClipTextTokenizer.instance.init(vocabPath);
+            sendPort.send(true);
+            break;
+          case MLComputerOperation.runClipText:
+            final textEmbedding = await ClipTextEncoder.predict(args);
+            sendPort.send(List<double>.from(textEmbedding, growable: false));
+            break;
         }
       } catch (e, stackTrace) {
         sendPort
@@ -98,15 +111,13 @@ class ImageIsolate {
 
   /// The common method to run any operation in the isolate. It sends the [message] to [_isolateMain] and waits for the result.
   Future<dynamic> _runInIsolate(
-    (ImageOperation, Map<String, dynamic>) message,
+    (MLComputerOperation, Map<String, dynamic>) message,
   ) async {
-    await ensureSpawned();
+    await _init();
     return _functionLock.synchronized(() async {
-      _resetInactivityTimer();
       final completer = Completer<dynamic>();
       final answerPort = ReceivePort();
 
-      _activeTasks++;
       _mainSendPort.send([message.$1.index, message.$2, answerPort.sendPort]);
 
       answerPort.listen((receivedMessage) {
@@ -121,39 +132,9 @@ class ImageIsolate {
           completer.complete(receivedMessage);
         }
       });
-      _activeTasks--;
 
       return completer.future;
     });
-  }
-
-  /// Resets a timer that kills the isolate after a certain amount of inactivity.
-  ///
-  /// Should be called after initialization (e.g. inside `init()`) and after every call to isolate (e.g. inside `_runInIsolate()`)
-  void _resetInactivityTimer() {
-    _inactivityTimer?.cancel();
-    _inactivityTimer = Timer(_inactivityDuration, () {
-      if (_activeTasks > 0) {
-        _logger.info('Tasks are still running. Delaying isolate disposal.');
-        // Optionally, reschedule the timer to check again later.
-        _resetInactivityTimer();
-      } else {
-        _logger.info(
-          'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
-        );
-        dispose();
-      }
-    });
-  }
-
-  /// Disposes the isolate worker.
-  void dispose() {
-    if (!isSpawned) return;
-
-    isSpawned = false;
-    _isolate.kill();
-    _receivePort.close();
-    _inactivityTimer?.cancel();
   }
 
   /// Generates face thumbnails for all [faceBoxes] in [imageData].
@@ -167,12 +148,70 @@ class ImageIsolate {
         faceBoxes.map((box) => box.toJson()).toList();
     return await _runInIsolate(
       (
-        ImageOperation.generateFaceThumbnails,
+        MLComputerOperation.generateFaceThumbnails,
         {
           'imagePath': imagePath,
           'faceBoxesList': faceBoxesJson,
         },
       ),
     ).then((value) => value.cast<Uint8List>());
+  }
+
+  Future<List<double>> runClipText(String query) async {
+    await _ensureLoadedClipTextModel();
+    try {
+      final int clipAddress = ClipTextEncoder.instance.sessionAddress;
+      final textEmbedding = await _runInIsolate(
+        (
+          MLComputerOperation.runClipText,
+          {
+            "text": query,
+            "address": clipAddress,
+          }
+        ),
+      ) as List<double>;
+      return textEmbedding;
+    } catch (e, s) {
+      _logger.severe("Could not run clip text in isolate", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> _ensureLoadedClipTextModel() async {
+    return _initModelLock.synchronized(() async {
+      if (ClipTextEncoder.instance.isInitialized) return;
+      try {
+        // Initialize ClipText tokenizer
+        final String tokenizerRemotePath =
+            ClipTextEncoder.instance.vocabRemotePath;
+        final String tokenizerVocabPath = await RemoteAssetsService.instance
+            .getAssetPath(tokenizerRemotePath);
+        await _runInIsolate(
+          (
+            MLComputerOperation.initializeClipTokenizer,
+            {'vocabPath': tokenizerVocabPath},
+          ),
+        );
+
+        // Load ClipText model
+        final String modelName = ClipTextEncoder.instance.modelName;
+        final String modelRemotePath = ClipTextEncoder.instance.modelRemotePath;
+        final String modelPath =
+            await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
+        final address = await _runInIsolate(
+          (
+            MLComputerOperation.loadModel,
+            {
+              'modelName': modelName,
+              'modelPath': modelPath,
+            },
+          ),
+        ) as int;
+        ClipTextEncoder.instance.storeSessionAddress(address);
+      } catch (e, s) {
+        _logger.severe("Could not load clip text model in MLComputer", e, s);
+        rethrow;
+      }
+    });
   }
 }

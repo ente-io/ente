@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 import "dart:io";
+import "dart:typed_data";
 
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart";
@@ -33,6 +34,12 @@ class PreviewVideoStore {
     final tmpDirectory = await getTemporaryDirectory();
     final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
     Directory(prefix).createSync();
+    final mediaInfo = await VideoCompress.compressVideo(
+      file.path,
+      quality: VideoQuality.Res1280x720Quality,
+      deleteOrigin: true,
+    );
+    if (mediaInfo?.path == null) return;
 
     final key = Key.fromLength(16);
     final iv = IV.fromLength(16);
@@ -46,18 +53,12 @@ class PreviewVideoStore {
       "${keyfile.path}\n"
       "${iv.base64}",
     );
-    final mediaInfo = await VideoCompress.compressVideo(
-      file.path,
-      quality: VideoQuality.Res1280x720Quality,
-      deleteOrigin: true,
-    );
-    if (mediaInfo!.file?.path == null) return;
-    // -hls_key_info_file ${keyinfo.path}
+
     await FFmpegKit.execute(
       """
-      -i "${mediaInfo.file!.path}"
+      -i "${mediaInfo!.path}"
       -c copy -f hls -hls_time 10 -hls_flags single_file
-      -hls_list_size 0
+      -hls_list_size 0 -hls_key_info_file ${keyinfo.path}
       $prefix/video.m3u8""",
     ).then((session) async {
       final returnCode = await session.getReturnCode();

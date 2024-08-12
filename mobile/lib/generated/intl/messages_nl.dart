@@ -999,6 +999,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m34,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mlFunctions": MessageLookupByLibrary.simpleMessage("ML functions"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Houd er rekening mee dat dit zal resulteren in een hoger internet- en batterijverbruik totdat alle items zijn geïndexeerd."),
         "mobileWebDesktop":

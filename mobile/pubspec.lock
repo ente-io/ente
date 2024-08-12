@@ -259,13 +259,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.1"
-  clip_ggml:
-    dependency: "direct main"
-    description:
-      path: "plugins/clip_ggml"
-      relative: true
-    source: path
-    version: "0.0.1"
   clock:
     dependency: transitive
     description:
@@ -576,11 +569,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  ffmpeg_kit_flutter_min:
+  ffmpeg_kit_flutter_full_gpl:
     dependency: "direct main"
     description:
-      name: ffmpeg_kit_flutter_min
-      sha256: "123bfbc0e0b9e7cf6d32d8ba8e08b666d66af0f52c07683dd2305fbfc13f494a"
+      name: ffmpeg_kit_flutter_full_gpl
+      sha256: "4f269bcb636bfcb544e5b4d65c706a3d311839970cb42638e72406410c1b5b7b"
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
@@ -1646,6 +1639,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  onnx_dart:
+    dependency: "direct main"
+    description:
+      path: "plugins/onnx_dart"
+      relative: true
+    source: path
+    version: "0.0.1"
   onnxruntime:
     dependency: "direct main"
     description:
@@ -2856,5 +2856,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.4.0 <4.0.0"
+  dart: ">=3.4.3 <4.0.0"
   flutter: ">=3.22.0"

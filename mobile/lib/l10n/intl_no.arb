@@ -41,6 +41,8 @@
   "clusteringProgress": "Clustering progress",
   "indexingIsPaused": "Indexing is paused, will automatically resume when device is ready",
   "reenterPassword": "Re-enter password",
+  "mlFunctions": "ML functions",
+  "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",
   "deviceLock": "Device lock",
   "pinLock": "PIN lock",

@@ -1,32 +1,32 @@
 import "dart:async";
 
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
-import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import 'package:photos/services/machine_learning/ml_service.dart';
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/local_settings.dart";
 import 'package:photos/utils/toast_util.dart';
 
-class FaceDebugSectionWidget extends StatefulWidget {
-  const FaceDebugSectionWidget({Key? key}) : super(key: key);
+class MLDebugSectionWidget extends StatefulWidget {
+  const MLDebugSectionWidget({Key? key}) : super(key: key);
 
   @override
-  State<FaceDebugSectionWidget> createState() => _FaceDebugSectionWidgetState();
+  State<MLDebugSectionWidget> createState() => _MLDebugSectionWidgetState();
 }
 
-class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
+class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   Timer? _timer;
   @override
   void initState() {
@@ -47,14 +47,14 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Faces Debug",
+      title: "ML Debug",
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.bug_report_outlined,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final Logger _logger = Logger("FaceDebugSectionWidget");
+    final Logger _logger = Logger("MLDebugSectionWidget");
     return Column(
       children: [
         MenuItemWidget(
@@ -63,7 +63,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
-                  title: LocalSettings.instance.isFaceIndexingEnabled
+                  title: localSettings.isFaceIndexingEnabled
                       ? "Disable faces (${snapshot.data!} files done)"
                       : "Enable faces (${snapshot.data!} files done)",
                 );
@@ -76,10 +76,9 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              final isEnabled =
-                  await LocalSettings.instance.toggleFaceIndexing();
+              final isEnabled = await localSettings.toggleFaceIndexing();
               if (!isEnabled) {
-                FaceMlService.instance.pauseIndexingAndClustering();
+                MLService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});
@@ -93,7 +92,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: LocalSettings.instance.remoteFetchEnabled
+            title: localSettings.remoteFetchEnabled
                 ? "Remote fetch enabled"
                 : "Remote fetch disabled",
           ),
@@ -102,7 +101,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await LocalSettings.instance.toggleRemoteFetch();
+              await localSettings.toggleRemoteFetch();
               if (mounted) {
                 setState(() {});
               }
@@ -115,7 +114,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: FaceMlService.instance.debugIndexingDisabled
+            title: MLService.instance.debugIndexingDisabled
                 ? "Debug enable indexing again"
                 : "Debug disable indexing",
           ),
@@ -124,10 +123,10 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.debugIndexingDisabled =
-                  !FaceMlService.instance.debugIndexingDisabled;
-              if (FaceMlService.instance.debugIndexingDisabled) {
-                FaceMlService.instance.pauseIndexingAndClustering();
+              MLService.instance.debugIndexingDisabled =
+                  !MLService.instance.debugIndexingDisabled;
+              if (MLService.instance.debugIndexingDisabled) {
+                MLService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});
@@ -148,8 +147,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.debugIndexingDisabled = false;
-              unawaited(FaceMlService.instance.runAllFaceML());
+              MLService.instance.debugIndexingDisabled = false;
+              unawaited(MLService.instance.runAllML());
             } catch (e, s) {
               _logger.warning('indexAndClusterAll failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
@@ -166,8 +165,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              FaceMlService.instance.debugIndexingDisabled = false;
-              unawaited(FaceMlService.instance.indexAllImages());
+              MLService.instance.debugIndexingDisabled = false;
+              unawaited(MLService.instance.indexAllImages());
             } catch (e, s) {
               _logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
@@ -194,9 +193,8 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
           onTap: () async {
             try {
               await PersonService.instance.fetchRemoteClusterFeedback();
-              FaceMlService.instance.debugIndexingDisabled = false;
-              await FaceMlService.instance
-                  .clusterAllImages(clusterInBuckets: true);
+              MLService.instance.debugIndexingDisabled = false;
+              await MLService.instance.clusterAllImages(clusterInBuckets: true);
               Bus.instance.fire(PeopleChangedEvent());
               showShortToast(context, "Done");
             } catch (e, s) {
@@ -253,7 +251,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback",
+            title: "Reset faces feedback",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -282,7 +280,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset feedback and clustering",
+            title: "Reset faces feedback and clustering",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -315,7 +313,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset everything (embeddings)",
+            title: "Reset faces everything (embeddings)",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -335,6 +333,32 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
                   showShortToast(context, "Done");
                 } catch (e, s) {
                   _logger.warning('drop feedback failed ', e, s);
+                  await showGenericErrorDialog(context: context, error: e);
+                }
+              },
+            );
+          },
+        ),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset clip embeddings",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await showChoiceDialog(
+              context,
+              title: "Are you sure?",
+              body:
+                  "You will need to again re-index or fetch all clip image embeddings.",
+              firstButtonLabel: "Yes, confirm",
+              firstButtonOnTap: () async {
+                try {
+                  await SemanticSearchService.instance.clearIndexes();
+                  showShortToast(context, "Done");
+                } catch (e, s) {
+                  _logger.warning('drop clip embeddings failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },

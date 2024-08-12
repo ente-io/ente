@@ -1263,6 +1263,7 @@
       }
     }
   },
+  "mlFunctions": "ML functions",
   "panorama": "Panorama",
   "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",

@@ -39,7 +39,6 @@ import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/utils/date_time_util.dart';
-import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
@@ -178,8 +177,7 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getMagicSectionResutls() async {
-    if (LocalSettings.instance.hasEnabledMagicSearch() &&
-        flagService.internalUser) {
+    if (localSettings.isFaceIndexingEnabled && flagService.internalUser) {
       return MagicCacheService.instance.getMagicGenericSearchResult();
     } else {
       return <GenericSearchResult>[];

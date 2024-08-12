@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_keys.dart";
+import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class VideoExifDialog extends StatelessWidget {
-  final Map<String, dynamic> probeData;
+  final FFProbeProps props;
 
-  const VideoExifDialog({Key? key, required this.probeData}) : super(key: key);
+  const VideoExifDialog({Key? key, required this.props}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,23 +49,23 @@ class VideoExifDialog extends StatelessWidget {
           context.l10n.videoInfo,
           style: getEnteTextTheme(context).large,
         ),
-        _buildInfoRow(context, 'Creation Time', probeData, 'creation_time'),
-        _buildInfoRow(context, 'Duration', probeData, 'duration'),
-        _buildInfoRow(context, context.l10n.location, probeData, 'location'),
-        _buildInfoRow(context, 'Bitrate', probeData, 'bitrate'),
-        _buildInfoRow(context, 'Frame Rate', probeData, FFProbeKeys.rFrameRate),
-        _buildInfoRow(context, 'Width', probeData, FFProbeKeys.codedWidth),
-        _buildInfoRow(context, 'Height', probeData, FFProbeKeys.codedHeight),
-        _buildInfoRow(context, 'Model', probeData, 'com.apple.quicktime.model'),
-        _buildInfoRow(context, 'OS', probeData, 'com.apple.quicktime.software'),
-        _buildInfoRow(context, 'Major Brand', probeData, 'major_brand'),
-        _buildInfoRow(context, 'Format', probeData, 'format'),
+        _buildInfoRow(context, 'Creation Time', props, 'creation_time'),
+        _buildInfoRow(context, 'Duration', props, 'duration'),
+        _buildInfoRow(context, context.l10n.location, props, 'location'),
+        _buildInfoRow(context, 'Bitrate', props, 'bitrate'),
+        _buildInfoRow(context, 'Frame Rate', props, FFProbeKeys.rFrameRate),
+        _buildInfoRow(context, 'Width', props, null),
+        _buildInfoRow(context, 'Height', props, null),
+        _buildInfoRow(context, 'Model', props, 'com.apple.quicktime.model'),
+        _buildInfoRow(context, 'OS', props, 'com.apple.quicktime.software'),
+        _buildInfoRow(context, 'Major Brand', props, 'major_brand'),
+        _buildInfoRow(context, 'Format', props, 'format'),
       ],
     );
   }
 
   Widget _buildStreamsList(BuildContext context) {
-    final List<dynamic> streams = probeData['streams'];
+    final List<dynamic> streams = props.propData!['streams'];
     final List<Map<String, dynamic>> data = [];
     for (final stream in streams) {
       final Map<String, dynamic> streamData = {};
@@ -113,7 +114,12 @@ class VideoExifDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: stream.entries
               .map(
-                (entry) => _buildInfoRow(context, entry.key, stream, entry.key),
+                (entry) => _buildInfoRow(
+                  context,
+                  entry.key,
+                  FFProbeProps()..propData = stream,
+                  entry.key,
+                ),
               )
               .toList(),
         ),
@@ -124,15 +130,24 @@ class VideoExifDialog extends StatelessWidget {
   Widget _buildInfoRow(
     BuildContext context,
     String rowName,
-    Map<String, dynamic> data,
-    String dataKey,
+    FFProbeProps data,
+    String? dataKey,
   ) {
+    final propData = data.propData;
     rowName = rowName.replaceAll('_', ' ');
     rowName = rowName[0].toUpperCase() + rowName.substring(1);
     try {
-      final value = data[dataKey];
+      dynamic value;
+
+      if (rowName == 'Width' || rowName == 'Height') {
+        rowName == 'Width' ? value = data.width : value = data.height;
+      } else {
+        value = propData![dataKey];
+      }
+
       if (value == null) {
-        return Container(); // Return an empty container if there's no data for the key.
+        return const SizedBox
+            .shrink(); // Return an empty container if there's no data for the key.
       }
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),

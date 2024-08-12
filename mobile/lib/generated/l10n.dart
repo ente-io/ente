@@ -8965,6 +8965,16 @@ class S {
     );
   }
 
+  /// `ML functions`
+  String get mlFunctions {
+    return Intl.message(
+      'ML functions',
+      name: 'mlFunctions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Panorama`
   String get panorama {
     return Intl.message(
