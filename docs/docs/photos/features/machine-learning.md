@@ -1,10 +1,10 @@
 ---
-title: Advanced search
+title: Machine learning
 description:
-    On device machine learning in Ente for face and natural language search
+    Ente supports on-device machine learning for face and natural language search
 ---
 
-# Advanced search
+# Machine learning
 
 > [!NOTE]
 >

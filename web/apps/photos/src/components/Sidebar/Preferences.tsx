@@ -95,7 +95,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                                     <EnteMenuItem
                                         endIcon={<ChevronRight />}
                                         onClick={() => setOpenMLSettings(true)}
-                                        label={t("face_and_magic_search")}
+                                        label={t("ml_search")}
                                     />
                                 </MenuItemGroup>
                             </Box>

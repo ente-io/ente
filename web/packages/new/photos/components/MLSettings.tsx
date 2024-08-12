@@ -123,7 +123,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={t("face_and_magic_search")}
+                        title={t("ml_search")}
                         onRootClose={onRootClose}
                     />
                     {component}
@@ -155,7 +155,7 @@ interface EnableMLProps {
 
 const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     const moreDetails = () =>
-        openURL("https://help.ente.io/photos/features/advanced-search");
+        openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
         <Stack py={"20px"} px={"16px"} spacing={"32px"}>
