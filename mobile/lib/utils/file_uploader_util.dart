@@ -185,7 +185,7 @@ Future<void> _computeZip(Map<String, dynamic> args) async {
   encoder.create(zipPath);
   await encoder.addFile(File(imagePath), "image" + extension(imagePath));
   await encoder.addFile(File(videoPath), "video" + extension(videoPath));
-  encoder.close();
+  await encoder.close();
 }
 
 Future<void> zip({
