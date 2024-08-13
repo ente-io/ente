@@ -42,7 +42,7 @@ export interface Person {
      */
     id: string;
     /**
-     * An optional name assigned by the user to this person.
+     * A name assigned by the user to this person.
      */
     name: string;
     /**

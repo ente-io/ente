@@ -3,6 +3,7 @@ import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
+import type { FaceCluster, Person } from "./cluster-new";
 import type { LocalFaceIndex } from "./face";
 
 /**
@@ -42,6 +43,14 @@ interface MLDBSchema extends DBSchema {
     "clip-index": {
         key: number;
         value: LocalCLIPIndex;
+    };
+    "face-cluster": {
+        key: string;
+        value: FaceCluster;
+    };
+    person: {
+        key: string;
+        value: Person;
     };
 }
 
@@ -97,6 +106,17 @@ const openMLDB = async () => {
             }
             if (oldVersion < 2) {
                 db.createObjectStore("clip-index", { keyPath: "fileID" });
+            }
+            // TODO-Cluster
+            if (oldVersion < 3) {
+                if (
+                    newVersion &&
+                    newVersion > 10 &&
+                    process.env.NEXT_PUBLIC_ENTE_WIP_CL
+                ) {
+                    db.createObjectStore("face-cluster", { keyPath: "id" });
+                    db.createObjectStore("person", { keyPath: "id" });
+                }
             }
         },
         blocking() {
@@ -392,4 +412,20 @@ export const markIndexingFailed = async (fileID: number) => {
     fileStatus.status = "failed";
     fileStatus.failureCount = fileStatus.failureCount + 1;
     await Promise.all([tx.store.put(fileStatus), tx.done]);
+};
+
+/**
+ * Return all face clusters present locally.
+ */
+export const faceClusters = async () => {
+    const db = await mlDB();
+    return await db.getAll("face-cluster");
+};
+
+/**
+ * Return all people present locally.
+ */
+export const people = async () => {
+    const db = await mlDB();
+    return await db.getAll("person");
 };
