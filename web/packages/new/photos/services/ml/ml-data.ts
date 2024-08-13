@@ -1,4 +1,4 @@
-import { decryptFileEmbedding } from "@/base/crypto/ente";
+import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import log from "@/base/log";
 import type { EnteFile } from "@/new/photos/types/file";
 import { nullToUndefined } from "@/utils/transform";
@@ -172,7 +172,7 @@ export const fetchMLData = async (
         }
 
         try {
-            const decryptedBytes = await decryptFileEmbedding({
+            const decryptedBytes = await decryptAssociatedB64Data({
                 encryptedDataB64: remoteFileData.encryptedData,
                 decryptionHeaderB64: remoteFileData.decryptionHeader,
                 keyB64: file.key,

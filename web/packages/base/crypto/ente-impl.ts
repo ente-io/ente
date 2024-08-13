@@ -23,8 +23,6 @@ export const _encryptThumbnail = _encryptAssociatedData;
 export const _encryptAssociatedB64Data = (r: EncryptBytes) =>
     _encryptAssociatedData(r).then(EncryptedBytesToB64);
 
-export const _encryptFileEmbedding = _encryptAssociatedB64Data;
-
 export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
     _encryptAssociatedB64Data({
         data: new TextEncoder().encode(JSON.stringify(jsonValue)),
@@ -45,8 +43,6 @@ export const _decryptAssociatedB64Data = async ({
         decryptionHeaderB64,
         keyB64,
     });
-
-export const _decryptFileEmbedding = _decryptAssociatedB64Data;
 
 export const _decryptMetadataJSON = async (r: DecryptB64) =>
     JSON.parse(
