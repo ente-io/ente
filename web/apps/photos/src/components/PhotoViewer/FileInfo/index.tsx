@@ -19,10 +19,8 @@ import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getPublicMagicMetadataMTSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
-import BackupOutlined from "@mui/icons-material/BackupOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
@@ -246,12 +244,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     }
                     hideEditOption
                 />
-                <InfoItem
-                    icon={<BackupOutlined />}
-                    title={formatDate(file.metadata.modificationTime / 1000)}
-                    caption={formatTime(file.metadata.modificationTime / 1000)}
-                    hideEditOption
-                />
                 {showCollectionChips && (
                     <InfoItem icon={<FolderOutlined />} hideEditOption>
                         <Box
@@ -399,13 +391,10 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     return;
                 }
 
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-                await updateRemotePublicMagicMetadata(
-                    enteFile,
-                    { dateTime, editedTime: timestamp },
-                    cryptoWorker.encryptMetadata,
-                    cryptoWorker.decryptMetadata,
-                );
+                await updateRemotePublicMagicMetadata(enteFile, {
+                    dateTime,
+                    editedTime: timestamp,
+                });
 
                 scheduleUpdate();
             }

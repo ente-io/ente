@@ -49,8 +49,12 @@ export interface EnteFile
     /**
      * The envelope containing the public magic metadata associated with this
      * file.
+     *
+     * In almost all cases, files will have associated public magic metadata
+     * since newer clients have something or the other they need to add to it.
+     * But its presence is not guaranteed.
      */
-    pubMagicMetadata: FilePublicMagicMetadata;
+    pubMagicMetadata?: FilePublicMagicMetadata;
     isTrashed?: boolean;
     /**
      * The base64 encoded encryption key associated with this file.

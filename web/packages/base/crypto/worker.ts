@@ -1,55 +1,27 @@
-import * as ente from "@/base/crypto/ente";
-import * as libsodium from "@ente/shared/crypto/internal/libsodium";
-import * as Comlink from "comlink";
+import { expose } from "comlink";
 import type { StateAddress } from "libsodium-wrappers";
+import * as ei from "./ente-impl";
+import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (base/crypto/ente.ts) or the internal libsodium layer
- * (internal/libsodium.ts).
- *
- * Use these when running on the main thread, since running these in a web
- * worker allows us to use potentially CPU-intensive crypto operations from the
- * main thread without stalling the UI.
- *
- * If the code that needs this functionality is already running in the context
- * of a web worker, then use the underlying functions directly.
+ * specific layer (crypto/ente.ts) or the libsodium layer (crypto/libsodium.ts).
  *
  * See: [Note: Crypto code hierarchy].
  *
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
-export class DedicatedCryptoWorker {
-    async decryptThumbnail(
-        encryptedData: Uint8Array,
-        headerB64: string,
-        keyB64: string,
-    ) {
-        return ente.decryptThumbnail(encryptedData, headerB64, keyB64);
-    }
+export class CryptoWorker {
+    encryptThumbnail = ei._encryptThumbnail;
+    encryptMetadataJSON = ei._encryptMetadataJSON;
+    decryptThumbnail = ei._decryptThumbnail;
+    decryptAssociatedB64Data = ei._decryptAssociatedB64Data;
+    decryptMetadataJSON = ei._decryptMetadataJSON;
 
-    async decryptMetadata(
-        encryptedDataB64: string,
-        decryptionHeaderB64: string,
-        keyB64: string,
-    ) {
-        return ente.decryptMetadata(
-            encryptedDataB64,
-            decryptionHeaderB64,
-            keyB64,
-        );
-    }
+    // TODO: -- AUDIT BELOW --
 
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
-    }
-
-    async encryptThumbnail(data: Uint8Array, keyB64: string) {
-        return ente.encryptThumbnail(data, keyB64);
-    }
-
-    async encryptMetadata(metadata: unknown, keyB64: string) {
-        return ente.encryptMetadata(metadata, keyB64);
     }
 
     async encryptFile(fileData: Uint8Array) {
@@ -182,4 +154,4 @@ export class DedicatedCryptoWorker {
     }
 }
 
-Comlink.expose(DedicatedCryptoWorker, self);
+expose(CryptoWorker);

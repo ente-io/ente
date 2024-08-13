@@ -1,4 +1,4 @@
-import { decryptMetadataBytes } from "@/base/crypto/ente";
+import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
@@ -91,8 +91,12 @@ export const userEntityDiff = async (
     sinceTime: number,
     entityKeyB64: string,
 ): Promise<UserEntity[]> => {
-    const decrypt = (dataB64: string, headerB64: string) =>
-        decryptMetadataBytes(dataB64, headerB64, entityKeyB64);
+    const decrypt = (encryptedDataB64: string, decryptionHeaderB64: string) =>
+        decryptAssociatedB64Data({
+            encryptedDataB64,
+            decryptionHeaderB64,
+            keyB64: entityKeyB64,
+        });
 
     const params = new URLSearchParams({
         type,

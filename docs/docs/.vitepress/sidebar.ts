@@ -43,6 +43,10 @@ export const sidebar = [
                         text: "Location tags",
                         link: "/photos/features/location-tags",
                     },
+                    {
+                        text: "Machine learning",
+                        link: "/photos/features/machine-learning",
+                    },
                     { text: "Map", link: "/photos/features/map" },
                     {
                         text: "Passkeys",

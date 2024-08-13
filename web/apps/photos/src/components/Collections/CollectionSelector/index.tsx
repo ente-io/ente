@@ -126,6 +126,7 @@ function CollectionSelector({
             open={props.open}
             position="center"
             fullScreen={isMobile}
+            fullWidth={true}
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
                 {attributes.intent === CollectionSelectorIntent.upload

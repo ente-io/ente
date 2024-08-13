@@ -286,7 +286,7 @@
   "claimFreeStorage": "Reivindicar armazenamento gratuito",
   "inviteYourFriends": "Convide seus amigos",
   "failedToFetchReferralDetails": "Não foi possível buscar os detalhes de indicação. Por favor, tente novamente mais tarde.",
-  "referralStep1": "Envie esse código aos seus amigos",
+  "referralStep1": "1. Dê este código aos seus amigos",
   "referralStep2": "2. Eles se inscrevem em um plano pago",
   "referralStep3": "3. Ambos ganham {storageInGB} GB* grátis",
   "referralsAreCurrentlyPaused": "Indicações estão atualmente pausadas",
@@ -1118,7 +1118,7 @@
     "description": "Label for the map view"
   },
   "maps": "Mapas",
-  "enableMaps": "Habilitar mapa",
+  "enableMaps": "Habilitar Mapa",
   "enableMapsDesc": "Isto mostrará suas fotos em um mapa do mundo.\n\nEste mapa é hospedado pelo OpenStreetMap, e os exatos locais de suas fotos nunca são compartilhados.\n\nVocê pode desativar esse recurso a qualquer momento nas Configurações.",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
@@ -1279,7 +1279,6 @@
   "tooManyIncorrectAttempts": "Muitas tentativas incorretas",
   "videoInfo": "Informação de Vídeo",
   "appLockDescription": "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha.",
-  "swipeLockEnablePreSteps": "Para ativar o bloqueio por deslizar, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
   "autoLock": "Bloqueio automático",
   "immediately": "Imediatamente",
   "autoLockFeatureDescription": "Tempo após o qual o app bloqueia depois de ser colocado em segundo plano",
@@ -1291,6 +1290,6 @@
   "pleaseSelectQuickLinksToRemove": "Selecione links rápidos para remover",
   "removePublicLinks": "Remover link público",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Isto removerá links públicos de todos os links rápidos selecionados.",
-  "guestView": "Guest view",
-  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
+  "guestView": "Visão de convidado",
+  "guestViewEnablePreSteps": "Para ativar a visão de convidado, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."
 }

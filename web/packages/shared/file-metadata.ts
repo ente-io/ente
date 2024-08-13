@@ -1,4 +1,3 @@
-import { decryptMetadata } from "@/base/crypto/ente";
 import { isDevBuild } from "@/base/env";
 import {
     decryptPublicMagicMetadata,
@@ -6,20 +5,6 @@ import {
 } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-
-/**
- * On-demand decrypt the public magic metadata for an {@link EnteFile} for code
- * running on the main thread.
- *
- * It both modifies the given file object, and also returns the decrypted
- * metadata.
- */
-export const getPublicMagicMetadataMT = async (enteFile: EnteFile) =>
-    decryptPublicMagicMetadata(
-        enteFile,
-        (await ComlinkCryptoWorker.getInstance()).decryptMetadata,
-    );
 
 /**
  * On-demand decrypt the public magic metadata for an {@link EnteFile} for code
@@ -40,7 +25,7 @@ export const getPublicMagicMetadataMTSync = (enteFile: EnteFile) => {
             throw new Error(
                 `Public magic metadata for ${fileLogID(enteFile)} had not been decrypted even when the file reached the UI layer`,
             );
-        decryptPublicMagicMetadata(enteFile, decryptMetadata);
+        decryptPublicMagicMetadata(enteFile);
     }
     // This cast is unavoidable in the current setup. We need to refactor the
     // types so that this cast in not needed.

@@ -25,11 +25,11 @@ type ObjectCleanupRepository struct {
 func (repo *ObjectCleanupRepository) AddTempObject(tempObject ente.TempObject, expirationTime int64) error {
 	var err error
 	if tempObject.IsMultipart {
-		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time,upload_id,is_multipart)
-		VALUES($1, $2, $3, $4)`, tempObject.ObjectKey, expirationTime, tempObject.UploadID, tempObject.IsMultipart)
+		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time,upload_id,is_multipart, bucket_id)
+		VALUES($1, $2, $3, $4, $5)`, tempObject.ObjectKey, expirationTime, tempObject.UploadID, tempObject.IsMultipart, tempObject.BucketId)
 	} else {
-		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time)
-		VALUES($1, $2)`, tempObject.ObjectKey, expirationTime)
+		_, err = repo.DB.Exec(`INSERT INTO temp_objects(object_key, expiration_time, bucket_id)
+		VALUES($1, $2, $3)`, tempObject.ObjectKey, expirationTime, tempObject.BucketId)
 	}
 	return stacktrace.Propagate(err, "")
 }
@@ -62,7 +62,7 @@ func (repo *ObjectCleanupRepository) GetAndLockExpiredObjects() (*sql.Tx, []ente
 	}
 
 	rows, err := tx.Query(`
-	SELECT object_key, is_multipart, upload_id FROM temp_objects
+	SELECT object_key, is_multipart, upload_id, bucket_id FROM temp_objects
 	WHERE expiration_time <= $1
 	LIMIT 1000
 	FOR UPDATE SKIP LOCKED
@@ -83,13 +83,17 @@ func (repo *ObjectCleanupRepository) GetAndLockExpiredObjects() (*sql.Tx, []ente
 	for rows.Next() {
 		var tempObject ente.TempObject
 		var uploadID sql.NullString
-		err := rows.Scan(&tempObject.ObjectKey, &tempObject.IsMultipart, &uploadID)
+		var bucketID sql.NullString
+		err := rows.Scan(&tempObject.ObjectKey, &tempObject.IsMultipart, &uploadID, &bucketID)
 		if err != nil {
 			rollback()
 			return nil, nil, stacktrace.Propagate(err, "")
 		}
 		if tempObject.IsMultipart {
 			tempObject.UploadID = uploadID.String
+		}
+		if bucketID.Valid {
+			tempObject.BucketId = bucketID.String
 		}
 		tempObjects = append(tempObjects, tempObject)
 	}

@@ -1428,6 +1428,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.3"
+  maps_launcher:
+    dependency: "direct main"
+    description:
+      name: maps_launcher
+      sha256: "57ba3c31db96e30f58c23fcb22a1fac6accc5683535b2cf344c534bbb9f8f910"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   matcher:
     dependency: transitive
     description:

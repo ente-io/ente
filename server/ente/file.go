@@ -153,8 +153,11 @@ type MultipartUploadURLs struct {
 type ObjectType string
 
 const (
-	FILE      ObjectType = "file"
-	THUMBNAIL ObjectType = "thumbnail"
+	FILE         ObjectType = "file"
+	THUMBNAIL    ObjectType = "thumbnail"
+	PreviewImage ObjectType = "img_preview"
+	PreviewVideo ObjectType = "vid_preview"
+	MlData       ObjectType = "mldata"
 )
 
 // S3ObjectKey represents the s3 object key and corresponding fileID for it
@@ -199,7 +202,7 @@ type TempObject struct {
 	ObjectKey   string
 	IsMultipart bool
 	UploadID    string
-	DataCenter  string
+	BucketId    string
 }
 
 // DuplicateFiles represents duplicate files
