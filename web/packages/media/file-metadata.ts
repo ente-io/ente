@@ -333,11 +333,11 @@ const withoutNullAndUndefinedValues = (o: object) =>
  */
 export const getUICreationDate = (
     enteFile: EnteFile,
-    publicMagicMetadata: PublicMagicMetadata,
+    publicMagicMetadata: PublicMagicMetadata | undefined,
 ) =>
     toUIDate(
-        publicMagicMetadata.dateTime ??
-            publicMagicMetadata.editedTime ??
+        publicMagicMetadata?.dateTime ??
+            publicMagicMetadata?.editedTime ??
             enteFile.metadata.creationTime,
     );
 
