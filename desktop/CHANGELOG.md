@@ -2,6 +2,7 @@
 
 ## v1.7.3 (Unreleased)
 
+-   Face recognition and magic search (beta).
 -   Support Polish translations.
 -   .
 
