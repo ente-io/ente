@@ -35,7 +35,7 @@ import { type RemoteFaceIndex } from "./face";
  *
  * which is then gzipped to get the plaintext data to upload.
  *
- * [Note: Preserve unknown derived data fields]
+ * [Note: Preserve unknown ML data fields]
  *
  * The (unzipped) remote mldata can contain arbitrary keys at the top level
  * apart from the ones that the current client knows about. We need to preserve
@@ -214,7 +214,7 @@ const remoteMLDataFromJSONString = (jsonString: string) => {
  * client (us) to ensure that we preserve the parts of the pre-existing ML data
  * (if any) that we did not understand or touch.
  *
- * See: [Note: Preserve unknown derived data fields].
+ * See: [Note: Preserve unknown ML data fields].
  */
 export const putMLData = async (enteFile: EnteFile, mlData: RawRemoteMLData) =>
     putFileData(enteFile, "mldata", await gzip(JSON.stringify(mlData)));
