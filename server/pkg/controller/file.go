@@ -633,7 +633,11 @@ func (c *FileController) validateUpdateMetadataRequest(ctx *gin.Context, req ent
 			}).Error("can't update magic metadata for file which isn't owned by use")
 			return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 		}
-		if existingMetadata != nil && (existingMetadata.Version != updateMMdRequest.MagicMetadata.Version || existingMetadata.Count > updateMMdRequest.MagicMetadata.Count) {
+		oldToNewCountDiff := existingMetadata.Count - updateMMdRequest.MagicMetadata.Count
+		// Return an error if there is a version mismatch with the previous metadata
+		// or if the new metadata contains an unexpectedly lower number of keys
+		// (oldToNewCountDiff difference is > 2), which may indicate potential data loss due to potentially buggy client.
+		if existingMetadata != nil && (existingMetadata.Version != updateMMdRequest.MagicMetadata.Version || oldToNewCountDiff > 2) {
 			log.WithFields(log.Fields{
 				"existing_count":   existingMetadata.Count,
 				"existing_version": existingMetadata.Version,
