@@ -22,21 +22,6 @@ export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     return currentDate.getTime() * 1000;
 }
 
-export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
-    if (!dateTime || isNaN(dateTime.getTime())) {
-        return null;
-    }
-    const unixTime = dateTime.getTime() * 1000;
-    //ignoring dateTimeString = "0000:00:00 00:00:00"
-    if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0) || unixTime === 0) {
-        return null;
-    } else if (unixTime > Date.now() * 1000) {
-        return null;
-    } else {
-        return unixTime;
-    }
-}
-
 function _addDays(date: Date, days: number): Date {
     const result = new Date(date);
     result.setDate(date.getDate() + days);

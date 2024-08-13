@@ -5,6 +5,8 @@ import {
 } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
 import type { AccountsContextT } from "@/accounts/types/context";
+import { sharedCryptoWorker } from "@/base/crypto";
+import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -16,8 +18,6 @@ import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { ApiError } from "@ente/shared/error";
 import {
     LS_KEYS,
@@ -117,7 +117,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 }
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
-            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const cryptoWorker = await sharedCryptoWorker();
             const { encryptedData, nonce } = ensure(encryptedTwoFactorSecret);
             const twoFactorSecret = await cryptoWorker.decryptB64(
                 encryptedData,

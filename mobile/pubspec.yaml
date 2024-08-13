@@ -22,7 +22,7 @@ dependencies:
   adaptive_theme: ^3.1.0
   animate_do: ^2.0.0
   animated_list_plus: ^0.5.2
-  archive: ^3.1.2
+  archive: ^3.6.1
   background_fetch: ^1.2.1
   battery_info: ^1.1.1
   bip39: ^1.0.6
@@ -79,7 +79,7 @@ dependencies:
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.8.0
   flutter_launcher_icons: ^0.13.1
-  flutter_local_notifications: ^17.0.0
+  flutter_local_notifications: ^17.2.1+2
   flutter_localizations:
     sdk: flutter
   flutter_map: ^6.2.0
@@ -111,6 +111,7 @@ dependencies:
   local_auth_ios:
   logging: ^1.0.1
   lottie: ^1.2.2
+  maps_launcher: ^2.2.1
   media_extension: ^1.0.1
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
@@ -131,7 +132,10 @@ dependencies:
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
-  panorama_viewer: ^1.0.5
+  panorama:
+    git:
+      url: https://github.com/ente-io/panorama_blur.git
+      ref: blur
   password_strength: ^0.2.0
   path: #dart
   path_provider: ^2.1.1
@@ -195,6 +199,7 @@ dependency_overrides:
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
   watcher: ^1.1.0
+  win32: ^5.5.3
 
 flutter_intl:
   enabled: true

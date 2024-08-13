@@ -139,6 +139,17 @@ export interface Face {
      * This ID is guaranteed to be unique for all the faces detected in all the
      * files for the user. In particular, each file can have multiple faces but
      * they all will get their own unique {@link faceID}.
+     *
+     * This ID is also meant to be stable across reindexing. That is, if the
+     * same algorithm and hyperparameters are used to reindex the file, then it
+     * should result in the same face IDs. This allows us leeway in letting
+     * unnecessary reindexing happen in rare cases without invalidating the
+     * clusters that rely on the presence of the given face ID.
+     *
+     * Finally, this face ID is not completely opaque. It consists of underscore
+     * separated components, the first of which is the ID of the
+     * {@link EnteFile} to which this face belongs. Client code can rely on this
+     * structure and can parse it if needed.
      */
     faceID: string;
     /**

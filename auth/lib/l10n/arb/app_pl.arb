@@ -83,7 +83,7 @@
   "passwordForDecryptingExport": "Hasło do odszyfrowania eksportu",
   "passwordEmptyError": "Pole hasło nie może być puste",
   "importFromApp": "Importuj kody z {appName}",
-  "importGoogleAuthGuide": "Wyeksportuj twoje konta z Google Authenticator do kodu QR używając opcji \"Przenieś konta\". Potem używając innego urządzenia, zeskanuj kod QR.",
+  "importGoogleAuthGuide": "Wyeksportuj Twoje konta z Google Authenticator do kodu QR używając opcji \"Przenieś konta\". Potem używając innego urządzenia, zeskanuj kod QR.\n\nWskazówka: Możesz użyć kamery Twojego laptopa, by zrobić zdjęcie kodu QR.",
   "importSelectJsonFile": "Wybierz plik JSON",
   "importSelectAppExport": "Wybierz plik eksportu {appName}",
   "importEnteEncGuide": "Wybierz zaszyfrowany plik JSON wyeksportowany z Ente",
@@ -465,5 +465,6 @@
   "appLockDescription": "Wybierz między domyślnym ekranem blokady urządzenia a niestandardowym ekranem blokady z kodem PIN lub hasłem.",
   "pinLock": "Blokada PIN",
   "enterPin": "Wprowadź kod PIN",
-  "setNewPin": "Ustaw nowy kod PIN"
+  "setNewPin": "Ustaw nowy kod PIN",
+  "importFailureDescNew": "Nie udało się przetworzyć wybranego pliku."
 }

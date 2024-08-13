@@ -644,7 +644,7 @@
   "continueOnFreeTrial": "Kontynuuj bezpłatny okres próbny",
   "areYouSureYouWantToExit": "Czy na pewno chcesz wyjść?",
   "thankYou": "Dziękujemy",
-  "failedToVerifyPaymentStatus": "Nie udało się zweryfikować statusu płatności",
+  "failedToVerifyPaymentStatus": "Nie udało się zweryfikować stanu płatności",
   "pleaseWaitForSometimeBeforeRetrying": "Proszę poczekać chwilę przed ponowną próbą",
   "paymentFailedMessage": "Niestety Twoja płatność nie powiodła się. Skontaktuj się z pomocą techniczną, a my Ci pomożemy!",
   "youAreOnAFamilyPlan": "Jesteś w planie rodzinnym!",
@@ -1279,7 +1279,6 @@
   "tooManyIncorrectAttempts": "Zbyt wiele błędnych prób",
   "videoInfo": "Informacje Wideo",
   "appLockDescription": "Wybierz między domyślnym ekranem blokady urządzenia a niestandardowym ekranem blokady z kodem PIN lub hasłem.",
-  "swipeLockEnablePreSteps": "Aby włączyć blokadę aplikacji, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu.",
   "autoLock": "Automatyczna blokada",
   "immediately": "Natychmiast",
   "autoLockFeatureDescription": "Czas, po którym aplikacja blokuje się po umieszczeniu jej w tle",
@@ -1290,5 +1289,7 @@
   "noQuickLinksSelected": "Nie wybrano żadnych szybkich linków",
   "pleaseSelectQuickLinksToRemove": "Prosimy wybrać szybkie linki do usunięcia",
   "removePublicLinks": "Usuń linki publiczne",
-  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Spowoduje to usunięcie publicznych linków wszystkich zaznaczonych szybkich linków."
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Spowoduje to usunięcie publicznych linków wszystkich zaznaczonych szybkich linków.",
+  "guestView": "Widok gościa",
+  "guestViewEnablePreSteps": "Aby włączyć widok gościa, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu."
 }

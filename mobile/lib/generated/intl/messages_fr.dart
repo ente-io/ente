@@ -775,6 +775,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Accorder la permission"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Grouper les photos à proximité"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Nous ne suivons pas les installations d\'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1404,8 +1407,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures": MessageLookupByLibrary.simpleMessage(
             "Suggérer des fonctionnalités"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synchronisation arrêtée ?"),

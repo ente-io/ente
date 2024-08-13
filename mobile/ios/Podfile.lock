@@ -3,12 +3,12 @@ PODS:
     - Flutter
   - battery_info (0.0.1):
     - Flutter
+  - blurhash_ffi (0.0.1):
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
   - dart_ui_isolate (0.0.1):
-    - Flutter
-  - dchs_motion_sensors (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
@@ -140,6 +140,8 @@ PODS:
   - Mantle (2.2.0):
     - Mantle/extobjc (= 2.2.0)
   - Mantle/extobjc (2.2.0)
+  - maps_launcher (0.0.1):
+    - Flutter
   - media_extension (0.0.1):
     - Flutter
   - media_kit_libs_ios_video (1.0.4):
@@ -147,6 +149,8 @@ PODS:
   - media_kit_native_event_loop (1.0.0):
     - Flutter
   - media_kit_video (0.0.1):
+    - Flutter
+  - motion_sensors (0.0.1):
     - Flutter
   - motionphoto (0.0.1):
     - Flutter
@@ -240,9 +244,9 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
+  - blurhash_ffi (from `.symlinks/plugins/blurhash_ffi/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
-  - dchs_motion_sensors (from `.symlinks/plugins/dchs_motion_sensors/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - ffmpeg_kit_flutter_min (from `.symlinks/plugins/ffmpeg_kit_flutter_min/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -265,10 +269,12 @@ DEPENDENCIES:
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
+  - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
   - media_kit_libs_ios_video (from `.symlinks/plugins/media_kit_libs_ios_video/ios`)
   - media_kit_native_event_loop (from `.symlinks/plugins/media_kit_native_event_loop/ios`)
   - media_kit_video (from `.symlinks/plugins/media_kit_video/ios`)
+  - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
@@ -321,12 +327,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
+  blurhash_ffi:
+    :path: ".symlinks/plugins/blurhash_ffi/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
   dart_ui_isolate:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
-  dchs_motion_sensors:
-    :path: ".symlinks/plugins/dchs_motion_sensors/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   ffmpeg_kit_flutter_min:
@@ -371,6 +377,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
+  maps_launcher:
+    :path: ".symlinks/plugins/maps_launcher/ios"
   media_extension:
     :path: ".symlinks/plugins/media_extension/ios"
   media_kit_libs_ios_video:
@@ -379,6 +387,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/media_kit_native_event_loop/ios"
   media_kit_video:
     :path: ".symlinks/plugins/media_kit_video/ios"
+  motion_sensors:
+    :path: ".symlinks/plugins/motion_sensors/ios"
   motionphoto:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
@@ -427,9 +437,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   background_fetch: 2319bf7e18237b4b269430b7f14d177c0df09c5a
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
+  blurhash_ffi: 4831b96320d4273876c9a2fd3f7d50b8a3a53509
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
-  dchs_motion_sensors: 9cef816635a39345cda9f0c4943e061f6429f453
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   ffmpeg-kit-ios-min: 4e9a088f4ee9629435960b9d68e54848975f1931
   ffmpeg_kit_flutter_min: 5eff47f4965bf9d1150e98961eb6129f5ae3f28c
@@ -462,10 +472,12 @@ SPEC CHECKSUMS:
   local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
   local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  maps_launcher: 2e5b6a2d664ec6c27f82ffa81b74228d770ab203
   media_extension: 6d30dc1431ebaa63f43c397c37917b1a0a597a4c
   media_kit_libs_ios_video: a5fe24bc7875ccd6378a0978c13185e1344651c1
   media_kit_native_event_loop: e6b2ab20cf0746eb1c33be961fcf79667304fa2a
   media_kit_video: 5da63f157170e5bf303bf85453b7ef6971218a2e
+  motion_sensors: 03f55b7c637a7e365a0b5f9697a449f9059d5d91
   motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   nanopb: 438bc412db1928dac798aa6fd75726007be04262

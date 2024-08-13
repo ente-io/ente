@@ -1293,7 +1293,6 @@
   "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche",
   "videoInfo": "Video-Informationen",
   "appLockDescription": "Wähle zwischen dem Standard-Sperrbildschirm deines Gerätes und einem eigenen Sperrbildschirm mit PIN oder Passwort.",
-  "swipeLockEnablePreSteps": "Um die Sperre für die Wischfunktion zu aktivieren, richte bitte einen Gerätepasscode oder eine Bildschirmsperre in den Systemeinstellungen ein.",
   "autoLock": "Automatisches Sperren",
   "immediately": "Sofort",
   "autoLockFeatureDescription": "Zeit, nach der die App gesperrt wird, nachdem sie in den Hintergrund verschoben wurde",
@@ -1304,5 +1303,7 @@
   "noQuickLinksSelected": "Keine schnellen Links ausgewählt",
   "pleaseSelectQuickLinksToRemove": "Bitte wähle die zu entfernenden schnellen Links",
   "removePublicLinks": "Öffentliche Links entfernen",
-  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Hiermit werden die öffentlichen Links aller ausgewählten schnellen Links entfernt."
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Hiermit werden die öffentlichen Links aller ausgewählten schnellen Links entfernt.",
+  "guestView": "Gastansicht",
+  "guestViewEnablePreSteps": "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen."
 }

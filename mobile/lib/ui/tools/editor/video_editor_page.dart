@@ -200,7 +200,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
     final config = VideoFFmpegVideoEditorConfig(
       _controller!,
-      format: VideoExportFormat.mp4,
+      format: VideoExportFormat(
+        path.extension(widget.ioFile.path).substring(1),
+      ),
       // commandBuilder: (config, videoPath, outputPath) {
       //   final List<String> filters = config.getExportFilters();
       //   filters.add('hflip'); // add horizontal flip

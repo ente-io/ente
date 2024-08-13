@@ -35,7 +35,7 @@ export function ManageLinkPassword({
             content: t("DISABLE_PASSWORD_MESSAGE"),
             close: { text: t("cancel") },
             proceed: {
-                text: t("DISABLE"),
+                text: t("disable"),
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,

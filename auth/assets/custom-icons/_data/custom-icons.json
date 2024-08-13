@@ -41,6 +41,9 @@
       "title": "BitMEX"
     },
     {
+      "title": "BitOasis"
+    },
+    {
       "title": "BitSkins"
     },
     {
@@ -61,6 +64,15 @@
       ]
     },
     {
+      "title": "Blockchain",
+      "altNames": [
+        "blockchain.com",
+        "blockchain.com Wallet",
+        "blockchain.com Exchange"
+      ],
+      "slug": "blockchain"
+    },
+    {
       "title": "BorgBase",
       "altNames": [
         "borg"
@@ -68,8 +80,20 @@
       "slug": "BorgBase"
     },
     {
+      "title": "Booking",
+      "slug": "booking",
+      "altNames":[
+        "Booking.com"
+      ]
+    },
+    {
       "title": "Brave Creators",
-      "slug": "brave_creators"
+      "slug": "brave_creators",
+      "altNames":[
+        "Brave",
+        "Brave Rewards",
+        "Brave Browser"
+      ]
     },
     {
       "title": "Bybit"
@@ -110,7 +134,13 @@
       "title": "Crowdpear"
     },
     {
-      "title": "crypto"
+      "title": "Crypto.com",
+      "slug": "crypto",
+      "altNames": [
+        "crypto",
+        "Crypto.com",
+        "Crypto com"
+      ]
     },
     {
       "title": "DCS",
@@ -149,6 +179,10 @@
       "title": "ente",
       "hex": "1DB954"
     },
+    {
+      "title": "enom"   
+    },
+   
     {
       "title": "Epic Games",
       "slug": "epic_games",
@@ -206,6 +240,10 @@
       "slug": "Icedrive"
     },
     {
+      "titile": "Infomaniak",
+      "slug": "infomaniak"
+    },
+    {
       "title": "ING"
     },
     {
@@ -219,8 +257,9 @@
       "title": "INWX"
     },
     {
-      "title": "Itch.io",
-      "slug": "itch_io"
+      "title": "Itch",
+      "slug": "itch_io",
+      "hex": "e7685e"
     },
     {
       "title": "IVPN",
@@ -358,6 +397,14 @@
     {
       "title": "Odido"
     },
+    {
+      "titile": "OpenObserve",
+      "slug": "open_observe",
+      "altNames":[
+        "openobserve.ai",
+        "openobserve ai"
+      ]
+    },
     { "title": "okx",
       "hex": "000000" },
     {
@@ -463,6 +510,18 @@
       "title": "Skinport"
     },
     {
+      "title": "SMSPool",
+      "slug": "sms_pool_net",
+      "altNames": [
+        "smspool.net",
+        "smspool net"
+      ]
+    },
+    {
+      "title": "SMTP2GO",
+      "slug": "smtp2go"
+    },
+    {
       "title": "Snapchat"
     },
     {
@@ -549,6 +608,10 @@
       "hex": "6FE68A"
     },
     {
+      "titile": "Vikunja",
+      "slug": "vikunja"
+    },
+    {
       "title": "WHMCS"
     },
     {
@@ -593,6 +656,15 @@
       ],
       "slug": "ynab",
       "hex": "3B5EDA"
+    },
+    {
+      "title": "Shakepay",
+      "slug": "shakepay"
+    },
+    {
+      "title": "Newton",
+      "altNames": ["Newton Crypto"],
+      "slug": "newton"
     }
   ]
 }

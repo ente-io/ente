@@ -1195,5 +1195,7 @@
   "noQuickLinksSelected": "No quick links selected",
   "pleaseSelectQuickLinksToRemove": "Please select quick links to remove",
   "removePublicLinks": "Remove public links",
-  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links."
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
+  "guestView": "Guest view",
+  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
 }

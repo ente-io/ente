@@ -74,7 +74,7 @@ const Page: React.FC<PageProps> = () => {
                         <TwoFactorSetup twoFactorSecret={twoFactorSecret} />
                         <VerifyTwoFactor
                             onSubmit={onSubmit}
-                            buttonText={t("ENABLE")}
+                            buttonText={t("enable")}
                         />
                         <LinkButton sx={{ mt: 2 }} onClick={router.back}>
                             {t("GO_BACK")}

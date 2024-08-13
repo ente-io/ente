@@ -1,7 +1,10 @@
-import { encryptMetadata } from "@/base/crypto/ente";
+import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type EnteFile } from "@/new/photos/types/file";
+import { mergeMetadata1 } from "@/new/photos/utils/file";
+import { ensure } from "@/utils/ensure";
+import { z } from "zod";
 import { FileType } from "./file-type";
 
 /**
@@ -56,10 +59,12 @@ import { FileType } from "./file-type";
  * unchanged.
  */
 export interface Metadata {
-    /** The "Ente" file type - image, video or live photo. */
+    /**
+     * The "Ente" file type - image, video or live photo.
+     */
     fileType: FileType;
     /**
-     * The file name.
+     * The name of the file (including its extension).
      *
      * See: [Note: File name for local EnteFile objects]
      */
@@ -67,21 +72,47 @@ export interface Metadata {
     /**
      * The time when this file was created (epoch microseconds).
      *
-     * For photos (and images in general), this is our best attempt (using Exif
-     * and other metadata, or deducing it from file name for screenshots without
-     * any embedded metadata) at detecting the time when the photo was taken.
+     * This is our best attempt at detecting the time when the photo or live
+     * photo or video was taken.
      *
-     * If nothing can be found, then it is set to the current time at the time
-     * of the upload.
+     * -   We first try to obtain this from metadata, using Exif and other
+     *     metadata for images and FFmpeg-extracted metadata for video.
+     *
+     * -   If no suitable metadata is available, then we try to deduce it from
+     *     file name (e.g. for screenshots without any embedded metadata).
+     *
+     * -   If nothing can be found, then it is set to the current time at the
+     *     time of the upload.
      */
     creationTime: number;
+    /**
+     * The last modification time of the file (epoch microseconds).
+     */
     modificationTime: number;
-    latitude: number;
-    longitude: number;
-    hasStaticThumbnail?: boolean;
+    /**
+     * The latitude where the file was taken.
+     */
+    latitude?: number;
+    /**
+     * The longitude where the file was taken.
+     */
+    longitude?: number;
+    /**
+     * A hash of the file's contents.
+     *
+     * It is only valid for images and videos. For live photos, see
+     * {@link imageHash} and {@link videoHash}.
+     */
     hash?: string;
+    /**
+     * The hash of the image component of a live photo.
+     */
     imageHash?: string;
+    /**
+     * The hash of the video component of a live photo.
+     */
     videoHash?: string;
+    hasStaticThumbnail?: boolean;
     localID?: number;
     version?: number;
     deviceFolder?: string;
@@ -134,8 +165,42 @@ export enum ItemVisibility {
  *     with whom the file has been shared.
  *
  * For more details, see [Note: Metadatum].
+ *
+ * ---
+ *
+ * [Note: Optional magic metadata keys]
+ *
+ * Remote does not support nullish (`undefined` or `null`) values for the keys
+ * in the magic metadata associated with a file. All of the keys themselves are
+ * optional though.
+ *
+ * That is, all magic metadata properties are of the form:
+ *
+ *     foo?: T
+ *
+ * And never like:
+ *
+ *     foo: T | undefined
+ *
+ * Also see: [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet].
  */
 export interface PublicMagicMetadata {
+    /**
+     * A ISO 8601 date time string without a timezone, indicating the local time
+     * where the photo (or video) was taken.
+     *
+     * e.g. "2022-01-26T13:08:20".
+     *
+     * See: [Note: Photos are always in local date/time].
+     */
+    dateTime?: string;
+    /**
+     * When available, a "±HH:mm" string indicating the UTC offset of the place
+     * where the photo was taken.
+     *
+     * e.g. "+02:00".
+     */
+    offsetTime?: string;
     /**
      * Modified value of the date time associated with an {@link EnteFile}.
      *
@@ -152,6 +217,18 @@ export interface PublicMagicMetadata {
      */
     editedName?: string;
     /**
+     * The width of the photo (or video) in pixels.
+     *
+     * While this should usually be present, it is not guaranteed to be.
+     */
+    w?: number;
+    /**
+     * The height of the photo (or video) in pixels, if available.
+     *
+     * While this should usually be present, it is not guaranteed to be.
+     */
+    h?: number;
+    /**
      * An arbitrary caption / description string that the user has added to the
      * file.
      *
@@ -160,9 +237,161 @@ export interface PublicMagicMetadata {
      */
     caption?: string;
     uploaderName?: string;
-    w?: number;
-    h?: number;
 }
+
+/**
+ * Zod schema for the {@link PublicMagicMetadata} type.
+ *
+ * See: [Note: Duplicated Zod schema and TypeScript type]
+ *
+ * ---
+ *
+ * [Note: Use passthrough for metadata Zod schemas]
+ *
+ * It is important to (recursively) use the {@link passthrough} option when
+ * definining Zod schemas for the various metadata types (the plaintext JSON
+ * objects) because we want to retain all the fields we get from remote. There
+ * might be other, newer, clients out there adding fields that the current
+ * client might not we aware of, and we don't want to overwrite them.
+ */
+const PublicMagicMetadata = z
+    .object({
+        // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+        //
+        // Using `optional` is not accurate here. The key is optional, but the
+        // value itself is not optional.
+        //
+        // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
+        // to be on the roadmap so we suppress these mismatches.
+        //
+        // See:
+        // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+        editedTime: z.number().optional(),
+    })
+    .passthrough();
+
+/**
+ * Return the public magic metadata for the given {@link enteFile}.
+ *
+ * The file we persist in our local db has the metadata in the encrypted form
+ * that we get it from remote. We decrypt when we read it, and also hang the
+ * decrypted version to the in-memory {@link EnteFile} as a cache.
+ *
+ * If the file doesn't have any public magic metadata attached to it, return
+ * `undefined`.
+ */
+export const decryptPublicMagicMetadata = async (
+    enteFile: EnteFile,
+): Promise<PublicMagicMetadata | undefined> => {
+    const envelope = enteFile.pubMagicMetadata;
+    // TODO: The underlying types need auditing.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!envelope) return undefined;
+
+    // TODO: This function can be optimized to directly return the cached value
+    // instead of reparsing it using Zod. But that requires us (a) first fix the
+    // types, and (b) guarantee that we're the only ones putting that parsed
+    // data there, so that it is in a known good state (currently we exist in
+    // parallel with other functions that do the similar things).
+
+    const jsonValue =
+        typeof envelope.data == "string"
+            ? await decryptMetadataJSON({
+                  encryptedDataB64: envelope.data,
+                  decryptionHeaderB64: envelope.header,
+                  keyB64: enteFile.key,
+              })
+            : envelope.data;
+    const result = PublicMagicMetadata.parse(
+        // TODO: Can we avoid this cast?
+        withoutNullAndUndefinedValues(jsonValue as object),
+    );
+
+    // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    // We can't use -@ts-expect-error since this code is also included in the
+    // packages which don't have strict mode enabled (and thus don't error).
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
+    envelope.data = result;
+
+    // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
+    return result;
+};
+
+const withoutNullAndUndefinedValues = (o: object) =>
+    Object.fromEntries(
+        Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
+    );
+
+/**
+ * Return the file's creation date in a form suitable for using in the UI.
+ *
+ * For all the details and nuance, see {@link toUIDate}.
+ */
+export const getUICreationDate = (
+    enteFile: EnteFile,
+    publicMagicMetadata: PublicMagicMetadata,
+) =>
+    toUIDate(
+        publicMagicMetadata.dateTime ??
+            publicMagicMetadata.editedTime ??
+            enteFile.metadata.creationTime,
+    );
+
+/**
+ * Update the public magic metadata associated with a file on remote.
+ *
+ * This function updates the public magic metadata on remote, and as a
+ * convenience also modifies the provided {@link EnteFile} object in place with
+ * the updated values, but it does not update the state of the local databases.
+ *
+ * The caller needs to ensure that we subsequently sync with remote to fetch the
+ * updates as part of the diff and update the {@link EnteFile} that is persisted
+ * in our local db.
+ *
+ * @param enteFile The {@link EnteFile} whose public magic metadata we want to
+ * update.
+ *
+ * @param metadataUpdates A subset of {@link PublicMagicMetadata} containing the
+ * fields that we want to add or update.
+ */
+export const updateRemotePublicMagicMetadata = async (
+    enteFile: EnteFile,
+    metadataUpdates: Partial<PublicMagicMetadata>,
+) => {
+    const existingMetadata = await decryptPublicMagicMetadata(enteFile);
+
+    const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
+
+    // The underlying types of enteFile.pubMagicMetadata are incorrect
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const metadataVersion = enteFile.pubMagicMetadata?.version ?? 1;
+
+    const updateRequest = await updateMagicMetadataRequest(
+        enteFile,
+        updatedMetadata,
+        metadataVersion,
+    );
+
+    const updatedEnvelope = ensure(updateRequest.metadataList[0]).magicMetadata;
+
+    await putFilesPublicMagicMetadata(updateRequest);
+
+    // Modify the in-memory object to use the updated envelope. This steps are
+    // quite ad-hoc, as is the concept of updating the object in place.
+    enteFile.pubMagicMetadata =
+        updatedEnvelope as typeof enteFile.pubMagicMetadata;
+    // The correct version will come in the updated EnteFile we get in the
+    // response of the /diff. Temporarily bump it for the in place edits.
+    enteFile.pubMagicMetadata.version = enteFile.pubMagicMetadata.version + 1;
+    // Re-read the data.
+    await decryptPublicMagicMetadata(enteFile);
+    // Re-jig the other bits of EnteFile that depend on its public magic
+    // metadata.
+    mergeMetadata1(enteFile);
+};
 
 /**
  * Magic metadata, either public and private, as persisted and used by remote.
@@ -178,8 +407,8 @@ interface RemoteMagicMetadata {
     /**
      * Monotonically increasing iteration of this metadata object.
      *
-     * The version starts at 1. Each time a client updates the underlying magic
-     * metadata JSONs for a file, it increments this version number.
+     * The version starts at 1. Remote increments this version number each time
+     * a client updates the corresponding magic metadata field for the file.
      */
     version: number;
     /**
@@ -222,33 +451,23 @@ interface UpdateMagicMetadataRequest {
 }
 
 /**
- * A function that can be used to encrypt the contents of a metadata field
- * associated with a file.
- *
- * This is parameterized to allow us to use either the regular
- * {@link encryptMetadata} or the web worker wrapper for it.
- */
-export type EncryptMetadataF = typeof encryptMetadata;
-
-/**
  * Construct an remote update request payload from the public or private magic
  * metadata JSON object for an {@link enteFile}, using the provided
  * {@link encryptMetadataF} function to encrypt the JSON.
  */
-export const updateMagicMetadataRequest = async (
+const updateMagicMetadataRequest = async (
     enteFile: EnteFile,
     metadata: PrivateMagicMetadata | PublicMagicMetadata,
     metadataVersion: number,
-    encryptMetadataF: EncryptMetadataF,
 ): Promise<UpdateMagicMetadataRequest> => {
     // Drop all null or undefined values to obtain the syncable entries.
+    // See: [Note: Optional magic metadata keys].
     const validEntries = Object.entries(metadata).filter(
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataF(
-        Object.fromEntries(validEntries),
-        enteFile.key,
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: Object.fromEntries(validEntries), keyB64: enteFile.key },
     );
 
     return {
@@ -272,6 +491,7 @@ export const updateMagicMetadataRequest = async (
  * @param request The list of file ids and the updated encrypted magic metadata
  * associated with each of them.
  */
+// TODO: Remove export once this is used.
 export const putFilesMagicMetadata = async (
     request: UpdateMagicMetadataRequest,
 ) =>
@@ -289,7 +509,7 @@ export const putFilesMagicMetadata = async (
  * @param request The list of file ids and the updated encrypted magic metadata
  * associated with each of them.
  */
-export const putFilesPublicMagicMetadata = async (
+const putFilesPublicMagicMetadata = async (
     request: UpdateMagicMetadataRequest,
 ) =>
     ensureOk(
@@ -381,10 +601,11 @@ export interface ParsedMetadata {
  * offset, its siblings photos might not. The only way to retain their
  * comparability is to treat them all the "time zone where the photo was taken".
  *
- * Finally, while this is all great, we still have existing code that deals with
- * UTC timestamps. So we also retain the existing `creationTime` UTC timestamp,
- * but this should be considered deprecated, and over time we should move
- * towards using the `dateTime` string.
+ * All this is good, but we still need to retain the existing `creationTime` UTC
+ * epoch timestamp because in some cases when importing photos from other
+ * providers, that's all we get. We could try and convert that to a date/time
+ * string too, but since we anyways need to handle existing code that deals with
+ * epoch timestamps, we retain them as they were provided.
  */
 export interface ParsedMetadataDate {
     /**
@@ -400,13 +621,13 @@ export interface ParsedMetadataDate {
      * This is an optional UTC offset string of the form "±HH:mm" or "Z",
      * specifying the timezone offset for {@link dateTime} when available.
      */
-    offsetTime: string | undefined;
+    offset: string | undefined;
     /**
      * UTC epoch microseconds derived from {@link dateTime} and
-     * {@link offsetTime}.
+     * {@link offset}.
      *
-     * When the {@link offsetTime} is present, this will accurately reflect a
-     * UTC timestamp. When the {@link offsetTime} is not present it convert to a
+     * When the {@link offset} is present, this will accurately reflect a
+     * UTC timestamp. When the {@link offset} is not present it convert to a
      * UTC timestamp by assuming that the given {@link dateTime} is in the local
      * time where this code is running. This is a good assumption but not always
      * correct (e.g. vacation photos).
@@ -451,7 +672,7 @@ export const parseMetadataDate = (
     // Now we try to massage s into two parts - the local date/time string, and
     // an UTC offset string.
 
-    let offsetTime: string | undefined;
+    let offset: string | undefined;
     let sWithoutOffset: string;
 
     // Check to see if there is a time-zone descriptor of the form "Z" or
@@ -459,7 +680,7 @@ export const parseMetadataDate = (
     const m = s.match(/Z|[+-]\d\d:?\d\d$/);
     if (m?.index) {
         sWithoutOffset = s.substring(0, m.index);
-        offsetTime = s.substring(m.index);
+        offset = s.substring(m.index);
     } else {
         sWithoutOffset = s;
     }
@@ -499,7 +720,45 @@ export const parseMetadataDate = (
     // any time zone descriptor.
     const dateTime = dropLast(date.toISOString());
 
-    return { dateTime, offsetTime, timestamp };
+    return { dateTime, offset, timestamp };
 };
 
 const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);
+
+/**
+ * Return a date that can be used on the UI by constructing it from a
+ * {@link ParsedMetadataDate}, or its {@link dateTime} component, or a UTC epoch
+ * timestamp.
+ *
+ * These dates are all hypothetically in the timezone of the place where the
+ * photo was taken. Different photos might've been taken in different timezones,
+ * which is why it is hypothetical, so concretely these are all mapped to the
+ * current timezone.
+ *
+ * The difference is subtle, but we should not think of these as absolute points
+ * on the UTC timeline. They are instead better thought of as dates without an
+ * associated timezone. For the purpose of mapping them all to a comparable
+ * dimension them we all contingently use the current timezone - this makes it
+ * easy to use JavaScript Date constructor which assumes that any date/time
+ * string without an associated timezone is in the current timezone.
+ *
+ * Whenever we're surfacing them in the UI, or using them for grouping (say by
+ * day), we should use their current timezone representation, not the UTC one.
+ *
+ * See also: [Note: Photos are always in local date/time].
+ */
+export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
+    switch (typeof dateLike) {
+        case "object":
+            // A ISO 8601 string without a timezone. The Date constructor will
+            // assume the timezone to be the current timezone.
+            return new Date(dateLike.dateTime);
+        case "string":
+            // This is expected to be a string with the same meaning as
+            // `ParsedMetadataDate.dateTime`.
+            return new Date(dateLike);
+        case "number":
+            // A UTC epoch microseconds value.
+            return new Date(dateLike / 1000);
+    }
+};

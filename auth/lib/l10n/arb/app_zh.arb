@@ -465,5 +465,6 @@
   "appLockDescription": "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。",
   "pinLock": "Pin 锁定",
   "enterPin": "输入 PIN 码",
-  "setNewPin": "设置新 PIN 码"
+  "setNewPin": "设置新 PIN 码",
+  "importFailureDescNew": "无法解析选定的文件。"
 }

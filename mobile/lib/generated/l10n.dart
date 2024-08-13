@@ -9135,16 +9135,6 @@ class S {
     );
   }
 
-  /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
-  String get swipeLockEnablePreSteps {
-    return Intl.message(
-      'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
-      name: 'swipeLockEnablePreSteps',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Auto lock`
   String get autoLock {
     return Intl.message(
@@ -9250,6 +9240,26 @@ class S {
     return Intl.message(
       'This will remove public links of all selected quick links.',
       name: 'thisWillRemovePublicLinksOfAllSelectedQuickLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Guest view`
+  String get guestView {
+    return Intl.message(
+      'Guest view',
+      name: 'guestView',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable guest view, please setup device passcode or screen lock in your system settings.`
+  String get guestViewEnablePreSteps {
+    return Intl.message(
+      'To enable guest view, please setup device passcode or screen lock in your system settings.',
+      name: 'guestViewEnablePreSteps',
       desc: '',
       args: [],
     );

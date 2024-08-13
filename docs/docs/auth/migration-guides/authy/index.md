@@ -101,7 +101,7 @@ to Ente Authenticator!
 > the codes yet, ignore this section.
 >
 > If the export itself failed, try using
-> [**method 1**](#method-1-use-neerajs-export-tool) instead.
+> [**method 1**](#method-1-use-neeraj-s-export-tool) instead.
 
 Usually, you should be able to import Bitwarden exports directly into Ente
 Authenticator. In case this didn't work for whatever reason, I've written a
@@ -170,7 +170,7 @@ depending on which method you used to export your codes.
 5. Select the JSON file that was made earlier.
 
 If this didn't work, refer to
-[**method 2.1**](#method-21-if-the-export-worked-but-the-import-didnt).<br><br>
+[**method 2.1**](#method-2-1-if-the-export-worked-but-the-import-didn-t).<br><br>
 
 And that's it! You have now successfully migrated from Authy to Ente
 Authenticator.

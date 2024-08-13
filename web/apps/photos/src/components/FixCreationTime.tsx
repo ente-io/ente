@@ -1,11 +1,17 @@
 import log from "@/base/log";
-import type { ParsedMetadataDate } from "@/media/file-metadata";
+import {
+    decryptPublicMagicMetadata,
+    getUICreationDate,
+    updateRemotePublicMagicMetadata,
+    type ParsedMetadataDate,
+} from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
 import { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
+import { ensure } from "@/utils/ensure";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
     Button,
@@ -21,10 +27,6 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useState } from "react";
-import {
-    changeFileCreationTime,
-    updateExistingFilePubMetadata,
-} from "utils/file";
 
 /** The current state of the fixing process. */
 type Status = "running" | "completed" | "completed-with-errors";
@@ -277,7 +279,7 @@ type SetProgressTracker = React.Dispatch<
 const updateFiles = async (
     enteFiles: EnteFile[],
     fixOption: FixOption,
-    customDate: ParsedMetadataDate,
+    customDate: ParsedMetadataDate | undefined,
     setProgressTracker: SetProgressTracker,
 ) => {
     setProgressTracker({ current: 0, total: enteFiles.length });
@@ -312,25 +314,29 @@ const updateFiles = async (
  * {@link fixOption} is provided, but the given underlying image for the given
  * {@link enteFile} does not have a corresponding Exif (or related) value, then
  * that file is skipped.
- *
- * Note that metadata associated with an {@link EnteFile} is immutable, and we
- * instead modify the mutable metadata section associated with the file. See
- * [Note: Metadatum] for more details.
  */
-export const updateEnteFileDate = async (
+const updateEnteFileDate = async (
     enteFile: EnteFile,
     fixOption: FixOption,
-    customDate: ParsedMetadataDate,
+    customDate: ParsedMetadataDate | undefined,
 ) => {
     let newDate: ParsedMetadataDate | undefined;
-    if (fixOption === "custom") {
-        newDate = customDate;
+
+    if (fixOption == "custom") {
+        newDate = {
+            dateTime: ensure(customDate).dateTime,
+            // See [Note: Don't modify offsetTime when editing date via picker]
+            // for why we don't also set the offset here.
+            offset: undefined,
+            timestamp: ensure(customDate).timestamp,
+        };
     } else if (enteFile.metadata.fileType == FileType.image) {
         const stream = await downloadManager.getFile(enteFile);
         const blob = await new Response(stream).blob();
         const file = new File([blob], enteFile.metadata.title);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
             await extractExifDates(file);
+
         switch (fixOption) {
             case "date-time-original":
                 newDate = DateTimeOriginal ?? DateTime;
@@ -344,11 +350,17 @@ export const updateEnteFileDate = async (
         }
     }
 
-    if (newDate && newDate.timestamp !== enteFile.metadata.creationTime) {
-        const updatedFile = await changeFileCreationTime(
-            enteFile,
-            newDate.timestamp,
-        );
-        updateExistingFilePubMetadata(enteFile, updatedFile);
-    }
+    if (!newDate) return;
+
+    const existingUIDate = getUICreationDate(
+        enteFile,
+        await decryptPublicMagicMetadata(enteFile),
+    );
+    if (newDate.timestamp == existingUIDate.getTime()) return;
+
+    await updateRemotePublicMagicMetadata(enteFile, {
+        dateTime: newDate.dateTime,
+        offsetTime: newDate.offset,
+        editedTime: newDate.timestamp,
+    });
 };

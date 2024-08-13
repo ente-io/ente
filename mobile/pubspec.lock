@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: archive
-      sha256: "22600aa1e926be775fa5fe7e6894e7fb3df9efda8891c73f70fb3262399a432d"
+      sha256: cb6a278ef2dbb298455e1a713bda08524a175630ec643a242c399c932a0a1f7d
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.10"
+    version: "3.6.1"
   args:
     dependency: transitive
     description:
@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  blurhash_ffi:
+    dependency: transitive
+    description:
+      name: blurhash_ffi
+      sha256: "941868602bb3bc34b0a7d630e4bf0e88e4c93af36090fe1cc0d63021c9a46cb3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.6"
   boolean_selector:
     dependency: transitive
     description:
@@ -372,14 +380,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.10"
-  dchs_motion_sensors:
-    dependency: transitive
-    description:
-      name: dchs_motion_sensors
-      sha256: "0f1cac6cd876fad2afff47405a963913f39a67221cbfc4f00aa04da2845bab0a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   defer_pointer:
     dependency: "direct main"
     description:
@@ -792,10 +792,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_local_notifications
-      sha256: f9a05409385b77b06c18f200a41c7c2711ebf7415669350bb0f8474c07bd40d1
+      sha256: dd6676d8c2926537eccdf9f72128bbb2a9d0814689527b17f92c248ff192eaf3
       url: "https://pub.dev"
     source: hosted
-    version: "17.0.0"
+    version: "17.2.1+2"
   flutter_local_notifications_linux:
     dependency: transitive
     description:
@@ -808,10 +808,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_local_notifications_platform_interface
-      sha256: "7cf643d6d5022f3baed0be777b0662cce5919c0a7b86e700299f22dc4ae660ef"
+      sha256: "85f8d07fe708c1bdcf45037f2c0109753b26ae077e9d9e899d55971711a4ea66"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.0+1"
+    version: "7.2.0"
   flutter_localizations:
     dependency: "direct main"
     description: flutter
@@ -1421,6 +1421,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.3"
+  maps_launcher:
+    dependency: "direct main"
+    description:
+      name: maps_launcher
+      sha256: "57ba3c31db96e30f58c23fcb22a1fac6accc5683535b2cf344c534bbb9f8f910"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   matcher:
     dependency: transitive
     description:
@@ -1566,6 +1574,15 @@ packages:
       url: "https://github.com/ente-io/motion_photo.git"
     source: git
     version: "0.0.6"
+  motion_sensors:
+    dependency: transitive
+    description:
+      path: "."
+      ref: aves
+      resolved-ref: "4b11d59f4bda152627f701070272f657f8358e67"
+      url: "https://github.com/deckerst/aves_panorama_motion_sensors.git"
+    source: git
+    version: "0.1.0"
   motionphoto:
     dependency: "direct main"
     description:
@@ -1679,14 +1696,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  panorama_viewer:
+  panorama:
     dependency: "direct main"
     description:
-      name: panorama_viewer
-      sha256: "66b51a28921df33463968ebb411394551f6dbb065cc98474401820d6c2676e57"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.5"
+      path: "."
+      ref: blur
+      resolved-ref: "362f0295ba4ed42486577c9f9724c462107080f8"
+      url: "https://github.com/ente-io/panorama_blur.git"
+    source: git
+    version: "0.4.1"
   password_strength:
     dependency: "direct main"
     description:
@@ -2767,13 +2785,13 @@ packages:
     source: hosted
     version: "0.0.2"
   win32:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: win32
-      sha256: "464f5674532865248444b4c3daca12bd9bf2d7c47f759ce2617986e7229494a8"
+      sha256: "015002c060f1ae9f41a818f2d5640389cc05283e368be19dc8d77cecb43c40c9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.2.0"
+    version: "5.5.3"
   win32_registry:
     dependency: transitive
     description:

@@ -1,8 +1,11 @@
+import type { EnteFile } from "../../types/file";
+
 export interface Person {
     id: number;
     name?: string;
     files: number[];
-    displayFaceId: string;
+    displayFaceID: string;
+    displayFaceFile: EnteFile;
 }
 
 // Forced disable clustering. It doesn't currently work.
