@@ -37,14 +37,6 @@ export const syncPeopleIndex = async () => {
     }
 
 
-    // TODO: have faces addresable through fileId + faceId
-    // to avoid index based addressing, which is prone to wrong results
-    // one way could be to match nearest face within threshold in the file
-
-    const allFacesMap =
-        syncContext.allSyncedFacesMap ??
-        (syncContext.allSyncedFacesMap = await mlIDbStorage.getAllFacesMap());
-
 
     // await this.init();
 
@@ -86,30 +78,13 @@ export const syncPeopleIndex = async () => {
                 : best,
         );
 
-export async function getLocalFile(fileId: number) {
-    const localFiles = await getLocalFiles();
-    return localFiles.find((f) => f.id === fileId);
-}
-
-        if (personFace && !personFace.crop?.cacheKey) {
-            const file = await getLocalFile(personFace.fileId);
-            const imageBitmap = await fetchImageBitmap(file);
-            await saveFaceCrop(imageBitmap, personFace);
-        }
-
-
-        const person: Person = {
-            id: index,
-            files: faces.map((f) => f.fileId),
-            displayFaceId: personFace?.id,
-        };
 
         await mlIDbStorage.putPerson(person);
 
         faces.forEach((face) => {
             face.personId = person.id;
         });
-        // log.info("Creating person: ", person, faces);
+
     }
 
     await mlIDbStorage.updateFaces(allFacesMap);
@@ -117,20 +92,4 @@ export async function getLocalFile(fileId: number) {
     // await mlIDbStorage.setIndexVersion("people", filesVersion);
 };
 
-    public async regenerateFaceCrop(token: string, faceID: string) {
-        await downloadManager.init(APPS.PHOTOS, { token });
-        return mlService.regenerateFaceCrop(faceID);
-    }
-
-export const regenerateFaceCrop = async (faceID: string) => {
-    const fileID = Number(faceID.split("-")[0]);
-    const personFace = await mlIDbStorage.getFace(fileID, faceID);
-    if (!personFace) {
-        throw Error("Face not found");
-    }
-
-    const file = await getLocalFile(personFace.fileId);
-    const imageBitmap = await fetchImageBitmap(file);
-    return await saveFaceCrop(imageBitmap, personFace);
-};
 */
