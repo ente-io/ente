@@ -1,7 +1,10 @@
 import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { type EnteFile } from "@/new/photos/types/file";
+import {
+    type EnteFile,
+    type FilePublicMagicMetadata,
+} from "@/new/photos/types/file";
 import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { z } from "zod";
@@ -284,8 +287,6 @@ export const decryptPublicMagicMetadata = async (
     enteFile: EnteFile,
 ): Promise<PublicMagicMetadata | undefined> => {
     const envelope = enteFile.pubMagicMetadata;
-    // TODO: The underlying types need auditing.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!envelope) return undefined;
 
     // TODO: This function can be optimized to directly return the cached value
@@ -332,11 +333,11 @@ const withoutNullAndUndefinedValues = (o: object) =>
  */
 export const getUICreationDate = (
     enteFile: EnteFile,
-    publicMagicMetadata: PublicMagicMetadata,
+    publicMagicMetadata: PublicMagicMetadata | undefined,
 ) =>
     toUIDate(
-        publicMagicMetadata.dateTime ??
-            publicMagicMetadata.editedTime ??
+        publicMagicMetadata?.dateTime ??
+            publicMagicMetadata?.editedTime ??
             enteFile.metadata.creationTime,
     );
 
@@ -365,8 +366,6 @@ export const updateRemotePublicMagicMetadata = async (
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
 
-    // The underlying types of enteFile.pubMagicMetadata are incorrect
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const metadataVersion = enteFile.pubMagicMetadata?.version ?? 1;
 
     const updateRequest = await updateMagicMetadataRequest(
@@ -381,8 +380,7 @@ export const updateRemotePublicMagicMetadata = async (
 
     // Modify the in-memory object to use the updated envelope. This steps are
     // quite ad-hoc, as is the concept of updating the object in place.
-    enteFile.pubMagicMetadata =
-        updatedEnvelope as typeof enteFile.pubMagicMetadata;
+    enteFile.pubMagicMetadata = updatedEnvelope as FilePublicMagicMetadata;
     // The correct version will come in the updated EnteFile we get in the
     // response of the /diff. Temporarily bump it for the in place edits.
     enteFile.pubMagicMetadata.version = enteFile.pubMagicMetadata.version + 1;
