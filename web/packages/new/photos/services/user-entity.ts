@@ -124,19 +124,7 @@ export const userEntityDiff = async (
 };
 
 /**
- * Fetch all Person entities that have been created or updated since the last
- * time we checked.
- */
-export const personDiff = async (entityKeyB64: string) => {
-    const entities = await userEntityDiff("person", 0, entityKeyB64);
-    return entities.map(({ data }) => {
-        if (!data) return undefined;
-        return RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)));
-    });
-};
-
-/**
- * Zod schema for the "person" entity
+ * Zod schema for the "person" entity (the {@link RemotePerson} type).
  */
 const RemotePerson = z.object({
     name: z.string(),
@@ -147,3 +135,33 @@ const RemotePerson = z.object({
         }),
     ),
 });
+
+/**
+ * A "person" entity as synced via remote.
+ */
+export type RemotePerson = z.infer<typeof RemotePerson>;
+
+/**
+ * Fetch all Person entities that have been created or updated since the last
+ * time we checked.
+ */
+export const personDiff = async (
+    entityKeyB64: string,
+): Promise<RemotePerson[]> => {
+    const sinceTime = 0;
+    const entities = await userEntityDiff("person", 0, entityKeyB64);
+    const latestUpdatedAt = entities.reduce(
+        (max, e) => Math.max(max, e.updatedAt),
+        sinceTime,
+    );
+    const people = entities
+        .map(({ data }) =>
+            data
+                ? RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)))
+                : undefined,
+        )
+        .filter((p) => !!p);
+    // TODO-Cluster
+    console.log({ latestUpdatedAt, people });
+    return people;
+};
