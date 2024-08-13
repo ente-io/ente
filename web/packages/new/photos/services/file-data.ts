@@ -18,7 +18,7 @@ import { z } from "zod";
  * There are specialized APIs for fetching and uploading the originals and the
  * thumbnails. But for the other associated data, we can use the file data APIs.
  */
-type FileDataType = "mldata";
+type FileDataType = "mldata" /* See: [Note: "mldata" format] */;
 
 const RemoteFileData = z.object({
     /**
@@ -82,29 +82,29 @@ export const fetchFileData = async (
  * {@link type} associated with the given {@link enteFile}. The data will be
  * end-to-end encrypted using the given {@link enteFile}'s key before uploading.
  *
- * @param enteFile {@link EnteFile} to which this data is associated with.
+ * @param enteFile {@link EnteFile} which this data is associated with.
  *
  * @param type The {@link FileDataType} which we are uploading.
  *
- * @param embedding The binary data the embedding. The exact contents of the
- * embedding are {@link type} specific.
+ * @param data The binary data to upload. The exact contents of the data are
+ * {@link type} specific.
  */
 export const putFileData = async (
     enteFile: EnteFile,
     type: FileDataType,
-    embedding: Uint8Array,
+    data: Uint8Array,
 ) => {
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await encryptFileEmbedding({ data: embedding, keyB64: enteFile.key });
+        await encryptFileEmbedding({ data: data, keyB64: enteFile.key });
 
     const res = await fetch(await apiURL("/files/data"), {
         method: "PUT",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
             fileID: enteFile.id,
+            type,
             encryptedData: encryptedDataB64,
             decryptionHeader: decryptionHeaderB64,
-            type,
         }),
     });
     ensureOk(res);
