@@ -17,7 +17,7 @@ import "package:pool/pool.dart";
 class PersonFaceWidget extends StatelessWidget {
   final EnteFile file;
   final String? personId;
-  final int? clusterID;
+  final String? clusterID;
   final bool useFullFile;
   final bool thumbnailFallback;
   final Uint8List? faceCrop;

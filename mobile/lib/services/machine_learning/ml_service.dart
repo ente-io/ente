@@ -250,7 +250,7 @@ class MLService {
       );
 
       // Get the current cluster statistics
-      final Map<int, (Uint8List, int)> oldClusterSummaries =
+      final Map<String, (Uint8List, int)> oldClusterSummaries =
           await FaceMLDataDB.instance.getAllClusterSummary();
 
       if (clusterInBuckets) {

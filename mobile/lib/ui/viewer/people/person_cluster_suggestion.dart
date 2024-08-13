@@ -109,7 +109,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             allSuggestions = snapshot.data!;
             final numberOfDifferentSuggestions = allSuggestions.length;
             final currentSuggestion = allSuggestions[currentSuggestionIndex];
-            final int clusterID = currentSuggestion.clusterIDToMerge;
+            final String clusterID = currentSuggestion.clusterIDToMerge;
             final double distance = currentSuggestion.distancePersonToCluster;
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
@@ -182,7 +182,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Future<void> _handleUserClusterChoice(
-    int clusterID,
+    String clusterID,
     bool yesOrNo,
     int numberOfSuggestions,
   ) async {
@@ -229,7 +229,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Future<void> _rejectSuggestion(
-    int clusterID,
+    String clusterID,
     int numberOfSuggestions,
   ) async {
     canGiveFeedback = false;
@@ -254,7 +254,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Widget _buildSuggestionView(
-    int clusterID,
+    String clusterID,
     double distance,
     bool usingMean,
     List<EnteFile> files,
@@ -379,7 +379,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   Widget _buildThumbnailWidget(
     List<EnteFile> files,
-    int clusterID,
+    String clusterID,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     return SizedBox(
@@ -433,7 +433,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   List<Widget> _buildThumbnailWidgetsRow(
     List<EnteFile> files,
-    int cluserId,
+    String cluserId,
     Map<int, Uint8List?> faceThumbnails, {
     int start = 0,
   }) {
@@ -460,7 +460,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   Future<Map<int, Uint8List?>> _generateFaceThumbnails(
     List<EnteFile> files,
-    int clusterID,
+    String clusterID,
   ) async {
     final futures = <Future<Uint8List?>>[];
     for (final file in files) {

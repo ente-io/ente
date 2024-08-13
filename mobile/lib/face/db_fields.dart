@@ -41,7 +41,7 @@ const fcFaceId = 'face_id';
 const createFaceClustersTable = '''
 CREATE TABLE IF NOT EXISTS $faceClustersTable (
   $fcFaceId	TEXT NOT NULL,
-  $fcClusterID INTEGER NOT NULL,
+  $fcClusterID TEXT NOT NULL,
   PRIMARY KEY($fcFaceId)
 );
 ''';
@@ -59,7 +59,7 @@ const clusterIDColumn = 'cluster_id';
 const createClusterPersonTable = '''
 CREATE TABLE IF NOT EXISTS $clusterPersonTable (
   $personIdColumn	TEXT NOT NULL,
-  $clusterIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn	TEXT NOT NULL,
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
@@ -72,7 +72,7 @@ const avgColumn = 'avg';
 const countColumn = 'count';
 const createClusterSummaryTable = '''
 CREATE TABLE IF NOT EXISTS $clusterSummaryTable (
-  $clusterIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn	TEXT NOT NULL,
   $avgColumn BLOB NOT NULL,
   $countColumn INTEGER NOT NULL,
   PRIMARY KEY($clusterIDColumn)
@@ -89,7 +89,7 @@ const notPersonFeedback = 'not_person_feedback';
 const createNotPersonFeedbackTable = '''
 CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   $personIdColumn	TEXT NOT NULL,
-  $clusterIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn TEXT NOT NULL,
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';

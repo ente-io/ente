@@ -82,7 +82,7 @@ class PersonService {
         continue;
       }
       final personData = person.data;
-      final Map<int, Set<String>> dbPersonCluster =
+      final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
       if (_shouldUpdateRemotePerson(personData, dbPersonCluster)) {
         final personData = person.data;
@@ -109,7 +109,7 @@ class PersonService {
 
   bool _shouldUpdateRemotePerson(
     PersonData personData,
-    Map<int, Set<String>> dbPersonCluster,
+    Map<String, Set<String>> dbPersonCluster,
   ) {
     bool result = false;
     if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
@@ -152,7 +152,7 @@ class PersonService {
 
   Future<PersonEntity> addPerson(
     String name,
-    int clusterID, {
+    String clusterID, {
     bool isHidden = false,
   }) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
@@ -179,7 +179,7 @@ class PersonService {
 
   Future<void> removeClusterToPerson({
     required String personID,
-    required int clusterID,
+    required String clusterID,
   }) async {
     final person = (await getPerson(personID))!;
     final personData = person.data;
@@ -201,7 +201,7 @@ class PersonService {
     required Set<String> faceIDs,
   }) async {
     final personData = person.data;
-    final List<int> emptiedClusters = [];
+    final List<String> emptiedClusters = [];
     for (final cluster in personData.assigned!) {
       cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
       if (cluster.faces.isEmpty) {
@@ -219,7 +219,6 @@ class PersonService {
       );
     }
 
-    
     await entityService.addOrUpdate(
       EntityType.person,
       json.encode(personData.toJson()),
@@ -256,8 +255,8 @@ class PersonService {
     await entityService.syncEntities();
     final entities = await entityService.getEntities(EntityType.person);
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
-    final Map<String, int> faceIdToClusterID = {};
-    final Map<int, String> clusterToPersonID = {};
+    final Map<String, String> faceIdToClusterID = {};
+    final Map<String, String> clusterToPersonID = {};
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
       int faceCount = 0;

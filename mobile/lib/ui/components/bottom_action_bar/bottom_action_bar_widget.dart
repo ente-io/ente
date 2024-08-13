@@ -13,7 +13,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final GalleryType galleryType;
   final Collection? collection;
   final PersonEntity? person;
-  final int? clusterID;
+  final String? clusterID;
   final SelectedFiles selectedFiles;
   final VoidCallback? onCancel;
   final Color? backgroundColor;

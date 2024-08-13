@@ -29,7 +29,7 @@ class ClusterPage extends StatefulWidget {
   final List<EnteFile> searchResult;
   final bool enableGrouping;
   final String tagPrefix;
-  final int clusterID;
+  final String clusterID;
   final PersonEntity? personID;
   final String appendTitle;
   final bool showNamingBanner;

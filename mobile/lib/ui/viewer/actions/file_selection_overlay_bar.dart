@@ -14,7 +14,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final Collection? collection;
   final Color? backgroundColor;
   final PersonEntity? person;
-  final int? clusterID;
+  final String? clusterID;
 
   const FileSelectionOverlayBar(
     this.galleryType,

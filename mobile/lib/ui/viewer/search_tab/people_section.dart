@@ -273,7 +273,7 @@ class SearchExample extends StatelessWidget {
                       onTap: () async {
                         final result = await showAssignPersonAction(
                           context,
-                          clusterID: int.parse(searchResult.name()),
+                          clusterID: searchResult.name(),
                         );
                         if (result != null &&
                             result is (PersonEntity, EnteFile)) {

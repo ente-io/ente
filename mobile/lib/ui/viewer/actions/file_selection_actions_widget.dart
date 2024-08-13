@@ -53,7 +53,7 @@ class FileSelectionActionsWidget extends StatefulWidget {
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
   final PersonEntity? person;
-  final int? clusterID;
+  final String? clusterID;
 
   const FileSelectionActionsWidget(
     this.type,

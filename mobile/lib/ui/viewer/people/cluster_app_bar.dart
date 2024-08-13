@@ -26,7 +26,7 @@ class ClusterAppBar extends StatefulWidget {
   final GalleryType type;
   final String? title;
   final SelectedFiles selectedFiles;
-  final int clusterID;
+  final String clusterID;
   final PersonEntity? person;
 
   const ClusterAppBar(
@@ -179,7 +179,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   Future<void> _breakUpCluster(BuildContext context) async {
     bool userConfirmed = false;
     List<EnteFile> biggestClusterFiles = [];
-    int biggestClusterID = -1;
+    String biggestClusterID = '';
     await showChoiceDialog(
       context,
       title: "Does this grouping contain multiple people?",
@@ -190,9 +190,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         try {
           final breakupResult = await ClusterFeedbackService.instance
               .breakUpCluster(widget.clusterID);
-          final Map<int, List<String>> newClusterIDToFaceIDs =
+          final Map<String, List<String>> newClusterIDToFaceIDs =
               breakupResult.newClusterIdToFaceIds;
-          final Map<String, int> newFaceIdToClusterID =
+          final Map<String, String> newFaceIdToClusterID =
               breakupResult.newFaceIdToCluster;
 
           // Update to delete the old clusters and save the new clusters
@@ -203,9 +203,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               .updateFaceIdToClusterId(newFaceIdToClusterID);
 
           // Find the biggest cluster
-          biggestClusterID = -1;
+          biggestClusterID = '';
           int biggestClusterSize = 0;
-          for (final MapEntry<int, List<String>> clusterToFaces
+          for (final MapEntry<String, List<String>> clusterToFaces
               in newClusterIDToFaceIDs.entries) {
             if (clusterToFaces.value.length > biggestClusterSize) {
               biggestClusterSize = clusterToFaces.value.length;
@@ -253,7 +253,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     final breakupResult =
         await ClusterFeedbackService.instance.breakUpCluster(widget.clusterID);
 
-    final Map<int, List<String>> newClusterIDToFaceIDs =
+    final Map<String, List<String>> newClusterIDToFaceIDs =
         breakupResult.newClusterIdToFaceIds;
 
     final allFileIDs = newClusterIDToFaceIDs.values

@@ -28,7 +28,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 class FaceMLDataDB {
   static final Logger _logger = Logger("FaceMLDataDB");
 
-  static const _databaseName = "ente.face_ml_db.db";
+  static const _databaseName = "ente.face_ml_db_v2.db";
   // static const _databaseVersion = 1;
 
   FaceMLDataDB._privateConstructor();
@@ -136,7 +136,7 @@ class FaceMLDataDB {
   }
 
   Future<void> updateFaceIdToClusterId(
-    Map<String, int> faceIDToClusterID,
+    Map<String, String> faceIDToClusterID,
   ) async {
     final db = await instance.asyncDB;
     const batchSize = 500;
@@ -185,43 +185,43 @@ class FaceMLDataDB {
     return maps.first['count'] as int;
   }
 
-  Future<Map<int, int>> clusterIdToFaceCount() async {
+  Future<Map<String, int>> clusterIdToFaceCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, COUNT(*) as count FROM $faceClustersTable where $fcClusterID IS NOT NULL GROUP BY $fcClusterID ',
     );
-    final Map<int, int> result = {};
+    final Map<String, int> result = {};
     for (final map in maps) {
-      result[map[fcClusterID] as int] = map['count'] as int;
+      result[map[fcClusterID] as String] = map['count'] as int;
     }
     return result;
   }
 
-  Future<Set<int>> getPersonIgnoredClusters(String personID) async {
+  Future<Set<String>> getPersonIgnoredClusters(String personID) async {
     final db = await instance.asyncDB;
     // find out clusterIds that are assigned to other persons using the clusters table
     final List<Map<String, dynamic>> otherPersonMaps = await db.getAll(
       'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn != ? AND $personIdColumn IS NOT NULL',
       [personID],
     );
-    final Set<int> ignoredClusterIDs =
-        otherPersonMaps.map((e) => e[clusterIDColumn] as int).toSet();
+    final Set<String> ignoredClusterIDs =
+        otherPersonMaps.map((e) => e[clusterIDColumn] as String).toSet();
     final List<Map<String, dynamic>> rejectMaps = await db.getAll(
       'SELECT $clusterIDColumn FROM $notPersonFeedback WHERE $personIdColumn = ?',
       [personID],
     );
-    final Set<int> rejectClusterIDs =
-        rejectMaps.map((e) => e[clusterIDColumn] as int).toSet();
+    final Set<String> rejectClusterIDs =
+        rejectMaps.map((e) => e[clusterIDColumn] as String).toSet();
     return ignoredClusterIDs.union(rejectClusterIDs);
   }
 
-  Future<Set<int>> getPersonClusterIDs(String personID) async {
+  Future<Set<String>> getPersonClusterIDs(String personID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn = ?',
       [personID],
     );
-    return maps.map((e) => e[clusterIDColumn] as int).toSet();
+    return maps.map((e) => e[clusterIDColumn] as String).toSet();
   }
 
   Future<void> clearTable() async {
@@ -235,7 +235,7 @@ class FaceMLDataDB {
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
-    int clusterID, {
+    String clusterID, {
     int? limit,
   }) async {
     final db = await instance.asyncDB;
@@ -246,12 +246,12 @@ class FaceMLDataDB {
     return maps.map((e) => e[faceEmbeddingBlob] as Uint8List);
   }
 
-  Future<Map<int, Iterable<Uint8List>>> getFaceEmbeddingsForClusters(
-    Iterable<int> clusterIDs, {
+  Future<Map<String, Iterable<Uint8List>>> getFaceEmbeddingsForClusters(
+    Iterable<String> clusterIDs, {
     int? limit,
   }) async {
     final db = await instance.asyncDB;
-    final Map<int, List<Uint8List>> result = {};
+    final Map<String, List<Uint8List>> result = {};
 
     final selectQuery = '''
     SELECT fc.$fcClusterID, fe.$faceEmbeddingBlob
@@ -264,7 +264,7 @@ class FaceMLDataDB {
     final List<Map<String, dynamic>> maps = await db.getAll(selectQuery);
 
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as int;
+      final clusterID = map[fcClusterID] as String;
       final faceEmbedding = map[faceEmbeddingBlob] as Uint8List;
       result.putIfAbsent(clusterID, () => <Uint8List>[]).add(faceEmbedding);
     }
@@ -276,7 +276,7 @@ class FaceMLDataDB {
     required int recentFileID,
     String? personID,
     String? avatarFaceId,
-    int? clusterID,
+    String? clusterID,
   }) async {
     // read person from db
     final db = await instance.asyncDB;
@@ -299,7 +299,7 @@ class FaceMLDataDB {
         [personID],
       );
       final clusterIDs =
-          clusterRows.map((e) => e[clusterIDColumn] as int).toList();
+          clusterRows.map((e) => e[clusterIDColumn] as String).toList();
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
         'SELECT * FROM $facesTable where '
         '$faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where  $fcClusterID IN (${clusterIDs.join(",")}))'
@@ -359,23 +359,23 @@ class FaceMLDataDB {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
-  Future<Map<int, Iterable<String>>> getClusterToFaceIDs(
-    Set<int> clusterIDs,
+  Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
+    Set<String> clusterIDs,
   ) async {
     final db = await instance.asyncDB;
-    final Map<int, List<String>> result = {};
+    final Map<String, List<String>> result = {};
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable WHERE $fcClusterID IN (${clusterIDs.join(",")})',
     );
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as int;
+      final clusterID = map[fcClusterID] as String;
       final faceID = map[fcFaceId] as String;
       result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
     }
     return result;
   }
 
-  Future<int?> getClusterIDForFaceID(String faceID) async {
+  Future<String?> getClusterIDForFaceID(String faceID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID FROM $faceClustersTable WHERE $fcFaceId = ?',
@@ -384,24 +384,24 @@ class FaceMLDataDB {
     if (maps.isEmpty) {
       return null;
     }
-    return maps.first[fcClusterID] as int;
+    return maps.first[fcClusterID] as String;
   }
 
-  Future<Map<int, Iterable<String>>> getAllClusterIdToFaceIDs() async {
+  Future<Map<String, Iterable<String>>> getAllClusterIdToFaceIDs() async {
     final db = await instance.asyncDB;
-    final Map<int, List<String>> result = {};
+    final Map<String, List<String>> result = {};
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable',
     );
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as int;
+      final clusterID = map[fcClusterID] as String;
       final faceID = map[fcFaceId] as String;
       result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
     }
     return result;
   }
 
-  Future<Iterable<String>> getFaceIDsForCluster(int clusterID) async {
+  Future<Iterable<String>> getFaceIDsForCluster(String clusterID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcFaceId FROM $faceClustersTable '
@@ -412,17 +412,17 @@ class FaceMLDataDB {
   }
 
   // Get Map of personID to Map of clusterID to faceIDs
-  Future<Map<String, Map<int, Set<String>>>>
+  Future<Map<String, Map<String, Set<String>>>>
       getPersonToClusterIdToFaceIds() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $personIdColumn, $faceClustersTable.$fcClusterID, $fcFaceId FROM $clusterPersonTable '
       'LEFT JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$fcClusterID',
     );
-    final Map<String, Map<int, Set<String>>> result = {};
+    final Map<String, Map<String, Set<String>>> result = {};
     for (final map in maps) {
       final personID = map[personIdColumn] as String;
-      final clusterID = map[fcClusterID] as int;
+      final clusterID = map[fcClusterID] as String;
       final faceID = map[fcFaceId] as String;
       result
           .putIfAbsent(personID, () => {})
@@ -443,7 +443,7 @@ class FaceMLDataDB {
     return faceIdsResult.map((e) => e[fcFaceId] as String).toSet();
   }
 
-  Future<Iterable<double>> getBlurValuesForCluster(int clusterID) async {
+  Future<Iterable<double>> getBlurValuesForCluster(String clusterID) async {
     final db = await instance.asyncDB;
     const String query = '''
         SELECT $facesTable.$faceBlur 
@@ -463,29 +463,29 @@ class FaceMLDataDB {
     return maps.map((e) => e[faceBlur] as double).toSet();
   }
 
-  Future<Map<String, int?>> getFaceIdsToClusterIds(
+  Future<Map<String, String?>> getFaceIdsToClusterIds(
     Iterable<String> faceIds,
   ) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcFaceId, $fcClusterID FROM $faceClustersTable where $fcFaceId IN (${faceIds.map((id) => "'$id'").join(",")})',
     );
-    final Map<String, int?> result = {};
+    final Map<String, String?> result = {};
     for (final map in maps) {
-      result[map[fcFaceId] as String] = map[fcClusterID] as int?;
+      result[map[fcFaceId] as String] = map[fcClusterID] as String?;
     }
     return result;
   }
 
-  Future<Map<int, Set<int>>> getFileIdToClusterIds() async {
-    final Map<int, Set<int>> result = {};
+  Future<Map<int, Set<String>>> getFileIdToClusterIds() async {
+    final Map<int, Set<String>> result = {};
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable',
     );
 
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as int;
+      final clusterID = map[fcClusterID] as String;
       final faceID = map[fcFaceId] as String;
       final fileID = getFileIdFromFaceId(faceID);
       result[fileID] = (result[fileID] ?? {})..add(clusterID);
@@ -494,7 +494,7 @@ class FaceMLDataDB {
   }
 
   Future<void> forceUpdateClusterIds(
-    Map<String, int> faceIDToClusterID,
+    Map<String, String> faceIDToClusterID,
   ) async {
     final db = await instance.asyncDB;
 
@@ -681,7 +681,7 @@ class FaceMLDataDB {
 
   Future<void> assignClusterToPerson({
     required String personID,
-    required int clusterID,
+    required String clusterID,
   }) async {
     final db = await instance.asyncDB;
 
@@ -692,7 +692,7 @@ class FaceMLDataDB {
   }
 
   Future<void> bulkAssignClusterToPersonID(
-    Map<int, String> clusterToPersonID,
+    Map<String, String> clusterToPersonID,
   ) async {
     final db = await instance.asyncDB;
 
@@ -706,7 +706,7 @@ class FaceMLDataDB {
 
   Future<void> captureNotPersonFeedback({
     required String personID,
-    required int clusterID,
+    required String clusterID,
   }) async {
     final db = await instance.asyncDB;
 
@@ -717,7 +717,7 @@ class FaceMLDataDB {
   }
 
   Future<void> bulkCaptureNotPersonFeedback(
-    Map<int, String> clusterToPersonID,
+    Map<String, String> clusterToPersonID,
   ) async {
     final db = await instance.asyncDB;
 
@@ -732,7 +732,7 @@ class FaceMLDataDB {
 
   Future<void> removeNotPersonFeedback({
     required String personID,
-    required int clusterID,
+    required String clusterID,
   }) async {
     final db = await instance.asyncDB;
 
@@ -744,7 +744,7 @@ class FaceMLDataDB {
 
   Future<void> removeClusterToPerson({
     required String personID,
-    required int clusterID,
+    required String clusterID,
   }) async {
     final db = await instance.asyncDB;
 
@@ -755,7 +755,7 @@ class FaceMLDataDB {
   }
 
   // for a given personID, return a map of clusterID to fileIDs using join query
-  Future<Map<int, Set<int>>> getFileIdToClusterIDSet(String personID) {
+  Future<Map<int, Set<String>>> getFileIdToClusterIDSet(String personID) {
     final db = instance.asyncDB;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.getAll(
@@ -765,9 +765,9 @@ class FaceMLDataDB {
         'WHERE $clusterPersonTable.$personIdColumn = ?',
         [personID],
       );
-      final Map<int, Set<int>> result = {};
+      final Map<int, Set<String>> result = {};
       for (final map in maps) {
-        final clusterID = map[clusterIDColumn] as int;
+        final clusterID = map[clusterIDColumn] as String;
         final String faceID = map[fcFaceId] as String;
         final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
@@ -776,8 +776,8 @@ class FaceMLDataDB {
     });
   }
 
-  Future<Map<int, Set<int>>> getFileIdToClusterIDSetForCluster(
-    Set<int> clusterIDs,
+  Future<Map<int, Set<String>>> getFileIdToClusterIDSetForCluster(
+    Set<String> clusterIDs,
   ) {
     final db = instance.asyncDB;
     return db.then((db) async {
@@ -785,9 +785,9 @@ class FaceMLDataDB {
         'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable '
         'WHERE $fcClusterID IN (${clusterIDs.join(",")})',
       );
-      final Map<int, Set<int>> result = {};
+      final Map<int, Set<String>> result = {};
       for (final map in maps) {
-        final clusterID = map[fcClusterID] as int;
+        final clusterID = map[fcClusterID] as String;
         final faceID = map[fcFaceId] as String;
         final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
@@ -796,7 +796,9 @@ class FaceMLDataDB {
     });
   }
 
-  Future<void> clusterSummaryUpdate(Map<int, (Uint8List, int)> summary) async {
+  Future<void> clusterSummaryUpdate(
+    Map<String, (Uint8List, int)> summary,
+  ) async {
     final db = await instance.asyncDB;
 
     const String sql = '''
@@ -810,7 +812,7 @@ class FaceMLDataDB {
         batchCounter = 0;
         parameterSets.clear();
       }
-      final int clusterID = entry.key;
+      final String clusterID = entry.key;
       final int count = entry.value.$2;
       final Uint8List avg = entry.value.$1;
       parameterSets.add([clusterID, avg, count]);
@@ -819,7 +821,7 @@ class FaceMLDataDB {
     await db.executeBatch(sql, parameterSets);
   }
 
-  Future<void> deleteClusterSummary(int clusterID) async {
+  Future<void> deleteClusterSummary(String clusterID) async {
     final db = await instance.asyncDB;
     const String sqlDelete =
         'DELETE FROM $clusterSummaryTable WHERE $clusterIDColumn = ?';
@@ -827,16 +829,16 @@ class FaceMLDataDB {
   }
 
   /// Returns a map of clusterID to (avg embedding, count)
-  Future<Map<int, (Uint8List, int)>> getAllClusterSummary([
+  Future<Map<String, (Uint8List, int)>> getAllClusterSummary([
     int? minClusterSize,
   ]) async {
     final db = await instance.asyncDB;
-    final Map<int, (Uint8List, int)> result = {};
+    final Map<String, (Uint8List, int)> result = {};
     final rows = await db.getAll(
       'SELECT * FROM $clusterSummaryTable${minClusterSize != null ? ' WHERE $countColumn >= $minClusterSize' : ''}',
     );
     for (final r in rows) {
-      final id = r[clusterIDColumn] as int;
+      final id = r[clusterIDColumn] as String;
       final avg = r[avgColumn] as Uint8List;
       final count = r[countColumn] as int;
       result[id] = (avg, count);
@@ -844,16 +846,16 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<Map<int, (Uint8List, int)>> getClusterToClusterSummary(
-    Iterable<int> clusterIDs,
+  Future<Map<String, (Uint8List, int)>> getClusterToClusterSummary(
+    Iterable<String> clusterIDs,
   ) async {
     final db = await instance.asyncDB;
-    final Map<int, (Uint8List, int)> result = {};
+    final Map<String, (Uint8List, int)> result = {};
     final rows = await db.getAll(
       'SELECT * FROM $clusterSummaryTable WHERE $clusterIDColumn IN (${clusterIDs.join(",")})',
     );
     for (final r in rows) {
-      final id = r[clusterIDColumn] as int;
+      final id = r[clusterIDColumn] as String;
       final avg = r[avgColumn] as Uint8List;
       final count = r[countColumn] as int;
       result[id] = (avg, count);
@@ -861,14 +863,14 @@ class FaceMLDataDB {
     return result;
   }
 
-  Future<Map<int, String>> getClusterIDToPersonID() async {
+  Future<Map<String, String>> getClusterIDToPersonID() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $personIdColumn, $clusterIDColumn FROM $clusterPersonTable',
     );
-    final Map<int, String> result = {};
+    final Map<String, String> result = {};
     for (final map in maps) {
-      result[map[clusterIDColumn] as int] = map[personIdColumn] as String;
+      result[map[clusterIDColumn] as String] = map[personIdColumn] as String;
     }
     return result;
   }

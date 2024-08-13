@@ -24,7 +24,7 @@ class PersonEntity {
 }
 
 class ClusterInfo {
-  final int id;
+  final String id;
   final Set<String> faces;
   ClusterInfo({
     required this.id,
@@ -40,7 +40,7 @@ class ClusterInfo {
   // from Json
   factory ClusterInfo.fromJson(Map<String, dynamic> json) {
     return ClusterInfo(
-      id: json['id'] as int,
+      id: json['id'] as String,
       faces: (json['faces'] as List<dynamic>).map((e) => e as String).toSet(),
     );
   }

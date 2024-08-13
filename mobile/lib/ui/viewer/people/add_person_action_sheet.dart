@@ -47,7 +47,7 @@ String _actionName(
 
 Future<dynamic> showAssignPersonAction(
   BuildContext context, {
-  required int clusterID,
+  required String clusterID,
   PersonActionType actionType = PersonActionType.assignPerson,
   bool showOptionToAddNewPerson = true,
 }) {
@@ -75,7 +75,7 @@ Future<dynamic> showAssignPersonAction(
 
 class PersonActionSheet extends StatefulWidget {
   final PersonActionType actionType;
-  final int cluserID;
+  final String cluserID;
   final bool showOptionToCreateNewPerson;
   const PersonActionSheet({
     required this.actionType,
@@ -276,7 +276,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   Future<void> addNewPerson(
     BuildContext context, {
     String initValue = '',
-    required int clusterID,
+    required String clusterID,
   }) async {
     final result = await showTextInputDialog(
       context,

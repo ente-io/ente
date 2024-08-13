@@ -6,26 +6,12 @@ const alphaphet =
 const clusterIDLength = 22;
 
 class ClusterID {
-  final String value;
-
-  // Private constructor
-  ClusterID._internal(this.value);
-
-  // Factory constructor with validation
-  factory ClusterID(String value) {
-    if (!_isValidClusterID(value)) {
-      throw const FormatException('Invalid NanoID format');
-    }
-    return ClusterID._internal(value);
-  }
-
-  // Static method to generate a new NanoID
-  static ClusterID generate() {
-    return ClusterID("cluster_${customAlphabet(urlAlphabet, clusterIDLength)}");
+  static String generate() {
+    return "cluster_${customAlphabet(urlAlphabet, clusterIDLength)}";
   }
 
   // Validation method
-  static bool _isValidClusterID(String value) {
+  static bool isValidClusterID(String value) {
     if (value.length != (clusterIDLength + 8)) {
       debugPrint("ClusterID length is not ${clusterIDLength + 8}:  $value");
       return false;
@@ -35,25 +21,5 @@ class ClusterID {
       return false;
     }
     return true;
-  }
-
-  // Override == operator
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is ClusterID && other.value == value;
-  }
-
-  // Override hashCode
-  @override
-  int get hashCode => value.hashCode;
-
-  @override
-  String toString() => value;
-
-  String toJson() => value;
-
-  static ClusterID fromJson(String value) {
-    return ClusterID(value);
   }
 }
