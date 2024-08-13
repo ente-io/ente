@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
+import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
@@ -78,6 +79,17 @@ void main() async {
   await _runInForeground(savedThemeMode);
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Color(0x00010000),
+    ),
+  );
+
+  unawaited(
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
+    ),
+  );
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {

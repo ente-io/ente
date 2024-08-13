@@ -117,11 +117,19 @@ class _DetailPageState extends State<DetailPage> {
     _pageController.dispose();
     _enableFullScreenNotifier.dispose();
     _selectedIndexNotifier.dispose();
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values,
-    );
     super.dispose();
+
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0x00010000),
+      ),
+    );
+
+    unawaited(
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.edgeToEdge,
+      ),
+    );
   }
 
   @override
@@ -324,14 +332,19 @@ class _DetailPageState extends State<DetailPage> {
       if (_enableFullScreenNotifier.value == shouldEnable) return;
     }
     _enableFullScreenNotifier.value = !_enableFullScreenNotifier.value;
-
-    Future.delayed(const Duration(milliseconds: 125), () {
+    if (_enableFullScreenNotifier.value) {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: [],
+        );
+      });
+    } else {
       SystemChrome.setEnabledSystemUIMode(
-        //to hide status bar?
-        SystemUiMode.manual,
-        overlays: _enableFullScreenNotifier.value ? [] : SystemUiOverlay.values,
+        SystemUiMode.edgeToEdge,
+        overlays: SystemUiOverlay.values,
       );
-    });
+    }
   }
 
   Future<void> _preloadEntries() async {
