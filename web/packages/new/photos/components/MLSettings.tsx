@@ -205,6 +205,18 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
         else onClose();
     };
 
+    const privacyPolicyLink = (
+        <Link
+            target="_blank"
+            href="https://ente.io/privacy#8-biometric-information-privacy-policy"
+            underline="always"
+            sx={{
+                color: "inherit",
+                textDecorationColor: "inherit",
+            }}
+        />
+    );
+
     return (
         <EnteDrawer
             transitionDuration={0}
@@ -217,26 +229,14 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("enable_face_search_title")}
+                    title={t("ml_consent_title")}
                     onRootClose={handleRootClose}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                     <Typography component="div" color="text.muted" px={"8px"}>
                         <Trans
-                            i18nKey={"enable_face_search_description"}
-                            components={{
-                                a: (
-                                    <Link
-                                        target="_blank"
-                                        href="https://ente.io/privacy#8-biometric-information-privacy-policy"
-                                        underline="always"
-                                        sx={{
-                                            color: "inherit",
-                                            textDecorationColor: "inherit",
-                                        }}
-                                    />
-                                ),
-                            }}
+                            i18nKey={"ml_consent_description"}
+                            components={{ a: privacyPolicyLink }}
                         />
                     </Typography>
                     <FormGroup sx={{ width: "100%" }}>
@@ -255,7 +255,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                                     }
                                 />
                             }
-                            label={t("face_search_confirmation")}
+                            label={t("ml_consent_confirmation")}
                         />
                     </FormGroup>
                     <Stack px={"8px"} spacing={"8px"}>
@@ -265,7 +265,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                             disabled={!acceptTerms}
                             onClick={onConsent}
                         >
-                            {t("enable_face_search")}
+                            {t("ml_consent")}
                         </Button>
                         <Button
                             color={"secondary"}
