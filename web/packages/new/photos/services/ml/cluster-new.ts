@@ -8,6 +8,10 @@ import { dotProduct } from "./math";
  * A face cluster is an set of faces.
  *
  * Each cluster has an id so that a Person (a set of clusters) can refer to it.
+ *
+ * The cluster is not directly synced to remote. But it can indirectly get
+ * synced if it gets attached to a person (which can be thought of as a named
+ * cluster).
  */
 export interface FaceCluster {
     /**
@@ -15,7 +19,7 @@ export interface FaceCluster {
      */
     id: string;
     /**
-     * An unordered set of ids of the faces that belong to the cluster.
+     * An unordered set of ids of the faces that belong to this cluster.
      *
      * For ergonomics of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
@@ -24,16 +28,13 @@ export interface FaceCluster {
 }
 
 /**
- * A Person is a set of clusters, with some attached metadata.
+ * A Person is a set of clusters and some attached metadata.
  *
- * The person is the user visible concept. It consists of a set of clusters,
- * each of which itself is a set of faces.
- *
- * For ease of transportation, the Person entity on remote looks like
+ * For ease of transportation, the Person entity on remote is something like
  *
  *     { name, clusters: [{ clusterID, faceIDs }] }
  *
- * That is, it has the clusters embedded within itself.
+ * That is, the Person has the clusters embedded within itself.
  */
 export interface Person {
     /**
@@ -43,11 +44,11 @@ export interface Person {
     /**
      * An optional name assigned by the user to this person.
      */
-    name: string | undefined;
+    name: string;
     /**
      * An unordered set of ids of the clusters that belong to this person.
      *
-     * For ergonomics of transportation and persistence this is an array but it
+     * For ergonomics of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
     clusterIDs: string[];
@@ -58,20 +59,28 @@ export interface Person {
  *
  * [Note: Face clustering algorithm]
  *
+ * A person consists of clusters, each of which itself is a set of faces.
+ *
+ * The clusters are generated using locally by clients using this algorithm:
+ *
  * 1.  clusters = []
+ *
  * 2.  For each face, find its nearest neighbour in the embedding space from
  *     amongst the faces that have already been clustered.
+ *
  * 3.  If no such neighbour is found within our threshold, create a new cluster.
+ *
  * 4.  Otherwise assign this face to the same cluster as its nearest neighbour.
  *
- * [Note: Face clustering feedback]
+ * This user can then tweak the output of the algorithm by performing the
+ * following actions to the list of clusters that they can see:
  *
- * This user can tweak the output of the algorithm by providing feedback. They
- * can perform the following actions:
+ * -   They can provide a name for a cluster. This upgrades a cluster into a
+ *     "Person", which then gets synced via remote to all their devices.
  *
- * 1.  Move a cluster from one person to another.
- * 2.  Break a cluster.
+ * -   They can attach more clusters to a person.
  *
+ * -   They can remove a cluster from a person.
  */
 export const clusterFaces = (faceIndexes: FaceIndex[]) => {
     const t = Date.now();

@@ -1,7 +1,6 @@
 import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
 /**
@@ -140,7 +139,7 @@ export const personDiff = async (entityKeyB64: string) => {
  * Zod schema for the "person" entity
  */
 const RemotePerson = z.object({
-    name: z.string().nullish().transform(nullToUndefined),
+    name: z.string(),
     assigned: z.array(
         z.object({
             id: z.number(), // TODO z.string person_v2
