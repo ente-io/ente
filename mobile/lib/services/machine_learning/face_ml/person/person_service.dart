@@ -95,11 +95,7 @@ class PersonService {
             )
             .toList();
         entityService
-            .addOrUpdate(
-              EntityType.person,
-              json.encode(personData.toJson()),
-              id: personID,
-            )
+            .addOrUpdate(EntityType.person, personData.toJson(), id: personID)
             .ignore();
         personData.logStats();
       }
@@ -168,7 +164,7 @@ class PersonService {
     );
     final result = await entityService.addOrUpdate(
       EntityType.person,
-      json.encode(data.toJson()),
+      data.toJson(),
     );
     await faceMLDataDB.assignClusterToPerson(
       personID: result.id,
@@ -186,7 +182,7 @@ class PersonService {
     personData.assigned!.removeWhere((element) => element.id != clusterID);
     await entityService.addOrUpdate(
       EntityType.person,
-      json.encode(personData.toJson()),
+      personData.toJson(),
       id: personID,
     );
     await faceMLDataDB.removeClusterToPerson(
@@ -221,7 +217,7 @@ class PersonService {
 
     await entityService.addOrUpdate(
       EntityType.person,
-      json.encode(personData.toJson()),
+      personData.toJson(),
       id: person.remoteID,
     );
     personData.logStats();
@@ -237,7 +233,7 @@ class PersonService {
           PersonEntity(personID, PersonData(name: entity.data.name));
       await entityService.addOrUpdate(
         EntityType.person,
-        json.encode(justName.data.toJson()),
+        justName.data.toJson(),
         id: personID,
       );
       await faceMLDataDB.removePerson(personID);
@@ -312,7 +308,7 @@ class PersonService {
   Future<void> _updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
       EntityType.person,
-      json.encode(updatePerson.data.toJson()),
+      updatePerson.data.toJson(),
       id: updatePerson.remoteID,
     );
     updatePerson.data.logStats();

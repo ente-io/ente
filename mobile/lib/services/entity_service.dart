@@ -56,14 +56,13 @@ class EntityService {
 
   Future<LocalEntityData> addOrUpdate(
     EntityType type,
-    String plainText, {
+    Map<String, dynamic> jsonMap, {
     String? id,
   }) async {
+    final String plainText = jsonEncode(jsonMap);
     final key = await getOrCreateEntityKey(type);
-    final encryptedKeyData = await CryptoUtil.encryptChaCha(
-      utf8.encode(plainText),
-      key,
-    );
+    final encryptedKeyData =
+        await CryptoUtil.encryptChaCha(utf8.encode(plainText), key);
     final String encryptedData =
         CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
     final String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
