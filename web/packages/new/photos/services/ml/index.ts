@@ -330,7 +330,7 @@ export const wipCluster = async () => {
 
     if (last) return last;
 
-    const clusters = clusterFaces(await faceIndexes());
+    const clusters = await clusterFaces(await faceIndexes());
 
     const localFiles = await getAllLocalFiles();
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));

@@ -130,7 +130,8 @@ const RemotePerson = z.object({
     name: z.string(),
     assigned: z.array(
         z.object({
-            id: z.number(), // TODO z.string person_v2
+            // TODO-Cluster temporary modify
+            id: z.number().transform((n) => n.toString()), // TODO z.string person_v2
             faces: z.string().array(),
         }),
     ),
@@ -154,12 +155,10 @@ export const personDiff = async (
         (max, e) => Math.max(max, e.updatedAt),
         sinceTime,
     );
+    const parse = (data: Uint8Array) =>
+        RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)));
     const people = entities
-        .map(({ data }) =>
-            data
-                ? RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)))
-                : undefined,
-        )
+        .map(({ data }) => (data ? parse(data) : undefined))
         .filter((p) => !!p);
     // TODO-Cluster
     console.log({ latestUpdatedAt, people });
