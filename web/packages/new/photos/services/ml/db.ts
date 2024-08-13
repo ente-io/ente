@@ -419,13 +419,41 @@ export const markIndexingFailed = async (fileID: number) => {
  */
 export const faceClusters = async () => {
     const db = await mlDB();
-    return await db.getAll("face-cluster");
+    return db.getAll("face-cluster");
 };
 
 /**
- * Return all people present locally.
+ * Return all person entries (aka "people") present locally.
  */
 export const persons = async () => {
     const db = await mlDB();
-    return await db.getAll("person");
+    return db.getAll("person");
+};
+
+/**
+ * Replace the face clusters stored locally with the given ones.
+ *
+ * This function deletes all entries from the person object store, and then
+ * inserts the given {@link clusters} into it.
+ */
+export const setFaceClusters = async (clusters: FaceCluster[]) => {
+    const db = await mlDB();
+    const tx = db.transaction("face-cluster", "readwrite");
+    await tx.store.clear();
+    await Promise.all(clusters.map((cluster) => tx.store.put(cluster)));
+    return tx.done;
+};
+
+/**
+ * Replace the persons stored locally with the given ones.
+ *
+ * This function deletes all entries from the person object store, and then
+ * inserts the given {@link persons} into it.
+ */
+export const setPersons = async (persons: Person[]) => {
+    const db = await mlDB();
+    const tx = db.transaction("person", "readwrite");
+    await tx.store.clear();
+    await Promise.all(persons.map((person) => tx.store.put(person)));
+    return tx.done;
 };

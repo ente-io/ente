@@ -71,13 +71,6 @@ export const syncPeopleIndex = async () => {
     for (const [index, cluster] of clusters.entries()) {
         const faces = cluster.map((f) => allFaces[f]).filter((f) => f);
 
-        // TODO: take default display face from last leaves of hdbscan clusters
-        const personFace = faces.reduce((best, face) =>
-            face.detection.probability > best.detection.probability
-                ? face
-                : best,
-        );
-
 
         await mlIDbStorage.putPerson(person);
 
