@@ -510,7 +510,8 @@ export const unidentifiedFaceIDs = async (
 };
 
 /**
- * Extract the ID of the {@link EnteFile} to which a face belongs from its ID.
+ * Extract the fileID of the {@link EnteFile} to which the face belongs from its
+ * faceID.
  */
 const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");

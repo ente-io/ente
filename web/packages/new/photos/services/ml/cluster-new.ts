@@ -1,8 +1,8 @@
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
-import { faceClusters } from "./db";
-import type { FaceIndex } from "./face";
+import { faceClusters, persons } from "./db";
+import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
 /**
@@ -56,6 +56,11 @@ export interface Person {
      * should conceptually be thought of as a set.
      */
     clusterIDs: string[];
+    /**
+     * The ID of the face that should be used as the display face, to represent
+     * this person in the UI.
+     */
+    avatarFaceID: string;
 }
 
 /**
@@ -89,8 +94,8 @@ export interface Person {
 export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
-    // The face data that we need (face ID and its embedding).
-    const faces = [...faceIDAndEmbeddings(faceIndexes)];
+    // A flattened array of faces.
+    const faces = [...enumerateFaces(faceIndexes)];
 
     // Start with the clusters we already have (either from a previous indexing,
     // or fetched from remote).
@@ -117,7 +122,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         if (clusterIDForFaceID.get(faceID)) continue;
 
         // Find the nearest neighbour from among all the other faces.
-        let nn: (typeof faces)[number] | undefined;
+        let nn: Face | undefined;
         let nnCosineSimilarity = 0;
         for (let j = 0; j < faces.length; j++) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
@@ -177,11 +182,39 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         }
     }
 
+    // Prune too small clusters.
     const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
+
+    // For each person, use the highest scoring face in any of its clusters as
+    // its display face.
+
+    const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
+    const people = await persons();
+
+    for (const person of people) {
+        person.avatarFaceID = person.clusterIDs
+            .map((clusterID) => clusterIndexForClusterID.get(clusterID))
+            .map((clusterIndex) =>
+                clusterIndex ? clusters[clusterIndex] : undefined,
+            )
+            .filter((cluster) => !!cluster)
+            .flatMap((cluster) => cluster.faceIDs)
+            .map((id) => faceForFaceID.get(id))
+            .filter((face) => !!face)
+            .reduce((topFace, face) =>
+                topFace.score > face.score ? topFace : face,
+            ).faceID;
+    }
 
     log.debug(() => [
         "ml/cluster",
-        { faces, validClusters, clusterIndexForClusterID, clusterIDForFaceID },
+        {
+            faces,
+            validClusters,
+            clusterIndexForClusterID,
+            clusterIDForFaceID,
+            people,
+        },
     ]);
     log.debug(
         () =>
@@ -195,10 +228,10 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
  * A generator function that returns a stream of {faceID, embedding} values,
  * flattening all the all the faces present in the given {@link faceIndices}.
  */
-function* faceIDAndEmbeddings(faceIndices: FaceIndex[]) {
+function* enumerateFaces(faceIndices: FaceIndex[]) {
     for (const fi of faceIndices) {
         for (const f of fi.faces) {
-            yield { faceID: f.faceID, embedding: f.embedding };
+            yield f;
         }
     }
 }
