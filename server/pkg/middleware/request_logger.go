@@ -35,6 +35,12 @@ func shouldSkipBodyLog(method string, path string) bool {
 	if method == "PUT" && path == "/embeddings" {
 		return true
 	}
+	if path == "/user-entity/entity" && (method == "POST" || method == "PUT") {
+		return true
+	}
+	if path == "files/data" && method == "PUT" {
+		return true
+	}
 	return false
 }
 
