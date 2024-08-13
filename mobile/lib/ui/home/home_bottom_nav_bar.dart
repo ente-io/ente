@@ -32,9 +32,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     super.initState();
     currentTabIndex = widget.selectedTabIndex;
     //Todo: Remove this listener on dispose
-    widget.selectedFiles.addListener(() {
-      setState(() {});
-    });
+    widget.selectedFiles.addListener(_selectedFilesListener);
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tabBar) {
@@ -58,7 +56,14 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   @override
   void dispose() {
     _tabChangedEventSubscription.cancel();
+    widget.selectedFiles.removeListener(_selectedFilesListener);
     super.dispose();
+  }
+
+  void _selectedFilesListener() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _onTabChange(int index, {String mode = 'tabChanged'}) {
