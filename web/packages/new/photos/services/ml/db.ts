@@ -425,7 +425,7 @@ export const faceClusters = async () => {
 /**
  * Return all people present locally.
  */
-export const people = async () => {
+export const persons = async () => {
     const db = await mlDB();
     return await db.getAll("person");
 };

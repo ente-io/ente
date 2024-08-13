@@ -40,6 +40,9 @@ export interface FaceCluster {
 export interface Person {
     /**
      * A nanoid for this person.
+     *
+     * This is the ID of the Person user entity, it is not contained as part of
+     * the Person entity payload.
      */
     id: string;
     /**
@@ -105,24 +108,24 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         ),
     );
 
-    // Generate a new cluster ID
+    // New cluster ID generator function.
     const newClusterID = () => newNonSecureID("cluster_");
 
-    // For each face
+    // For each face,
     for (const [i, { faceID, embedding }] of faces.entries()) {
         // If the face is already part of a cluster, then skip it.
         if (clusterIDForFaceID.get(faceID)) continue;
 
         // Find the nearest neighbour from among all the other faces.
-        let nnIndex: number | undefined;
+        let nn: (typeof faces)[number] | undefined;
         let nnCosineSimilarity = 0;
         for (let j = 0; j < faces.length; j++) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // Skip itself
+            // Skip ourselves.
             if (i == j) continue;
 
-            // Can't find a way of avoiding the null assertion.
+            // Can't find a way of avoiding the null assertion here.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const n = faces[j]!;
 
@@ -130,24 +133,13 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             // dot product as their cosine similarity.
             const csim = dotProduct(embedding, n.embedding);
             if (csim > 0.76 && csim > nnCosineSimilarity) {
-                nnIndex = j;
+                nn = n;
                 nnCosineSimilarity = csim;
             }
         }
 
-        if (nnIndex === undefined) {
-            // We didn't find a neighbour within the threshold. Create a new
-            // cluster with this face.
-
-            const cluster = { id: newClusterID(), faceIDs: [faceID] };
-            clusters.push(cluster);
-            clusterIndexForClusterID.set(cluster.id, clusters.length);
-            clusterIDForFaceID.set(faceID, cluster.id);
-        } else {
+        if (nn) {
             // Found a neighbour near enough.
-
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const nn = faces[nnIndex]!;
 
             // Find the cluster the nearest neighbour belongs to, if any.
             const nnClusterID = clusterIDForFaceID.get(nn.faceID);
@@ -162,7 +154,8 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
                 clusters[nnClusterIndex]?.faceIDs.push(faceID);
                 clusterIDForFaceID.set(faceID, nnClusterID);
             } else {
-                // Create a new cluster with us and our nearest neighbour.
+                // Otherwise create a new cluster with us and our nearest
+                // neighbour.
 
                 const cluster = {
                     id: newClusterID(),
@@ -173,6 +166,14 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
                 clusterIDForFaceID.set(faceID, cluster.id);
                 clusterIDForFaceID.set(nn.faceID, cluster.id);
             }
+        } else {
+            // We didn't find a neighbour within the threshold. Create a new
+            // cluster with only this face.
+
+            const cluster = { id: newClusterID(), faceIDs: [faceID] };
+            clusters.push(cluster);
+            clusterIndexForClusterID.set(cluster.id, clusters.length);
+            clusterIDForFaceID.set(faceID, cluster.id);
         }
     }
 
