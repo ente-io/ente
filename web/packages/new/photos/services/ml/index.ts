@@ -27,9 +27,9 @@ import {
     faceIndexes,
     indexableAndIndexedCounts,
 } from "./db";
-import type { Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
+import type { SearchPerson } from "../search";
 
 /**
  * Internal state of the ML subsystem.
@@ -314,7 +314,8 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-let last: Person[] | undefined;
+// TODO-Cluster temporary import here
+let last: SearchPerson[] | undefined;
 
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
@@ -335,7 +336,7 @@ export const wipCluster = async () => {
     const localFiles = await getAllLocalFiles();
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    const people: Person[] = []; // await mlIDbStorage.getAllPeople();
+    const people: SearchPerson[] = []; // await mlIDbStorage.getAllPeople();
     for (const cluster of clusters) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const dfID = cluster.faceIDs[0]!;

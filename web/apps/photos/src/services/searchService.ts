@@ -9,7 +9,7 @@ import {
     wipCluster,
     wipClusterEnable,
 } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
+import type { SearchPerson } from "@/new/photos/services/search";
 import { personDiff } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
@@ -406,7 +406,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { files: option.value as number[] };
 
         case SuggestionType.PERSON:
-            return { person: option.value as Person };
+            return { person: option.value as SearchPerson };
 
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FileType };
@@ -429,7 +429,7 @@ async function getAllPeople(limit: number = undefined) {
         return [];
     }
 
-    let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
+    let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
     people = await wipCluster();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);

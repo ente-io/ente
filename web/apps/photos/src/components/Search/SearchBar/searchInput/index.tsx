@@ -1,6 +1,5 @@
 import { FileType } from "@/media/file-type";
 import { isMLEnabled } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
 import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
@@ -19,6 +18,7 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 import { LocationTagData } from "types/entity";
+import type { SearchPerson } from "@/new/photos/services/search";
 import {
     ClipSearchScores,
     DateValue,
@@ -146,7 +146,7 @@ export default function SearchInput(props: Iprops) {
                 search = { files: selectedOption.value as number[] };
                 break;
             case SuggestionType.PERSON:
-                search = { person: selectedOption.value as Person };
+                search = { person: selectedOption.value as SearchPerson };
                 break;
             case SuggestionType.FILE_TYPE:
                 search = { fileType: selectedOption.value as FileType };
