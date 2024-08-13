@@ -18,6 +18,7 @@ import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import type { SearchPerson } from "../search";
 import type { UploadItem } from "../upload/types";
 import { clusterFaces } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
@@ -29,7 +30,6 @@ import {
 } from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
-import type { SearchPerson } from "../search";
 
 /**
  * Internal state of the ML subsystem.
@@ -331,32 +331,39 @@ export const wipCluster = async () => {
 
     if (last) return last;
 
-    const clusters = await clusterFaces(await faceIndexes());
+    const { clusters, people } = await clusterFaces(await faceIndexes());
+    const clusterByID = new Map(
+        clusters.map((cluster) => [cluster.id, cluster]),
+    );
 
     const localFiles = await getAllLocalFiles();
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    const people: SearchPerson[] = []; // await mlIDbStorage.getAllPeople();
-    for (const cluster of clusters) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const dfID = cluster.faceIDs[0]!;
-        const dfFile = localFilesByID.get(fileIDFromFaceID(dfID) ?? 0);
-        if (!dfFile) {
-            assertionFailed(`Face ID ${dfID} without local file`);
+    const result: SearchPerson[] = [];
+    for (const person of people) {
+        const avatarFaceID = person.avatarFaceID;
+        const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
+        const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
+        if (!avatarFaceFileID || !avatarFaceFile) {
+            assertionFailed(`Face ID ${avatarFaceID} without local file`);
             continue;
         }
-        people.push({
-            id: Math.random(), //cluster.id,
-            name: "test",
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            files: cluster.faceIDs.map((s) => parseInt(s.split("_")[0]!)),
-            displayFaceID: dfID,
-            displayFaceFile: dfFile,
+        const files = person.clusterIDs
+            .map((id) => clusterByID.get(id))
+            .flatMap((cluster) => cluster?.faceIDs ?? [])
+            .map((faceID) => fileIDFromFaceID(faceID))
+            .filter((fileID) => fileID !== undefined);
+        result.push({
+            id: person.id,
+            name: person.name,
+            files,
+            displayFaceID: avatarFaceID,
+            displayFaceFile: avatarFaceFile,
         });
     }
 
-    last = people;
-    return people;
+    last = result;
+    return result;
 };
 
 export type MLStatus =

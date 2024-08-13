@@ -221,7 +221,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return validClusters;
+    return { clusters: validClusters, people };
 };
 
 /**

@@ -5,7 +5,7 @@ import type { EnteFile } from "@/new/photos/types/file";
  * results.
  */
 export interface SearchPerson {
-    id: number;
+    id: string;
     name?: string;
     files: number[];
     displayFaceID: string;
