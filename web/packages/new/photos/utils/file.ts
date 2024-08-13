@@ -53,6 +53,11 @@ export function mergeMetadata1(file: EnteFile): EnteFile {
     if (file.pubMagicMetadata?.data.editedName) {
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
+    // In a very rare cases (have found only one so far, a very old file
+    // uploaded by an initial dev version of Ente) the photo has no modification
+    // time. Gracefully handle such cases.
+    if (!file.metadata.modificationTime)
+        file.metadata.modificationTime = file.metadata.creationTime;
 
     return file;
 }
