@@ -17,7 +17,7 @@ export interface FaceCluster {
     /**
      * An unordered set of ids of the faces that belong to the cluster.
      *
-     * For ergonomics of transportation and persistence this is an array but it
+     * For ergonomics of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
     faceIDs: string[];

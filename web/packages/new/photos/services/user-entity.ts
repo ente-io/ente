@@ -1,6 +1,7 @@
 import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
 /**
@@ -131,6 +132,19 @@ export const personDiff = async (entityKeyB64: string) => {
     const entities = await userEntityDiff("person", 0, entityKeyB64);
     return entities.map(({ data }) => {
         if (!data) return undefined;
-        return JSON.parse(new TextDecoder().decode(data)) as unknown;
+        return RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)));
     });
 };
+
+/**
+ * Zod schema for the "person" entity
+ */
+const RemotePerson = z.object({
+    name: z.string().nullish().transform(nullToUndefined),
+    assigned: z.array(
+        z.object({
+            id: z.number(), // TODO z.string person_v2
+            faces: z.string().array(),
+        }),
+    ),
+});
