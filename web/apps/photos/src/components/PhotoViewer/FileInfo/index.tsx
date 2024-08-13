@@ -21,7 +21,6 @@ import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { getPublicMagicMetadataMTSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
-import BackupOutlined from "@mui/icons-material/BackupOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
@@ -243,12 +242,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             </LinkButton>
                         )
                     }
-                    hideEditOption
-                />
-                <InfoItem
-                    icon={<BackupOutlined />}
-                    title={formatDate(file.metadata.modificationTime / 1000)}
-                    caption={formatTime(file.metadata.modificationTime / 1000)}
                     hideEditOption
                 />
                 {showCollectionChips && (
