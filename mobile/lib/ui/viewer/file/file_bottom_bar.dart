@@ -76,7 +76,7 @@ class FileBottomBarState extends State<FileBottomBar> {
         }
       }
     }
-    return _getBottomBar();
+    return SafeArea(child: _getBottomBar());
   }
 
   void safeRefresh() {
@@ -95,7 +95,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       Tooltip(
         message: "Info",
         child: Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          padding: const EdgeInsets.only(top: 12),
           child: IconButton(
             icon: Icon(
               Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
@@ -125,7 +125,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           Tooltip(
             message: "Edit",
             child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              padding: const EdgeInsets.only(top: 12),
               child: IconButton(
                 icon: const Icon(
                   Icons.tune_outlined,
@@ -144,7 +144,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           Tooltip(
             message: S.of(context).delete,
             child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 12),
+              padding: const EdgeInsets.only(top: 12),
               child: IconButton(
                 icon: Icon(
                   Platform.isAndroid
@@ -165,7 +165,7 @@ class FileBottomBarState extends State<FileBottomBar> {
         Tooltip(
           message: S.of(context).share,
           child: Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 12),
+            padding: const EdgeInsets.only(top: 12),
             child: IconButton(
               key: shareButtonKey,
               icon: Icon(
@@ -182,7 +182,6 @@ class FileBottomBarState extends State<FileBottomBar> {
         ),
       );
     }
-    final safeAreaBottomPadding = MediaQuery.of(context).padding.bottom * .5;
     return ValueListenableBuilder(
       valueListenable: widget.enableFullScreenNotifier,
       builder: (BuildContext context, bool isFullScreen, _) {
@@ -207,45 +206,42 @@ class FileBottomBarState extends State<FileBottomBar> {
                     stops: const [0, 0.8, 1],
                   ),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      widget.file.caption?.isNotEmpty ?? false
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                16,
-                                12,
-                                16,
-                                0,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    widget.file.caption?.isNotEmpty ?? false
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              16,
+                              12,
+                              16,
+                              0,
+                            ),
+                            child: GestureDetector(
+                              onTap: () async {
+                                await _displayDetails(widget.file);
+                                await Future.delayed(
+                                  const Duration(milliseconds: 500),
+                                ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+                                safeRefresh();
+                              },
+                              child: Text(
+                                widget.file.caption!,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: getEnteTextTheme(context)
+                                    .mini
+                                    .copyWith(color: textBaseDark),
+                                textAlign: TextAlign.center,
                               ),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  await _displayDetails(widget.file);
-                                  await Future.delayed(
-                                    const Duration(milliseconds: 500),
-                                  ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
-                                  safeRefresh();
-                                },
-                                child: Text(
-                                  widget.file.caption!,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: getEnteTextTheme(context)
-                                      .mini
-                                      .copyWith(color: textBaseDark),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: children,
-                      ),
-                    ],
-                  ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: children,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -268,7 +264,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       Tooltip(
         message: S.of(context).restore,
         child: Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          padding: const EdgeInsets.only(top: 12),
           child: IconButton(
             icon: const Icon(
               Icons.restore_outlined,
@@ -292,7 +288,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       Tooltip(
         message: S.of(context).delete,
         child: Padding(
-          padding: const EdgeInsets.only(top: 12, bottom: 12),
+          padding: const EdgeInsets.only(top: 12),
           child: IconButton(
             icon: const Icon(
               Icons.delete_forever_outlined,
