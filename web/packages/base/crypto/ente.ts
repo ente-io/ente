@@ -93,18 +93,18 @@ export const encryptThumbnail = (r: EncryptBytes) =>
     assertInWorker(ei._encryptThumbnail(r));
 
 /**
- * A variant of {@link encryptAssociatedData} that returns the encrypted data in
- * the result as a base64 string instead of its bytes.
+ * A variant of {@link encryptAssociatedData} that returns the encrypted data as
+ * a base64 string instead of returning its bytes.
  *
- * Use {@link decryptMetadataBytes} to decrypt the result.
+ * Use {@link decryptAssociatedB64Data} to decrypt the result.
  */
-export const encryptMetadataBytes = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptMetadataBytes(r));
+export const encryptAssociatedB64Data = (r: EncryptBytes) =>
+    assertInWorker(ei._encryptAssociatedB64Data(r));
 
 /**
  * Encrypted the embedding associated with a file using the file's key.
  *
- * This is just an alias for {@link encryptMetadataBytes}.
+ * This is just an alias for {@link encryptAssociatedB64Data}.
  *
  * Use {@link decryptFileEmbedding} to decrypt the result.
  */
@@ -151,14 +151,15 @@ export const decryptThumbnail = (r: DecryptBytes) =>
     assertInWorker(ei._decryptThumbnail(r));
 
 /**
- * Decrypt metadata associated with an Ente object.
+ * A variant of {@link decryptAssociatedData} that expects the encrypted data as
+ * a base64 encoded string.
  *
- * This is the sibling of {@link decryptMetadataBytes}.
+ * This is the sibling of {@link decryptAssociatedB64Data}.
  */
-export const decryptMetadataBytes = (r: DecryptB64) =>
+export const decryptAssociatedB64Data = (r: DecryptB64) =>
     inWorker()
-        ? ei._decryptMetadataBytes(r)
-        : sharedCryptoWorker().then((w) => w.decryptMetadataBytes(r));
+        ? ei._decryptAssociatedB64Data(r)
+        : sharedCryptoWorker().then((w) => w.decryptAssociatedB64Data(r));
 
 /**
  * Decrypt the embedding associated with a file using the file's key.
