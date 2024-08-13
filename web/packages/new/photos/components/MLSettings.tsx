@@ -300,14 +300,14 @@ const ManageML: React.FC<ManageMLProps> = ({
     let status: string;
     switch (phase) {
         case "indexing":
-            status = t("running");
+            status = "running";
             break;
         case "scheduled":
-            status = t("scheduled");
+            status = "scheduled";
             break;
         // TODO: Clustering
         default:
-            status = t("done");
+            status = "done";
             break;
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
