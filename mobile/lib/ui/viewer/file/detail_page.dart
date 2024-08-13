@@ -345,7 +345,6 @@ class _DetailPageState extends State<DetailPage> {
         overlays: SystemUiOverlay.values,
       );
     }
-    // });
   }
 
   Future<void> _preloadEntries() async {
