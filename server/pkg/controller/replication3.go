@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"database/sql"
 	"encoding/base64"
 	"errors"
@@ -222,7 +223,9 @@ func (c *ReplicationController3) replicate(i int) {
 // objects left to replicate currently.
 func (c *ReplicationController3) tryReplicate() error {
 	// Fetch an object to replicate
-	copies, err := c.ObjectCopiesRepo.GetAndLockUnreplicatedObject()
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	copies, err := c.ObjectCopiesRepo.GetAndLockUnreplicatedObject(ctxWithTimeout)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			log.Errorf("Could not fetch an object to replicate: %s", err)

@@ -22,8 +22,8 @@ type ObjectCopiesRepository struct {
 // to that object to be blocked for 24h before next replication attemp.
 //
 // ObjectCopies is guaranteed to be nil if error is not nil.
-func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*ente.ObjectCopies, error) {
-	tx, err := repo.DB.Begin()
+func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject(ctx context.Context) (*ente.ObjectCopies, error) {
+	tx, err := repo.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -35,7 +35,7 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*ente.Object
 		}
 	}
 
-	row := tx.QueryRow(`
+	row := tx.QueryRowContext(ctx, `
 	SELECT object_key, want_b2, b2, want_wasabi, wasabi, want_scw, scw
 	FROM object_copies
 	WHERE (
@@ -60,7 +60,7 @@ func (repo *ObjectCopiesRepository) GetAndLockUnreplicatedObject() (*ente.Object
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	err = repo.RegisterReplicationAttempt(tx, r.ObjectKey)
+	err = repo.RegisterReplicationAttempt(tx, ctx, r.ObjectKey)
 	if err != nil {
 		rollback()
 		return nil, stacktrace.Propagate(err, "failed to register replication attempt")
@@ -102,8 +102,8 @@ func (repo *ObjectCopiesRepository) CreateNewWasabiObject(ctx context.Context, t
 
 // RegisterReplicationAttempt sets the last_attempt timestamp so that this row can
 // be skipped over for the next day in case the replication was not succesful.
-func (repo *ObjectCopiesRepository) RegisterReplicationAttempt(tx *sql.Tx, objectKey string) error {
-	_, err := tx.Exec(`
+func (repo *ObjectCopiesRepository) RegisterReplicationAttempt(tx *sql.Tx, ctx context.Context, objectKey string) error {
+	_, err := tx.ExecContext(ctx, `
 	UPDATE object_copies
 	SET last_attempt = now_utc_micro_seconds()
 	WHERE object_key = $1
