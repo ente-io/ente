@@ -478,7 +478,7 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "<p>Du hast sowohl Dateien als auch Ordner in das Ente-Fenster gezogen.</p><p>Bitte wähle entweder nur Dateien oder nur Ordner aus, wenn separate Alben erstellt werden sollen</p>",
     "CHOSE_THEME": "Design auswählen",
     "more_details": "Weitere Details",
-    "face_and_magic_search": "",
+    "ml_search": "",
     "ml_search_description": "",
     "ml_search_footnote": "",
     "indexing": "",
