@@ -35,7 +35,7 @@ import {
     putMLData,
     type RawRemoteMLData,
     type RemoteMLData,
-} from "./embedding";
+} from "./ml-data";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
