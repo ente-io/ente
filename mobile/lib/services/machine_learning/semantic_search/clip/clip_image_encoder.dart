@@ -10,7 +10,7 @@ import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
-  static const kRemoteBucketModelPath = "clip-image-vit-32-float32.onnx";
+  static const kRemoteBucketModelPath = "mobileclip_s2_image.onnx";
   static const _modelName = "ClipImageEncoder";
 
   @override
@@ -47,7 +47,7 @@ class ClipImageEncoder extends MlModel {
   ) {
     final w = EnteWatch("ClipImageEncoder._runFFIBasedPredict")..start();
     final inputOrt =
-        OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 224, 224]);
+        OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 256, 256]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(sessionAddress);
     final runOptions = OrtRunOptions();

@@ -367,7 +367,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请确保您的设备与电视处于同一网络。"),
         "castIPMismatchTitle": MessageLookupByLibrary.simpleMessage("投放相册失败"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
-            "在您要配对的设备上访问 cast.ente.io。\n输入下面的代码即可在电视上播放相册。"),
+            "在您要配对的设备上访问 cast.ente.io。\n在下框中输入代码即可在电视上播放相册。"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
         "changeLocationOfSelectedItems":
@@ -858,8 +858,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage("目前没有照片正在备份"),
         "noPhotosFoundHere": MessageLookupByLibrary.simpleMessage("这里没有找到照片"),
-        "noQuickLinksSelected":
-            MessageLookupByLibrary.simpleMessage("No quick links selected"),
+        "noQuickLinksSelected": MessageLookupByLibrary.simpleMessage("未选择快速链接"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage("没有恢复密钥吗？"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "由于我们端到端加密协议的性质，如果没有您的密码或恢复密钥，您的数据将无法解密"),
@@ -942,8 +941,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseEmailUsAt": m41,
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage("请授予权限"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage("请重新登录"),
-        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
-            "Please select quick links to remove"),
+        "pleaseSelectQuickLinksToRemove":
+            MessageLookupByLibrary.simpleMessage("请选择要删除的快速链接"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage("请重试"),
         "pleaseVerifyTheCodeYouHaveEntered":
@@ -1021,8 +1020,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipantBody": m45,
         "removePersonLabel": MessageLookupByLibrary.simpleMessage("移除人物标签"),
         "removePublicLink": MessageLookupByLibrary.simpleMessage("删除公开链接"),
-        "removePublicLinks":
-            MessageLookupByLibrary.simpleMessage("Remove public links"),
+        "removePublicLinks": MessageLookupByLibrary.simpleMessage("删除公开链接"),
         "removeShareItemsWarning":
             MessageLookupByLibrary.simpleMessage("您要删除的某些项目是由其他人添加的，您将无法访问它们"),
         "removeWithQuestionMark": MessageLookupByLibrary.simpleMessage("要移除吗?"),
@@ -1262,8 +1260,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillLogYouOutOfThisDevice":
             MessageLookupByLibrary.simpleMessage("这将使您在此设备上退出登录！"),
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
-            MessageLookupByLibrary.simpleMessage(
-                "This will remove public links of all selected quick links."),
+            MessageLookupByLibrary.simpleMessage("这将删除所有选定的快速链接的公共链接。"),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage("要启用应用锁，请在系统设置中设置设备密码或屏幕锁定。"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage("隐藏照片或视频"),

@@ -9,7 +9,7 @@ import "package:photos/utils/ml_util.dart";
 class ClipTextEncoder extends MlModel {
   // static const _kRemoteBucketModelPath = "clip-text-vit-32-float32-int32.onnx"; // Unquantized model
   static const _kRemoteBucketModelPath =
-      "clip-text-vit-32-uint8.onnx"; // Quantized model
+      "mobileclip_s2_text_int32.onnx"; // Quantized model
   static const _kVocabRemotePath = "bpe_simple_vocab_16e6.txt";
 
   // static const kRemoteBucketModelPath = "clip-text-vit-32-uint8.onnx";
