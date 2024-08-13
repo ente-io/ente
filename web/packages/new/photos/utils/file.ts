@@ -43,13 +43,9 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
 }
 
 export function mergeMetadata1(file: EnteFile): EnteFile {
-    // TODO: Until the types reflect reality
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (file.pubMagicMetadata?.data.editedTime) {
         file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
     }
-    // TODO: Until the types reflect reality
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (file.pubMagicMetadata?.data.editedName) {
         file.metadata.title = file.pubMagicMetadata.data.editedName;
     }
