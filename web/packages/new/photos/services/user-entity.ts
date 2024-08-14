@@ -6,6 +6,7 @@ import { apiURL } from "@/base/origins";
 import { usersEncryptionKeyB64 } from "@/base/session-store";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
+import { gunzip } from "./gzip";
 import type { Person } from "./ml/cluster-new";
 import { applyPersonDiff } from "./ml/db";
 
@@ -16,12 +17,11 @@ import { applyPersonDiff } from "./ml/db";
  * e.g. location tags, people in their photos.
  */
 export type EntityType =
-    | "person"
     /**
      * The latest iteration of the Person entity format, where the data is
      * gzipped before encryption.
      */
-    | "person_v2";
+    "person_v2";
 
 /**
  * The maximum number of items to fetch in a single diff
@@ -305,14 +305,12 @@ const saveLatestUpdatedAt = (type: EntityType, value: number) =>
  * This diff is then applied to the data we have persisted locally.
  */
 export const syncPersons = async () => {
-    const type: EntityType = "person";
+    const type: EntityType = "person_v2";
 
     const entityKeyB64 = await getOrCreateEntityKeyB64(type);
 
-    const parse = ({ id, data }: UserEntity): Person => {
-        const rp = RemotePerson.parse(
-            JSON.parse(new TextDecoder().decode(data)),
-        );
+    const parse = async (id: string, data: Uint8Array): Promise<Person> => {
+        const rp = RemotePerson.parse(JSON.parse(await gunzip(data)));
         return {
             id,
             name: rp.name,
@@ -330,7 +328,11 @@ export const syncPersons = async () => {
         if (entities.length == 0) break;
 
         await applyPersonDiff(
-            entities.map((entity) => (entity.data ? parse(entity) : entity.id)),
+            await Promise.all(
+                entities.map(async ({ id, data }) =>
+                    data ? await parse(id, data) : id,
+                ),
+            ),
         );
 
         sinceTime = entities.reduce(
@@ -346,8 +348,7 @@ const RemotePerson = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(
         z.object({
-            // TODO-Cluster temporary modify
-            id: z.number().transform((n) => n.toString()), // TODO z.string person_v2
+            id: z.string(),
             faces: z.string().array(),
         }),
     ),

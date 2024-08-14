@@ -9,6 +9,7 @@ import {
     wipCluster,
     wipClusterEnable,
 } from "@/new/photos/services/ml";
+import { persons } from "@/new/photos/services/ml/db";
 import type { SearchPerson } from "@/new/photos/services/search";
 import { syncPersons } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
@@ -27,7 +28,7 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
-import { getEntityKey, getLatestEntities } from "./entityService";
+import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -420,12 +421,10 @@ async function getAllPeople(limit: number = undefined) {
     if (!(await wipClusterEnable())) return [];
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-        const entityKey = await getEntityKey("person" as EntityType);
-        const peopleR = await syncPersons(entityKey.data);
-        const r = peopleR.length;
-        log.debug(() => ["people", peopleR]);
+        await syncPersons();
+        const people = await persons();
+        log.debug(() => ["people", { people }]);
 
-        if (r) return [];
         return [];
     }
 
