@@ -168,7 +168,7 @@ export const userEntityDiff = async (
  *
  * See also, [Note: User entity keys].
  */
-const entityKey = async (type: EntityType) => {
+const getOrCreateEntityKeyB64 = async (type: EntityType) => {
     const encryptionKeyB64 = await usersEncryptionKeyB64();
     const worker = await sharedCryptoWorker();
 
@@ -304,8 +304,10 @@ const saveLatestUpdatedAt = (type: EntityType, value: number) =>
  *
  * This diff is then applied to the data we have persisted locally.
  */
-export const syncPersons = async (entityKeyB64: string) => {
+export const syncPersons = async () => {
     const type: EntityType = "person";
+
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type);
 
     const parse = ({ id, data }: UserEntity): Person => {
         const rp = RemotePerson.parse(
@@ -327,10 +329,12 @@ export const syncPersons = async (entityKeyB64: string) => {
         const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (entities.length == 0) break;
 
-        await applyPersonDiff(entities.map((e) => (e.data ? parse(e) : e.id)));
+        await applyPersonDiff(
+            entities.map((entity) => (entity.data ? parse(entity) : entity.id)),
+        );
 
         sinceTime = entities.reduce(
-            (max, e) => Math.max(max, e.updatedAt),
+            (max, entity) => Math.max(max, entity.updatedAt),
             sinceTime,
         );
         await saveLatestUpdatedAt(type, sinceTime);
