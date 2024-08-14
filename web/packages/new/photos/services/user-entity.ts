@@ -165,24 +165,24 @@ export const userEntityDiff = async (
  * 3.  Otherwise we'll create a new one, save it locally and put it to remote.
  */
 const entityKey = (type: EntityType) => {
-
+    const masterKey = await getActualKey();
 
 };
 
-const savedRemoteUserEntityKeyKey = (type: EntityType) => `entityKey/${type}`;
+const savedRemoteEntityKeyKey = (type: EntityType) => `entityKey/${type}`;
 
 /**
  * Return the locally persisted value for the entity key to use for decrypting
  * the contents of entities of the given {@link type}.
  */
 const savedRemoteUserEntityKey = (type: EntityType) =>
-    getKV(savedRemoteUserEntityKeyKey(type));
+    getKV(savedRemoteEntityKeyKey(type));
 
 /**
  * Setter for {@link entityKey}.
  */
 const setSavedRemoteUserEntityKey = (type: EntityType, value: string) =>
-    setKV(savedRemoteUserEntityKeyKey(type), value);
+    setKV(savedRemoteEntityKeyKey(type), value);
 
 /**
  * Fetch the latest encryption key for the given user entity {@link} type from
