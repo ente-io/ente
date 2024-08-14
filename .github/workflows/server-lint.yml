@@ -21,7 +21,8 @@ jobs:
             - name: Setup go
               uses: actions/setup-go@v5
               with:
-                  go-version-file: "server/go.mod"
+                  go-version-file: server/go.mod
+                  cache-dependency-path: server/go.sum
                   cache: true
 
             - name: Install dependencies
