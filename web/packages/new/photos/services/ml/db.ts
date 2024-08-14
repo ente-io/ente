@@ -109,11 +109,7 @@ const openMLDB = async () => {
             }
             // TODO-Cluster
             if (oldVersion < 3) {
-                if (
-                    newVersion &&
-                    newVersion > 10 &&
-                    process.env.NEXT_PUBLIC_ENTE_WIP_CL
-                ) {
+                if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
                     db.createObjectStore("face-cluster", { keyPath: "id" });
                     db.createObjectStore("person", { keyPath: "id" });
                 }

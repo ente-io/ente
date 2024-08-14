@@ -76,10 +76,18 @@ interface UserEntity {
 
 const RemoteUserEntity = z.object({
     id: z.string(),
-    /** Base64 string containing the encrypted contents of the entity. */
-    encryptedData: z.string(),
-    /** Base64 string containing the decryption header. */
-    header: z.string(),
+    /**
+     * Base64 string containing the encrypted contents of the entity.
+     *
+     * Will be `null` when isDeleted is true.
+     */
+    encryptedData: z.string().nullable(),
+    /**
+     * Base64 string containing the decryption header.
+     *
+     * Will be `null` when isDeleted is true.
+     */
+    header: z.string().nullable(),
     isDeleted: z.boolean(),
     updatedAt: z.number(),
 });
