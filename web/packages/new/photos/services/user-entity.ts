@@ -151,6 +151,62 @@ export const userEntityDiff = async (
     );
 };
 
+/**
+ * Return the entity key that can be used to decrypt the encrypted contents of
+ * user entities of the given {@link type}.
+ *
+ * 1.  We'll see if we have the (encrypted) entity key present locally. If so,
+ *     we'll decrypt it using the user's master key and return it.
+ *
+ * 2.  Otherwise we'll fetch the entity key for that type from remote. If found,
+ *     we'll decrypte it using the user's master key and return it, also saving
+ *     it locally for future use.
+ *
+ * 3.  Otherwise we'll create a new one, save it locally and put it to remote.
+ */
+const entityKey = (type: EntityType) => {
+
+
+};
+
+const savedRemoteUserEntityKeyKey = (type: EntityType) => `entityKey/${type}`;
+
+/**
+ * Return the locally persisted value for the entity key to use for decrypting
+ * the contents of entities of the given {@link type}.
+ */
+const savedRemoteUserEntityKey = (type: EntityType) =>
+    getKV(savedRemoteUserEntityKeyKey(type));
+
+/**
+ * Setter for {@link entityKey}.
+ */
+const setSavedRemoteUserEntityKey = (type: EntityType, value: string) =>
+    setKV(savedRemoteUserEntityKeyKey(type), value);
+
+/**
+ * Fetch the latest encryption key for the given user entity {@link} type from
+ * remote.
+ */
+const getUserEntityKey = async (
+    type: EntityType,
+): Promise<RemoteUserEntityKey> => {
+    const params = new URLSearchParams({ type });
+    const url = await apiURL("/user-entity/key");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return RemoteUserEntityKey.parse(await res.json());
+};
+
+const RemoteUserEntityKey = z.object({
+    encryptedKey: z.string(),
+    header: z.string(),
+});
+
+type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
+
 const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
 
 /**
@@ -167,20 +223,6 @@ const latestUpdatedAt = (type: EntityType) => getKVN(latestUpdatedAtKey(type));
  */
 const setLatestUpdatedAt = (type: EntityType, value: number) =>
     setKV(latestUpdatedAtKey(type), value);
-
-const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
-
-/**
- * Return the locally persisted value for the entity key to use for decrypting
- * the contents of entities of the given {@link type}.
- */
-const entityKey = (type: EntityType) => getKV(entityKeyKey(type));
-
-/**
- * Setter for {@link entityKey}.
- */
-const setEntityKey = (type: EntityType, value: string) =>
-    setKV(entityKeyKey(type), value);
 
 /**
  * Sync the {@link Person} entities that we have locally with remote.
