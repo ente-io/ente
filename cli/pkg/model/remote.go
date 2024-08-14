@@ -151,7 +151,7 @@ func (r *RemoteFile) GetCreationTime() time.Time {
 func (r *RemoteFile) GetModificationTime() time.Time {
 	value, ok := r.Metadata["modificationTime"]
 	if !ok {
-		panic("creationTime not found in metadata")
+		panic("modificationTime not found in metadata")
 	}
 	return time.UnixMicro(int64(value.(float64)))
 }
