@@ -144,6 +144,14 @@ class SemanticSearchService {
     String query, {
     double? scoreThreshold,
   }) async {
+    // if the query starts with 0.xxx, the split the query to get score threshold and actual query
+    if (query.startsWith(RegExp(r"0\.\d+"))) {
+      final parts = query.split(" ");
+      if (parts.length > 1) {
+        scoreThreshold = double.parse(parts[0]);
+        query = parts.sublist(1).join(" ");
+      }
+    }
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults = await _getSimilarities(
