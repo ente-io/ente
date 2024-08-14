@@ -7965,6 +7965,16 @@ class S {
     );
   }
 
+  /// `Enable multi-part upload`
+  String get enableMultiPartUpload {
+    return Intl.message(
+      'Enable multi-part upload',
+      name: 'enableMultiPartUpload',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to hidden album`
   String get addToHiddenAlbum {
     return Intl.message(

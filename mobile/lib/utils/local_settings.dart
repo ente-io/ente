@@ -17,6 +17,7 @@ class LocalSettings {
   static const kEnableFaceIndexing = "enable_face_indexing";
   static const kEnableFaceClustering = "enable_face_clustering";
   static const kRateUsShownCount = "rate_us_shown_count";
+  static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
 
   late SharedPreferences _prefs;
@@ -74,6 +75,14 @@ class LocalSettings {
 
   bool get isFaceIndexingEnabled =>
       _prefs.getBool(kEnableFaceIndexing) ?? false;
+
+  bool get userEnabledMultiplePart =>
+      _prefs.getBool(kEnableMultiplePart) ?? false;
+
+  Future<bool> setUserEnabledMultiplePart(bool value) async {
+    await _prefs.setBool(kEnableMultiplePart, value);
+    return value;
+  }
 
   bool get isFaceClusteringEnabled =>
       _prefs.getBool(kEnableFaceIndexing) ?? false;

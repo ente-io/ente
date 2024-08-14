@@ -72,4 +72,6 @@ class FlagService {
   bool get passKeyEnabled => flags.passKeyEnabled || internalOrBetaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
+
+  bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 }
