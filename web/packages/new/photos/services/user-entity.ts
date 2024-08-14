@@ -2,6 +2,7 @@ import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import type { Person } from "./ml/cluster-new";
 import { applyPersonDiff } from "./ml/db";
@@ -93,6 +94,24 @@ const RemoteUserEntity = z.object({
  *
  * @param entityKeyB64 The base64 encoded key to use for decrypting the
  * encrypted contents of the user entity.
+ *
+ * [Note: Diff contents]
+ *
+ * Unlike git diffs which track all changes, the diffs we get from remote are
+ * guaranteed to contain only one entry (upsert or delete) for particular Ente
+ * object. This holds true irrespective of the diff limit.
+ *
+ * For example, in the user entity diff response, it is guaranteed that there
+ * will only be at max one entry for a particular entity id. The entry will have
+ * no data to indicate that the corresponding entity was deleted. Otherwise,
+ * when the data is present, it is taken as the creation of a new entity or the
+ * updation of an existing one.
+ *
+ * This behaviour comes from how remote stores the underlying, e.g., entities. A
+ * diff returns just entities whose updation times greater than the provided
+ * since time (limited to the given diff limit). So there will be at most one
+ * row for a particular entity id. And if that entity has been deleted, then the
+ * row will be a tombstone so data will be not be present.
  */
 export const userEntityDiff = async (
     type: EntityType,
@@ -176,7 +195,7 @@ export const syncPersons = async (entityKeyB64: string) => {
  * Zod schema for the "person" entity (the {@link RemotePerson} type).
  */
 const RemotePerson = z.object({
-    name: z.string(),
+    name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(
         z.object({
             // TODO-Cluster temporary modify
@@ -184,6 +203,8 @@ const RemotePerson = z.object({
             faces: z.string().array(),
         }),
     ),
+    isHidden: z.boolean(),
+    avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
 
 /**

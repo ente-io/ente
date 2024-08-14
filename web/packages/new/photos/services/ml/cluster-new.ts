@@ -8,11 +8,11 @@ import { dotProduct } from "./math";
 /**
  * A face cluster is an set of faces.
  *
- * Each cluster has an id so that a Person (a set of clusters) can refer to it.
+ * Each cluster has an id so that a {@link Person} can refer to it.
  *
- * The cluster is not directly synced to remote. But it can indirectly get
- * synced if it gets attached to a person (which can be thought of as a named
- * cluster).
+ * The cluster is not directly synced to remote. But it does indirectly get
+ * synced if it gets promoted or attached to a person (which can be thought of
+ * as a named or hidden clusters).
  */
 export interface FaceCluster {
     /**
@@ -29,13 +29,26 @@ export interface FaceCluster {
 }
 
 /**
- * A Person is a set of clusters and some attached metadata.
+ * A Person is a set of clusters with some attached metadata.
  *
- * For ease of transportation, the Person entity on remote is something like
+ * More precisely, a person is a a single cluster or a set of clusters that the
+ * user has interacted with.
+ *
+ * The most frequent interaction is naming a {@link FaceCluster}, which promotes
+ * it to a become a {@link Person}. The promotion comes with the ability to be
+ * synced with remote (as a "person_v2" user entity).
+ *
+ * There after, the user may attach more clusters to the same {@link Person}.
+ *
+ * The other form of interaction is hiding. The user may hide a single (unnamed)
+ * cluster, or they may hide a person.
+ *
+ * The Person entity on remote has clusters embedded within itself
  *
  *     { name, clusters: [{ clusterID, faceIDs }] }
  *
- * That is, the Person has the clusters embedded within itself.
+ * Since clusters don't get independently synced, one way to think about a
+ * Person is that it is an interaction with a cluster that we want to sync.
  */
 export interface Person {
     /**
@@ -47,8 +60,21 @@ export interface Person {
     id: string;
     /**
      * A name assigned by the user to this person.
+     *
+     * This can be missing or an empty string for an unnamed cluster that was
+     * hidden.
      */
-    name: string;
+    name: string | undefined;
+    /**
+     * True if this person should be hidden.
+     *
+     * This can also be true for unnamed hidden clusters. When the user hides a
+     * single cluster that was offered as a suggestion to them on a client, then
+     * the client will create a new person entity without a name, and set its
+     * hidden flag to sync it with remote (so that other clients can also stop
+     * showing this cluster).
+     */
+    isHidden: boolean;
     /**
      * An unordered set of ids of the clusters that belong to this person.
      *
@@ -57,10 +83,15 @@ export interface Person {
      */
     clusterIDs: string[];
     /**
-     * The ID of the face that should be used as the display face, to represent
-     * this person in the UI.
+     * The ID of the face that should be used as the cover photo for this person
+     * (if the user has set one).
      */
     avatarFaceID: string | undefined;
+    /**
+     * Locally determined ID of the "best" face that should be used as the
+     * display face, to represent this person in the UI.
+     */
+    displayFaceID: string | undefined;
 }
 
 /**
@@ -90,6 +121,16 @@ export interface Person {
  * -   They can attach more clusters to a person.
  *
  * -   They can remove a cluster from a person.
+ *
+ * After clustering, we also do some routine cleanup. Faces belonging to files
+ * that have been deleted (including those in Trash) should be pruned off.
+ *
+ * We should not make strict assumptions about the clusters we get from remote.
+ * In particular, the same face ID can be in different clusters. In such cases
+ * we should assign it arbitrarily assign it to the last cluster we find it in.
+ * Such leeway is intentionally provided to allow clients some slack in how they
+ * implement the sync without making an blocking API request for every user
+ * interaction.
  */
 export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
