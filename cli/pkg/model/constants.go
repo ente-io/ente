@@ -13,3 +13,9 @@ const (
 	CollectionsSyncKey        = "lastCollectionSync"
 	CollectionsFileSyncKeyFmt = "collectionFilesSync-%d"
 )
+
+type ContextKey string
+
+const (
+	FilterKey ContextKey = "export_filter"
+)

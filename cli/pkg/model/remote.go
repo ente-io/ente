@@ -47,6 +47,13 @@ type RemoteAlbum struct {
 	LastUpdatedAt int64                  `json:"lastUpdatedAt"`
 }
 
+func (r *RemoteAlbum) IsHidden() bool {
+	if value, ok := r.PrivateMeta["visibility"]; ok {
+		return int64(value.(float64)) == int64(2)
+	}
+	return false
+}
+
 type AlbumFileEntry struct {
 	FileID        int64 `json:"fileID"`
 	AlbumID       int64 `json:"albumID"`
