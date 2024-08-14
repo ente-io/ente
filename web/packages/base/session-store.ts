@@ -6,7 +6,7 @@ import { z } from "zod";
  *
  * Precondition: The user should be logged in.
  */
-export const userEncryptionKey = async () => {
+export const usersEncryptionKey = async () => {
     // TODO: Same value as the deprecated SESSION_KEYS.ENCRYPTION_KEY.
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) {

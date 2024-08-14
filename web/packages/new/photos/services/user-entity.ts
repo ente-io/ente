@@ -1,7 +1,9 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
+import { usersEncryptionKey } from "@/base/session-store";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import type { Person } from "./ml/cluster-new";
@@ -164,25 +166,40 @@ export const userEntityDiff = async (
  *
  * 3.  Otherwise we'll create a new one, save it locally and put it to remote.
  */
-const entityKey = (type: EntityType) => {
-    const masterKey = await getActualKey();
-
+const entityKey = async (type: EntityType) => {
+    const encryptionKey = await usersEncryptionKey();
+    const worker = await sharedCryptoWorker();
+    const saved = await savedRemoteUserEntityKey(type);
+    if (saved) {
+        return worker.decryptB64(
+            saved.encryptedKey,
+            saved.header,
+            encryptionKey,
+        );
+    }
+    return undefined;
 };
 
-const savedRemoteEntityKeyKey = (type: EntityType) => `entityKey/${type}`;
+const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
 
 /**
- * Return the locally persisted value for the entity key to use for decrypting
- * the contents of entities of the given {@link type}.
+ * Return the locally persisted {@link RemoteUserEntityKey}, if any,
+ * corresponding the given {@link type}.
  */
-const savedRemoteUserEntityKey = (type: EntityType) =>
-    getKV(savedRemoteEntityKeyKey(type));
+const savedRemoteUserEntityKey = (
+    type: EntityType,
+): Promise<RemoteUserEntityKey | undefined> =>
+    getKV(entityKeyKey(type)).then((s) =>
+        s ? RemoteUserEntityKey.parse(JSON.parse(s)) : undefined,
+    );
 
 /**
  * Setter for {@link entityKey}.
  */
-const setSavedRemoteUserEntityKey = (type: EntityType, value: string) =>
-    setKV(savedRemoteEntityKeyKey(type), value);
+const saveRemoteUserEntityKey = (
+    type: EntityType,
+    entityKey: RemoteUserEntityKey,
+) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
 
 /**
  * Fetch the latest encryption key for the given user entity {@link} type from
@@ -216,12 +233,13 @@ const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
  * This is used to checkpoint diffs, so that we can resume fetching from the
  * last time we did a fetch.
  */
-const latestUpdatedAt = (type: EntityType) => getKVN(latestUpdatedAtKey(type));
+const savedLatestUpdatedAt = (type: EntityType) =>
+    getKVN(latestUpdatedAtKey(type));
 
 /**
- * Setter for {@link latestUpdatedAt}.
+ * Setter for {@link savedLatestUpdatedAt}.
  */
-const setLatestUpdatedAt = (type: EntityType, value: number) =>
+const saveLatestUpdatedAt = (type: EntityType, value: number) =>
     setKV(latestUpdatedAtKey(type), value);
 
 /**
@@ -250,7 +268,7 @@ export const syncPersons = async (entityKeyB64: string) => {
         };
     };
 
-    let sinceTime = (await latestUpdatedAt(type)) ?? 0;
+    let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
     while (true) {
         const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
@@ -262,7 +280,7 @@ export const syncPersons = async (entityKeyB64: string) => {
             (max, e) => Math.max(max, e.updatedAt),
             sinceTime,
         );
-        await setLatestUpdatedAt(type, sinceTime);
+        await saveLatestUpdatedAt(type, sinceTime);
     }
 };
 
