@@ -140,6 +140,8 @@ PODS:
   - Mantle (2.2.0):
     - Mantle/extobjc (= 2.2.0)
   - Mantle/extobjc (2.2.0)
+  - maps_launcher (0.0.1):
+    - Flutter
   - media_extension (0.0.1):
     - Flutter
   - media_kit_libs_ios_video (1.0.4):
@@ -269,6 +271,7 @@ DEPENDENCIES:
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
+  - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
   - media_kit_libs_ios_video (from `.symlinks/plugins/media_kit_libs_ios_video/ios`)
   - media_kit_native_event_loop (from `.symlinks/plugins/media_kit_native_event_loop/ios`)
@@ -377,6 +380,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
+  maps_launcher:
+    :path: ".symlinks/plugins/maps_launcher/ios"
   media_extension:
     :path: ".symlinks/plugins/media_extension/ios"
   media_kit_libs_ios_video:
@@ -472,6 +477,7 @@ SPEC CHECKSUMS:
   local_auth_darwin: c7e464000a6a89e952235699e32b329457608d98
   local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  maps_launcher: 2e5b6a2d664ec6c27f82ffa81b74228d770ab203
   media_extension: 6d30dc1431ebaa63f43c397c37917b1a0a597a4c
   media_kit_libs_ios_video: a5fe24bc7875ccd6378a0978c13185e1344651c1
   media_kit_native_event_loop: e6b2ab20cf0746eb1c33be961fcf79667304fa2a
