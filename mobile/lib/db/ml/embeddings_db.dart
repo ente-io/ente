@@ -23,7 +23,7 @@ extension EmbeddingsDB on FaceMLDataDB {
         .getAll('SELECT $fileIDColumn , $mlVersionColumn FROM $clipTable');
     final Map<int, int> result = {};
     for (final map in maps) {
-      result[map[mlVersionColumn] as int] = map[mlVersionColumn] as int;
+      result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
     }
     return result;
   }
