@@ -1,6 +1,6 @@
 import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { getKVN, setKV } from "@/base/kv";
+import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
@@ -151,6 +151,37 @@ export const userEntityDiff = async (
     );
 };
 
+const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
+
+/**
+ * Return the locally persisted value for the latest `updatedAt` time for the
+ * given entity {@link type}.
+ *
+ * This is used to checkpoint diffs, so that we can resume fetching from the
+ * last time we did a fetch.
+ */
+const latestUpdatedAt = (type: EntityType) => getKVN(latestUpdatedAtKey(type));
+
+/**
+ * Setter for {@link latestUpdatedAt}.
+ */
+const setLatestUpdatedAt = (type: EntityType, value: number) =>
+    setKV(latestUpdatedAtKey(type), value);
+
+const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
+
+/**
+ * Return the locally persisted value for the entity key to use for decrypting
+ * the contents of entities of the given {@link type}.
+ */
+const entityKey = (type: EntityType) => getKV(entityKeyKey(type));
+
+/**
+ * Setter for {@link entityKey}.
+ */
+const setEntityKey = (type: EntityType, value: string) =>
+    setKV(entityKeyKey(type), value);
+
 /**
  * Sync the {@link Person} entities that we have locally with remote.
  *
@@ -211,20 +242,3 @@ const RemotePerson = z.object({
  * A "person_v2" entity as synced via remote.
  */
 type RemotePerson = z.infer<typeof RemotePerson>;
-
-const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
-
-/**
- * Return the locally persisted value for the latest `updatedAt` time for the
- * given entity type.
- *
- * This is used to checkpoint diffs, so that we can resume fetching from the
- * last time we did a fetch.
- */
-const latestUpdatedAt = (type: EntityType) => getKVN(latestUpdatedAtKey(type));
-
-/**
- * Setter for {@link latestUpdatedAt}.
- */
-const setLatestUpdatedAt = (type: EntityType, value: number) =>
-    setKV(latestUpdatedAtKey(type), value);
