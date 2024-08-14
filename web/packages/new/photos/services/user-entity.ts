@@ -16,8 +16,8 @@ import { applyPersonDiff } from "./ml/db";
 export type EntityType =
     | "person"
     /**
-     * A new version of the Person entity where the data is gzipped before
-     * encryption.
+     * The latest iteration of the Person entity format, where the data is
+     * gzipped before encryption.
      */
     | "person_v2";
 
@@ -171,7 +171,9 @@ export const syncPersons = async (entityKeyB64: string) => {
             id,
             name: rp.name,
             clusterIDs: rp.assigned.map(({ id }) => id),
-            avatarFaceID: undefined,
+            isHidden: rp.isHidden,
+            avatarFaceID: rp.avatarFaceID,
+            displayFaceID: undefined,
         };
     };
 
@@ -191,9 +193,7 @@ export const syncPersons = async (entityKeyB64: string) => {
     }
 };
 
-/**
- * Zod schema for the "person" entity (the {@link RemotePerson} type).
- */
+/** Zod schema for the {@link RemotePerson} type. */
 const RemotePerson = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(
@@ -208,7 +208,7 @@ const RemotePerson = z.object({
 });
 
 /**
- * A "person" entity as synced via remote.
+ * A "person_v2" entity as synced via remote.
  */
 type RemotePerson = z.infer<typeof RemotePerson>;
 

@@ -66,6 +66,13 @@ export interface Person {
      */
     name: string | undefined;
     /**
+     * An unordered set of ids of the clusters that belong to this person.
+     *
+     * For ergonomics of transportation and persistence this is an array, but it
+     * should conceptually be thought of as a set.
+     */
+    clusterIDs: string[];
+    /**
      * True if this person should be hidden.
      *
      * This can also be true for unnamed hidden clusters. When the user hides a
@@ -75,13 +82,6 @@ export interface Person {
      * showing this cluster).
      */
     isHidden: boolean;
-    /**
-     * An unordered set of ids of the clusters that belong to this person.
-     *
-     * For ergonomics of transportation and persistence this is an array, but it
-     * should conceptually be thought of as a set.
-     */
-    clusterIDs: string[];
     /**
      * The ID of the face that should be used as the cover photo for this person
      * (if the user has set one).
