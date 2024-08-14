@@ -15,6 +15,8 @@ EntityType typeFromString(String type) {
       return EntityType.location;
     case "person_v2":
       return EntityType.personV2;
+    case "personV2":
+      return EntityType.personV2;
   }
   debugPrint("unexpected collection type $type");
   return EntityType.unknown;
