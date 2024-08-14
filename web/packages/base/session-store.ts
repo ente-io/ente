@@ -2,11 +2,11 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { z } from "zod";
 
 /**
- * Return the user's encryption key from session storage.
+ * Return the base64 encoded user's encryption key from session storage.
  *
  * Precondition: The user should be logged in.
  */
-export const usersEncryptionKey = async () => {
+export const usersEncryptionKeyB64 = async () => {
     // TODO: Same value as the deprecated SESSION_KEYS.ENCRYPTION_KEY.
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) {

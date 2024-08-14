@@ -1,9 +1,9 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import { decryptAssociatedB64Data } from "@/base/crypto/ente";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
-import { usersEncryptionKey } from "@/base/session-store";
+import { usersEncryptionKeyB64 } from "@/base/session-store";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import type { Person } from "./ml/cluster-new";
@@ -165,19 +165,42 @@ export const userEntityDiff = async (
  *     it locally for future use.
  *
  * 3.  Otherwise we'll create a new one, save it locally and put it to remote.
+ *
+ * See also, [Note: User entity keys].
  */
 const entityKey = async (type: EntityType) => {
-    const encryptionKey = await usersEncryptionKey();
+    const encryptionKeyB64 = await usersEncryptionKeyB64();
     const worker = await sharedCryptoWorker();
+
+    const decrypt = async ({ encryptedKey, header }: RemoteUserEntityKey) => {
+        return worker.decryptB64(encryptedKey, header, encryptionKeyB64);
+    };
+
+    // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
-    if (saved) {
-        return worker.decryptB64(
-            saved.encryptedKey,
-            saved.header,
-            encryptionKey,
-        );
+    if (saved) return decrypt(saved);
+
+    // See if remote already has it.
+    const existing = await getUserEntityKey(type);
+    if (existing) {
+        // Only save it if we can decrypt it to avoid corrupting our local state
+        // in unforeseen circumstances.
+        const result = decrypt(existing);
+        await saveRemoteUserEntityKey(type, existing);
+        return result;
     }
-    return undefined;
+
+    // Nada. Create a new one, put it to remote, save it locally, and return.
+    // TODO-Cluster Keep this read only, only add the writeable bits after other
+    // stuff has been tested.
+    throw new Error("Not implemented");
+    // const generatedKeyB64 = await worker.generateEncryptionKey();
+    // const encryptedNewKey = await worker.encryptToB64(
+    //     generatedKeyB64,
+    //     encryptionKeyB64,
+    // );
+    // await postUserEntityKey(type, newKey);
+    // return decrypt(newKey);
 };
 
 const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
@@ -202,19 +225,30 @@ const saveRemoteUserEntityKey = (
 ) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
 
 /**
- * Fetch the latest encryption key for the given user entity {@link} type from
- * remote.
+ * Fetch the encryption key for the given user entity {@link type} from remote.
+ *
+ * [Note: User entity keys]
+ *
+ * There is one encryption key (itself encrypted with the user's encryption key)
+ * for each user entity type. If the key doesn't exist on remote, then the
+ * client is expected to create one on the user's behalf. Remote will disallow
+ * attempts to multiple keys for the same user entity type.
  */
 const getUserEntityKey = async (
     type: EntityType,
-): Promise<RemoteUserEntityKey> => {
+): Promise<RemoteUserEntityKey | undefined> => {
     const params = new URLSearchParams({ type });
     const url = await apiURL("/user-entity/key");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });
-    ensureOk(res);
-    return RemoteUserEntityKey.parse(await res.json());
+    if (!res.ok) {
+        // Remote says HTTP 404 Not Found if there is no key yet for the user.
+        if (res.status == 404) return undefined;
+        throw new HTTPError(res);
+    } else {
+        return RemoteUserEntityKey.parse(await res.json());
+    }
 };
 
 const RemoteUserEntityKey = z.object({
@@ -223,6 +257,25 @@ const RemoteUserEntityKey = z.object({
 });
 
 type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
+
+/**
+ * Create a new encryption key for the given user entity {@link type} on remote.
+ *
+ * See: [Note: User entity keys]
+ */
+// TODO-Cluster remove export
+export const postUserEntityKey = async (
+    type: EntityType,
+    entityKey: RemoteUserEntityKey,
+) => {
+    const url = await apiURL("/user-entity/key");
+    const res = await fetch(url, {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({ type, ...entityKey }),
+    });
+    ensureOk(res);
+};
 
 const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
 
