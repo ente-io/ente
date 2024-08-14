@@ -29,6 +29,7 @@ class FaceMLDataDB {
   static final Logger _logger = Logger("FaceMLDataDB");
 
   static const _databaseName = "ente.face_ml_db_v3.db";
+
   // static const _databaseVersion = 1;
 
   FaceMLDataDB._privateConstructor();
@@ -256,14 +257,20 @@ class FaceMLDataDB {
     final Map<String, List<Uint8List>> result = {};
 
     final selectQuery = '''
-    SELECT fc.$fcClusterID, fe.$embeddingColumn
-    FROM $faceClustersTable fc
-    INNER JOIN $facesTable fe ON fc.$fcFaceId = fe.$faceIDColumn
-    WHERE fc.$fcClusterID IN (${clusterIDs.join(',')})
-    ${limit != null ? 'LIMIT $limit' : ''}
-  ''';
+  SELECT fc.$fcClusterID, fe.$embeddingColumn 
+  FROM $faceClustersTable fc 
+  INNER JOIN $facesTable fe ON fc.$fcFaceId = fe.$faceIDColumn 
+  WHERE fc.$fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  ${limit != null ? 'LIMIT ?' : ''}
+''';
 
-    final List<Map<String, dynamic>> maps = await db.getAll(selectQuery);
+    final List<dynamic> selectQueryParams = [...clusterIDs];
+    if (limit != null) {
+      selectQueryParams.add(limit);
+    }
+
+    final List<Map<String, dynamic>> maps =
+        await db.getAll(selectQuery, selectQueryParams);
 
     for (final map in maps) {
       final clusterID = map[fcClusterID] as String;
@@ -381,15 +388,14 @@ class FaceMLDataDB {
   ) async {
     final db = await instance.asyncDB;
     final Map<String, List<String>> result = {};
+
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable WHERE $fcClusterID IN (${clusterIDs.join(",")})',
-    );
-    final List<Map<String, dynamic>> maps = await db.query(
-      faceClustersTable,
-      columns: [fcClusterID, fcFaceId],
-      where:
-          '$fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})',
-      whereArgs: clusterIDs,
+      '''
+  SELECT $fcClusterID, $fcFaceId 
+  FROM $faceClustersTable 
+  WHERE $fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  ''',
+      [...clusterIDs],
     );
 
     for (final map in maps) {
@@ -807,8 +813,12 @@ class FaceMLDataDB {
     final db = instance.asyncDB;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.getAll(
-        'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable '
-        'WHERE $fcClusterID IN (${clusterIDs.join(",")})',
+        '''
+  SELECT $fcClusterID, $fcFaceId 
+  FROM $faceClustersTable 
+  WHERE $fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  ''',
+        [...clusterIDs],
       );
       final Map<int, Set<String>> result = {};
       for (final map in maps) {
@@ -876,9 +886,12 @@ class FaceMLDataDB {
   ) async {
     final db = await instance.asyncDB;
     final Map<String, (Uint8List, int)> result = {};
+
     final rows = await db.getAll(
-      'SELECT * FROM $clusterSummaryTable WHERE $clusterIDColumn IN (${clusterIDs.join(",")})',
+      'SELECT * FROM $clusterSummaryTable WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})',
+      [...clusterIDs],
     );
+
     for (final r in rows) {
       final id = r[clusterIDColumn] as String;
       final avg = r[avgColumn] as Uint8List;
