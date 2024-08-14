@@ -1,5 +1,6 @@
 import { decryptAssociatedB64Data } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
 
@@ -52,6 +53,10 @@ const defaultDiffLimit = 500;
  */
 interface UserEntity {
     /**
+     * A UUID or nanoid for the entity.
+     */
+    id: string;
+    /**
      * Arbitrary data associated with the entity. The format of this data is
      * specific to each entity type.
      *
@@ -65,6 +70,7 @@ interface UserEntity {
 }
 
 const RemoteUserEntity = z.object({
+    id: z.string(),
     /** Base64 string containing the encrypted contents of the entity. */
     encryptedData: z.string(),
     /** Base64 string containing the decryption header. */
@@ -74,8 +80,8 @@ const RemoteUserEntity = z.object({
 });
 
 /**
- * Fetch all user entities of the given type that have been created or updated
- * since the given time.
+ * Fetch the next batch of user entities of the given type that have been
+ * created or updated since the given time.
  *
  * @param type The type of the entities to fetch.
  *
@@ -113,7 +119,8 @@ export const userEntityDiff = async (
         .parse(await res.json()).diff;
     return Promise.all(
         entities.map(
-            async ({ encryptedData, header, isDeleted, updatedAt }) => ({
+            async ({ id, encryptedData, header, isDeleted, updatedAt }) => ({
+                id,
                 data: isDeleted
                     ? undefined
                     : await decrypt(encryptedData, header),
@@ -121,6 +128,43 @@ export const userEntityDiff = async (
             }),
         ),
     );
+};
+
+/**
+ * Sync the {@link Person} entities that we have locally with remote.
+ *
+ * This fetches all the user entities corresponding to the "person_v2" entity
+ * type from remote that have been created, updated or deleted since the last
+ * time we checked. This diff is then applied to the data we have persisted
+ * locally.
+ */
+export const personDiff = async (
+    entityKeyB64: string,
+): Promise<RemotePerson[]> => {
+    const sinceTime = 0;
+
+    const parse = (data: Uint8Array) =>
+        RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)));
+
+    const result: RemotePerson[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+    while (true) {
+        const entities = await userEntityDiff("person", 0, entityKeyB64);
+        if (entities.length == 0) break;
+
+        const latestUpdatedAt = entities.reduce(
+            (max, e) => Math.max(max, e.updatedAt),
+            sinceTime,
+        );
+
+        const people = entities
+            .map(({ data }) => (data ? parse(data) : undefined))
+            .filter((p) => !!p);
+        // TODO-Cluster
+        console.log({ latestUpdatedAt, people });
+        return people;
+    }
+    return result;
 };
 
 /**
@@ -140,27 +184,21 @@ const RemotePerson = z.object({
 /**
  * A "person" entity as synced via remote.
  */
-export type RemotePerson = z.infer<typeof RemotePerson>;
+type RemotePerson = z.infer<typeof RemotePerson>;
+
+const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
 
 /**
- * Fetch all Person entities that have been created or updated since the last
- * time we checked.
+ * Return the locally persisted value for the latest `updatedAt` time for the
+ * given entity type.
+ *
+ * This is used to checkpoint diffs, so that we can resume fetching from the
+ * last time we did a fetch.
  */
-export const personDiff = async (
-    entityKeyB64: string,
-): Promise<RemotePerson[]> => {
-    const sinceTime = 0;
-    const entities = await userEntityDiff("person", 0, entityKeyB64);
-    const latestUpdatedAt = entities.reduce(
-        (max, e) => Math.max(max, e.updatedAt),
-        sinceTime,
-    );
-    const parse = (data: Uint8Array) =>
-        RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)));
-    const people = entities
-        .map(({ data }) => (data ? parse(data) : undefined))
-        .filter((p) => !!p);
-    // TODO-Cluster
-    console.log({ latestUpdatedAt, people });
-    return people;
-};
+const latestUpdatedAt = (type: EntityType) => getKVN(latestUpdatedAtKey(type));
+
+/**
+ * Setter for {@link latestUpdatedAt}.
+ */
+const setLatestUpdatedAt = (type: EntityType, value: number) =>
+    setKV(latestUpdatedAtKey(type), value);
