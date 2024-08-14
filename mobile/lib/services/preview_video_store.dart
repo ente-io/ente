@@ -1,12 +1,11 @@
 import "dart:async";
 import "dart:convert";
 import "dart:io";
-import "dart:typed_data";
 
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart";
-import "package:ffmpeg_kit_flutter_min/ffmpeg_kit.dart";
-import "package:ffmpeg_kit_flutter_min/return_code.dart";
+import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
 import "package:flutter/foundation.dart" hide Key;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
@@ -31,7 +30,7 @@ class PreviewVideoStore {
 
     final file = await getFileFromServer(enteFile);
     if (file == null) return;
-    final tmpDirectory = await getTemporaryDirectory();
+    final tmpDirectory = await getApplicationDocumentsDirectory();
     final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
     Directory(prefix).createSync();
     final mediaInfo = await VideoCompress.compressVideo(
@@ -42,42 +41,37 @@ class PreviewVideoStore {
     if (mediaInfo?.path == null) return;
 
     final key = Key.fromLength(16);
-    final iv = IV.fromLength(16);
 
     final keyfile = File('$prefix/keyfile.key');
     keyfile.writeAsBytesSync(key.bytes);
 
     final keyinfo = File('$prefix/mykey.keyinfo');
-    keyinfo.writeAsStringSync(
-      "data:text/plain;base64,${key.base64}\n"
-      "${keyfile.path}\n"
-      "${iv.base64}",
+    keyinfo.writeAsStringSync("data:text/plain;base64,${key.base64}\n"
+        "${keyfile.path}\n");
+
+    final session = await FFmpegKit.executeAsync(
+      '-i "${mediaInfo!.path}" '
+      '-c copy -f hls -hls_time 10 -hls_flags single_file '
+      '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+      '$prefix/video.m3u8',
     );
 
-    await FFmpegKit.execute(
-      """
-      -i "${mediaInfo!.path}"
-      -c copy -f hls -hls_time 10 -hls_flags single_file
-      -hls_list_size 0 -hls_key_info_file ${keyinfo.path}
-      $prefix/video.m3u8""",
-    ).then((session) async {
-      final returnCode = await session.getReturnCode();
+    final returnCode = await session.getReturnCode();
 
-      if (ReturnCode.isSuccess(returnCode)) {
-        final playlistFile = File("$prefix/output.m3u8");
-        final previewFile = File("$prefix/segment000.ts");
-        await _reportPreview(enteFile, previewFile);
-        await _reportPlaylist(enteFile, playlistFile);
-      } else if (ReturnCode.isCancel(returnCode)) {
-        _logger.warning("FFmpeg command cancelled");
-      } else {
-        _logger.severe("FFmpeg command failed with return code $returnCode");
-        if (kDebugMode) {
-          final output = await session.getOutput();
-          _logger.severe(output);
-        }
+    if (ReturnCode.isSuccess(returnCode)) {
+      final playlistFile = File("$prefix/output.m3u8");
+      final previewFile = File("$prefix/video.ts");
+      await _reportPreview(enteFile, previewFile);
+      await _reportPlaylist(enteFile, playlistFile);
+    } else if (ReturnCode.isCancel(returnCode)) {
+      _logger.warning("FFmpeg command cancelled");
+    } else {
+      _logger.severe("FFmpeg command failed with return code $returnCode");
+      if (kDebugMode) {
+        final output = await session.getOutput();
+        _logger.severe(output);
       }
-    });
+    }
   }
 
   Future<void> _reportPlaylist(EnteFile file, File playlist) async {
