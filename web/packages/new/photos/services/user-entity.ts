@@ -74,6 +74,7 @@ interface UserEntity {
     updatedAt: number;
 }
 
+/** Zod schema for {@link RemoteUserEntity} */
 const RemoteUserEntity = z.object({
     id: z.string(),
     /**
@@ -91,6 +92,9 @@ const RemoteUserEntity = z.object({
     isDeleted: z.boolean(),
     updatedAt: z.number(),
 });
+
+/** An item in the user entity diff response we get from remote. */
+type RemoteUserEntity = z.infer<typeof RemoteUserEntity>;
 
 /**
  * Fetch the next batch of user entities of the given type that have been
@@ -128,6 +132,21 @@ export const userEntityDiff = async (
     sinceTime: number,
     entityKeyB64: string,
 ): Promise<UserEntity[]> => {
+    const parse = async ({
+        id,
+        encryptedData,
+        header,
+        isDeleted,
+        updatedAt,
+    }: RemoteUserEntity) => ({
+        id,
+        data:
+            encryptedData && header && !isDeleted
+                ? await decrypt(encryptedData, header)
+                : undefined,
+        updatedAt,
+    });
+
     const decrypt = (encryptedDataB64: string, decryptionHeaderB64: string) =>
         decryptAssociatedB64Data({
             encryptedDataB64,
@@ -148,17 +167,7 @@ export const userEntityDiff = async (
     const entities = z
         .object({ diff: z.array(RemoteUserEntity) })
         .parse(await res.json()).diff;
-    return Promise.all(
-        entities.map(
-            async ({ id, encryptedData, header, isDeleted, updatedAt }) => ({
-                id,
-                data: isDeleted
-                    ? undefined
-                    : await decrypt(encryptedData, header),
-                updatedAt,
-            }),
-        ),
-    );
+    return Promise.all(entities.map(parse));
 };
 
 /**
