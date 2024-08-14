@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -192,9 +193,11 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 },
                               ),
                             ),
-                            const SizedBox(
-                              height: 24,
-                            ),
+                            if (flagService.enableMobMultiPart)
+                              const SizedBox(
+                                height: 24,
+                              ),
+                            if (flagService.enableMobMultiPart)
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
                                 title: S.of(context).enableMultiPartUpload,

@@ -12,6 +12,7 @@ class RemoteFlags {
   final bool recoveryKeyVerified;
   final bool internalUser;
   final bool betaUser;
+  final bool enableMobMultiPart;
 
   RemoteFlags({
     required this.enableStripe,
@@ -22,6 +23,7 @@ class RemoteFlags {
     required this.recoveryKeyVerified,
     required this.internalUser,
     required this.betaUser,
+    required this.enableMobMultiPart,
   });
 
   static RemoteFlags defaultValue = RemoteFlags(
@@ -33,6 +35,7 @@ class RemoteFlags {
     recoveryKeyVerified: false,
     internalUser: kDebugMode,
     betaUser: kDebugMode,
+    enableMobMultiPart: false,
   );
 
   String toJson() => json.encode(toMap());
@@ -46,6 +49,7 @@ class RemoteFlags {
       'recoveryKeyVerified': recoveryKeyVerified,
       'internalUser': internalUser,
       'betaUser': betaUser,
+      'enableMobMultiPart': enableMobMultiPart,
     };
   }
 
@@ -61,6 +65,8 @@ class RemoteFlags {
           map['recoveryKeyVerified'] ?? defaultValue.recoveryKeyVerified,
       internalUser: map['internalUser'] ?? defaultValue.internalUser,
       betaUser: map['betaUser'] ?? defaultValue.betaUser,
+      enableMobMultiPart:
+          map['enableMobMultiPart'] ?? defaultValue.enableMobMultiPart,
     );
   }
 }
