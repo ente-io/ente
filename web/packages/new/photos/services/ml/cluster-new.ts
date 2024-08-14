@@ -52,7 +52,7 @@ export interface FaceCluster {
  */
 export interface Person {
     /**
-     * A nanoid for this person.
+     * A UUID or nanoid for this person.
      *
      * This is the ID of the Person user entity, it is not contained as part of
      * the Person entity payload.
