@@ -825,9 +825,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zugriff gewähren"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Fotos in der Nähe gruppieren"),
-        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Gastansicht"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable guest view, please setup device passcode or screen lock in your system settings."),
+            "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(

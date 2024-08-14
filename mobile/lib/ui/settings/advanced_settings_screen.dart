@@ -197,6 +197,28 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                             ),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).enableMultiPartUpload,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () => LocalSettings
+                                    .instance.userEnabledMultiplePart,
+                                onChanged: () async {
+                                  await LocalSettings.instance
+                                      .setUserEnabledMultiplePart(
+                                    !LocalSettings
+                                        .instance.userEnabledMultiplePart,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
                                 title: S.of(context).crashReporting,
                               ),
                               menuItemColor: colorScheme.fillFaint,
