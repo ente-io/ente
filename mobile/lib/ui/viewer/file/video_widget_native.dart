@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
@@ -232,111 +231,17 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               bottom: widget.isFromMemories ? 32 : 0,
                             ),
                             child: ValueListenableBuilder(
+                              valueListenable: _isPlaybackReady,
                               builder: (BuildContext context, bool value, _) {
                                 return value
-                                    ? ValueListenableBuilder(
-                                        valueListenable: _showControls,
-                                        builder: (
-                                          BuildContext context,
-                                          bool value,
-                                          _,
-                                        ) {
-                                          return AnimatedOpacity(
-                                            duration: const Duration(
-                                              milliseconds: 200,
-                                            ),
-                                            curve: Curves.easeInQuad,
-                                            opacity: value ? 1 : 0,
-                                            child: IgnorePointer(
-                                              ignoring: !value,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 8,
-                                                ),
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                    16,
-                                                    4,
-                                                    16,
-                                                    4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black
-                                                        .withOpacity(0.3),
-                                                    borderRadius:
-                                                        const BorderRadius.all(
-                                                      Radius.circular(8),
-                                                    ),
-                                                    border: Border.all(
-                                                      color: strokeFaintDark,
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      AnimatedSize(
-                                                        duration:
-                                                            const Duration(
-                                                          seconds: 5,
-                                                        ),
-                                                        curve: Curves.easeInOut,
-                                                        child:
-                                                            ValueListenableBuilder(
-                                                          valueListenable:
-                                                              _controller!
-                                                                  .onPlaybackPositionChanged,
-                                                          builder: (
-                                                            BuildContext
-                                                                context,
-                                                            int value,
-                                                            _,
-                                                          ) {
-                                                            return Text(
-                                                              _secondsToDuration(
-                                                                value,
-                                                              ),
-                                                              style:
-                                                                  getEnteTextTheme(
-                                                                context,
-                                                              ).mini.copyWith(
-                                                                        color:
-                                                                            textBaseDark,
-                                                                      ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: SeekBar(
-                                                          _controller!,
-                                                          _durationToSeconds(
-                                                            duration,
-                                                          ),
-                                                          _isSeeking,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        duration ?? "0:00",
-                                                        style: getEnteTextTheme(
-                                                          context,
-                                                        ).mini.copyWith(
-                                                              color:
-                                                                  textBaseDark,
-                                                            ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        },
+                                    ? _SeekBarAndDuration(
+                                        controller: _controller,
+                                        duration: duration,
+                                        showControls: _showControls,
+                                        isSeeking: _isSeeking,
                                       )
                                     : const SizedBox();
                               },
-                              valueListenable: _isPlaybackReady,
                             ),
                           ),
                         ),
@@ -347,42 +252,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         ),
       ),
     );
-  }
-
-  String _secondsToDuration(int totalSeconds) {
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-    final seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-  }
-
-  int? _durationToSeconds(String? duration) {
-    if (duration == null) {
-      _logger.warning("Duration is null");
-      return null;
-    }
-    final parts = duration.split(':');
-    int seconds = 0;
-
-    if (parts.length == 3) {
-      // Format: "h:mm:ss"
-      seconds += int.parse(parts[0]) * 3600; // Hours to seconds
-      seconds += int.parse(parts[1]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[2]); // Seconds
-    } else if (parts.length == 2) {
-      // Format: "m:ss"
-      seconds += int.parse(parts[0]) * 60; // Minutes to seconds
-      seconds += int.parse(parts[1]); // Seconds
-    } else {
-      throw FormatException('Invalid duration format: $duration');
-    }
-
-    return seconds;
   }
 
   Future<void> _initializeController(
@@ -598,5 +467,148 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       _logger.info("Video props are null");
       aspectRatio = 1;
     }
+  }
+}
+
+class _SeekBarAndDuration extends StatelessWidget {
+  final NativeVideoPlayerController? controller;
+  final String? duration;
+  final ValueNotifier<bool> showControls;
+  final ValueNotifier<bool> isSeeking;
+
+  const _SeekBarAndDuration({
+    required this.controller,
+    required this.duration,
+    required this.showControls,
+    required this.isSeeking,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: showControls,
+      builder: (
+        BuildContext context,
+        bool value,
+        _,
+      ) {
+        return AnimatedOpacity(
+          duration: const Duration(
+            milliseconds: 200,
+          ),
+          curve: Curves.easeInQuad,
+          opacity: value ? 1 : 0,
+          child: IgnorePointer(
+            ignoring: !value,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(
+                  16,
+                  4,
+                  16,
+                  4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.3),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                  border: Border.all(
+                    color: strokeFaintDark,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    AnimatedSize(
+                      duration: const Duration(
+                        seconds: 5,
+                      ),
+                      curve: Curves.easeInOut,
+                      child: ValueListenableBuilder(
+                        valueListenable: controller!.onPlaybackPositionChanged,
+                        builder: (
+                          BuildContext context,
+                          int value,
+                          _,
+                        ) {
+                          return Text(
+                            _secondsToDuration(
+                              value,
+                            ),
+                            style: getEnteTextTheme(
+                              context,
+                            ).mini.copyWith(
+                                  color: textBaseDark,
+                                ),
+                          );
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: SeekBar(
+                        controller!,
+                        _durationToSeconds(
+                          duration,
+                        ),
+                        isSeeking,
+                      ),
+                    ),
+                    Text(
+                      duration ?? "0:00",
+                      style: getEnteTextTheme(
+                        context,
+                      ).mini.copyWith(
+                            color: textBaseDark,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Returns the duration in the format "h:mm:ss" or "m:ss".
+  String _secondsToDuration(int totalSeconds) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return '${hours.toString().padLeft(1, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(1, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
+  }
+
+  /// Returns the duration in seconds from the format "h:mm:ss" or "m:ss".
+  int? _durationToSeconds(String? duration) {
+    if (duration == null) {
+      return null;
+    }
+    final parts = duration.split(':');
+    int seconds = 0;
+
+    if (parts.length == 3) {
+      // Format: "h:mm:ss"
+      seconds += int.parse(parts[0]) * 3600; // Hours to seconds
+      seconds += int.parse(parts[1]) * 60; // Minutes to seconds
+      seconds += int.parse(parts[2]); // Seconds
+    } else if (parts.length == 2) {
+      // Format: "m:ss"
+      seconds += int.parse(parts[0]) * 60; // Minutes to seconds
+      seconds += int.parse(parts[1]); // Seconds
+    } else {
+      throw FormatException('Invalid duration format: $duration');
+    }
+
+    return seconds;
   }
 }
