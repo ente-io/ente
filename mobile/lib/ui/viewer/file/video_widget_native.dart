@@ -52,10 +52,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool _isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
-
   NativeVideoPlayerController? _controller;
   String? _filePath;
-
   String? duration;
   double? aspectRatio;
   final _isPlaybackReady = ValueNotifier(false);
@@ -109,6 +107,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         _isGuestView = event.isGuestView;
       });
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) {
+      if (_controller?.playbackInfo?.status == PlaybackStatus.playing) {
+        _controller?.pause();
+      }
+    }
   }
 
   @override
