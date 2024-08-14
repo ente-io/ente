@@ -1,13 +1,13 @@
 import "package:flutter/foundation.dart";
 import 'package:nanoid/nanoid.dart';
 
-const alphaphet =
+const enteWhiteListedAlphabet =
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const clusterIDLength = 22;
 
 class ClusterID {
   static String generate() {
-    return "cluster_${customAlphabet(urlAlphabet, clusterIDLength)}";
+    return "cluster_${customAlphabet(enteWhiteListedAlphabet, clusterIDLength)}";
   }
 
   // Validation method
