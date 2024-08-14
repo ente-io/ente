@@ -82,9 +82,6 @@ func (c *Controller) Delete(ctx *gin.Context, entityID uuid.UUID) (bool, error) 
 
 // GetDiff...
 func (c *Controller) GetDiff(ctx *gin.Context, req model.GetEntityDiffRequest) ([]model.Entity, error) {
-	if err := c.validateKey(ctx); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to validateKey")
-	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	return c.Repo.GetDiff(ctx, userID, *req.SinceTime, req.Limit)
 }
