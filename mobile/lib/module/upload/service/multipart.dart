@@ -51,9 +51,6 @@ class MultiPartUploader {
   }
 
   int get multipartPartSizeForUpload {
-    if (_featureFlagService.internalUser) {
-      return multipartPartSizeInternal;
-    }
     return multipartPartSize;
   }
 
