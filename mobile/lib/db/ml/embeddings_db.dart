@@ -1,135 +1,71 @@
 import "dart:io";
 import "dart:typed_data";
 
-import "package:path/path.dart";
-import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/db_fields.dart";
 import "package:photos/events/embedding_updated_event.dart";
-import "package:photos/models/embedding.dart";
-import "package:sqlite_async/sqlite_async.dart";
+import "package:photos/models/ml/clip.dart";
 
-class EmbeddingsDB {
-  EmbeddingsDB._privateConstructor();
-
-  static final EmbeddingsDB instance = EmbeddingsDB._privateConstructor();
-
+extension EmbeddingsDB on FaceMLDataDB {
   static const databaseName = "ente.embeddings.db";
-  static const tableName = "clip_embedding";
-  static const oldTableName = "embeddings";
-  static const columnFileID = "file_id";
-  static const columnEmbedding = "embedding";
-  static const columnVersion = "version";
-
-  @Deprecated("")
-  static const columnUpdationTime = "updation_time";
-
-  static Future<SqliteDatabase>? _dbFuture;
-
-  Future<SqliteDatabase> get _database async {
-    _dbFuture ??= _initDatabase();
-    return _dbFuture!;
-  }
-
-  Future<void> init() async {
-    final dir = await getApplicationDocumentsDirectory();
-    await _clearDeprecatedStores(dir);
-  }
-
-  Future<SqliteDatabase> _initDatabase() async {
-    final Directory documentsDirectory =
-        await getApplicationDocumentsDirectory();
-    final String path = join(documentsDirectory.path, databaseName);
-    final migrations = SqliteMigrations()
-      ..add(
-        SqliteMigration(
-          1,
-          (tx) async {
-            // Avoid creating the old table
-            // await tx.execute(
-            //   'CREATE TABLE $oldTableName ($columnFileID INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnUpdationTime INTEGER, UNIQUE ($columnFileID))',
-            // );
-          },
-        ),
-      )
-      ..add(
-        SqliteMigration(
-          2,
-          (tx) async {
-            // delete old table
-            await tx.execute('DROP TABLE IF EXISTS $oldTableName');
-            await tx.execute(
-              'CREATE TABLE $tableName ($columnFileID INTEGER NOT NULL, $columnEmbedding BLOB NOT NULL, $columnVersion INTEGER, UNIQUE ($columnFileID))',
-            );
-          },
-        ),
-      );
-    final database = SqliteDatabase(path: path);
-    await migrations.migrate(database);
-    return database;
-  }
-
-  Future<void> clearTable() async {
-    final db = await _database;
-    await db.execute('DELETE FROM $tableName');
-  }
 
   Future<List<ClipEmbedding>> getAll() async {
-    final db = await _database;
-    final results = await db.getAll('SELECT * FROM $tableName');
+    final db = await FaceMLDataDB.instance.asyncDB;
+    final results = await db.getAll('SELECT * FROM $clipTable');
     return _convertToEmbeddings(results);
   }
 
   // Get indexed FileIDs
-  Future<Map<int, int>> getIndexedFileIds() async {
-    final db = await _database;
+  Future<Map<int, int>> clipIndexedFileWithVersion() async {
+    final db = await FaceMLDataDB.instance.asyncDB;
     final maps = await db
-        .getAll('SELECT $columnFileID , $columnVersion FROM $tableName');
+        .getAll('SELECT $fileIDColumn , $mlVersionColumn FROM $clipTable');
     final Map<int, int> result = {};
     for (final map in maps) {
-      result[map[columnFileID] as int] = map[columnVersion] as int;
+      result[map[mlVersionColumn] as int] = map[mlVersionColumn] as int;
     }
     return result;
   }
 
-  // TODO: Add actual colomn for version and use here, similar to faces
-  Future<int> getIndexedFileCount() async {
-    final db = await _database;
+  Future<int> getClipIndexedFileCount() async {
+    final db = await FaceMLDataDB.instance.asyncDB;
     const String query =
-        'SELECT COUNT(DISTINCT $columnFileID) as count FROM $tableName';
+        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
     return maps.first['count'] as int;
   }
 
   Future<void> put(ClipEmbedding embedding) async {
-    final db = await _database;
+    final db = await FaceMLDataDB.instance.asyncDB;
     await db.execute(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnEmbedding, $columnVersion) VALUES (?, ?, ?)',
+      'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
       _getRowFromEmbedding(embedding),
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
   Future<void> putMany(List<ClipEmbedding> embeddings) async {
-    final db = await _database;
+    final db = await FaceMLDataDB.instance.asyncDB;
     final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
     await db.executeBatch(
-      'INSERT OR REPLACE INTO $tableName ($columnFileID, $columnEmbedding, $columnVersion) values(?, ?, ?)',
+      'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
       inputs,
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
   Future<void> deleteEmbeddings(List<int> fileIDs) async {
-    final db = await _database;
+    final db = await FaceMLDataDB.instance.asyncDB;
     await db.execute(
-      'DELETE FROM $tableName WHERE $columnFileID IN (${fileIDs.join(", ")})',
+      'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
-  Future<void> deleteAll() async {
-    final db = await _database;
-    await db.execute('DELETE FROM $tableName');
+  Future<void> deleteClipIndexes() async {
+    final db = await FaceMLDataDB.instance.asyncDB;
+    await db.execute('DELETE FROM $clipTable');
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
@@ -144,9 +80,9 @@ class EmbeddingsDB {
   }
 
   ClipEmbedding _getEmbeddingFromRow(Map<String, dynamic> row) {
-    final fileID = row[columnFileID];
-    final bytes = row[columnEmbedding] as Uint8List;
-    final version = row[columnVersion] as int;
+    final fileID = row[fileIDColumn] as int;
+    final bytes = row[embeddingColumn] as Uint8List;
+    final version = row[mlVersionColumn] as int;
     final list = Float32List.view(bytes.buffer);
     return ClipEmbedding(fileID: fileID, embedding: list, version: version);
   }

@@ -5,13 +5,13 @@ import "dart:typed_data" show ByteData;
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/dimension.dart";
+import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/embeddings_db.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
@@ -54,7 +54,7 @@ Future<IndexStatus> getIndexStatus() async {
     final int facesIndexedFiles =
         await FaceMLDataDB.instance.getIndexedFileCount();
     final int clipIndexedFiles =
-        await EmbeddingsDB.instance.getIndexedFileCount();
+        await FaceMLDataDB.instance.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
 
     final showIndexedFiles = math.min(indexedFiles, indexableFiles);
@@ -73,7 +73,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final Map<int, int> faceIndexedFileIDs =
       await FaceMLDataDB.instance.getIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
-      await EmbeddingsDB.instance.getIndexedFileIds();
+      await FaceMLDataDB.instance.clipIndexedFileWithVersion();
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFiles();

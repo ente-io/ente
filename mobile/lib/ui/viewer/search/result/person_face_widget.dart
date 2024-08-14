@@ -3,10 +3,10 @@ import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
 import "package:photos/db/files_db.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/face.dart";
-import "package:photos/face/model/person.dart";
+import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";

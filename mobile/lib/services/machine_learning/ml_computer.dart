@@ -5,7 +5,7 @@ import 'dart:typed_data' show Uint8List;
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:logging/logging.dart";
-import "package:photos/face/model/box.dart";
+import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";

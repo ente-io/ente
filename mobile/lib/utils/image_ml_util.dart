@@ -6,8 +6,8 @@ import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import 'package:ml_linalg/linalg.dart';
-import "package:photos/face/model/box.dart";
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/similarity_transform.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';

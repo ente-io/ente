@@ -6,10 +6,10 @@ import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/db/ml/db_fields.dart';
+import "package:photos/db/ml/db_model_mappers.dart";
 import "package:photos/extensions/stop_watch.dart";
-import 'package:photos/face/db_fields.dart';
-import "package:photos/face/db_model_mappers.dart";
-import "package:photos/face/model/face.dart";
+import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
@@ -28,7 +28,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 class FaceMLDataDB {
   static final Logger _logger = Logger("FaceMLDataDB");
 
-  static const _databaseName = "ente.face_ml_db_v2.db";
+  static const _databaseName = "ente.face_ml_db_v3.db";
   // static const _databaseVersion = 1;
 
   FaceMLDataDB._privateConstructor();
@@ -42,6 +42,7 @@ class FaceMLDataDB {
     createClusterSummaryTable,
     createNotPersonFeedbackTable,
     fcClusterIDIndex,
+    createClipEmbeddingsTable,
   ];
 
   // only have a single app-wide reference to the database
@@ -111,9 +112,9 @@ class FaceMLDataDB {
 
       const String sql = '''
         INSERT INTO $facesTable (
-          $fileIDColumn, $faceIDColumn, $faceDetectionColumn, $faceEmbeddingBlob, $faceScore, $faceBlur, $isSideways, $imageHeight, $imageWidth, $mlVersionColumn 
+          $fileIDColumn, $faceIDColumn, $faceDetectionColumn, $embeddingColumn, $faceScore, $faceBlur, $isSideways, $imageHeight, $imageWidth, $mlVersionColumn 
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT($fileIDColumn, $faceIDColumn) DO UPDATE SET $faceIDColumn = excluded.$faceIDColumn, $faceDetectionColumn = excluded.$faceDetectionColumn, $faceEmbeddingBlob = excluded.$faceEmbeddingBlob, $faceScore = excluded.$faceScore, $faceBlur = excluded.$faceBlur, $isSideways = excluded.$isSideways, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn 
+        ON CONFLICT($fileIDColumn, $faceIDColumn) DO UPDATE SET $faceIDColumn = excluded.$faceIDColumn, $faceDetectionColumn = excluded.$faceDetectionColumn, $embeddingColumn = excluded.$embeddingColumn, $faceScore = excluded.$faceScore, $faceBlur = excluded.$faceBlur, $isSideways = excluded.$isSideways, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn 
       ''';
       final parameterSets = batch.map((face) {
         final map = mapRemoteToFaceDB(face);
@@ -121,7 +122,7 @@ class FaceMLDataDB {
           map[fileIDColumn],
           map[faceIDColumn],
           map[faceDetectionColumn],
-          map[faceEmbeddingBlob],
+          map[embeddingColumn],
           map[faceScore],
           map[faceBlur],
           map[isSideways],
@@ -232,6 +233,7 @@ class FaceMLDataDB {
     await db.execute(deleteClusterPersonTable);
     await db.execute(deleteClusterSummaryTable);
     await db.execute(deleteNotPersonFeedbackTable);
+    await db.execute(deleteClipEmbeddingsTable);
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
@@ -240,10 +242,10 @@ class FaceMLDataDB {
   }) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $faceEmbeddingBlob FROM $facesTable WHERE  $faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where $fcClusterID = ?) ${limit != null ? 'LIMIT $limit' : ''}',
+      'SELECT $embeddingColumn FROM $facesTable WHERE  $faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where $fcClusterID = ?) ${limit != null ? 'LIMIT $limit' : ''}',
       [clusterID],
     );
-    return maps.map((e) => e[faceEmbeddingBlob] as Uint8List);
+    return maps.map((e) => e[embeddingColumn] as Uint8List);
   }
 
   Future<Map<String, Iterable<Uint8List>>> getFaceEmbeddingsForClusters(
@@ -254,7 +256,7 @@ class FaceMLDataDB {
     final Map<String, List<Uint8List>> result = {};
 
     final selectQuery = '''
-    SELECT fc.$fcClusterID, fe.$faceEmbeddingBlob
+    SELECT fc.$fcClusterID, fe.$embeddingColumn
     FROM $faceClustersTable fc
     INNER JOIN $facesTable fe ON fc.$fcFaceId = fe.$faceIDColumn
     WHERE fc.$fcClusterID IN (${clusterIDs.join(',')})
@@ -265,7 +267,7 @@ class FaceMLDataDB {
 
     for (final map in maps) {
       final clusterID = map[fcClusterID] as String;
-      final faceEmbedding = map[faceEmbeddingBlob] as Uint8List;
+      final faceEmbedding = map[embeddingColumn] as Uint8List;
       result.putIfAbsent(clusterID, () => <Uint8List>[]).add(faceEmbedding);
     }
 
@@ -300,10 +302,25 @@ class FaceMLDataDB {
       );
       final clusterIDs =
           clusterRows.map((e) => e[clusterIDColumn] as String).toList();
+      // final List<Map<String, dynamic>> faceMaps = await db.getAll(
+      //   'SELECT * FROM $facesTable where '
+      //   '$faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where  $fcClusterID IN (${clusterIDs.join(",")}))'
+      //   'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinimumQualityFaceScore ORDER BY $faceScore DESC',
+      // );
+
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
-        'SELECT * FROM $facesTable where '
-        '$faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where  $fcClusterID IN (${clusterIDs.join(",")}))'
-        'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinimumQualityFaceScore ORDER BY $faceScore DESC',
+        '''
+  SELECT * FROM $facesTable 
+  WHERE $faceIDColumn IN (
+    SELECT $fcFaceId 
+    FROM $faceClustersTable 
+    WHERE $fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  )
+  AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
+  AND $faceScore > ?
+  ORDER BY $faceScore DESC
+  ''',
+        [...clusterIDs, ...fileId, kMinimumQualityFaceScore],
       );
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
@@ -367,6 +384,14 @@ class FaceMLDataDB {
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable WHERE $fcClusterID IN (${clusterIDs.join(",")})',
     );
+    final List<Map<String, dynamic>> maps = await db.query(
+      faceClustersTable,
+      columns: [fcClusterID, fcFaceId],
+      where:
+          '$fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})',
+      whereArgs: clusterIDs,
+    );
+
     for (final map in maps) {
       final clusterID = map[fcClusterID] as String;
       final faceID = map[fcFaceId] as String;
@@ -541,7 +566,7 @@ class FaceMLDataDB {
       while (true) {
         // Query a batch of rows
         final List<Map<String, dynamic>> maps = await db.getAll(
-          'SELECT $faceIDColumn, $faceEmbeddingBlob, $faceScore, $faceBlur, $isSideways FROM $facesTable'
+          'SELECT $faceIDColumn, $embeddingColumn, $faceScore, $faceBlur, $isSideways FROM $facesTable'
           ' WHERE $faceScore > $minScore AND $faceBlur > $minClarity'
           ' ORDER BY $faceIDColumn'
           ' DESC LIMIT $batchSize OFFSET $offset',
@@ -560,7 +585,7 @@ class FaceMLDataDB {
           final faceInfo = FaceDbInfoForClustering(
             faceID: faceID,
             clusterId: faceIdToClusterId[faceID],
-            embeddingBytes: map[faceEmbeddingBlob] as Uint8List,
+            embeddingBytes: map[embeddingColumn] as Uint8List,
             faceScore: map[faceScore] as double,
             blurValue: map[faceBlur] as double,
             isSideways: (map[isSideways] as int) == 1,
@@ -594,7 +619,7 @@ class FaceMLDataDB {
     while (true) {
       // Query a batch of rows
       final String query = '''
-        SELECT $faceIDColumn, $faceEmbeddingBlob 
+        SELECT $faceIDColumn, $embeddingColumn 
         FROM $facesTable 
         WHERE $faceIDColumn IN (${faceIDs.map((id) => "'$id'").join(",")}) 
         ORDER BY $faceIDColumn DESC 
@@ -607,7 +632,7 @@ class FaceMLDataDB {
       }
       for (final map in maps) {
         final faceID = map[faceIDColumn] as String;
-        result[faceID] = map[faceEmbeddingBlob] as Uint8List;
+        result[faceID] = map[embeddingColumn] as Uint8List;
       }
       if (result.length > 10000) {
         break;

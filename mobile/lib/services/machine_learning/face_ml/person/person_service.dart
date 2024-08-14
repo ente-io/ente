@@ -4,11 +4,11 @@ import "dart:developer";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
