@@ -417,9 +417,12 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
     }
 }
 
+let done = false;
 async function getAllPeople(limit: number = undefined) {
     if (!(await wipClusterEnable())) return [];
+    if (done) return [];
 
+    done = true;
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
         await syncPersons();
         const people = await persons();
