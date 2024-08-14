@@ -35,8 +35,8 @@ platform. Private sharing. Collaborative albums. Family plans. Easy import,
 easier export. Background uploads. The list goes on. And of course, all of this,
 while being fully end-to-end encrypted.
 
-Ente Photos is a paid service, but we offer a free trial. You can also clone
-this repository and choose to self host.
+Ente Photos is a paid service, but we offer 5GB of free storage.
+You can also clone this repository and choose to self-host.
 
 <br />
 
