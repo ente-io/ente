@@ -83,7 +83,7 @@ class PersonFaceWidget extends StatelessWidget {
       final PersonEntity? personEntity =
           await PersonService.instance.getPerson(personId!);
       if (personEntity != null) {
-        personAvatarFaceID = personEntity.data.avatarFaceId;
+        personAvatarFaceID = personEntity.data.avatarFaceID;
       }
     }
     return await FaceMLDataDB.instance.getCoverFaceForPerson(
