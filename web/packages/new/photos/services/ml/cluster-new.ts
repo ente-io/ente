@@ -60,7 +60,7 @@ export interface Person {
      * The ID of the face that should be used as the display face, to represent
      * this person in the UI.
      */
-    avatarFaceID: string;
+    avatarFaceID: string | undefined;
 }
 
 /**

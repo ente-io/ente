@@ -3,6 +3,8 @@ import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
+import type { Person } from "./ml/cluster-new";
+import { applyPersonDiff } from "./ml/db";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
@@ -135,36 +137,39 @@ export const userEntityDiff = async (
  *
  * This fetches all the user entities corresponding to the "person_v2" entity
  * type from remote that have been created, updated or deleted since the last
- * time we checked. This diff is then applied to the data we have persisted
- * locally.
+ * time we checked.
+ *
+ * This diff is then applied to the data we have persisted locally.
  */
-export const personDiff = async (
-    entityKeyB64: string,
-): Promise<RemotePerson[]> => {
-    const sinceTime = 0;
+export const syncPersons = async (entityKeyB64: string) => {
+    const type: EntityType = "person";
 
-    const parse = (data: Uint8Array) =>
-        RemotePerson.parse(JSON.parse(new TextDecoder().decode(data)));
+    const parse = ({ id, data }: UserEntity): Person => {
+        const rp = RemotePerson.parse(
+            JSON.parse(new TextDecoder().decode(data)),
+        );
+        return {
+            id,
+            name: rp.name,
+            clusterIDs: rp.assigned.map(({ id }) => id),
+            avatarFaceID: undefined,
+        };
+    };
 
-    const result: RemotePerson[] = [];
+    let sinceTime = (await latestUpdatedAt(type)) ?? 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
     while (true) {
-        const entities = await userEntityDiff("person", 0, entityKeyB64);
+        const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (entities.length == 0) break;
 
-        const latestUpdatedAt = entities.reduce(
+        await applyPersonDiff(entities.map((e) => (e.data ? parse(e) : e.id)));
+
+        sinceTime = entities.reduce(
             (max, e) => Math.max(max, e.updatedAt),
             sinceTime,
         );
-
-        const people = entities
-            .map(({ data }) => (data ? parse(data) : undefined))
-            .filter((p) => !!p);
-        // TODO-Cluster
-        console.log({ latestUpdatedAt, people });
-        return people;
+        await setLatestUpdatedAt(type, sinceTime);
     }
-    return result;
 };
 
 /**

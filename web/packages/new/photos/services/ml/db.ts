@@ -445,11 +445,54 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
 };
 
 /**
+ * Update the person store to reflect the given changes, in order.
+ *
+ * @param changes A list of changes to apply. Each entry is either
+ *
+ * -   A string, in which case the person with the given string as their ID
+ *     should be deleted from the store, or
+ *
+ * -   A person, in which case it should add or overwrite the entry for the
+ *     corresponding person (as identified by their {@link id}).
+ */
+export const applyPersonDiff = async (changes: (string | Person)[]) => {
+    const db = await mlDB();
+    const tx = db.transaction("person", "readwrite");
+    // We want to do the changes in order, so we shouldn't use Promise.all.
+    for (const change of changes) {
+        await (typeof change == "string"
+            ? tx.store.delete(change)
+            : tx.store.put(change));
+    }
+    return tx.done;
+};
+
+/**
+ * Add or overwrite the entry for the given {@link person}, as identified by
+ * their {@link id}.
+ */
+export const savePerson = async (person: Person) => {
+    const db = await mlDB();
+    const tx = db.transaction("person", "readwrite");
+    await Promise.all([tx.store.put(person), tx.done]);
+};
+
+/**
+ * Delete the entry for the persons with the given {@link id}, if any.
+ */
+export const deletePerson = async (id: string) => {
+    const db = await mlDB();
+    const tx = db.transaction("person", "readwrite");
+    await Promise.all([tx.store.delete(id), tx.done]);
+};
+
+/**
  * Replace the persons stored locally with the given ones.
  *
  * This function deletes all entries from the person object store, and then
  * inserts the given {@link persons} into it.
  */
+// TODO-Cluster: Remove me
 export const setPersons = async (persons: Person[]) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");

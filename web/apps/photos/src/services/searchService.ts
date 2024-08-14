@@ -10,7 +10,7 @@ import {
     wipClusterEnable,
 } from "@/new/photos/services/ml";
 import type { SearchPerson } from "@/new/photos/services/search";
-import { personDiff } from "@/new/photos/services/user-entity";
+import { syncPersons } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -421,7 +421,7 @@ async function getAllPeople(limit: number = undefined) {
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
         const entityKey = await getEntityKey("person" as EntityType);
-        const peopleR = await personDiff(entityKey.data);
+        const peopleR = await syncPersons(entityKey.data);
         const r = peopleR.length;
         log.debug(() => ["people", peopleR]);
 
