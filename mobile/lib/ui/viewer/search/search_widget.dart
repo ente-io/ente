@@ -87,16 +87,19 @@ class SearchWidgetState extends State<SearchWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    //https://api.flutter.dev/flutter/dart-ui/FlutterView-class.html
     _bottomPadding =
         (MediaQuery.viewInsetsOf(context).bottom - _distanceOfWidgetFromBottom);
     if (_bottomPadding < 0) {
       _bottomPadding = 0;
+    } else if (_bottomPadding != 0) {
+      _bottomPadding += MediaQuery.viewPaddingOf(context).bottom;
     }
   }
 
   @override
   void dispose() {
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     focusNode.dispose();
     _tabDoubleTapEvent?.cancel();
     textController.removeListener(textControllerListener);

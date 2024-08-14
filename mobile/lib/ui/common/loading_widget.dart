@@ -25,6 +25,7 @@ class EnteLoadingWidget extends StatelessWidget {
           child: CircularProgressIndicator(
             strokeWidth: 2,
             color: color ?? getEnteColorScheme(context).strokeBase,
+            strokeCap: StrokeCap.round,
           ),
         ),
       ),

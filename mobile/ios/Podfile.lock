@@ -161,6 +161,8 @@ PODS:
     - nanopb/encode (= 2.30910.0)
   - nanopb/decode (2.30910.0)
   - nanopb/encode (2.30910.0)
+  - native_video_player (1.0.0):
+    - Flutter
   - onnxruntime (0.0.1):
     - Flutter
     - onnxruntime-objc (= 1.18.0)
@@ -277,6 +279,7 @@ DEPENDENCIES:
   - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
+  - native_video_player (from `.symlinks/plugins/native_video_player/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
   - open_mail_app (from `.symlinks/plugins/open_mail_app/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
@@ -393,6 +396,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
+  native_video_player:
+    :path: ".symlinks/plugins/native_video_player/ios"
   onnxruntime:
     :path: ".symlinks/plugins/onnxruntime/ios"
   open_mail_app:
@@ -481,6 +486,7 @@ SPEC CHECKSUMS:
   motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
+  native_video_player: d12af78a1a4a8cf09775a5177d5b392def6fd23c
   onnxruntime: e7c2ae44385191eaad5ae64c935a72debaddc997
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
   onnxruntime-objc: b6fab0f1787aa6f7190c2013f03037df4718bd8b
