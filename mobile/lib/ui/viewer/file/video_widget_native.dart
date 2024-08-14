@@ -128,8 +128,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    // player.dispose();
-
     _controller?.onPlaybackEnded.removeListener(_onPlaybackEnded);
     _controller?.onPlaybackReady.removeListener(_onPlaybackReady);
     _controller?.onError.removeListener(_onError);
@@ -296,7 +294,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                                             _,
                                                           ) {
                                                             return Text(
-                                                              secondsToDuration(
+                                                              _secondsToDuration(
                                                                 value,
                                                               ),
                                                               style:
@@ -351,7 +349,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
   }
 
-  String secondsToDuration(int totalSeconds) {
+  String _secondsToDuration(int totalSeconds) {
     final hours = totalSeconds ~/ 3600;
     final minutes = (totalSeconds % 3600) ~/ 60;
     final seconds = totalSeconds % 60;
@@ -391,7 +389,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     NativeVideoPlayerController controller,
   ) async {
     try {
-      _logger.info("Initializing native video player controller");
+      _logger.info(
+        "Initializing native video player controller for file gen id: ${widget.file.generatedID}",
+      );
       _controller = controller;
 
       controller.onError.addListener(_onError);
@@ -406,7 +406,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       );
       await controller.loadVideoSource(videoSource);
     } catch (e) {
-      _logger.severe("Error initializing native video player controller", e);
+      _logger.severe(
+        "Error initializing native video player controller for file gen id: ${widget.file.generatedID}",
+        e,
+      );
     }
   }
 
@@ -426,8 +429,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
-  ///Need to not execute this if the status change is coming from a video getting
-  ///played in loop.
   void _onPlaybackStatusChanged() {
     if (_isSeeking.value || _controller?.playbackInfo?.positionFraction == 1) {
       return;
@@ -454,7 +455,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   void _onError() {
     //This doesn't work all the time
-    _logger.severe("Error in native video player controller");
+    _logger.severe(
+      "Error in native video player controller for file gen id: ${widget.file.generatedID}",
+    );
     _logger.severe(_controller!.onError.value);
   }
 

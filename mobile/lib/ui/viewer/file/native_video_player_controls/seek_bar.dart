@@ -51,6 +51,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     widget.controller.onPlaybackPositionChanged.removeListener(
       _onPlaybackPositionChanged,
     );
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 
