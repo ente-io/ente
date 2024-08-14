@@ -84,7 +84,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
               (snapshot.data?.outgoing.length ?? 0) == 0) {
             return const Center(child: SharedEmptyStateWidget());
           }
-          return _getSharedCollectionsGallery(snapshot.data!);
+          return SafeArea(child: _getSharedCollectionsGallery(snapshot.data!));
         } else if (snapshot.hasError) {
           _logger.severe(
             "critical: failed to load share gallery",

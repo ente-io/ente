@@ -175,7 +175,9 @@ class SubFaqWidget extends StatelessWidget {
             barrierColor: Colors.black87,
             context: context,
             builder: (context) {
-              return const BillingQuestionsWidget();
+              return const SafeArea(
+                child: BillingQuestionsWidget(),
+              );
             },
           );
         },
