@@ -1,11 +1,14 @@
 package authenticaor
 
 import (
+	"errors"
+	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/authenticator"
 	"github.com/ente-io/museum/pkg/repo/authenticator"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"github.com/google/uuid"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,6 +36,9 @@ func (c *Controller) GetKey(ctx *gin.Context) (*model.Key, error) {
 
 // CreateEntity...
 func (c *Controller) CreateEntity(ctx *gin.Context, req model.CreateEntityRequest) (*model.Entity, error) {
+	if err := c.validateKey(ctx); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to validateKey")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
 	id, err := c.Repo.Create(ctx, userID, req)
 	if err != nil {
@@ -47,8 +53,25 @@ func (c *Controller) CreateEntity(ctx *gin.Context, req model.CreateEntityReques
 
 // UpdateEntity...
 func (c *Controller) UpdateEntity(ctx *gin.Context, req model.UpdateEntityRequest) error {
+	if err := c.validateKey(ctx); err != nil {
+		return stacktrace.Propagate(err, "failed to validateKey")
+	}
 	userID := auth.GetUserID(ctx.Request.Header)
+
 	return c.Repo.Update(ctx, userID, req)
+}
+
+func (c *Controller) validateKey(ctx *gin.Context) error {
+	userID := auth.GetUserID(ctx.Request.Header)
+	_, err := c.Repo.GetKey(ctx, userID)
+	if err != nil && errors.Is(err, &ente.ErrNotFoundError) {
+		return stacktrace.Propagate(&ente.ApiError{
+			Code:           ente.AuthKeyNotCreated,
+			Message:        "AuthKey is not created",
+			HttpStatusCode: http.StatusBadRequest,
+		}, "")
+	}
+	return err
 }
 
 // Delete...
