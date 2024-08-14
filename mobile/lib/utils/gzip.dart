@@ -105,6 +105,9 @@ ChaChaEncryptionResult _gzipAndEncryptJsonSync(
 Map<String, dynamic> _decryptAndUnzipJsonSync(
   Map<String, dynamic> args,
 ) {
-  return decryptAndUnzipJsonSync(args["key"],
-      encryptedData: args["encryptedData"], header: args["header"]);
+  return decryptAndUnzipJsonSync(
+    args["key"],
+    encryptedData: args["encryptedData"],
+    header: args["header"],
+  );
 }
