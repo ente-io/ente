@@ -424,8 +424,6 @@ async function getAllPeople(limit: number = undefined) {
         await syncPersons();
         const people = await persons();
         log.debug(() => ["people", { people }]);
-
-        return [];
     }
 
     let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();

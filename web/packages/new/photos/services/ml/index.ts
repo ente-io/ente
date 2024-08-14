@@ -341,7 +341,16 @@ export const wipCluster = async () => {
 
     const result: SearchPerson[] = [];
     for (const person of people) {
-        const avatarFaceID = person.avatarFaceID;
+        let avatarFaceID = person.avatarFaceID;
+        // TODO-Cluster
+        // Temp
+        if (!avatarFaceID) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            avatarFaceID = person.clusterIDs
+                .map((id) => clusterByID.get(id))
+                .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
+        }
+        person.clusterIDs;
         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
         if (!avatarFaceFileID || !avatarFaceFile) {
