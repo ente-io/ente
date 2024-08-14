@@ -89,6 +89,10 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 					continue
 				} else if existingEntry.IsLivePhoto() && errors.Is(err, model.ErrLiveZip) {
 					continue
+				} else if model.IsBadTimeStampError(err) {
+					log.Printf("Skipping file due to error %s (%d)", existingEntry.GetTitle(), existingEntry.ID)
+					log.Printf("CreationTime %v, ModidicationTime %v", existingEntry.GetCreationTime(), existingEntry.GetModificationTime())
+					continue
 				} else {
 					return err
 				}
