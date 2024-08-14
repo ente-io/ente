@@ -447,7 +447,7 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
 /**
  * Update the person store to reflect the given changes, in order.
  *
- * @param changes A list of changes to apply. Each entry is either
+ * @param diff A list of changes to apply. Each entry is either
  *
  * -   A string, in which case the person with the given string as their ID
  *     should be deleted from the store, or
@@ -455,15 +455,15 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
  * -   A person, in which case it should add or overwrite the entry for the
  *     corresponding person (as identified by their {@link id}).
  */
-export const applyPersonDiff = async (changes: (string | Person)[]) => {
+export const applyPersonDiff = async (diff: (string | Person)[]) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");
-    // We want to do the changes in order, so we shouldn't use Promise.all.
-    for (const change of changes) {
-        await (typeof change == "string"
-            ? tx.store.delete(change)
-            : tx.store.put(change));
-    }
+    // See: [Note: Diff response will have at most one entry for an id]
+    await Promise.all(
+        diff.map((d) =>
+            typeof d == "string" ? tx.store.delete(d) : tx.store.put(d),
+        ),
+    );
     return tx.done;
 };
 
@@ -471,6 +471,7 @@ export const applyPersonDiff = async (changes: (string | Person)[]) => {
  * Add or overwrite the entry for the given {@link person}, as identified by
  * their {@link id}.
  */
+// TODO-Cluster: Remove me
 export const savePerson = async (person: Person) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");
@@ -480,6 +481,7 @@ export const savePerson = async (person: Person) => {
 /**
  * Delete the entry for the persons with the given {@link id}, if any.
  */
+// TODO-Cluster: Remove me
 export const deletePerson = async (id: string) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");

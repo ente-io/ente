@@ -95,7 +95,7 @@ const RemoteUserEntity = z.object({
  * @param entityKeyB64 The base64 encoded key to use for decrypting the
  * encrypted contents of the user entity.
  *
- * [Note: Diff contents]
+ * [Note: Diff response will have at most one entry for an id]
  *
  * Unlike git diffs which track all changes, the diffs we get from remote are
  * guaranteed to contain only one entry (upsert or delete) for particular Ente
