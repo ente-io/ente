@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/base"
+	"strings"
 )
 
 type EntityType string
@@ -11,21 +12,20 @@ type EntityType string
 const (
 	Location EntityType = "location"
 	Person   EntityType = "person"
-	// Profile is a new version of Person entity, where the data is gzipped before encryption
-	Profile EntityType = "profile"
+	// CGroup is a new version of Person entity, where the data is gzipped before encryption
+	CGroup EntityType = "cgroup"
 )
 
 func (et EntityType) IsValid() error {
-
 	switch et {
-	case Location, Person, Profile:
+	case Location, Person, CGroup:
 		return nil
 	}
 	return ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid EntityType: %s", et))
 }
 
 func (et EntityType) GetNewID() (*string, error) {
-	return base.NewID(string(et))
+	return base.NewID(strings.ToLower(string(et)))
 }
 
 type EntityKey struct {
