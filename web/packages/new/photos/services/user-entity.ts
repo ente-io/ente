@@ -1,21 +1,29 @@
-import { decryptMetadataBytes } from "@/base/crypto/ente";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
+import { sharedCryptoWorker } from "@/base/crypto";
+import { decryptAssociatedB64Data } from "@/base/crypto/ente";
+import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
+import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
+import { usersEncryptionKeyB64 } from "@/base/session-store";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
+import { gunzip } from "./gzip";
+import type { CGroup } from "./ml/cluster-new";
+import { applyCGroupDiff } from "./ml/db";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
  * can store for their account.
  *
- * e.g. location tags, people in their photos.
+ * e.g. location tags, cluster groups.
  */
 export type EntityType =
-    | "person"
     /**
-     * A new version of the Person entity where the data is gzipped before
-     * encryption.
+     * A cluster group.
+     *
+     * Format: An encrypted string containing a gzipped JSON string representing
+     * the cgroup data.
      */
-    | "person_v2";
+    "cgroup";
 
 /**
  * The maximum number of items to fetch in a single diff
@@ -52,6 +60,10 @@ const defaultDiffLimit = 500;
  */
 interface UserEntity {
     /**
+     * A UUID or nanoid for the entity.
+     */
+    id: string;
+    /**
      * Arbitrary data associated with the entity. The format of this data is
      * specific to each entity type.
      *
@@ -64,18 +76,31 @@ interface UserEntity {
     updatedAt: number;
 }
 
+/** Zod schema for {@link RemoteUserEntity} */
 const RemoteUserEntity = z.object({
-    /** Base64 string containing the encrypted contents of the entity. */
-    encryptedData: z.string(),
-    /** Base64 string containing the decryption header. */
-    header: z.string(),
+    id: z.string(),
+    /**
+     * Base64 string containing the encrypted contents of the entity.
+     *
+     * Will be `null` when isDeleted is true.
+     */
+    encryptedData: z.string().nullable(),
+    /**
+     * Base64 string containing the decryption header.
+     *
+     * Will be `null` when isDeleted is true.
+     */
+    header: z.string().nullable(),
     isDeleted: z.boolean(),
     updatedAt: z.number(),
 });
 
+/** An item in the user entity diff response we get from remote. */
+type RemoteUserEntity = z.infer<typeof RemoteUserEntity>;
+
 /**
- * Fetch all user entities of the given type that have been created or updated
- * since the given time.
+ * Fetch the next batch of user entities of the given type that have been
+ * created or updated since the given time.
  *
  * @param type The type of the entities to fetch.
  *
@@ -85,14 +110,47 @@ const RemoteUserEntity = z.object({
  *
  * @param entityKeyB64 The base64 encoded key to use for decrypting the
  * encrypted contents of the user entity.
+ *
+ * [Note: Diff response will have at most one entry for an id]
+ *
+ * Unlike git diffs which track all changes, the diffs we get from remote are
+ * guaranteed to contain only one entry (upsert or delete) for particular Ente
+ * object. This holds true irrespective of the diff limit.
+ *
+ * For example, in the user entity diff response, it is guaranteed that there
+ * will only be at max one entry for a particular entity id. The entry will have
+ * no data to indicate that the corresponding entity was deleted. Otherwise,
+ * when the data is present, it is taken as the creation of a new entity or the
+ * updation of an existing one.
+ *
+ * This behaviour comes from how remote stores the underlying, e.g., entities. A
+ * diff returns just entities whose updation times greater than the provided
+ * since time (limited to the given diff limit). So there will be at most one
+ * row for a particular entity id. And if that entity has been deleted, then the
+ * row will be a tombstone so data will be not be present.
  */
 export const userEntityDiff = async (
     type: EntityType,
     sinceTime: number,
     entityKeyB64: string,
 ): Promise<UserEntity[]> => {
+    const parse = async ({
+        id,
+        encryptedData,
+        header,
+        isDeleted,
+        updatedAt,
+    }: RemoteUserEntity) => ({
+        id,
+        data:
+            encryptedData && header && !isDeleted
+                ? await decrypt(encryptedData, header)
+                : undefined,
+        updatedAt,
+    });
+
     const decrypt = (encryptedDataB64: string, decryptionHeaderB64: string) =>
-        decryptMetadataBytes({
+        decryptAssociatedB64Data({
             encryptedDataB64,
             decryptionHeaderB64,
             keyB64: entityKeyB64,
@@ -111,26 +169,213 @@ export const userEntityDiff = async (
     const entities = z
         .object({ diff: z.array(RemoteUserEntity) })
         .parse(await res.json()).diff;
-    return Promise.all(
-        entities.map(
-            async ({ encryptedData, header, isDeleted, updatedAt }) => ({
-                data: isDeleted
-                    ? undefined
-                    : await decrypt(encryptedData, header),
-                updatedAt,
-            }),
-        ),
-    );
+    return Promise.all(entities.map(parse));
 };
 
 /**
- * Fetch all Person entities that have been created or updated since the last
- * time we checked.
+ * Return the entity key that can be used to decrypt the encrypted contents of
+ * user entities of the given {@link type}.
+ *
+ * 1.  We'll see if we have the (encrypted) entity key present locally. If so,
+ *     we'll decrypt it using the user's master key and return it.
+ *
+ * 2.  Otherwise we'll fetch the entity key for that type from remote. If found,
+ *     we'll decrypte it using the user's master key and return it, also saving
+ *     it locally for future use.
+ *
+ * 3.  Otherwise we'll create a new one, save it locally and put it to remote.
+ *
+ * See also, [Note: User entity keys].
  */
-export const personDiff = async (entityKeyB64: string) => {
-    const entities = await userEntityDiff("person", 0, entityKeyB64);
-    return entities.map(({ data }) => {
-        if (!data) return undefined;
-        return JSON.parse(new TextDecoder().decode(data)) as unknown;
-    });
+const getOrCreateEntityKeyB64 = async (type: EntityType) => {
+    const encryptionKeyB64 = await usersEncryptionKeyB64();
+    const worker = await sharedCryptoWorker();
+
+    const decrypt = async ({ encryptedKey, header }: RemoteUserEntityKey) => {
+        return worker.decryptB64(encryptedKey, header, encryptionKeyB64);
+    };
+
+    // See if we already have it locally.
+    const saved = await savedRemoteUserEntityKey(type);
+    if (saved) return decrypt(saved);
+
+    // See if remote already has it.
+    const existing = await getUserEntityKey(type);
+    if (existing) {
+        // Only save it if we can decrypt it to avoid corrupting our local state
+        // in unforeseen circumstances.
+        const result = decrypt(existing);
+        await saveRemoteUserEntityKey(type, existing);
+        return result;
+    }
+
+    // Nada. Create a new one, put it to remote, save it locally, and return.
+    // TODO-Cluster Keep this read only, only add the writeable bits after other
+    // stuff has been tested.
+    throw new Error("Not implemented");
+    // const generatedKeyB64 = await worker.generateEncryptionKey();
+    // const encryptedNewKey = await worker.encryptToB64(
+    //     generatedKeyB64,
+    //     encryptionKeyB64,
+    // );
+    // await postUserEntityKey(type, newKey);
+    // return decrypt(newKey);
 };
+
+const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
+
+/**
+ * Return the locally persisted {@link RemoteUserEntityKey}, if any,
+ * corresponding the given {@link type}.
+ */
+const savedRemoteUserEntityKey = (
+    type: EntityType,
+): Promise<RemoteUserEntityKey | undefined> =>
+    getKV(entityKeyKey(type)).then((s) =>
+        s ? RemoteUserEntityKey.parse(JSON.parse(s)) : undefined,
+    );
+
+/**
+ * Setter for {@link entityKey}.
+ */
+const saveRemoteUserEntityKey = (
+    type: EntityType,
+    entityKey: RemoteUserEntityKey,
+) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
+
+/**
+ * Fetch the encryption key for the given user entity {@link type} from remote.
+ *
+ * [Note: User entity keys]
+ *
+ * There is one encryption key (itself encrypted with the user's encryption key)
+ * for each user entity type. If the key doesn't exist on remote, then the
+ * client is expected to create one on the user's behalf. Remote will disallow
+ * attempts to multiple keys for the same user entity type.
+ */
+const getUserEntityKey = async (
+    type: EntityType,
+): Promise<RemoteUserEntityKey | undefined> => {
+    const params = new URLSearchParams({ type });
+    const url = await apiURL("/user-entity/key");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    if (!res.ok) {
+        // Remote says HTTP 404 Not Found if there is no key yet for the user.
+        if (res.status == 404) return undefined;
+        throw new HTTPError(res);
+    } else {
+        return RemoteUserEntityKey.parse(await res.json());
+    }
+};
+
+const RemoteUserEntityKey = z.object({
+    encryptedKey: z.string(),
+    header: z.string(),
+});
+
+type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
+
+/**
+ * Create a new encryption key for the given user entity {@link type} on remote.
+ *
+ * See: [Note: User entity keys]
+ */
+// TODO-Cluster remove export
+export const postUserEntityKey = async (
+    type: EntityType,
+    entityKey: RemoteUserEntityKey,
+) => {
+    const url = await apiURL("/user-entity/key");
+    const res = await fetch(url, {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({ type, ...entityKey }),
+    });
+    ensureOk(res);
+};
+
+const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
+
+/**
+ * Return the locally persisted value for the latest `updatedAt` time for the
+ * given entity {@link type}.
+ *
+ * This is used to checkpoint diffs, so that we can resume fetching from the
+ * last time we did a fetch.
+ */
+const savedLatestUpdatedAt = (type: EntityType) =>
+    getKVN(latestUpdatedAtKey(type));
+
+/**
+ * Setter for {@link savedLatestUpdatedAt}.
+ */
+const saveLatestUpdatedAt = (type: EntityType, value: number) =>
+    setKV(latestUpdatedAtKey(type), value);
+
+/**
+ * Sync the {@link CGroup} entities that we have locally with remote.
+ *
+ * This fetches all the user entities corresponding to the "cgroup" entity type
+ * from remote that have been created, updated or deleted since the last time we
+ * checked.
+ *
+ * This diff is then applied to the data we have persisted locally.
+ */
+export const syncCGroups = async () => {
+    const type: EntityType = "cgroup";
+
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type);
+
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
+        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
+        return {
+            id,
+            name: rp.name,
+            clusterIDs: rp.assigned.map(({ id }) => id),
+            isHidden: rp.isHidden,
+            avatarFaceID: rp.avatarFaceID,
+            displayFaceID: undefined,
+        };
+    };
+
+    let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+    while (true) {
+        const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
+        if (entities.length == 0) break;
+
+        await applyCGroupDiff(
+            await Promise.all(
+                entities.map(async ({ id, data }) =>
+                    data ? await parse(id, data) : id,
+                ),
+            ),
+        );
+
+        sinceTime = entities.reduce(
+            (max, entity) => Math.max(max, entity.updatedAt),
+            sinceTime,
+        );
+        await saveLatestUpdatedAt(type, sinceTime);
+    }
+};
+
+/** Zod schema for the {@link RemoteCGroup} type. */
+const RemoteCGroup = z.object({
+    name: z.string().nullish().transform(nullToUndefined),
+    assigned: z.array(
+        z.object({
+            id: z.string(),
+            faces: z.string().array(),
+        }),
+    ),
+    isHidden: z.boolean(),
+    avatarFaceID: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Contents of a "cgroup" user entity, as synced via remote.
+ */
+type RemoteCGroup = z.infer<typeof RemoteCGroup>;

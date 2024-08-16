@@ -18,6 +18,7 @@ import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import type { SearchPerson } from "../search";
 import type { UploadItem } from "../upload/types";
 import { clusterFaces } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
@@ -27,7 +28,6 @@ import {
     faceIndexes,
     indexableAndIndexedCounts,
 } from "./db";
-import type { Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -270,24 +270,40 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
     updateRemoteFlag(mlRemoteKey, enabled);
 
 /**
- * Trigger a "sync", whatever that means for the ML subsystem.
+ * Sync the ML status with remote.
  *
- * This is called during the global sync sequence.
+ * This is called an at early point in the global sync sequence, without waiting
+ * for the potentially long file information sync to complete.
  *
- * * It checks with remote if the ML flag is set, and updates our local flag to
- *   reflect that value.
+ * It checks with remote if the ML flag is set, and updates our local flag to
+ * reflect that value.
  *
- * * If ML is enabled, it pulls any missing embeddings from remote and starts
- *   indexing to backfill any missing values.
+ * To trigger the actual ML sync, use {@link triggerMLSync}.
+ */
+export const triggerMLStatusSync = () => void mlStatusSync();
+
+const mlStatusSync = async () => {
+    _state.isMLEnabled = await getIsMLEnabledRemote();
+    setIsMLEnabledLocal(_state.isMLEnabled);
+    triggerStatusUpdate();
+};
+
+/**
+ * Trigger a ML sync.
+ *
+ * This is called during the global sync sequence, after files information have
+ * been synced with remote.
+ *
+ * If ML is enabled, it pulls any missing embeddings from remote and starts
+ * indexing to backfill any missing values.
+ *
+ * This will only have an effect if {@link triggerMLSync} has been called at
+ * least once prior to calling this in the sync sequence.
  */
 export const triggerMLSync = () => void mlSync();
 
 const mlSync = async () => {
-    _state.isMLEnabled = await getIsMLEnabledRemote();
-    setIsMLEnabledLocal(_state.isMLEnabled);
-    triggerStatusUpdate();
-
-    if (_state.isMLEnabled) void worker().then((w) => w.sync());
+    if (_state.isMLEnabled) await worker().then((w) => w.sync());
 };
 
 /**
@@ -314,7 +330,8 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-let last: Person[] | undefined;
+// TODO-Cluster temporary import here
+let last: SearchPerson[] | undefined;
 
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
@@ -330,32 +347,48 @@ export const wipCluster = async () => {
 
     if (last) return last;
 
-    const clusters = clusterFaces(await faceIndexes());
+    const { clusters, cgroups } = await clusterFaces(await faceIndexes());
+    const clusterByID = new Map(
+        clusters.map((cluster) => [cluster.id, cluster]),
+    );
 
     const localFiles = await getAllLocalFiles();
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    const people: Person[] = []; // await mlIDbStorage.getAllPeople();
-    for (const cluster of clusters) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const dfID = cluster.faceIDs[0]!;
-        const dfFile = localFilesByID.get(fileIDFromFaceID(dfID) ?? 0);
-        if (!dfFile) {
-            assertionFailed(`Face ID ${dfID} without local file`);
+    const result: SearchPerson[] = [];
+    for (const cgroup of cgroups) {
+        let avatarFaceID = cgroup.avatarFaceID;
+        // TODO-Cluster
+        // Temp
+        if (!avatarFaceID) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            avatarFaceID = cgroup.clusterIDs
+                .map((id) => clusterByID.get(id))
+                .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
+        }
+        cgroup.clusterIDs;
+        const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
+        const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
+        if (!avatarFaceFileID || !avatarFaceFile) {
+            assertionFailed(`Face ID ${avatarFaceID} without local file`);
             continue;
         }
-        people.push({
-            id: Math.random(), //cluster.id,
-            name: "test",
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            files: cluster.faceIDs.map((s) => parseInt(s.split("_")[0]!)),
-            displayFaceID: dfID,
-            displayFaceFile: dfFile,
+        const files = cgroup.clusterIDs
+            .map((id) => clusterByID.get(id))
+            .flatMap((cluster) => cluster?.faceIDs ?? [])
+            .map((faceID) => fileIDFromFaceID(faceID))
+            .filter((fileID) => fileID !== undefined);
+        result.push({
+            id: cgroup.id,
+            name: cgroup.name,
+            files,
+            displayFaceID: avatarFaceID,
+            displayFaceFile: avatarFaceFile,
         });
     }
 
-    last = people;
-    return people;
+    last = result;
+    return result;
 };
 
 export type MLStatus =
@@ -510,7 +543,8 @@ export const unidentifiedFaceIDs = async (
 };
 
 /**
- * Extract the ID of the {@link EnteFile} to which a face belongs from its ID.
+ * Extract the fileID of the {@link EnteFile} to which the face belongs from its
+ * faceID.
  */
 const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");

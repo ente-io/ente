@@ -9,8 +9,9 @@ import {
     wipCluster,
     wipClusterEnable,
 } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
-import { personDiff } from "@/new/photos/services/user-entity";
+import { clusterGroups } from "@/new/photos/services/ml/db";
+import type { SearchPerson } from "@/new/photos/services/search";
+import { syncCGroups } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -27,7 +28,7 @@ import {
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
 import { getFormattedDate } from "utils/search";
-import { getEntityKey, getLatestEntities } from "./entityService";
+import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
@@ -406,7 +407,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { files: option.value as number[] };
 
         case SuggestionType.PERSON:
-            return { person: option.value as Person };
+            return { person: option.value as SearchPerson };
 
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FileType };
@@ -416,20 +417,19 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
     }
 }
 
+let done = false;
 async function getAllPeople(limit: number = undefined) {
     if (!(await wipClusterEnable())) return [];
+    if (done) return [];
 
+    done = true;
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-        const entityKey = await getEntityKey("person" as EntityType);
-        const peopleR = await personDiff(entityKey.data);
-        const r = peopleR.length;
-        log.debug(() => ["people", peopleR]);
-
-        if (r) return [];
-        return [];
+        await syncCGroups();
+        const people = await clusterGroups();
+        log.debug(() => ["people", { people }]);
     }
 
-    let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
+    let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
     people = await wipCluster();
     // await mlPeopleStore.iterate<Person, void>((person) => {
     //     people.push(person);

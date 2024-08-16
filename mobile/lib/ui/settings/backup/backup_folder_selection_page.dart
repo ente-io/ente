@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:animated_list_plus/animated_list_plus.dart';
@@ -14,6 +13,7 @@ import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/remote_sync_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -148,61 +148,61 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   },
                 ),
           Expanded(child: _getFolders()),
-          Column(
-            children: [
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).colorScheme.background,
-                      blurRadius: 24,
-                      offset: const Offset(0, -8),
-                      spreadRadius: 4,
-                    ),
-                  ],
-                ),
-                padding: widget.isOnboarding
-                    ? const EdgeInsets.only(left: 20, right: 20)
-                    : EdgeInsets.only(
-                        top: 16,
-                        left: 20,
-                        right: 20,
-                        bottom: Platform.isIOS ? 60 : 32,
-                      ),
-                child: OutlinedButton(
-                  onPressed:
-                      widget.isOnboarding && _selectedDevicePathIDs.isEmpty
-                          ? null
-                          : () async {
-                              await updateFolderSettings();
-                            },
-                  child: Text(widget.buttonText),
-                ),
-              ),
-              widget.isOnboarding
-                  ? GestureDetector(
-                      key: const ValueKey("skipBackupButton"),
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          top: 16,
-                          bottom: Platform.isIOS ? 48 : 32,
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: getEnteColorScheme(context).backgroundBase,
+                          blurRadius: 24,
+                          offset: const Offset(0, -8),
+                          spreadRadius: 4,
                         ),
-                        child: Text(
-                          S.of(context).skip,
-                          style:
-                              Theme.of(context).textTheme.bodySmall!.copyWith(
+                      ],
+                    ),
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: OutlinedButton(
+                      onPressed:
+                          widget.isOnboarding && _selectedDevicePathIDs.isEmpty
+                              ? null
+                              : () async {
+                                  await updateFolderSettings();
+                                },
+                      child: Text(widget.buttonText),
+                    ),
+                  ),
+                  widget.isOnboarding
+                      ? const SizedBox(height: 20)
+                      : const SizedBox.shrink(),
+                  widget.isOnboarding
+                      ? GestureDetector(
+                          key: const ValueKey("skipBackupButton"),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              S.of(context).skip,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .copyWith(
                                     decoration: TextDecoration.underline,
                                   ),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ],
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ],
+              ),
+            ),
           ),
         ],
       ),

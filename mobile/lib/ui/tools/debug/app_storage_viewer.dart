@@ -34,9 +34,9 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
 
   @override
   void initState() {
+    super.initState();
     internalUser = flagService.internalUser;
     addPath();
-    super.initState();
   }
 
   void addPath() async {

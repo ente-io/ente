@@ -277,7 +277,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       await widget.onSubmit!.call(_textController.text);
     } catch (e) {
       executionState = ExecutionState.error;
-      _debouncer.cancelDebounce();
+      _debouncer.cancelDebounceTimer();
       _exception = e as Exception;
       if (e.toString().contains("Incorrect password")) {
         _logger.warning("Incorrect password");
@@ -290,7 +290,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     widget.alwaysShowSuccessState && _debouncer.isActive()
         ? executionState = ExecutionState.successful
         : null;
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     if (executionState == ExecutionState.successful) {
       setState(() {});
     }

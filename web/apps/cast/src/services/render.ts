@@ -19,6 +19,7 @@ import type {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "@/new/photos/types/file";
+import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -231,24 +232,15 @@ const decryptEnteFile = async (
             ),
         };
     }
-    const file = {
+    return mergeMetadata1({
         ...restFileProps,
         key: fileKey,
+        // @ts-expect-error The types need to be updated here
         metadata: fileMetadata,
+        // @ts-expect-error The types need to be updated here
         magicMetadata: fileMagicMetadata,
         pubMagicMetadata: filePubMagicMetadata,
-    };
-    if (file.pubMagicMetadata?.data.editedTime) {
-        // @ts-expect-error TODO: Need to use zod here.
-        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-    }
-    if (file.pubMagicMetadata?.data.editedName) {
-        // @ts-expect-error TODO: Need to use zod here.
-        file.metadata.title = file.pubMagicMetadata.data.editedName;
-    }
-    // @ts-expect-error TODO: The core types need to be updated to allow the
-    // possibility of missing metadata fields.
-    return file;
+    });
 };
 
 const isFileEligible = (file: EnteFile) => {

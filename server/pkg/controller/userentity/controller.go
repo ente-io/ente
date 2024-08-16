@@ -5,8 +5,6 @@ import (
 	"github.com/ente-io/museum/pkg/repo/userentity"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
-	"github.com/google/uuid"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -52,7 +50,7 @@ func (c *Controller) UpdateEntity(ctx *gin.Context, req model.UpdateEntityDataRe
 }
 
 // Delete...
-func (c *Controller) Delete(ctx *gin.Context, entityID uuid.UUID) (bool, error) {
+func (c *Controller) Delete(ctx *gin.Context, entityID string) (bool, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
 	return c.Repo.Delete(ctx, userID, entityID)
 }

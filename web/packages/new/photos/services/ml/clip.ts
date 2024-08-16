@@ -186,5 +186,8 @@ export const clipMatches = async (
             // This code is on the hot path, so these optimizations help.
             [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
-    return new Map(items.filter(([, score]) => score >= 0.2));
+    // This score threshold was obtain heuristically. 0.2 generally gives solid
+    // results, and around 0.15 we start getting many false positives (all this
+    // is query dependent too).
+    return new Map(items.filter(([, score]) => score >= 0.175));
 };

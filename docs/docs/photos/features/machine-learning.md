@@ -1,7 +1,8 @@
 ---
 title: Machine learning
 description:
-    Ente supports on-device machine learning for face and natural language search
+    Ente supports on-device machine learning for face and natural language
+    search
 ---
 
 # Machine learning
@@ -45,5 +46,6 @@ app is fast enough to easily and seamlessly index the new photos that you take.
 The indexes are synced across all your devices automatically using the same
 end-to-end encypted security that we use for syncing your photos.
 
-Note that the desktop app does not currently support modifying the automatically
-generated face groupings, that is only supported by the mobile app.
+Note that the desktop app does not currently support viewing and modifying the
+automatically generated face groupings, that is only supported by the mobile
+app.

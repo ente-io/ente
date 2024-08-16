@@ -1,7 +1,10 @@
 package userentity
 
 import (
-	"github.com/google/uuid"
+	"fmt"
+	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/ente/base"
+	"strings"
 )
 
 type EntityType string
@@ -9,9 +12,21 @@ type EntityType string
 const (
 	Location EntityType = "location"
 	Person   EntityType = "person"
-	// PersonV2 is a new version of Person entity, where the data is gzipped before encryption
-	PersonV2 EntityType = "person_v2"
+	// CGroup is a new version of Person entity, where the data is gzipped before encryption
+	CGroup EntityType = "cgroup"
 )
+
+func (et EntityType) IsValid() error {
+	switch et {
+	case Location, Person, CGroup:
+		return nil
+	}
+	return ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid EntityType: %s", et))
+}
+
+func (et EntityType) GetNewID() (*string, error) {
+	return base.NewID(strings.ToLower(string(et)))
+}
 
 type EntityKey struct {
 	UserID       int64      `json:"userID" binding:"required"`
@@ -23,7 +38,7 @@ type EntityKey struct {
 
 // EntityData represents a single UserEntity
 type EntityData struct {
-	ID            uuid.UUID  `json:"id" binding:"required"`
+	ID            string     `json:"id" binding:"required"`
 	UserID        int64      `json:"userID" binding:"required"`
 	Type          EntityType `json:"type" binding:"required"`
 	EncryptedData *string    `json:"encryptedData" binding:"required"`
@@ -54,7 +69,7 @@ type EntityDataRequest struct {
 
 // UpdateEntityDataRequest updates the current entity
 type UpdateEntityDataRequest struct {
-	ID            uuid.UUID  `json:"id" binding:"required"`
+	ID            string     `json:"id" binding:"required"`
 	Type          EntityType `json:"type" binding:"required"`
 	EncryptedData string     `json:"encryptedData" binding:"required"`
 	Header        string     `json:"header" binding:"required"`

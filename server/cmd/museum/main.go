@@ -413,11 +413,11 @@ func main() {
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
-	privateAPI.PUT("/files/data/", fileHandler.PutFileData)
-	privateAPI.POST("files/data/fetch", fileHandler.GetFilesData)
-	privateAPI.GET("files/data/fetch", fileHandler.GetFileData)
-	privateAPI.GET("/files/data/preview-upload-url/", fileHandler.GetPreviewUploadURL)
-	privateAPI.GET("/files/data/preview/", fileHandler.GetPreviewURL)
+	privateAPI.PUT("/files/data", fileHandler.PutFileData)
+	privateAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
+	privateAPI.GET("/files/data/fetch", fileHandler.GetFileData)
+	privateAPI.GET("/files/data/preview-upload-url", fileHandler.GetPreviewUploadURL)
+	privateAPI.GET("/files/data/preview", fileHandler.GetPreviewURL)
 
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
 	privateAPI.POST("/files/copy", fileHandler.CopyFiles)

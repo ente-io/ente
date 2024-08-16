@@ -86,7 +86,7 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   }
 
   void _updateSelectedRadius(double radius) {
-    _selectedRadiusDebouncer.cancelDebounce();
+    _selectedRadiusDebouncer.cancelDebounceTimer();
     _selectedRadiusDebouncer.run(() async {
       if (mounted) {
         setState(() {

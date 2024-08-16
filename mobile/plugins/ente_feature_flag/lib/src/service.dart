@@ -69,7 +69,7 @@ class FlagService {
 
   bool get faceSearchEnabled => internalUser || flags.betaUser;
 
-  bool get passKeyEnabled => flags.passKeyEnabled || internalOrBetaUser;
-
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
+
+  bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 }

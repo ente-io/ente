@@ -30,13 +30,13 @@ import {
     saveIndexes,
     updateAssumingLocalFiles,
 } from "./db";
-import {
-    fetchDerivedData,
-    putDerivedData,
-    type RawRemoteDerivedData,
-    type RemoteDerivedData,
-} from "./embedding";
 import { faceIndexingVersion, indexFaces, type FaceIndex } from "./face";
+import {
+    fetchMLData,
+    putMLData,
+    type RawRemoteMLData,
+    type RemoteMLData,
+} from "./ml-data";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 const idleDurationStart = 5; /* 5 seconds */
@@ -47,8 +47,8 @@ interface IndexableItem {
     enteFile: EnteFile;
     /** If the file was uploaded from the current client, then its contents. */
     uploadItem: UploadItem | undefined;
-    /** The existing derived data on remote corresponding to this file. */
-    remoteDerivedData: RemoteDerivedData | undefined;
+    /** The existing ML data on remote corresponding to this file. */
+    remoteMLData: RemoteMLData | undefined;
 }
 
 /**
@@ -78,7 +78,7 @@ interface IndexableItem {
 export class MLWorker {
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private state: "idle" | "tick" | "pull" | "indexing" = "idle";
+    private state: "idle" | "tick" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -111,9 +111,9 @@ export class MLWorker {
      * This function enqueues a backfill attempt and returns immediately without
      * waiting for it complete.
      *
-     * During a backfill, we first attempt to fetch derived data for files which
-     * don't have that data locally. If we fetch and find what we need, we save
-     * it locally. Otherwise we index them.
+     * During a backfill, we first attempt to fetch ML data for files which
+     * don't have that data locally. If on fetching we find what we need, we
+     * save it locally. Otherwise we index them.
      */
     sync() {
         this.wakeUp();
@@ -156,9 +156,8 @@ export class MLWorker {
         // the live queue, it'll later get indexed anyway when we backfill.
         if (this.liveQ.length < 200) {
             // The file is just being uploaded, and so will not have any
-            // pre-existing derived data on remote.
-            const remoteDerivedData = undefined;
-            this.liveQ.push({ enteFile, uploadItem, remoteDerivedData });
+            // pre-existing ML data on remote.
+            this.liveQ.push({ enteFile, uploadItem, remoteMLData: undefined });
             this.wakeUp();
         } else {
             log.debug(() => "Ignoring upload item since liveQ is full");
@@ -235,13 +234,13 @@ export class MLWorker {
             200,
         );
         if (!filesByID.size) return [];
-        // Fetch their existing derived data (if any).
-        const derivedDataByID = await fetchDerivedData(filesByID);
-        // Return files after annotating them with their existing derived data.
+        // Fetch their existing ML data (if any).
+        const mlDataByID = await fetchMLData(filesByID);
+        // Return files after annotating them with their existing ML data.
         return Array.from(filesByID, ([id, file]) => ({
             enteFile: file,
             uploadItem: undefined,
-            remoteDerivedData: derivedDataByID.get(id),
+            remoteMLData: mlDataByID.get(id),
         }));
     }
 }
@@ -387,7 +386,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { enteFile, uploadItem, remoteDerivedData }: IndexableItem,
+    { enteFile, uploadItem, remoteMLData }: IndexableItem,
     electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(enteFile);
@@ -399,8 +398,8 @@ const index = async (
     // Discard any existing data that is made by an older indexing pipelines.
     // See: [Note: Embedding versions]
 
-    const existingRemoteFaceIndex = remoteDerivedData?.parsed?.face;
-    const existingRemoteCLIPIndex = remoteDerivedData?.parsed?.clip;
+    const existingRemoteFaceIndex = remoteMLData?.parsed?.face;
+    const existingRemoteCLIPIndex = remoteMLData?.parsed?.clip;
 
     let existingFaceIndex: FaceIndex | undefined;
     if (
@@ -422,8 +421,8 @@ const index = async (
         existingCLIPIndex = { embedding };
     }
 
-    // If we already have all the derived data fields then just update our local
-    // db and return.
+    // If we already have all the ML data types then just update our local db
+    // and return.
 
     if (existingFaceIndex && existingCLIPIndex) {
         try {
@@ -438,7 +437,7 @@ const index = async (
         return;
     }
 
-    // There is at least one derived data type that still needs to be indexed.
+    // There is at least one ML data type that still needs to be indexed.
 
     const renderableBlob = await fetchRenderableBlob(
         enteFile,
@@ -501,22 +500,22 @@ const index = async (
 
         // Perform an "upsert" by using the existing raw data we got from the
         // remote as the base, and inserting or overwriting any newly indexed
-        // parts. See: [Note: Preserve unknown derived data fields].
+        // parts. See: [Note: Preserve unknown ML data fields].
 
-        const existingRawDerivedData = remoteDerivedData?.raw ?? {};
-        const rawDerivedData: RawRemoteDerivedData = {
-            ...existingRawDerivedData,
+        const existingRawMLData = remoteMLData?.raw ?? {};
+        const rawMLData: RawRemoteMLData = {
+            ...existingRawMLData,
             face: remoteFaceIndex,
             clip: remoteCLIPIndex,
         };
 
-        log.debug(() => ["Uploading derived data", rawDerivedData]);
+        log.debug(() => ["Uploading ML data", rawMLData]);
 
         try {
-            await putDerivedData(enteFile, rawDerivedData);
+            await putMLData(enteFile, rawMLData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            log.error(`Failed to put derived data for ${f}`, e);
+            log.error(`Failed to put ML data for ${f}`, e);
             if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
             throw e;
         }
