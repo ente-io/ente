@@ -2,7 +2,6 @@ import { PeopleList } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import { Row } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
-import { t } from "i18next";
 import { components } from "react-select";
 import { Suggestion, SuggestionType } from "types/search";
 
@@ -36,12 +35,13 @@ const MenuWithPeople = (props) => {
     return (
         <Menu {...props}>
             <Box my={1}>
-                {((isMLEnabled() && indexStatus) ||
+                {/* TODO: Hide People header until we start showing cgroups
+                 {((isMLEnabled() && indexStatus) ||
                     (people && people.length > 0)) && (
                     <Box>
                         <Legend>{t("PEOPLE")}</Legend>
                     </Box>
-                )}
+                )} */}
                 {isMLEnabled() && indexStatus && (
                     <Box>
                         <Caption>{indexStatusSuggestion.label}</Caption>
