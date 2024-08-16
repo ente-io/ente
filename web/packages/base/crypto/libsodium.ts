@@ -171,7 +171,7 @@ export async function fromHex(input: string) {
  *
  * 1.  Box: Using secretbox APIs to encrypt some independent blob of data.
  *
- * 2.  File: Using secretstream APIs in one-shot mode. This is used to encrypt
+ * 2.  Blob: Using secretstream APIs in one-shot mode. This is used to encrypt
  *     data associated to an Ente object (file, collection, entity, etc), when
  *     the data is small-ish (less than a few MBs).
  *
@@ -179,10 +179,10 @@ export async function fromHex(input: string) {
  *     used to encrypt the actual content of the files associated with an
  *     EnteFile object.
  *
- * "File" is not a term of art, it is just something we use to abbreviate
- * "streaming encryption in one-shot mode".
+ * "Blob" is not a prior term of art in this context, it is just something we
+ * use to abbreviate "data encrypted using secretstream APIs in one-shot mode".
  *
- * The distinction between Box and File is also handy since not only does the
+ * The distinction between Box and Blob is also handy since not only does the
  * underlying algorithm differ, but also the terminology that libsodium use for
  * the nonce.
  *
@@ -194,14 +194,14 @@ export async function fromHex(input: string) {
  *
  * However, even for case 1, the functions we expose from libsodium.ts generate
  * the nonce for the caller. So for higher level functions, the difference
- * between Box and File encryption is:
+ * between Box and Blob encryption is:
  *
- * 1.  Box uses Salsa, File uses ChaCha.
+ * 1.  Box uses secretbox APIs (Salsa), Blob uses secretstream APIs (ChaCha).
  *
- * 2.  While both are one-shot, File should generally be used for data
+ * 2.  While both are one-shot, Blob should generally be used for data
  *     associated with an Ente object, and Box for the other cases.
  *
- * 3.  Box returns a "nonce", while File returns a "header".
+ * 3.  Box returns a "nonce", while Blob returns a "header".
  */
 const encryptBox = async ({ data, keyB64 }: EncryptBytes) => {
     await sodium.ready;
