@@ -4,6 +4,7 @@ import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { usersEncryptionKeyB64 } from "@/base/session-store";
+import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
@@ -77,7 +78,9 @@ interface UserEntityChange {
     updatedAt: number;
 }
 
-/** Zod schema for {@link RemoteUserEntityChange} */
+/**
+ * Zod schema for a item in the user entity diff.
+ */
 const RemoteUserEntityChange = z.object({
     id: z.string(),
     /**
@@ -95,9 +98,6 @@ const RemoteUserEntityChange = z.object({
     isDeleted: z.boolean(),
     updatedAt: z.number(),
 });
-
-/** An item in the user entity diff response we get from remote. */
-type RemoteUserEntity = z.infer<typeof RemoteUserEntityChange>;
 
 /**
  * Fetch the next set of changes (upsert or deletion) to user entities of the
@@ -135,21 +135,6 @@ const userEntityDiff = async (
     sinceTime: number,
     entityKeyB64: string,
 ): Promise<UserEntityChange[]> => {
-    const parse = async ({
-        id,
-        encryptedData,
-        header,
-        isDeleted,
-        updatedAt,
-    }: RemoteUserEntity) => ({
-        id,
-        data:
-            encryptedData && header && !isDeleted
-                ? await decrypt(encryptedData, header)
-                : undefined,
-        updatedAt,
-    });
-
     const decrypt = (encryptedDataB64: string, decryptionHeaderB64: string) =>
         decryptAssociatedDataB64({
             encryptedDataB64,
@@ -170,7 +155,17 @@ const userEntityDiff = async (
     const diff = z
         .object({ diff: z.array(RemoteUserEntityChange) })
         .parse(await res.json()).diff;
-    return Promise.all(diff.map(parse));
+    return Promise.all(
+        diff.map(
+            async ({ id, encryptedData, header, isDeleted, updatedAt }) => ({
+                id,
+                data: !isDeleted
+                    ? await decrypt(ensure(encryptedData), ensure(header))
+                    : undefined,
+                updatedAt,
+            }),
+        ),
+    );
 };
 
 /**
