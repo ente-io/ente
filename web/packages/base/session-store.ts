@@ -2,16 +2,16 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { z } from "zod";
 
 /**
- * Return the base64 encoded user's encryption key from session storage.
+ * Return the user's master key (as a base64 string) from session storage.
  *
  * Precondition: The user should be logged in.
  */
-export const usersEncryptionKeyB64 = async () => {
+export const masterKeyB64FromSession = async () => {
     // TODO: Same value as the deprecated SESSION_KEYS.ENCRYPTION_KEY.
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) {
         throw new Error(
-            "The user's encryption key was not found in session storage. Likely they are not logged in.",
+            "The user's master key was not found in session storage. Likely they are not logged in.",
         );
     }
 

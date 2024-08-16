@@ -3,7 +3,7 @@ import { decryptAssociatedDataB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
-import { usersEncryptionKeyB64 } from "@/base/session-store";
+import { masterKeyB64FromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
@@ -172,19 +172,21 @@ const userEntityDiff = async (
  * Return the entity key that can be used to decrypt the encrypted contents of
  * user entities of the given {@link type}.
  *
- * 1.  We'll see if we have the (encrypted) entity key present locally. If so,
- *     we'll decrypt it using the user's master key and return it.
+ * 1.  See if we have the encrypted entity key present locally. If so, return
+ *     the entity key by decrypting it using with the user's master key.
  *
- * 2.  Otherwise we'll fetch the entity key for that type from remote. If found,
- *     we'll decrypte it using the user's master key and return it, also saving
- *     it locally for future use.
+ * 2.  Otherwise fetch the encrypted entity key for that type from remote. If we
+ *     get one, obtain the entity key by decrypt the encrypted one using the
+ *     user's master key, save it locally for future use, and return it.
  *
- * 3.  Otherwise we'll create a new one, save it locally and put it to remote.
+ * 3.  Otherwise generate a new entity key, encrypt it using the user's master
+ *     key, putting the encrypted one to remote and also saving it locally, and
+ *     return it.
  *
  * See also, [Note: User entity keys].
  */
 const getOrCreateEntityKeyB64 = async (type: EntityType) => {
-    const encryptionKeyB64 = await usersEncryptionKeyB64();
+    const encryptionKeyB64 = await masterKeyB64FromSession();
     const worker = await sharedCryptoWorker();
 
     const decrypt = async ({ encryptedKey, header }: RemoteUserEntityKey) => {
@@ -244,10 +246,10 @@ const saveRemoteUserEntityKey = (
  *
  * [Note: User entity keys]
  *
- * There is one encryption key (itself encrypted with the user's encryption key)
- * for each user entity type. If the key doesn't exist on remote, then the
- * client is expected to create one on the user's behalf. Remote will disallow
- * attempts to multiple keys for the same user entity type.
+ * There is one encryption key (itself encrypted with the user's master key) for
+ * each user entity type. If the key doesn't exist on remote, then the client is
+ * expected to create one on the user's behalf. Remote will disallow attempts to
+ * multiple keys for the same user entity type.
  */
 const getUserEntityKey = async (
     type: EntityType,
