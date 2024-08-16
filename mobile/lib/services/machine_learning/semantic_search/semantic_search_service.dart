@@ -34,7 +34,7 @@ class SemanticSearchService {
 
   static final Computer _computer = Computer.shared();
   final LRUMap<String, List<double>> _queryCache = LRUMap(20);
-  static const kMinimumSimilarityThreshold = 0.20;
+  static const kMinimumSimilarityThreshold = 0.175;
 
   final _reloadCacheDebouncer = Debouncer(
     const Duration(milliseconds: 4000),
