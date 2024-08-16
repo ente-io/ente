@@ -215,22 +215,21 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
           isGestureDetectorDisabled: true,
         ),
         // show the progress map if in debug mode
-        if (flagService.internalUser)
-          ..._progressMap.entries.map((entry) {
-            return MenuItemWidget(
-              key: ValueKey(entry.value),
-              captionedTextWidget: CaptionedTextWidget(
-                title: entry.key,
-              ),
-              trailingWidget: Text(
-                '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              singleBorderRadius: 8,
-              alignCaptionedTextToLeft: true,
-              isGestureDetectorDisabled: true,
-            );
-          }),
+        ..._progressMap.entries.map((entry) {
+          return MenuItemWidget(
+            key: ValueKey(entry.value),
+            captionedTextWidget: CaptionedTextWidget(
+              title: entry.key,
+            ),
+            trailingWidget: Text(
+              '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            singleBorderRadius: 8,
+            alignCaptionedTextToLeft: true,
+            isGestureDetectorDisabled: true,
+          );
+        }),
       ],
     );
   }
