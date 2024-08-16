@@ -73,6 +73,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       await MLDataDB.instance.getIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await MLDataDB.instance.clipIndexedFileWithVersion();
+  final Set<int> queuedFiledIDs = {};
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFiles();
@@ -86,6 +87,11 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     if (_skipAnalysisEnteFile(enteFile)) {
       continue;
     }
+    if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
+      continue;
+    }
+    queuedFiledIDs.add(enteFile.uploadedFileID!);
+
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
@@ -108,6 +114,10 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     if (_skipAnalysisEnteFile(enteFile)) {
       continue;
     }
+    if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
+      continue;
+    }
+    queuedFiledIDs.add(enteFile.uploadedFileID!);
     final shouldRunFaces =
         _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
