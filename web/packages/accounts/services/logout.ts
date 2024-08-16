@@ -21,6 +21,8 @@ export const accountLogout = async () => {
     const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
+    log.info("logout (account)");
+
     try {
         await remoteLogout();
     } catch (e) {
