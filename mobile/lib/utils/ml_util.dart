@@ -52,9 +52,9 @@ Future<IndexStatus> getIndexStatus() async {
   try {
     final int indexableFiles = (await getIndexableFileIDs()).length;
     final int facesIndexedFiles =
-        await FaceMLDataDB.instance.getIndexedFileCount();
+        await MLDataDB.instance.getIndexedFileCount();
     final int clipIndexedFiles =
-        await FaceMLDataDB.instance.getClipIndexedFileCount();
+        await MLDataDB.instance.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
 
     final showIndexedFiles = math.min(indexedFiles, indexableFiles);
@@ -71,9 +71,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
   final Map<int, int> faceIndexedFileIDs =
-      await FaceMLDataDB.instance.getIndexedFileIds();
+      await MLDataDB.instance.getIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
-      await FaceMLDataDB.instance.clipIndexedFileWithVersion();
+      await MLDataDB.instance.clipIndexedFileWithVersion();
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFiles();

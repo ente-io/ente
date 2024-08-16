@@ -143,8 +143,8 @@ class FaceRecognitionService {
           }
         }
       }
-      await FaceMLDataDB.instance.bulkInsertFaces(faces);
-      await FaceMLDataDB.instance.putMany(clipEmbeddings);
+      await MLDataDB.instance.bulkInsertFaces(faces);
+      await MLDataDB.instance.putMany(clipEmbeddings);
     }
     // Yield any remaining instructions
     if (batchToYield.isNotEmpty) {

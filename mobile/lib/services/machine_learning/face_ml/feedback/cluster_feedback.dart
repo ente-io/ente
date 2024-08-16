@@ -78,11 +78,11 @@ class ClusterFeedbackService {
       // Get the files for the suggestions
       final suggestionClusterIDs = foundSuggestions.map((e) => e.$1).toSet();
       final Map<int, Set<String>> fileIdToClusterID =
-          await FaceMLDataDB.instance.getFileIdToClusterIDSetForCluster(
+          await MLDataDB.instance.getFileIdToClusterIDSetForCluster(
         suggestionClusterIDs,
       );
       final clusterIdToFaceIDs =
-          await FaceMLDataDB.instance.getClusterToFaceIDs(suggestionClusterIDs);
+          await MLDataDB.instance.getClusterToFaceIDs(suggestionClusterIDs);
       final Map<String, List<EnteFile>> clusterIDToFiles = {};
       final allFiles = await SearchService.instance.getAllFiles();
       for (final f in allFiles) {
@@ -141,7 +141,7 @@ class ClusterFeedbackService {
     try {
       _logger.info('removeFilesFromPerson called');
       // Get the relevant faces to be removed
-      final faceIDs = await FaceMLDataDB.instance
+      final faceIDs = await MLDataDB.instance
           .getFaceIDsForPerson(p.remoteID)
           .then((iterable) => iterable.toList());
       faceIDs.retainWhere((faceID) {
@@ -149,7 +149,7 @@ class ClusterFeedbackService {
         return files.any((file) => file.uploadedFileID == fileID);
       });
       final embeddings =
-          await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+          await MLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
 
       if (faceIDs.isEmpty || embeddings.isEmpty) {
         _logger.severe(
@@ -175,8 +175,8 @@ class ClusterFeedbackService {
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
 
       // Update the deleted faces
-      await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
-      await FaceMLDataDB.instance
+      await MLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+      await MLDataDB.instance
           .clusterSummaryUpdate(clusterResult.newClusterSummaries);
 
       // Make sure the deleted faces don't get suggested in the future
@@ -184,7 +184,7 @@ class ClusterFeedbackService {
       for (final clusterId in newFaceIdToClusterID.values.toSet()) {
         notClusterIdToPersonId[clusterId] = p.remoteID;
       }
-      await FaceMLDataDB.instance
+      await MLDataDB.instance
           .bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
 
       // Update remote so new sync does not undo this change
@@ -207,7 +207,7 @@ class ClusterFeedbackService {
     _logger.info('removeFilesFromCluster called');
     try {
       // Get the relevant faces to be removed
-      final faceIDs = await FaceMLDataDB.instance
+      final faceIDs = await MLDataDB.instance
           .getFaceIDsForCluster(clusterID)
           .then((iterable) => iterable.toList());
       faceIDs.retainWhere((faceID) {
@@ -215,7 +215,7 @@ class ClusterFeedbackService {
         return files.any((file) => file.uploadedFileID == fileID);
       });
       final embeddings =
-          await FaceMLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
+          await MLDataDB.instance.getFaceEmbeddingMapForFaces(faceIDs);
 
       if (faceIDs.isEmpty || embeddings.isEmpty) {
         _logger.severe(
@@ -241,8 +241,8 @@ class ClusterFeedbackService {
       final newFaceIdToClusterID = clusterResult.newFaceIdToCluster;
 
       // Update the deleted faces
-      await FaceMLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
-      await FaceMLDataDB.instance
+      await MLDataDB.instance.forceUpdateClusterIds(newFaceIdToClusterID);
+      await MLDataDB.instance
           .clusterSummaryUpdate(clusterResult.newClusterSummaries);
 
       Bus.instance.fire(
@@ -265,7 +265,7 @@ class ClusterFeedbackService {
     for (final faceID in faceIDs) {
       faceIDToClusterID[faceID] = clusterID;
     }
-    await FaceMLDataDB.instance.forceUpdateClusterIds(faceIDToClusterID);
+    await MLDataDB.instance.forceUpdateClusterIds(faceIDToClusterID);
     Bus.instance.fire(PeopleChangedEvent());
     return;
   }
@@ -274,7 +274,7 @@ class ClusterFeedbackService {
     PersonEntity p, {
     required String personClusterID,
   }) async {
-    final faceMlDb = FaceMLDataDB.instance;
+    final faceMlDb = MLDataDB.instance;
     final faceIDs = await faceMlDb.getFaceIDsForCluster(personClusterID);
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     if (faceIDs.length < 2 * kMinimumClusterSizeSearchResult) {
@@ -323,7 +323,7 @@ class ClusterFeedbackService {
 
     for (final suggestion in suggestions) {
       final clusterID = suggestion.$1;
-      await FaceMLDataDB.instance.assignClusterToPerson(
+      await MLDataDB.instance.assignClusterToPerson(
         personID: p.remoteID,
         clusterID: clusterID,
       );
@@ -341,7 +341,7 @@ class ClusterFeedbackService {
   }
 
   Future<List<(String, int)>> checkForMixedClusters() async {
-    final faceMlDb = FaceMLDataDB.instance;
+    final faceMlDb = MLDataDB.instance;
     final allClusterToFaceCount = await faceMlDb.clusterIdToFaceCount();
     final clustersToInspect = <String>[];
     for (final clusterID in allClusterToFaceCount.keys) {
@@ -439,7 +439,7 @@ class ClusterFeedbackService {
     _logger.info(
       'breakUpCluster called for cluster $clusterID with dbscan $useDbscan',
     );
-    final faceMlDb = FaceMLDataDB.instance;
+    final faceMlDb = MLDataDB.instance;
 
     final faceIDs = await faceMlDb.getFaceIDsForCluster(clusterID);
     final originalFaceIDsSet = faceIDs.toSet();
@@ -502,18 +502,18 @@ class ClusterFeedbackService {
   }) async {
     final w = (kDebugMode ? EnteWatch('getSuggestions') : null)?..start();
     // Get all the cluster data
-    final faceMlDb = FaceMLDataDB.instance;
+    final faceMlDb = MLDataDB.instance;
     final allClusterIdsToCountMap = await faceMlDb.clusterIdToFaceCount();
     final ignoredClusters = await faceMlDb.getPersonIgnoredClusters(p.remoteID);
     final personClusters = await faceMlDb.getPersonClusterIDs(p.remoteID);
     final personFaceIDs =
-        await FaceMLDataDB.instance.getFaceIDsForPerson(p.remoteID);
+        await MLDataDB.instance.getFaceIDsForPerson(p.remoteID);
     final personFileIDs = personFaceIDs.map(getFileIdFromFaceId).toSet();
     w?.log(
       '${p.data.name} has ${personClusters.length} existing clusters, getting all database data done',
     );
     final allClusterIdToFaceIDs =
-        await FaceMLDataDB.instance.getAllClusterIdToFaceIDs();
+        await MLDataDB.instance.getAllClusterIdToFaceIDs();
     w?.log('getAllClusterIdToFaceIDs done');
 
     // First only do a simple check on the big clusters, if the person does not have small clusters yet
@@ -552,7 +552,7 @@ class ClusterFeedbackService {
           final overlap = personFileIDs.intersection(suggestionSet);
           if (overlap.isNotEmpty &&
               ((overlap.length / suggestionSet.length) > 0.5)) {
-            await FaceMLDataDB.instance.captureNotPersonFeedback(
+            await MLDataDB.instance.captureNotPersonFeedback(
               personID: p.remoteID,
               clusterID: suggestion.$1,
             );
@@ -599,7 +599,7 @@ class ClusterFeedbackService {
     final List<Uint8List> personEmbeddingsProto = [];
     for (final clusterID in personClusters) {
       final Iterable<Uint8List> embeddings =
-          await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
+          await MLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
       personEmbeddingsProto.addAll(embeddings);
     }
     final List<Uint8List> sampledEmbeddingsProto =
@@ -622,7 +622,7 @@ class ClusterFeedbackService {
     double minMedianDistance = maxMedianDistance;
     for (final otherClusterId in otherClusterIdsCandidates) {
       final Iterable<Uint8List> otherEmbeddingsProto =
-          await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(
+          await MLDataDB.instance.getFaceEmbeddingsForCluster(
         otherClusterId,
       );
       final sampledOtherEmbeddingsProto = _randomSampleWithoutReplacement(
@@ -698,7 +698,7 @@ class ClusterFeedbackService {
   }) async {
     final w = (kDebugMode ? EnteWatch('_getUpdateClusterAvg') : null)?..start();
     final startTime = DateTime.now();
-    final faceMlDb = FaceMLDataDB.instance;
+    final faceMlDb = MLDataDB.instance;
     _logger.info(
       'start getUpdateClusterAvg for ${allClusterIdsToCountMap.length} clusters, minClusterSize $minClusterSize, maxClusterInCurrentRun $maxClusterInCurrentRun',
     );
@@ -775,8 +775,7 @@ class ClusterFeedbackService {
     }
 
     final Map<String, Iterable<Uint8List>> clusterEmbeddings =
-        await FaceMLDataDB.instance
-            .getFaceEmbeddingsForClusters(clusterIdsToRead);
+        await MLDataDB.instance.getFaceEmbeddingsForClusters(clusterIdsToRead);
 
     w?.logAndReset(
       'read  $currentPendingRead embeddings for ${clusterEmbeddings.length} clusters',
@@ -887,7 +886,7 @@ class ClusterFeedbackService {
       }
     }
     final startTime = DateTime.now();
-    final faceMlDb = FaceMLDataDB.instance;
+    final faceMlDb = MLDataDB.instance;
 
     // Get the cluster averages for the person's clusters and the suggestions' clusters
     final personClusters = await faceMlDb.getPersonClusterIDs(person.remoteID);
@@ -993,7 +992,7 @@ class ClusterFeedbackService {
 
     // Logging the cluster summary for the cluster
     if (logClusterSummary) {
-      final summaryMap = await FaceMLDataDB.instance.getClusterToClusterSummary(
+      final summaryMap = await MLDataDB.instance.getClusterToClusterSummary(
         [clusterID, biggestClusterID],
       );
       final summary = summaryMap[clusterID];
@@ -1039,8 +1038,7 @@ class ClusterFeedbackService {
 
         // Median distance
         const sampleSize = 100;
-        final Iterable<Uint8List> biggestEmbeddings = await FaceMLDataDB
-            .instance
+        final Iterable<Uint8List> biggestEmbeddings = await MLDataDB.instance
             .getFaceEmbeddingsForCluster(biggestClusterID);
         final List<Uint8List> biggestSampledEmbeddingsProto =
             _randomSampleWithoutReplacement(
@@ -1058,7 +1056,7 @@ class ClusterFeedbackService {
                 .toList(growable: false);
 
         final Iterable<Uint8List> currentEmbeddings =
-            await FaceMLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
+            await MLDataDB.instance.getFaceEmbeddingsForCluster(clusterID);
         final List<Uint8List> currentSampledEmbeddingsProto =
             _randomSampleWithoutReplacement(
           currentEmbeddings,
@@ -1104,7 +1102,7 @@ class ClusterFeedbackService {
 
     // Logging the blur values for the cluster
     if (logBlurValues) {
-      final List<double> blurValues = await FaceMLDataDB.instance
+      final List<double> blurValues = await MLDataDB.instance
           .getBlurValuesForCluster(clusterID)
           .then((value) => value.toList());
       final blurValuesIntegers =

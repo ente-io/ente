@@ -7,18 +7,18 @@ import "package:photos/db/ml/db_fields.dart";
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/models/ml/clip.dart";
 
-extension EmbeddingsDB on FaceMLDataDB {
+extension EmbeddingsDB on MLDataDB {
   static const databaseName = "ente.embeddings.db";
 
   Future<List<ClipEmbedding>> getAll() async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     final results = await db.getAll('SELECT * FROM $clipTable');
     return _convertToEmbeddings(results);
   }
 
   // Get indexed FileIDs
   Future<Map<int, int>> clipIndexedFileWithVersion() async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     final maps = await db
         .getAll('SELECT $fileIDColumn , $mlVersionColumn FROM $clipTable');
     final Map<int, int> result = {};
@@ -29,7 +29,7 @@ extension EmbeddingsDB on FaceMLDataDB {
   }
 
   Future<int> getClipIndexedFileCount() async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     const String query =
         'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
@@ -37,7 +37,7 @@ extension EmbeddingsDB on FaceMLDataDB {
   }
 
   Future<void> put(ClipEmbedding embedding) async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     await db.execute(
       'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
       _getRowFromEmbedding(embedding),
@@ -46,7 +46,7 @@ extension EmbeddingsDB on FaceMLDataDB {
   }
 
   Future<void> putMany(List<ClipEmbedding> embeddings) async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
     await db.executeBatch(
       'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
@@ -56,7 +56,7 @@ extension EmbeddingsDB on FaceMLDataDB {
   }
 
   Future<void> deleteEmbeddings(List<int> fileIDs) async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
@@ -64,7 +64,7 @@ extension EmbeddingsDB on FaceMLDataDB {
   }
 
   Future<void> deleteClipIndexes() async {
-    final db = await FaceMLDataDB.instance.asyncDB;
+    final db = await MLDataDB.instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }

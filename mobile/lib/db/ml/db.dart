@@ -17,7 +17,7 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/ml_util.dart";
 import 'package:sqlite_async/sqlite_async.dart';
 
-/// Stores all data for the FacesML-related features. The database can be accessed by `FaceMLDataDB.instance.database`.
+/// Stores all data for the FacesML-related features. The database can be accessed by `MLDataDB.instance.database`.
 ///
 /// This includes:
 /// [facesTable] - Stores all the detected faces and its embeddings in the images.
@@ -25,16 +25,16 @@ import 'package:sqlite_async/sqlite_async.dart';
 /// [clusterPersonTable] - Stores all the clusters that are mapped to a certain person.
 /// [clusterSummaryTable] - Stores a summary of each cluster, containg the mean embedding and the number of faces in the cluster.
 /// [notPersonFeedback] - Stores the clusters that are confirmed not to belong to a certain person by the user
-class FaceMLDataDB {
-  static final Logger _logger = Logger("FaceMLDataDB");
+class MLDataDB {
+  static final Logger _logger = Logger("MLDataDB");
 
   static const _databaseName = "ente.face_ml_db_v3.db";
 
   // static const _databaseVersion = 1;
 
-  FaceMLDataDB._privateConstructor();
+  MLDataDB._privateConstructor();
 
-  static final FaceMLDataDB instance = FaceMLDataDB._privateConstructor();
+  static final MLDataDB instance = MLDataDB._privateConstructor();
 
   static final _migrationScripts = [
     createFacesTable,
@@ -62,10 +62,10 @@ class FaceMLDataDB {
     final asyncDBConnection =
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
     final stopwatch = Stopwatch()..start();
-    _logger.info("FaceMLDataDB: Starting migration");
+    _logger.info("MLDataDB: Starting migration");
     await _migrate(asyncDBConnection);
     _logger.info(
-      "FaceMLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
+      "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
 
@@ -355,7 +355,8 @@ class FaceMLDataDB {
       if (faces != null) {
         for (final face in faces) {
           if (faceMaps.any(
-              (element) => (element[faceIDColumn] as String) == face.faceID,)) {
+            (element) => (element[faceIDColumn] as String) == face.faceID,
+          )) {
             return face;
           }
         }

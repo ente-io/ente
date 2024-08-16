@@ -113,7 +113,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await FaceMLDataDB.instance.deleteClipIndexes();
+    await MLDataDB.instance.deleteClipIndexes();
     final preferences = await SharedPreferences.getInstance();
     await preferences.remove("sync_time_embeddings_v3");
     _logger.info("Indexes cleared");
@@ -122,7 +122,7 @@ class SemanticSearchService {
   Future<void> _loadImageEmbeddings() async {
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
-    _cachedImageEmbeddings = await FaceMLDataDB.instance.getAll();
+    _cachedImageEmbeddings = await MLDataDB.instance.getAll();
     final endTime = DateTime.now();
     _logger.info(
       "Loading ${_cachedImageEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
@@ -134,7 +134,7 @@ class SemanticSearchService {
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
     final uploadedFileIDs = await getIndexableFileIDs();
-    final embeddedFileIDs = await FaceMLDataDB.instance.getIndexedFileIds();
+    final embeddedFileIDs = await MLDataDB.instance.getIndexedFileIds();
     embeddedFileIDs.removeWhere((key, value) => value < clipMlVersion);
 
     return uploadedFileIDs.difference(embeddedFileIDs.keys.toSet()).toList();
@@ -187,7 +187,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(FaceMLDataDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
     }
 
     return results;
@@ -230,7 +230,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(FaceMLDataDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
     }
 
     final matchingFileIDs = <int>[];
@@ -262,12 +262,12 @@ class SemanticSearchService {
       embedding: clipResult.embedding,
       version: clipMlVersion,
     );
-    await FaceMLDataDB.instance.put(embedding);
+    await MLDataDB.instance.put(embedding);
   }
 
   static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
     final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await FaceMLDataDB.instance.put(embedding);
+    await MLDataDB.instance.put(embedding);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {

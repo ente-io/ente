@@ -59,7 +59,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
       children: [
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<int>(
-            future: FaceMLDataDB.instance.getIndexedFileCount(),
+            future: MLDataDB.instance.getIndexedFileCount(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
@@ -176,7 +176,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<double>(
-            future: FaceMLDataDB.instance.getClusteredToIndexableFilesRatio(),
+            future: MLDataDB.instance.getClusteredToIndexableFilesRatio(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
@@ -266,7 +266,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
-                  await FaceMLDataDB.instance.dropFeedbackTables();
+                  await MLDataDB.instance.dropFeedbackTables();
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
@@ -299,7 +299,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   for (final PersonEntity p in persons) {
                     await PersonService.instance.deletePerson(p.remoteID);
                   }
-                  await FaceMLDataDB.instance.dropClustersAndPersonTable();
+                  await MLDataDB.instance.dropClustersAndPersonTable();
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
@@ -327,7 +327,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
-                  await FaceMLDataDB.instance
+                  await MLDataDB.instance
                       .dropClustersAndPersonTable(faces: true);
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");

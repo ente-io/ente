@@ -199,7 +199,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     );
     if (yesOrNo) {
       canGiveFeedback = false;
-      await FaceMLDataDB.instance.assignClusterToPerson(
+      await MLDataDB.instance.assignClusterToPerson(
         personID: widget.person.remoteID,
         clusterID: clusterID,
       );
@@ -233,7 +233,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     int numberOfSuggestions,
   ) async {
     canGiveFeedback = false;
-    await FaceMLDataDB.instance.captureNotPersonFeedback(
+    await MLDataDB.instance.captureNotPersonFeedback(
       personID: widget.person.remoteID,
       clusterID: clusterID,
     );
@@ -489,7 +489,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );
       } else {
-        await FaceMLDataDB.instance.removeNotPersonFeedback(
+        await MLDataDB.instance.removeNotPersonFeedback(
           personID: widget.person.remoteID,
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );

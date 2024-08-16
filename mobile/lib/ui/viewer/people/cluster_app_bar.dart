@@ -196,10 +196,10 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               breakupResult.newFaceIdToCluster;
 
           // Update to delete the old clusters and save the new clusters
-          await FaceMLDataDB.instance.deleteClusterSummary(widget.clusterID);
-          await FaceMLDataDB.instance
+          await MLDataDB.instance.deleteClusterSummary(widget.clusterID);
+          await MLDataDB.instance
               .clusterSummaryUpdate(breakupResult.newClusterSummaries);
-          await FaceMLDataDB.instance
+          await MLDataDB.instance
               .updateFaceIdToClusterId(newFaceIdToClusterID);
 
           // Find the biggest cluster

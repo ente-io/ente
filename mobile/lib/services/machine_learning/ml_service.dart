@@ -125,7 +125,7 @@ class MLService {
       await sync();
 
       final int unclusteredFacesCount =
-          await FaceMLDataDB.instance.getUnclusteredFaceCount();
+          await MLDataDB.instance.getUnclusteredFaceCount();
       if (unclusteredFacesCount > _kForceClusteringFaceCount) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
@@ -220,13 +220,13 @@ class MLService {
       _showClusteringIsHappening = true;
 
       // Get a sense of the total number of faces in the database
-      final int totalFaces = await FaceMLDataDB.instance
-          .getTotalFaceCount(minFaceScore: minFaceScore);
+      final int totalFaces =
+          await MLDataDB.instance.getTotalFaceCount(minFaceScore: minFaceScore);
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final result = await FaceMLDataDB.instance.getFaceInfoForClustering(
+      final result = await MLDataDB.instance.getFaceInfoForClustering(
         minScore: minFaceScore,
         maxFaces: totalFaces,
       );
@@ -251,7 +251,7 @@ class MLService {
 
       // Get the current cluster statistics
       final Map<String, (Uint8List, int)> oldClusterSummaries =
-          await FaceMLDataDB.instance.getAllClusterSummary();
+          await MLDataDB.instance.getAllClusterSummary();
 
       if (clusterInBuckets) {
         const int bucketSize = 10000;
@@ -310,9 +310,9 @@ class MLService {
             return;
           }
 
-          await FaceMLDataDB.instance
+          await MLDataDB.instance
               .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-          await FaceMLDataDB.instance
+          await MLDataDB.instance
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
           Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
@@ -355,9 +355,9 @@ class MLService {
         _logger.info(
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await FaceMLDataDB.instance
+        await MLDataDB.instance
             .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-        await FaceMLDataDB.instance
+        await MLDataDB.instance
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
         Bus.instance.fire(PeopleChangedEvent());
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
@@ -484,7 +484,7 @@ class MLService {
             'Skipped putting embedding because of error ${result.toJsonString()}',
           );
         }
-        await FaceMLDataDB.instance.bulkInsertFaces(faces);
+        await MLDataDB.instance.bulkInsertFaces(faces);
       }
 
       if (result.clipRan) {
@@ -500,7 +500,7 @@ class MLService {
         e,
         s,
       );
-      await FaceMLDataDB.instance.bulkInsertFaces(
+      await MLDataDB.instance.bulkInsertFaces(
         [Face.empty(instruction.file.uploadedFileID!, error: true)],
       );
       await SemanticSearchService.storeEmptyClipImageResult(

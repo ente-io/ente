@@ -205,7 +205,7 @@ class Configuration {
     await FilesDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
-    await FaceMLDataDB.instance.clearTable();
+    await MLDataDB.instance.clearTable();
 
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();

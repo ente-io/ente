@@ -86,7 +86,7 @@ class PersonFaceWidget extends StatelessWidget {
         personAvatarFaceID = personEntity.data.avatarFaceID;
       }
     }
-    return await FaceMLDataDB.instance.getCoverFaceForPerson(
+    return await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       avatarFaceId: personAvatarFaceID,
       personID: personId,
@@ -174,7 +174,7 @@ class PersonFaceWidget extends StatelessWidget {
     required bool useFullFile,
   }) async {
     try {
-      final Face? face = await FaceMLDataDB.instance.getCoverFaceForPerson(
+      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
         recentFileID: file.uploadedFileID!,
         clusterID: clusterID,
       );

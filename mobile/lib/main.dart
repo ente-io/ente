@@ -311,7 +311,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     }
     PersonService.init(
       EntityService.instance,
-      FaceMLDataDB.instance,
+      MLDataDB.instance,
       preferences,
     );
 

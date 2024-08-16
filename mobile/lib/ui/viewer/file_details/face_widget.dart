@@ -73,12 +73,12 @@ class _FaceWidgetState extends State<FaceWidget> {
                 // Get faceID and double check that it doesn't belong to an existing clusterID. If it does, push that cluster page
                 final w = (kDebugMode ? EnteWatch('FaceWidget') : null)
                   ?..start();
-                final existingClusterID = await FaceMLDataDB.instance
+                final existingClusterID = await MLDataDB.instance
                     .getClusterIDForFaceID(widget.face.faceID);
                 w?.log('getting existing clusterID for faceID');
                 if (existingClusterID != null) {
                   final fileIdsToClusterIds =
-                      await FaceMLDataDB.instance.getFileIdToClusterIds();
+                      await MLDataDB.instance.getFileIdToClusterIds();
                   final files = await SearchService.instance.getAllFiles();
                   final clusterFiles = files
                       .where(
@@ -100,7 +100,7 @@ class _FaceWidgetState extends State<FaceWidget> {
 
                 // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
                 final String newClusterID = ClusterID.generate();
-                await FaceMLDataDB.instance.updateFaceIdToClusterId(
+                await MLDataDB.instance.updateFaceIdToClusterId(
                   {widget.face.faceID: newClusterID},
                 );
 
@@ -124,7 +124,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 );
               } else if (widget.clusterID != null) {
                 final fileIdsToClusterIds =
-                    await FaceMLDataDB.instance.getFileIdToClusterIds();
+                    await MLDataDB.instance.getFileIdToClusterIds();
                 final files = await SearchService.instance.getAllFiles();
                 final clusterFiles = files
                     .where(

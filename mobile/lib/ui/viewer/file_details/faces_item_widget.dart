@@ -66,8 +66,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      final List<Face>? faces = await FaceMLDataDB.instance
-          .getFacesForGivenFileID(file.uploadedFileID!);
+      final List<Face>? faces =
+          await MLDataDB.instance.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
         return [
           const ChipButtonWidget(
@@ -93,12 +93,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      final faceIdsToClusterIds = await FaceMLDataDB.instance
+      final faceIdsToClusterIds = await MLDataDB.instance
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
       final Map<String, PersonEntity> persons =
           await PersonService.instance.getPersonsMap();
       final clusterIDToPerson =
-          await FaceMLDataDB.instance.getClusterIDToPersonID();
+          await MLDataDB.instance.getClusterIDToPersonID();
 
       // Sort faces by name and score
       final faceIdToPersonID = <String, String>{};

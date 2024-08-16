@@ -248,7 +248,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                             return;
                           }
                           userAlreadyAssigned = true;
-                          await FaceMLDataDB.instance.assignClusterToPerson(
+                          await MLDataDB.instance.assignClusterToPerson(
                             personID: person.$1.remoteID,
                             clusterID: widget.cluserID,
                           );

@@ -14,7 +14,7 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
   final EntityService entityService;
-  final FaceMLDataDB faceMLDataDB;
+  final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
   // instance
@@ -30,7 +30,7 @@ class PersonService {
 
   static init(
     EntityService entityService,
-    FaceMLDataDB faceMLDataDB,
+    MLDataDB faceMLDataDB,
     SharedPreferences prefs,
   ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);

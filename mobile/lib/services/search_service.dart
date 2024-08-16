@@ -741,7 +741,7 @@ class SearchService {
   ) async {
     _logger.info('getClusterFilesForPersonID $personID');
     final Map<int, Set<String>> fileIdToClusterID =
-        await FaceMLDataDB.instance.getFileIdToClusterIDSet(personID);
+        await MLDataDB.instance.getFileIdToClusterIDSet(personID);
     _logger.info('faceDbDone getClusterFilesForPersonID $personID');
     final Map<String, List<EnteFile>> clusterIDToFiles = {};
     final allFiles = await getAllFiles();
@@ -766,11 +766,11 @@ class SearchService {
     try {
       debugPrint("getting faces");
       final Map<int, Set<String>> fileIdToClusterID =
-          await FaceMLDataDB.instance.getFileIdToClusterIds();
+          await MLDataDB.instance.getFileIdToClusterIds();
       final Map<String, PersonEntity> personIdToPerson =
           await PersonService.instance.getPersonsMap();
       final clusterIDToPersonID =
-          await FaceMLDataDB.instance.getClusterIDToPersonID();
+          await MLDataDB.instance.getClusterIDToPersonID();
 
       final List<GenericSearchResult> facesResult = [];
       final Map<String, List<EnteFile>> clusterIdToFiles = {};
