@@ -52,32 +52,33 @@ export type EntityType =
 const defaultDiffLimit = 500;
 
 /**
- * A generic user entity.
+ * An entry in the user entity diff.
  *
- * This is an intermediate step, usually what we really want is a version
- * of this with the {@link data} parsed to the specific type of JSON object
- * expected to be associated with this entity type.
+ * Each change either contains the latest data associated with a particular user
+ * entity that has been created or updated, or indicates that the corresponding
+ * entity has been deleted.
  */
-interface UserEntity {
+interface UserEntityChange {
     /**
-     * A UUID or nanoid for the entity.
+     * A UUID or nanoid of the entity.
      */
     id: string;
     /**
-     * Arbitrary data associated with the entity. The format of this data is
-     * specific to each entity type.
+     * Arbitrary (decrypted) data associated with the entity. The format of this
+     * data is specific to each entity type.
      *
      * This will not be present for entities that have been deleted on remote.
      */
     data: Uint8Array | undefined;
     /**
-     * Epoch microseconds denoting when this entity was created or last updated.
+     * Epoch microseconds denoting when this entity was last changed (created or
+     * updated or deleted).
      */
     updatedAt: number;
 }
 
-/** Zod schema for {@link RemoteUserEntity} */
-const RemoteUserEntity = z.object({
+/** Zod schema for {@link RemoteUserEntityChange} */
+const RemoteUserEntityChange = z.object({
     id: z.string(),
     /**
      * Base64 string containing the encrypted contents of the entity.
@@ -96,11 +97,11 @@ const RemoteUserEntity = z.object({
 });
 
 /** An item in the user entity diff response we get from remote. */
-type RemoteUserEntity = z.infer<typeof RemoteUserEntity>;
+type RemoteUserEntity = z.infer<typeof RemoteUserEntityChange>;
 
 /**
- * Fetch the next batch of user entities of the given type that have been
- * created or updated since the given time.
+ * Fetch the next set of changes (upsert or deletion) to user entities of the
+ * given type since the given time.
  *
  * @param type The type of the entities to fetch.
  *
@@ -114,26 +115,26 @@ type RemoteUserEntity = z.infer<typeof RemoteUserEntity>;
  * [Note: Diff response will have at most one entry for an id]
  *
  * Unlike git diffs which track all changes, the diffs we get from remote are
- * guaranteed to contain only one entry (upsert or delete) for particular Ente
+ * guaranteed to contain only one entry (upsert or delete) for a particular Ente
  * object. This holds true irrespective of the diff limit.
  *
- * For example, in the user entity diff response, it is guaranteed that there
- * will only be at max one entry for a particular entity id. The entry will have
- * no data to indicate that the corresponding entity was deleted. Otherwise,
- * when the data is present, it is taken as the creation of a new entity or the
- * updation of an existing one.
+ * For example, in a user entity diff, it is guaranteed that there will only be
+ * at max one entry for a particular entity id. The entry will have no data to
+ * indicate that the corresponding entity was deleted. Otherwise, when the data
+ * is present, it is taken as the creation of a new entity or the updation of an
+ * existing one.
  *
- * This behaviour comes from how remote stores the underlying, e.g., entities. A
+ * This behaviour comes from how remote stores the underlying, say, entities. A
  * diff returns just entities whose updation times greater than the provided
  * since time (limited to the given diff limit). So there will be at most one
  * row for a particular entity id. And if that entity has been deleted, then the
- * row will be a tombstone so data will be not be present.
+ * row will be a tombstone, so data be absent.
  */
-export const userEntityDiff = async (
+const userEntityDiff = async (
     type: EntityType,
     sinceTime: number,
     entityKeyB64: string,
-): Promise<UserEntity[]> => {
+): Promise<UserEntityChange[]> => {
     const parse = async ({
         id,
         encryptedData,
@@ -166,10 +167,10 @@ export const userEntityDiff = async (
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    const entities = z
-        .object({ diff: z.array(RemoteUserEntity) })
+    const diff = z
+        .object({ diff: z.array(RemoteUserEntityChange) })
         .parse(await res.json()).diff;
-    return Promise.all(entities.map(parse));
+    return Promise.all(diff.map(parse));
 };
 
 /**
