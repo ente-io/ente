@@ -8,7 +8,6 @@ class RemoteFlags {
   final bool disableCFWorker;
   final bool mapEnabled;
   final bool faceSearchEnabled;
-  final bool passKeyEnabled;
   final bool recoveryKeyVerified;
   final bool internalUser;
   final bool betaUser;
@@ -19,7 +18,6 @@ class RemoteFlags {
     required this.disableCFWorker,
     required this.mapEnabled,
     required this.faceSearchEnabled,
-    required this.passKeyEnabled,
     required this.recoveryKeyVerified,
     required this.internalUser,
     required this.betaUser,
@@ -31,7 +29,6 @@ class RemoteFlags {
     disableCFWorker: false,
     mapEnabled: false,
     faceSearchEnabled: false,
-    passKeyEnabled: false,
     recoveryKeyVerified: false,
     internalUser: kDebugMode,
     betaUser: kDebugMode,
@@ -45,7 +42,6 @@ class RemoteFlags {
       'disableCFWorker': disableCFWorker,
       'mapEnabled': mapEnabled,
       'faceSearchEnabled': faceSearchEnabled,
-      'passKeyEnabled': passKeyEnabled,
       'recoveryKeyVerified': recoveryKeyVerified,
       'internalUser': internalUser,
       'betaUser': betaUser,
@@ -60,7 +56,6 @@ class RemoteFlags {
       mapEnabled: map['mapEnabled'] ?? defaultValue.mapEnabled,
       faceSearchEnabled:
           map['faceSearchEnabled'] ?? defaultValue.faceSearchEnabled,
-      passKeyEnabled: map['passKeyEnabled'] ?? defaultValue.passKeyEnabled,
       recoveryKeyVerified:
           map['recoveryKeyVerified'] ?? defaultValue.recoveryKeyVerified,
       internalUser: map['internalUser'] ?? defaultValue.internalUser,
