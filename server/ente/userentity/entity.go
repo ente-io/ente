@@ -1,9 +1,5 @@
 package userentity
 
-import (
-	"github.com/google/uuid"
-)
-
 type EntityType string
 
 const (
@@ -23,7 +19,7 @@ type EntityKey struct {
 
 // EntityData represents a single UserEntity
 type EntityData struct {
-	ID            uuid.UUID  `json:"id" binding:"required"`
+	ID            string     `json:"id" binding:"required"`
 	UserID        int64      `json:"userID" binding:"required"`
 	Type          EntityType `json:"type" binding:"required"`
 	EncryptedData *string    `json:"encryptedData" binding:"required"`
@@ -54,7 +50,7 @@ type EntityDataRequest struct {
 
 // UpdateEntityDataRequest updates the current entity
 type UpdateEntityDataRequest struct {
-	ID            uuid.UUID  `json:"id" binding:"required"`
+	ID            string     `json:"id" binding:"required"`
 	Type          EntityType `json:"type" binding:"required"`
 	EncryptedData string     `json:"encryptedData" binding:"required"`
 	Header        string     `json:"header" binding:"required"`

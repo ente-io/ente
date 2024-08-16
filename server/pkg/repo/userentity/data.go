@@ -13,7 +13,7 @@ import (
 )
 
 // Create inserts a new  entry
-func (r *Repository) Create(ctx context.Context, userID int64, entry model.EntityDataRequest) (uuid.UUID, error) {
+func (r *Repository) Create(ctx context.Context, userID int64, entry model.EntityDataRequest) (string, error) {
 	id := uuid.New()
 	err := r.DB.QueryRow(`INSERT into entity_data(
                          id,
@@ -28,12 +28,12 @@ func (r *Repository) Create(ctx context.Context, userID int64, entry model.Entit
 		entry.Header).       // $5 header
 		Scan(&id)
 	if err != nil {
-		return id, stacktrace.Propagate(err, "failed to create enity data")
+		return id.String(), stacktrace.Propagate(err, "failed to create enity data")
 	}
-	return id, nil
+	return id.String(), nil
 }
 
-func (r *Repository) Get(ctx context.Context, userID int64, id uuid.UUID) (*model.EntityData, error) {
+func (r *Repository) Get(ctx context.Context, userID int64, id string) (*model.EntityData, error) {
 	res := model.EntityData{}
 	row := r.DB.QueryRowContext(ctx, `SELECT
 	id, user_id, type, encrypted_data, header, is_deleted, created_at, updated_at
@@ -50,7 +50,7 @@ func (r *Repository) Get(ctx context.Context, userID int64, id uuid.UUID) (*mode
 	return &res, nil
 }
 
-func (r *Repository) Delete(ctx context.Context, userID int64, id uuid.UUID) (bool, error) {
+func (r *Repository) Delete(ctx context.Context, userID int64, id string) (bool, error) {
 	_, err := r.DB.ExecContext(ctx,
 		`UPDATE entity_data SET is_deleted = true, encrypted_data = NULL, header = NULL where id=$1 and user_id = $2`,
 		id, userID)

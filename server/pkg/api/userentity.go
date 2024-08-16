@@ -10,7 +10,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // UserEntityHandler expose request handlers for various operations on user entity
@@ -84,12 +83,8 @@ func (h *UserEntityHandler) UpdateEntity(c *gin.Context) {
 
 // DeleteEntity...
 func (h *UserEntityHandler) DeleteEntity(c *gin.Context) {
-	id, err := uuid.Parse(c.Query("id"))
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "failed to find id"))
-		return
-	}
-	_, err = h.Controller.Delete(c, id)
+	id := c.Query("id")
+	_, err := h.Controller.Delete(c, id)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to delete DeleteEntity"))
 		return
