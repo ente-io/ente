@@ -144,6 +144,10 @@ export const sidebar = [
                         link: "/photos/troubleshooting/thumbnails",
                     },
                     {
+                        text: "Network drives",
+                        link: "/photos/troubleshooting/nas",
+                    },
+                    {
                         text: "Sharing debug logs",
                         link: "/photos/troubleshooting/sharing-logs",
                     },
