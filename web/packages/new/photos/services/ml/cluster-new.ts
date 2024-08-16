@@ -241,10 +241,10 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // clusters as its display face.
 
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-    const people = await clusterGroups();
+    const cgroups = await clusterGroups();
 
-    for (const person of people) {
-        person.avatarFaceID = person.clusterIDs
+    for (const cgroup of cgroups) {
+        cgroup.avatarFaceID = cgroup.clusterIDs
             .map((clusterID) => clusterIndexForClusterID.get(clusterID))
             .map((clusterIndex) =>
                 clusterIndex ? clusters[clusterIndex] : undefined,
@@ -265,7 +265,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             validClusters,
             clusterIndexForClusterID,
             clusterIDForFaceID,
-            people,
+            cgroups,
         },
     ]);
     log.debug(
@@ -273,7 +273,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return { clusters: validClusters, people };
+    return { clusters: validClusters, cgroups };
 };
 
 /**
