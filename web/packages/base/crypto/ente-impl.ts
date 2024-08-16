@@ -20,11 +20,11 @@ export const _encryptAssociatedData = libsodium.encryptBlob;
 
 export const _encryptThumbnail = _encryptAssociatedData;
 
-export const _encryptAssociatedB64Data = (r: EncryptBytes) =>
+export const _encryptAssociatedDataB64 = (r: EncryptBytes) =>
     _encryptAssociatedData(r).then(EncryptedBlobBytesToB64);
 
 export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
-    _encryptAssociatedB64Data({
+    _encryptAssociatedDataB64({
         data: new TextEncoder().encode(JSON.stringify(jsonValue)),
         keyB64,
     });
@@ -33,7 +33,7 @@ export const _decryptAssociatedData = libsodium.decryptBlob;
 
 export const _decryptThumbnail = _decryptAssociatedData;
 
-export const _decryptAssociatedB64Data = async ({
+export const _decryptAssociatedDataB64 = async ({
     encryptedDataB64,
     decryptionHeaderB64,
     keyB64,
@@ -46,5 +46,5 @@ export const _decryptAssociatedB64Data = async ({
 
 export const _decryptMetadataJSON = async (r: DecryptBlobB64) =>
     JSON.parse(
-        new TextDecoder().decode(await _decryptAssociatedB64Data(r)),
+        new TextDecoder().decode(await _decryptAssociatedDataB64(r)),
     ) as unknown;

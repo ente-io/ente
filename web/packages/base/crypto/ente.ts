@@ -96,10 +96,10 @@ export const encryptThumbnail = (r: EncryptBytes) =>
  * A variant of {@link encryptAssociatedData} that returns the encrypted data as
  * a base64 string instead of returning its bytes.
  *
- * Use {@link decryptAssociatedB64Data} to decrypt the result.
+ * Use {@link decryptAssociatedDataB64} to decrypt the result.
  */
-export const encryptAssociatedB64Data = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptAssociatedB64Data(r));
+export const encryptAssociatedDataB64 = (r: EncryptBytes) =>
+    assertInWorker(ei._encryptAssociatedDataB64(r));
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -144,12 +144,12 @@ export const decryptThumbnail = (r: DecryptBlobBytes) =>
  * A variant of {@link decryptAssociatedData} that expects the encrypted data as
  * a base64 encoded string.
  *
- * This is the sibling of {@link decryptAssociatedB64Data}.
+ * This is the sibling of {@link encryptAssociatedDataB64}.
  */
-export const decryptAssociatedB64Data = (r: DecryptBlobB64) =>
+export const decryptAssociatedDataB64 = (r: DecryptBlobB64) =>
     inWorker()
-        ? ei._decryptAssociatedB64Data(r)
-        : sharedCryptoWorker().then((w) => w.decryptAssociatedB64Data(r));
+        ? ei._decryptAssociatedDataB64(r)
+        : sharedCryptoWorker().then((w) => w.decryptAssociatedDataB64(r));
 /**
  * Decrypt the metadata JSON associated with an Ente object.
  *

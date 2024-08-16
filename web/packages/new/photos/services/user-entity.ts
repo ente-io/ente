@@ -1,5 +1,5 @@
 import { sharedCryptoWorker } from "@/base/crypto";
-import { decryptAssociatedB64Data } from "@/base/crypto/ente";
+import { decryptAssociatedDataB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
@@ -150,7 +150,7 @@ export const userEntityDiff = async (
     });
 
     const decrypt = (encryptedDataB64: string, decryptionHeaderB64: string) =>
-        decryptAssociatedB64Data({
+        decryptAssociatedDataB64({
             encryptedDataB64,
             decryptionHeaderB64,
             keyB64: entityKeyB64,
