@@ -303,9 +303,7 @@ const mlStatusSync = async () => {
 export const triggerMLSync = () => void mlSync();
 
 const mlSync = async () => {
-    await mlStatusSync();
-
-    if (_state.isMLEnabled) void worker().then((w) => w.sync());
+    if (_state.isMLEnabled) await worker().then((w) => w.sync());
 };
 
 /**
