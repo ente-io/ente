@@ -3,7 +3,7 @@ import "package:flutter/foundation.dart";
 enum EntityType {
   location,
   person,
-  personV2,
+  cgroup,
   unknown,
 }
 
@@ -13,12 +13,10 @@ EntityType typeFromString(String type) {
       return EntityType.location;
     case "person":
       return EntityType.location;
-    case "person_v2":
-      return EntityType.personV2;
-    case "personV2":
-      return EntityType.personV2;
+    case "cgroup":
+      return EntityType.cgroup;
   }
-  debugPrint("unexpected collection type $type");
+  debugPrint("unexpected entity type $type");
   return EntityType.unknown;
 }
 
@@ -36,8 +34,8 @@ extension EntityTypeExtn on EntityType {
         return "location";
       case EntityType.person:
         return "person";
-      case EntityType.personV2:
-        return "person_v2";
+      case EntityType.cgroup:
+        return "cgroup";
       case EntityType.unknown:
         return "unknown";
     }

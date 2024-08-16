@@ -37,7 +37,7 @@ class PersonService {
   }
 
   Future<List<PersonEntity>> getPersons() async {
-    final entities = await entityService.getEntities(EntityType.personV2);
+    final entities = await entityService.getEntities(EntityType.cgroup);
     return entities
         .map(
           (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
@@ -46,7 +46,7 @@ class PersonService {
   }
 
   Future<PersonEntity?> getPerson(String id) {
-    return entityService.getEntity(EntityType.personV2, id).then((e) {
+    return entityService.getEntity(EntityType.cgroup, id).then((e) {
       if (e == null) {
         return null;
       }
@@ -55,7 +55,7 @@ class PersonService {
   }
 
   Future<Map<String, PersonEntity>> getPersonsMap() async {
-    final entities = await entityService.getEntities(EntityType.personV2);
+    final entities = await entityService.getEntities(EntityType.cgroup);
     final Map<String, PersonEntity> map = {};
     for (var e in entities) {
       final person =
@@ -95,7 +95,7 @@ class PersonService {
             )
             .toList();
         entityService
-            .addOrUpdate(EntityType.personV2, personData.toJson(), id: personID)
+            .addOrUpdate(EntityType.cgroup, personData.toJson(), id: personID)
             .ignore();
         personData.logStats();
       }
@@ -163,7 +163,7 @@ class PersonService {
       isHidden: isHidden,
     );
     final result = await entityService.addOrUpdate(
-      EntityType.personV2,
+      EntityType.cgroup,
       data.toJson(),
     );
     await faceMLDataDB.assignClusterToPerson(
@@ -181,7 +181,7 @@ class PersonService {
     final personData = person.data;
     personData.assigned!.removeWhere((element) => element.id != clusterID);
     await entityService.addOrUpdate(
-      EntityType.personV2,
+      EntityType.cgroup,
       personData.toJson(),
       id: personID,
     );
@@ -216,7 +216,7 @@ class PersonService {
     }
 
     await entityService.addOrUpdate(
-      EntityType.personV2,
+      EntityType.cgroup,
       personData.toJson(),
       id: person.remoteID,
     );
@@ -232,7 +232,7 @@ class PersonService {
       final PersonEntity justName =
           PersonEntity(personID, PersonData(name: entity.data.name));
       await entityService.addOrUpdate(
-        EntityType.personV2,
+        EntityType.cgroup,
         justName.data.toJson(),
         id: personID,
       );
@@ -249,7 +249,7 @@ class PersonService {
 
   Future<void> fetchRemoteClusterFeedback() async {
     await entityService.syncEntities();
-    final entities = await entityService.getEntities(EntityType.personV2);
+    final entities = await entityService.getEntities(EntityType.cgroup);
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
     final Map<String, String> faceIdToClusterID = {};
     final Map<String, String> clusterToPersonID = {};
@@ -307,7 +307,7 @@ class PersonService {
 
   Future<void> _updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
-      EntityType.personV2,
+      EntityType.cgroup,
       updatePerson.data.toJson(),
       id: updatePerson.remoteID,
     );

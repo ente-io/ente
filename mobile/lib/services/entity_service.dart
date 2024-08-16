@@ -101,7 +101,7 @@ class EntityService {
   Future<void> syncEntities() async {
     try {
       await _remoteToLocalSync(EntityType.location);
-      await _remoteToLocalSync(EntityType.personV2);
+      await _remoteToLocalSync(EntityType.cgroup);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
     }
