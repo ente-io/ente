@@ -7,7 +7,7 @@ import { usersEncryptionKeyB64 } from "@/base/session-store";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
-import type { Person } from "./ml/cluster-new";
+import type { CGroup } from "./ml/cluster-new";
 import { applyPersonDiff } from "./ml/db";
 
 /**
@@ -313,7 +313,7 @@ const saveLatestUpdatedAt = (type: EntityType, value: number) =>
     setKV(latestUpdatedAtKey(type), value);
 
 /**
- * Sync the {@link Person} entities that we have locally with remote.
+ * Sync the {@link CGroup} entities that we have locally with remote.
  *
  * This fetches all the user entities corresponding to the "person_v2" entity
  * type from remote that have been created, updated or deleted since the last
@@ -326,7 +326,7 @@ export const syncPersons = async () => {
 
     const entityKeyB64 = await getOrCreateEntityKeyB64(type);
 
-    const parse = async (id: string, data: Uint8Array): Promise<Person> => {
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
         const rp = RemotePerson.parse(JSON.parse(await gunzip(data)));
         return {
             id,

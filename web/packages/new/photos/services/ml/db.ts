@@ -3,7 +3,7 @@ import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
-import type { FaceCluster, Person } from "./cluster-new";
+import type { CGroup, FaceCluster } from "./cluster-new";
 import type { LocalFaceIndex } from "./face";
 
 /**
@@ -50,7 +50,7 @@ interface MLDBSchema extends DBSchema {
     };
     person: {
         key: string;
-        value: Person;
+        value: CGroup;
     };
 }
 
@@ -451,7 +451,7 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
  * -   A person, in which case it should add or overwrite the entry for the
  *     corresponding person (as identified by their {@link id}).
  */
-export const applyPersonDiff = async (diff: (string | Person)[]) => {
+export const applyPersonDiff = async (diff: (string | CGroup)[]) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");
     // See: [Note: Diff response will have at most one entry for an id]
@@ -468,7 +468,7 @@ export const applyPersonDiff = async (diff: (string | Person)[]) => {
  * their {@link id}.
  */
 // TODO-Cluster: Remove me
-export const savePerson = async (person: Person) => {
+export const savePerson = async (person: CGroup) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");
     await Promise.all([tx.store.put(person), tx.done]);
@@ -491,7 +491,7 @@ export const deletePerson = async (id: string) => {
  * inserts the given {@link persons} into it.
  */
 // TODO-Cluster: Remove me
-export const setPersons = async (persons: Person[]) => {
+export const setPersons = async (persons: CGroup[]) => {
     const db = await mlDB();
     const tx = db.transaction("person", "readwrite");
     await tx.store.clear();
