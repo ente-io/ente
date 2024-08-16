@@ -223,18 +223,9 @@ const encryptBox = async ({ data, keyB64 }: EncryptBytes) => {
  *
  * Use {@link decryptBlob} to decrypt the result.
  *
- * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
- *
- * @param data A {@link Uint8Array} containing the bytes that we want to
- * encrypt.
- *
- * @param keyB64 A base64 string containing the encryption key.
- *
- * @returns The encrypted data (bytes) and decryption header pair (base64
- * encoded string). Both these values are needed to decrypt the data. The header
- * does not need to be secret.
+ * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
 export const encryptBlob = async ({
     data,
