@@ -12,6 +12,7 @@ import * as libsodium from "./libsodium";
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
+    encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
     encryptMetadataJSON = ei._encryptMetadataJSON;
     decryptThumbnail = ei._decryptThumbnail;

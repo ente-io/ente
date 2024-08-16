@@ -205,7 +205,7 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
  */
-const encryptBox = async ({
+export const encryptBox = async ({
     data,
     keyB64,
 }: EncryptBytes): Promise<EncryptedBoxBytes> => {

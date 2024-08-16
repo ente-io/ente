@@ -54,6 +54,7 @@ import * as ei from "./ente-impl";
 import type {
     DecryptBlobB64,
     DecryptBlobBytes,
+    EncryptB64,
     EncryptBytes,
     EncryptJSON,
 } from "./types";
@@ -70,6 +71,23 @@ const assertInWorker = <T>(x: T): T => {
     if (!inWorker()) assertionFailed("Currently only usable in a web worker");
     return x;
 };
+
+/**
+ * Encrypt arbitrary data using the given key and a randomly generated nonce.
+ *
+ * Use {@link decryptBoxB64} to decrypt the result.
+ *
+ * ee {@link encryptBox} for the implementation details.
+ *
+ * > The suffix "Box" comes from the fact that it uses the so called secretbox
+ * > APIs provided by libsodium under the hood.
+ * >
+ * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
+ */
+export const encryptBoxB64 = (r: EncryptB64) =>
+    inWorker()
+        ? ei._encryptBoxB64(r)
+        : sharedCryptoWorker().then((w) => w.encryptBoxB64(r));
 
 /**
  * Encrypt arbitrary data associated with an Ente object (file, collection,

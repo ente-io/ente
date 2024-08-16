@@ -1,5 +1,5 @@
 /**
- * An encryption request with the plaintext data as bytes.
+ * An encryption request with the data to encrypt provided as bytes.
  */
 export interface EncryptBytes {
     /**
@@ -13,9 +13,21 @@ export interface EncryptBytes {
 }
 
 /**
- * An encryption request with the plaintext data as a JSON value.
- *
- * This is a variant of {@link EncryptBytes}.
+ * A variant of {@link EncryptBytes} with the data as base64 encoded string.
+ */
+export interface EncryptB64 {
+    /**
+     * A base64 string containing the data to encrypt.
+     */
+    dataB64: string;
+    /**
+     * A base64 string containing the encryption key.
+     */
+    keyB64: string;
+}
+
+/**
+ * A variant of {@link EncryptBytes} with the data as a JSON value.
  */
 export interface EncryptJSON {
     /**
