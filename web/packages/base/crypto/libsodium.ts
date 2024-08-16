@@ -11,7 +11,11 @@
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
-import type { DecryptBytes, EncryptBytes, EncryptedBytes } from "./types";
+import type {
+    DecryptBlobBytes,
+    EncryptBytes,
+    EncryptedBlobBytes,
+} from "./types";
 
 /**
  * Convert bytes ({@link Uint8Array}) to a base64 string.
@@ -116,7 +120,7 @@ export async function fromHex(input: string) {
 /**
  * Encrypt the given data using the provided base64 encoded key.
  *
- * [Note: 3 forms of encryption]
+ * [Note: 3 forms of encryption (Box | Blob | Stream)]
  *
  * libsodium provides two "high level" encryption patterns:
  *
@@ -201,38 +205,14 @@ export async function fromHex(input: string) {
  */
 
 /**
- * Encrypt the given file data using the given (base64 encoded) key.
+ * Encrypt the given data using stream APIs in one-shot mode, using the given
+ * base64 encoded key.
  *
- * Use {@link decryptChaChaOneShot} to decrypt the result.
+ * Use {@link decryptBlob} to decrypt the result.
  *
- * [Note: Salsa and ChaCha]
+ * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * This uses the same stream encryption algorithm (XChaCha20 stream cipher with
- * Poly1305 MAC authentication) that we use for encrypting other streams, in
- * particular the actual file's contents.
- *
- * The difference here is that this function does a one shot instead of a
- * streaming encryption. This is only meant to be used for relatively small
- * amounts of data (few MBs).
- *
- * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
- *
- * Libsodium also provides the `crypto_secretbox_easy` APIs for one shot
- * encryption, which we do use in other places where we need to one shot
- * encryption of independent bits of data.
- *
- * These secretbox APIs use XSalsa20 with Poly1305. XSalsa20 is a minor variant
- * (predecessor in fact) of XChaCha20.
- *
- * See: https://doc.libsodium.org/secret-key_cryptography/secretbox
- *
- * The difference to those is that this function is meant to used for data
- * associated with a file (or some other Ente object, like a collection or an
- * entity). There is no technical reason to do it that way, just this way all
- * data associated with a file, including its actual contents, use the same
- * underlying (streaming) libsodium APIs. In other cases, where we have free
- * standing independent data, we continue using the secretbox APIs for one shot
- * encryption and decryption.
+ * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  *
  * @param data A {@link Uint8Array} containing the bytes that we want to
  * encrypt.
@@ -243,10 +223,10 @@ export async function fromHex(input: string) {
  * encoded string). Both these values are needed to decrypt the data. The header
  * does not need to be secret.
  */
-export const encryptChaChaOneShot = async ({
+export const encryptBlob = async ({
     data,
     keyB64,
-}: EncryptBytes): Promise<EncryptedBytes> => {
+}: EncryptBytes): Promise<EncryptedBlobBytes> => {
     await sodium.ready;
 
     const uintkey: Uint8Array = await fromB64(keyB64);
@@ -341,13 +321,13 @@ export async function encryptFileChunk(
 }
 
 /**
- * Decrypt the result of {@link encryptChaChaOneShot}.
+ * Decrypt the result of {@link encryptBlob}.
  */
-export const decryptChaChaOneShot = async ({
+export const decryptBlob = async ({
     encryptedData,
     decryptionHeaderB64,
     keyB64,
-}: DecryptBytes): Promise<Uint8Array> => {
+}: DecryptBlobBytes): Promise<Uint8Array> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         await fromB64(decryptionHeaderB64),

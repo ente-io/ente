@@ -52,8 +52,8 @@ import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
-    DecryptB64,
-    DecryptBytes,
+    DecryptBlobB64,
+    DecryptBlobBytes,
     EncryptBytes,
     EncryptJSON,
 } from "./types";
@@ -77,7 +77,7 @@ const assertInWorker = <T>(x: T): T => {
  *
  * Use {@link decryptAssociatedData} to decrypt the result.
  *
- * See {@link encryptChaChaOneShot} for the implementation details.
+ * See {@link encryptBlob} for the implementation details.
  */
 export const encryptAssociatedData = (r: EncryptBytes) =>
     assertInWorker(ei._encryptAssociatedData(r));
@@ -127,9 +127,9 @@ export const encryptMetadataJSON = async (r: EncryptJSON) =>
  *
  * This is the sibling of {@link encryptAssociatedData}.
  *
- * See {@link decryptChaChaOneShot} for the implementation details.
+ * See {@link decryptBlob} for the implementation details.
  */
-export const decryptAssociatedData = (r: DecryptBytes) =>
+export const decryptAssociatedData = (r: DecryptBlobBytes) =>
     assertInWorker(ei._decryptAssociatedData(r));
 
 /**
@@ -137,7 +137,7 @@ export const decryptAssociatedData = (r: DecryptBytes) =>
  *
  * This is the sibling of {@link encryptThumbnail}.
  */
-export const decryptThumbnail = (r: DecryptBytes) =>
+export const decryptThumbnail = (r: DecryptBlobBytes) =>
     assertInWorker(ei._decryptThumbnail(r));
 
 /**
@@ -146,7 +146,7 @@ export const decryptThumbnail = (r: DecryptBytes) =>
  *
  * This is the sibling of {@link decryptAssociatedB64Data}.
  */
-export const decryptAssociatedB64Data = (r: DecryptB64) =>
+export const decryptAssociatedB64Data = (r: DecryptBlobB64) =>
     inWorker()
         ? ei._decryptAssociatedB64Data(r)
         : sharedCryptoWorker().then((w) => w.decryptAssociatedB64Data(r));
@@ -158,7 +158,7 @@ export const decryptAssociatedB64Data = (r: DecryptB64) =>
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadataJSON = (r: DecryptB64) =>
+export const decryptMetadataJSON = (r: DecryptBlobB64) =>
     inWorker()
         ? ei._decryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));
