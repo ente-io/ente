@@ -8,7 +8,7 @@ import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
 import type { CGroup } from "./ml/cluster-new";
-import { applyPersonDiff } from "./ml/db";
+import { applyCGroupDiff } from "./ml/db";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
@@ -344,7 +344,7 @@ export const syncPersons = async () => {
         const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (entities.length == 0) break;
 
-        await applyPersonDiff(
+        await applyCGroupDiff(
             await Promise.all(
                 entities.map(async ({ id, data }) =>
                     data ? await parse(id, data) : id,

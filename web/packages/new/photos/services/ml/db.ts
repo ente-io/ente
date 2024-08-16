@@ -444,8 +444,8 @@ export const clusterGroups = async () => {
 /**
  * Replace the face clusters stored locally with the given ones.
  *
- * This function deletes all entries from the person object store, and then
- * inserts the given {@link clusters} into it.
+ * This function deletes all entries from the face cluster object store, and
+ * then inserts the given {@link clusters} into it.
  */
 export const setFaceClusters = async (clusters: FaceCluster[]) => {
     const db = await mlDB();
@@ -456,19 +456,19 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
 };
 
 /**
- * Update the person store to reflect the given changes, in order.
+ * Update the cluster group store to reflect the given changes.
  *
  * @param diff A list of changes to apply. Each entry is either
  *
- * -   A string, in which case the person with the given string as their ID
- *     should be deleted from the store, or
+ * -   A string, in which case the cluster group with the given string as their
+ *     ID should be deleted from the store, or
  *
- * -   A person, in which case it should add or overwrite the entry for the
- *     corresponding person (as identified by their {@link id}).
+ * -   A cgroup, in which case it should add or overwrite the entry for the
+ *     corresponding cluster group (as identified by its {@link id}).
  */
-export const applyPersonDiff = async (diff: (string | CGroup)[]) => {
+export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
     const db = await mlDB();
-    const tx = db.transaction("person", "readwrite");
+    const tx = db.transaction("cluster-group", "readwrite");
     // See: [Note: Diff response will have at most one entry for an id]
     await Promise.all(
         diff.map((d) =>
