@@ -341,6 +341,7 @@ export const decryptBlob = async ({
     return pullResult.message;
 };
 
+/** Decrypt Stream, but merge the results. */
 export const decryptChaCha = async (
     data: Uint8Array,
     header: Uint8Array,
@@ -418,7 +419,7 @@ export interface B64EncryptionResult {
 
 export async function encryptToB64(data: string, key: string) {
     await sodium.ready;
-    const encrypted = await encrypt(await fromB64(data), await fromB64(key));
+    const encrypted = await encryptBox(await fromB64(data), await fromB64(key));
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
@@ -440,7 +441,7 @@ export async function encryptUTF8(data: string, key: string) {
 
 export async function decryptB64(data: string, nonce: string, key: string) {
     await sodium.ready;
-    const decrypted = await decrypt(
+    const decrypted = await decryptBox(
         await fromB64(data),
         await fromB64(nonce),
         await fromB64(key),
@@ -451,7 +452,7 @@ export async function decryptB64(data: string, nonce: string, key: string) {
 
 export async function decryptToUTF8(data: string, nonce: string, key: string) {
     await sodium.ready;
-    const decrypted = await decrypt(
+    const decrypted = await decryptBox(
         await fromB64(data),
         await fromB64(nonce),
         await fromB64(key),
@@ -460,7 +461,7 @@ export async function decryptToUTF8(data: string, nonce: string, key: string) {
     return sodium.to_string(decrypted);
 }
 
-async function encrypt(data: Uint8Array, key: Uint8Array) {
+async function encryptBox(data: Uint8Array, key: Uint8Array) {
     await sodium.ready;
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
@@ -471,7 +472,11 @@ async function encrypt(data: Uint8Array, key: Uint8Array) {
     };
 }
 
-async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
+async function decryptBox(
+    data: Uint8Array,
+    nonce: Uint8Array,
+    key: Uint8Array,
+) {
     await sodium.ready;
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
