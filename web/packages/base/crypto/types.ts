@@ -55,6 +55,24 @@ export interface EncryptedBoxBytes {
 }
 
 /**
+ * A variant of {@link EncryptedBoxBytes} with the encrypted data encoded as a
+ * base64 string.
+ */
+export interface EncryptedBox64 {
+    /**
+     * A base64 string containing the encrypted data.
+     */
+    encryptedDataB64: string;
+    /**
+     * A base64 string containing the nonce used during encryption.
+     *
+     * A randomly generated nonce for this encryption. It does not need to be
+     * confidential, but it will be required to decrypt the data.
+     */
+    nonceB64: string;
+}
+
+/**
  * The result of encryption using the secretstream APIs used in one-shot mode.
  *
  * It contains the encrypted data (bytes) and decryption header (base64 encoded
@@ -78,10 +96,8 @@ export interface EncryptedBlobBytes {
 }
 
 /**
- * The result of encryption using the secretstream APIs used in one-shot mode,
- * with the encrypted data encoded as a base64 string.
- *
- * This is a variant of {@link EncryptedBlobBytes}.
+ * A variant of {@link EncryptedBlobBytes} with the encrypted data encoded as a
+ * base64 string.
  */
 export interface EncryptedBlobB64 {
     /**
@@ -101,7 +117,9 @@ export interface EncryptedBlobB64 {
  * A decryption request with the encrypted Blob's data as bytes.
  *
  * This is a request to decrypt data encrypted using the secretstream APIs in
- * one-shot mode. See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * one-shot mode.
+ *
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  */
 export interface DecryptBlobBytes {
     /**
@@ -123,10 +141,8 @@ export interface DecryptBlobBytes {
 }
 
 /**
- * A decryption request with the encrypted Blob's data as a base64 encoded
- * string.
- *
- * This is a variant of {@link DecryptBlobBytes}.
+ * A variant of {@link DecryptBlobBytes} with the encrypted Blob's data as a
+ * base64 encoded string.
  */
 export interface DecryptBlobB64 {
     /**
