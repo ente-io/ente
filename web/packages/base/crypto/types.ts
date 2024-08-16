@@ -32,11 +32,34 @@ export interface EncryptJSON {
 }
 
 /**
- * The result of encryption using the stream APIs used in one-shot mode.
+ * The result of encryption using the secretbox APIs.
  *
- * The encrypted data (bytes) and decryption header pair (base64 encoded
- * string). Both these values are needed to decrypt the data. The header does
- * not need to be secret.
+ * It contains the encrypted data (bytes) and nonce (base64 encoded string)
+ * pair. Both these values are needed to decrypt the data. The nonce does not
+ * need to be secret.
+ *
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ */
+export interface EncryptedBoxBytes {
+    /**
+     * A {@link Uint8Array} containing the encrypted data.
+     */
+    encryptedData: Uint8Array;
+    /**
+     * A base64 string containing the nonce used during encryption.
+     *
+     * A randomly generated nonce for this encryption. It does not need to be
+     * confidential, but it will be required to decrypt the data.
+     */
+    nonceB64: string;
+}
+
+/**
+ * The result of encryption using the secretstream APIs used in one-shot mode.
+ *
+ * It contains the encrypted data (bytes) and decryption header (base64 encoded
+ * string) pair. Both these values are needed to decrypt the data. The header
+ * does not need to be secret.
  *
  * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  */
@@ -55,8 +78,8 @@ export interface EncryptedBlobBytes {
 }
 
 /**
- * The result of encryption using the stream APIs used in one-shot mode, with
- * the encrypted data encoded as a base64 string.
+ * The result of encryption using the secretstream APIs used in one-shot mode,
+ * with the encrypted data encoded as a base64 string.
  *
  * This is a variant of {@link EncryptedBlobBytes}.
  */
@@ -77,7 +100,7 @@ export interface EncryptedBlobB64 {
 /**
  * A decryption request with the encrypted Blob's data as bytes.
  *
- * This is a request to decrypt data that was encrypted using the stream APIs in
+ * This is a request to decrypt data encrypted using the secretstream APIs in
  * one-shot mode. See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  */
 export interface DecryptBlobBytes {

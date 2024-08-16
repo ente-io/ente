@@ -218,8 +218,8 @@ const encryptBox = async ({ data, keyB64 }: EncryptBytes) => {
 };
 
 /**
- * Encrypt the given data using stream APIs in one-shot mode, using the given
- * base64 encoded key.
+ * Encrypt the given data using secretstream APIs in one-shot mode, using the
+ * given base64 encoded key.
  *
  * Use {@link decryptBlob} to decrypt the result.
  *
