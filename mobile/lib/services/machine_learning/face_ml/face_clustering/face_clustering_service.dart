@@ -9,7 +9,7 @@ import "package:logging/logging.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
-import "package:photos/models/nanoids/cluster_id.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -491,11 +491,11 @@ ClusteringResult _runLinearClustering(Map args) {
     "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces in total in this round ${offset != null ? "on top of ${offset + facesWithClusterID.length} earlier processed faces" : ""}",
   );
   // set current epoch time as clusterID
-  String clusterID = ClusterID.generate();
+  String clusterID = newClusterID();
   if (facesWithClusterID.isEmpty) {
     // assign a clusterID to the first face
     sortedFaceInfos[0].clusterId = clusterID;
-    clusterID = ClusterID.generate();
+    clusterID = newClusterID();
   }
   final stopwatchClustering = Stopwatch()..start();
   for (int i = 1; i < totalFaces; i++) {
@@ -539,12 +539,13 @@ ClusteringResult _runLinearClustering(Map args) {
         log(
           " [ClusterIsolate] [WARNING] ${DateTime.now()} Found new cluster $clusterID",
         );
-        clusterID = ClusterID.generate();
+        clusterID = newClusterID();
         sortedFaceInfos[closestIdx].clusterId = clusterID;
       }
       sortedFaceInfos[i].clusterId = sortedFaceInfos[closestIdx].clusterId;
     } else {
-      clusterID = ClusterID.generate();
+      clusterID = newClusterID();
+      ;
       sortedFaceInfos[i].clusterId = clusterID;
     }
   }
@@ -634,7 +635,7 @@ ClusteringResult _runCompleteClustering(Map args) {
     "[CompleteClustering] ${DateTime.now()} Processing $totalFaces faces in one single round of complete clustering",
   );
 
-  String clusterID = ClusterID.generate();
+  String clusterID = newClusterID();
 
   // Start actual clustering
   final Map<String, String> newFaceIdToCluster = {};
@@ -658,12 +659,12 @@ ClusteringResult _runCompleteClustering(Map args) {
 
     if (closestDistance < distanceThreshold) {
       if (faceInfos[closestIdx].clusterId == null) {
-        clusterID = ClusterID.generate();
+        clusterID = newClusterID();
         faceInfos[closestIdx].clusterId = clusterID;
       }
       faceInfos[i].clusterId = faceInfos[closestIdx].clusterId!;
     } else {
-      clusterID = ClusterID.generate();
+      clusterID = newClusterID();
       faceInfos[i].clusterId = clusterID;
     }
   }

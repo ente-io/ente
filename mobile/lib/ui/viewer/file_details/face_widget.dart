@@ -6,10 +6,10 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/models/base/id.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/models/nanoids/cluster_id.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
@@ -99,9 +99,9 @@ class _FaceWidgetState extends State<FaceWidget> {
                 }
 
                 // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
-                final String newClusterID = ClusterID.generate();
+                final String clusterID = newClusterID();
                 await MLDataDB.instance.updateFaceIdToClusterId(
-                  {widget.face.faceID: newClusterID},
+                  {widget.face.faceID: clusterID},
                 );
 
                 // Push page for the new cluster
@@ -109,7 +109,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                   MaterialPageRoute(
                     builder: (context) => ClusterPage(
                       [widget.file],
-                      clusterID: newClusterID,
+                      clusterID: clusterID,
                     ),
                   ),
                 );

@@ -12,7 +12,6 @@ const isSideways = 'is_sideways';
 const imageWidth = 'width';
 const imageHeight = 'height';
 const mlVersionColumn = 'ml_version';
-
 const personIdColumn = 'person_id';
 const clusterIDColumn = 'cluster_id';
 
