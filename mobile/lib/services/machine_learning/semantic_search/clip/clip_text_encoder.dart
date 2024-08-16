@@ -8,7 +8,7 @@ import "package:photos/utils/ml_util.dart";
 
 class ClipTextEncoder extends MlModel {
   // static const _kRemoteBucketModelPath = "clip-text-vit-32-float32-int32.onnx"; // Unquantized model
-  static const _kRemoteBucketModelPath =
+  static const kRemoteBucketModelPath =
       "mobileclip_s2_text_int32.onnx"; // Quantized model
   static const _kVocabRemotePath = "bpe_simple_vocab_16e6.txt";
 
@@ -16,7 +16,7 @@ class ClipTextEncoder extends MlModel {
   static const _modelName = "ClipTextEncoder";
 
   @override
-  String get modelRemotePath => kModelBucketEndpoint + _kRemoteBucketModelPath;
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
   String get vocabRemotePath => kModelBucketEndpoint + _kVocabRemotePath;
 
   @override

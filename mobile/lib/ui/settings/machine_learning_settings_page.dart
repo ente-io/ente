@@ -6,6 +6,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -164,9 +166,9 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         RemoteAssetsService.instance.progressStream.listen((event) {
       final String url = event.$1;
       String title = "";
-      if (url.contains("clip-image")) {
+      if (url.contains(ClipImageEncoder.kRemoteBucketModelPath)) {
         title = "Image Model";
-      } else if (url.contains("clip-text")) {
+      } else if (url.contains(ClipTextEncoder.kRemoteBucketModelPath)) {
         title = "Text Model";
       } else if (url.contains("yolov5s_face")) {
         title = "Face Detection Model";
