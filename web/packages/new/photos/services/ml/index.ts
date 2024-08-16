@@ -270,22 +270,40 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
     updateRemoteFlag(mlRemoteKey, enabled);
 
 /**
- * Trigger a "sync", whatever that means for the ML subsystem.
+ * Sync the ML status with remote.
  *
- * This is called during the global sync sequence.
+ * This is called an at early point in the global sync sequence, without waiting
+ * for the potentially long file information sync to complete.
  *
- * * It checks with remote if the ML flag is set, and updates our local flag to
- *   reflect that value.
+ * It checks with remote if the ML flag is set, and updates our local flag to
+ * reflect that value.
  *
- * * If ML is enabled, it pulls any missing embeddings from remote and starts
- *   indexing to backfill any missing values.
+ * To trigger the actual ML sync, use {@link triggerMLSync}.
+ */
+export const triggerMLStatusSync = () => void mlStatusSync();
+
+const mlStatusSync = async () => {
+    _state.isMLEnabled = await getIsMLEnabledRemote();
+    setIsMLEnabledLocal(_state.isMLEnabled);
+    triggerStatusUpdate();
+};
+
+/**
+ * Trigger a ML sync.
+ *
+ * This is called during the global sync sequence, after files information have
+ * been synced with remote.
+ *
+ * If ML is enabled, it pulls any missing embeddings from remote and starts
+ * indexing to backfill any missing values.
+ *
+ * This will only have an effect if {@link triggerMLSync} has been called at
+ * least once prior to calling this in the sync sequence.
  */
 export const triggerMLSync = () => void mlSync();
 
 const mlSync = async () => {
-    _state.isMLEnabled = await getIsMLEnabledRemote();
-    setIsMLEnabledLocal(_state.isMLEnabled);
-    triggerStatusUpdate();
+    await mlStatusSync();
 
     if (_state.isMLEnabled) void worker().then((w) => w.sync());
 };
