@@ -6,8 +6,8 @@ import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/db/ml/embeddings_db.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -51,8 +51,7 @@ class FileMLInstruction {
 Future<IndexStatus> getIndexStatus() async {
   try {
     final int indexableFiles = (await getIndexableFileIDs()).length;
-    final int facesIndexedFiles =
-        await MLDataDB.instance.getIndexedFileCount();
+    final int facesIndexedFiles = await MLDataDB.instance.getIndexedFileCount();
     final int clipIndexedFiles =
         await MLDataDB.instance.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);

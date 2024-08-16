@@ -6,8 +6,9 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/db_fields.dart";
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/ml_versions.dart";
 
-extension EmbeddingsDB on MLDataDB {
+extension ClipDB on MLDataDB {
   static const databaseName = "ente.embeddings.db";
 
   Future<List<ClipEmbedding>> getAll() async {
@@ -28,10 +29,12 @@ extension EmbeddingsDB on MLDataDB {
     return result;
   }
 
-  Future<int> getClipIndexedFileCount() async {
+  Future<int> getClipIndexedFileCount({
+    int minimumMlVersion = clipMlVersion,
+  }) async {
     final db = await MLDataDB.instance.asyncDB;
-    const String query =
-        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable';
+    final String query =
+        'SELECT COUNT(DISTINCT $fileIDColumn) as count FROM $clipTable WHERE $mlVersionColumn >= $minimumMlVersion';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
     return maps.first['count'] as int;
   }

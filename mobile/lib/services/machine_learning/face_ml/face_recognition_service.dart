@@ -5,8 +5,8 @@ import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/db/ml/embeddings_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/list.dart";
