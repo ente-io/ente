@@ -30,6 +30,7 @@ type FeatureFlagResponse struct {
 	RecoveryKeyVerified bool `json:"recoveryKeyVerified"`
 	InternalUser        bool `json:"internalUser"`
 	BetaUser            bool `json:"betaUser"`
+	EnableMobMultiPart  bool `json:"enableMobMultiPart"`
 }
 
 type FlagKey string
