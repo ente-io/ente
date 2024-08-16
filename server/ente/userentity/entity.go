@@ -1,6 +1,10 @@
 package userentity
 
-import "github.com/ente-io/museum/ente/base"
+import (
+	"fmt"
+	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/ente/base"
+)
 
 type EntityType string
 
@@ -10,6 +14,15 @@ const (
 	// Profile is a new version of Person entity, where the data is gzipped before encryption
 	Profile EntityType = "profile"
 )
+
+func (et EntityType) IsValid() error {
+
+	switch et {
+	case Location, Person, Profile:
+		return nil
+	}
+	return ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid EntityType: %s", et))
+}
 
 func (et EntityType) GetNewID() (*string, error) {
 	return base.NewID(string(et))
