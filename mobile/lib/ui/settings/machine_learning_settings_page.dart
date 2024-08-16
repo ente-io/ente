@@ -35,12 +35,20 @@ class MachineLearningSettingsPage extends StatefulWidget {
 class _MachineLearningSettingsPageState
     extends State<MachineLearningSettingsPage> {
   final EnteWakeLock _wakeLock = EnteWakeLock();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _wakeLock.enable();
     MachineLearningController.instance.forceOverrideML(turnOn: true);
+    if (!MLService.instance.areModelsDownloaded) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
   }
 
   @override
@@ -48,6 +56,7 @@ class _MachineLearningSettingsPageState
     super.dispose();
     _wakeLock.disable();
     MachineLearningController.instance.forceOverrideML(turnOn: false);
+    _timer?.cancel();
   }
 
   @override
