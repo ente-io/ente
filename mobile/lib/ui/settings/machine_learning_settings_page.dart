@@ -20,7 +20,6 @@ import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/utils/data_util.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/wakelock_util.dart";
 
@@ -224,9 +223,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
                 title: entry.key,
               ),
               trailingWidget: Text(
-                entry.value.$1 == entry.value.$2
-                    ? "Done"
-                    : "${formatBytes(entry.value.$1)} / ${formatBytes(entry.value.$2)}",
+                '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               singleBorderRadius: 8,
