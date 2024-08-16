@@ -342,8 +342,10 @@ Future<bool> deleteLocalFiles(
   final bool shouldDeleteInBatches =
       await isAndroidSDKVersionLowerThan(android11SDKINT);
   if (shouldDeleteInBatches) {
+    _logger.info("Deleting in batches");
     deletedIDs.addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
   } else {
+    _logger.info("Deleting in one shot");
     deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
   }
   // In IOS, the library returns no error and fail to delete any file is
@@ -426,6 +428,7 @@ Future<List<String>> deleteLocalFilesInBatches(
     max(minimumBatchSize, (localIDs.length / minimumParts).round()),
     maximumBatchSize,
   );
+  _logger.info("Batch size: $batchSize");
   final List<String> deletedIDs = [];
   for (int index = 0; index < localIDs.length; index += batchSize) {
     if (dialogKey.currentState != null) {
