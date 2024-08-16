@@ -114,7 +114,72 @@ export async function fromHex(input: string) {
 }
 
 /**
- * Encrypt the given data using the given (base64 encoded) key.
+ * Encrypt the given data using the provided base64 encoded key.
+ *
+ * [Note: 3 forms of encryption]
+ *
+ * libsodium provides two "high level" encryption patterns:
+ *
+ * 1.  Authenticated encryption ("secretbox")
+ *     https://doc.libsodium.org/secret-key_cryptography/secretbox
+ *
+ * 2.  Encrypted streams and file encryption ("secretstream")
+ *     https://doc.libsodium.org/secret-key_cryptography/secretstream
+ *
+ * In terms of the underlying algorithm, they are essentially the same.
+ *
+ * 1.  The secretbox APIs use XSalsa20 with Poly1305 (where XSalsa20 is the
+ *     stream cipher used for encryption, which Poly1305 is the MAC used for
+ *     authentication).
+ *
+ * 2.  The secretstream APIs use XChaCha20 with Poly1305.
+ *
+ * XSalsa20 is a minor variant (predecessor in fact) of XChaCha20. I am not
+ * aware why libsodium uses both the variants, but they seem to have similar
+ * characteristics.
+ *
+ * These two sets of APIs map functionally map to two different use cases.
+ *
+ * 1.  If there is a single independent bit of data to encrypt, the secretbox
+ *     APIs fit the bill.
+ *
+ * 2.  If there is a set of related data to encrypt, e.g. the contents of a file
+ *     where the file is too big to fit into a single message, then the
+ *     secretstream APIs are more appropriate.
+ *
+ * However, in our code we have evolved two different use cases for the 2nd
+ * option.
+ *
+ * Say we have an Ente object, specifically an {@link EnteFile}. This holds the
+ * encryption keys for encrypting the contents of the file that a user wishes to
+ * upload. The secretstream APIs are the obvious fit, and indeed that's what we
+ * use, chunking the file if the contents are bigger than some threshold. But if
+ * the file is small enough, there is no need to chunk, so we also expose a
+ * function that does streaming encryption, but in "one-shot" mode.
+ *
+ * Later on, say we have to encrypt the public magic metadata associated with
+ * the {@link EnteFile}. Instead of using the secretbox APIs, we just us the
+ * same streaming encryption that the rest of the file uses, but since such
+ * metadata is well below the threshold for chunking, it invariably uses the
+ * "one-shot" mode.
+ *
+ * Thus, we have three scenarios:
+ *
+ * 1.  Box: Using secretbox APIs to encrypt some independent blob of data.
+ *
+ * 2.  File: Using secretstream APIs in one-shot mode. This is used to encrypt
+ *     data associated to an Ente object (file, collection, entity, etc), when
+ *     the data is small-ish (less than a few MBs).
+ *
+ * 3.  Stream/Chunks: Using secretstream APIs for encrypting chunks. This is
+ *     used to encrypt the actual content of the files associated with an
+ *     EnteFile object.
+ *
+ * "File" is not a term of art, it is just something we use to abbreviate
+ * "streaming encryption in one-shot mode".
+ */
+/**
+ * Encrypt the given file data using the given (base64 encoded) key.
  *
  * Use {@link decryptChaChaOneShot} to decrypt the result.
  *
