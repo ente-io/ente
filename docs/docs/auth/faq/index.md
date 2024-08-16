@@ -32,6 +32,13 @@ You can enable FaceID lock under Settings → Security → Lockscreen.
 
 Please verify that the time on both your mobile and desktop is same.
 
+The codes depend on time. If the time is the same on both browser and mobile,
+the codes you see will be the same.
+
+Usually this discrepancy occurs because the time in your browser might be
+incorrect. In particular, multiple users who have reported that Firefox provides
+incorrect time when various privacy settings are enabled.
+
 ### Does ente Authenticator require an account?
 
 Answer: No, ente Authenticator does not require an account. You can choose to

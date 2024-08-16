@@ -1,7 +1,8 @@
 ---
 title: Machine learning
 description:
-    Ente supports on-device machine learning for face and natural language search
+    Ente supports on-device machine learning for face and natural language
+    search
 ---
 
 # Machine learning

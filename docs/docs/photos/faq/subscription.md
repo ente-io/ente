@@ -77,8 +77,8 @@ We accept the following crypto currencies:
 -   Dogecoin
 
 To purchase a subscription with any of the above mentioned currencies, please
-write to crypto@ente.io from your registered email address, citing the [storage
-plan](https://ente.io#pricing) of your choice.
+write to crypto@ente.io from your registered email address, citing the
+[storage plan](https://ente.io#pricing) of your choice.
 
 In case you have any further questions or need support, please reach out to
 [support@ente.io](mailto:support@ente.io), and we'll be happy to help!
@@ -96,9 +96,8 @@ Ente does not store any of your sensitive payment related information.
 We use [Stripe](https://stripe.com) to handle our card payments, and all of your
 payment information is sent directly to Stripe's PCI DSS validated servers.
 
-Stripe has been audited by a PCI-certified auditor and is certified to [PCI
-Service Provider Level
-1](https://www.visa.com/splisting/searchGrsp.do?companyNameCriteria=stripe).
+Stripe has been audited by a PCI-certified auditor and is certified to
+[PCI Service Provider Level 1](https://www.visa.com/splisting/searchGrsp.do?companyNameCriteria=stripe).
 This is the most stringent level of certification available in the payments
 industry.
 
