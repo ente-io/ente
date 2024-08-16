@@ -6,7 +6,7 @@ import 'dart:ui' as ui show Image;
 import 'package:logging/logging.dart';
 import "package:onnx_dart/onnx_dart.dart";
 import 'package:onnxruntime/onnxruntime.dart';
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
 import "package:photos/services/machine_learning/ml_model.dart";

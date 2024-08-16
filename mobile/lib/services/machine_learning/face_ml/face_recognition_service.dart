@@ -5,13 +5,13 @@ import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/embeddings_db.dart";
+import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/embeddings_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/list.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/face.dart";
-import "package:photos/models/embedding.dart";
+import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
@@ -144,7 +144,7 @@ class FaceRecognitionService {
         }
       }
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
-      await EmbeddingsDB.instance.putMany(clipEmbeddings);
+      await FaceMLDataDB.instance.putMany(clipEmbeddings);
     }
     // Yield any remaining instructions
     if (batchToYield.isNotEmpty) {

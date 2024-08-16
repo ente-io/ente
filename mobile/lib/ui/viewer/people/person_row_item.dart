@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
 class PersonRowItem extends StatelessWidget {

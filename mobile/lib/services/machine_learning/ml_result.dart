@@ -1,6 +1,6 @@
 import "dart:convert" show jsonEncode, jsonDecode;
 
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';

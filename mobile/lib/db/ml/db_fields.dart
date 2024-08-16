@@ -5,7 +5,7 @@ const facesTable = 'faces';
 const fileIDColumn = 'file_id';
 const faceIDColumn = 'face_id';
 const faceDetectionColumn = 'detection';
-const faceEmbeddingBlob = 'eBlob';
+const embeddingColumn = 'embedding';
 const faceScore = 'score';
 const faceBlur = 'blur';
 const isSideways = 'is_sideways';
@@ -18,7 +18,7 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $fileIDColumn	INTEGER NOT NULL,
   $faceIDColumn  TEXT NOT NULL UNIQUE,
 	$faceDetectionColumn	TEXT NOT NULL,
-  $faceEmbeddingBlob BLOB NOT NULL,
+  $embeddingColumn BLOB NOT NULL,
   $faceScore  REAL NOT NULL,
   $faceBlur REAL NOT NULL DEFAULT $kLapacianDefault,
   $isSideways	INTEGER NOT NULL DEFAULT 0,
@@ -41,7 +41,7 @@ const fcFaceId = 'face_id';
 const createFaceClustersTable = '''
 CREATE TABLE IF NOT EXISTS $faceClustersTable (
   $fcFaceId	TEXT NOT NULL,
-  $fcClusterID INTEGER NOT NULL,
+  $fcClusterID TEXT NOT NULL,
   PRIMARY KEY($fcFaceId)
 );
 ''';
@@ -59,7 +59,7 @@ const clusterIDColumn = 'cluster_id';
 const createClusterPersonTable = '''
 CREATE TABLE IF NOT EXISTS $clusterPersonTable (
   $personIdColumn	TEXT NOT NULL,
-  $clusterIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn	TEXT NOT NULL,
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
@@ -72,7 +72,7 @@ const avgColumn = 'avg';
 const countColumn = 'count';
 const createClusterSummaryTable = '''
 CREATE TABLE IF NOT EXISTS $clusterSummaryTable (
-  $clusterIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn	TEXT NOT NULL,
   $avgColumn BLOB NOT NULL,
   $countColumn INTEGER NOT NULL,
   PRIMARY KEY($clusterIDColumn)
@@ -89,9 +89,23 @@ const notPersonFeedback = 'not_person_feedback';
 const createNotPersonFeedbackTable = '''
 CREATE TABLE IF NOT EXISTS $notPersonFeedback (
   $personIdColumn	TEXT NOT NULL,
-  $clusterIDColumn	INTEGER NOT NULL,
+  $clusterIDColumn TEXT NOT NULL,
   PRIMARY KEY($personIdColumn, $clusterIDColumn)
 );
 ''';
 const deleteNotPersonFeedbackTable = 'DELETE FROM $notPersonFeedback';
 // End Clusters Table Fields & Schema Queries
+
+// ## CLIP EMBEDDINGS TABLE
+const clipTable = 'clip';
+
+const createClipEmbeddingsTable = '''
+CREATE TABLE IF NOT EXISTS $clipTable ( 
+  $fileIDColumn INTEGER NOT NULL,
+  $embeddingColumn BLOB NOT NULL,
+  $mlVersionColumn INTEGER NOT NULL,
+  PRIMARY KEY ($fileIDColumn)
+  );
+''';
+
+const deleteClipEmbeddingsTable = 'DELETE FROM $clipTable';

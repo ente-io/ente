@@ -1,7 +1,7 @@
 import "dart:math" show min, max;
 
-import "package:photos/face/model/box.dart";
-import "package:photos/face/model/landmark.dart";
+import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/face/landmark.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 
 /// Stores the face detection data, notably the bounding box and landmarks.

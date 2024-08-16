@@ -32,7 +32,7 @@ class FileDataService {
 
     try {
       final _ = await _dio.put(
-        "/files/data/",
+        "/files/data",
         data: {
           "fileID": file.uploadedFileID!,
           "type": data.type.toJson(),

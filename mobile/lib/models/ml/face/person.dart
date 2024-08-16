@@ -24,7 +24,7 @@ class PersonEntity {
 }
 
 class ClusterInfo {
-  final int id;
+  final String id;
   final Set<String> faces;
   ClusterInfo({
     required this.id,
@@ -40,7 +40,7 @@ class ClusterInfo {
   // from Json
   factory ClusterInfo.fromJson(Map<String, dynamic> json) {
     return ClusterInfo(
-      id: json['id'] as int,
+      id: json['id'] as String,
       faces: (json['faces'] as List<dynamic>).map((e) => e as String).toSet(),
     );
   }
@@ -49,12 +49,12 @@ class ClusterInfo {
 class PersonData {
   final String name;
   final bool isHidden;
-  String? avatarFaceId;
+  String? avatarFaceID;
   List<ClusterInfo>? assigned = List<ClusterInfo>.empty();
   List<ClusterInfo>? rejected = List<ClusterInfo>.empty();
   final String? birthDate;
 
-  bool hasAvatar() => avatarFaceId != null;
+  bool hasAvatar() => avatarFaceID != null;
 
   bool get isIgnored =>
       (name.isEmpty || name == '(hidden)' || name == '(ignored)');
@@ -63,7 +63,7 @@ class PersonData {
     required this.name,
     this.assigned,
     this.rejected,
-    this.avatarFaceId,
+    this.avatarFaceID,
     this.isHidden = false,
     this.birthDate,
   });
@@ -79,7 +79,7 @@ class PersonData {
     return PersonData(
       name: name ?? this.name,
       assigned: assigned ?? this.assigned,
-      avatarFaceId: avatarFaceId ?? this.avatarFaceId,
+      avatarFaceID: avatarFaceId ?? this.avatarFaceID,
       isHidden: isHidden ?? this.isHidden,
       birthDate: birthDate ?? this.birthDate,
     );
@@ -109,7 +109,7 @@ class PersonData {
         'name': name,
         'assigned': assigned?.map((e) => e.toJson()).toList(),
         'rejected': rejected?.map((e) => e.toJson()).toList(),
-        'avatarFaceId': avatarFaceId,
+        'avatarFaceID': avatarFaceID,
         'isHidden': isHidden,
         'birthDate': birthDate,
       };
@@ -131,7 +131,7 @@ class PersonData {
       name: json['name'] as String,
       assigned: assigned,
       rejected: rejected,
-      avatarFaceId: json['avatarFaceId'] as String?,
+      avatarFaceID: json['avatarFaceId'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
     );

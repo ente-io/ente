@@ -9,10 +9,9 @@ import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/string_ext.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -22,6 +21,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/search_constants.dart";
@@ -736,14 +736,14 @@ class SearchService {
     return searchResults;
   }
 
-  Future<Map<int, List<EnteFile>>> getClusterFilesForPersonID(
+  Future<Map<String, List<EnteFile>>> getClusterFilesForPersonID(
     String personID,
   ) async {
     _logger.info('getClusterFilesForPersonID $personID');
-    final Map<int, Set<int>> fileIdToClusterID =
+    final Map<int, Set<String>> fileIdToClusterID =
         await FaceMLDataDB.instance.getFileIdToClusterIDSet(personID);
     _logger.info('faceDbDone getClusterFilesForPersonID $personID');
-    final Map<int, List<EnteFile>> clusterIDToFiles = {};
+    final Map<String, List<EnteFile>> clusterIDToFiles = {};
     final allFiles = await getAllFiles();
     for (final f in allFiles) {
       if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
@@ -765,7 +765,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getAllFace(int? limit) async {
     try {
       debugPrint("getting faces");
-      final Map<int, Set<int>> fileIdToClusterID =
+      final Map<int, Set<String>> fileIdToClusterID =
           await FaceMLDataDB.instance.getFileIdToClusterIds();
       final Map<String, PersonEntity> personIdToPerson =
           await PersonService.instance.getPersonsMap();
@@ -773,7 +773,7 @@ class SearchService {
           await FaceMLDataDB.instance.getClusterIDToPersonID();
 
       final List<GenericSearchResult> facesResult = [];
-      final Map<int, List<EnteFile>> clusterIdToFiles = {};
+      final Map<String, List<EnteFile>> clusterIdToFiles = {};
       final Map<String, List<EnteFile>> personIdToFiles = {};
       final allFiles = await getAllFiles();
       for (final f in allFiles) {

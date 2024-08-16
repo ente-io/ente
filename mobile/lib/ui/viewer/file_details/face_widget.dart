@@ -4,11 +4,12 @@ import "dart:typed_data";
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/face.dart";
-import "package:photos/face/model/person.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/nanoids/cluster_id.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
@@ -24,7 +25,7 @@ class FaceWidget extends StatefulWidget {
   final Face face;
   final Future<Map<String, Uint8List>?>? faceCrops;
   final PersonEntity? person;
-  final int? clusterID;
+  final String? clusterID;
   final bool highlight;
   final bool editMode;
 
@@ -98,7 +99,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                 }
 
                 // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
-                final int newClusterID = DateTime.now().microsecondsSinceEpoch;
+                final String newClusterID = ClusterID.generate();
                 await FaceMLDataDB.instance.updateFaceIdToClusterId(
                   {widget.face.faceID: newClusterID},
                 );

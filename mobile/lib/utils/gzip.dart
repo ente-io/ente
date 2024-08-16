@@ -28,6 +28,25 @@ Uint8List _gzipUInt8List(Uint8List data) {
   return Uint8List.fromList(compressedData);
 }
 
+Future<Map<String, dynamic>> decryptAndUnzipJson(
+  Uint8List key, {
+  required String encryptedData,
+  required String header,
+}) async {
+  final Computer computer = Computer.shared();
+  final response =
+      await computer.compute<Map<String, dynamic>, Map<String, dynamic>>(
+    _decryptAndUnzipJsonSync,
+    param: {
+      "key": key,
+      "encryptedData": encryptedData,
+      "header": header,
+    },
+    taskName: "decryptAndUnzipJson",
+  );
+  return response;
+}
+
 Map<String, dynamic> decryptAndUnzipJsonSync(
   Uint8List key, {
   required String encryptedData,
@@ -81,4 +100,14 @@ ChaChaEncryptionResult _gzipAndEncryptJsonSync(
   Map<String, dynamic> args,
 ) {
   return gzipAndEncryptJsonSync(args["jsonData"], args["key"]);
+}
+
+Map<String, dynamic> _decryptAndUnzipJsonSync(
+  Map<String, dynamic> args,
+) {
+  return decryptAndUnzipJsonSync(
+    args["key"],
+    encryptedData: args["encryptedData"],
+    header: args["header"],
+  );
 }
