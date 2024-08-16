@@ -203,7 +203,7 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while File returns a "header".
  */
-async function encryptBox(data: Uint8Array, key: Uint8Array) {
+const encryptBox = async (data: Uint8Array, key: Uint8Array) => {
     await sodium.ready;
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
@@ -212,16 +212,7 @@ async function encryptBox(data: Uint8Array, key: Uint8Array) {
         key,
         nonce,
     };
-}
-
-async function decryptBox(
-    data: Uint8Array,
-    nonce: Uint8Array,
-    key: Uint8Array,
-) {
-    await sodium.ready;
-    return sodium.crypto_secretbox_open_easy(data, nonce, key);
-}
+};
 
 /**
  * Encrypt the given data using stream APIs in one-shot mode, using the given
@@ -338,6 +329,18 @@ export async function encryptFileChunk(
 
     return pushResult;
 }
+
+/**
+ * Decrypt the result of {@link encryptBox}.
+ */
+const decryptBox = async (
+    data: Uint8Array,
+    nonce: Uint8Array,
+    key: Uint8Array,
+) => {
+    await sodium.ready;
+    return sodium.crypto_secretbox_open_easy(data, nonce, key);
+};
 
 /**
  * Decrypt the result of {@link encryptBlob}.
