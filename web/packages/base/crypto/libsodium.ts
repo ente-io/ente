@@ -203,7 +203,7 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while File returns a "header".
  */
-const encryptBox = async (data: Uint8Array, keyB64: string) => {
+const encryptBox = async ({ data, keyB64 }: EncryptBytes) => {
     await sodium.ready;
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(
@@ -444,7 +444,7 @@ export interface B64EncryptionResult {
 
 export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encryptBox(await fromB64(data), keyB64);
+    const encrypted = await encryptBox({ data: await fromB64(data), keyB64 });
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
