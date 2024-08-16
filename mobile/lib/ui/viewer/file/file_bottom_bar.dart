@@ -12,7 +12,6 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
-import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -68,14 +67,13 @@ class FileBottomBarState extends State<FileBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (flagService.internalUser) {
-      if (widget.file.canBePanorama()) {
-        lastFileGenID = widget.file.generatedID;
-        if (lastFileGenID != widget.file.generatedID) {
-          guardedCheckPanorama(widget.file).ignore();
-        }
+    if (widget.file.canBePanorama()) {
+      lastFileGenID = widget.file.generatedID;
+      if (lastFileGenID != widget.file.generatedID) {
+        guardedCheckPanorama(widget.file).ignore();
       }
     }
+
     return SafeArea(child: _getBottomBar());
   }
 
