@@ -54,6 +54,7 @@ import * as ei from "./ente-impl";
 import type {
     DecryptBlobB64,
     DecryptBlobBytes,
+    DecryptBoxB64,
     EncryptB64,
     EncryptBytes,
     EncryptJSON,
@@ -138,6 +139,19 @@ export const encryptMetadataJSON = async (r: EncryptJSON) =>
     inWorker()
         ? ei._encryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
+
+/**
+ * Decrypt arbitrary data, provided as a base64 string, using the given key and
+ * the provided nonce.
+ *
+ * This is the sibling of {@link encryptBoxB64}.
+ *
+ * See {@link decryptBox} for the implementation details.
+ */
+export const decryptBoxB64 = (r: DecryptBoxB64) =>
+    inWorker()
+        ? ei._decryptBoxB64(r)
+        : sharedCryptoWorker().then((w) => w.decryptBoxB64(r));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or

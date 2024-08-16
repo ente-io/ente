@@ -2,6 +2,8 @@
 import * as libsodium from "./libsodium";
 import type {
     DecryptBlobB64,
+    DecryptBoxB64,
+    DecryptBoxBytes,
     EncryptB64,
     EncryptBytes,
     EncryptedBlobB64,
@@ -40,6 +42,19 @@ export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
         data: new TextEncoder().encode(JSON.stringify(jsonValue)),
         keyB64,
     });
+
+const DecryptBoxB64ToBytes = async ({
+    encryptedDataB64,
+    nonceB64,
+    keyB64,
+}: DecryptBoxB64): Promise<DecryptBoxBytes> => ({
+    encryptedData: await libsodium.fromB64(encryptedDataB64),
+    nonceB64,
+    keyB64,
+});
+
+export const _decryptBoxB64 = (r: DecryptBoxB64) =>
+    DecryptBoxB64ToBytes(r).then((rb) => libsodium.decryptBox(rb));
 
 export const _decryptAssociatedData = libsodium.decryptBlob;
 
