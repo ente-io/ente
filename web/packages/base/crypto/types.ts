@@ -14,6 +14,8 @@ export interface EncryptBytes {
 
 /**
  * An encryption request with the plaintext data as a JSON value.
+ *
+ * This is a variant of {@link EncryptBytes}.
  */
 export interface EncryptJSON {
     /**
@@ -35,8 +37,10 @@ export interface EncryptJSON {
  * The encrypted data (bytes) and decryption header pair (base64 encoded
  * string). Both these values are needed to decrypt the data. The header does
  * not need to be secret.
+ *
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  */
-export interface EncryptedBytes {
+export interface EncryptedBlobBytes {
     /**
      * A {@link Uint8Array} containing the encrypted data.
      */
@@ -53,8 +57,10 @@ export interface EncryptedBytes {
 /**
  * The result of encryption using the stream APIs used in one-shot mode, with
  * the encrypted data encoded as a base64 string.
+ *
+ * This is a variant of {@link EncryptedBlobBytes}.
  */
-export interface EncryptedB64 {
+export interface EncryptedBlobB64 {
     /**
      * A base64 string containing the encrypted data.
      */
@@ -69,9 +75,12 @@ export interface EncryptedB64 {
 }
 
 /**
- * A decryption request with the encrypted data as bytes.
+ * A decryption request with the encrypted Blob's data as bytes.
+ *
+ * This is a request to decrypt data that was encrypted using the stream APIs in
+ * one-shot mode. See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  */
-export interface DecryptBytes {
+export interface DecryptBlobBytes {
     /**
      * A {@link Uint8Array} containing the bytes to decrypt.
      */
@@ -91,9 +100,12 @@ export interface DecryptBytes {
 }
 
 /**
- * A decryption request with the encrypted data as a base64 encoded string.
+ * A decryption request with the encrypted Blob's data as a base64 encoded
+ * string.
+ *
+ * This is a variant of {@link DecryptBlobBytes}.
  */
-export interface DecryptB64 {
+export interface DecryptBlobB64 {
     /**
      * A base64 string containing the data to decrypt.
      */
