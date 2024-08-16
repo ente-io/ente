@@ -1,13 +1,19 @@
 package userentity
 
+import "github.com/ente-io/museum/ente/base"
+
 type EntityType string
 
 const (
 	Location EntityType = "location"
 	Person   EntityType = "person"
-	// PersonV2 is a new version of Person entity, where the data is gzipped before encryption
-	PersonV2 EntityType = "person_v2"
+	// Profile is a new version of Person entity, where the data is gzipped before encryption
+	Profile EntityType = "profile"
 )
+
+func (et EntityType) GetNewID() (*string, error) {
+	return base.NewID(string(et))
+}
 
 type EntityKey struct {
 	UserID       int64      `json:"userID" binding:"required"`

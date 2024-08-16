@@ -8,14 +8,17 @@ import (
 
 	model "github.com/ente-io/museum/ente/userentity"
 	"github.com/ente-io/stacktrace"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 // Create inserts a new  entry
 func (r *Repository) Create(ctx context.Context, userID int64, entry model.EntityDataRequest) (string, error) {
-	id := uuid.New()
-	err := r.DB.QueryRow(`INSERT into entity_data(
+	idPrt, err := entry.Type.GetNewID()
+	if err != nil {
+		return "", stacktrace.Propagate(err, "failed to generate new id")
+	}
+	id := *idPrt
+	err = r.DB.QueryRow(`INSERT into entity_data(
                          id,
                          user_id,
                          type,
@@ -28,9 +31,9 @@ func (r *Repository) Create(ctx context.Context, userID int64, entry model.Entit
 		entry.Header).       // $5 header
 		Scan(&id)
 	if err != nil {
-		return id.String(), stacktrace.Propagate(err, "failed to create enity data")
+		return id, stacktrace.Propagate(err, "failed to create enity data")
 	}
-	return id.String(), nil
+	return id, nil
 }
 
 func (r *Repository) Get(ctx context.Context, userID int64, id string) (*model.EntityData, error) {
