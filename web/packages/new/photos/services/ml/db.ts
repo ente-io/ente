@@ -3,32 +3,47 @@ import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
-import type { FaceCluster, Person } from "./cluster-new";
+import type { CGroup, FaceCluster } from "./cluster-new";
 import type { LocalFaceIndex } from "./face";
 
 /**
  * ML DB schema.
  *
- * The "ML" database is made of three object stores:
+ * The "ML" database is made of the lower level "index" object stores, and
+ * higher level "cluster" object stores.
  *
- * - "file-status": Contains {@link FileStatus} objects, one for each
- *   {@link EnteFile} that the ML subsystem knows about. Periodically (and when
- *   required), this is synced with the list of files that the current client
- *   knows about locally.
+ * The index related object stores are the following:
  *
- * - "face-index": Contains {@link LocalFaceIndex} objects, either indexed
- *   locally or fetched from remote.
+ * -   "file-status": Contains {@link FileStatus} objects, one for each
+ *     {@link EnteFile} that the ML subsystem knows about. Periodically (and
+ *     when required), this is synced with the list of files that the current
+ *     client knows about locally.
  *
- * - "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
- *   locally or fetched from remote.
+ * -   "face-index": Contains {@link LocalFaceIndex} objects, either indexed
+ *     locally or fetched from remote.
  *
- * All the stores are keyed by {@link fileID}. The "file-status" contains
+ * -   "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
+ *     locally or fetched from remote.
+ *
+ * These three stores are keyed by {@link fileID}. The "file-status" contains
  * book-keeping about the indexing process (whether or not a file needs
  * indexing, or if there were errors doing so), while the other stores contain
  * the actual indexing results.
  *
- * In tandem, these serve as the underlying storage for the functions exposed by
- * the ML database.
+ * In tandem, these serve as the underlying storage for the indexes maintained
+ * in the ML database.
+ *
+ * The cluster related object stores are the following:
+ *
+ * -   "face-cluster": Contains {@link FaceCluster} objects, one for each
+ *     cluster of faces that either the clustering algorithm produced locally or
+ *     were synced from remote. It is indexed by the (cluster) ID.
+ *
+ * -   "cluster-group": Contains {@link CGroup} objects, one for each group of
+ *     clusters that were synced from remote. The client can also locally
+ *     generate cluster groups on certain user interactions, but these too will
+ *     eventually get synced with remote. This object store is indexed by the
+ *     (cgroup) ID.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -48,9 +63,9 @@ interface MLDBSchema extends DBSchema {
         key: string;
         value: FaceCluster;
     };
-    person: {
+    "cluster-group": {
         key: string;
-        value: Person;
+        value: CGroup;
     };
 }
 
@@ -111,7 +126,7 @@ const openMLDB = async () => {
             if (oldVersion < 3) {
                 if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
                     db.createObjectStore("face-cluster", { keyPath: "id" });
-                    db.createObjectStore("person", { keyPath: "id" });
+                    db.createObjectStore("cluster-group", { keyPath: "id" });
                 }
             }
         },
@@ -419,18 +434,18 @@ export const faceClusters = async () => {
 };
 
 /**
- * Return all person entries (aka "people") present locally.
+ * Return all cluster group entries (aka "cgroups") present locally.
  */
-export const persons = async () => {
+export const clusterGroups = async () => {
     const db = await mlDB();
-    return db.getAll("person");
+    return db.getAll("cluster-group");
 };
 
 /**
  * Replace the face clusters stored locally with the given ones.
  *
- * This function deletes all entries from the person object store, and then
- * inserts the given {@link clusters} into it.
+ * This function deletes all entries from the face cluster object store, and
+ * then inserts the given {@link clusters} into it.
  */
 export const setFaceClusters = async (clusters: FaceCluster[]) => {
     const db = await mlDB();
@@ -441,19 +456,19 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
 };
 
 /**
- * Update the person store to reflect the given changes, in order.
+ * Update the cluster group store to reflect the given changes.
  *
  * @param diff A list of changes to apply. Each entry is either
  *
- * -   A string, in which case the person with the given string as their ID
- *     should be deleted from the store, or
+ * -   A string, in which case the cluster group with the given string as their
+ *     ID should be deleted from the store, or
  *
- * -   A person, in which case it should add or overwrite the entry for the
- *     corresponding person (as identified by their {@link id}).
+ * -   A cgroup, in which case it should add or overwrite the entry for the
+ *     corresponding cluster group (as identified by its {@link id}).
  */
-export const applyPersonDiff = async (diff: (string | Person)[]) => {
+export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
     const db = await mlDB();
-    const tx = db.transaction("person", "readwrite");
+    const tx = db.transaction("cluster-group", "readwrite");
     // See: [Note: Diff response will have at most one entry for an id]
     await Promise.all(
         diff.map((d) =>
@@ -464,37 +479,22 @@ export const applyPersonDiff = async (diff: (string | Person)[]) => {
 };
 
 /**
- * Add or overwrite the entry for the given {@link person}, as identified by
+ * Add or overwrite the entry for the given {@link cgroup}, as identified by
  * their {@link id}.
  */
 // TODO-Cluster: Remove me
-export const savePerson = async (person: Person) => {
+export const saveClusterGroup = async (cgroup: CGroup) => {
     const db = await mlDB();
-    const tx = db.transaction("person", "readwrite");
-    await Promise.all([tx.store.put(person), tx.done]);
+    const tx = db.transaction("cluster-group", "readwrite");
+    await Promise.all([tx.store.put(cgroup), tx.done]);
 };
 
 /**
- * Delete the entry for the persons with the given {@link id}, if any.
+ * Delete the entry (if any) for the cluster group with the given {@link id}.
  */
 // TODO-Cluster: Remove me
-export const deletePerson = async (id: string) => {
+export const deleteClusterGroup = async (id: string) => {
     const db = await mlDB();
-    const tx = db.transaction("person", "readwrite");
+    const tx = db.transaction("cluster-group", "readwrite");
     await Promise.all([tx.store.delete(id), tx.done]);
-};
-
-/**
- * Replace the persons stored locally with the given ones.
- *
- * This function deletes all entries from the person object store, and then
- * inserts the given {@link persons} into it.
- */
-// TODO-Cluster: Remove me
-export const setPersons = async (persons: Person[]) => {
-    const db = await mlDB();
-    const tx = db.transaction("person", "readwrite");
-    await tx.store.clear();
-    await Promise.all(persons.map((person) => tx.store.put(person)));
-    return tx.done;
 };

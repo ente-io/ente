@@ -7,21 +7,23 @@ import { usersEncryptionKeyB64 } from "@/base/session-store";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
-import type { Person } from "./ml/cluster-new";
-import { applyPersonDiff } from "./ml/db";
+import type { CGroup } from "./ml/cluster-new";
+import { applyCGroupDiff } from "./ml/db";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
  * can store for their account.
  *
- * e.g. location tags, people in their photos.
+ * e.g. location tags, cluster groups.
  */
 export type EntityType =
     /**
-     * The latest iteration of the Person entity format, where the data is
-     * gzipped before encryption.
+     * A cluster group.
+     *
+     * Format: An encrypted string containing a gzipped JSON string representing
+     * the cgroup data.
      */
-    "person_v2";
+    "cgroup";
 
 /**
  * The maximum number of items to fetch in a single diff
@@ -313,21 +315,21 @@ const saveLatestUpdatedAt = (type: EntityType, value: number) =>
     setKV(latestUpdatedAtKey(type), value);
 
 /**
- * Sync the {@link Person} entities that we have locally with remote.
+ * Sync the {@link CGroup} entities that we have locally with remote.
  *
- * This fetches all the user entities corresponding to the "person_v2" entity
- * type from remote that have been created, updated or deleted since the last
- * time we checked.
+ * This fetches all the user entities corresponding to the "cgroup" entity type
+ * from remote that have been created, updated or deleted since the last time we
+ * checked.
  *
  * This diff is then applied to the data we have persisted locally.
  */
-export const syncPersons = async () => {
-    const type: EntityType = "person_v2";
+export const syncCGroups = async () => {
+    const type: EntityType = "cgroup";
 
     const entityKeyB64 = await getOrCreateEntityKeyB64(type);
 
-    const parse = async (id: string, data: Uint8Array): Promise<Person> => {
-        const rp = RemotePerson.parse(JSON.parse(await gunzip(data)));
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
+        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
         return {
             id,
             name: rp.name,
@@ -344,7 +346,7 @@ export const syncPersons = async () => {
         const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (entities.length == 0) break;
 
-        await applyPersonDiff(
+        await applyCGroupDiff(
             await Promise.all(
                 entities.map(async ({ id, data }) =>
                     data ? await parse(id, data) : id,
@@ -360,8 +362,8 @@ export const syncPersons = async () => {
     }
 };
 
-/** Zod schema for the {@link RemotePerson} type. */
-const RemotePerson = z.object({
+/** Zod schema for the {@link RemoteCGroup} type. */
+const RemoteCGroup = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(
         z.object({
@@ -374,6 +376,6 @@ const RemotePerson = z.object({
 });
 
 /**
- * A "person_v2" entity as synced via remote.
+ * Contents of a "cgroup" user entity, as synced via remote.
  */
-type RemotePerson = z.infer<typeof RemotePerson>;
+type RemoteCGroup = z.infer<typeof RemoteCGroup>;

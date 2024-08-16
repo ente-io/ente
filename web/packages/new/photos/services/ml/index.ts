@@ -347,7 +347,7 @@ export const wipCluster = async () => {
 
     if (last) return last;
 
-    const { clusters, people } = await clusterFaces(await faceIndexes());
+    const { clusters, cgroups } = await clusterFaces(await faceIndexes());
     const clusterByID = new Map(
         clusters.map((cluster) => [cluster.id, cluster]),
     );
@@ -356,31 +356,31 @@ export const wipCluster = async () => {
     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
     const result: SearchPerson[] = [];
-    for (const person of people) {
-        let avatarFaceID = person.avatarFaceID;
+    for (const cgroup of cgroups) {
+        let avatarFaceID = cgroup.avatarFaceID;
         // TODO-Cluster
         // Temp
         if (!avatarFaceID) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            avatarFaceID = person.clusterIDs
+            avatarFaceID = cgroup.clusterIDs
                 .map((id) => clusterByID.get(id))
                 .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
         }
-        person.clusterIDs;
+        cgroup.clusterIDs;
         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
         if (!avatarFaceFileID || !avatarFaceFile) {
             assertionFailed(`Face ID ${avatarFaceID} without local file`);
             continue;
         }
-        const files = person.clusterIDs
+        const files = cgroup.clusterIDs
             .map((id) => clusterByID.get(id))
             .flatMap((cluster) => cluster?.faceIDs ?? [])
             .map((faceID) => fileIDFromFaceID(faceID))
             .filter((fileID) => fileID !== undefined);
         result.push({
-            id: person.id,
-            name: person.name,
+            id: cgroup.id,
+            name: cgroup.name,
             files,
             displayFaceID: avatarFaceID,
             displayFaceFile: avatarFaceFile,

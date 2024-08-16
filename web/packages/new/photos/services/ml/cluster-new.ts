@@ -1,18 +1,17 @@
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
-import { faceClusters, persons } from "./db";
+import { clusterGroups, faceClusters } from "./db";
 import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
 /**
  * A face cluster is an set of faces.
  *
- * Each cluster has an id so that a {@link Person} can refer to it.
+ * Each cluster has an id so that a {@link CGroup} can refer to it.
  *
- * The cluster is not directly synced to remote. But it does indirectly get
- * synced if it gets promoted or attached to a person (which can be thought of
- * as a named or hidden clusters).
+ * The cluster is not directly synced to remote. Only clusters that the user
+ * interacts with get synced to remote, as part of a {@link CGroup}.
  */
 export interface FaceCluster {
     /**
@@ -29,67 +28,77 @@ export interface FaceCluster {
 }
 
 /**
- * A Person is a set of clusters with some attached metadata.
+ * A cgroup ("cluster group") is a group of clusters (possibly containing a
+ * single cluster) that the user has interacted with.
  *
- * More precisely, a person is a a single cluster or a set of clusters that the
- * user has interacted with.
+ * Interactions include hiding, merging and giving a name and/or a cover photo.
  *
  * The most frequent interaction is naming a {@link FaceCluster}, which promotes
- * it to a become a {@link Person}. The promotion comes with the ability to be
- * synced with remote (as a "person_v2" user entity).
+ * it to a become a {@link CGroup}. The promotion comes with the ability to be
+ * synced with remote (as a "cgroup" user entity).
  *
- * There after, the user may attach more clusters to the same {@link Person}.
+ * There after, the user may attach more clusters to the same {@link CGroup}.
+ *
+ * > A named cluster group can be thought of as a "person", though this is not
+ * > necessarily an accurate characterization. e.g. there can be a named cluster
+ * > group that contains face clusters of pets.
  *
  * The other form of interaction is hiding. The user may hide a single (unnamed)
- * cluster, or they may hide a person.
+ * cluster, or they may hide an named {@link CGroup}. In both cases, we promote
+ * the cluster to a CGroup if needed so that their request to hide gets synced.
  *
- * The Person entity on remote has clusters embedded within itself
+ * While in our local representation we separately maintain clusters and link to
+ * them from within CGroups by their clusterID, in the remote representation
+ * clusters themselves don't get synced. Instead, the "cgroup" entities synced
+ * with remote contain the clusters within themselves. So a group that gets
+ * synced with remote looks something like:
  *
- *     { name, clusters: [{ clusterID, faceIDs }] }
+ *     { id, name, clusters: [{ clusterID, faceIDs }] }
  *
- * Since clusters don't get independently synced, one way to think about a
- * Person is that it is an interaction with a cluster that we want to sync.
  */
-export interface Person {
+export interface CGroup {
     /**
-     * A UUID or nanoid for this person.
+     * A nanoid for this cluster group.
      *
-     * This is the ID of the Person user entity, it is not contained as part of
-     * the Person entity payload.
+     * This is the ID of the "cgroup" user entity, it is not contained as part
+     * of the group entity payload itself.
      */
     id: string;
     /**
-     * A name assigned by the user to this person.
+     * A name assigned by the user to this cluster group.
      *
-     * This can be missing or an empty string for an unnamed cluster that was
+     * This should be set to an empty string for an unnamed cluster that was
      * hidden.
      */
     name: string | undefined;
     /**
-     * An unordered set of ids of the clusters that belong to this person.
+     * An unordered set of ids of the clusters that belong to this group.
      *
      * For ergonomics of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
     clusterIDs: string[];
     /**
-     * True if this person should be hidden.
+     * True if this cluster group should be hidden.
      *
-     * This can also be true for unnamed hidden clusters. When the user hides a
-     * single cluster that was offered as a suggestion to them on a client, then
-     * the client will create a new person entity without a name, and set its
-     * hidden flag to sync it with remote (so that other clients can also stop
-     * showing this cluster).
+     * The user can hide both named cluster groups and single unnamed clusters.
+     * If the user hides a single cluster that was offered as a suggestion to
+     * them on a client, the client will create a new unnamed cgroup containing
+     * it, and set its hidden flag to sync it with remote (so that other clients
+     * can also stop showing this cluster).
      */
     isHidden: boolean;
     /**
-     * The ID of the face that should be used as the cover photo for this person
-     * (if the user has set one).
+     * The ID of the face that should be used as the cover photo for this
+     * cluster group (if the user has set one).
+     *
+     * {@link avatarFaceID} is the user selected face. {@link displayFaceID} is
+     * the automatic placeholder.
      */
     avatarFaceID: string | undefined;
     /**
      * Locally determined ID of the "best" face that should be used as the
-     * display face, to represent this person in the UI.
+     * display face, to represent this cluster group in the UI.
      */
     displayFaceID: string | undefined;
 }
@@ -99,9 +108,11 @@ export interface Person {
  *
  * [Note: Face clustering algorithm]
  *
- * A person consists of clusters, each of which itself is a set of faces.
+ * A (cluster) group consists of clusters, each of which itself is a set of
+ * faces.
  *
- * The clusters are generated using locally by clients using this algorithm:
+ * The clusters are generated using locally by clients using the following
+ * (pseudo-) algorithm:
  *
  * 1.  clusters = [] initially, or fetched from remote.
  *
@@ -116,11 +127,11 @@ export interface Person {
  * following actions to the list of clusters that they can see:
  *
  * -   They can provide a name for a cluster. This upgrades a cluster into a
- *     "Person", which then gets synced via remote to all their devices.
+ *     "cgroup", which then gets synced via remote to all their devices.
  *
- * -   They can attach more clusters to a person.
+ * -   They can attach more clusters to a cgroup.
  *
- * -   They can remove a cluster from a person.
+ * -   They can remove a cluster from a cgroup.
  *
  * After clustering, we also do some routine cleanup. Faces belonging to files
  * that have been deleted (including those in Trash) should be pruned off.
@@ -226,14 +237,14 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // Prune too small clusters.
     const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
 
-    // For each person, use the highest scoring face in any of its clusters as
-    // its display face.
+    // For each cluster group, use the highest scoring face in any of its
+    // clusters as its display face.
 
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-    const people = await persons();
+    const cgroups = await clusterGroups();
 
-    for (const person of people) {
-        person.avatarFaceID = person.clusterIDs
+    for (const cgroup of cgroups) {
+        cgroup.avatarFaceID = cgroup.clusterIDs
             .map((clusterID) => clusterIndexForClusterID.get(clusterID))
             .map((clusterIndex) =>
                 clusterIndex ? clusters[clusterIndex] : undefined,
@@ -254,7 +265,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             validClusters,
             clusterIndexForClusterID,
             clusterIDForFaceID,
-            people,
+            cgroups,
         },
     ]);
     log.debug(
@@ -262,7 +273,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return { clusters: validClusters, people };
+    return { clusters: validClusters, cgroups };
 };
 
 /**

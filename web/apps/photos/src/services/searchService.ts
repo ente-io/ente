@@ -9,9 +9,9 @@ import {
     wipCluster,
     wipClusterEnable,
 } from "@/new/photos/services/ml";
-import { persons } from "@/new/photos/services/ml/db";
+import { clusterGroups } from "@/new/photos/services/ml/db";
 import type { SearchPerson } from "@/new/photos/services/search";
-import { syncPersons } from "@/new/photos/services/user-entity";
+import { syncCGroups } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import * as chrono from "chrono-node";
 import { t } from "i18next";
@@ -424,8 +424,8 @@ async function getAllPeople(limit: number = undefined) {
 
     done = true;
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-        await syncPersons();
-        const people = await persons();
+        await syncCGroups();
+        const people = await clusterGroups();
         log.debug(() => ["people", { people }]);
     }
 

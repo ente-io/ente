@@ -78,7 +78,7 @@ interface IndexableItem {
 export class MLWorker {
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private state: "idle" | "tick" | "pull" | "indexing" = "idle";
+    private state: "idle" | "tick" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */

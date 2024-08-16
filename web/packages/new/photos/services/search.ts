@@ -1,7 +1,7 @@
 import type { EnteFile } from "@/new/photos/types/file";
 
 /**
- * A massaged version of {@link Person} suitable for being shown in search
+ * A massaged version of {@link CGroup} suitable for being shown in search
  * results.
  */
 export interface SearchPerson {
