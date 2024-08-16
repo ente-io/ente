@@ -203,6 +203,25 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while File returns a "header".
  */
+async function encryptBox(data: Uint8Array, key: Uint8Array) {
+    await sodium.ready;
+    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
+    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
+    return {
+        encryptedData,
+        key,
+        nonce,
+    };
+}
+
+async function decryptBox(
+    data: Uint8Array,
+    nonce: Uint8Array,
+    key: Uint8Array,
+) {
+    await sodium.ready;
+    return sodium.crypto_secretbox_open_easy(data, nonce, key);
+}
 
 /**
  * Encrypt the given data using stream APIs in one-shot mode, using the given
@@ -459,26 +478,6 @@ export async function decryptToUTF8(data: string, nonce: string, key: string) {
     );
 
     return sodium.to_string(decrypted);
-}
-
-async function encryptBox(data: Uint8Array, key: Uint8Array) {
-    await sodium.ready;
-    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
-    return {
-        encryptedData,
-        key,
-        nonce,
-    };
-}
-
-async function decryptBox(
-    data: Uint8Array,
-    nonce: Uint8Array,
-    key: Uint8Array,
-) {
-    await sodium.ready;
-    return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
 
 export async function initChunkHashing() {
