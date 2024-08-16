@@ -1,7 +1,7 @@
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
-import { faceClusters, persons } from "./db";
+import { clusterGroups, faceClusters } from "./db";
 import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
@@ -241,7 +241,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // clusters as its display face.
 
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-    const people = await persons();
+    const people = await clusterGroups();
 
     for (const person of people) {
         person.avatarFaceID = person.clusterIDs
