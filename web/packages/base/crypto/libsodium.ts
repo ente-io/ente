@@ -11,7 +11,13 @@
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
-import type { DecryptBytes, EncryptBytes, EncryptedBytes } from "./types";
+import type {
+    DecryptBlobBytes,
+    DecryptBoxBytes,
+    EncryptBytes,
+    EncryptedBlobBytes,
+    EncryptedBoxBytes,
+} from "./types";
 
 /**
  * Convert bytes ({@link Uint8Array}) to a base64 string.
@@ -114,52 +120,119 @@ export async function fromHex(input: string) {
 }
 
 /**
- * Encrypt the given data using the given (base64 encoded) key.
+ * Encrypt the given data using the provided base64 encoded key.
  *
- * Use {@link decryptChaChaOneShot} to decrypt the result.
+ * [Note: 3 forms of encryption (Box | Blob | Stream)]
  *
- * [Note: Salsa and ChaCha]
+ * libsodium provides two "high level" encryption patterns:
  *
- * This uses the same stream encryption algorithm (XChaCha20 stream cipher with
- * Poly1305 MAC authentication) that we use for encrypting other streams, in
- * particular the actual file's contents.
+ * 1.  Authenticated encryption ("secretbox")
+ *     https://doc.libsodium.org/secret-key_cryptography/secretbox
  *
- * The difference here is that this function does a one shot instead of a
- * streaming encryption. This is only meant to be used for relatively small
- * amounts of data (few MBs).
+ * 2.  Encrypted streams and file encryption ("secretstream")
+ *     https://doc.libsodium.org/secret-key_cryptography/secretstream
  *
- * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * In terms of the underlying algorithm, they are essentially the same.
  *
- * Libsodium also provides the `crypto_secretbox_easy` APIs for one shot
- * encryption, which we do use in other places where we need to one shot
- * encryption of independent bits of data.
+ * 1.  The secretbox APIs use XSalsa20 with Poly1305 (where XSalsa20 is the
+ *     stream cipher used for encryption, which Poly1305 is the MAC used for
+ *     authentication).
  *
- * These secretbox APIs use XSalsa20 with Poly1305. XSalsa20 is a minor variant
- * (predecessor in fact) of XChaCha20.
+ * 2.  The secretstream APIs use XChaCha20 with Poly1305.
  *
- * See: https://doc.libsodium.org/secret-key_cryptography/secretbox
+ * XSalsa20 is a minor variant (predecessor in fact) of XChaCha20. I am not
+ * aware why libsodium uses both the variants, but they seem to have similar
+ * characteristics.
  *
- * The difference to those is that this function is meant to used for data
- * associated with a file (or some other Ente object, like a collection or an
- * entity). There is no technical reason to do it that way, just this way all
- * data associated with a file, including its actual contents, use the same
- * underlying (streaming) libsodium APIs. In other cases, where we have free
- * standing independent data, we continue using the secretbox APIs for one shot
- * encryption and decryption.
+ * These two sets of APIs map functionally map to two different use cases.
  *
- * @param data A {@link Uint8Array} containing the bytes that we want to
- * encrypt.
+ * 1.  If there is a single independent bit of data to encrypt, the secretbox
+ *     APIs fit the bill.
  *
- * @param keyB64 A base64 string containing the encryption key.
+ * 2.  If there is a set of related data to encrypt, e.g. the contents of a file
+ *     where the file is too big to fit into a single message, then the
+ *     secretstream APIs are more appropriate.
  *
- * @returns The encrypted data (bytes) and decryption header pair (base64
- * encoded string). Both these values are needed to decrypt the data. The header
- * does not need to be secret.
+ * However, in our code we have evolved two different use cases for the 2nd
+ * option.
+ *
+ * Say we have an Ente object, specifically an {@link EnteFile}. This holds the
+ * encryption keys for encrypting the contents of the file that a user wishes to
+ * upload. The secretstream APIs are the obvious fit, and indeed that's what we
+ * use, chunking the file if the contents are bigger than some threshold. But if
+ * the file is small enough, there is no need to chunk, so we also expose a
+ * function that does streaming encryption, but in "one-shot" mode.
+ *
+ * Later on, say we have to encrypt the public magic metadata associated with
+ * the {@link EnteFile}. Instead of using the secretbox APIs, we just us the
+ * same streaming encryption that the rest of the file uses, but since such
+ * metadata is well below the threshold for chunking, it invariably uses the
+ * "one-shot" mode.
+ *
+ * Thus, we have three scenarios:
+ *
+ * 1.  Box: Using secretbox APIs to encrypt some independent blob of data.
+ *
+ * 2.  Blob: Using secretstream APIs in one-shot mode. This is used to encrypt
+ *     data associated to an Ente object (file, collection, entity, etc), when
+ *     the data is small-ish (less than a few MBs).
+ *
+ * 3.  Stream/Chunks: Using secretstream APIs for encrypting chunks. This is
+ *     used to encrypt the actual content of the files associated with an
+ *     EnteFile object.
+ *
+ * "Blob" is not a prior term of art in this context, it is just something we
+ * use to abbreviate "data encrypted using secretstream APIs in one-shot mode".
+ *
+ * The distinction between Box and Blob is also handy since not only does the
+ * underlying algorithm differ, but also the terminology that libsodium use for
+ * the nonce.
+ *
+ * 1.  When using the secretbox APIs, the nonce is called the "nonce", and needs
+ *     to be provided by us (the caller).
+ *
+ * 2.  When using the secretstream APIs, the nonce is internally generated by
+ *     libsodium and provided by libsodium to us (the caller) as a "header".
+ *
+ * However, even for case 1, the functions we expose from libsodium.ts generate
+ * the nonce for the caller. So for higher level functions, the difference
+ * between Box and Blob encryption is:
+ *
+ * 1.  Box uses secretbox APIs (Salsa), Blob uses secretstream APIs (ChaCha).
+ *
+ * 2.  While both are one-shot, Blob should generally be used for data
+ *     associated with an Ente object, and Box for the other cases.
+ *
+ * 3.  Box returns a "nonce", while Blob returns a "header".
  */
-export const encryptChaChaOneShot = async ({
+export const encryptBox = async ({
     data,
     keyB64,
-}: EncryptBytes): Promise<EncryptedBytes> => {
+}: EncryptBytes): Promise<EncryptedBoxBytes> => {
+    await sodium.ready;
+    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
+    const encryptedData = sodium.crypto_secretbox_easy(
+        data,
+        nonce,
+        await fromB64(keyB64),
+    );
+    return { encryptedData, nonceB64: await toB64(nonce) };
+};
+
+/**
+ * Encrypt the given data using secretstream APIs in one-shot mode, using the
+ * given base64 encoded key.
+ *
+ * Use {@link decryptBlob} to decrypt the result.
+ *
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ *
+ * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ */
+export const encryptBlob = async ({
+    data,
+    keyB64,
+}: EncryptBytes): Promise<EncryptedBlobBytes> => {
     await sodium.ready;
 
     const uintkey: Uint8Array = await fromB64(keyB64);
@@ -254,13 +327,29 @@ export async function encryptFileChunk(
 }
 
 /**
- * Decrypt the result of {@link encryptChaChaOneShot}.
+ * Decrypt the result of {@link encryptBox}.
  */
-export const decryptChaChaOneShot = async ({
+export const decryptBox = async ({
+    encryptedData,
+    nonceB64,
+    keyB64,
+}: DecryptBoxBytes): Promise<Uint8Array> => {
+    await sodium.ready;
+    return sodium.crypto_secretbox_open_easy(
+        encryptedData,
+        await fromB64(nonceB64),
+        await fromB64(keyB64),
+    );
+};
+
+/**
+ * Decrypt the result of {@link encryptBlob}.
+ */
+export const decryptBlob = async ({
     encryptedData,
     decryptionHeaderB64,
     keyB64,
-}: DecryptBytes): Promise<Uint8Array> => {
+}: DecryptBlobBytes): Promise<Uint8Array> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         await fromB64(decryptionHeaderB64),
@@ -274,6 +363,7 @@ export const decryptChaChaOneShot = async ({
     return pullResult.message;
 };
 
+/** Decrypt Stream, but merge the results. */
 export const decryptChaCha = async (
     data: Uint8Array,
     header: Uint8Array,
@@ -349,14 +439,14 @@ export interface B64EncryptionResult {
     nonce: string;
 }
 
-export async function encryptToB64(data: string, key: string) {
+export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encrypt(await fromB64(data), await fromB64(key));
+    const encrypted = await encryptBox({ data: await fromB64(data), keyB64 });
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
-        key: await toB64(encrypted.key),
-        nonce: await toB64(encrypted.nonce),
+        key: keyB64,
+        nonce: encrypted.nonceB64,
     } as B64EncryptionResult;
 }
 
@@ -371,42 +461,36 @@ export async function encryptUTF8(data: string, key: string) {
     return await encryptToB64(b64Data, key);
 }
 
-export async function decryptB64(data: string, nonce: string, key: string) {
+/** Deprecated */
+export async function decryptB64(
+    data: string,
+    nonceB64: string,
+    keyB64: string,
+) {
     await sodium.ready;
-    const decrypted = await decrypt(
-        await fromB64(data),
-        await fromB64(nonce),
-        await fromB64(key),
-    );
+    const decrypted = await decryptBox({
+        encryptedData: await fromB64(data),
+        nonceB64,
+        keyB64,
+    });
 
     return await toB64(decrypted);
 }
 
-export async function decryptToUTF8(data: string, nonce: string, key: string) {
+/** Deprecated */
+export async function decryptToUTF8(
+    data: string,
+    nonceB64: string,
+    keyB64: string,
+) {
     await sodium.ready;
-    const decrypted = await decrypt(
-        await fromB64(data),
-        await fromB64(nonce),
-        await fromB64(key),
-    );
+    const decrypted = await decryptBox({
+        encryptedData: await fromB64(data),
+        nonceB64,
+        keyB64,
+    });
 
     return sodium.to_string(decrypted);
-}
-
-async function encrypt(data: Uint8Array, key: Uint8Array) {
-    await sodium.ready;
-    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
-    return {
-        encryptedData,
-        key,
-        nonce,
-    };
-}
-
-async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
-    await sodium.ready;
-    return sodium.crypto_secretbox_open_easy(data, nonce, key);
 }
 
 export async function initChunkHashing() {

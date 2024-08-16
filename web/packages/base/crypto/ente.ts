@@ -52,8 +52,10 @@ import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
-    DecryptB64,
-    DecryptBytes,
+    DecryptBlobB64,
+    DecryptBlobBytes,
+    DecryptBoxB64,
+    EncryptB64,
     EncryptBytes,
     EncryptJSON,
 } from "./types";
@@ -72,12 +74,29 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
+ * Encrypt arbitrary data using the given key and a randomly generated nonce.
+ *
+ * Use {@link decryptBoxB64} to decrypt the result.
+ *
+ * ee {@link encryptBox} for the implementation details.
+ *
+ * > The suffix "Box" comes from the fact that it uses the so called secretbox
+ * > APIs provided by libsodium under the hood.
+ * >
+ * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
+ */
+export const encryptBoxB64 = (r: EncryptB64) =>
+    inWorker()
+        ? ei._encryptBoxB64(r)
+        : sharedCryptoWorker().then((w) => w.encryptBoxB64(r));
+
+/**
  * Encrypt arbitrary data associated with an Ente object (file, collection,
  * entity) using the object's key.
  *
  * Use {@link decryptAssociatedData} to decrypt the result.
  *
- * See {@link encryptChaChaOneShot} for the implementation details.
+ * See {@link encryptBlob} for the implementation details.
  */
 export const encryptAssociatedData = (r: EncryptBytes) =>
     assertInWorker(ei._encryptAssociatedData(r));
@@ -96,10 +115,10 @@ export const encryptThumbnail = (r: EncryptBytes) =>
  * A variant of {@link encryptAssociatedData} that returns the encrypted data as
  * a base64 string instead of returning its bytes.
  *
- * Use {@link decryptAssociatedB64Data} to decrypt the result.
+ * Use {@link decryptAssociatedDataB64} to decrypt the result.
  */
-export const encryptAssociatedB64Data = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptAssociatedB64Data(r));
+export const encryptAssociatedDataB64 = (r: EncryptBytes) =>
+    assertInWorker(ei._encryptAssociatedDataB64(r));
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -122,14 +141,27 @@ export const encryptMetadataJSON = async (r: EncryptJSON) =>
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
+ * Decrypt arbitrary data, provided as a base64 string, using the given key and
+ * the provided nonce.
+ *
+ * This is the sibling of {@link encryptBoxB64}.
+ *
+ * See {@link decryptBox} for the implementation details.
+ */
+export const decryptBoxB64 = (r: DecryptBoxB64) =>
+    inWorker()
+        ? ei._decryptBoxB64(r)
+        : sharedCryptoWorker().then((w) => w.decryptBoxB64(r));
+
+/**
  * Decrypt arbitrary data associated with an Ente object (file, collection or
  * entity) using the object's key.
  *
  * This is the sibling of {@link encryptAssociatedData}.
  *
- * See {@link decryptChaChaOneShot} for the implementation details.
+ * See {@link decryptBlob} for the implementation details.
  */
-export const decryptAssociatedData = (r: DecryptBytes) =>
+export const decryptAssociatedData = (r: DecryptBlobBytes) =>
     assertInWorker(ei._decryptAssociatedData(r));
 
 /**
@@ -137,19 +169,19 @@ export const decryptAssociatedData = (r: DecryptBytes) =>
  *
  * This is the sibling of {@link encryptThumbnail}.
  */
-export const decryptThumbnail = (r: DecryptBytes) =>
+export const decryptThumbnail = (r: DecryptBlobBytes) =>
     assertInWorker(ei._decryptThumbnail(r));
 
 /**
  * A variant of {@link decryptAssociatedData} that expects the encrypted data as
  * a base64 encoded string.
  *
- * This is the sibling of {@link decryptAssociatedB64Data}.
+ * This is the sibling of {@link encryptAssociatedDataB64}.
  */
-export const decryptAssociatedB64Data = (r: DecryptB64) =>
+export const decryptAssociatedDataB64 = (r: DecryptBlobB64) =>
     inWorker()
-        ? ei._decryptAssociatedB64Data(r)
-        : sharedCryptoWorker().then((w) => w.decryptAssociatedB64Data(r));
+        ? ei._decryptAssociatedDataB64(r)
+        : sharedCryptoWorker().then((w) => w.decryptAssociatedDataB64(r));
 /**
  * Decrypt the metadata JSON associated with an Ente object.
  *
@@ -158,7 +190,7 @@ export const decryptAssociatedB64Data = (r: DecryptB64) =>
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadataJSON = (r: DecryptB64) =>
+export const decryptMetadataJSON = (r: DecryptBlobB64) =>
     inWorker()
         ? ei._decryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));

@@ -1,4 +1,4 @@
-import { encryptAssociatedB64Data } from "@/base/crypto/ente";
+import { encryptAssociatedDataB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import type { EnteFile } from "@/new/photos/types/file";
@@ -95,7 +95,7 @@ export const putFileData = async (
     data: Uint8Array,
 ) => {
     const { encryptedDataB64, decryptionHeaderB64 } =
-        await encryptAssociatedB64Data({ data: data, keyB64: enteFile.key });
+        await encryptAssociatedDataB64({ data: data, keyB64: enteFile.key });
 
     const res = await fetch(await apiURL("/files/data"), {
         method: "PUT",
