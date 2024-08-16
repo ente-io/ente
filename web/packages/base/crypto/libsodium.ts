@@ -15,6 +15,7 @@ import type {
     DecryptBlobBytes,
     EncryptBytes,
     EncryptedBlobBytes,
+    EncryptedBoxBytes,
 } from "./types";
 
 /**
@@ -203,7 +204,10 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
  */
-const encryptBox = async ({ data, keyB64 }: EncryptBytes) => {
+const encryptBox = async ({
+    data,
+    keyB64,
+}: EncryptBytes): Promise<EncryptedBoxBytes> => {
     await sodium.ready;
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(
@@ -211,10 +215,7 @@ const encryptBox = async ({ data, keyB64 }: EncryptBytes) => {
         nonce,
         await fromB64(keyB64),
     );
-    return {
-        encryptedData,
-        nonce,
-    };
+    return { encryptedData, nonceB64: await toB64(nonce) };
 };
 
 /**
@@ -440,7 +441,7 @@ export async function encryptToB64(data: string, keyB64: string) {
     return {
         encryptedData: await toB64(encrypted.encryptedData),
         key: keyB64,
-        nonce: await toB64(encrypted.nonce),
+        nonce: encrypted.nonceB64,
     } as B64EncryptionResult;
 }
 
