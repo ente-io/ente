@@ -13,6 +13,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/empty_album_state.dart";
+import "package:photos/ui/viewer/gallery/empty_album_state_new.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -22,11 +23,13 @@ class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final bool? hasVerifiedLock;
+  final bool isNewCollection;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
+    this.isNewCollection = false,
     Key? key,
   }) : super(key: key);
 
@@ -86,8 +89,14 @@ class CollectionPage extends StatelessWidget {
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       showSelectAllByDefault: galleryType != GalleryType.sharedCollection,
       emptyState: galleryType == GalleryType.ownedCollection
-          ? EmptyAlbumState(c.collection)
+          ? EmptyAlbumState(
+              c.collection,
+              isNewCollection: isNewCollection,
+            )
           : const EmptyState(),
+      footer: isNewCollection
+          ? const SizedBox(height: 20)
+          : const SizedBox(height: 212),
     );
     return Scaffold(
       appBar: PreferredSize(
@@ -99,6 +108,13 @@ class CollectionPage extends StatelessWidget {
           collection: c.collection,
         ),
       ),
+      floatingActionButton: isNewCollection
+          ? EmptyAlbumStateNew(
+              c.collection,
+              selectedFiles: _selectedFiles,
+            )
+          : const SizedBox.shrink(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: SelectionState(
         selectedFiles: _selectedFiles,
         child: Stack(

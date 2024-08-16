@@ -17,6 +17,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/settings/new_album_card_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
@@ -318,6 +319,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ],
                   )
                 : const SizedBox.shrink(),
+            const NewAlbumCardWidget(),
             const SizedBox(height: 32),
           ],
         ),
