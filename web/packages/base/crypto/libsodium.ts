@@ -13,6 +13,7 @@ import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
     DecryptBlobBytes,
+    DecryptBoxBytes,
     EncryptBytes,
     EncryptedBlobBytes,
     EncryptedBoxBytes,
@@ -328,13 +329,17 @@ export async function encryptFileChunk(
 /**
  * Decrypt the result of {@link encryptBox}.
  */
-const decryptBox = async (
-    data: Uint8Array,
-    nonce: Uint8Array,
-    key: Uint8Array,
-) => {
+const decryptBox = async ({
+    encryptedData,
+    nonceB64,
+    keyB64,
+}: DecryptBoxBytes): Promise<Uint8Array> => {
     await sodium.ready;
-    return sodium.crypto_secretbox_open_easy(data, nonce, key);
+    return sodium.crypto_secretbox_open_easy(
+        encryptedData,
+        await fromB64(nonceB64),
+        await fromB64(keyB64),
+    );
 };
 
 /**
@@ -456,24 +461,34 @@ export async function encryptUTF8(data: string, key: string) {
     return await encryptToB64(b64Data, key);
 }
 
-export async function decryptB64(data: string, nonce: string, key: string) {
+/** Deprecated */
+export async function decryptB64(
+    data: string,
+    nonceB64: string,
+    keyB64: string,
+) {
     await sodium.ready;
-    const decrypted = await decryptBox(
-        await fromB64(data),
-        await fromB64(nonce),
-        await fromB64(key),
-    );
+    const decrypted = await decryptBox({
+        encryptedData: await fromB64(data),
+        nonceB64,
+        keyB64,
+    });
 
     return await toB64(decrypted);
 }
 
-export async function decryptToUTF8(data: string, nonce: string, key: string) {
+/** Deprecated */
+export async function decryptToUTF8(
+    data: string,
+    nonceB64: string,
+    keyB64: string,
+) {
     await sodium.ready;
-    const decrypted = await decryptBox(
-        await fromB64(data),
-        await fromB64(nonce),
-        await fromB64(key),
-    );
+    const decrypted = await decryptBox({
+        encryptedData: await fromB64(data),
+        nonceB64,
+        keyB64,
+    });
 
     return sodium.to_string(decrypted);
 }
