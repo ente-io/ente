@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/events/notification_event.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,7 +45,11 @@ class UserRemoteFlagService {
   }
 
   bool getCachedBoolValue(String key) {
-    return _prefs.getBool(key) ?? false;
+    bool defaultValue = false;
+    if (key == mapEnabled) {
+      defaultValue = flagService.mapEnabled;
+    }
+    return _prefs.getBool(key) ?? defaultValue;
   }
 
   Future<bool> getBoolValue(String key) async {
