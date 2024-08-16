@@ -673,7 +673,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "empty": MessageLookupByLibrary.simpleMessage("Esvaziar"),
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Esvaziar a lixeira?"),
-        "enableMaps": MessageLookupByLibrary.simpleMessage("Habilitar mapa"),
+        "enableMaps": MessageLookupByLibrary.simpleMessage("Habilitar Mapa"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Isto mostrará suas fotos em um mapa do mundo.\n\nEste mapa é hospedado pelo OpenStreetMap, e os exatos locais de suas fotos nunca são compartilhados.\n\nVocê pode desativar esse recurso a qualquer momento nas Configurações."),
         "encryptingBackup":
@@ -817,9 +817,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Conceder permissão"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Agrupar fotos próximas"),
-        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Visão de convidado"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable guest view, please setup device passcode or screen lock in your system settings."),
+            "Para ativar a visão de convidado, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1222,7 +1222,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "referFriendsAnd2xYourPlan": MessageLookupByLibrary.simpleMessage(
             "Indique amigos e 2x seu plano"),
         "referralStep1": MessageLookupByLibrary.simpleMessage(
-            "Envie esse código aos seus amigos"),
+            "1. Dê este código aos seus amigos"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. Eles se inscrevem em um plano pago"),
         "referralStep3": m44,

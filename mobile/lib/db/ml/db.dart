@@ -149,9 +149,9 @@ class FaceMLDataDB {
       final batch = faceIDToClusterID.entries.toList().sublist(start, end);
 
       const String sql = '''
-        INSERT INTO $faceClustersTable ($fcFaceId, $fcClusterID)
+        INSERT INTO $faceClustersTable ($faceIDColumn, $clusterIDColumn)
         VALUES (?, ?)
-        ON CONFLICT($fcFaceId) DO UPDATE SET $fcClusterID = excluded.$fcClusterID
+        ON CONFLICT($faceIDColumn) DO UPDATE SET $clusterIDColumn = excluded.$clusterIDColumn
       ''';
       final parameterSets = batch.map((e) => [e.key, e.value]).toList();
 
@@ -190,11 +190,11 @@ class FaceMLDataDB {
   Future<Map<String, int>> clusterIdToFaceCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcClusterID, COUNT(*) as count FROM $faceClustersTable where $fcClusterID IS NOT NULL GROUP BY $fcClusterID ',
+      'SELECT $clusterIDColumn, COUNT(*) as count FROM $faceClustersTable where $clusterIDColumn IS NOT NULL GROUP BY $clusterIDColumn ',
     );
     final Map<String, int> result = {};
     for (final map in maps) {
-      result[map[fcClusterID] as String] = map['count'] as int;
+      result[map[clusterIDColumn] as String] = map['count'] as int;
     }
     return result;
   }
@@ -243,7 +243,7 @@ class FaceMLDataDB {
   }) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $embeddingColumn FROM $facesTable WHERE  $faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where $fcClusterID = ?) ${limit != null ? 'LIMIT $limit' : ''}',
+      'SELECT $embeddingColumn FROM $facesTable WHERE  $faceIDColumn in (SELECT $faceIDColumn from $faceClustersTable where $clusterIDColumn = ?) ${limit != null ? 'LIMIT $limit' : ''}',
       [clusterID],
     );
     return maps.map((e) => e[embeddingColumn] as Uint8List);
@@ -257,10 +257,10 @@ class FaceMLDataDB {
     final Map<String, List<Uint8List>> result = {};
 
     final selectQuery = '''
-  SELECT fc.$fcClusterID, fe.$embeddingColumn 
+  SELECT fc.$clusterIDColumn, fe.$embeddingColumn 
   FROM $faceClustersTable fc 
-  INNER JOIN $facesTable fe ON fc.$fcFaceId = fe.$faceIDColumn 
-  WHERE fc.$fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  INNER JOIN $facesTable fe ON fc.$faceIDColumn = fe.$faceIDColumn 
+  WHERE fc.$clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   ${limit != null ? 'LIMIT ?' : ''}
 ''';
 
@@ -273,7 +273,7 @@ class FaceMLDataDB {
         await db.getAll(selectQuery, selectQueryParams);
 
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as String;
+      final clusterID = map[clusterIDColumn] as String;
       final faceEmbedding = map[embeddingColumn] as Uint8List;
       result.putIfAbsent(clusterID, () => <Uint8List>[]).add(faceEmbedding);
     }
@@ -311,7 +311,7 @@ class FaceMLDataDB {
           clusterRows.map((e) => e[clusterIDColumn] as String).toList();
       // final List<Map<String, dynamic>> faceMaps = await db.getAll(
       //   'SELECT * FROM $facesTable where '
-      //   '$faceIDColumn in (SELECT $fcFaceId from $faceClustersTable where  $fcClusterID IN (${clusterIDs.join(",")}))'
+      //   '$faceIDColumn in (SELECT $faceIDColumn from $faceClustersTable where  $clusterIDColumn IN (${clusterIDs.join(",")}))'
       //   'AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinimumQualityFaceScore ORDER BY $faceScore DESC',
       // );
 
@@ -319,9 +319,9 @@ class FaceMLDataDB {
         '''
   SELECT * FROM $facesTable 
   WHERE $faceIDColumn IN (
-    SELECT $fcFaceId 
+    SELECT $faceIDColumn 
     FROM $faceClustersTable 
-    WHERE $fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+    WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   )
   AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
   AND $faceScore > ?
@@ -343,9 +343,9 @@ class FaceMLDataDB {
     }
     if (clusterID != null) {
       const String queryFaceID = '''
-        SELECT $fcFaceId
+        SELECT $faceIDColumn
         FROM $faceClustersTable
-        WHERE $fcClusterID = ?
+        WHERE $clusterIDColumn = ?
       ''';
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
         queryFaceID,
@@ -354,8 +354,8 @@ class FaceMLDataDB {
       final List<Face>? faces = await getFacesForGivenFileID(recentFileID);
       if (faces != null) {
         for (final face in faces) {
-          if (faceMaps
-              .any((element) => (element[fcFaceId] as String) == face.faceID)) {
+          if (faceMaps.any(
+              (element) => (element[faceIDColumn] as String) == face.faceID,)) {
             return face;
           }
         }
@@ -391,16 +391,16 @@ class FaceMLDataDB {
 
     final List<Map<String, dynamic>> maps = await db.getAll(
       '''
-  SELECT $fcClusterID, $fcFaceId 
+  SELECT $clusterIDColumn, $faceIDColumn 
   FROM $faceClustersTable 
-  WHERE $fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   ''',
       [...clusterIDs],
     );
 
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as String;
-      final faceID = map[fcFaceId] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      final faceID = map[faceIDColumn] as String;
       result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
     }
     return result;
@@ -409,24 +409,24 @@ class FaceMLDataDB {
   Future<String?> getClusterIDForFaceID(String faceID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcClusterID FROM $faceClustersTable WHERE $fcFaceId = ?',
+      'SELECT $clusterIDColumn FROM $faceClustersTable WHERE $faceIDColumn = ?',
       [faceID],
     );
     if (maps.isEmpty) {
       return null;
     }
-    return maps.first[fcClusterID] as String;
+    return maps.first[clusterIDColumn] as String;
   }
 
   Future<Map<String, Iterable<String>>> getAllClusterIdToFaceIDs() async {
     final db = await instance.asyncDB;
     final Map<String, List<String>> result = {};
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable',
+      'SELECT $clusterIDColumn, $faceIDColumn FROM $faceClustersTable',
     );
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as String;
-      final faceID = map[fcFaceId] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      final faceID = map[faceIDColumn] as String;
       result.putIfAbsent(clusterID, () => <String>[]).add(faceID);
     }
     return result;
@@ -435,11 +435,11 @@ class FaceMLDataDB {
   Future<Iterable<String>> getFaceIDsForCluster(String clusterID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcFaceId FROM $faceClustersTable '
-      'WHERE $faceClustersTable.$fcClusterID = ?',
+      'SELECT $faceIDColumn FROM $faceClustersTable '
+      'WHERE $faceClustersTable.$clusterIDColumn = ?',
       [clusterID],
     );
-    return maps.map((e) => e[fcFaceId] as String).toSet();
+    return maps.map((e) => e[faceIDColumn] as String).toSet();
   }
 
   // Get Map of personID to Map of clusterID to faceIDs
@@ -447,14 +447,14 @@ class FaceMLDataDB {
       getPersonToClusterIdToFaceIds() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $personIdColumn, $faceClustersTable.$fcClusterID, $fcFaceId FROM $clusterPersonTable '
-      'LEFT JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$fcClusterID',
+      'SELECT $personIdColumn, $faceClustersTable.$clusterIDColumn, $faceIDColumn FROM $clusterPersonTable '
+      'LEFT JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn',
     );
     final Map<String, Map<String, Set<String>>> result = {};
     for (final map in maps) {
       final personID = map[personIdColumn] as String;
-      final clusterID = map[fcClusterID] as String;
-      final faceID = map[fcFaceId] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      final faceID = map[faceIDColumn] as String;
       result
           .putIfAbsent(personID, () => {})
           .putIfAbsent(clusterID, () => {})
@@ -466,12 +466,12 @@ class FaceMLDataDB {
   Future<Set<String>> getFaceIDsForPerson(String personID) async {
     final db = await instance.asyncDB;
     final faceIdsResult = await db.getAll(
-      'SELECT $fcFaceId FROM $faceClustersTable LEFT JOIN $clusterPersonTable '
-      'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$clusterIDColumn '
+      'SELECT $faceIDColumn FROM $faceClustersTable LEFT JOIN $clusterPersonTable '
+      'ON $faceClustersTable.$clusterIDColumn = $clusterPersonTable.$clusterIDColumn '
       'WHERE $clusterPersonTable.$personIdColumn = ?',
       [personID],
     );
-    return faceIdsResult.map((e) => e[fcFaceId] as String).toSet();
+    return faceIdsResult.map((e) => e[faceIDColumn] as String).toSet();
   }
 
   Future<Iterable<double>> getBlurValuesForCluster(String clusterID) async {
@@ -479,13 +479,13 @@ class FaceMLDataDB {
     const String query = '''
         SELECT $facesTable.$faceBlur 
         FROM $facesTable 
-        JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$fcFaceId 
-        WHERE $faceClustersTable.$fcClusterID = ?
+        JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$faceIDColumn 
+        WHERE $faceClustersTable.$clusterIDColumn = ?
       ''';
     // const String query2 = '''
     //     SELECT $faceBlur
     //     FROM $facesTable
-    //     WHERE $faceIDColumn IN (SELECT $fcFaceId FROM $faceClustersTable WHERE $fcClusterID = ?)
+    //     WHERE $faceIDColumn IN (SELECT $faceIDColumn FROM $faceClustersTable WHERE $clusterIDColumn = ?)
     //   ''';
     final List<Map<String, dynamic>> maps = await db.getAll(
       query,
@@ -499,11 +499,11 @@ class FaceMLDataDB {
   ) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcFaceId, $fcClusterID FROM $faceClustersTable where $fcFaceId IN (${faceIds.map((id) => "'$id'").join(",")})',
+      'SELECT $faceIDColumn, $clusterIDColumn FROM $faceClustersTable where $faceIDColumn IN (${faceIds.map((id) => "'$id'").join(",")})',
     );
     final Map<String, String?> result = {};
     for (final map in maps) {
-      result[map[fcFaceId] as String] = map[fcClusterID] as String?;
+      result[map[faceIDColumn] as String] = map[clusterIDColumn] as String?;
     }
     return result;
   }
@@ -512,12 +512,12 @@ class FaceMLDataDB {
     final Map<int, Set<String>> result = {};
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
-      'SELECT $fcClusterID, $fcFaceId FROM $faceClustersTable',
+      'SELECT $clusterIDColumn, $faceIDColumn FROM $faceClustersTable',
     );
 
     for (final map in maps) {
-      final clusterID = map[fcClusterID] as String;
-      final faceID = map[fcFaceId] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      final faceID = map[faceIDColumn] as String;
       final fileID = getFileIdFromFaceId(faceID);
       result[fileID] = (result[fileID] ?? {})..add(clusterID);
     }
@@ -530,9 +530,9 @@ class FaceMLDataDB {
     final db = await instance.asyncDB;
 
     const String sql = '''
-      INSERT INTO $faceClustersTable ($fcFaceId, $fcClusterID)
+      INSERT INTO $faceClustersTable ($faceIDColumn, $clusterIDColumn)
       VALUES (?, ?)
-      ON CONFLICT($fcFaceId) DO UPDATE SET $fcClusterID = excluded.$fcClusterID
+      ON CONFLICT($faceIDColumn) DO UPDATE SET $clusterIDColumn = excluded.$clusterIDColumn
     ''';
     final parameterSets =
         faceIDToClusterID.entries.map((e) => [e.key, e.value]).toList();
@@ -662,11 +662,11 @@ class FaceMLDataDB {
   Future<int> getClusteredOrFacelessFileCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> clustered = await db.getAll(
-      'SELECT $fcFaceId FROM $faceClustersTable',
+      'SELECT $faceIDColumn FROM $faceClustersTable',
     );
     final Set<int> clusteredFileIDs = {};
     for (final map in clustered) {
-      final int fileID = getFileIdFromFaceId(map[fcFaceId] as String);
+      final int fileID = getFileIdFromFaceId(map[faceIDColumn] as String);
       clusteredFileIDs.add(fileID);
     }
 
@@ -701,10 +701,10 @@ class FaceMLDataDB {
     const String query = '''
       SELECT f.$faceIDColumn
       FROM $facesTable f
-      LEFT JOIN $faceClustersTable fc ON f.$faceIDColumn = fc.$fcFaceId
+      LEFT JOIN $faceClustersTable fc ON f.$faceIDColumn = fc.$faceIDColumn
       WHERE f.$faceScore > $kMinimumQualityFaceScore
       AND f.$faceBlur > $kLaplacianHardThreshold
-      AND fc.$fcFaceId IS NULL
+      AND fc.$faceIDColumn IS NULL
     ''';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
     return maps.length;
@@ -790,16 +790,16 @@ class FaceMLDataDB {
     final db = instance.asyncDB;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.getAll(
-        'SELECT $faceClustersTable.$fcClusterID, $fcFaceId FROM $faceClustersTable '
+        'SELECT $faceClustersTable.$clusterIDColumn, $faceIDColumn FROM $faceClustersTable '
         'INNER JOIN $clusterPersonTable '
-        'ON $faceClustersTable.$fcClusterID = $clusterPersonTable.$clusterIDColumn '
+        'ON $faceClustersTable.$clusterIDColumn = $clusterPersonTable.$clusterIDColumn '
         'WHERE $clusterPersonTable.$personIdColumn = ?',
         [personID],
       );
       final Map<int, Set<String>> result = {};
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as String;
-        final String faceID = map[fcFaceId] as String;
+        final String faceID = map[faceIDColumn] as String;
         final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
@@ -814,16 +814,16 @@ class FaceMLDataDB {
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.getAll(
         '''
-  SELECT $fcClusterID, $fcFaceId 
+  SELECT $clusterIDColumn, $faceIDColumn 
   FROM $faceClustersTable 
-  WHERE $fcClusterID IN (${List.filled(clusterIDs.length, '?').join(',')})
+  WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   ''',
         [...clusterIDs],
       );
       final Map<int, Set<String>> result = {};
       for (final map in maps) {
-        final clusterID = map[fcClusterID] as String;
-        final faceID = map[fcFaceId] as String;
+        final clusterID = map[clusterIDColumn] as String;
+        final faceID = map[faceIDColumn] as String;
         final fileID = getFileIdFromFaceId(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }

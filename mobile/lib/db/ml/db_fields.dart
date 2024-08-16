@@ -11,8 +11,10 @@ const faceBlur = 'blur';
 const isSideways = 'is_sideways';
 const imageWidth = 'width';
 const imageHeight = 'height';
-const faceClusterId = 'cluster_id';
 const mlVersionColumn = 'ml_version';
+
+const personIdColumn = 'person_id';
+const clusterIDColumn = 'cluster_id';
 
 const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $fileIDColumn	INTEGER NOT NULL,
@@ -34,27 +36,23 @@ const deleteFacesTable = 'DELETE FROM $facesTable';
 
 //##region Face Clusters Table Fields & Schema Queries
 const faceClustersTable = 'face_clusters';
-const fcClusterID = 'cluster_id';
-const fcFaceId = 'face_id';
 
 // fcClusterId & fcFaceId are the primary keys and fcClusterId is a foreign key to faces table
 const createFaceClustersTable = '''
 CREATE TABLE IF NOT EXISTS $faceClustersTable (
-  $fcFaceId	TEXT NOT NULL,
-  $fcClusterID TEXT NOT NULL,
-  PRIMARY KEY($fcFaceId)
+  $faceIDColumn	TEXT NOT NULL,
+  $clusterIDColumn TEXT NOT NULL,
+  PRIMARY KEY($faceIDColumn)
 );
 ''';
 // -- Creating a non-unique index on clusterID for query optimization
 const fcClusterIDIndex =
-    '''CREATE INDEX IF NOT EXISTS idx_fcClusterID ON $faceClustersTable($fcClusterID);''';
+    '''CREATE INDEX IF NOT EXISTS idx_fcClusterID ON $faceClustersTable($clusterIDColumn);''';
 const deleteFaceClustersTable = 'DELETE FROM $faceClustersTable';
 //##endregion
 
 // Clusters Table Fields & Schema Queries
 const clusterPersonTable = 'cluster_person';
-const personIdColumn = 'person_id';
-const clusterIDColumn = 'cluster_id';
 
 const createClusterPersonTable = '''
 CREATE TABLE IF NOT EXISTS $clusterPersonTable (
