@@ -186,11 +186,11 @@ const userEntityDiff = async (
  * See also, [Note: User entity keys].
  */
 const getOrCreateEntityKeyB64 = async (type: EntityType) => {
-    const encryptionKeyB64 = await masterKeyB64FromSession();
+    const masterKeyB64 = await masterKeyB64FromSession();
     const worker = await sharedCryptoWorker();
 
     const decrypt = async ({ encryptedKey, header }: RemoteUserEntityKey) => {
-        return worker.decryptB64(encryptedKey, header, encryptionKeyB64);
+        return worker.decryptB64(encryptedKey, header, masterKeyB64);
     };
 
     // See if we already have it locally.
@@ -202,7 +202,7 @@ const getOrCreateEntityKeyB64 = async (type: EntityType) => {
     if (existing) {
         // Only save it if we can decrypt it to avoid corrupting our local state
         // in unforeseen circumstances.
-        const result = decrypt(existing);
+        const result = await decrypt(existing);
         await saveRemoteUserEntityKey(type, existing);
         return result;
     }

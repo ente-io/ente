@@ -127,10 +127,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 try {
                     key = await electron.masterKeyB64();
                 } catch (e) {
-                    log.error(
-                        "Failed to read master key from secure storage",
-                        e,
-                    );
+                    log.error("Failed to read master key from safe storage", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(
