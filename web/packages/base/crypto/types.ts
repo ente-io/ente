@@ -1,4 +1,9 @@
 /**
+ * Data provided either as bytes ({@link Uint8Array}) or their base64 string representation.
+ */
+export type BytesOrB64 = Uint8Array | string;
+
+/**
  * An encryption request with the data to encrypt provided as bytes.
  */
 export interface EncryptBytes {
@@ -41,6 +46,29 @@ export interface EncryptJSON {
      * A base64 string containing the encryption key.
      */
     keyB64: string;
+}
+
+/**
+ * The result of encryption using the secretbox APIs.
+ *
+ * It contains an encrypted data and a randomly generated nonce that was used
+ * during encryption. Both these values are needed to decrypt the data. The
+ * nonce does not need to be secret.
+ *
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ */
+export interface EncryptedBox2 {
+    /**
+     * The data to decrypt.
+     */
+    encryptedData: BytesOrB64;
+    /**
+     * The nonce that was used during encryption.
+     *
+     * The nonce is required to decrypt the data, but it does not need to be
+     * kept secret.
+     */
+    nonce: BytesOrB64;
 }
 
 /**
@@ -147,30 +175,6 @@ export interface DecryptBoxBytes {
      * A base64 string containing the encryption key.
      */
     keyB64: string;
-}
-
-/**
- * Data provided either as bytes ({@link Uint8Array}) or their base64 string representation.
- */
-export type BytesOrB64 = Uint8Array | string;
-
-/**
- * A decryption request to decrypt data encrypted using the secretbox APIs.
- *
- * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
- */
-export interface EncryptedBox2 {
-    /**
-     * The data to decrypt.
-     */
-    encryptedData: BytesOrB64;
-    /**
-     * The nonce that was used during encryption.
-     *
-     * The nonce is required to decrypt the data, but it does not need to be
-     * kept secret.
-     */
-    nonce: BytesOrB64;
 }
 
 /**
