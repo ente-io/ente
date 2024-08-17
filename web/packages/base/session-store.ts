@@ -1,12 +1,13 @@
-import { sharedCryptoWorker } from "@/base/crypto";
 import { z } from "zod";
+import { decryptBox } from "./crypto/ente";
+import { toB64 } from "./crypto/libsodium";
 
 /**
  * Return the user's master key (as a base64 string) from session storage.
  *
  * Precondition: The user should be logged in.
  */
-export const masterKeyB64FromSession = async () => {
+export const masterKeyFromSession = async () => {
     // TODO: Same value as the deprecated SESSION_KEYS.ENCRYPTION_KEY.
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) {
@@ -19,9 +20,14 @@ export const masterKeyB64FromSession = async () => {
         JSON.parse(value),
     );
 
-    const cryptoWorker = await sharedCryptoWorker();
-    return cryptoWorker.decryptB64(encryptedData, nonce, key);
+    return decryptBox({ encryptedData, nonce }, key);
 };
+
+/**
+ * Variant of {@link masterKeyFromSession} that returns the master key as a
+ * base64 string.
+ */
+export const masterKeyB64FromSession = () => masterKeyFromSession().then(toB64);
 
 // TODO: Same as B64EncryptionResult. Revisit.
 const EncryptionKeyAttributes = z.object({
