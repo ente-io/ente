@@ -12,10 +12,12 @@ import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
+    BytesOrB64,
     DecryptBlobBytes,
     DecryptBoxBytes,
     EncryptBytes,
     EncryptedBlobBytes,
+    EncryptedBox2,
     EncryptedBoxBytes,
 } from "./types";
 
@@ -339,6 +341,29 @@ export const decryptBox = async ({
         encryptedData,
         await fromB64(nonceB64),
         await fromB64(keyB64),
+    );
+};
+
+/**
+ * If the provided {@link bob} ("Bytes or B64 string") is already a
+ * {@link Uint8Array}, return it unchanged, otherwise convert the base64 string
+ * into bytes and return those.
+ */
+const bytes = async (bob: BytesOrB64) =>
+    typeof bob == "string" ? fromB64(bob) : bob;
+
+/**
+ * Decrypt the result of {@link encryptBox}.
+ */
+export const decryptBox2 = async (
+    { encryptedData, nonce }: EncryptedBox2,
+    key: BytesOrB64,
+): Promise<Uint8Array> => {
+    await sodium.ready;
+    return sodium.crypto_secretbox_open_easy(
+        await bytes(encryptedData),
+        await bytes(nonce),
+        await bytes(key),
     );
 };
 

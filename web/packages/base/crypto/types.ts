@@ -150,6 +150,34 @@ export interface DecryptBoxBytes {
 }
 
 /**
+ * Data provided either as bytes ({@link Uint8Array}) or their base64 string representation.
+ */
+export type BytesOrB64 = Uint8Array | string;
+
+/**
+ * A decryption request to decrypt data encrypted using the secretbox APIs.
+ *
+ * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ */
+export interface EncryptedBox2 {
+    /**
+     * The data to decrypt.
+     */
+    encryptedData: BytesOrB64;
+    /**
+     * The nonce that was used during encryption.
+     *
+     * The nonce is required to decrypt the data, but it does not need to be
+     * kept secret.
+     */
+    nonce: BytesOrB64;
+    /**
+     * The encryption key.
+     */
+    key: BytesOrB64;
+}
+
+/**
  * A variant of {@link DecryptBoxBytes} with the encrypted Blob's data as a
  * base64 encoded string.
  */

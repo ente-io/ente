@@ -142,7 +142,7 @@ export const encryptMetadataJSON = async (r: EncryptJSON) =>
 
 /**
  * Decrypt arbitrary data, provided as a base64 string, using the given key and
- * the provided nonce.
+ * the provided nonce, and return the base64
  *
  * This is the sibling of {@link encryptBoxB64}.
  *
