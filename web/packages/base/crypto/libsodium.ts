@@ -370,7 +370,7 @@ export async function encryptFileChunk(
 /**
  * Decrypt the result of {@link encryptBoxB64}.
  */
-export const decryptBox2 = async (
+export const decryptBox = async (
     { encryptedData, nonce }: EncryptedBox,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
@@ -388,12 +388,12 @@ export const decryptBox2 = async (
 export const decryptBoxB64 = (
     box: EncryptedBox,
     key: BytesOrB64,
-): Promise<string> => decryptBox2(box, key).then(toB64);
+): Promise<string> => decryptBox(box, key).then(toB64);
 
 /**
  * Decrypt the result of {@link encryptBlob} or {@link encryptBlobB64}.
  */
-export const decryptBlob2 = async (
+export const decryptBlob = async (
     { encryptedData, decryptionHeader }: EncryptedBlob,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
@@ -411,12 +411,12 @@ export const decryptBlob2 = async (
 };
 
 /**
- * A variant of {@link decryptBlob2} that returns the result as a base64 string.
+ * A variant of {@link decryptBlob} that returns the result as a base64 string.
  */
 export const decryptBlobB64 = (
     blob: EncryptedBlob,
     key: BytesOrB64,
-): Promise<string> => decryptBlob2(blob, key).then(toB64);
+): Promise<string> => decryptBlob(blob, key).then(toB64);
 
 /** Decrypt Stream, but merge the results. */
 export const decryptChaCha = async (
@@ -532,7 +532,7 @@ export async function decryptToUTF8(
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox2({ encryptedData, nonce }, keyB64);
+    const decrypted = await decryptBox({ encryptedData, nonce }, keyB64);
     return sodium.to_string(decrypted);
 }
 

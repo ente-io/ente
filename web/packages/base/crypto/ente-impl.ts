@@ -34,11 +34,11 @@ export const _encryptMetadataJSON = async (r: {
     };
 };
 
-export const _decryptBox = libsodium.decryptBox2;
+export const _decryptBox = libsodium.decryptBox;
 
 export const _decryptBoxB64 = libsodium.decryptBoxB64;
 
-export const _decryptBlob = libsodium.decryptBlob2;
+export const _decryptBlob = libsodium.decryptBlob;
 
 export const _decryptBlobB64 = libsodium.decryptBlobB64;
 
