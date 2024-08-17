@@ -1,12 +1,10 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
 import type {
-    BytesOrB64,
     DecryptBlobB64,
     EncryptBytes,
     EncryptedBlobB64,
     EncryptedBlobBytes,
-    EncryptedBox2,
     EncryptJSON,
 } from "./types";
 
@@ -33,10 +31,7 @@ export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
         keyB64,
     });
 
-export const _decryptBox = libsodium.decryptBox2;
-
-export const _decryptBoxB64 = (b: EncryptedBox2, k: BytesOrB64) =>
-    _decryptBox(b, k).then(libsodium.toB64);
+export const _decryptBoxB64 = libsodium.decryptBoxB64;
 
 export const _decryptAssociatedData = libsodium.decryptBlob;
 

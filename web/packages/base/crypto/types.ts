@@ -1,10 +1,11 @@
 /**
- * Data provided either as bytes ({@link Uint8Array}) or their base64 string representation.
+ * Data provided either as bytes ({@link Uint8Array}) or their base64 string
+ * representation.
  */
 export type BytesOrB64 = Uint8Array | string;
 
 /**
- * An encryption request
+ * An encryption request.
  */
 export interface EncryptBytesOrB64 {
     /**

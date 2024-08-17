@@ -64,9 +64,9 @@ import type {
  * Some of these functions have not yet been needed on the main thread, and for
  * these we don't have a corresponding sharedCryptoWorker method.
  *
- * This assertion will let us know when we need to implement them (this'll
+ * This assertion will let us know when we need to implement them. This will
  * gracefully degrade in production: the functionality will work, just that the
- * crypto will happen on the main thread itself).
+ * crypto operations will happen on the main thread itself.
  */
 const assertInWorker = <T>(x: T): T => {
     if (!inWorker()) assertionFailed("Currently only usable in a web worker");
@@ -74,12 +74,12 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
- * Encrypt the given data, returning a box containing encrypted data and a
- * randomly generated nonce.
+ * Encrypt the given data, returning a box containing the encrypted data and a
+ * randomly generated nonce that was used during encryption.
+ *
+ * Both the encrypted data and the nonce are returned as base64 strings.
  *
  * Use {@link decryptBoxB64} to decrypt the result.
- *
- * ee {@link encryptBox} for the implementation details.
  *
  * > The suffix "Box" comes from the fact that it uses the so called secretbox
  * > APIs provided by libsodium under the hood.
@@ -142,16 +142,8 @@ export const encryptMetadataJSON = async (r: EncryptJSON) =>
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
- * Decrypt a box encrypted using {@link encryptBox}.
- */
-export const decryptBox = (b: EncryptedBox2, k: BytesOrB64) =>
-    inWorker()
-        ? ei._decryptBox(b, k)
-        : sharedCryptoWorker().then((w) => w.decryptBox(b, k));
-
-/**
- * Variant of {@link decryptBox} that returns the decrypted data as a base64
- * string.
+ * Decrypt a box encrypted using {@link encryptBoxB64}, and return the result as
+ * a base64 string.
  */
 export const decryptBoxB64 = (box: EncryptedBox2, key: BytesOrB64) =>
     inWorker()
