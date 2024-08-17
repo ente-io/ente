@@ -367,9 +367,6 @@ export async function encryptFileChunk(
     return pushResult;
 }
 
-/**
- * Decrypt the result of {@link encryptBox_Deprecated}.
- */
 const decryptBox_Deprecated = async ({
     encryptedData,
     nonceB64,
@@ -536,35 +533,25 @@ export async function encryptUTF8(data: string, key: string) {
     return await encryptToB64(b64Data, key);
 }
 
-/** Deprecated */
+/** Deprecated, use {@link decryptBox2} instead. */
 export async function decryptB64(
-    data: string,
-    nonceB64: string,
+    encryptedData: string,
+    nonce: string,
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox_Deprecated({
-        encryptedData: await fromB64(data),
-        nonceB64,
-        keyB64,
-    });
-
+    const decrypted = await decryptBox2({ encryptedData, nonce }, keyB64);
     return await toB64(decrypted);
 }
 
 /** Deprecated */
 export async function decryptToUTF8(
-    data: string,
-    nonceB64: string,
+    encryptedData: string,
+    nonce: string,
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox_Deprecated({
-        encryptedData: await fromB64(data),
-        nonceB64,
-        keyB64,
-    });
-
+    const decrypted = await decryptBox2({ encryptedData, nonce }, keyB64);
     return sodium.to_string(decrypted);
 }
 
