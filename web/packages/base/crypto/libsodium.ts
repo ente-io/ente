@@ -18,6 +18,7 @@ import type {
     EncryptBytes,
     EncryptedBlob_2,
     EncryptedBlobB64_2,
+    EncryptedBlobBytes_2,
     EncryptedBox2,
     EncryptedBoxB64,
     EncryptedBoxBytes,
@@ -276,7 +277,7 @@ const encryptBox = async ({
 export const encryptBlob = async (
     data: BytesOrB64,
     key: BytesOrB64,
-): Promise<EncryptedBlob_2> => {
+): Promise<EncryptedBlobBytes_2> => {
     await sodium.ready;
 
     const uintkey = await bytes(key);
@@ -304,13 +305,12 @@ export const encryptBlobB64 = async (
     data: BytesOrB64,
     key: BytesOrB64,
 ): Promise<EncryptedBlobB64_2> => {
-    const { encryptedData, decryptionHeader} = await encryptBlob(data, key);
+    const { encryptedData, decryptionHeader } = await encryptBlob(data, key);
     return {
         encryptedData: await toB64(encryptedData),
         decryptionHeader: await toB64(decryptionHeader),
     };
 };
-
 
 export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
 
@@ -424,6 +424,34 @@ export const decryptBoxB64 = (
     box: EncryptedBox2,
     key: BytesOrB64,
 ): Promise<string> => decryptBox2(box, key).then(toB64);
+
+/**
+ * Decrypt the result of {@link encryptBlob} or {@link encryptBlobB64}.
+ */
+export const decryptBlob2 = async (
+    { encryptedData, decryptionHeader }: EncryptedBlob_2,
+    key: BytesOrB64,
+): Promise<Uint8Array> => {
+    await sodium.ready;
+    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
+        await bytes(decryptionHeader),
+        await bytes(key),
+    );
+    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
+        pullState,
+        await bytes(encryptedData),
+        null,
+    );
+    return pullResult.message;
+};
+
+/**
+ * A variant of {@link decryptBlob2} that returns the result as a base64 string.
+ */
+export const decryptBlobB64 = (
+    blob: EncryptedBlob_2,
+    key: BytesOrB64,
+): Promise<string> => decryptBlob2(blob, key).then(toB64);
 
 /**
  * Decrypt the result of {@link encryptBlob}.

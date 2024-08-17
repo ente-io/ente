@@ -55,6 +55,7 @@ import type {
     BytesOrB64,
     DecryptBlobB64,
     DecryptBlobBytes,
+    EncryptedBlob_2,
     EncryptedBox2,
     EncryptJSON,
 } from "./types";
@@ -97,7 +98,7 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * This function is usually used to encrypt data associated with an Ente object
  * (file, collection, entity) using the object's key.
  *
- * Use {@link decryptBlobB64} to decrypt the result.
+ * Use {@link decryptBlob} to decrypt the result.
  *
  * > The suffix "Blob" comes from our convention of naming functions that use
  * > the secretstream APIs in one-shot mode.
@@ -155,12 +156,27 @@ export const decryptBox = (box: EncryptedBox2, key: BytesOrB64) =>
         : sharedCryptoWorker().then((w) => w.decryptBox(box, key));
 
 /**
- * Variant of {@link decryptBoxlink} that returns the result as a base64 string.
+ * Variant of {@link decryptBox} that returns the result as a base64 string.
  */
 export const decryptBoxB64 = (box: EncryptedBox2, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBoxB64(box, key)
         : sharedCryptoWorker().then((w) => w.decryptBoxB64(box, key));
+
+/**
+ * Decrypt a blob encrypted using either {@link encryptBlob} or
+ * {@link encryptBlobB64}.
+ */
+export const decryptBlob = (blob: EncryptedBlob_2, key: BytesOrB64) =>
+    assertInWorker(ei._decryptBlob(blob, key));
+
+/**
+ * A variant of {@link decryptBlob} that returns the result as a base64 string.
+ */
+export const decryptBlobB64 = (blob: EncryptedBlob_2, key: BytesOrB64) =>
+    inWorker()
+        ? ei._decryptBlobB64(blob, key)
+        : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or

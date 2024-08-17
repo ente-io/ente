@@ -36,6 +36,10 @@ export const _decryptBox = libsodium.decryptBox2;
 
 export const _decryptBoxB64 = libsodium.decryptBoxB64;
 
+export const _decryptBlob = libsodium.decryptBlob2;
+
+export const _decryptBlobB64 = libsodium.decryptBlobB64;
+
 export const _decryptAssociatedData = libsodium.decryptBlob;
 
 export const _decryptThumbnail = _decryptAssociatedData;
