@@ -13,7 +13,6 @@ import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
     BytesOrB64,
-    DecryptBoxBytes,
     EncryptBytes,
     EncryptedBlob_2,
     EncryptedBlobB64_2,
@@ -135,7 +134,7 @@ const bytes = async (bob: BytesOrB64) =>
  * Encrypt the given data using libsodium's secretbox APIs, using a randomly
  * generated nonce.
  *
- * Use {@link decryptBox} to decrypt the result.
+ * Use {@link decryptBox_Deprecated} to decrypt the result.
  *
  * @param data The data to encrypt.
  *
@@ -388,11 +387,15 @@ export async function encryptFileChunk(
 /**
  * Decrypt the result of {@link encryptBox}.
  */
-export const decryptBox = async ({
+const decryptBox_Deprecated = async ({
     encryptedData,
     nonceB64,
     keyB64,
-}: DecryptBoxBytes): Promise<Uint8Array> => {
+}: {
+    encryptedData: Uint8Array;
+    nonceB64: string;
+    keyB64: string;
+}): Promise<Uint8Array> => {
     await sodium.ready;
     return sodium.crypto_secretbox_open_easy(
         encryptedData,
@@ -417,7 +420,7 @@ export const decryptBox2 = async (
 };
 
 /**
- * Variant of {@link decryptBox} that returns the data as a base64 string.
+ * Variant of {@link decryptBox_Deprecated} that returns the data as a base64 string.
  */
 export const decryptBoxB64 = (
     box: EncryptedBox2,
@@ -557,7 +560,7 @@ export async function decryptB64(
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox({
+    const decrypted = await decryptBox_Deprecated({
         encryptedData: await fromB64(data),
         nonceB64,
         keyB64,
@@ -573,7 +576,7 @@ export async function decryptToUTF8(
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox({
+    const decrypted = await decryptBox_Deprecated({
         encryptedData: await fromB64(data),
         nonceB64,
         keyB64,
