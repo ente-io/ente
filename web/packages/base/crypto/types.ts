@@ -171,10 +171,6 @@ export interface EncryptedBox2 {
      * kept secret.
      */
     nonce: BytesOrB64;
-    /**
-     * The encryption key.
-     */
-    key: BytesOrB64;
 }
 
 /**

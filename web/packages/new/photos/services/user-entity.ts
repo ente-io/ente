@@ -1,4 +1,3 @@
-import { sharedCryptoWorker } from "@/base/crypto";
 import { decryptAssociatedDataB64, decryptBoxB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
@@ -241,12 +240,14 @@ const decryptEntityKey = async ({
     encryptedKey,
     header,
 }: RemoteUserEntityKey) =>
-    decryptBoxB64({
-        encryptedDataB64: encryptedKey,
-        // Remote calls it the header, but it really is the nonce.
-        nonceB64: header,
-        keyB64: await masterKeyB64FromSession(),
-    });
+    decryptBoxB64(
+        {
+            encryptedData: encryptedKey,
+            // Remote calls it the header, but it really is the nonce.
+            nonce: header,
+        },
+        await masterKeyB64FromSession(),
+    );
 
 /**
  * Fetch the encryption key for the given user entity {@link type} from remote.
