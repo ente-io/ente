@@ -142,8 +142,15 @@ export const encryptMetadataJSON = async (r: EncryptJSON) =>
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
- * Decrypt a box encrypted using {@link encryptBoxB64}, and return the result as
- * a base64 string.
+ * Decrypt a box encrypted using {@link encryptBoxB64}.
+ */
+export const decryptBox = (box: EncryptedBox2, key: BytesOrB64) =>
+    inWorker()
+        ? ei._decryptBox(box, key)
+        : sharedCryptoWorker().then((w) => w.decryptBox(box, key));
+
+/**
+ * Variant of {@link decryptBoxlink} that returns the result as a base64 string.
  */
 export const decryptBoxB64 = (box: EncryptedBox2, key: BytesOrB64) =>
     inWorker()

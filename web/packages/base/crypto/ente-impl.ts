@@ -31,6 +31,8 @@ export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
         keyB64,
     });
 
+export const _decryptBox = libsodium.decryptBox2;
+
 export const _decryptBoxB64 = libsodium.decryptBoxB64;
 
 export const _decryptAssociatedData = libsodium.decryptBlob;

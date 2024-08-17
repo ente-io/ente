@@ -380,12 +380,7 @@ export const decryptBox = async ({
 /**
  * Decrypt the result of {@link encryptBoxB64}.
  */
-export const decryptBoxB64 = (
-    box: EncryptedBox2,
-    key: BytesOrB64,
-): Promise<string> => _decryptBox(box, key).then(toB64);
-
-export const _decryptBox = async (
+export const decryptBox2 = async (
     { encryptedData, nonce }: EncryptedBox2,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
@@ -396,6 +391,14 @@ export const _decryptBox = async (
         await bytes(key),
     );
 };
+
+/**
+ * Variant of {@link decryptBox} that returns the data as a base64 string.
+ */
+export const decryptBoxB64 = (
+    box: EncryptedBox2,
+    key: BytesOrB64,
+): Promise<string> => decryptBox2(box, key).then(toB64);
 
 /**
  * Decrypt the result of {@link encryptBlob}.
