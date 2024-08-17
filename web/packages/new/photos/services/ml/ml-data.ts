@@ -172,6 +172,11 @@ export const fetchMLData = async (
         }
 
         try {
+            // TODO: This line is included in the photos app which currently
+            // doesn't have strict mode enabled, and where it causes a spurious
+            // error, so we unfortunately need to turn off typechecking.
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+            // @ts-ignore
             const decryptedBytes = await decryptBlob(remoteFileData, file.key);
             const jsonString = await gunzip(decryptedBytes);
             result.set(fileID, remoteMLDataFromJSONString(jsonString));
