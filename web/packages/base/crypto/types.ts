@@ -5,25 +5,6 @@
 export type BytesOrB64 = Uint8Array | string;
 
 /**
- * Deprecated.
- *
- * A variant of {@link EncryptBytes} with the data as a JSON value.
- */
-export interface EncryptJSON {
-    /**
-     * The JSON value to encrypt.
-     *
-     * This can be an arbitrary JSON value, but since TypeScript currently
-     * doesn't have a native JSON type, it is typed as {@link unknown}.
-     */
-    jsonValue: unknown;
-    /**
-     * A base64 string containing the encryption key.
-     */
-    keyB64: string;
-}
-
-/**
  * The result of encryption using the secretbox APIs.
  *
  * It contains an encrypted data and a randomly generated nonce that was used

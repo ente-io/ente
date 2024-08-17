@@ -51,12 +51,7 @@ import { sharedCryptoWorker } from ".";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import type {
-    BytesOrB64,
-    EncryptedBlob_2,
-    EncryptedBox2,
-    EncryptJSON,
-} from "./types";
+import type { BytesOrB64, EncryptedBlob_2, EncryptedBox2 } from "./types";
 
 /**
  * Some of these functions have not yet been needed on the main thread, and for
@@ -129,18 +124,36 @@ export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
  * entity) using the object's key.
  *
- * This is a variant of {@link encryptAssociatedData} tailored for encrypting
- * any arbitrary metadata associated with an Ente object. For example, it is
- * used for encrypting the various metadata fields (See: [Note: Metadatum])
- * associated with a file, using that file's key.
+ * This is a variant of {@link encryptBlobB64} tailored for encrypting any
+ * arbitrary metadata associated with an Ente object. For example, it is used
+ * for encrypting the various metadata fields associated with a file, using that
+ * file's key.
  *
  * Instead of raw bytes, it takes as input an arbitrary JSON object which it
- * encodes into a string, and encrypts that. And instead of returning the raw
- * encrypted bytes, it returns their base64 string representation.
+ * encodes into a string, and encrypts that.
  *
  * Use {@link decryptMetadataJSON} to decrypt the result.
+ *
+ * @param jsonValue The JSON value to encrypt. This can be an arbitrary JSON
+ * value, but since TypeScript currently doesn't have a native JSON type, it is
+ * typed as {@link unknown}.
+ *
+ * @param key The encryption key.
  */
-export const encryptMetadataJSON = async (r: EncryptJSON) =>
+export const encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptMetadataJSON_New(jsonValue, key)
+        : sharedCryptoWorker().then((w) =>
+              w.encryptMetadataJSON_New(jsonValue, key),
+          );
+
+/**
+ * Deprecated, use {@link encryptMetadataJSON_New} instead.
+ */
+export const encryptMetadataJSON = async (r: {
+    jsonValue: unknown;
+    keyB64: string;
+}) =>
     inWorker()
         ? ei._encryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
