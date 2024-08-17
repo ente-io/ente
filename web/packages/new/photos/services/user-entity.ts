@@ -2,7 +2,7 @@ import { decryptAssociatedDataB64, decryptBoxB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
-import { masterKeyB64FromSession } from "@/base/session-store";
+import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
@@ -236,17 +236,14 @@ const saveRemoteUserEntityKey = (
 /**
  * Decrypt an encrypted entity key using the user's master key.
  */
-const decryptEntityKey = async ({
-    encryptedKey,
-    header,
-}: RemoteUserEntityKey) =>
+const decryptEntityKey = async (remote: RemoteUserEntityKey) =>
     decryptBoxB64(
         {
-            encryptedData: encryptedKey,
+            encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.
-            nonce: header,
+            nonce: remote.header,
         },
-        await masterKeyB64FromSession(),
+        await masterKeyFromSession(),
     );
 
 /**
