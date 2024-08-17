@@ -179,17 +179,6 @@ export const decryptBlobB64 = (blob: EncryptedBlob_2, key: BytesOrB64) =>
         : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
 
 /**
- * Decrypt arbitrary data associated with an Ente object (file, collection or
- * entity) using the object's key.
- *
- * This is the sibling of {@link encryptAssociatedData}.
- *
- * See {@link decryptBlob} for the implementation details.
- */
-export const decryptAssociatedData = (r: DecryptBlobBytes) =>
-    assertInWorker(ei._decryptAssociatedData(r));
-
-/**
  * Decrypt the thumbnail for a file.
  *
  * This is the sibling of {@link encryptThumbnail}.
