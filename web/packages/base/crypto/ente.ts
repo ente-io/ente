@@ -200,12 +200,7 @@ export const decryptMetadataJSON_New = (
           );
 
 /**
- * Decrypt the metadata JSON associated with an Ente object.
- *
- * This is the sibling of {@link encryptMetadataJSON}.
- *
- * @returns The decrypted JSON value. Since TypeScript does not have a native
- * JSON type, we need to return it as an `unknown`.
+ * Deprecated, retains the old API.
  */
 export const decryptMetadataJSON = (r: DecryptBlobB64) =>
     inWorker()

@@ -69,6 +69,10 @@ export const _decryptMetadataJSON_New = async (
     ) as unknown;
 
 export const _decryptMetadataJSON = async (r: DecryptBlobB64) =>
-    JSON.parse(
-        new TextDecoder().decode(await _decryptAssociatedDataB64(r)),
-    ) as unknown;
+    _decryptMetadataJSON_New(
+        {
+            encryptedData: r.encryptedDataB64,
+            decryptionHeader: r.decryptionHeaderB64,
+        },
+        r.keyB64,
+    );
