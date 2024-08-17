@@ -4,19 +4,6 @@
  */
 export type BytesOrB64 = Uint8Array | string;
 
-/**
- * Deprecated.
- */
-export interface EncryptBytes {
-    /**
-     * A {@link Uint8Array} containing the bytes to encrypt.
-     */
-    data: Uint8Array;
-    /**
-     * A base64 string containing the encryption key.
-     */
-    keyB64: string;
-}
 
 /**
  * Deprecated.
@@ -137,29 +124,6 @@ export interface EncryptedBlobB64_2 {
      * not need to be secret, but it is required to decrypt the data.
      */
     decryptionHeader: string;
-}
-
-/**
- * The result of encryption using the secretbox APIs.
- *
- * It contains the encrypted data (bytes) and nonce (base64 encoded string)
- * pair. Both these values are needed to decrypt the data. The nonce does not
- * need to be secret.
- *
- * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
- */
-export interface EncryptedBoxBytes {
-    /**
-     * A {@link Uint8Array} containing the encrypted data.
-     */
-    encryptedData: Uint8Array;
-    /**
-     * A base64 string containing the nonce used during encryption.
-     *
-     * A randomly generated nonce for this encryption. It does not need to be
-     * confidential, but it will be required to decrypt the data.
-     */
-    nonceB64: string;
 }
 
 /**

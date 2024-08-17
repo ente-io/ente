@@ -13,13 +13,11 @@ import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
     BytesOrB64,
-    EncryptBytes,
     EncryptedBlob_2,
     EncryptedBlobB64_2,
     EncryptedBlobBytes_2,
     EncryptedBox2,
     EncryptedBoxB64,
-    EncryptedBoxBytes,
 } from "./types";
 
 /**
@@ -243,10 +241,16 @@ export const encryptBoxB64 = async (
 };
 
 /** deprecated + needs rename */
-const encryptBox = async ({
+const encryptBox_Deprecated = async ({
     data,
     keyB64,
-}: EncryptBytes): Promise<EncryptedBoxBytes> => {
+}: {
+    data: Uint8Array;
+    keyB64: string;
+}): Promise<{
+    encryptedData: Uint8Array;
+    nonceB64: string;
+}> => {
     await sodium.ready;
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(
@@ -385,7 +389,7 @@ export async function encryptFileChunk(
 }
 
 /**
- * Decrypt the result of {@link encryptBox}.
+ * Decrypt the result of {@link encryptBox_Deprecated}.
  */
 const decryptBox_Deprecated = async ({
     encryptedData,
@@ -533,7 +537,10 @@ export interface B64EncryptionResult {
 
 export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encryptBox({ data: await fromB64(data), keyB64 });
+    const encrypted = await encryptBox_Deprecated({
+        data: await fromB64(data),
+        keyB64,
+    });
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
