@@ -184,6 +184,22 @@ export const decryptThumbnail = (blob: EncryptedBlob_2, key: BytesOrB64) =>
     assertInWorker(ei._decryptThumbnail(blob, key));
 
 /**
+ * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.
+ *
+ * @returns The decrypted JSON value. Since TypeScript does not have a native
+ * JSON type, we need to return it as an `unknown`.
+ */
+export const decryptMetadataJSON_New = (
+    blob: EncryptedBlob_2,
+    key: BytesOrB64,
+) =>
+    inWorker()
+        ? ei._decryptMetadataJSON_New(blob, key)
+        : sharedCryptoWorker().then((w) =>
+              w.decryptMetadataJSON_New(blob, key),
+          );
+
+/**
  * Decrypt the metadata JSON associated with an Ente object.
  *
  * This is the sibling of {@link encryptMetadataJSON}.
