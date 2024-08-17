@@ -268,7 +268,7 @@ export const encryptBlob = async (
 
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
         pushState,
-        data,
+        await bytes(data),
         null,
         sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL,
     );
