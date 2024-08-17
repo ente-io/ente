@@ -1,5 +1,5 @@
 import { sharedCryptoWorker } from "@/base/crypto";
-import { decryptAssociatedDataB64 } from "@/base/crypto/ente";
+import { decryptAssociatedDataB64, decryptBoxB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
@@ -186,23 +186,16 @@ const userEntityDiff = async (
  * See also, [Note: User entity keys].
  */
 const getOrCreateEntityKeyB64 = async (type: EntityType) => {
-    const masterKeyB64 = await masterKeyB64FromSession();
-    const worker = await sharedCryptoWorker();
-
-    const decrypt = async ({ encryptedKey, header }: RemoteUserEntityKey) => {
-        return worker.decryptB64(encryptedKey, header, masterKeyB64);
-    };
-
     // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
-    if (saved) return decrypt(saved);
+    if (saved) return decryptEntityKey(saved);
 
     // See if remote already has it.
     const existing = await getUserEntityKey(type);
     if (existing) {
         // Only save it if we can decrypt it to avoid corrupting our local state
         // in unforeseen circumstances.
-        const result = await decrypt(existing);
+        const result = await decryptEntityKey(existing);
         await saveRemoteUserEntityKey(type, existing);
         return result;
     }
@@ -240,6 +233,20 @@ const saveRemoteUserEntityKey = (
     type: EntityType,
     entityKey: RemoteUserEntityKey,
 ) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
+
+/**
+ * Decrypt an encrypted entity key using the user's master key.
+ */
+const decryptEntityKey = async ({
+    encryptedKey,
+    header,
+}: RemoteUserEntityKey) =>
+    decryptBoxB64({
+        encryptedDataB64: encryptedKey,
+        // Remote calls it the header, but it really is the nonce.
+        nonceB64: header,
+        keyB64: await masterKeyB64FromSession(),
+    });
 
 /**
  * Fetch the encryption key for the given user entity {@link type} from remote.
