@@ -55,7 +55,6 @@ import type {
     BytesOrB64,
     DecryptBlobB64,
     DecryptBlobBytes,
-    EncryptBytes,
     EncryptedBox2,
     EncryptJSON,
 } from "./types";
@@ -92,34 +91,40 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
         : sharedCryptoWorker().then((w) => w.encryptBoxB64(data, key));
 
 /**
- * Encrypt arbitrary data associated with an Ente object (file, collection,
- * entity) using the object's key.
+ * Encrypt the given data, returning a blob containing the encrypted data and a
+ * decryption header.
  *
- * Use {@link decryptAssociatedData} to decrypt the result.
+ * This function is usually used to encrypt data associated with an Ente object
+ * (file, collection, entity) using the object's key.
  *
- * See {@link encryptBlob} for the implementation details.
+ * Use {@link decryptBlobB64} to decrypt the result.
+ *
+ * > The suffix "Blob" comes from our convention of naming functions that use
+ * > the secretstream APIs in one-shot mode.
+ * >
+ * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptAssociatedData = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptAssociatedData(r));
+export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptBlob(data, key));
+
+/**
+ * A variant of {@link encryptBlob} that returns the result components as base64
+ * strings.
+ */
+export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptBlobB64(data, key));
 
 /**
  * Encrypt the thumbnail for a file.
  *
- * This is just an alias for {@link encryptAssociatedData}.
+ * This is midway variant of {@link encryptBlob} and {@link encryptBlobB64} that
+ * returns the decryption header as a base64 string, but leaves the data
+ * unchanged.
  *
  * Use {@link decryptThumbnail} to decrypt the result.
  */
-export const encryptThumbnail = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptThumbnail(r));
-
-/**
- * A variant of {@link encryptAssociatedData} that returns the encrypted data as
- * a base64 string instead of returning its bytes.
- *
- * Use {@link decryptAssociatedDataB64} to decrypt the result.
- */
-export const encryptAssociatedDataB64 = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptAssociatedDataB64(r));
+export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptThumbnail(data, key));
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or

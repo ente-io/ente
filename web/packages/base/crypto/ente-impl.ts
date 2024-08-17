@@ -1,35 +1,36 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
-import type {
-    DecryptBlobB64,
-    EncryptBytes,
-    EncryptedBlobB64,
-    EncryptedBlobBytes,
-    EncryptJSON,
-} from "./types";
-
-const EncryptedBlobBytesToB64 = async ({
-    encryptedData,
-    decryptionHeaderB64,
-}: EncryptedBlobBytes): Promise<EncryptedBlobB64> => ({
-    encryptedDataB64: await libsodium.toB64(encryptedData),
-    decryptionHeaderB64,
-});
+import type { BytesOrB64, DecryptBlobB64, EncryptJSON } from "./types";
 
 export const _encryptBoxB64 = libsodium.encryptBoxB64;
 
-export const _encryptAssociatedData = libsodium.encryptBlob;
+export const _encryptBlob = libsodium.encryptBlob;
 
-export const _encryptThumbnail = _encryptAssociatedData;
+export const _encryptBlobB64 = libsodium.encryptBlobB64;
 
-export const _encryptAssociatedDataB64 = (r: EncryptBytes) =>
-    _encryptAssociatedData(r).then(EncryptedBlobBytesToB64);
+export const _encryptThumbnail = async (data: BytesOrB64, key: BytesOrB64) => {
+    const { encryptedData, decryptionHeader } = await _encryptBlob(data, key);
+    return {
+        encryptedData,
+        decryptionHeader: await libsodium.toB64(decryptionHeader),
+    };
+};
 
-export const _encryptMetadataJSON = ({ jsonValue, keyB64 }: EncryptJSON) =>
-    _encryptAssociatedDataB64({
-        data: new TextEncoder().encode(JSON.stringify(jsonValue)),
+export const _encryptMetadataJSON_New = ({ jsonValue, keyB64 }: EncryptJSON) =>
+    _encryptBlobB64(
+        new TextEncoder().encode(JSON.stringify(jsonValue)),
         keyB64,
-    });
+    );
+
+export const _encryptMetadataJSON = async (r: EncryptJSON) => {
+    // Deprecated. Keep the old API for now.
+    const { encryptedData, decryptionHeader } =
+        await _encryptMetadataJSON_New(r);
+    return {
+        encryptedDataB64: encryptedData,
+        decryptionHeaderB64: decryptionHeader,
+    };
+};
 
 export const _decryptBox = libsodium.decryptBox2;
 

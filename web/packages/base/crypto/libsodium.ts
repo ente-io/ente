@@ -16,7 +16,8 @@ import type {
     DecryptBlobBytes,
     DecryptBoxBytes,
     EncryptBytes,
-    EncryptedBlobBytes,
+    EncryptedBlob_2,
+    EncryptedBlobB64_2,
     EncryptedBox2,
     EncryptedBoxB64,
     EncryptedBoxBytes,
@@ -140,6 +141,8 @@ const bytes = async (bob: BytesOrB64) =>
  *
  * @param key The key to use for encryption.
  *
+ * @returns The encrypted data and the generated nonce, both as base64 strings.
+ *
  * [Note: 3 forms of encryption (Box | Blob | Stream)]
  *
  * libsodium provides two "high level" encryption patterns:
@@ -240,7 +243,8 @@ export const encryptBoxB64 = async (
     };
 };
 
-export const encryptBox = async ({
+/** deprecated + needs rename */
+const encryptBox = async ({
     data,
     keyB64,
 }: EncryptBytes): Promise<EncryptedBoxBytes> => {
@@ -255,22 +259,27 @@ export const encryptBox = async ({
 };
 
 /**
- * Encrypt the given data using secretstream APIs in one-shot mode, using the
- * given base64 encoded key.
+ * Encrypt the given data using libsodium's secretstream APIs in one-shot mode.
  *
  * Use {@link decryptBlob} to decrypt the result.
  *
- * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * @param data The data to encrypt.
  *
- * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * @param key The key to use for encryption.
+ *
+ * @returns The encrypted data and the decryption header as {@link Uint8Array}s.
+ *
+ * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ *
+ * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
-export const encryptBlob = async ({
-    data,
-    keyB64,
-}: EncryptBytes): Promise<EncryptedBlobBytes> => {
+export const encryptBlob = async (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBlob_2> => {
     await sodium.ready;
 
-    const uintkey: Uint8Array = await fromB64(keyB64);
+    const uintkey = await bytes(key);
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
@@ -283,9 +292,25 @@ export const encryptBlob = async ({
     );
     return {
         encryptedData: pushResult,
-        decryptionHeaderB64: await toB64(header),
+        decryptionHeader: header,
     };
 };
+
+/**
+ * A variant of {@link encryptBlob} that returns the both the encrypted data and
+ * decryption header as base64 strings.
+ */
+export const encryptBlobB64 = async (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBlobB64_2> => {
+    const { encryptedData, decryptionHeader} = await encryptBlob(data, key);
+    return {
+        encryptedData: await toB64(encryptedData),
+        decryptionHeader: await toB64(decryptionHeader),
+    };
+};
+
 
 export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
 
