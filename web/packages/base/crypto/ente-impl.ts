@@ -3,21 +3,12 @@ import * as libsodium from "./libsodium";
 import type {
     BytesOrB64,
     DecryptBlobB64,
-    EncryptB64,
     EncryptBytes,
     EncryptedBlobB64,
     EncryptedBlobBytes,
     EncryptedBox2,
     EncryptJSON,
 } from "./types";
-
-const EncryptB64ToBytes = async ({
-    dataB64,
-    keyB64,
-}: EncryptB64): Promise<EncryptBytes> => ({
-    data: await libsodium.fromB64(dataB64),
-    keyB64,
-});
 
 const EncryptedBlobBytesToB64 = async ({
     encryptedData,
@@ -27,8 +18,7 @@ const EncryptedBlobBytesToB64 = async ({
     decryptionHeaderB64,
 });
 
-export const _encryptBoxB64 = (r: EncryptB64) =>
-    EncryptB64ToBytes(r).then((rb) => libsodium.encryptBox(rb));
+export const _encryptBoxB64 = libsodium.encryptBoxB64;
 
 export const _encryptAssociatedData = libsodium.encryptBlob;
 

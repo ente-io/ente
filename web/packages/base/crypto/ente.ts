@@ -55,7 +55,6 @@ import type {
     BytesOrB64,
     DecryptBlobB64,
     DecryptBlobBytes,
-    EncryptB64,
     EncryptBytes,
     EncryptedBox2,
     EncryptJSON,
@@ -75,7 +74,8 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
- * Encrypt arbitrary data using the given key and a randomly generated nonce.
+ * Encrypt the given data, returning a box containing encrypted data and a
+ * randomly generated nonce.
  *
  * Use {@link decryptBoxB64} to decrypt the result.
  *
@@ -86,10 +86,10 @@ const assertInWorker = <T>(x: T): T => {
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptBoxB64 = (r: EncryptB64) =>
+export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
-        ? ei._encryptBoxB64(r)
-        : sharedCryptoWorker().then((w) => w.encryptBoxB64(r));
+        ? ei._encryptBoxB64(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptBoxB64(data, key));
 
 /**
  * Encrypt arbitrary data associated with an Ente object (file, collection,
@@ -153,10 +153,10 @@ export const decryptBox = (b: EncryptedBox2, k: BytesOrB64) =>
  * Variant of {@link decryptBox} that returns the decrypted data as a base64
  * string.
  */
-export const decryptBoxB64 = (b: EncryptedBox2, k: BytesOrB64) =>
+export const decryptBoxB64 = (box: EncryptedBox2, key: BytesOrB64) =>
     inWorker()
-        ? ei._decryptBoxB64(b, k)
-        : sharedCryptoWorker().then((w) => w.decryptBoxB64(b, k));
+        ? ei._decryptBoxB64(box, key)
+        : sharedCryptoWorker().then((w) => w.decryptBoxB64(box, key));
 
 /**
  * Decrypt arbitrary data associated with an Ente object (file, collection or

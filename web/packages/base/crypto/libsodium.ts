@@ -18,6 +18,7 @@ import type {
     EncryptBytes,
     EncryptedBlobBytes,
     EncryptedBox2,
+    EncryptedBoxB64,
     EncryptedBoxBytes,
 } from "./types";
 
@@ -122,7 +123,22 @@ export async function fromHex(input: string) {
 }
 
 /**
- * Encrypt the given data using the provided base64 encoded key.
+ * If the provided {@link bob} ("Bytes or B64 string") is already a
+ * {@link Uint8Array}, return it unchanged, otherwise convert the base64 string
+ * into bytes and return those.
+ */
+const bytes = async (bob: BytesOrB64) =>
+    typeof bob == "string" ? fromB64(bob) : bob;
+
+/**
+ * Encrypt the given data using libsodium's secretbox APIs, using a randomly
+ * generated nonce.
+ *
+ * Use {@link decryptBox} to decrypt the result.
+ *
+ * @param data The data to encrypt.
+ *
+ * @param key The key to use for encryption.
  *
  * [Note: 3 forms of encryption (Box | Blob | Stream)]
  *
@@ -207,6 +223,23 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
  */
+export const encryptBoxB64 = async (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBoxB64> => {
+    await sodium.ready;
+    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
+    const encryptedData = sodium.crypto_secretbox_easy(
+        data,
+        nonce,
+        await bytes(key),
+    );
+    return {
+        encryptedData: await toB64(encryptedData),
+        nonce: await toB64(nonce),
+    };
+};
+
 export const encryptBox = async ({
     data,
     keyB64,
@@ -343,14 +376,6 @@ export const decryptBox = async ({
         await fromB64(keyB64),
     );
 };
-
-/**
- * If the provided {@link bob} ("Bytes or B64 string") is already a
- * {@link Uint8Array}, return it unchanged, otherwise convert the base64 string
- * into bytes and return those.
- */
-const bytes = async (bob: BytesOrB64) =>
-    typeof bob == "string" ? fromB64(bob) : bob;
 
 /**
  * Decrypt the result of {@link encryptBox}.

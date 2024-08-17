@@ -4,6 +4,20 @@
 export type BytesOrB64 = Uint8Array | string;
 
 /**
+ * An encryption request
+ */
+export interface EncryptBytesOrB64 {
+    /**
+     * The data to encrypt.
+     */
+    data: BytesOrB64;
+    /**
+     * The key to use for encryption.
+     */
+    key: BytesOrB64;
+}
+
+/**
  * An encryption request with the data to encrypt provided as bytes.
  */
 export interface EncryptBytes {
@@ -69,6 +83,20 @@ export interface EncryptedBox2 {
      * kept secret.
      */
     nonce: BytesOrB64;
+}
+
+export interface EncryptedBoxB64 {
+    /**
+     * The encrypted data as a base64 string.
+     */
+    encryptedData: string;
+    /**
+     * The nonce that was used during encryption, as a base64 string.
+     *
+     * The nonce is required to decrypt the data, but it does not need to be
+     * kept secret.
+     */
+    nonce: string;
 }
 
 /**
