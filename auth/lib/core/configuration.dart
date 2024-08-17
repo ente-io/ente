@@ -288,11 +288,11 @@ class Configuration {
       final split = recoveryKey.split(' ');
       if (split.length != mnemonicKeyWordCount) {
         String wordThatIsFollowedByEmptySpaceInSplit = '';
-        for (int i = 1; i < split.length; i++) {
+        for (int i = 0; i < split.length; i++) {
           String word = split[i];
           if (word.isEmpty) {
             wordThatIsFollowedByEmptySpaceInSplit =
-                '\n\nExtra space after word "${split[i - 1]}"';
+                '\n\nExtra space after word at position $i';
             break;
           }
         }
