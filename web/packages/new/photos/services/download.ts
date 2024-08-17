@@ -124,11 +124,13 @@ class DownloadManagerImpl {
         const { downloadClient, cryptoWorker } = this.ensureInitialized();
 
         const encrypted = await downloadClient.downloadThumbnail(file);
-        const decrypted = await cryptoWorker.decryptThumbnail({
-            encryptedData: encrypted,
-            decryptionHeaderB64: file.thumbnail.decryptionHeader,
-            keyB64: file.key,
-        });
+        const decrypted = await cryptoWorker.decryptThumbnail(
+            {
+                encryptedData: encrypted,
+                decryptionHeader: file.thumbnail.decryptionHeader,
+            },
+            file.key,
+        );
         return decrypted;
     };
 

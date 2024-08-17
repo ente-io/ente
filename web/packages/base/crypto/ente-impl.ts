@@ -42,7 +42,7 @@ export const _decryptBlobB64 = libsodium.decryptBlobB64;
 
 export const _decryptAssociatedData = libsodium.decryptBlob;
 
-export const _decryptThumbnail = _decryptAssociatedData;
+export const _decryptThumbnail = _decryptBlob;
 
 export const _decryptAssociatedDataB64 = async ({
     encryptedDataB64,

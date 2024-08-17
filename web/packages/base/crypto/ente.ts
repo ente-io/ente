@@ -54,7 +54,6 @@ import * as ei from "./ente-impl";
 import type {
     BytesOrB64,
     DecryptBlobB64,
-    DecryptBlobBytes,
     EncryptedBlob_2,
     EncryptedBox2,
     EncryptJSON,
@@ -179,12 +178,10 @@ export const decryptBlobB64 = (blob: EncryptedBlob_2, key: BytesOrB64) =>
         : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
 
 /**
- * Decrypt the thumbnail for a file.
- *
- * This is the sibling of {@link encryptThumbnail}.
+ * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
  */
-export const decryptThumbnail = (r: DecryptBlobBytes) =>
-    assertInWorker(ei._decryptThumbnail(r));
+export const decryptThumbnail = (blob: EncryptedBlob_2, key: BytesOrB64) =>
+    assertInWorker(ei._decryptThumbnail(blob, key));
 
 /**
  * Decrypt the metadata JSON associated with an Ente object.
