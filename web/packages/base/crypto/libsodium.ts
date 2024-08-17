@@ -132,7 +132,7 @@ const bytes = async (bob: BytesOrB64) =>
  * Encrypt the given data using libsodium's secretbox APIs, using a randomly
  * generated nonce.
  *
- * Use {@link decryptBox_Deprecated} to decrypt the result.
+ * Use {@link decryptBox} to decrypt the result.
  *
  * @param data The data to encrypt.
  *
@@ -238,27 +238,6 @@ export const encryptBoxB64 = async (
         encryptedData: await toB64(encryptedData),
         nonce: await toB64(nonce),
     };
-};
-
-/** deprecated + needs rename */
-const encryptBox_Deprecated = async ({
-    data,
-    keyB64,
-}: {
-    data: Uint8Array;
-    keyB64: string;
-}): Promise<{
-    encryptedData: Uint8Array;
-    nonceB64: string;
-}> => {
-    await sodium.ready;
-    const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(
-        data,
-        nonce,
-        await fromB64(keyB64),
-    );
-    return { encryptedData, nonceB64: await toB64(nonce) };
 };
 
 /**
@@ -535,17 +514,14 @@ export interface B64EncryptionResult {
     nonce: string;
 }
 
+/** Deprecated, use {@link encryptBoxB64} instead */
 export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encryptBox_Deprecated({
-        data: await fromB64(data),
-        keyB64,
-    });
-
+    const encrypted = await encryptBoxB64(data, keyB64);
     return {
-        encryptedData: await toB64(encrypted.encryptedData),
+        encryptedData: encrypted.encryptedData,
         key: keyB64,
-        nonce: encrypted.nonceB64,
+        nonce: encrypted.nonce,
     } as B64EncryptionResult;
 }
 
