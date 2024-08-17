@@ -4,7 +4,6 @@
  */
 export type BytesOrB64 = Uint8Array | string;
 
-
 /**
  * Deprecated.
  *
@@ -124,29 +123,4 @@ export interface EncryptedBlobB64_2 {
      * not need to be secret, but it is required to decrypt the data.
      */
     decryptionHeader: string;
-}
-
-/**
- * Deprecated.
- *
- * A variant of {@link DecryptBlobBytes} with the encrypted Blob's data as a
- * base64 encoded string.
- */
-export interface DecryptBlobB64 {
-    /**
-     * A base64 string containing the data to decrypt.
-     */
-    encryptedDataB64: string;
-    /**
-     * A base64 string containing the decryption header that was produced during
-     * encryption.
-     *
-     * The header contains a random nonce and other libsodium metadata. It does
-     * not need to be kept secret.
-     */
-    decryptionHeaderB64: string;
-    /**
-     * A base64 string containing the encryption key.
-     */
-    keyB64: string;
 }

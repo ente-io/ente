@@ -1,11 +1,6 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
-import type {
-    BytesOrB64,
-    DecryptBlobB64,
-    EncryptedBlob_2,
-    EncryptJSON,
-} from "./types";
+import type { BytesOrB64, EncryptedBlob_2, EncryptJSON } from "./types";
 
 export const _encryptBoxB64 = libsodium.encryptBoxB64;
 
@@ -55,7 +50,11 @@ export const _decryptMetadataJSON_New = async (
         new TextDecoder().decode(await _decryptBlob(blob, key)),
     ) as unknown;
 
-export const _decryptMetadataJSON = async (r: DecryptBlobB64) =>
+export const _decryptMetadataJSON = async (r: {
+    encryptedDataB64: string;
+    decryptionHeaderB64: string;
+    keyB64: string;
+}) =>
     _decryptMetadataJSON_New(
         {
             encryptedData: r.encryptedDataB64,

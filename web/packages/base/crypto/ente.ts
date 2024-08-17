@@ -53,7 +53,6 @@ import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
     BytesOrB64,
-    DecryptBlobB64,
     EncryptedBlob_2,
     EncryptedBox2,
     EncryptJSON,
@@ -202,7 +201,11 @@ export const decryptMetadataJSON_New = (
 /**
  * Deprecated, retains the old API.
  */
-export const decryptMetadataJSON = (r: DecryptBlobB64) =>
+export const decryptMetadataJSON = (r: {
+    encryptedDataB64: string;
+    decryptionHeaderB64: string;
+    keyB64: string;
+}) =>
     inWorker()
         ? ei._decryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));
