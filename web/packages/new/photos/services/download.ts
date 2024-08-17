@@ -123,13 +123,12 @@ class DownloadManagerImpl {
     private downloadThumb = async (file: EnteFile) => {
         const { downloadClient, cryptoWorker } = this.ensureInitialized();
 
-        const encrypted = await downloadClient.downloadThumbnail(file);
-        const decrypted = await cryptoWorker.decryptThumbnail({
-            encryptedData: encrypted,
-            decryptionHeaderB64: file.thumbnail.decryptionHeader,
-            keyB64: file.key,
-        });
-        return decrypted;
+        const encryptedData = await downloadClient.downloadThumbnail(file);
+        const decryptionHeader = file.thumbnail.decryptionHeader;
+        return cryptoWorker.decryptThumbnail(
+            { encryptedData, decryptionHeader },
+            file.key,
+        );
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {
