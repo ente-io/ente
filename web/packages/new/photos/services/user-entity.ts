@@ -1,4 +1,4 @@
-import { decryptAssociatedDataB64, decryptBoxB64 } from "@/base/crypto/ente";
+import { decryptBlob, decryptBoxB64 } from "@/base/crypto/ente";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
@@ -134,12 +134,8 @@ const userEntityDiff = async (
     sinceTime: number,
     entityKeyB64: string,
 ): Promise<UserEntityChange[]> => {
-    const decrypt = (encryptedDataB64: string, decryptionHeaderB64: string) =>
-        decryptAssociatedDataB64({
-            encryptedDataB64,
-            decryptionHeaderB64,
-            keyB64: entityKeyB64,
-        });
+    const decrypt = (encryptedData: string, decryptionHeader: string) =>
+        decryptBlob({ encryptedData, decryptionHeader }, entityKeyB64);
 
     const params = new URLSearchParams({
         type,

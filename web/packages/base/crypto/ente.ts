@@ -187,16 +187,6 @@ export const decryptThumbnail = (r: DecryptBlobBytes) =>
     assertInWorker(ei._decryptThumbnail(r));
 
 /**
- * A variant of {@link decryptAssociatedData} that expects the encrypted data as
- * a base64 encoded string.
- *
- * This is the sibling of {@link encryptAssociatedDataB64}.
- */
-export const decryptAssociatedDataB64 = (r: DecryptBlobB64) =>
-    inWorker()
-        ? ei._decryptAssociatedDataB64(r)
-        : sharedCryptoWorker().then((w) => w.decryptAssociatedDataB64(r));
-/**
  * Decrypt the metadata JSON associated with an Ente object.
  *
  * This is the sibling of {@link encryptMetadataJSON}.
