@@ -13,10 +13,10 @@ import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
     BytesOrB64,
-    EncryptedBlob_2,
-    EncryptedBlobB64_2,
-    EncryptedBlobBytes_2,
-    EncryptedBox2,
+    EncryptedBlob,
+    EncryptedBlobB64,
+    EncryptedBlobBytes,
+    EncryptedBox,
     EncryptedBoxB64,
 } from "./types";
 
@@ -258,7 +258,7 @@ export const encryptBoxB64 = async (
 export const encryptBlob = async (
     data: BytesOrB64,
     key: BytesOrB64,
-): Promise<EncryptedBlobBytes_2> => {
+): Promise<EncryptedBlobBytes> => {
     await sodium.ready;
 
     const uintkey = await bytes(key);
@@ -285,7 +285,7 @@ export const encryptBlob = async (
 export const encryptBlobB64 = async (
     data: BytesOrB64,
     key: BytesOrB64,
-): Promise<EncryptedBlobB64_2> => {
+): Promise<EncryptedBlobB64> => {
     const { encryptedData, decryptionHeader } = await encryptBlob(data, key);
     return {
         encryptedData: await toB64(encryptedData),
@@ -371,7 +371,7 @@ export async function encryptFileChunk(
  * Decrypt the result of {@link encryptBoxB64}.
  */
 export const decryptBox2 = async (
-    { encryptedData, nonce }: EncryptedBox2,
+    { encryptedData, nonce }: EncryptedBox,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
     await sodium.ready;
@@ -386,7 +386,7 @@ export const decryptBox2 = async (
  * Variant of {@link decryptBox} that returns the data as a base64 string.
  */
 export const decryptBoxB64 = (
-    box: EncryptedBox2,
+    box: EncryptedBox,
     key: BytesOrB64,
 ): Promise<string> => decryptBox2(box, key).then(toB64);
 
@@ -394,7 +394,7 @@ export const decryptBoxB64 = (
  * Decrypt the result of {@link encryptBlob} or {@link encryptBlobB64}.
  */
 export const decryptBlob2 = async (
-    { encryptedData, decryptionHeader }: EncryptedBlob_2,
+    { encryptedData, decryptionHeader }: EncryptedBlob,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
     await sodium.ready;
@@ -414,7 +414,7 @@ export const decryptBlob2 = async (
  * A variant of {@link decryptBlob2} that returns the result as a base64 string.
  */
 export const decryptBlobB64 = (
-    blob: EncryptedBlob_2,
+    blob: EncryptedBlob,
     key: BytesOrB64,
 ): Promise<string> => decryptBlob2(blob, key).then(toB64);
 

@@ -51,7 +51,7 @@ import { sharedCryptoWorker } from ".";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import type { BytesOrB64, EncryptedBlob_2, EncryptedBox2 } from "./types";
+import type { BytesOrB64, EncryptedBlob, EncryptedBox } from "./types";
 
 /**
  * Some of these functions have not yet been needed on the main thread, and for
@@ -161,7 +161,7 @@ export const encryptMetadataJSON = async (r: {
 /**
  * Decrypt a box encrypted using {@link encryptBoxB64}.
  */
-export const decryptBox = (box: EncryptedBox2, key: BytesOrB64) =>
+export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBox(box, key)
         : sharedCryptoWorker().then((w) => w.decryptBox(box, key));
@@ -169,7 +169,7 @@ export const decryptBox = (box: EncryptedBox2, key: BytesOrB64) =>
 /**
  * Variant of {@link decryptBox} that returns the result as a base64 string.
  */
-export const decryptBoxB64 = (box: EncryptedBox2, key: BytesOrB64) =>
+export const decryptBoxB64 = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBoxB64(box, key)
         : sharedCryptoWorker().then((w) => w.decryptBoxB64(box, key));
@@ -178,13 +178,13 @@ export const decryptBoxB64 = (box: EncryptedBox2, key: BytesOrB64) =>
  * Decrypt a blob encrypted using either {@link encryptBlob} or
  * {@link encryptBlobB64}.
  */
-export const decryptBlob = (blob: EncryptedBlob_2, key: BytesOrB64) =>
+export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
     assertInWorker(ei._decryptBlob(blob, key));
 
 /**
  * A variant of {@link decryptBlob} that returns the result as a base64 string.
  */
-export const decryptBlobB64 = (blob: EncryptedBlob_2, key: BytesOrB64) =>
+export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlobB64(blob, key)
         : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
@@ -192,7 +192,7 @@ export const decryptBlobB64 = (blob: EncryptedBlob_2, key: BytesOrB64) =>
 /**
  * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
  */
-export const decryptThumbnail = (blob: EncryptedBlob_2, key: BytesOrB64) =>
+export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
     assertInWorker(ei._decryptThumbnail(blob, key));
 
 /**
@@ -202,7 +202,7 @@ export const decryptThumbnail = (blob: EncryptedBlob_2, key: BytesOrB64) =>
  * JSON type, we need to return it as an `unknown`.
  */
 export const decryptMetadataJSON_New = (
-    blob: EncryptedBlob_2,
+    blob: EncryptedBlob,
     key: BytesOrB64,
 ) =>
     inWorker()

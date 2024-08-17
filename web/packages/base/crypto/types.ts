@@ -13,7 +13,7 @@ export type BytesOrB64 = Uint8Array | string;
  *
  * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  */
-export interface EncryptedBox2 {
+export interface EncryptedBox {
     /**
      * The data to decrypt.
      */
@@ -49,11 +49,11 @@ export interface EncryptedBoxB64 {
  *
  * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
- * This type is a combination of {@link EncryptedBlobBytes_2} and
- * {@link EncryptedBlobB64_2} which allows the decryption routines to accept
+ * This type is a combination of {@link EncryptedBlobBytes} and
+ * {@link EncryptedBlobB64} which allows the decryption routines to accept
  * either the bytes or the base64 variants produced by the encryption routines.
  */
-export interface EncryptedBlob_2 {
+export interface EncryptedBlob {
     /**
      * The encrypted data.
      */
@@ -69,10 +69,10 @@ export interface EncryptedBlob_2 {
 }
 
 /**
- * A variant of {@link EncryptedBlob_2} that has the encrypted data and header
+ * A variant of {@link EncryptedBlob} that has the encrypted data and header
  * as bytes ({@link Uint8Array}s).
  */
-export interface EncryptedBlobBytes_2 {
+export interface EncryptedBlobBytes {
     /**
      * The encrypted data.
      */
@@ -88,10 +88,10 @@ export interface EncryptedBlobBytes_2 {
 }
 
 /**
- * A variant of {@link EncryptedBlob_2} that has the encrypted data and header
+ * A variant of {@link EncryptedBlob} that has the encrypted data and header
  * as base64 strings.
  */
-export interface EncryptedBlobB64_2 {
+export interface EncryptedBlobB64 {
     /**
      * The encrypted data as a base64 string.
      */
