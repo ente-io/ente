@@ -45,20 +45,7 @@ export const _decryptBlob = libsodium.decryptBlob2;
 
 export const _decryptBlobB64 = libsodium.decryptBlobB64;
 
-export const _decryptAssociatedData = libsodium.decryptBlob;
-
 export const _decryptThumbnail = _decryptBlob;
-
-export const _decryptAssociatedDataB64 = async ({
-    encryptedDataB64,
-    decryptionHeaderB64,
-    keyB64,
-}: DecryptBlobB64) =>
-    await _decryptAssociatedData({
-        encryptedData: await libsodium.fromB64(encryptedDataB64),
-        decryptionHeaderB64,
-        keyB64,
-    });
 
 export const _decryptMetadataJSON_New = async (
     blob: EncryptedBlob_2,

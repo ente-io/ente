@@ -13,7 +13,6 @@ import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
     BytesOrB64,
-    DecryptBlobBytes,
     DecryptBoxBytes,
     EncryptBytes,
     EncryptedBlob_2,
@@ -452,27 +451,6 @@ export const decryptBlobB64 = (
     blob: EncryptedBlob_2,
     key: BytesOrB64,
 ): Promise<string> => decryptBlob2(blob, key).then(toB64);
-
-/**
- * Decrypt the result of {@link encryptBlob}.
- */
-export const decryptBlob = async ({
-    encryptedData,
-    decryptionHeaderB64,
-    keyB64,
-}: DecryptBlobBytes): Promise<Uint8Array> => {
-    await sodium.ready;
-    const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        await fromB64(decryptionHeaderB64),
-        await fromB64(keyB64),
-    );
-    const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
-        pullState,
-        encryptedData,
-        null,
-    );
-    return pullResult.message;
-};
 
 /** Decrypt Stream, but merge the results. */
 export const decryptChaCha = async (
