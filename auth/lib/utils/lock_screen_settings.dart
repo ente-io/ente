@@ -19,6 +19,7 @@ class LockScreenSettings {
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const autoLockTime = "ls_auto_lock_time";
   static const keyHideAppContent = "ls_hide_app_content";
+  static const keyAppLockSet = "ls_is_app_lock_set";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
     Duration(seconds: 5),
@@ -81,6 +82,14 @@ class LockScreenSettings {
 
   Future<void> setInvalidAttemptCount(int count) async {
     await _preferences.setInt(keyInvalidAttempts, count);
+  }
+
+  Future<void> isAppLockSet(bool value) async {
+    await _preferences.setBool(keyAppLockSet, value);
+  }
+
+  bool getIsAppLockSet() {
+    return _preferences.getBool(keyAppLockSet) ?? false;
   }
 
   static Uint8List _generateSalt() {
