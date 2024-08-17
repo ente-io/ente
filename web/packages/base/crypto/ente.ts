@@ -51,22 +51,15 @@ import { sharedCryptoWorker } from ".";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import type {
-    DecryptBlobB64,
-    DecryptBlobBytes,
-    DecryptBoxB64,
-    EncryptB64,
-    EncryptBytes,
-    EncryptJSON,
-} from "./types";
+import type { BytesOrB64, EncryptedBlob, EncryptedBox } from "./types";
 
 /**
  * Some of these functions have not yet been needed on the main thread, and for
  * these we don't have a corresponding sharedCryptoWorker method.
  *
- * This assertion will let us know when we need to implement them (this'll
+ * This assertion will let us know when we need to implement them. This will
  * gracefully degrade in production: the functionality will work, just that the
- * crypto will happen on the main thread itself).
+ * crypto operations will happen on the main thread itself.
  */
 const assertInWorker = <T>(x: T): T => {
     if (!inWorker()) assertionFailed("Currently only usable in a web worker");
@@ -74,123 +67,158 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
- * Encrypt arbitrary data using the given key and a randomly generated nonce.
+ * Encrypt the given data, returning a box containing the encrypted data and a
+ * randomly generated nonce that was used during encryption.
+ *
+ * Both the encrypted data and the nonce are returned as base64 strings.
  *
  * Use {@link decryptBoxB64} to decrypt the result.
- *
- * ee {@link encryptBox} for the implementation details.
  *
  * > The suffix "Box" comes from the fact that it uses the so called secretbox
  * > APIs provided by libsodium under the hood.
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptBoxB64 = (r: EncryptB64) =>
+export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
-        ? ei._encryptBoxB64(r)
-        : sharedCryptoWorker().then((w) => w.encryptBoxB64(r));
+        ? ei._encryptBoxB64(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptBoxB64(data, key));
 
 /**
- * Encrypt arbitrary data associated with an Ente object (file, collection,
- * entity) using the object's key.
+ * Encrypt the given data, returning a blob containing the encrypted data and a
+ * decryption header.
  *
- * Use {@link decryptAssociatedData} to decrypt the result.
+ * This function is usually used to encrypt data associated with an Ente object
+ * (file, collection, entity) using the object's key.
  *
- * See {@link encryptBlob} for the implementation details.
+ * Use {@link decryptBlob} to decrypt the result.
+ *
+ * > The suffix "Blob" comes from our convention of naming functions that use
+ * > the secretstream APIs in one-shot mode.
+ * >
+ * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptAssociatedData = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptAssociatedData(r));
+export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptBlob(data, key));
+
+/**
+ * A variant of {@link encryptBlob} that returns the result components as base64
+ * strings.
+ */
+export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptBlobB64(data, key));
 
 /**
  * Encrypt the thumbnail for a file.
  *
- * This is just an alias for {@link encryptAssociatedData}.
+ * This is midway variant of {@link encryptBlob} and {@link encryptBlobB64} that
+ * returns the decryption header as a base64 string, but leaves the data
+ * unchanged.
  *
  * Use {@link decryptThumbnail} to decrypt the result.
  */
-export const encryptThumbnail = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptThumbnail(r));
-
-/**
- * A variant of {@link encryptAssociatedData} that returns the encrypted data as
- * a base64 string instead of returning its bytes.
- *
- * Use {@link decryptAssociatedDataB64} to decrypt the result.
- */
-export const encryptAssociatedDataB64 = (r: EncryptBytes) =>
-    assertInWorker(ei._encryptAssociatedDataB64(r));
+export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptThumbnail(data, key));
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
  * entity) using the object's key.
  *
- * This is a variant of {@link encryptAssociatedData} tailored for encrypting
- * any arbitrary metadata associated with an Ente object. For example, it is
- * used for encrypting the various metadata fields (See: [Note: Metadatum])
- * associated with a file, using that file's key.
+ * This is a variant of {@link encryptBlobB64} tailored for encrypting any
+ * arbitrary metadata associated with an Ente object. For example, it is used
+ * for encrypting the various metadata fields associated with a file, using that
+ * file's key.
  *
  * Instead of raw bytes, it takes as input an arbitrary JSON object which it
- * encodes into a string, and encrypts that. And instead of returning the raw
- * encrypted bytes, it returns their base64 string representation.
+ * encodes into a string, and encrypts that.
  *
  * Use {@link decryptMetadataJSON} to decrypt the result.
+ *
+ * @param jsonValue The JSON value to encrypt. This can be an arbitrary JSON
+ * value, but since TypeScript currently doesn't have a native JSON type, it is
+ * typed as {@link unknown}.
+ *
+ * @param key The encryption key.
  */
-export const encryptMetadataJSON = async (r: EncryptJSON) =>
+export const encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptMetadataJSON_New(jsonValue, key)
+        : sharedCryptoWorker().then((w) =>
+              w.encryptMetadataJSON_New(jsonValue, key),
+          );
+
+/**
+ * Deprecated, use {@link encryptMetadataJSON_New} instead.
+ */
+export const encryptMetadataJSON = async (r: {
+    jsonValue: unknown;
+    keyB64: string;
+}) =>
     inWorker()
         ? ei._encryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
- * Decrypt arbitrary data, provided as a base64 string, using the given key and
- * the provided nonce.
- *
- * This is the sibling of {@link encryptBoxB64}.
- *
- * See {@link decryptBox} for the implementation details.
+ * Decrypt a box encrypted using {@link encryptBoxB64}.
  */
-export const decryptBoxB64 = (r: DecryptBoxB64) =>
+export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
-        ? ei._decryptBoxB64(r)
-        : sharedCryptoWorker().then((w) => w.decryptBoxB64(r));
+        ? ei._decryptBox(box, key)
+        : sharedCryptoWorker().then((w) => w.decryptBox(box, key));
 
 /**
- * Decrypt arbitrary data associated with an Ente object (file, collection or
- * entity) using the object's key.
- *
- * This is the sibling of {@link encryptAssociatedData}.
- *
- * See {@link decryptBlob} for the implementation details.
+ * Variant of {@link decryptBox} that returns the result as a base64 string.
  */
-export const decryptAssociatedData = (r: DecryptBlobBytes) =>
-    assertInWorker(ei._decryptAssociatedData(r));
-
-/**
- * Decrypt the thumbnail for a file.
- *
- * This is the sibling of {@link encryptThumbnail}.
- */
-export const decryptThumbnail = (r: DecryptBlobBytes) =>
-    assertInWorker(ei._decryptThumbnail(r));
-
-/**
- * A variant of {@link decryptAssociatedData} that expects the encrypted data as
- * a base64 encoded string.
- *
- * This is the sibling of {@link encryptAssociatedDataB64}.
- */
-export const decryptAssociatedDataB64 = (r: DecryptBlobB64) =>
+export const decryptBoxB64 = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
-        ? ei._decryptAssociatedDataB64(r)
-        : sharedCryptoWorker().then((w) => w.decryptAssociatedDataB64(r));
+        ? ei._decryptBoxB64(box, key)
+        : sharedCryptoWorker().then((w) => w.decryptBoxB64(box, key));
+
 /**
- * Decrypt the metadata JSON associated with an Ente object.
- *
- * This is the sibling of {@link encryptMetadataJSON}.
+ * Decrypt a blob encrypted using either {@link encryptBlob} or
+ * {@link encryptBlobB64}.
+ */
+export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
+    assertInWorker(ei._decryptBlob(blob, key));
+
+/**
+ * A variant of {@link decryptBlob} that returns the result as a base64 string.
+ */
+export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
+    inWorker()
+        ? ei._decryptBlobB64(blob, key)
+        : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
+
+/**
+ * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
+ */
+export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
+    assertInWorker(ei._decryptThumbnail(blob, key));
+
+/**
+ * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.
  *
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadataJSON = (r: DecryptBlobB64) =>
+export const decryptMetadataJSON_New = (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+) =>
+    inWorker()
+        ? ei._decryptMetadataJSON_New(blob, key)
+        : sharedCryptoWorker().then((w) =>
+              w.decryptMetadataJSON_New(blob, key),
+          );
+
+/**
+ * Deprecated, retains the old API.
+ */
+export const decryptMetadataJSON = (r: {
+    encryptedDataB64: string;
+    decryptionHeaderB64: string;
+    keyB64: string;
+}) =>
     inWorker()
         ? ei._decryptMetadataJSON(r)
         : sharedCryptoWorker().then((w) => w.decryptMetadataJSON(r));

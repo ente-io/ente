@@ -12,11 +12,12 @@ import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers";
 import type {
-    DecryptBlobBytes,
-    DecryptBoxBytes,
-    EncryptBytes,
+    BytesOrB64,
+    EncryptedBlob,
+    EncryptedBlobB64,
     EncryptedBlobBytes,
-    EncryptedBoxBytes,
+    EncryptedBox,
+    EncryptedBoxB64,
 } from "./types";
 
 /**
@@ -120,7 +121,24 @@ export async function fromHex(input: string) {
 }
 
 /**
- * Encrypt the given data using the provided base64 encoded key.
+ * If the provided {@link bob} ("Bytes or B64 string") is already a
+ * {@link Uint8Array}, return it unchanged, otherwise convert the base64 string
+ * into bytes and return those.
+ */
+const bytes = async (bob: BytesOrB64) =>
+    typeof bob == "string" ? fromB64(bob) : bob;
+
+/**
+ * Encrypt the given data using libsodium's secretbox APIs, using a randomly
+ * generated nonce.
+ *
+ * Use {@link decryptBox} to decrypt the result.
+ *
+ * @param data The data to encrypt.
+ *
+ * @param key The key to use for encryption.
+ *
+ * @returns The encrypted data and the generated nonce, both as base64 strings.
  *
  * [Note: 3 forms of encryption (Box | Blob | Stream)]
  *
@@ -205,50 +223,73 @@ export async function fromHex(input: string) {
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
  */
-export const encryptBox = async ({
-    data,
-    keyB64,
-}: EncryptBytes): Promise<EncryptedBoxBytes> => {
+export const encryptBoxB64 = async (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBoxB64> => {
     await sodium.ready;
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(
-        data,
-        nonce,
-        await fromB64(keyB64),
+        await bytes(data),
+        await bytes(nonce),
+        await bytes(key),
     );
-    return { encryptedData, nonceB64: await toB64(nonce) };
+    return {
+        encryptedData: await toB64(encryptedData),
+        nonce: await toB64(nonce),
+    };
 };
 
 /**
- * Encrypt the given data using secretstream APIs in one-shot mode, using the
- * given base64 encoded key.
+ * Encrypt the given data using libsodium's secretstream APIs in one-shot mode.
  *
  * Use {@link decryptBlob} to decrypt the result.
  *
- * See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ * @param data The data to encrypt.
  *
- * See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ * @param key The key to use for encryption.
+ *
+ * @returns The encrypted data and the decryption header as {@link Uint8Array}s.
+ *
+ * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ *
+ * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
-export const encryptBlob = async ({
-    data,
-    keyB64,
-}: EncryptBytes): Promise<EncryptedBlobBytes> => {
+export const encryptBlob = async (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBlobBytes> => {
     await sodium.ready;
 
-    const uintkey: Uint8Array = await fromB64(keyB64);
+    const uintkey = await bytes(key);
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
 
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
         pushState,
-        data,
+        await bytes(data),
         null,
         sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL,
     );
     return {
         encryptedData: pushResult,
-        decryptionHeaderB64: await toB64(header),
+        decryptionHeader: header,
+    };
+};
+
+/**
+ * A variant of {@link encryptBlob} that returns the both the encrypted data and
+ * decryption header as base64 strings.
+ */
+export const encryptBlobB64 = async (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBlobB64> => {
+    const { encryptedData, decryptionHeader } = await encryptBlob(data, key);
+    return {
+        encryptedData: await toB64(encryptedData),
+        decryptionHeader: await toB64(decryptionHeader),
     };
 };
 
@@ -327,41 +368,55 @@ export async function encryptFileChunk(
 }
 
 /**
- * Decrypt the result of {@link encryptBox}.
+ * Decrypt the result of {@link encryptBoxB64}.
  */
-export const decryptBox = async ({
-    encryptedData,
-    nonceB64,
-    keyB64,
-}: DecryptBoxBytes): Promise<Uint8Array> => {
+export const decryptBox = async (
+    { encryptedData, nonce }: EncryptedBox,
+    key: BytesOrB64,
+): Promise<Uint8Array> => {
     await sodium.ready;
     return sodium.crypto_secretbox_open_easy(
-        encryptedData,
-        await fromB64(nonceB64),
-        await fromB64(keyB64),
+        await bytes(encryptedData),
+        await bytes(nonce),
+        await bytes(key),
     );
 };
 
 /**
- * Decrypt the result of {@link encryptBlob}.
+ * Variant of {@link decryptBox} that returns the data as a base64 string.
  */
-export const decryptBlob = async ({
-    encryptedData,
-    decryptionHeaderB64,
-    keyB64,
-}: DecryptBlobBytes): Promise<Uint8Array> => {
+export const decryptBoxB64 = (
+    box: EncryptedBox,
+    key: BytesOrB64,
+): Promise<string> => decryptBox(box, key).then(toB64);
+
+/**
+ * Decrypt the result of {@link encryptBlob} or {@link encryptBlobB64}.
+ */
+export const decryptBlob = async (
+    { encryptedData, decryptionHeader }: EncryptedBlob,
+    key: BytesOrB64,
+): Promise<Uint8Array> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        await fromB64(decryptionHeaderB64),
-        await fromB64(keyB64),
+        await bytes(decryptionHeader),
+        await bytes(key),
     );
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
-        encryptedData,
+        await bytes(encryptedData),
         null,
     );
     return pullResult.message;
 };
+
+/**
+ * A variant of {@link decryptBlob} that returns the result as a base64 string.
+ */
+export const decryptBlobB64 = (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+): Promise<string> => decryptBlob(blob, key).then(toB64);
 
 /** Decrypt Stream, but merge the results. */
 export const decryptChaCha = async (
@@ -439,14 +494,14 @@ export interface B64EncryptionResult {
     nonce: string;
 }
 
+/** Deprecated, use {@link encryptBoxB64} instead */
 export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encryptBox({ data: await fromB64(data), keyB64 });
-
+    const encrypted = await encryptBoxB64(data, keyB64);
     return {
-        encryptedData: await toB64(encrypted.encryptedData),
+        encryptedData: encrypted.encryptedData,
         key: keyB64,
-        nonce: encrypted.nonceB64,
+        nonce: encrypted.nonce,
     } as B64EncryptionResult;
 }
 
@@ -461,35 +516,23 @@ export async function encryptUTF8(data: string, key: string) {
     return await encryptToB64(b64Data, key);
 }
 
-/** Deprecated */
+/** Deprecated, use {@link decryptBoxB64} instead. */
 export async function decryptB64(
-    data: string,
-    nonceB64: string,
+    encryptedData: string,
+    nonce: string,
     keyB64: string,
 ) {
-    await sodium.ready;
-    const decrypted = await decryptBox({
-        encryptedData: await fromB64(data),
-        nonceB64,
-        keyB64,
-    });
-
-    return await toB64(decrypted);
+    return decryptBoxB64({ encryptedData, nonce }, keyB64);
 }
 
 /** Deprecated */
 export async function decryptToUTF8(
-    data: string,
-    nonceB64: string,
+    encryptedData: string,
+    nonce: string,
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox({
-        encryptedData: await fromB64(data),
-        nonceB64,
-        keyB64,
-    });
-
+    const decrypted = await decryptBox({ encryptedData, nonce }, keyB64);
     return sodium.to_string(decrypted);
 }
 
