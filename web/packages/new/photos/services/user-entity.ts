@@ -238,7 +238,8 @@ const saveRemoteUserEntityKey = (
  * Generate a new entity key and return it after encrypting it using the user's
  * master key.
  */
-const generateEncryptedEntityKey = async () =>
+// TODO: Temporary export to silence lint
+export const generateEncryptedEntityKey = async () =>
     encryptBoxB64(await generateBoxKey(), await masterKeyFromSession());
 
 /**
