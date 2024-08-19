@@ -55,7 +55,7 @@ class LockScreenSettings {
       final bool systemLockEnabled =
           Configuration.instance.shouldShowSystemLockScreen();
       if (passwordEnabled || pinEnabled || systemLockEnabled) {
-        await isAppLockSet(true);
+        await setAppLockEnabled(true);
       }
     }
   }
@@ -104,7 +104,7 @@ class LockScreenSettings {
     await _preferences.setInt(keyInvalidAttempts, count);
   }
 
-  Future<void> isAppLockSet(bool value) async {
+  Future<void> setAppLockEnabled(bool value) async {
     await _preferences.setBool(keyAppLockSet, value);
   }
 
