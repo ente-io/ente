@@ -84,13 +84,15 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
         },
       ),
     );
-    await _lockscreenSetting.setAppLockEnabled(result);
-    await _initializeSettings();
-    setState(() {
-      if (result) {
+
+    if (result) {
+      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.setAppLockEnabled(true);
+      setState(() {
         appLock = _lockscreenSetting.getIsAppLockSet();
-      }
-    });
+      });
+    }
+    await _initializeSettings();
   }
 
   Future<void> _passwordLock() async {
@@ -101,14 +103,13 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
         },
       ),
     );
-
-    await _lockscreenSetting.setAppLockEnabled(result);
-    await _initializeSettings();
-    setState(() {
-      if (result) {
+    if (result) {
+      await _configuration.setSystemLockScreen(false);
+      setState(() {
         appLock = _lockscreenSetting.getIsAppLockSet();
-      }
-    });
+      });
+    }
+    await _initializeSettings();
   }
 
   Future<void> _onToggleSwitch() async {

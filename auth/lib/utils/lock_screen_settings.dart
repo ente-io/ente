@@ -46,18 +46,20 @@ class LockScreenSettings {
   }
 
   Future<void> setHasMigratedLockScreenChanges() async {
-    if (_preferences.getBool(keyHasMigratedLockScreenChanges) == null ||
-        getIsAppLockSet() == false) {
-      await _preferences.setBool(keyHasMigratedLockScreenChanges, true);
-
-      final bool passwordEnabled = await isPasswordSet();
-      final bool pinEnabled = await isPinSet();
-      final bool systemLockEnabled =
-          Configuration.instance.shouldShowSystemLockScreen();
-      if (passwordEnabled || pinEnabled || systemLockEnabled) {
-        await setAppLockEnabled(true);
-      }
+    if (_preferences.getBool(keyHasMigratedLockScreenChanges) != null) {
+      return;
     }
+
+    final bool passwordEnabled = await isPasswordSet();
+    final bool pinEnabled = await isPinSet();
+    final bool systemLockEnabled =
+        Configuration.instance.shouldShowSystemLockScreen();
+
+    if (passwordEnabled || pinEnabled || systemLockEnabled) {
+      await setAppLockEnabled(true);
+    }
+
+    await _preferences.setBool(keyHasMigratedLockScreenChanges, true);
   }
 
   Future<void> setHideAppContent(bool hideContent) async {

@@ -6,6 +6,7 @@ import 'package:ente_auth/ui/settings/lock_screen/lock_screen_pin.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +24,8 @@ class LocalAuthenticationService {
     BuildContext context,
     String infoMessage,
   ) async {
-    if (await isLocalAuthSupportedOnDevice()) {
+    if (await isLocalAuthSupportedOnDevice() ||
+        LockScreenSettings.instance.getIsAppLockSet()) {
       AppLock.of(context)!.setEnabled(false);
       final result = await requestAuthentication(
         context,
