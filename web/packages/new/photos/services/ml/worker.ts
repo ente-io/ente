@@ -139,7 +139,7 @@ export class MLWorker {
 
     /** Invoked in response to external events. */
     private wakeUp() {
-        if (this.state == "idle") {
+        if (this.state == "init" || this.state == "idle") {
             // We are currently paused. Get back to work.
             if (this.idleTimeout) clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
