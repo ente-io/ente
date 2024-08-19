@@ -47,8 +47,6 @@ class SemanticSearchService {
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
-  get hasInitialized => _hasInitialized;
-
   Future<void> init() async {
     if (!localSettings.isFaceIndexingEnabled) {
       return;
@@ -256,7 +254,7 @@ class SemanticSearchService {
   Future<void> _loadTextModel({bool delay = false}) async {
     _logger.info("Initializing ClipText");
     try {
-      if (delay) await Future.delayed(const Duration(seconds: 10));
+      if (delay) await Future.delayed(const Duration(seconds: 5));
       await MLComputer.instance.runClipText("warm up text encoder");
       _textModelIsLoaded = true;
     } catch (e, s) {
