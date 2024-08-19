@@ -404,13 +404,16 @@ export type MLStatus =
            *
            * - "indexing": The indexer is currently running.
            *
+           * - "fetching": The indexer is currently running, but we're primarily
+           *   fetching indexes for existing files.
+           *
            * - "clustering": All file we know of have been indexed, and we are now
            *   clustering the faces that were found.
            *
            * - "done": ML indexing and face clustering is complete for the user's
            *   library.
            */
-          phase: "scheduled" | "indexing" | "clustering" | "done";
+          phase: "scheduled" | "indexing" | "fetching" | "clustering" | "done";
           /** The number of files that have already been indexed. */
           nSyncedFiles: number;
           /** The total number of files that are eligible for indexing. */
@@ -478,8 +481,9 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     let phase: MLStatus["phase"];
     if (indexableCount > 0) {
-        const isIndexing = await (await worker()).isIndexing();
-        phase = !isIndexing ? "scheduled" : "indexing";
+        const state = await (await worker()).state;
+        phase =
+            state == "indexing" || state == "fetching" ? state : "scheduled";
     } else {
         phase = "done";
     }
