@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:typed_data";
 
+import "package:ente_auth/core/configuration.dart";
 import "package:ente_auth/utils/platform_util.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
@@ -20,6 +21,8 @@ class LockScreenSettings {
   static const autoLockTime = "ls_auto_lock_time";
   static const keyHideAppContent = "ls_hide_app_content";
   static const keyAppLockSet = "ls_is_app_lock_set";
+  static const keyHasMigratedLockScreenChanges =
+      "ls_has_migrated_lock_screen_changes";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
     Duration(seconds: 5),
@@ -38,6 +41,23 @@ class LockScreenSettings {
 
     ///Workaround for privacyScreen not working when app is killed and opened.
     await setHideAppContent(getShouldHideAppContent());
+
+    await setHasMigratedLockScreenChanges();
+  }
+
+  Future<void> setHasMigratedLockScreenChanges() async {
+    if (_preferences.getBool(keyHasMigratedLockScreenChanges) == null ||
+        getIsAppLockSet() == false) {
+      await _preferences.setBool(keyHasMigratedLockScreenChanges, true);
+
+      final bool passwordEnabled = await isPasswordSet();
+      final bool pinEnabled = await isPinSet();
+      final bool systemLockEnabled =
+          Configuration.instance.shouldShowSystemLockScreen();
+      if (passwordEnabled || pinEnabled || systemLockEnabled) {
+        await isAppLockSet(true);
+      }
+    }
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
