@@ -1,4 +1,4 @@
-import { decryptBlob, decryptBoxB64 } from "@/base/crypto/ente";
+import { decryptBlob, decryptBoxB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";

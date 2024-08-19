@@ -1,5 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto";
-import { encryptMetadataJSON } from "@/base/crypto/ente";
+import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { ItemVisibility } from "@/media/file-metadata";

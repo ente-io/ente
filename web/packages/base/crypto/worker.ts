@@ -5,7 +5,8 @@ import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (crypto/ente.ts) or the libsodium layer (crypto/libsodium.ts).
+ * specific layer (@/base/crypto) or the libsodium layer
+ * (@/base/crypto/libsodium.ts).
  *
  * See: [Note: Crypto code hierarchy].
  *
