@@ -122,7 +122,7 @@ class LocalAuthenticationService {
 
   Future<bool> isLocalAuthSupportedOnDevice() async {
     try {
-      return Platform.isMacOS || Platform.isLinux
+      return Platform.isLinux
           ? await FlutterLocalAuthentication().canAuthenticate()
           : await LocalAuthentication().isDeviceSupported();
     } on MissingPluginException {
