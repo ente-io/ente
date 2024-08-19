@@ -339,6 +339,8 @@ const indexNextBatch = async (
  * about. Then return the next {@link count} files that still need to be
  * indexed.
  *
+ * When returning from amongst pending files, prefer the most recent ones first.
+ *
  * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
  *
  * @param userID Sync only files owned by a {@link userID} with the face DB.

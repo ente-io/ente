@@ -394,14 +394,23 @@ export const indexableAndIndexedCounts = async () => {
  * universe, we filter out fileIDs the files corresponding to which have already
  * been indexed, or which should be ignored.
  *
- * @param count Limit the result to up to {@link count} items.
+ * @param count Limit the result to up to {@link count} items. If there are more
+ * than {@link count} items present, the files with the higher file IDs (which
+ * can be taken as a approximate for their creation order) are preferred.
  */
-export const indexableFileIDs = async (count?: number) => {
+export const indexableFileIDs = async (count: number) => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
-    return tx.store
+    let cursor = await tx.store
         .index("status")
-        .getAllKeys(IDBKeyRange.only("indexable"), count);
+        .openKeyCursor(IDBKeyRange.only("indexable"), "prev");
+    const result: number[] = [];
+    while (cursor && count > 0) {
+        result.push(cursor.primaryKey);
+        cursor = await cursor.continue();
+        count -= 1;
+    }
+    return result;
 };
 
 /**
