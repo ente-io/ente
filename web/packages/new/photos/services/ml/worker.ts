@@ -203,7 +203,12 @@ export class MLWorker {
 
         const liveQ = this.liveQ;
         this.liveQ = [];
-        this.state = "indexing";
+
+        // Retain the previous state if it was one of the indexing states. This
+        // prevents jumping between "fetching" and "indexing" being shown in the
+        // UI during the initial load.
+        if (this.state != "fetching" && this.state != "indexing")
+            this.state = "indexing";
 
         // Use the liveQ if present, otherwise get the next batch to backfill.
         const items = liveQ.length ? liveQ : await this.backfillQ();
