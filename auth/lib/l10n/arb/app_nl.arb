@@ -465,5 +465,6 @@
   "appLockDescription": "Kies tussen de standaard schermvergrendeling van uw apparaat en een aangepaste schermvergrendeling met een pincode of wachtwoord.",
   "pinLock": "Pin vergrendeling",
   "enterPin": "Pin invoeren",
-  "setNewPin": "Nieuwe pin instellen"
+  "setNewPin": "Nieuwe pin instellen",
+  "importFailureDescNew": "Kon het geselecteerde bestand niet lezen."
 }
