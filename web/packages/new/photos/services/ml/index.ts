@@ -479,13 +479,19 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
 
+    // During live uploads, the indexable count remains zero even as the indexer
+    // is processing the newly uploaded items. This is because these "live
+    // queue" items do not yet have a "file-status" entry.
+    //
+    // So use the state of the worker as a guide for the phase, not the
+    // indexable count.
+
     let phase: MLStatus["phase"];
-    if (indexableCount > 0) {
-        const state = await (await worker()).state;
-        phase =
-            state == "indexing" || state == "fetching" ? state : "scheduled";
+    const state = await (await worker()).state;
+    if (state == "indexing" || state == "fetching") {
+        phase = state;
     } else {
-        phase = "done";
+        phase = indexableCount > 0 ? "scheduled" : "done";
     }
 
     return {
