@@ -52,9 +52,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         setDialogBoxAttributesV2,
     };
 
-    const title = isI18nReady
-        ? t("title", { context: "accounts" })
-        : staticAppTitle;
+    const title = isI18nReady ? t("title_accounts") : staticAppTitle;
 
     return (
         <>
