@@ -1143,6 +1143,7 @@
   "successfullyHid": "Erfolgreich versteckt",
   "successfullyUnhid": "Erfolgreich eingeblendet",
   "crashReporting": "Absturzbericht",
+  "enableMultiPartUpload": "Mehrteiliges Hochladen aktivieren",
   "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
   "moveToHiddenAlbum": "Zu verstecktem Album verschieben",
   "fileTypes": "Dateitypen",

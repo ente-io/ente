@@ -45,9 +45,9 @@ import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import { createMLWorker } from "./services/ml";
 import {
-    encryptionKey,
     lastShownChangelogVersion,
-    saveEncryptionKey,
+    masterKeyB64,
+    saveMasterKeyB64,
     setLastShownChangelogVersion,
 } from "./services/store";
 import {
@@ -103,10 +103,10 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
-    ipcMain.handle("encryptionKey", () => encryptionKey());
+    ipcMain.handle("masterKeyB64", () => masterKeyB64());
 
-    ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
-        saveEncryptionKey(encryptionKey),
+    ipcMain.handle("saveMasterKeyB64", (_, masterKeyB64: string) =>
+        saveMasterKeyB64(masterKeyB64),
     );
 
     ipcMain.handle("lastShownChangelogVersion", () =>

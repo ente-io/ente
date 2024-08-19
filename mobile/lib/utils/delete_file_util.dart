@@ -375,8 +375,14 @@ Future<bool> deleteLocalFiles(
     );
     return true;
   } else {
-    showToast(context, S.of(context).couldNotFreeUpSpace);
-    return false;
+    //On android 10, even if files were deleted, deletedIDs is empty.
+    //This is a workaround so that users are not shown an error message on
+    //android 10
+    if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+      showToast(context, S.of(context).couldNotFreeUpSpace);
+      return false;
+    }
+    return true;
   }
 }
 

@@ -936,10 +936,10 @@
       }
     }
   },
-  "archiving": "正在归档中...",
-  "unarchiving": "正在取消归档...",
-  "successfullyArchived": "归档成功",
-  "successfullyUnarchived": "取消归档成功",
+  "archiving": "正在存档...",
+  "unarchiving": "正在取消存档...",
+  "successfullyArchived": "存档成功",
+  "successfullyUnarchived": "取消存档成功",
   "renameFile": "重命名文件",
   "enterFileName": "请输入文件名",
   "filesDeleted": "文件已删除",
@@ -1143,6 +1143,7 @@
   "successfullyHid": "已成功隐藏",
   "successfullyUnhid": "已成功取消隐藏",
   "crashReporting": "上报崩溃",
+  "enableMultiPartUpload": "启用分片上传",
   "addToHiddenAlbum": "添加到隐藏相册",
   "moveToHiddenAlbum": "移至隐藏相册",
   "fileTypes": "文件类型",
@@ -1293,7 +1294,6 @@
   "tooManyIncorrectAttempts": "错误尝试次数过多",
   "videoInfo": "视频详情",
   "appLockDescription": "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。",
-  "swipeLockEnablePreSteps": "要启用滑动锁定，请在系统设置中设置设备密码或屏幕锁。",
   "autoLock": "自动锁定",
   "immediately": "立即",
   "autoLockFeatureDescription": "应用程序进入后台后锁定的时间",
@@ -1305,6 +1305,6 @@
   "pleaseSelectQuickLinksToRemove": "请选择要删除的快速链接",
   "removePublicLinks": "删除公开链接",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "这将删除所有选定的快速链接的公共链接。",
-  "guestView": "Guest view",
-  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
+  "guestView": "访客视图",
+  "guestViewEnablePreSteps": "要启用访客视图，请在系统设置中设置设备密码或屏幕锁。"
 }

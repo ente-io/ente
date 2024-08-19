@@ -337,8 +337,8 @@ let last: SearchPerson[] | undefined;
  * WIP! Don't enable, dragon eggs are hatching here.
  */
 export const wipClusterEnable = async () => {
-    if (!isDevBuild || !(await isInternalUser())) return false;
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
+    if (!isDevBuild || !(await isInternalUser())) return false;
     return true;
 };
 

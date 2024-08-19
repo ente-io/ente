@@ -73,9 +73,9 @@ export default function LandingPage() {
         const electron = globalThis.electron;
         if (!key && electron) {
             try {
-                key = await electron.encryptionKey();
+                key = await electron.masterKeyB64();
             } catch (e) {
-                log.error("Failed to get encryption key from electron", e);
+                log.error("Failed to read master key from safe storage", e);
             }
             if (key) {
                 await saveKeyInSessionStore(
