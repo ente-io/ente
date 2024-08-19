@@ -1143,6 +1143,7 @@
   "successfullyHid": "Ocultado com sucesso",
   "successfullyUnhid": "Desocultado com sucesso",
   "crashReporting": "Relatório de falhas",
+  "enableMultiPartUpload": "Ativar envio de várias partes",
   "addToHiddenAlbum": "Adicionar a álbum oculto",
   "moveToHiddenAlbum": "Mover para álbum oculto",
   "fileTypes": "Tipos de arquivo",
