@@ -1,4 +1,4 @@
-import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto/ente";
+import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import {

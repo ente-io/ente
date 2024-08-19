@@ -1,4 +1,4 @@
-import { encryptMetadataJSON } from "@/base/crypto/ente";
+import { encryptMetadataJSON } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";

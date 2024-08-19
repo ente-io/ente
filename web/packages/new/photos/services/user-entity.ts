@@ -1,4 +1,9 @@
-import { decryptBlob, decryptBoxB64 } from "@/base/crypto/ente";
+import {
+    decryptBlob,
+    decryptBoxB64,
+    encryptBoxB64,
+    generateBoxKey,
+} from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
@@ -228,6 +233,14 @@ const saveRemoteUserEntityKey = (
     type: EntityType,
     entityKey: RemoteUserEntityKey,
 ) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
+
+/**
+ * Generate a new entity key and return it after encrypting it using the user's
+ * master key.
+ */
+// TODO: Temporary export to silence lint
+export const generateEncryptedEntityKey = async () =>
+    encryptBoxB64(await generateBoxKey(), await masterKeyFromSession());
 
 /**
  * Decrypt an encrypted entity key using the user's master key.

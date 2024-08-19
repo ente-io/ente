@@ -5,7 +5,8 @@ import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (crypto/ente.ts) or the libsodium layer (crypto/libsodium.ts).
+ * specific layer (@/base/crypto) or the libsodium layer
+ * (@/base/crypto/libsodium.ts).
  *
  * See: [Note: Crypto code hierarchy].
  *
@@ -18,6 +19,7 @@ export class CryptoWorker {
     encryptMetadataJSON = ei._encryptMetadataJSON;
     decryptBox = ei._decryptBox;
     decryptBoxB64 = ei._decryptBoxB64;
+    decryptBlob = ei._decryptBlob;
     decryptBlobB64 = ei._decryptBlobB64;
     decryptThumbnail = ei._decryptThumbnail;
     decryptMetadataJSON_New = ei._decryptMetadataJSON_New;

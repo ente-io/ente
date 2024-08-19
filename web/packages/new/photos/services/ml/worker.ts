@@ -43,6 +43,7 @@ import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 /**
  * A rough hint at what the worker is up to.
  *
+ * -   "init": Worker has been created but hasn't done anything yet.
  * -   "idle": Not doing anything
  * -   "tick": Transitioning to a new state
  * -   "indexing": Indexing
@@ -52,7 +53,7 @@ import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
  * data for more than 50% of the files that we requested from it in the last
  * fetch during indexing.
  */
-export type WorkerState = "idle" | "tick" | "indexing" | "fetching";
+export type WorkerState = "init" | "idle" | "tick" | "indexing" | "fetching";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -92,7 +93,7 @@ interface IndexableItem {
  */
 export class MLWorker {
     /** The last known state of the worker. */
-    public state: WorkerState = "idle";
+    public state: WorkerState = "init";
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
@@ -138,7 +139,7 @@ export class MLWorker {
 
     /** Invoked in response to external events. */
     private wakeUp() {
-        if (this.state == "idle") {
+        if (this.state == "init" || this.state == "idle") {
             // We are currently paused. Get back to work.
             if (this.idleTimeout) clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
@@ -202,7 +203,12 @@ export class MLWorker {
 
         const liveQ = this.liveQ;
         this.liveQ = [];
-        this.state = "indexing";
+
+        // Retain the previous state if it was one of the indexing states. This
+        // prevents jumping between "fetching" and "indexing" being shown in the
+        // UI during the initial load.
+        if (this.state != "fetching" && this.state != "indexing")
+            this.state = "indexing";
 
         // Use the liveQ if present, otherwise get the next batch to backfill.
         const items = liveQ.length ? liveQ : await this.backfillQ();

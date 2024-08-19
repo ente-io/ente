@@ -490,8 +490,10 @@ const getMLStatus = async (): Promise<MLStatus> => {
     const state = await (await worker()).state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
+    } else if (state == "init" || indexableCount > 0) {
+        phase = "scheduled";
     } else {
-        phase = indexableCount > 0 ? "scheduled" : "done";
+        phase = "done";
     }
 
     return {
