@@ -194,8 +194,7 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
             label = t("indexing_photos", status);
             break;
         case "fetching":
-            // label = pt("Fetching"indexing_photos", status);
-            label = `Fetching indexes (${status.nSyncedFiles} / ${status.nTotalFiles})`;
+            label = t("indexing_fetching", status);
             break;
         case "clustering":
             label = t("indexing_people", status);
