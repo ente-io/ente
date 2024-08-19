@@ -231,7 +231,7 @@ export const encryptBoxB64 = async (
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
     const encryptedData = sodium.crypto_secretbox_easy(
         await bytes(data),
-        await bytes(nonce),
+        nonce,
         await bytes(key),
     );
     return {
