@@ -47,6 +47,7 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
+import * as libsodium from "./libsodium";
 import type { BytesOrB64, EncryptedBlob, EncryptedBox } from "./types";
 import type { CryptoWorker } from "./worker";
 
@@ -84,6 +85,12 @@ const assertInWorker = <T>(x: T): T => {
     if (!inWorker()) assertionFailed("Currently only usable in a web worker");
     return x;
 };
+
+/**
+ * Generate a new randomly generated 256-bit key suitable for use with the *Box
+ * encryption functions.
+ */
+export const generateBoxKey = libsodium.generateBoxKey;
 
 /**
  * Encrypt the given data, returning a box containing the encrypted data and a

@@ -129,6 +129,17 @@ const bytes = async (bob: BytesOrB64) =>
     typeof bob == "string" ? fromB64(bob) : bob;
 
 /**
+ * Generate a key for use with the *Box encryption functions.
+ *
+ * This returns a new randomly generated 256-bit key suitable for being used
+ * with libsodium's secretbox APIs.
+ */
+export const generateBoxKey = async () => {
+    await sodium.ready;
+    return toB64(sodium.crypto_secretbox_keygen());
+};
+
+/**
  * Encrypt the given data using libsodium's secretbox APIs, using a randomly
  * generated nonce.
  *
