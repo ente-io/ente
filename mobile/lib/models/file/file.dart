@@ -268,8 +268,10 @@ class EnteFile {
   }
 
   String? get caption {
-    return pubMagicMetadata?.caption;
+    return debugCaption ?? pubMagicMetadata?.caption;
   }
+
+  String? debugCaption;
 
   String get thumbnailUrl {
     if (localFileServer.isNotEmpty) {

@@ -144,12 +144,14 @@ class SemanticSearchService {
     String query, {
     double? scoreThreshold,
   }) async {
+    bool showScore = false;
     // if the query starts with 0.xxx, the split the query to get score threshold and actual query
     if (query.startsWith(RegExp(r"0\.\d+"))) {
       final parts = query.split(" ");
       if (parts.length > 1) {
         scoreThreshold = double.parse(parts[0]);
         query = parts.sublist(1).join(" ");
+        showScore = true;
       }
     }
     final textEmbedding = await _getTextEmbedding(query);
@@ -165,6 +167,11 @@ class SemanticSearchService {
       dev.log("Query: $query, Score: ${result.score}, index $i");
     }
 
+    final Map<int, double> fileIDToScoreMap = {};
+    for (final result in queryResults) {
+      fileIDToScoreMap[result.id] = result.score;
+    }
+
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
 
@@ -177,8 +184,13 @@ class SemanticSearchService {
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
+        if (showScore) {
+          file.debugCaption =
+              "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
+        }
         results.add(file);
       }
+
       if (file == null) {
         deletedEntries.add(result.id);
       }
