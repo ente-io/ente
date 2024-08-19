@@ -150,9 +150,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         somethingWentWrong,
     };
 
-    const title = isI18nReady
-        ? t("title", { context: "auth" })
-        : staticAppTitle;
+    const title = isI18nReady ? t("title_auth") : staticAppTitle;
 
     return (
         <>

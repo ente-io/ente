@@ -8,11 +8,10 @@
  */
 export interface MLWorkerDelegate {
     /**
-     * Called whenever a file is processed during indexing.
-     *
-     * It is called both when the indexing was successful or it failed.
+     * Called whenever the worker processes a file during indexing (either
+     * successfully or with errors), or when in goes into the "idle" state.
      */
-    workerDidProcessFile: () => void;
+    workerDidProcessFileOrIdle: () => void;
 }
 
 /**
