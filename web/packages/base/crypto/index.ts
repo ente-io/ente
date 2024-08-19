@@ -205,7 +205,9 @@ export const decryptBoxB64 = (box: EncryptedBox, key: BytesOrB64) =>
  * {@link encryptBlobB64}.
  */
 export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
-    assertInWorker(ei._decryptBlob(blob, key));
+    inWorker()
+        ? ei._decryptBlob(blob, key)
+        : sharedCryptoWorker().then((w) => w.decryptBlob(blob, key));
 
 /**
  * A variant of {@link decryptBlob} that returns the result as a base64 string.
