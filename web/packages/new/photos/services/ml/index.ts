@@ -89,7 +89,7 @@ const worker = () =>
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
     const delegate = {
-        workerDidProcessFile,
+        workerDidProcessFileOrIdle,
     };
 
     // Obtain a message port from the Electron layer.
@@ -523,7 +523,7 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFile = throttled(updateMLStatusSnapshot, 2000);
+const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
 
 /**
  * Use CLIP to perform a natural language search over image embeddings.

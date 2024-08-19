@@ -233,6 +233,7 @@ export class MLWorker {
         this.state = "idle";
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
+        this.delegate?.workerDidProcessFileOrIdle();
     }
 
     /** Return the next batch of items to backfill (if any). */
@@ -320,7 +321,7 @@ const indexNextBatch = async (
         await Promise.race(tasks);
 
         // Let the main thread now we're doing something.
-        delegate?.workerDidProcessFile();
+        delegate?.workerDidProcessFileOrIdle();
 
         // Let us drain the microtask queue. This also gives a chance for other
         // interactive tasks like `clipMatches` to run.
