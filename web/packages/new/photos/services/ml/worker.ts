@@ -43,6 +43,7 @@ import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 /**
  * A rough hint at what the worker is up to.
  *
+ * -   "init": Worker has been created but hasn't done anything yet.
  * -   "idle": Not doing anything
  * -   "tick": Transitioning to a new state
  * -   "indexing": Indexing
@@ -52,7 +53,7 @@ import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
  * data for more than 50% of the files that we requested from it in the last
  * fetch during indexing.
  */
-export type WorkerState = "idle" | "tick" | "indexing" | "fetching";
+export type WorkerState = "init" | "idle" | "tick" | "indexing" | "fetching";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -92,7 +93,7 @@ interface IndexableItem {
  */
 export class MLWorker {
     /** The last known state of the worker. */
-    public state: WorkerState = "idle";
+    public state: WorkerState = "init";
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
