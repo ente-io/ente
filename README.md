@@ -99,7 +99,7 @@ connect with the community.
 [![Discord](https://img.shields.io/discord/948937918347608085?style=for-the-badge&logo=Discord&logoColor=white&label=Discord)](https://discord.gg/z2YVKkycX3)
 [![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.io/blog/rss.xml)
 
-[![Twitter](.github/assets/twitter.svg)](https://twitter.com/enteio) &nbsp; [![Mastodon](.github/assets/mastodon.svg)](https://mstdn.social/@ente)
+[![Twitter](.github/assets/twitter.svg)](https://twitter.com/enteio) &nbsp; [![Mastodon](.github/assets/mastodon.svg)](https://fosstodon.org/@ente)
 
 ---
 
