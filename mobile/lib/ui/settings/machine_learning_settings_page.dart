@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
@@ -13,11 +14,14 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/common/web_page.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
@@ -62,6 +66,7 @@ class _MachineLearningSettingsPageState
 
   @override
   Widget build(BuildContext context) {
+    final hasEnabled = localSettings.isFaceIndexingEnabled;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -86,12 +91,16 @@ class _MachineLearningSettingsPageState
             delegate: SliverChildBuilderDelegate(
               (delegateBuildContext, index) => Padding(
                 padding: const EdgeInsets.only(left: 16, right: 16),
-                child: Text(
-                  S.of(context).mlIndexingDescription,
-                  textAlign: TextAlign.left,
-                  style: getEnteTextTheme(context)
-                      .mini
-                      .copyWith(color: getEnteColorScheme(context).textMuted),
+                child: Column(
+                  children: [
+                    Text(
+                      S.of(context).mlIndexingDescription,
+                      textAlign: TextAlign.left,
+                      style: getEnteTextTheme(context).mini.copyWith(
+                            color: getEnteColorScheme(context).textMuted,
+                          ),
+                    ),
+                  ],
                 ),
               ),
               childCount: 1,
@@ -103,7 +112,7 @@ class _MachineLearningSettingsPageState
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.only(top: 20),
                     child: _getMlSettings(context),
                   ),
                 );
@@ -111,6 +120,45 @@ class _MachineLearningSettingsPageState
               childCount: 1,
             ),
           ),
+          if (!hasEnabled)
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (delegateBuildContext, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        ButtonWidget(
+                          buttonType: ButtonType.secondary,
+                          labelText: context.l10n.moreDetails,
+                          onTap: () async {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  return WebPage(
+                                    S.of(context).help,
+                                    "https://help.ente.io/photos/features/machine-learning",
+                                  );
+                                },
+                              ),
+                            ).ignore();
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          S.of(context).magicSearchHint,
+                          textAlign: TextAlign.left,
+                          style: getEnteTextTheme(context).mini.copyWith(
+                                color: getEnteColorScheme(context).textMuted,
+                              ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                childCount: 1,
+              ),
+            ),
         ],
       ),
     );
@@ -123,15 +171,15 @@ class _MachineLearningSettingsPageState
       children: [
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).mlFunctions,
+            title: S.of(context).mlIndexing,
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
             value: () => localSettings.isFaceIndexingEnabled,
             onChanged: () async {
-              if (!localSettings.isFaceIndexingEnabled &&
-                  !UserRemoteFlagService.instance
-                      .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+              final hasGivenConsent = UserRemoteFlagService.instance
+                  .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+              if (!localSettings.isFaceIndexingEnabled && !hasGivenConsent) {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -149,7 +197,10 @@ class _MachineLearningSettingsPageState
                 await MLService.instance.init(firstTime: true);
                 await SemanticSearchService.instance.init();
                 unawaited(MLService.instance.runAllML(force: true));
-              } else {}
+              } else {
+                await UserRemoteFlagService.instance
+                    .setBoolValue(UserRemoteFlagService.mlEnabled, false);
+              }
               if (mounted) {
                 setState(() {});
               }

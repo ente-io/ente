@@ -949,6 +949,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
+        "magicSearchHint": MessageLookupByLibrary.simpleMessage(
+            "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identify documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
@@ -975,8 +977,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please click here for more details about this feature in our privacy policy"),
         "mlConsentTitle":
             MessageLookupByLibrary.simpleMessage("Enable machine learning?"),
-        "mlIndexing":
-            MessageLookupByLibrary.simpleMessage("Enable ML indexing"),
+        "mlIndexing": MessageLookupByLibrary.simpleMessage("Enable Indexing"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed."),
         "mobileWebDesktop":

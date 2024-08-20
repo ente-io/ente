@@ -9025,10 +9025,10 @@ class S {
     );
   }
 
-  /// `Enable ML indexing`
+  /// `Enable Indexing`
   String get mlIndexing {
     return Intl.message(
-      'Enable ML indexing',
+      'Enable Indexing',
       name: 'mlIndexing',
       desc: '',
       args: [],
@@ -9050,6 +9050,16 @@ class S {
     return Intl.message(
       'Ente supports on-device machine learning for face recognition, magic search and other advanced search features',
       name: 'enableMLIndexingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identify documents'`
+  String get magicSearchHint {
+    return Intl.message(
+      'Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identify documents\'',
+      name: 'magicSearchHint',
       desc: '',
       args: [],
     );
