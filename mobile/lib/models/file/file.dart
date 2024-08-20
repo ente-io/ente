@@ -268,7 +268,7 @@ class EnteFile {
   }
 
   String? get caption {
-    return debugCaption ?? pubMagicMetadata?.caption;
+    return pubMagicMetadata?.caption;
   }
 
   String? debugCaption;
