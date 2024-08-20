@@ -42,10 +42,12 @@ class LockScreenSettings {
     ///Workaround for privacyScreen not working when app is killed and opened.
     await setHideAppContent(getShouldHideAppContent());
 
-    await setHasMigratedLockScreenChanges();
+    /// Function to Check if the migration for lock screen changes has
+    /// already been done by checking a stored boolean value.
+    await runLockScreenChangesMigration();
   }
 
-  Future<void> setHasMigratedLockScreenChanges() async {
+  Future<void> runLockScreenChangesMigration() async {
     if (_preferences.getBool(keyHasMigratedLockScreenChanges) != null) {
       return;
     }
