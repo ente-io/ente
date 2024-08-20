@@ -2,7 +2,6 @@ import "dart:convert" show jsonEncode, jsonDecode;
 
 import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
-import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
@@ -15,7 +14,6 @@ class MLResult {
 
   Dimensions decodedImageSize;
 
-  int mlVersion;
   bool errorOccured;
   bool onlyThumbnailUsed;
 
@@ -29,7 +27,6 @@ class MLResult {
     this.fileId = -1,
     this.faces = const <FaceResult>[],
     this.clip,
-    this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
@@ -37,7 +34,6 @@ class MLResult {
 
   MLResult.fromEnteFileID(
     fileID, {
-    this.mlVersion = faceMlVersion,
     this.errorOccured = false,
     this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
@@ -56,7 +52,6 @@ class MLResult {
         'fileId': fileId,
         'faces': faces?.map((face) => face.toJson()).toList(),
         'clip': clip?.toJson(),
-        'mlVersion': mlVersion,
         'errorOccured': errorOccured,
         'onlyThumbnailUsed': onlyThumbnailUsed,
         'decodedImageSize': {
@@ -78,7 +73,6 @@ class MLResult {
       clip: json['clip'] != null
           ? ClipResult.fromJson(json['clip'] as Map<String, dynamic>)
           : null,
-      mlVersion: json['mlVersion'],
       errorOccured: json['errorOccured'] ?? false,
       onlyThumbnailUsed: json['onlyThumbnailUsed'] ?? false,
       decodedImageSize: json['decodedImageSize'] != null

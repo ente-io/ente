@@ -15,6 +15,7 @@ import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/detection.dart" as face_detection;
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/landmark.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
@@ -459,7 +460,7 @@ class MLService {
             dataEntity.putFace(
               RemoteFaceEmbedding(
                 faces,
-                result.mlVersion,
+                faceMlVersion,
                 client: client,
                 height: result.decodedImageSize.height,
                 width: result.decodedImageSize.width,
@@ -470,7 +471,7 @@ class MLService {
             dataEntity.putClip(
               RemoteClipEmbedding(
                 result.clip!.embedding,
-                version: result.mlVersion,
+                version: clipMlVersion,
                 client: client,
               ),
             );
