@@ -281,7 +281,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("AppStore 订阅"),
         "archive": MessageLookupByLibrary.simpleMessage("存档"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("存档相册"),
-        "archiving": MessageLookupByLibrary.simpleMessage("正在归档中..."),
+        "archiving": MessageLookupByLibrary.simpleMessage("正在存档..."),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage("您确定要离开家庭计划吗？"),
         "areYouSureYouWantToCancel":
@@ -562,6 +562,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enableMaps": MessageLookupByLibrary.simpleMessage("启用地图"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "这将在世界地图上显示您的照片。\n\n该地图由 Open Street Map 托管，并且您的照片的确切位置永远不会共享。\n\n您可以随时从“设置”中禁用此功能。"),
+        "enableMultiPartUpload": MessageLookupByLibrary.simpleMessage("启用分片上传"),
         "encryptingBackup": MessageLookupByLibrary.simpleMessage("正在加密备份..."),
         "encryption": MessageLookupByLibrary.simpleMessage("加密"),
         "encryptionKeys": MessageLookupByLibrary.simpleMessage("加密密钥"),
@@ -669,9 +670,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请在手机“设置”中授权软件访问所有照片"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("授予权限"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
-        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
-        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable guest view, please setup device passcode or screen lock in your system settings."),
+        "guestView": MessageLookupByLibrary.simpleMessage("访客视图"),
+        "guestViewEnablePreSteps":
+            MessageLookupByLibrary.simpleMessage("要启用访客视图，请在系统设置中设置设备密码或屏幕锁。"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"),
         "hearUsWhereTitle":
@@ -1208,10 +1209,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您的订阅似乎已过期。请订阅以启用分享。"),
         "subscription": MessageLookupByLibrary.simpleMessage("订阅"),
         "success": MessageLookupByLibrary.simpleMessage("成功"),
-        "successfullyArchived": MessageLookupByLibrary.simpleMessage("归档成功"),
+        "successfullyArchived": MessageLookupByLibrary.simpleMessage("存档成功"),
         "successfullyHid": MessageLookupByLibrary.simpleMessage("已成功隐藏"),
         "successfullyUnarchived":
-            MessageLookupByLibrary.simpleMessage("取消归档成功"),
+            MessageLookupByLibrary.simpleMessage("取消存档成功"),
         "successfullyUnhid": MessageLookupByLibrary.simpleMessage("已成功取消隐藏"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("建议新功能"),
         "support": MessageLookupByLibrary.simpleMessage("支持"),
@@ -1291,7 +1292,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "twofactorSetup": MessageLookupByLibrary.simpleMessage("双重认证设置"),
         "unarchive": MessageLookupByLibrary.simpleMessage("取消存档"),
         "unarchiveAlbum": MessageLookupByLibrary.simpleMessage("取消存档相册"),
-        "unarchiving": MessageLookupByLibrary.simpleMessage("正在取消归档..."),
+        "unarchiving": MessageLookupByLibrary.simpleMessage("正在取消存档..."),
         "uncategorized": MessageLookupByLibrary.simpleMessage("未分类的"),
         "unhide": MessageLookupByLibrary.simpleMessage("取消隐藏"),
         "unhideToAlbum": MessageLookupByLibrary.simpleMessage("取消隐藏到相册"),

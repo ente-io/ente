@@ -71,5 +71,7 @@ class FlagService {
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
 
+  bool get hasGrantedMLConsent => flags.faceSearchEnabled;
+
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 }

@@ -676,6 +676,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enableMaps": MessageLookupByLibrary.simpleMessage("Habilitar Mapa"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Isto mostrará suas fotos em um mapa do mundo.\n\nEste mapa é hospedado pelo OpenStreetMap, e os exatos locais de suas fotos nunca são compartilhados.\n\nVocê pode desativar esse recurso a qualquer momento nas Configurações."),
+        "enableMultiPartUpload": MessageLookupByLibrary.simpleMessage(
+            "Ativar envio de várias partes"),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Criptografando backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Criptografia"),

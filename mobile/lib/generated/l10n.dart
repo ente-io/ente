@@ -2866,6 +2866,56 @@ class S {
     );
   }
 
+  /// `Enable machine learning`
+  String get mlConsent {
+    return Intl.message(
+      'Enable machine learning',
+      name: 'mlConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning?`
+  String get mlConsentTitle {
+    return Intl.message(
+      'Enable machine learning?',
+      name: 'mlConsentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you enable machine learning, Ente will extract information like face geometry from files. This will happen on your device, and any generated biometric information will be end-to-end encrypted.`
+  String get mlConsentDescription {
+    return Intl.message(
+      'If you enable machine learning, Ente will extract information like face geometry from files. This will happen on your device, and any generated biometric information will be end-to-end encrypted.',
+      name: 'mlConsentDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please click here for more details about this feature in our privacy policy`
+  String get mlConsentPrivacy {
+    return Intl.message(
+      'Please click here for more details about this feature in our privacy policy',
+      name: 'mlConsentPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I understand, and wish to enable machine learning`
+  String get mlConsentConfirmation {
+    return Intl.message(
+      'I understand, and wish to enable machine learning',
+      name: 'mlConsentConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Magic search`
   String get magicSearch {
     return Intl.message(

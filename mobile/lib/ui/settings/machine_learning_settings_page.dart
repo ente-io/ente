@@ -20,6 +20,7 @@ import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/wakelock_util.dart";
 
@@ -127,10 +128,22 @@ class _MachineLearningSettingsPageState
           trailingWidget: ToggleSwitchWidget(
             value: () => localSettings.isFaceIndexingEnabled,
             onChanged: () async {
+              if (!localSettings.isFaceIndexingEnabled) {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return const EnableMachineLearningConsent();
+                    },
+                  ),
+                );
+                if (result == null || result == false) {
+                  return;
+                }
+              }
               final isEnabled = await localSettings.toggleFaceIndexing();
               if (isEnabled) {
                 await MLService.instance.init(firstTime: true);
-
                 await SemanticSearchService.instance.init();
                 unawaited(MLService.instance.runAllML(force: true));
               } else {}
