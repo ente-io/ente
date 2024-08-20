@@ -299,15 +299,18 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     let status: string;
     switch (phase) {
-        case "indexing":
-            status = "running";
-            break;
         case "scheduled":
-            status = "scheduled";
+            status = t("indexing_status_scheduled");
+            break;
+        case "fetching":
+            status = t("indexing_status_fetching");
+            break;
+        case "indexing":
+            status = t("indexing_status_running");
             break;
         // TODO: Clustering
         default:
-            status = "done";
+            status = t("indexing_status_done");
             break;
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
@@ -351,9 +354,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         <Typography color="text.faint">
                             {t("indexing")}
                         </Typography>
-                        <Typography>
-                            {t("indexing_status", { context: status })}
-                        </Typography>
+                        <Typography>{status}</Typography>
                     </Stack>
                     <Divider sx={{ marginInlineStart: 2 }} />
                     <Stack

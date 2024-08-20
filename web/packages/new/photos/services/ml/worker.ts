@@ -1,4 +1,5 @@
 import { clientPackageName } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
 import { getKVN } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
@@ -39,6 +40,21 @@ import {
 } from "./ml-data";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
+/**
+ * A rough hint at what the worker is up to.
+ *
+ * -   "init": Worker has been created but hasn't done anything yet.
+ * -   "idle": Not doing anything
+ * -   "tick": Transitioning to a new state
+ * -   "indexing": Indexing
+ * -   "fetching": A subset of indexing
+ *
+ * During indexing, the state is set to "fetching" whenever remote provided us
+ * data for more than 50% of the files that we requested from it in the last
+ * fetch during indexing.
+ */
+export type WorkerState = "init" | "idle" | "tick" | "indexing" | "fetching";
+
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
@@ -76,9 +92,11 @@ interface IndexableItem {
  * particular, for finding the closest CLIP match when the user does a search.
  */
 export class MLWorker {
+    /** The last known state of the worker. */
+    public state: WorkerState = "init";
+
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private state: "idle" | "tick" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -121,7 +139,7 @@ export class MLWorker {
 
     /** Invoked in response to external events. */
     private wakeUp() {
-        if (this.state == "idle") {
+        if (this.state == "init" || this.state == "idle") {
             // We are currently paused. Get back to work.
             if (this.idleTimeout) clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
@@ -165,13 +183,6 @@ export class MLWorker {
     }
 
     /**
-     * Return true if we're currently indexing.
-     */
-    isIndexing() {
-        return this.state == "indexing";
-    }
-
-    /**
      * Find {@link CLIPMatches} for a given {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
@@ -192,7 +203,12 @@ export class MLWorker {
 
         const liveQ = this.liveQ;
         this.liveQ = [];
-        this.state = "indexing";
+
+        // Retain the previous state if it was one of the indexing states. This
+        // prevents jumping between "fetching" and "indexing" being shown in the
+        // UI during the initial load.
+        if (this.state != "fetching" && this.state != "indexing")
+            this.state = "indexing";
 
         // Use the liveQ if present, otherwise get the next batch to backfill.
         const items = liveQ.length ? liveQ : await this.backfillQ();
@@ -223,6 +239,7 @@ export class MLWorker {
         this.state = "idle";
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
+        this.delegate?.workerDidProcessFileOrIdle();
     }
 
     /** Return the next batch of items to backfill (if any). */
@@ -234,8 +251,20 @@ export class MLWorker {
             200,
         );
         if (!filesByID.size) return [];
+
         // Fetch their existing ML data (if any).
         const mlDataByID = await fetchMLData(filesByID);
+
+        // If the number of files for which remote gave us data is more than 50%
+        // of what we asked of it, assume we are "fetching", not "indexing".
+        // This is a heuristic to try and show a better indexing state in the UI
+        // (so that the user does not think that their files are being
+        // unnecessarily reindexed).
+        if (this.state != "indexing" && this.state != "fetching")
+            assertionFailed(`Unexpected state ${this.state}`);
+        this.state =
+            mlDataByID.size * 2 > filesByID.size ? "fetching" : "indexing";
+
         // Return files after annotating them with their existing ML data.
         return Array.from(filesByID, ([id, file]) => ({
             enteFile: file,
@@ -298,7 +327,7 @@ const indexNextBatch = async (
         await Promise.race(tasks);
 
         // Let the main thread now we're doing something.
-        delegate?.workerDidProcessFile();
+        delegate?.workerDidProcessFileOrIdle();
 
         // Let us drain the microtask queue. This also gives a chance for other
         // interactive tasks like `clipMatches` to run.
@@ -316,6 +345,8 @@ const indexNextBatch = async (
  * Sync face DB with the local (and potentially indexable) files that we know
  * about. Then return the next {@link count} files that still need to be
  * indexed.
+ *
+ * When returning from amongst pending files, prefer the most recent ones first.
  *
  * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
  *

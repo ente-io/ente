@@ -26,7 +26,7 @@ export default function AllCollectionsHeader({
                                 : t("ALL_ALBUMS")}
                         </Typography>
                         <Typography variant="small" color={"text.muted"}>
-                            {t("albums", { count: collectionCount })}
+                            {t("albums_count", { count: collectionCount })}
                         </Typography>
                     </Box>
                 </FluidContainer>

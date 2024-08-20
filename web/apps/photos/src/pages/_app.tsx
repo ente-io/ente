@@ -330,9 +330,7 @@ export default function App({ Component, pageProps }: AppProps) {
         logout,
     };
 
-    const title = isI18nReady
-        ? t("title", { context: "photos" })
-        : staticAppTitle;
+    const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
     return (
         <>

@@ -89,7 +89,7 @@ const worker = () =>
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
     const delegate = {
-        workerDidProcessFile,
+        workerDidProcessFileOrIdle,
     };
 
     // Obtain a message port from the Electron layer.
@@ -404,13 +404,16 @@ export type MLStatus =
            *
            * - "indexing": The indexer is currently running.
            *
+           * - "fetching": The indexer is currently running, but we're primarily
+           *   fetching indexes for existing files.
+           *
            * - "clustering": All file we know of have been indexed, and we are now
            *   clustering the faces that were found.
            *
            * - "done": ML indexing and face clustering is complete for the user's
            *   library.
            */
-          phase: "scheduled" | "indexing" | "clustering" | "done";
+          phase: "scheduled" | "indexing" | "fetching" | "clustering" | "done";
           /** The number of files that have already been indexed. */
           nSyncedFiles: number;
           /** The total number of files that are eligible for indexing. */
@@ -476,10 +479,19 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
 
+    // During live uploads, the indexable count remains zero even as the indexer
+    // is processing the newly uploaded items. This is because these "live
+    // queue" items do not yet have a "file-status" entry.
+    //
+    // So use the state of the worker as a guide for the phase, not the
+    // indexable count.
+
     let phase: MLStatus["phase"];
-    if (indexableCount > 0) {
-        const isIndexing = await (await worker()).isIndexing();
-        phase = !isIndexing ? "scheduled" : "indexing";
+    const state = await (await worker()).state;
+    if (state == "indexing" || state == "fetching") {
+        phase = state;
+    } else if (state == "init" || indexableCount > 0) {
+        phase = "scheduled";
     } else {
         phase = "done";
     }
@@ -513,7 +525,7 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFile = throttled(updateMLStatusSnapshot, 2000);
+const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
 
 /**
  * Use CLIP to perform a natural language search over image embeddings.

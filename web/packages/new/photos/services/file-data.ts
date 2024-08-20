@@ -1,4 +1,4 @@
-import { encryptBlobB64 } from "@/base/crypto/ente";
+import { encryptBlobB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import type { EnteFile } from "@/new/photos/types/file";

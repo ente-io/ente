@@ -1,4 +1,4 @@
-import { decryptBlob } from "@/base/crypto/ente";
+import { decryptBlob } from "@/base/crypto";
 import log from "@/base/log";
 import type { EnteFile } from "@/new/photos/types/file";
 import { nullToUndefined } from "@/utils/transform";

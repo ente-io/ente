@@ -118,7 +118,7 @@ export default function ManageEmailShare({
                         onClose={onClose}
                         title={collection.name}
                         onRootClose={handleRootClose}
-                        caption={t("participants", {
+                        caption={t("participants_count", {
                             count: peopleCount,
                         })}
                     />

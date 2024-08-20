@@ -33,7 +33,9 @@ export default function UserNameInputDialog({
                 initialValue={uploaderName}
                 callback={handleSubmit}
                 placeholder={t("NAME_PLACEHOLDER")}
-                buttonText={t("add_photos", { count: toUploadFilesCount ?? 0 })}
+                buttonText={t("add_photos_count", {
+                    count: toUploadFilesCount ?? 0,
+                })}
                 fieldType="text"
                 blockButton
                 secondaryButtonAction={onClose}

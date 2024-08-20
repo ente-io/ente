@@ -144,6 +144,10 @@ export const sidebar = [
                         link: "/photos/troubleshooting/thumbnails",
                     },
                     {
+                        text: "Large uploads",
+                        link: "/photos/troubleshooting/large-uploads",
+                    },
+                    {
                         text: "Network drives",
                         link: "/photos/troubleshooting/nas",
                     },
