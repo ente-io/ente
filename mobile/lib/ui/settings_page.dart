@@ -144,7 +144,7 @@ class SettingsPage extends StatelessWidget {
 
     if (hasLoggedIn && flagService.internalUser) {
       contents.addAll([sectionSpacing, const DebugSectionWidget()]);
-      if (flagService.faceSearchEnabled) {
+      if (flagService.isBetaUser) {
         contents.addAll([sectionSpacing, const MLDebugSectionWidget()]);
       }
     }
