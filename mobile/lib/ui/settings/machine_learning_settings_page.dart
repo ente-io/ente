@@ -359,6 +359,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                   MachineLearningController.instance.isDeviceHealthy;
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
+              final bool hasWifi = snapshot.data!.hasWifiEnabled!;
 
               if (!isDeviceHealthy && pendingFiles > 0) {
                 return MenuSectionDescriptionWidget(
@@ -407,7 +408,16 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                           alignCaptionedTextToLeft: true,
                           isGestureDetectorDisabled: true,
                         )
-                      : const SizedBox.shrink(),
+                      : (!hasWifi && pendingFiles > 0)
+                          ? MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).waitingForWifi,
+                              ),
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              isGestureDetectorDisabled: true,
+                            )
+                          : const SizedBox.shrink(),
                 ],
               );
             }
