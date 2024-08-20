@@ -94,7 +94,7 @@ class _EnableMachineLearningConsentState
                         ),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 1),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Text(
                               S.of(context).mlConsentConfirmation,
                               style: getEnteTextTheme(context).bodyMuted,
