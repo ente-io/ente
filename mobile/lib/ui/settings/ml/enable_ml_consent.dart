@@ -114,7 +114,7 @@ class _EnableMachineLearningConsentState
                       },
                       shouldSurfaceExecutionStates: true,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     ButtonWidget(
                       buttonType: ButtonType.secondary,
                       labelText: S.of(context).cancel,
