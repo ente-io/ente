@@ -50,7 +50,7 @@ export default function EmailShare({
         <>
             <Stack>
                 <MenuSectionTitle
-                    title={t("shared_with_people", {
+                    title={t("shared_with_people_count", {
                         count: collection.sharees?.length ?? 0,
                     })}
                     icon={<Workspaces />}
