@@ -78,6 +78,10 @@ class SemanticSearchService {
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
     if (!isMagicSearchEnabledAndReady()) {
+      if (flagService.internalUser) {
+        _logger.info(
+            "Magic search enabled ${localSettings.isFaceIndexingEnabled}, loaded $_textModelIsLoaded cached ${_cachedImageEmbeddings.isNotEmpty}");
+      }
       return (query, <EnteFile>[]);
     }
     // If there's an ongoing request, just update the last query and return its future.
