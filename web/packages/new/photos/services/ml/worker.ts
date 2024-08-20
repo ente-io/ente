@@ -311,14 +311,17 @@ const indexNextBatch = async (
     while (i < items.length) {
         for (let j = 0; j < tasks.length; j++) {
             if (i < items.length && !tasks[j]) {
-                tasks[j] = index(ensure(items[i++]), electron)
-                    .then(() => {
-                        tasks[j] = undefined;
-                    })
-                    .catch(() => {
-                        allSuccess = false;
-                        tasks[j] = undefined;
-                    });
+                // Use an IIFE to capture the value of j at the time of
+                // invocation.
+                tasks[j] = ((item: IndexableItem, j: number) =>
+                    index(item, electron)
+                        .then(() => {
+                            tasks[j] = undefined;
+                        })
+                        .catch(() => {
+                            allSuccess = false;
+                            tasks[j] = undefined;
+                        }))(ensure(items[i++]), j);
             }
         }
 
