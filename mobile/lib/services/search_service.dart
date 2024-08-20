@@ -846,7 +846,7 @@ class SearchService {
         // final String clusterName = "ID:$clusterId,  ${files.length}";
         // final String clusterName = "${files.length}";
         // const String clusterName = "";
-        final String clusterName = "$clusterId";
+        final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
           // This should not happen, means a faceID is assigned to multiple persons.
@@ -861,7 +861,7 @@ class SearchService {
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
-            clusterName,
+            "",
             files,
             params: {
               kClusterParamId: clusterId,
