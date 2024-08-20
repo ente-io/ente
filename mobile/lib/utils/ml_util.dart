@@ -73,7 +73,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
   final Map<int, int> faceIndexedFileIDs =
-      await MLDataDB.instance.getIndexedFileIds();
+      await MLDataDB.instance.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await MLDataDB.instance.clipIndexedFileWithVersion();
   final Set<int> queuedFiledIDs = {};

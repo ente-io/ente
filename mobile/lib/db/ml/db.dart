@@ -160,7 +160,7 @@ class MLDataDB {
   }
 
   /// Returns a map of fileID to the indexed ML version
-  Future<Map<int, int>> getIndexedFileIds({
+  Future<Map<int, int>> faceIndexedFileIds({
     int minimumMlVersion = faceMlVersion,
   }) async {
     final db = await instance.asyncDB;
