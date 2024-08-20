@@ -178,7 +178,8 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             inputTensorShape = longArrayOf(totalSize, 112, 112, 3)
           }
           ModelType.ClipImageEncoder -> {
-            inputTensorShape = longArrayOf(1, 3, 224, 224)
+            inputTensorShape = longArrayOf(1, 3, 256, 256)
+//            inputTensorShape = longArrayOf(1, 3, 256, 256)
           }
           ModelType.ClipTextEncoder -> {
             inputTensorShape = longArrayOf(1, 77)
