@@ -97,6 +97,11 @@ class BackupSettingsScreen extends StatelessWidget {
                                   flagService.enableMobMultiPart,
                             ),
                             if (flagService.enableMobMultiPart)
+                              DividerWidget(
+                                dividerType: DividerType.menuNoIcon,
+                                bgColor: colorScheme.fillFaint,
+                              ),
+                            if (flagService.enableMobMultiPart)
                               MenuItemWidget(
                                 captionedTextWidget: CaptionedTextWidget(
                                   title: S.of(context).resumableUploads,
