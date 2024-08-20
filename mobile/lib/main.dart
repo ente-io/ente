@@ -302,13 +302,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     MachineLearningController.instance.init();
 
     _logger.info("MachineLearningController done");
-    if (flagService.faceSearchEnabled) {
-      unawaited(MLService.instance.init());
-    } else {
-      if (localSettings.isFaceIndexingEnabled) {
-        unawaited(localSettings.toggleFaceIndexing());
-      }
-    }
+    unawaited(MLService.instance.init());
     PersonService.init(
       EntityService.instance,
       MLDataDB.instance,
