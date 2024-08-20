@@ -147,7 +147,7 @@ class RemoteClipEmbedding {
   // fromJson
   factory RemoteClipEmbedding.fromJson(Map<String, dynamic> json) {
     return RemoteClipEmbedding(
-      List<double>.from(json['embedding'] as List),
+      parseAsDoubleList(json['embedding'] as List),
       version: json['version'] as int,
       client: json['client'] as String,
     );
