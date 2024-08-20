@@ -123,12 +123,12 @@ const openMLDB = async () => {
                 db.createObjectStore("clip-index", { keyPath: "fileID" });
             }
             // TODO-Cluster
-            if (oldVersion < 3) {
-                if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-                    db.createObjectStore("face-cluster", { keyPath: "id" });
-                    db.createObjectStore("cluster-group", { keyPath: "id" });
-                }
-            }
+            // if (oldVersion < 3) {
+            //     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+            //         db.createObjectStore("face-cluster", { keyPath: "id" });
+            //         db.createObjectStore("cluster-group", { keyPath: "id" });
+            //     }
+            // }
         },
         blocking() {
             log.info(

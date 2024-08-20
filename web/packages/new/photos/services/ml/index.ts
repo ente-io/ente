@@ -6,7 +6,6 @@ import { isDesktop } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
-import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -16,18 +15,10 @@ import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
-import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
-import type { SearchPerson } from "../search";
 import type { UploadItem } from "../upload/types";
-import { clusterFaces } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
-import {
-    clearMLDB,
-    faceIndex,
-    faceIndexes,
-    indexableAndIndexedCounts,
-} from "./db";
+import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -330,66 +321,66 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-// TODO-Cluster temporary import here
-let last: SearchPerson[] | undefined;
+// // TODO-Cluster temporary import here
+// let last: SearchPerson[] | undefined;
 
-/**
- * WIP! Don't enable, dragon eggs are hatching here.
- */
-export const wipClusterEnable = async () => {
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
-    if (!isDevBuild || !(await isInternalUser())) return false;
-    return true;
-};
+// /**
+//  * WIP! Don't enable, dragon eggs are hatching here.
+//  */
+// export const wipClusterEnable = async () => {
+//     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
+//     if (!isDevBuild || !(await isInternalUser())) return false;
+//     return true;
+// };
 
-export const wipCluster = async () => {
-    if (!(await wipClusterEnable())) return;
+// export const wipCluster = async () => {
+//     if (!(await wipClusterEnable())) return;
 
-    if (last) return last;
+//     if (last) return last;
 
-    const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-    const clusterByID = new Map(
-        clusters.map((cluster) => [cluster.id, cluster]),
-    );
+//     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
+//     const clusterByID = new Map(
+//         clusters.map((cluster) => [cluster.id, cluster]),
+//     );
 
-    const localFiles = await getAllLocalFiles();
-    const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+//     const localFiles = await getAllLocalFiles();
+//     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    const result: SearchPerson[] = [];
-    for (const cgroup of cgroups) {
-        let avatarFaceID = cgroup.avatarFaceID;
-        // TODO-Cluster
-        // Temp
-        if (!avatarFaceID) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            avatarFaceID = cgroup.clusterIDs
-                .map((id) => clusterByID.get(id))
-                .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
-        }
-        cgroup.clusterIDs;
-        const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
-        const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
-        if (!avatarFaceFileID || !avatarFaceFile) {
-            assertionFailed(`Face ID ${avatarFaceID} without local file`);
-            continue;
-        }
-        const files = cgroup.clusterIDs
-            .map((id) => clusterByID.get(id))
-            .flatMap((cluster) => cluster?.faceIDs ?? [])
-            .map((faceID) => fileIDFromFaceID(faceID))
-            .filter((fileID) => fileID !== undefined);
-        result.push({
-            id: cgroup.id,
-            name: cgroup.name,
-            files,
-            displayFaceID: avatarFaceID,
-            displayFaceFile: avatarFaceFile,
-        });
-    }
+//     const result: SearchPerson[] = [];
+//     for (const cgroup of cgroups) {
+//         let avatarFaceID = cgroup.avatarFaceID;
+//         // TODO-Cluster
+//         // Temp
+//         if (!avatarFaceID) {
+//             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+//             avatarFaceID = cgroup.clusterIDs
+//                 .map((id) => clusterByID.get(id))
+//                 .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
+//         }
+//         cgroup.clusterIDs;
+//         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
+//         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
+//         if (!avatarFaceFileID || !avatarFaceFile) {
+//             assertionFailed(`Face ID ${avatarFaceID} without local file`);
+//             continue;
+//         }
+//         const files = cgroup.clusterIDs
+//             .map((id) => clusterByID.get(id))
+//             .flatMap((cluster) => cluster?.faceIDs ?? [])
+//             .map((faceID) => fileIDFromFaceID(faceID))
+//             .filter((fileID) => fileID !== undefined);
+//         result.push({
+//             id: cgroup.id,
+//             name: cgroup.name,
+//             files,
+//             displayFaceID: avatarFaceID,
+//             displayFaceFile: avatarFaceFile,
+//         });
+//     }
 
-    last = result;
-    return result;
-};
+//     last = result;
+//     return result;
+// };
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
@@ -558,7 +549,8 @@ export const unidentifiedFaceIDs = async (
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
  */
-const fileIDFromFaceID = (faceID: string) => {
+// TODO-Cluster: temporary export to supress linter
+export const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
