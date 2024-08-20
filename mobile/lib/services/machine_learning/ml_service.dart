@@ -492,7 +492,6 @@ class MLService {
         actuallyRanML = true;
         await SemanticSearchService.storeClipImageResult(
           result.clip!,
-          instruction.file,
         );
       }
     } on ThumbnailRetrievalException catch (e, s) {

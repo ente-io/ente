@@ -263,10 +263,7 @@ class SemanticSearchService {
     _logger.info("Clip text model loaded");
   }
 
-  static Future<void> storeClipImageResult(
-    ClipResult clipResult,
-    EnteFile entefile,
-  ) async {
+  static Future<void> storeClipImageResult(ClipResult clipResult) async {
     final embedding = ClipEmbedding(
       fileID: clipResult.fileID,
       embedding: clipResult.embedding,
