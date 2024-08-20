@@ -93,6 +93,15 @@ class _MachineLearningSettingsPageState
                 padding: const EdgeInsets.only(left: 16, right: 16),
                 child: Column(
                   children: [
+                    if (!hasEnabled)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text(
+                          S.of(context).enableMLIndexingDesc,
+                          textAlign: TextAlign.left,
+                          style: getEnteTextTheme(context).small,
+                        ),
+                      ),
                     Text(
                       S.of(context).mlIndexingDescription,
                       textAlign: TextAlign.left,
