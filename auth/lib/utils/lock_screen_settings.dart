@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:typed_data";
 
+import "package:ente_auth/core/configuration.dart";
 import "package:ente_auth/utils/platform_util.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
@@ -19,6 +20,9 @@ class LockScreenSettings {
   static const lastInvalidAttemptTime = "ls_last_invalid_attempt_time";
   static const autoLockTime = "ls_auto_lock_time";
   static const keyHideAppContent = "ls_hide_app_content";
+  static const keyAppLockSet = "ls_is_app_lock_set";
+  static const keyHasMigratedLockScreenChanges =
+      "ls_has_migrated_lock_screen_changes";
   final List<Duration> autoLockDurations = const [
     Duration(seconds: 0),
     Duration(seconds: 5),
@@ -37,6 +41,27 @@ class LockScreenSettings {
 
     ///Workaround for privacyScreen not working when app is killed and opened.
     await setHideAppContent(getShouldHideAppContent());
+
+    /// Function to Check if the migration for lock screen changes has
+    /// already been done by checking a stored boolean value.
+    await runLockScreenChangesMigration();
+  }
+
+  Future<void> runLockScreenChangesMigration() async {
+    if (_preferences.getBool(keyHasMigratedLockScreenChanges) != null) {
+      return;
+    }
+
+    final bool passwordEnabled = await isPasswordSet();
+    final bool pinEnabled = await isPinSet();
+    final bool systemLockEnabled =
+        Configuration.instance.shouldShowSystemLockScreen();
+
+    if (passwordEnabled || pinEnabled || systemLockEnabled) {
+      await setAppLockEnabled(true);
+    }
+
+    await _preferences.setBool(keyHasMigratedLockScreenChanges, true);
   }
 
   Future<void> setHideAppContent(bool hideContent) async {
@@ -81,6 +106,14 @@ class LockScreenSettings {
 
   Future<void> setInvalidAttemptCount(int count) async {
     await _preferences.setInt(keyInvalidAttempts, count);
+  }
+
+  Future<void> setAppLockEnabled(bool value) async {
+    await _preferences.setBool(keyAppLockSet, value);
+  }
+
+  bool getIsAppLockSet() {
+    return _preferences.getBool(keyAppLockSet) ?? false;
   }
 
   static Uint8List _generateSalt() {
