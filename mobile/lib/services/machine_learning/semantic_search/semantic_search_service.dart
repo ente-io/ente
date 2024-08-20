@@ -80,7 +80,8 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-            "Magic search enabled ${localSettings.isFaceIndexingEnabled}, loaded $_textModelIsLoaded cached ${_cachedImageEmbeddings.isNotEmpty}");
+          "Magic search enabled ${localSettings.isFaceIndexingEnabled}, loaded $_textModelIsLoaded cached ${_cachedImageEmbeddings.isNotEmpty}",
+        );
       }
       return (query, <EnteFile>[]);
     }
