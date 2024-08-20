@@ -117,6 +117,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             <Dialog
                 open={open}
                 onClose={onClose}
+                fullWidth
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
                 <Title_>
@@ -255,7 +256,12 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
 
     return (
         <SpaceBetweenFlex>
-            <HorizontalFlex>
+            <HorizontalFlex
+                sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                }}
+            >
                 {watch.collectionMapping === "root" ? (
                     <Tooltip title={t("UPLOADED_TO_SINGLE_COLLECTION")}>
                         <FolderOpenIcon />
@@ -267,9 +273,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                 )}
                 <EntryContainer>
                     <EntryHeading watch={watch} />
-                    <Typography color="text.muted" variant="small">
-                        {watch.folderPath}
-                    </Typography>
+                    <FolderPath variant="small">{watch.folderPath}</FolderPath>
                 </EntryContainer>
             </HorizontalFlex>
             <EntryOptions {...{ confirmStopWatching }} />
@@ -278,6 +282,8 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
 };
 
 const EntryContainer = styled(Box)({
+    overflow: "hidden",
+    textOverflow: "ellipsis",
     marginLeft: "12px",
     marginRight: "6px",
     marginBottom: "12px",
@@ -299,6 +305,12 @@ const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
         </FlexWrapper>
     );
 };
+
+const FolderPath = styled(Typography)(({ theme }) => ({
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    color: theme.colors.text.muted,
+}));
 
 interface EntryOptionsProps {
     confirmStopWatching: () => void;

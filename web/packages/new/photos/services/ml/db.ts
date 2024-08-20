@@ -109,8 +109,7 @@ let _mlDB: ReturnType<typeof openMLDB> | undefined;
 const openMLDB = async () => {
     deleteLegacyDB();
 
-    // TODO-ML: "face" => "ml", v2 => v1
-    const db = await openDB<MLDBSchema>("face", 2, {
+    const db = await openDB<MLDBSchema>("ml", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
@@ -118,16 +117,9 @@ const openMLDB = async () => {
                     keyPath: "fileID",
                 }).createIndex("status", "status");
                 db.createObjectStore("face-index", { keyPath: "fileID" });
-            }
-            if (oldVersion < 2) {
                 db.createObjectStore("clip-index", { keyPath: "fileID" });
-            }
-            // TODO-Cluster
-            if (oldVersion < 3) {
-                if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-                    db.createObjectStore("face-cluster", { keyPath: "id" });
-                    db.createObjectStore("cluster-group", { keyPath: "id" });
-                }
+                db.createObjectStore("face-cluster", { keyPath: "id" });
+                db.createObjectStore("cluster-group", { keyPath: "id" });
             }
         },
         blocking() {
@@ -180,6 +172,12 @@ const deleteLegacyDB = () => {
         removeKV("embeddingSyncTime:onnx-clip"),
         removeKV("embeddingSyncTime:file-ml-clip-face"),
     ]);
+
+    // Delete the legacy face DB v2.
+    //
+    // This code was added Aug 2024 (v1.7.3-beta) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
+    void deleteDB("face");
 };
 
 /**
