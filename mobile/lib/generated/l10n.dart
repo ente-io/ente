@@ -9055,10 +9055,10 @@ class S {
     );
   }
 
-  /// `Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identify documents'`
+  /// `Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'`
   String get magicSearchHint {
     return Intl.message(
-      'Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identify documents\'',
+      'Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'',
       name: 'magicSearchHint',
       desc: '',
       args: [],

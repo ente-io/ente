@@ -948,7 +948,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
         "magicSearchHint": MessageLookupByLibrary.simpleMessage(
-            "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identify documents\'"),
+            "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
