@@ -59,7 +59,7 @@ class Face {
     return Face(
       faceID,
       fileID,
-      List<double>.from((json['embedding'] ?? json['embeddings']) as List),
+      List<double>.from(json['embedding'] as List),
       json['score'] as double,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
       // high value means t
