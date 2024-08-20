@@ -22,7 +22,6 @@ import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/ml_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
@@ -125,14 +124,6 @@ class SemanticSearchService {
     Bus.instance.fire(EmbeddingCacheUpdatedEvent());
     _logger
         .info("Cached embeddings: " + _cachedImageEmbeddings.length.toString());
-  }
-
-  Future<List<int>> _getFileIDsToBeIndexed() async {
-    final uploadedFileIDs = await getIndexableFileIDs();
-    final embeddedFileIDs = await MLDataDB.instance.getIndexedFileIds();
-    embeddedFileIDs.removeWhere((key, value) => value < clipMlVersion);
-
-    return uploadedFileIDs.difference(embeddedFileIDs.keys.toSet()).toList();
   }
 
   Future<List<EnteFile>> getMatchingFiles(
