@@ -10,6 +10,7 @@ import "package:photos/services/machine_learning/semantic_search/clip/clip_image
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/remote_assets_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -128,7 +129,9 @@ class _MachineLearningSettingsPageState
           trailingWidget: ToggleSwitchWidget(
             value: () => localSettings.isFaceIndexingEnabled,
             onChanged: () async {
-              if (!localSettings.isFaceIndexingEnabled) {
+              if (!localSettings.isFaceIndexingEnabled &&
+                  !UserRemoteFlagService.instance
+                      .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(

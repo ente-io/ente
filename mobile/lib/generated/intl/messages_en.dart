@@ -656,6 +656,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Email your logs"),
         "empty": MessageLookupByLibrary.simpleMessage("Empty"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Empty trash?"),
+        "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
+            "Ente supports on-device machine learning for face recognition, magic search and other advanced search features"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Enable Maps"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
@@ -973,7 +975,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please click here for more details about this feature in our privacy policy"),
         "mlConsentTitle":
             MessageLookupByLibrary.simpleMessage("Enable machine learning?"),
-        "mlFunctions": MessageLookupByLibrary.simpleMessage("ML functions"),
+        "mlIndexing":
+            MessageLookupByLibrary.simpleMessage("Enable ML indexing"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed."),
         "mobileWebDesktop":
@@ -984,6 +987,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moments": MessageLookupByLibrary.simpleMessage("Moments"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
+        "moreDetails": MessageLookupByLibrary.simpleMessage("More details"),
         "moveItem": m35,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
         "moveToHiddenAlbum":

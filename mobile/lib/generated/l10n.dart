@@ -9025,11 +9025,31 @@ class S {
     );
   }
 
-  /// `ML functions`
-  String get mlFunctions {
+  /// `Enable ML indexing`
+  String get mlIndexing {
     return Intl.message(
-      'ML functions',
-      name: 'mlFunctions',
+      'Enable ML indexing',
+      name: 'mlIndexing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More details`
+  String get moreDetails {
+    return Intl.message(
+      'More details',
+      name: 'moreDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ente supports on-device machine learning for face recognition, magic search and other advanced search features`
+  String get enableMLIndexingDesc {
+    return Intl.message(
+      'Ente supports on-device machine learning for face recognition, magic search and other advanced search features',
+      name: 'enableMLIndexingDesc',
       desc: '',
       args: [],
     );
