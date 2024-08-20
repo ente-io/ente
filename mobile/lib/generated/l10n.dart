@@ -9025,11 +9025,21 @@ class S {
     );
   }
 
-  /// `Enable Indexing`
-  String get mlIndexing {
+  /// `Enable`
+  String get enable {
     return Intl.message(
-      'Enable Indexing',
-      name: 'mlIndexing',
+      'Enable',
+      name: 'enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enabled`
+  String get enabled {
+    return Intl.message(
+      'Enabled',
+      name: 'enabled',
       desc: '',
       args: [],
     );

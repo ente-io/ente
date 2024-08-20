@@ -129,6 +129,14 @@ class _MachineLearningSettingsPageState
                     child: Column(
                       children: [
                         ButtonWidget(
+                          buttonType: ButtonType.primary,
+                          labelText: context.l10n.enable,
+                          onTap: () async {
+                            await toggleIndexingState();
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        ButtonWidget(
                           buttonType: ButtonType.secondary,
                           labelText: context.l10n.moreDetails,
                           onTap: () async {
@@ -164,52 +172,57 @@ class _MachineLearningSettingsPageState
     );
   }
 
+  Future<void> toggleIndexingState() async {
+    final hasGivenConsent = UserRemoteFlagService.instance
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+    if (!localSettings.isFaceIndexingEnabled && !hasGivenConsent) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return const EnableMachineLearningConsent();
+          },
+        ),
+      );
+      if (result == null || result == false) {
+        return;
+      }
+    }
+    final isEnabled = await localSettings.toggleFaceIndexing();
+    if (isEnabled) {
+      await MLService.instance.init(firstTime: true);
+      await SemanticSearchService.instance.init();
+      unawaited(MLService.instance.runAllML(force: true));
+    } else {
+      await UserRemoteFlagService.instance
+          .setBoolValue(UserRemoteFlagService.mlEnabled, false);
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   Widget _getMlSettings(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final hasEnabled = localSettings.isFaceIndexingEnabled;
     return Column(
       children: [
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).mlIndexing,
+        if (hasEnabled)
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).enabled,
+            ),
+            menuItemColor: colorScheme.fillFaint,
+            trailingWidget: ToggleSwitchWidget(
+              value: () => localSettings.isFaceIndexingEnabled,
+              onChanged: () async {
+                await toggleIndexingState();
+              },
+            ),
+            singleBorderRadius: 8,
+            alignCaptionedTextToLeft: true,
+            isGestureDetectorDisabled: true,
           ),
-          menuItemColor: colorScheme.fillFaint,
-          trailingWidget: ToggleSwitchWidget(
-            value: () => localSettings.isFaceIndexingEnabled,
-            onChanged: () async {
-              final hasGivenConsent = UserRemoteFlagService.instance
-                  .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
-              if (!localSettings.isFaceIndexingEnabled && !hasGivenConsent) {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return const EnableMachineLearningConsent();
-                    },
-                  ),
-                );
-                if (result == null || result == false) {
-                  return;
-                }
-              }
-              final isEnabled = await localSettings.toggleFaceIndexing();
-              if (isEnabled) {
-                await MLService.instance.init(firstTime: true);
-                await SemanticSearchService.instance.init();
-                unawaited(MLService.instance.runAllML(force: true));
-              } else {
-                await UserRemoteFlagService.instance
-                    .setBoolValue(UserRemoteFlagService.mlEnabled, false);
-              }
-              if (mounted) {
-                setState(() {});
-              }
-            },
-          ),
-          singleBorderRadius: 8,
-          alignCaptionedTextToLeft: true,
-          isGestureDetectorDisabled: true,
-        ),
         const SizedBox(
           height: 12,
         ),
