@@ -102,14 +102,6 @@ class SemanticSearchService {
     }
   }
 
-  Future<IndexStatus> getIndexStatus() async {
-    final indexableFileIDs = await getIndexableFileIDs();
-    return IndexStatus(
-      min(_cachedImageEmbeddings.length, indexableFileIDs.length),
-      (await _getFileIDsToBeIndexed()).length,
-    );
-  }
-
   Future<void> clearIndexes() async {
     await MLDataDB.instance.deleteClipIndexes();
     final preferences = await SharedPreferences.getInstance();

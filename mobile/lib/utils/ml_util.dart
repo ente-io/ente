@@ -21,6 +21,7 @@ import "package:photos/services/machine_learning/semantic_search/semantic_search
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
+import "package:photos/utils/network_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 final _logger = Logger("MlUtil");
@@ -29,8 +30,9 @@ enum FileDataForML { thumbnailData, fileData }
 
 class IndexStatus {
   final int indexedItems, pendingItems;
+  final bool? hasWifiEnabled;
 
-  IndexStatus(this.indexedItems, this.pendingItems);
+  IndexStatus(this.indexedItems, this.pendingItems, [this.hasWifiEnabled]);
 }
 
 class FileMLInstruction {
@@ -58,7 +60,8 @@ Future<IndexStatus> getIndexStatus() async {
 
     final showIndexedFiles = math.min(indexedFiles, indexableFiles);
     final showPendingFiles = math.max(indexableFiles - indexedFiles, 0);
-    return IndexStatus(showIndexedFiles, showPendingFiles);
+    final hasWifiEnabled = await canUseHighBandwidth();
+    return IndexStatus(showIndexedFiles, showPendingFiles, hasWifiEnabled);
   } catch (e, s) {
     _logger.severe('Error getting ML status', e, s);
     rethrow;
