@@ -1,4 +1,3 @@
-import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -9,7 +8,6 @@ import {
     type SupportedLocale,
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/MLSettings";
-import { canEnableML } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -17,7 +15,7 @@ import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";
 import type { SettingsDrawerProps } from "./types";
@@ -31,12 +29,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
 
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
     const [mapSettingsView, setMapSettingsView] = useState(false);
-    const [showMLSettings, setShowMLSettings] = useState(false);
     const [openMLSettings, setOpenMLSettings] = useState(false);
-
-    useEffect(() => {
-        if (isDesktop) void canEnableML().then(setShowMLSettings);
-    }, []);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
@@ -85,21 +78,19 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                             endIcon={<ChevronRight />}
                             label={t("advanced")}
                         />
-                        {showMLSettings && (
-                            <Box>
-                                <MenuSectionTitle
-                                    title={t("labs")}
-                                    icon={<ScienceIcon />}
+                        <Box>
+                            <MenuSectionTitle
+                                title={t("labs")}
+                                icon={<ScienceIcon />}
+                            />
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    endIcon={<ChevronRight />}
+                                    onClick={() => setOpenMLSettings(true)}
+                                    label={t("ml_search")}
                                 />
-                                <MenuItemGroup>
-                                    <EnteMenuItem
-                                        endIcon={<ChevronRight />}
-                                        onClick={() => setOpenMLSettings(true)}
-                                        label={t("ml_search")}
-                                    />
-                                </MenuItemGroup>
-                            </Box>
-                        )}
+                            </MenuItemGroup>
+                        </Box>
                     </Stack>
                 </Box>
             </Stack>

@@ -150,11 +150,6 @@ const createMLWorker = (electron: Electron): Promise<MessagePort> => {
 export const isMLSupported = isDesktop;
 
 /**
- * TODO-ML: This will not be needed when we move to a public beta.
- */
-export const canEnableML = async () => await isInternalUser();
-
-/**
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
