@@ -683,8 +683,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "enableMaps": MessageLookupByLibrary.simpleMessage("Karten aktivieren"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Dies zeigt Ihre Fotos auf einer Weltkarte.\n\nDiese Karte wird von OpenStreetMap gehostet und die genauen Standorte Ihrer Fotos werden niemals geteilt.\n\nSie können diese Funktion jederzeit in den Einstellungen deaktivieren."),
-        "enableMultiPartUpload": MessageLookupByLibrary.simpleMessage(
-            "Mehrteiliges Hochladen aktivieren"),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Verschlüssele Sicherung …"),
         "encryption": MessageLookupByLibrary.simpleMessage("Verschlüsselung"),

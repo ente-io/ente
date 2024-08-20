@@ -8015,11 +8015,11 @@ class S {
     );
   }
 
-  /// `Enable multi-part upload`
-  String get enableMultiPartUpload {
+  /// `Resumable uploads`
+  String get resumableUploads {
     return Intl.message(
-      'Enable multi-part upload',
-      name: 'enableMultiPartUpload',
+      'Resumable uploads',
+      name: 'resumableUploads',
       desc: '',
       args: [],
     );

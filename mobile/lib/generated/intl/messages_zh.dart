@@ -562,7 +562,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "enableMaps": MessageLookupByLibrary.simpleMessage("启用地图"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "这将在世界地图上显示您的照片。\n\n该地图由 Open Street Map 托管，并且您的照片的确切位置永远不会共享。\n\n您可以随时从“设置”中禁用此功能。"),
-        "enableMultiPartUpload": MessageLookupByLibrary.simpleMessage("启用分片上传"),
         "encryptingBackup": MessageLookupByLibrary.simpleMessage("正在加密备份..."),
         "encryption": MessageLookupByLibrary.simpleMessage("加密"),
         "encryptionKeys": MessageLookupByLibrary.simpleMessage("加密密钥"),

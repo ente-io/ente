@@ -192,29 +192,6 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 },
                               ),
                             ),
-                            if (flagService.enableMobMultiPart)
-                              const SizedBox(
-                                height: 24,
-                              ),
-                            if (flagService.enableMobMultiPart)
-                              MenuItemWidget(
-                                captionedTextWidget: CaptionedTextWidget(
-                                  title: S.of(context).enableMultiPartUpload,
-                                ),
-                                menuItemColor: colorScheme.fillFaint,
-                                singleBorderRadius: 8,
-                                alignCaptionedTextToLeft: true,
-                                trailingWidget: ToggleSwitchWidget(
-                                  value: () =>
-                                      localSettings.userEnabledMultiplePart,
-                                  onChanged: () async {
-                                    await localSettings
-                                        .setUserEnabledMultiplePart(
-                                      !localSettings.userEnabledMultiplePart,
-                                    );
-                                  },
-                                ),
-                              ),
                             const SizedBox(
                               height: 24,
                             ),

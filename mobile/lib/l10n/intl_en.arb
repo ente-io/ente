@@ -1148,7 +1148,7 @@
   "successfullyHid": "Successfully hid",
   "successfullyUnhid": "Successfully unhid",
   "crashReporting": "Crash reporting",
-  "enableMultiPartUpload": "Enable multi-part upload",
+  "resumableUploads": "Resumable uploads",
   "addToHiddenAlbum": "Add to hidden album",
   "moveToHiddenAlbum": "Move to hidden album",
   "fileTypes": "File types",
