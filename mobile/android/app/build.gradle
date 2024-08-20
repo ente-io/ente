@@ -49,6 +49,7 @@ android {
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        consumerProguardFiles 'proguard-rules.pro'
     }
 
     signingConfigs {
