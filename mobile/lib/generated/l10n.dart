@@ -9225,16 +9225,6 @@ class S {
     );
   }
 
-  /// `Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.`
-  String get appLockDescription {
-    return Intl.message(
-      'Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password.',
-      name: 'appLockDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Auto lock`
   String get autoLock {
     return Intl.message(
@@ -9430,6 +9420,16 @@ class S {
     return Intl.message(
       'Introducing a fresh new video player, with better playback controls and support for HDR videos.',
       name: 'cl_video_player_description',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescriptions {
+    return Intl.message(
+      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescriptions',
       desc: '',
       args: [],
     );

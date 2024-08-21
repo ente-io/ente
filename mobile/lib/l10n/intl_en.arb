@@ -1271,7 +1271,7 @@
   },
   "enable": "Enable",
   "enabled": "Enabled",
-  "moreDetails" : "More details",
+  "moreDetails": "More details",
   "enableMLIndexingDesc": "Ente supports on-device machine learning for face recognition, magic search and other advanced search features",
   "magicSearchHint": "Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'",
   "panorama": "Panorama",
@@ -1289,7 +1289,6 @@
   "tapToUnlock": "Tap to unlock",
   "tooManyIncorrectAttempts": "Too many incorrect attempts",
   "videoInfo": "Video Info",
-  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
   "autoLock": "Auto lock",
   "immediately": "Immediately",
   "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
@@ -1303,13 +1302,15 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
   "guestView": "Guest view",
   "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings.",
-
   "cl_guest_view_title": "Guest View",
   "cl_guest_view_description": "Handing over your phone to show photos to a friend? Don't worry about them swiping too far. Guest view will lock them into the photos you select.",
   "cl_guest_view_call_to_action": "Select photos and check out \"Guest view\".",
   "cl_panorama_viewer_title": "Panorama Viewer",
   "cl_panorama_viewer_description": "We've added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!",
   "cl_video_player_title": "Video Player",
-  "cl_video_player_description": "Introducing a fresh new video player, with better playback controls and support for HDR videos."
-
+  "cl_video_player_description": "Introducing a fresh new video player, with better playback controls and support for HDR videos.",
+  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password."
 }
+
+
+

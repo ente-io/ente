@@ -313,6 +313,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("App-vergrendeling"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
             "Kies tussen het standaard vergrendelingsscherm van uw apparaat en een aangepast vergrendelingsscherm met een pincode of wachtwoord."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Toepassen"),
