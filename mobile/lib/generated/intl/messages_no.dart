@@ -35,8 +35,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewers": m1,
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(

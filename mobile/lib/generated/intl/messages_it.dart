@@ -292,8 +292,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autenticazione necessaria"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
