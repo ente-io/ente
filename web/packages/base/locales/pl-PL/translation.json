@@ -492,7 +492,7 @@
     "ml_search_disable_confirm": "Czy chcesz wyłączyć uczenie maszynowe na wszystkich Twoich urządzeniach?",
     "ml_consent": "Włącz uczenie maszynowe",
     "ml_consent_title": "Włączyć uczenie maszynowe?",
-    "ml_consent_description": "<p>Jeśli włączysz uczenie maszynowe, Ente wyodrębni informacje takie jak geometria twarzy z Twoich zdjęć. Będzie to miało miejsce na Twoim urządzeniu, a wygenerowane informacje biometryczne będą szyfrowane end-to-end.</p><p><a>Kliknij tutaj, aby uzyskać więcej informacji na temat tej funkcji w naszej polityce prywatności</a></p>",
+    "ml_consent_description": "<p>Jeśli włączysz uczenie maszynowe, Ente wyodrębni informacje takie jak geometria twarzy z plików, w tym udostępnionych z Tobą.</p><p>Będzie to miało miejsce na Twoim urządzeniu, a wygenerowane informacje biometryczne będą zaszyfrowane end-to-end.</p><p><a>Kliknij tutaj, aby uzyskać więcej informacji na temat tej funkcji w naszej polityce prywatności</a></p>",
     "ml_consent_confirmation": "Rozumiem i chcę włączyć uczenie maszynowe",
     "labs": "Laboratoria",
     "YOURS": "twoje",
