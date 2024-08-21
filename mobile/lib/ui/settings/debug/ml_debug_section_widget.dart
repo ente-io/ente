@@ -63,7 +63,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
-                  title: localSettings.isFaceIndexingEnabled
+                  title: localSettings.isMLIndexingEnabled
                       ? "Disable faces (${snapshot.data!} files done)"
                       : "Enable faces (${snapshot.data!} files done)",
                 );
@@ -76,7 +76,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              final isEnabled = await localSettings.toggleFaceIndexing();
+              final isEnabled = await localSettings.toggleMLIndexing();
               if (!isEnabled) {
                 MLService.instance.pauseIndexingAndClustering();
               }

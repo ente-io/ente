@@ -10,7 +10,7 @@ enum AlbumSortKey {
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
-  static const kEnableFaceIndexing = "enable_face_indexing";
+  static const _kisMLIndexingEnabled = "ls.enable_ml_idx";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
@@ -55,8 +55,11 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isFaceIndexingEnabled =>
-      _prefs.getBool(kEnableFaceIndexing) ?? false;
+  //  remove `enable_face_indexing`fallback after sometime, affects internal users only
+  bool get isMLIndexingEnabled =>
+      _prefs.getBool(_kisMLIndexingEnabled) ??
+      _prefs.getBool('enable_face_indexing') ??
+      false;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
@@ -67,9 +70,9 @@ class LocalSettings {
   }
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
-  Future<bool> toggleFaceIndexing() async {
-    await _prefs.setBool(kEnableFaceIndexing, !isFaceIndexingEnabled);
-    return isFaceIndexingEnabled;
+  Future<bool> toggleMLIndexing() async {
+    await _prefs.setBool(_kisMLIndexingEnabled, !isMLIndexingEnabled);
+    return isMLIndexingEnabled;
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see

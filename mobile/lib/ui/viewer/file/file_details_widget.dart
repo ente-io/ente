@@ -280,7 +280,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (localSettings.isFaceIndexingEnabled) {
+    if (localSettings.isMLIndexingEnabled) {
       fileDetailsTiles.addAll([
         FacesItemWidget(file),
         const FileDetailsDivider(),

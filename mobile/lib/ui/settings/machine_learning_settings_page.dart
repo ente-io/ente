@@ -66,7 +66,7 @@ class _MachineLearningSettingsPageState
 
   @override
   Widget build(BuildContext context) {
-    final hasEnabled = localSettings.isFaceIndexingEnabled;
+    final hasEnabled = localSettings.isMLIndexingEnabled;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -184,7 +184,7 @@ class _MachineLearningSettingsPageState
   Future<void> toggleIndexingState() async {
     final hasGivenConsent = UserRemoteFlagService.instance
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
-    if (!localSettings.isFaceIndexingEnabled && !hasGivenConsent) {
+    if (!localSettings.isMLIndexingEnabled && !hasGivenConsent) {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -197,7 +197,7 @@ class _MachineLearningSettingsPageState
         return;
       }
     }
-    final isEnabled = await localSettings.toggleFaceIndexing();
+    final isEnabled = await localSettings.toggleMLIndexing();
     if (isEnabled) {
       await MLService.instance.init(firstTime: true);
       await SemanticSearchService.instance.init();
@@ -213,7 +213,7 @@ class _MachineLearningSettingsPageState
 
   Widget _getMlSettings(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final hasEnabled = localSettings.isFaceIndexingEnabled;
+    final hasEnabled = localSettings.isMLIndexingEnabled;
     return Column(
       children: [
         if (hasEnabled)
@@ -223,7 +223,7 @@ class _MachineLearningSettingsPageState
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: ToggleSwitchWidget(
-              value: () => localSettings.isFaceIndexingEnabled,
+              value: () => localSettings.isMLIndexingEnabled,
               onChanged: () async {
                 await toggleIndexingState();
               },

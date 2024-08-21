@@ -94,7 +94,7 @@ class MagicCacheService {
   }
 
   Future<void> _updateCacheIfTheTimeHasCome() async {
-    if (localSettings.isFaceIndexingEnabled) {
+    if (localSettings.isMLIndexingEnabled) {
       return;
     }
     final jsonFile = await RemoteAssetsService.instance
