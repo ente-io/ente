@@ -243,7 +243,7 @@ func (h *AdminHandler) UpdateReferral(c *gin.Context) {
 	}
 	go h.DiscordController.NotifyAdminAction(
 		fmt.Sprintf("Admin (%d) updating referral code for %d to %s", auth.GetUserID(c.Request.Header), request.UserID, request.Code))
-	err := h.StorageBonusCtl.UpdateReferralCode(c, request.UserID, request.Code)
+	err := h.StorageBonusCtl.UpdateReferralCode(c, request.UserID, request.Code, true)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to disable 2FA")
 		handler.Error(c, stacktrace.Propagate(err, ""))

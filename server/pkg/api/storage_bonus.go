@@ -32,7 +32,7 @@ func (h StorageBonusHandler) UpdateReferralCode(context *gin.Context) {
 		return
 	}
 	userID := auth.GetUserID(context.Request.Header)
-	err := h.Controller.UpdateReferralCode(context, userID, request.Code)
+	err := h.Controller.UpdateReferralCode(context, userID, request.Code, false)
 	if err != nil {
 		handler.Error(context, stacktrace.Propagate(err, ""))
 		return

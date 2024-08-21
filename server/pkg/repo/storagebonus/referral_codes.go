@@ -39,14 +39,14 @@ func (r *Repository) InsertCode(ctx context.Context, userID int64, code string) 
 // AddNewCode and mark the old one as inactive for a given userID.
 // Note: This method is not being used in the initial MVP as we don't allow user to change the storagebonus
 // code
-func (r *Repository) AddNewCode(ctx context.Context, userID int64, code string) error {
+func (r *Repository) AddNewCode(ctx context.Context, userID int64, code string, isAdminEdit bool) error {
 	// check current referral code count
 	var count int
 	err := r.DB.QueryRowContext(ctx, "SELECT COALESCE(COUNT(*),0) FROM referral_codes WHERE user_id = $1", userID).Scan(&count)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get storagebonus code count for user %d", userID)
 	}
-	if count > maxReferralChangeAllowed {
+	if !isAdminEdit && count > maxReferralChangeAllowed {
 		return stacktrace.Propagate(&ente.ApiError{
 			Code:           "REFERRAL_CHANGE_LIMIT_REACHED",
 			Message:        fmt.Sprintf("max referral code change limit %d reached", maxReferralChangeAllowed),
