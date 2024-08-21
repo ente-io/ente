@@ -10,9 +10,7 @@ enum AlbumSortKey {
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
-  static const kEnableMagicSearch = "enable_magic_search";
   static const kEnableFaceIndexing = "enable_face_indexing";
-  static const kEnableFaceClustering = "enable_face_clustering";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
@@ -67,9 +65,6 @@ class LocalSettings {
     await _prefs.setBool(kEnableMultiplePart, value);
     return value;
   }
-
-  bool get isFaceClusteringEnabled =>
-      _prefs.getBool(kEnableFaceIndexing) ?? false;
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleFaceIndexing() async {
