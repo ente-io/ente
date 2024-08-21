@@ -13,14 +13,15 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class NewAlbumCardWidget extends StatefulWidget {
-  const NewAlbumCardWidget({super.key});
+class CollectPhotosCardWidget extends StatefulWidget {
+  const CollectPhotosCardWidget({super.key});
 
   @override
-  State<NewAlbumCardWidget> createState() => _NewAlbumCardWidgetState();
+  State<CollectPhotosCardWidget> createState() =>
+      _CollectPhotosCardWidgetState();
 }
 
-class _NewAlbumCardWidgetState extends State<NewAlbumCardWidget> {
+class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
   Future<void> _onTapCreateAlbum() async {
     final String currentDate =
         DateFormat('MMMM d, yyyy').format(DateTime.now());
@@ -45,12 +46,13 @@ class _NewAlbumCardWidgetState extends State<NewAlbumCardWidget> {
           routeToPage(
             context,
             CollectionPage(
-              isNewCollection: true,
+              isFromCollectPhotos: true,
               CollectionWithThumbnail(c, null),
             ),
           );
         } catch (e, s) {
-          Logger("CreateNewAlbumIcon").severe("Failed to rename album", e, s);
+          Logger("CollectPhotosCardWidget")
+              .severe("Failed to rename album", e, s);
           rethrow;
         }
       },

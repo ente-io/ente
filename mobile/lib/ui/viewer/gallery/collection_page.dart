@@ -12,8 +12,8 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/collect_photos_bottom_buttons.dart";
 import "package:photos/ui/viewer/gallery/empty_album_state.dart";
-import "package:photos/ui/viewer/gallery/empty_album_state_new.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -23,13 +23,13 @@ class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final bool? hasVerifiedLock;
-  final bool isNewCollection;
+  final bool isFromCollectPhotos;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
-    this.isNewCollection = false,
+    this.isFromCollectPhotos = false,
     Key? key,
   }) : super(key: key);
 
@@ -91,10 +91,10 @@ class CollectionPage extends StatelessWidget {
       emptyState: galleryType == GalleryType.ownedCollection
           ? EmptyAlbumState(
               c.collection,
-              isNewCollection: isNewCollection,
+              isFromCollectPhotos: isFromCollectPhotos,
             )
           : const EmptyState(),
-      footer: isNewCollection
+      footer: isFromCollectPhotos
           ? const SizedBox(height: 20)
           : const SizedBox(height: 212),
     );
@@ -108,8 +108,8 @@ class CollectionPage extends StatelessWidget {
           collection: c.collection,
         ),
       ),
-      floatingActionButton: isNewCollection
-          ? EmptyAlbumStateNew(
+      floatingActionButton: isFromCollectPhotos
+          ? CollectPhotosBottomButtons(
               c.collection,
               selectedFiles: _selectedFiles,
             )

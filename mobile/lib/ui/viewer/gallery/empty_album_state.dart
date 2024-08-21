@@ -8,16 +8,16 @@ import "package:photos/utils/dialog_util.dart";
 
 class EmptyAlbumState extends StatelessWidget {
   final Collection c;
-  final bool isNewCollection;
+  final bool isFromCollectPhotos;
   const EmptyAlbumState(
     this.c, {
     super.key,
-    this.isNewCollection = false,
+    this.isFromCollectPhotos = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return isNewCollection
+    return isFromCollectPhotos
         ? Stack(
             children: [
               Center(

@@ -12,21 +12,22 @@ import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/share_util.dart";
 
-class EmptyAlbumStateNew extends StatefulWidget {
-  final Collection c;
+class CollectPhotosBottomButtons extends StatefulWidget {
+  final Collection? c;
   final SelectedFiles? selectedFiles;
-  const EmptyAlbumStateNew(
+  const CollectPhotosBottomButtons(
     this.c, {
     super.key,
     this.selectedFiles,
   });
 
   @override
-  State<EmptyAlbumStateNew> createState() => _EmptyAlbumStateNewState();
+  State<CollectPhotosBottomButtons> createState() => _EmptyAlbumStateNewState();
 }
 
-class _EmptyAlbumStateNewState extends State<EmptyAlbumStateNew> {
+class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
   final ValueNotifier<bool> _hasSelectedFilesNotifier = ValueNotifier(false);
+  final GlobalKey shareLinkAlbumButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -41,18 +42,27 @@ class _EmptyAlbumStateNewState extends State<EmptyAlbumStateNew> {
     super.dispose();
   }
 
+  // Future<String> _getAlbumShareUrl() async {
+  //   try {
+  //     final String collectionKey = Base58Encode(
+  //       CollectionsService.instance.getCollectionKey(widget.c.id),
+  //     );
+  //   } catch (e) {
+  //     await showGenericErrorDialog(
+  //       context: context,
+  //       error: e,
+  //     );
+  //   }
+  //   return "";
+  // }
+
   @override
   Widget build(BuildContext context) {
-    final GlobalKey shareLinkAlbumButtonKey = GlobalKey();
-
-    Future<String> getAlbumShareUrl() async {
-      final PublicURL url = widget.c.publicURLs!.firstOrNull!;
-      final String collectionKey = Base58Encode(
-        CollectionsService.instance.getCollectionKey(widget.c.id),
-      );
-      return "${url.url}#$collectionKey";
-    }
-
+    final PublicURL url = widget.c!.publicURLs!.firstOrNull!;
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(widget.c!.id),
+    );
+    final String urlValue = "${url.url}#$collectionKey";
     return ValueListenableBuilder(
       valueListenable: _hasSelectedFilesNotifier,
       builder: (context, value, child) {
@@ -71,8 +81,6 @@ class _EmptyAlbumStateNewState extends State<EmptyAlbumStateNew> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
@@ -89,7 +97,7 @@ class _EmptyAlbumStateNewState extends State<EmptyAlbumStateNew> {
                           shouldSurfaceExecutionStates: false,
                           onTap: () async {
                             try {
-                              await showAddPhotosSheet(context, widget.c);
+                              await showAddPhotosSheet(context, widget.c!);
                             } catch (e) {
                               await showGenericErrorDialog(
                                 context: context,
@@ -107,11 +115,10 @@ class _EmptyAlbumStateNewState extends State<EmptyAlbumStateNew> {
                         icon: Icons.adaptive.share,
                         shouldSurfaceExecutionStates: false,
                         onTap: () async {
-                          final String shareUrl = await getAlbumShareUrl();
                           await shareAlbumLinkWithPlaceholder(
                             context,
-                            widget.c,
-                            shareUrl,
+                            widget.c!,
+                            urlValue,
                             shareLinkAlbumButtonKey,
                           );
                         },
