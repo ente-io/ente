@@ -438,6 +438,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Проверить статус"),
         "checking": MessageLookupByLibrary.simpleMessage("Проверка..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Выберите фото и попробуйте \"Режим гостя\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Показываете фото другу? Не переживайте, что он листнет слишком далеко. Режим гостя заблокирует те фото, которые вы выбрали."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Режим гостя"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "Мы добавили поддержку просмотра панорамных фотографий с углом обзора 360 градусов. Погружение обеспечивается навигацией на основе движения!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Просмотр Панорамы"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Представляем новый видеоплеер с улучшенными элементами управления воспроизведением и поддержкой HDR видео."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Видеоплеер"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Получить бесплатное хранилище"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Получите больше!"),

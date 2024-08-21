@@ -436,6 +436,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Lütfen doğrulama işlemini tamamlamak için gelen kutunuzu (ve spam klasörünüzü) kontrol edin"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Check status"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrol ediliyor..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Fotoğrafları seçin ve \"Misafir Görünümü\"nü deneyin."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Telefonunuzu bir arkadaşınıza fotoğraf göstermek için mi veriyorsunuz? Fazla kaydırmasından endişelenmeyin. Misafir görünümü seçtiğiniz fotoğraflarla sınırlı kalır."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Misafir Görünümü"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "360 derece görüşe sahip panorama fotoğrafları görüntüleme desteği ekledik. Hareket tabanlı gezinme ile etkileyici bir deneyim sunar!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Panorama Görüntüleyici"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Geliştirilmiş oynatma kontrolleri ve HDR video desteği ile yeni bir video oynatıcı sunuyoruz."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Video Oynatıcı"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Bedava alan talep edin"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Arttır!"),

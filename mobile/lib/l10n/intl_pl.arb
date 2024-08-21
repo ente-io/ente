@@ -1292,5 +1292,13 @@
   "removePublicLinks": "Usuń linki publiczne",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Spowoduje to usunięcie publicznych linków wszystkich zaznaczonych szybkich linków.",
   "guestView": "Widok gościa",
-  "guestViewEnablePreSteps": "Aby włączyć widok gościa, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu."
+  "guestViewEnablePreSteps": "Aby włączyć widok gościa, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu.",
+
+  "cl_guest_view_title": "Widok Gościa",
+  "cl_guest_view_description": "Pokazujesz zdjęcia znajomemu? Nie martw się, że przesunie za daleko. Widok gościa zablokuje wybrane przez Ciebie zdjęcia.",
+  "cl_guest_view_call_to_action": "Wybierz zdjęcia i sprawdź \"Widok Gościa\".",
+  "cl_panorama_viewer_title": "Przeglądarka Panoramy",
+  "cl_panorama_viewer_description": "Dodaliśmy obsługę zdjęć panoramicznych z widokiem 360 stopni. Doświadczenie jest immersyjne z nawigacją opartą na ruchu!",
+  "cl_video_player_title": "Odtwarzacz Wideo",
+  "cl_video_player_description": "Przedstawiamy nowy odtwarzacz wideo z lepszymi kontrolkami odtwarzania i wsparciem dla wideo HDR."
 }

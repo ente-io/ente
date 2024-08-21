@@ -1311,5 +1311,14 @@
   "removePublicLinks": "Remove public links",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
   "guestView": "Guest view",
-  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
+  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings.",
+
+  "cl_guest_view_title": "Gastweergave",
+  "cl_guest_view_description": "Geef je je telefoon aan een vriend om foto's te laten zien? Maak je geen zorgen dat ze te ver swipen. Gastweergave vergrendelt ze op de foto's die je selecteert.",
+  "cl_guest_view_call_to_action": "Selecteer foto's en bekijk de \"Gastweergave\".",
+  "cl_panorama_viewer_title": "Panorama Viewer",
+  "cl_panorama_viewer_description": "We hebben ondersteuning toegevoegd voor het bekijken van panoramafoto's met 360 graden weergaven. De ervaring is meeslepend met bewegingsgestuurde navigatie!",
+  "cl_video_player_title": "Videospeler",
+  "cl_video_player_description": "We introduceren een nieuwe videospeler met betere afspeelbediening en ondersteuning voor HDR-video's."
+
 }

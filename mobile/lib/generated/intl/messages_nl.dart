@@ -443,6 +443,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Status controleren"),
         "checking": MessageLookupByLibrary.simpleMessage("Controleren..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Selecteer foto\'s en bekijk de \"Gastweergave\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Geef je je telefoon aan een vriend om foto\'s te laten zien? Maak je geen zorgen dat ze te ver swipen. Gastweergave vergrendelt ze op de foto\'s die je selecteert."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Gastweergave"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "We hebben ondersteuning toegevoegd voor het bekijken van panoramafoto\'s met 360 graden weergaven. De ervaring is meeslepend met bewegingsgestuurde navigatie!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Panorama Viewer"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "We introduceren een nieuwe videospeler met betere afspeelbediening en ondersteuning voor HDR-video\'s."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Videospeler"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim gratis opslag"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim meer!"),
