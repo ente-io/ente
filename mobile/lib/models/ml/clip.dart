@@ -1,5 +1,7 @@
 import "dart:convert";
 
+import "package:photos/models/ml/ml_versions.dart";
+
 class ClipEmbedding {
   final int fileID;
   final List<double> embedding;
@@ -17,7 +19,7 @@ class ClipEmbedding {
     return ClipEmbedding(
       fileID: fileID,
       embedding: <double>[],
-      version: 0,
+      version: clipMlVersion,
     );
   }
 
