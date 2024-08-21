@@ -55,14 +55,6 @@ class UserRemoteFlagService {
     return _prefs.getBool(key) ?? defaultValue;
   }
 
-  Future<bool> getBoolValue(String key) async {
-    if (_prefs.containsKey(key)) {
-      return _prefs.getBool(key)!;
-    }
-    return _getValue(key, "false")
-        .then((value) => value.toLowerCase() == "true");
-  }
-
   Future<bool> setBoolValue(String key, bool value) async {
     await _updateKeyValue(key, value.toString());
     return _prefs.setBool(key, value);
