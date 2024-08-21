@@ -366,6 +366,30 @@
     {
       "title": "MyFRITZ!Net",
       "slug": "myfritz"
+      "altNames": [
+        "MyFRITZ!",
+        "FritzBox",
+        "Fritz!Box",
+        "FritzBox 7590",
+        "FritzBox 7590 AX",
+        "FritzBox 7530",
+        "FritzBox 7530 AX",
+        "FritzBox 4040",
+        "FritzBox 4060",
+        "FritzBox 5530 Fiber",
+        "FritzBox 6490 Cable",
+        "FritzBox 6590 Cable",
+        "FritzBox 6591 Cable",
+        "FritzBox 6660 Cable",
+        "FritzBox 6820 LTE",
+        "FritzBox 6850 LTE",
+        "FritzBox 6850 5G",
+        "FritzBox 6890 LTE",
+        "FritzBox 7583",
+        "FritzBox 7520",
+        "FritzBox 7490",
+        "FritzBox 7583"
+      ]
     },
     {
       "title": "Name.com",
