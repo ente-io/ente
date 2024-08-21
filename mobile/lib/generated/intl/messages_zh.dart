@@ -271,8 +271,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("安卓, iOS, 网页端, 桌面端"),
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage("需要身份验证"),
         "appLock": MessageLookupByLibrary.simpleMessage("应用锁"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,

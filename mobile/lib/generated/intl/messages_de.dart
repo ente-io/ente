@@ -312,8 +312,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage(
             "Authentifizierung erforderlich"),
         "appLock": MessageLookupByLibrary.simpleMessage("App-Sperre"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Wähle zwischen dem Standard-Sperrbildschirm deines Gerätes und einem eigenen Sperrbildschirm mit PIN oder Passwort."),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
