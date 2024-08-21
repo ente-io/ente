@@ -1,6 +1,5 @@
 import "dart:io" show File;
 import "dart:math" as math show sqrt, min, max;
-import "dart:typed_data" show ByteData;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
@@ -53,7 +52,8 @@ class FileMLInstruction {
 Future<IndexStatus> getIndexStatus() async {
   try {
     final int indexableFiles = (await getIndexableFileIDs()).length;
-    final int facesIndexedFiles = await MLDataDB.instance.getIndexedFileCount();
+    final int facesIndexedFiles =
+        await MLDataDB.instance.getFaceIndexedFileCount();
     final int clipIndexedFiles =
         await MLDataDB.instance.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
@@ -73,7 +73,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final time = DateTime.now();
   // Get indexed fileIDs for each ML service
   final Map<int, int> faceIndexedFileIDs =
-      await MLDataDB.instance.getIndexedFileIds();
+      await MLDataDB.instance.faceIndexedFileIds();
   final Map<int, int> clipIndexedFileIDs =
       await MLDataDB.instance.clipIndexedFileWithVersion();
   final Set<int> queuedFiledIDs = {};
@@ -281,9 +281,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final time = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final imageData = await File(imagePath).readAsBytes();
-    final image = await decodeImageFromData(imageData);
-    final ByteData imageByteData = await getByteDataFromImage(image);
+    final (image, imageByteData) = await decodeImageFromPath(imagePath);
     _logger.info('Reading and decoding image took '
         '${DateTime.now().difference(time).inMilliseconds} ms');
     final decodedImageSize =

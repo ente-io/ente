@@ -59,7 +59,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
       children: [
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<int>(
-            future: MLDataDB.instance.getIndexedFileCount(),
+            future: MLDataDB.instance.getFaceIndexedFileCount(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(

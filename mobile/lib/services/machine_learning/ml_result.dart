@@ -14,46 +14,26 @@ class MLResult {
 
   Dimensions decodedImageSize;
 
-  bool errorOccured;
-  bool onlyThumbnailUsed;
-
+  bool get ranML => facesRan || clipRan;
   bool get facesRan => faces != null;
   bool get clipRan => clip != null;
 
-  bool get foundFaces => facesRan && faces!.isNotEmpty;
-  bool get foundNoFaces => facesRan && faces!.isEmpty;
-
   MLResult({
     this.fileId = -1,
-    this.faces = const <FaceResult>[],
+    this.faces,
     this.clip,
-    this.errorOccured = false,
-    this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
   MLResult.fromEnteFileID(
     fileID, {
-    this.errorOccured = false,
-    this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
-
-  void noFaceDetected() {
-    faces = <FaceResult>[];
-  }
-
-  void errorOccurred() {
-    noFaceDetected();
-    errorOccured = true;
-  }
 
   Map<String, dynamic> _toJson() => {
         'fileId': fileId,
         'faces': faces?.map((face) => face.toJson()).toList(),
         'clip': clip?.toJson(),
-        'errorOccured': errorOccured,
-        'onlyThumbnailUsed': onlyThumbnailUsed,
         'decodedImageSize': {
           'width': decodedImageSize.width,
           'height': decodedImageSize.height,
@@ -73,8 +53,6 @@ class MLResult {
       clip: json['clip'] != null
           ? ClipResult.fromJson(json['clip'] as Map<String, dynamic>)
           : null,
-      errorOccured: json['errorOccured'] ?? false,
-      onlyThumbnailUsed: json['onlyThumbnailUsed'] ?? false,
       decodedImageSize: json['decodedImageSize'] != null
           ? Dimensions(
               width: json['decodedImageSize']['width'],

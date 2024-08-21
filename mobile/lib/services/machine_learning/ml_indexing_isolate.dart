@@ -228,10 +228,7 @@ class MLIndexingIsolate {
       debugPrint(
         "This image with ID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
       );
-      final resultBuilder =
-          MLResult.fromEnteFileID(instruction.file.uploadedFileID!)
-            ..errorOccurred();
-      return resultBuilder;
+      rethrow;
     }
     stopwatch.stop();
     _logger.info(
