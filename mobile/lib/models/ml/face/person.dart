@@ -131,7 +131,7 @@ class PersonData {
       name: json['name'] as String,
       assigned: assigned,
       rejected: rejected,
-      avatarFaceID: json['avatarFaceId'] as String?,
+      avatarFaceID: json['avatarFaceID'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
     );
