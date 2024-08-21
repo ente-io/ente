@@ -400,8 +400,8 @@ class MLService {
             DataType.mlData,
           );
       // Faces results
+      final List<Face> faces = [];
       if (result.facesRan) {
-        final List<Face> faces = [];
         if (result.faces!.isEmpty) {
           faces.add(Face.empty(result.fileId));
           _logger.info("no face detected, storing empty for ${result.fileId}");
@@ -418,7 +418,6 @@ class MLService {
           }
           _logger.info("storing ${faces.length} faces for ${result.fileId}");
         }
-        await MLDataDB.instance.bulkInsertFaces(faces);
         dataEntity.putFace(
           RemoteFaceEmbedding(
             faces,
@@ -431,9 +430,6 @@ class MLService {
       }
       // Clip results
       if (result.clipRan) {
-        await SemanticSearchService.storeClipImageResult(
-          result.clip!,
-        );
         dataEntity.putClip(
           RemoteClipEmbedding(
             result.clip!.embedding,
@@ -442,11 +438,20 @@ class MLService {
           ),
         );
       }
-      // Storing all results on remote
+      // Storing results on remote
       await FileDataService.instance.putFileData(
         instruction.file,
         dataEntity,
       );
+      _logger.info("Results for file ${result.fileId} stored on remote");
+      // Storing results locally
+      if (result.facesRan) await MLDataDB.instance.bulkInsertFaces(faces);
+      if (result.clipRan) {
+        await SemanticSearchService.storeClipImageResult(
+          result.clip!,
+        );
+      }
+      _logger.info("Results for file ${result.fileId} stored locally");
       return actuallyRanML;
     } catch (e, s) {
       bool acceptedIssue = false;
@@ -459,7 +464,8 @@ class MLService {
         );
         acceptedIssue = true;
       }
-      if (errorString.contains('InvalidImageFormatException: Error decoding image')) {
+      if (errorString
+          .contains('InvalidImageFormatException: Error decoding image')) {
         _logger.severe(
           'InvalidImageFormatException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
           e,
