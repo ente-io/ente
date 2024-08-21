@@ -70,7 +70,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       await showErrorDialog(
         context,
         context.l10n.noSystemLockFound,
-        context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+        context.l10n.deviceLockEnablePreSteps,
       );
     }
     await _initializeSettings();
