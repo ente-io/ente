@@ -55,7 +55,7 @@ func (r *Repository) AddNewCode(ctx context.Context, userID int64, code string) 
 	}
 	_, err = r.DB.ExecContext(ctx, "UPDATE referral_codes SET is_active = FALSE WHERE user_id = $1", userID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to update storagebonus code for user %d", userID)
+		return stacktrace.Propagate(err, "failed to update remove existing code code for user %d", userID)
 	}
 	return r.InsertCode(ctx, userID, code)
 }
