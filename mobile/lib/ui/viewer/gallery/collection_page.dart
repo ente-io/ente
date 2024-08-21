@@ -106,6 +106,7 @@ class CollectionPage extends StatelessWidget {
           c.collection.displayName,
           _selectedFiles,
           collection: c.collection,
+          isFromCollectPhotos: isFromCollectPhotos,
         ),
       ),
       floatingActionButton: isFromCollectPhotos

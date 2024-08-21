@@ -52,6 +52,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final DeviceCollection? deviceCollection;
   final Collection? collection;
+  final bool isFromCollectPhotos;
 
   const GalleryAppBarWidget(
     this.type,
@@ -60,6 +61,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     Key? key,
     this.deviceCollection,
     this.collection,
+    this.isFromCollectPhotos = false,
   }) : super(key: key);
 
   @override
@@ -306,7 +308,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (galleryType.isSharable()) {
+    if (galleryType.isSharable() && !widget.isFromCollectPhotos) {
       actions.add(
         Tooltip(
           message: "Share",
