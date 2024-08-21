@@ -11,10 +11,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/models/ml/face/box.dart";
-import "package:photos/models/ml/face/detection.dart" as face_detection;
 import "package:photos/models/ml/face/face.dart";
-import "package:photos/models/ml/face/landmark.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
@@ -416,35 +413,11 @@ class MLService {
             );
           }
           for (int i = 0; i < result.faces!.length; ++i) {
-            final FaceResult faceRes = result.faces![i];
-            final detection = face_detection.Detection(
-              box: FaceBox(
-                x: faceRes.detection.xMinBox,
-                y: faceRes.detection.yMinBox,
-                width: faceRes.detection.width,
-                height: faceRes.detection.height,
-              ),
-              landmarks: faceRes.detection.allKeypoints
-                  .map(
-                    (keypoint) => Landmark(
-                      x: keypoint[0],
-                      y: keypoint[1],
-                    ),
-                  )
-                  .toList(),
-            );
             faces.add(
-              Face(
-                faceRes.faceId,
+              Face.fromFaceResult(
+                result.faces![i],
                 result.fileId,
-                faceRes.embedding,
-                faceRes.detection.score,
-                detection,
-                faceRes.blurValue,
-                fileInfo: FileInfo(
-                  imageHeight: result.decodedImageSize.height,
-                  imageWidth: result.decodedImageSize.width,
-                ),
+                result.decodedImageSize,
               ),
             );
           }

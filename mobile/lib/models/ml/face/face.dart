@@ -1,4 +1,7 @@
+import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/detection.dart";
+import "package:photos/models/ml/face/dimension.dart";
+import "package:photos/models/ml/face/landmark.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
 
@@ -41,6 +44,41 @@ class Face {
     this.blur, {
     this.fileInfo,
   });
+
+  factory Face.fromFaceResult(
+    FaceResult faceResult,
+    int fileID,
+    Dimensions decodedDimensions,
+  ) {
+    final detection = Detection(
+      box: FaceBox(
+        x: faceResult.detection.xMinBox,
+        y: faceResult.detection.yMinBox,
+        width: faceResult.detection.width,
+        height: faceResult.detection.height,
+      ),
+      landmarks: faceResult.detection.allKeypoints
+          .map(
+            (keypoint) => Landmark(
+              x: keypoint[0],
+              y: keypoint[1],
+            ),
+          )
+          .toList(),
+    );
+    return Face(
+      faceResult.faceId,
+      fileID,
+      faceResult.embedding,
+      faceResult.detection.score,
+      detection,
+      faceResult.blurValue,
+      fileInfo: FileInfo(
+        imageHeight: decodedDimensions.height,
+        imageWidth: decodedDimensions.width,
+      ),
+    );
+  }
 
   factory Face.empty(int fileID, {bool error = false}) {
     return Face(
