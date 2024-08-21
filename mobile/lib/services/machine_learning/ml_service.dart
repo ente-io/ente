@@ -62,7 +62,7 @@ class MLService {
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init({bool firstTime = false}) async {
-    if (localSettings.isFaceIndexingEnabled == false || _isInitialized) {
+    if (localSettings.isMLIndexingEnabled == false || _isInitialized) {
       return;
     }
     _logger.info("init called");
@@ -80,7 +80,7 @@ class MLService {
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (localSettings.isFaceIndexingEnabled == false) {
+      if (localSettings.isMLIndexingEnabled == false) {
         return;
       }
       _mlControllerStatus = event.shouldRun;
@@ -572,7 +572,7 @@ class MLService {
   void _logStatus() {
     final String status = '''
     isInternalUser: ${flagService.internalUser}
-    isFaceIndexingEnabled: ${localSettings.isFaceIndexingEnabled}
+    isMLIndexingEnabled: ${localSettings.isMLIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering

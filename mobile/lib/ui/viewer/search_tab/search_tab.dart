@@ -115,7 +115,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
                       case SectionType.face:
-                        if (!localSettings.isFaceIndexingEnabled) {
+                        if (!localSettings.isMLIndexingEnabled) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(

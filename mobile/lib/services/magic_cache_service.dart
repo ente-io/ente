@@ -94,6 +94,9 @@ class MagicCacheService {
   }
 
   Future<void> _updateCacheIfTheTimeHasCome() async {
+    if (localSettings.isMLIndexingEnabled) {
+      return;
+    }
     final jsonFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (jsonFile != null) {
