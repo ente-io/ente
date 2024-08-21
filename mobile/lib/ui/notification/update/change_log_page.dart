@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -43,7 +44,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             const SizedBox(
               height: 24,
             ),
-            Expanded(child: _getChangeLog()),
+            Expanded(child: _getChangeLog(context)),
             const DividerWidget(
               dividerType: DividerType.solid,
             ),
@@ -109,21 +110,21 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     );
   }
 
-  Widget _getChangeLog() {
+  Widget _getChangeLog(BuildContext ctx) {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Custom App Lock ✨",
-        'Now choose from PIN, password or the default system lock to lock the app. You can set this up in Settings > Security > App lock.',
+        ctx.l10n.cl_guest_view_title,
+        '${ctx.l10n.cl_guest_view_description}\n\n${ctx.l10n.cl_guest_view_call_to_action}',
       ),
       ChangeLogEntry(
-        "Select All ✨",
-        "Selecting all files from gallery made easy with just one click! Select any item from gallery to see the option.",
+        ctx.l10n.cl_panorama_viewer_title,
+        ctx.l10n.cl_panorama_viewer_description,
       ),
       ChangeLogEntry(
-        "Bug Fixes",
-        "Many a bugs were squashed in this release. If you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏",
+        ctx.l10n.cl_video_player_title,
+        ctx.l10n.cl_video_player_description,
       ),
     ]);
 

@@ -302,7 +302,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Authentication required"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
@@ -428,6 +430,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please check your inbox (and spam) to complete verification"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Check status"),
         "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Select photos and check out \"Guest view\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far.\nGuest view will lock them into the photos you select."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Guest View"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "We\'ve added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Panorama Viewer"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Introducing a fresh new video player, with better playback controls and support for HDR videos."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Video Player"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim free storage"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),

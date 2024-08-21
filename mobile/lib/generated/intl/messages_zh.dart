@@ -273,6 +273,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("应用锁"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
             "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。"),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("应用"),
@@ -380,6 +382,18 @@ class MessageLookup extends MessageLookupByLibrary {
             "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("检查状态"),
         "checking": MessageLookupByLibrary.simpleMessage("正在检查..."),
+        "cl_guest_view_call_to_action":
+            MessageLookupByLibrary.simpleMessage("选择照片并查看\"访客视图\"。"),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "要把手机递给朋友看照片？别担心他们滑动太远。访客视图将锁定您选择的照片。"),
+        "cl_guest_view_title": MessageLookupByLibrary.simpleMessage("访客视图"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "我们新增了支持 360 度全景照片查看功能。结合动作导航，体验更加身临其境！"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("全景查看器"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "推出全新的视频播放器，具有更好的播放控制功能并支持 HDR 视频。"),
+        "cl_video_player_title": MessageLookupByLibrary.simpleMessage("视频播放器"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage("领取免费存储"),
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),

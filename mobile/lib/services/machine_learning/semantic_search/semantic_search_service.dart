@@ -21,7 +21,6 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
@@ -35,13 +34,9 @@ class SemanticSearchService {
   final LRUMap<String, List<double>> _queryCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
 
-  final _reloadCacheDebouncer = Debouncer(
-    const Duration(milliseconds: 4000),
-    executionInterval: const Duration(milliseconds: 8000),
-  );
-
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
+  bool _isCacheRefreshPending = true;
   List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
@@ -56,12 +51,9 @@ class SemanticSearchService {
     }
     _hasInitialized = true;
 
-    await _loadImageEmbeddings();
+    await _refreshClipCache();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      if (!_hasInitialized) return;
-      _reloadCacheDebouncer.run(() async {
-        await _loadImageEmbeddings();
-      });
+      _isCacheRefreshPending = true;
     });
 
     unawaited(_loadTextModel(delay: true));
@@ -76,6 +68,7 @@ class SemanticSearchService {
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
+    await _refreshClipCache();
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
@@ -113,7 +106,11 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<void> _loadImageEmbeddings() async {
+  Future<void> _refreshClipCache() async {
+    if (_isCacheRefreshPending == false) {
+      return;
+    }
+    _isCacheRefreshPending = false;
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
     _cachedImageEmbeddings = await MLDataDB.instance.getAll();

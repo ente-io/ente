@@ -133,7 +133,7 @@ func (c *Controller) GetOrCreateReferralCode(ctx *gin.Context, userID int64) (*s
 	return referralCode, nil
 }
 
-func (c *Controller) UpdateReferralCode(ctx *gin.Context, userID int64, code string) error {
+func (c *Controller) UpdateReferralCode(ctx *gin.Context, userID int64, code string, isAdminEdit bool) error {
 	code = strings.ToUpper(code)
 	if !random.IsAlphanumeric(code) {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code is not alphanumeric"), "")
@@ -141,7 +141,7 @@ func (c *Controller) UpdateReferralCode(ctx *gin.Context, userID int64, code str
 	if len(code) < 4 || len(code) > 8 {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code length should be between 4 and 8"), "")
 	}
-	err := c.StorageBonus.AddNewCode(ctx, userID, code)
+	err := c.StorageBonus.AddNewCode(ctx, userID, code, isAdminEdit)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to update referral code")
 	}

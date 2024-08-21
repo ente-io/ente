@@ -312,6 +312,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Blokada dostępu do aplikacji"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
             "Wybierz między domyślnym ekranem blokady urządzenia a niestandardowym ekranem blokady z kodem PIN lub hasłem."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Zastosuj"),
@@ -442,6 +444,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Sprawdź stan"),
         "checking": MessageLookupByLibrary.simpleMessage("Sprawdzanie..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Wybierz zdjęcia i sprawdź \"Widok Gościa\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Pokazujesz zdjęcia znajomemu? Nie martw się, że przesunie za daleko. Widok gościa zablokuje wybrane przez Ciebie zdjęcia."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Widok Gościa"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "Dodaliśmy obsługę zdjęć panoramicznych z widokiem 360 stopni. Doświadczenie jest immersyjne z nawigacją opartą na ruchu!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Przeglądarka Panoramy"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Przedstawiamy nowy odtwarzacz wideo z lepszymi kontrolkami odtwarzania i wsparciem dla wideo HDR."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Odtwarzacz Wideo"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Odbierz bezpłatną przestrzeń dyskową"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Zdobądź więcej!"),

@@ -278,7 +278,7 @@ class _FileSelectionActionsWidgetState
     }
     items.add(
       SelectionActionButton(
-        icon: Icons.people_outline_rounded,
+        svgAssetPath: "assets/icons/guest_view_icon.svg",
         labelText: S.of(context).guestView,
         onTap: _onGuestViewClick,
       ),

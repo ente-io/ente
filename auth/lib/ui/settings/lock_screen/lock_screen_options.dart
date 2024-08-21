@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:ente_auth/core/configuration.dart";
 import "package:ente_auth/l10n/l10n.dart";
+import "package:ente_auth/services/local_authentication_service.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:ente_auth/ui/components/captioned_text_widget.dart";
 import "package:ente_auth/ui/components/divider_widget.dart";
@@ -14,6 +15,7 @@ import "package:ente_auth/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:ente_auth/ui/tools/app_lock.dart";
+import "package:ente_auth/utils/dialog_util.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
 import "package:ente_auth/utils/navigation_util.dart";
 import "package:ente_auth/utils/platform_util.dart";
@@ -29,11 +31,12 @@ class LockScreenOptions extends StatefulWidget {
 class _LockScreenOptionsState extends State<LockScreenOptions> {
   final Configuration _configuration = Configuration.instance;
   final LockScreenSettings _lockscreenSetting = LockScreenSettings.instance;
-  late bool appLock;
+  late bool appLock = false;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
   late int autoLockTimeInMilliseconds;
   late bool hideAppContent;
+  late bool isSystemLockEnabled = false;
 
   @override
   void initState() {
@@ -41,9 +44,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     autoLockTimeInMilliseconds = _lockscreenSetting.getAutoLockTime();
     _initializeSettings();
-    appLock = isPinEnabled ||
-        isPasswordEnabled ||
-        _configuration.shouldShowSystemLockScreen();
+    appLock = _lockscreenSetting.getIsAppLockSet();
   }
 
   Future<void> _initializeSettings() async {
@@ -51,15 +52,27 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     final bool pinEnabled = await _lockscreenSetting.isPinSet();
     final bool shouldHideAppContent =
         _lockscreenSetting.getShouldHideAppContent();
+    final bool systemLockEnabled = _configuration.shouldShowSystemLockScreen();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
       hideAppContent = shouldHideAppContent;
+      isSystemLockEnabled = systemLockEnabled;
     });
   }
 
   Future<void> _deviceLock() async {
-    await _lockscreenSetting.removePinAndPassword();
+    if (await LocalAuthenticationService.instance
+        .isLocalAuthSupportedOnDevice()) {
+      await _lockscreenSetting.removePinAndPassword();
+      await _configuration.setSystemLockScreen(!isSystemLockEnabled);
+    } else {
+      await showErrorDialog(
+        context,
+        context.l10n.noSystemLockFound,
+        context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+      );
+    }
     await _initializeSettings();
   }
 
@@ -71,14 +84,15 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
         },
       ),
     );
-    setState(() {
-      _initializeSettings();
-      if (result) {
-        appLock = isPinEnabled ||
-            isPasswordEnabled ||
-            _configuration.shouldShowSystemLockScreen();
-      }
-    });
+
+    if (result) {
+      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.setAppLockEnabled(true);
+      setState(() {
+        appLock = _lockscreenSetting.getIsAppLockSet();
+      });
+    }
+    await _initializeSettings();
   }
 
   Future<void> _passwordLock() async {
@@ -89,27 +103,35 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
         },
       ),
     );
-    setState(() {
-      _initializeSettings();
-      if (result) {
-        appLock = isPinEnabled ||
-            isPasswordEnabled ||
-            _configuration.shouldShowSystemLockScreen();
-      }
-    });
+    if (result) {
+      await _configuration.setSystemLockScreen(false);
+      setState(() {
+        appLock = _lockscreenSetting.getIsAppLockSet();
+      });
+    }
+    await _initializeSettings();
   }
 
   Future<void> _onToggleSwitch() async {
     AppLock.of(context)!.setEnabled(!appLock);
-    await _configuration.setSystemLockScreen(!appLock);
+    if (await LocalAuthenticationService.instance
+        .isLocalAuthSupportedOnDevice()) {
+      await _configuration.setSystemLockScreen(!appLock);
+      await _lockscreenSetting.setAppLockEnabled(!appLock);
+    } else {
+      await _configuration.setSystemLockScreen(false);
+      await _lockscreenSetting.setAppLockEnabled(false);
+    }
     await _lockscreenSetting.removePinAndPassword();
     if (PlatformUtil.isMobile()) {
       await _lockscreenSetting.setHideAppContent(!appLock);
+      setState(() {
+        hideAppContent = _lockscreenSetting.getShouldHideAppContent();
+      });
     }
+    await _initializeSettings();
     setState(() {
-      _initializeSettings();
       appLock = !appLock;
-      hideAppContent = _lockscreenSetting.getShouldHideAppContent();
     });
   }
 
@@ -224,10 +246,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       isTopBorderRadiusRemoved: false,
                                       isBottomBorderRadiusRemoved: true,
                                       menuItemColor: colorTheme.fillFaint,
-                                      trailingIcon:
-                                          !(isPasswordEnabled || isPinEnabled)
-                                              ? Icons.check
-                                              : null,
+                                      trailingIcon: isSystemLockEnabled
+                                          ? Icons.check
+                                          : null,
                                       trailingIconColor: colorTheme.textBase,
                                       onTap: () => _deviceLock(),
                                     ),

@@ -492,7 +492,7 @@
     "ml_search_disable_confirm": "Do you want to disable machine learning on all your devices?",
     "ml_consent": "Enable machine learning",
     "ml_consent_title": "Enable machine learning?",
-    "ml_consent_description": "<p>If you enable machine learning, Ente will extract information like face geometry from your photos. This will happen on your device, and any generated biometric information will be end-to-end encrypted.</p><p><a>Please click here for more details about this feature in our privacy policy</a></p>",
+    "ml_consent_description": "<p>If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.</p><p>This will happen on your device, and any generated biometric information will be end-to-end encrypted.</p><p><a>Please click here for more details about this feature in our privacy policy</a></p>",
     "ml_consent_confirmation": "I understand, and wish to enable machine learning",
     "labs": "Labs",
     "YOURS": "yours",

@@ -148,7 +148,7 @@ class FaceRecognitionService {
     }
     // Yield any remaining instructions
     if (batchToYield.isNotEmpty) {
-      _logger.info("queueing indexing for  $batchToYield.length");
+      _logger.info("queueing indexing for  ${batchToYield.length}");
       yield batchToYield;
     }
   }

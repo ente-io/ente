@@ -37,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hva er hovedårsaken til at du sletter kontoen din?"),
         "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),

@@ -492,7 +492,7 @@
     "ml_search_disable_confirm": "Wil je machine learning op al je apparaten uitschakelen?",
     "ml_consent": "Schakel machine learning in",
     "ml_consent_title": "Schakel machine learning in?",
-    "ml_consent_description": "<p>Als u machine learning inschakelt, analyseert Ente de gezichtsgeometrie uit uw foto's. Dit gebeurt op uw apparaat en alle gegenereerde biometrische gegevens worden end-to-end versleuteld en blijven privé. </p><p><a>Klik hier voor meer informatie over deze functie in ons privacybeleid</a></p>",
+    "ml_consent_description": "",
     "ml_consent_confirmation": "Ik begrijp het en wil machine learning inschakelen",
     "labs": "Lab's",
     "YOURS": "jouw",

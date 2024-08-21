@@ -294,6 +294,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appLockDescription": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Applica"),
@@ -404,6 +406,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Per favore, controlla la tua casella di posta (e lo spam) per completare la verifica"),
         "checking":
             MessageLookupByLibrary.simpleMessage("Controllo in corso..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Seleziona le foto e prova la \"Vista Ospite\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Mostri le foto a un amico? Non preoccuparti che scorrano troppo lontano. La vista ospite bloccherà le foto che selezioni."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Vista Ospite"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "Abbiamo aggiunto il supporto per visualizzare foto panoramiche con viste a 360 gradi. L\'esperienza è immersiva con la navigazione basata sul movimento!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Visualizzatore Panoramico"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Presentiamo un nuovo lettore video, con controlli di riproduzione migliorati e supporto per video HDR."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Lettore Video"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Richiedi spazio gratuito"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Richiedine di più!"),
