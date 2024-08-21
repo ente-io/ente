@@ -28,7 +28,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 class MLDataDB {
   static final Logger _logger = Logger("MLDataDB");
 
-  static const _databaseName = "ente.face_ml_db_v3.db";
+  static const _databaseName = "ente.ml.db";
 
   // static const _databaseVersion = 1;
 

@@ -1,11 +1,12 @@
 import "dart:async";
 import "dart:developer" show log;
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:math" show max, min;
 import "dart:typed_data" show Float32List, Uint8List, ByteData;
 import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
+import "package:heif_converter/heif_converter.dart";
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
@@ -27,12 +28,27 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
     final ByteData imageByteData = await getByteDataFromImage(image);
     return (image, imageByteData);
   } catch (e, s) {
-    _logger.severe(
-      'Error decoding image of format ${imagePath.split('.').last}:',
-      e,
-      s,
-    );
-    throw Exception('InvalidImageFormatException: Error decoding image');
+    final format = imagePath.split('.').last;
+    if ((format == 'heic' || format == 'heif') && Platform.isAndroid) {
+      _logger.info('Cannot decode $format, converting to JPG format');
+      final String? jpgPath =
+          await HeifConverter.convert(imagePath, format: 'jpg');
+      if (jpgPath == null) {
+        _logger.severe('Error converting $format to jpg:', e, s);
+        throw Exception('InvalidImageFormatException: Error decoding image');
+      }
+      final imageData = await File(jpgPath).readAsBytes();
+      final image = await decodeImageFromData(imageData);
+      final ByteData imageByteData = await getByteDataFromImage(image);
+      return (image, imageByteData);
+    } else {
+      _logger.severe(
+        'Error decoding image of format ${imagePath.split('.').last}:',
+        e,
+        s,
+      );
+      throw Exception('InvalidImageFormatException: Error decoding image');
+    }
   }
 }
 
