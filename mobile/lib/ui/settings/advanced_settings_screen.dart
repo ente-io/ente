@@ -16,7 +16,6 @@ import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/settings/machine_learning_settings_page.dart";
 import 'package:photos/ui/tools/debug/app_storage_viewer.dart';
 import 'package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart';
-import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class AdvancedSettingsScreen extends StatefulWidget {
@@ -31,7 +30,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
 
   @override
   void initState() {
-    _photoGridSize = LocalSettings.instance.getPhotoGridSize();
+    _photoGridSize = localSettings.getPhotoGridSize();
     super.initState();
   }
 
@@ -102,8 +101,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   const PhotoGridSizePickerPage(),
                                 ).then((value) {
                                   setState(() {
-                                    _photoGridSize = LocalSettings.instance
-                                        .getPhotoGridSize();
+                                    _photoGridSize =
+                                        localSettings.getPhotoGridSize();
                                   });
                                 });
                               },
@@ -189,30 +188,6 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                       .setBoolValue(
                                     UserRemoteFlagService.mapEnabled,
                                     !isEnabled,
-                                  );
-                                },
-                              ),
-                            ),
-                            if (flagService.enableMobMultiPart)
-                              const SizedBox(
-                                height: 24,
-                              ),
-                            if (flagService.enableMobMultiPart)
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).enableMultiPartUpload,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => LocalSettings
-                                    .instance.userEnabledMultiplePart,
-                                onChanged: () async {
-                                  await LocalSettings.instance
-                                      .setUserEnabledMultiplePart(
-                                    !LocalSettings
-                                        .instance.userEnabledMultiplePart,
                                   );
                                 },
                               ),

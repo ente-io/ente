@@ -3,8 +3,6 @@ PODS:
     - Flutter
   - battery_info (0.0.1):
     - Flutter
-  - blurhash_ffi (0.0.1):
-    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -246,7 +244,6 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
-  - blurhash_ffi (from `.symlinks/plugins/blurhash_ffi/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -330,8 +327,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery_info:
     :path: ".symlinks/plugins/battery_info/ios"
-  blurhash_ffi:
-    :path: ".symlinks/plugins/blurhash_ffi/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/darwin"
   dart_ui_isolate:
@@ -442,7 +437,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   background_fetch: 2319bf7e18237b4b269430b7f14d177c0df09c5a
   battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
-  blurhash_ffi: 4831b96320d4273876c9a2fd3f7d50b8a3a53509
   connectivity_plus: ddd7f30999e1faaef5967c23d5b6d503d10434db
   dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6

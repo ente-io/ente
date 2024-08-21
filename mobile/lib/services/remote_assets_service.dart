@@ -32,6 +32,11 @@ class RemoteAssetsService {
     }
   }
 
+  Future<String> getAssetPath(String remotePath, {bool refetch = false}) async {
+    final file = await getAsset(remotePath, refetch: refetch);
+    return file.path;
+  }
+
   ///Returns asset if the remote asset is new compared to the local copy of it
   Future<File?> getAssetIfUpdated(String remotePath) async {
     try {

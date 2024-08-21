@@ -1252,6 +1252,8 @@
   "whatsNew": "Qué hay de nuevo",
   "reviewSuggestions": "Revisar sugerencias",
   "reenterPassword": "Re-enter password",
+  "mlFunctions": "ML functions",
+  "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",
   "deviceLock": "Device lock",
   "pinLock": "PIN lock",

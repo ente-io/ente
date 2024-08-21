@@ -271,6 +271,8 @@ class EnteFile {
     return pubMagicMetadata?.caption;
   }
 
+  String? debugCaption;
+
   String get thumbnailUrl {
     if (localFileServer.isNotEmpty) {
       return "$localFileServer/thumb/$uploadedFileID";

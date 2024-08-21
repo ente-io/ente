@@ -6,11 +6,11 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -109,7 +109,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             allSuggestions = snapshot.data!;
             final numberOfDifferentSuggestions = allSuggestions.length;
             final currentSuggestion = allSuggestions[currentSuggestionIndex];
-            final int clusterID = currentSuggestion.clusterIDToMerge;
+            final String clusterID = currentSuggestion.clusterIDToMerge;
             final double distance = currentSuggestion.distancePersonToCluster;
             final bool usingMean = currentSuggestion.usedOnlyMeanForSuggestion;
             final List<EnteFile> files = currentSuggestion.filesInCluster;
@@ -182,7 +182,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Future<void> _handleUserClusterChoice(
-    int clusterID,
+    String clusterID,
     bool yesOrNo,
     int numberOfSuggestions,
   ) async {
@@ -199,7 +199,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     );
     if (yesOrNo) {
       canGiveFeedback = false;
-      await FaceMLDataDB.instance.assignClusterToPerson(
+      await MLDataDB.instance.assignClusterToPerson(
         personID: widget.person.remoteID,
         clusterID: clusterID,
       );
@@ -229,11 +229,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Future<void> _rejectSuggestion(
-    int clusterID,
+    String clusterID,
     int numberOfSuggestions,
   ) async {
     canGiveFeedback = false;
-    await FaceMLDataDB.instance.captureNotPersonFeedback(
+    await MLDataDB.instance.captureNotPersonFeedback(
       personID: widget.person.remoteID,
       clusterID: clusterID,
     );
@@ -254,7 +254,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Widget _buildSuggestionView(
-    int clusterID,
+    String clusterID,
     double distance,
     bool usingMean,
     List<EnteFile> files,
@@ -379,7 +379,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   Widget _buildThumbnailWidget(
     List<EnteFile> files,
-    int clusterID,
+    String clusterID,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
     return SizedBox(
@@ -433,7 +433,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   List<Widget> _buildThumbnailWidgetsRow(
     List<EnteFile> files,
-    int cluserId,
+    String cluserId,
     Map<int, Uint8List?> faceThumbnails, {
     int start = 0,
   }) {
@@ -460,7 +460,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   Future<Map<int, Uint8List?>> _generateFaceThumbnails(
     List<EnteFile> files,
-    int clusterID,
+    String clusterID,
   ) async {
     final futures = <Future<Uint8List?>>[];
     for (final file in files) {
@@ -489,7 +489,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );
       } else {
-        await FaceMLDataDB.instance.removeNotPersonFeedback(
+        await MLDataDB.instance.removeNotPersonFeedback(
           personID: widget.person.remoteID,
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );

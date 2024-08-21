@@ -2866,6 +2866,56 @@ class S {
     );
   }
 
+  /// `Enable machine learning`
+  String get mlConsent {
+    return Intl.message(
+      'Enable machine learning',
+      name: 'mlConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning?`
+  String get mlConsentTitle {
+    return Intl.message(
+      'Enable machine learning?',
+      name: 'mlConsentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.`
+  String get mlConsentDescription {
+    return Intl.message(
+      'If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.',
+      name: 'mlConsentDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please click here for more details about this feature in our privacy policy`
+  String get mlConsentPrivacy {
+    return Intl.message(
+      'Please click here for more details about this feature in our privacy policy',
+      name: 'mlConsentPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I understand, and wish to enable machine learning`
+  String get mlConsentConfirmation {
+    return Intl.message(
+      'I understand, and wish to enable machine learning',
+      name: 'mlConsentConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Magic search`
   String get magicSearch {
     return Intl.message(
@@ -7965,11 +8015,11 @@ class S {
     );
   }
 
-  /// `Enable multi-part upload`
-  String get enableMultiPartUpload {
+  /// `Resumable uploads`
+  String get resumableUploads {
     return Intl.message(
-      'Enable multi-part upload',
-      name: 'enableMultiPartUpload',
+      'Resumable uploads',
+      name: 'resumableUploads',
       desc: '',
       args: [],
     );
@@ -8972,6 +9022,56 @@ class S {
       desc:
           'Label to indicate that the person in the photo is not the person whose name is mentioned',
       args: [name],
+    );
+  }
+
+  /// `Enable`
+  String get enable {
+    return Intl.message(
+      'Enable',
+      name: 'enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enabled`
+  String get enabled {
+    return Intl.message(
+      'Enabled',
+      name: 'enabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More details`
+  String get moreDetails {
+    return Intl.message(
+      'More details',
+      name: 'moreDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ente supports on-device machine learning for face recognition, magic search and other advanced search features`
+  String get enableMLIndexingDesc {
+    return Intl.message(
+      'Ente supports on-device machine learning for face recognition, magic search and other advanced search features',
+      name: 'enableMLIndexingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'`
+  String get magicSearchHint {
+    return Intl.message(
+      'Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'',
+      name: 'magicSearchHint',
+      desc: '',
+      args: [],
     );
   }
 

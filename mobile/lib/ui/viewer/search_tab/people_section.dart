@@ -4,8 +4,8 @@ import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -273,7 +273,7 @@ class SearchExample extends StatelessWidget {
                       onTap: () async {
                         final result = await showAssignPersonAction(
                           context,
-                          clusterID: int.parse(searchResult.name()),
+                          clusterID: searchResult.name(),
                         );
                         if (result != null &&
                             result is (PersonEntity, EnteFile)) {

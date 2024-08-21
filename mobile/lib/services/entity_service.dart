@@ -14,6 +14,7 @@ import "package:photos/models/api/entity/key.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/utils/crypto_util.dart";
+import "package:photos/utils/gzip.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EntityService {
@@ -56,17 +57,23 @@ class EntityService {
 
   Future<LocalEntityData> addOrUpdate(
     EntityType type,
-    String plainText, {
+    Map<String, dynamic> jsonMap, {
     String? id,
   }) async {
+    final String plainText = jsonEncode(jsonMap);
     final key = await getOrCreateEntityKey(type);
-    final encryptedKeyData = await CryptoUtil.encryptChaCha(
-      utf8.encode(plainText),
-      key,
-    );
-    final String encryptedData =
-        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-    final String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
+    late String encryptedData, header;
+    if (type.isZipped()) {
+      final ChaChaEncryptionResult result =
+          await gzipAndEncryptJson(jsonMap, key);
+      encryptedData = result.encData;
+      header = result.header;
+    } else {
+      final encryptedKeyData =
+          await CryptoUtil.encryptChaCha(utf8.encode(plainText), key);
+      encryptedData = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+      header = CryptoUtil.bin2base64(encryptedKeyData.header!);
+    }
     debugPrint(
       " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
           type.typeToString(),
@@ -94,7 +101,7 @@ class EntityService {
   Future<void> syncEntities() async {
     try {
       await _remoteToLocalSync(EntityType.location);
-      await _remoteToLocalSync(EntityType.person);
+      await _remoteToLocalSync(EntityType.cgroup);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
     }
@@ -127,12 +134,22 @@ class EntityService {
       final List<LocalEntityData> entities = [];
       for (EntityData e in result) {
         try {
-          final decryptedValue = await CryptoUtil.decryptChaCha(
-            CryptoUtil.base642bin(e.encryptedData!),
-            entityKey,
-            CryptoUtil.base642bin(e.header!),
-          );
-          final String plainText = utf8.decode(decryptedValue);
+          late String plainText;
+          if (type.isZipped()) {
+            final jsonMap = await decryptAndUnzipJson(
+              entityKey,
+              encryptedData: e.encryptedData!,
+              header: e.header!,
+            );
+            plainText = jsonEncode(jsonMap);
+          } else {
+            final Uint8List decryptedValue = await CryptoUtil.decryptChaCha(
+              CryptoUtil.base642bin(e.encryptedData!),
+              entityKey,
+              CryptoUtil.base642bin(e.header!),
+            );
+            plainText = utf8.decode(decryptedValue);
+          }
           entities.add(
             LocalEntityData(
               id: e.id,

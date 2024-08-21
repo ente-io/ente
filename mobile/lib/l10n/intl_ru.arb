@@ -1251,6 +1251,8 @@
   "right": "Вправо",
   "whatsNew": "Что нового",
   "reenterPassword": "Re-enter password",
+  "mlFunctions": "ML functions",
+  "reenterPassword": "Re-enter password",
   "reenterPin": "Re-enter PIN",
   "deviceLock": "Device lock",
   "pinLock": "PIN lock",

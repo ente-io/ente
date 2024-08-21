@@ -5,7 +5,7 @@ import "package:computer/computer.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
-import "package:photos/face/model/box.dart";
+import "package:photos/models/ml/face/box.dart";
 
 /// Bounding box of a face.
 ///

@@ -201,6 +201,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
     } else if (GalleryContextState.of(context)?.type == GroupType.size) {
       viewChildren.add(FileSizeOverlayText(widget.file));
+    } else if (widget.file.debugCaption != null) {
+      viewChildren.add(FileOverlayText(widget.file.debugCaption!));
     }
     // todo: Move this icon overlay to the collection widget.
     if (widget.shouldShowArchiveStatus) {

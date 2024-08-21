@@ -656,11 +656,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Email your logs"),
         "empty": MessageLookupByLibrary.simpleMessage("Empty"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Empty trash?"),
+        "enable": MessageLookupByLibrary.simpleMessage("Enable"),
+        "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
+            "Ente supports on-device machine learning for face recognition, magic search and other advanced search features"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Enable Maps"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
-        "enableMultiPartUpload":
-            MessageLookupByLibrary.simpleMessage("Enable multi-part upload"),
+        "enabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Encrypting backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
@@ -947,6 +949,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
+        "magicSearchHint": MessageLookupByLibrary.simpleMessage(
+            "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
@@ -963,6 +967,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m34,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mlConsent":
+            MessageLookupByLibrary.simpleMessage("Enable machine learning"),
+        "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
+            "I understand, and wish to enable machine learning"),
+        "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
+            "If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted."),
+        "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Please click here for more details about this feature in our privacy policy"),
+        "mlConsentTitle":
+            MessageLookupByLibrary.simpleMessage("Enable machine learning?"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed."),
         "mobileWebDesktop":
@@ -973,6 +987,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moments": MessageLookupByLibrary.simpleMessage("Moments"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
+        "moreDetails": MessageLookupByLibrary.simpleMessage("More details"),
         "moveItem": m35,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
         "moveToHiddenAlbum":
@@ -1243,6 +1258,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Restore to album"),
         "restoringFiles":
             MessageLookupByLibrary.simpleMessage("Restoring files..."),
+        "resumableUploads":
+            MessageLookupByLibrary.simpleMessage("Resumable uploads"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),

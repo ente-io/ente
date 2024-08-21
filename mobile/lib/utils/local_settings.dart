@@ -8,9 +8,6 @@ enum AlbumSortKey {
 }
 
 class LocalSettings {
-  LocalSettings._privateConstructor();
-
-  static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
   static const kEnableMagicSearch = "enable_magic_search";
@@ -20,11 +17,9 @@ class LocalSettings {
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
 
-  late SharedPreferences _prefs;
+  final SharedPreferences _prefs;
 
-  void init(SharedPreferences preferences) {
-    _prefs = preferences;
-  }
+  LocalSettings(this._prefs);
 
   AlbumSortKey albumSortKey() {
     return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref) ?? 0];
@@ -44,17 +39,6 @@ class LocalSettings {
 
   Future<void> setPhotoGridSize(int value) async {
     await _prefs.setInt(kPhotoGridSize, value);
-  }
-
-  bool hasEnabledMagicSearch() {
-    if (_prefs.containsKey(kEnableMagicSearch)) {
-      return _prefs.getBool(kEnableMagicSearch)!;
-    }
-    return false;
-  }
-
-  Future<void> setShouldEnableMagicSearch(bool value) async {
-    await _prefs.setBool(kEnableMagicSearch, value);
   }
 
   int getRateUsShownCount() {
@@ -100,10 +84,4 @@ class LocalSettings {
     await _prefs.setBool("remoteFetchEnabled", !remoteFetchEnabled);
   }
   //#endregion
-
-  /// toggleFaceClustering toggles the face clustering setting and returns the new value
-  Future<bool> toggleFaceClustering() async {
-    await _prefs.setBool(kEnableFaceClustering, !isFaceClusteringEnabled);
-    return isFaceClusteringEnabled;
-  }
 }
