@@ -203,10 +203,8 @@ class _MachineLearningSettingsPageState
       await SemanticSearchService.instance.init();
       unawaited(MLService.instance.runAllML(force: true));
     } else {
-      // todo: Take a call if we should disable ML from other devices as well
-      // when the user turns off indexing on mobile
-      // await UserRemoteFlagService.instance
-      //     .setBoolValue(UserRemoteFlagService.mlEnabled, false);
+      await UserRemoteFlagService.instance
+          .setBoolValue(UserRemoteFlagService.mlEnabled, false);
     }
     if (mounted) {
       setState(() {});
