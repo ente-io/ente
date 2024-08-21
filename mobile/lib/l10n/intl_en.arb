@@ -273,6 +273,10 @@
   "failedToApplyCode": "Failed to apply code",
   "enterReferralCode": "Enter referral code",
   "codeAppliedPageTitle": "Code applied",
+  "changeYourReferralCode": "Change your referral code",
+  "change": "Change",
+  "unavailableReferralCode": "Sorry, this code is unavailable.",
+  "codeChangeLimitReached": "Sorry, you've reached the limit of code changes.",
   "storageInGB": "{storageAmountInGB} GB",
   "claimed": "Claimed",
   "@claimed": {

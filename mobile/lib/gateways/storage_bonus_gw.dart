@@ -15,6 +15,15 @@ class StorageBonusGateway {
     return _enteDio.post("/storage-bonus/referral-claim?code=$code");
   }
 
+  Future<void> updateCode(String code) {
+    return _enteDio.post(
+      "/storage-bonus/change-code?code=$code",
+      data: {
+        "code": code,
+      },
+    );
+  }
+
   Future<BonusDetails> getBonusDetails() async {
     final response = await _enteDio.get("/storage-bonus/details");
     return BonusDetails.fromJson(response.data);
