@@ -377,7 +377,7 @@ func (r *Repository) FinishAuthentication(user *ente.User, req *http.Request, se
 	}
 
 	if time.Now().After(sessionData.Expires) {
-		err = stacktrace.NewError("session expired")
+		err = &ente.ApiError{Code: ente.SessionExpired, Message: "Session expired", HttpStatusCode: http.StatusGone}
 		return
 	}
 

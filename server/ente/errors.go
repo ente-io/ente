@@ -189,6 +189,8 @@ const (
 
 	// MaxPasskeysReached is thrown when user attempts to create more than max allowed passkeys
 	MaxPasskeysReached ErrorCode = "MAX_PASSKEYS_REACHED"
+
+	SessionExpired ErrorCode = "SESSION_EXPIRED"
 )
 
 type ApiError struct {
