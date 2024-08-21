@@ -49,6 +49,7 @@ extension ClipDB on MLDataDB {
   }
 
   Future<void> putMany(List<ClipEmbedding> embeddings) async {
+    if (embeddings.isEmpty) return;
     final db = await MLDataDB.instance.asyncDB;
     final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
     await db.executeBatch(
