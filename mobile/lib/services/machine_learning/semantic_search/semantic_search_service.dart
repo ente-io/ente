@@ -21,8 +21,6 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
-import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/ml_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
@@ -36,15 +34,10 @@ class SemanticSearchService {
   final LRUMap<String, List<double>> _queryCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
 
-  final _reloadCacheDebouncer = Debouncer(
-    const Duration(milliseconds: 4000),
-    executionInterval: const Duration(milliseconds: 8000),
-  );
-
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
-  List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
   bool _isCacheRefreshPending = true;
+  List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -128,14 +121,6 @@ class SemanticSearchService {
     Bus.instance.fire(EmbeddingCacheUpdatedEvent());
     _logger
         .info("Cached embeddings: " + _cachedImageEmbeddings.length.toString());
-  }
-
-  Future<List<int>> _getFileIDsToBeIndexed() async {
-    final uploadedFileIDs = await getIndexableFileIDs();
-    final embeddedFileIDs = await MLDataDB.instance.getIndexedFileIds();
-    embeddedFileIDs.removeWhere((key, value) => value < clipMlVersion);
-
-    return uploadedFileIDs.difference(embeddedFileIDs.keys.toSet()).toList();
   }
 
   Future<List<EnteFile>> getMatchingFiles(
