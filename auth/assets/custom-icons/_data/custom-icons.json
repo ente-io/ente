@@ -181,8 +181,7 @@
     },
     {
       "title": "enom"   
-    },
-   
+    },   
     {
       "title": "Epic Games",
       "slug": "epic_games",
@@ -259,7 +258,7 @@
     {
       "title": "Itch",
       "slug": "itch_io",
-      "hex": "e7685e"
+      "hex": "000000"
     },
     {
       "title": "IVPN",
