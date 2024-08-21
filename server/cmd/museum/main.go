@@ -612,7 +612,7 @@ func main() {
 	}
 
 	privateAPI.GET("/storage-bonus/details", storageBonusHandler.GetStorageBonusDetails)
-	privateAPI.GET("/storage-bonus/change-code", storageBonusHandler.UpdateReferralCode)
+	privateAPI.POST("/storage-bonus/change-code", storageBonusHandler.UpdateReferralCode)
 	privateAPI.GET("/storage-bonus/referral-view", storageBonusHandler.GetReferralView)
 	privateAPI.POST("/storage-bonus/referral-claim", storageBonusHandler.ClaimReferral)
 
