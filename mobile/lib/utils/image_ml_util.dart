@@ -1,10 +1,12 @@
 import "dart:async";
 import "dart:developer" show log;
+import "dart:io" show File;
 import "dart:math" show max, min;
 import "dart:typed_data" show Float32List, Uint8List, ByteData;
 import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
+import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/dimension.dart";
@@ -15,6 +17,24 @@ import 'package:photos/services/machine_learning/face_ml/face_filtering/blur_det
 
 /// All of the functions in this file are helper functions for using inside an isolate.
 /// Don't use them outside of a isolate, unless you are okay with UI jank!!!!
+
+final _logger = Logger("ImageMlUtil");
+
+Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
+  try {
+    final imageData = await File(imagePath).readAsBytes();
+    final image = await decodeImageFromData(imageData);
+    final ByteData imageByteData = await getByteDataFromImage(image);
+    return (image, imageByteData);
+  } catch (e, s) {
+    _logger.severe(
+      'Error decoding image of format ${imagePath.split('.').last}:',
+      e,
+      s,
+    );
+    throw Exception('InvalidImageFormatException: Error decoding image');
+  }
+}
 
 /// Decodes [Uint8List] image data to an ui.[Image] object.
 Future<Image> decodeImageFromData(Uint8List imageData) async {

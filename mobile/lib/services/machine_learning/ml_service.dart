@@ -3,7 +3,7 @@ import "dart:io" show Platform;
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List;
 
-import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/event_bus.dart";
@@ -23,7 +23,6 @@ import 'package:photos/services/machine_learning/face_ml/face_embedding/face_emb
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
@@ -373,7 +372,6 @@ class MLService {
   }
 
   Future<bool> processImage(FileMLInstruction instruction) async {
-    // TODO: clean this function up
     _logger.info(
       "`processImage` start processing image with uploadedFileID: ${instruction.file.uploadedFileID}",
     );
@@ -383,6 +381,7 @@ class MLService {
       final MLResult? result = await MLIndexingIsolate.instance.analyzeImage(
         instruction,
       );
+      // Check if there's no result simply because MLController paused indexing
       if (result == null) {
         if (!_shouldPauseIndexingAndClustering) {
           _logger.severe(
@@ -391,27 +390,23 @@ class MLService {
         }
         return actuallyRanML;
       }
+      // Check anything actually ran
+      actuallyRanML = result.ranML;
+      if (!actuallyRanML) return actuallyRanML;
+      // Prepare storing data on remote
+      final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
+          FileDataEntity.empty(
+            instruction.file.uploadedFileID!,
+            DataType.mlData,
+          );
+      // Faces results
       if (result.facesRan) {
-        actuallyRanML = true;
         final List<Face> faces = [];
-        if (result.foundNoFaces) {
-          debugPrint(
-            'No faces detected for file with name:${instruction.file.displayName}',
-          );
-          faces.add(
-            Face.empty(result.fileId, error: result.errorOccured),
-          );
+        if (result.faces!.isEmpty) {
+          faces.add(Face.empty(result.fileId));
+          _logger.info("no face detected, storing empty for ${result.fileId}");
         }
-        if (result.foundFaces) {
-          if (result.decodedImageSize.width == -1 ||
-              result.decodedImageSize.height == -1) {
-            _logger.severe(
-                "decodedImageSize is not stored correctly for image with "
-                "ID: ${instruction.file.uploadedFileID}");
-            _logger.info(
-              "Using aligned image size for image with ID: ${instruction.file.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${instruction.file.width}x${instruction.file.height} in the metadata",
-            );
-          }
+        if (result.faces!.isNotEmpty) {
           for (int i = 0; i < result.faces!.length; ++i) {
             faces.add(
               Face.fromFaceResult(
@@ -421,74 +416,73 @@ class MLService {
               ),
             );
           }
-        }
-        _logger.info("inserting ${faces.length} faces for ${result.fileId}");
-        if (!result.errorOccured) {
-          final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
-              FileDataEntity.empty(
-                instruction.file.uploadedFileID!,
-                DataType.mlData,
-              );
-          if (result.facesRan) {
-            dataEntity.putFace(
-              RemoteFaceEmbedding(
-                faces,
-                faceMlVersion,
-                client: client,
-                height: result.decodedImageSize.height,
-                width: result.decodedImageSize.width,
-              ),
-            );
-          }
-          if (result.clipRan) {
-            dataEntity.putClip(
-              RemoteClipEmbedding(
-                result.clip!.embedding,
-                version: clipMlVersion,
-                client: client,
-              ),
-            );
-          }
-          await FileDataService.instance.putFileData(
-            instruction.file,
-            dataEntity,
-          );
-        } else {
-          _logger.warning(
-            'Skipped putting embedding because of error ${result.toJsonString()}',
-          );
+          _logger.info("storing ${faces.length} faces for ${result.fileId}");
         }
         await MLDataDB.instance.bulkInsertFaces(faces);
+        dataEntity.putFace(
+          RemoteFaceEmbedding(
+            faces,
+            faceMlVersion,
+            client: client,
+            height: result.decodedImageSize.height,
+            width: result.decodedImageSize.width,
+          ),
+        );
       }
-
+      // Clip results
       if (result.clipRan) {
-        actuallyRanML = true;
         await SemanticSearchService.storeClipImageResult(
           result.clip!,
         );
+        dataEntity.putClip(
+          RemoteClipEmbedding(
+            result.clip!.embedding,
+            version: clipMlVersion,
+            client: client,
+          ),
+        );
       }
-    } on ThumbnailRetrievalException catch (e, s) {
-      _logger.severe(
-        'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty face so indexing does not get stuck',
-        e,
-        s,
-      );
-      await MLDataDB.instance.bulkInsertFaces(
-        [Face.empty(instruction.file.uploadedFileID!, error: true)],
-      );
-      await SemanticSearchService.storeEmptyClipImageResult(
+      // Storing all results on remote
+      await FileDataService.instance.putFileData(
         instruction.file,
+        dataEntity,
       );
-      return true;
+      return actuallyRanML;
     } catch (e, s) {
+      bool acceptedIssue = false;
+      final String errorString = e.toString();
+      if (errorString.contains('ThumbnailRetrievalException')) {
+        _logger.severe(
+          'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
+        acceptedIssue = true;
+      }
+      if (errorString.contains('InvalidImageFormatException: Error decoding image')) {
+        _logger.severe(
+          'InvalidImageFormatException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
+        acceptedIssue = true;
+      }
+      if (acceptedIssue) {
+        await MLDataDB.instance.bulkInsertFaces(
+          [Face.empty(instruction.file.uploadedFileID!, error: true)],
+        );
+        await SemanticSearchService.storeEmptyClipImageResult(
+          instruction.file,
+        );
+        return true;
+      }
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID}. Not storing any faces, which means it will be automatically retried later.",
+        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID}. Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );
       return false;
     }
-    return actuallyRanML;
   }
 
   Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {

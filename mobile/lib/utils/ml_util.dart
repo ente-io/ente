@@ -1,6 +1,5 @@
 import "dart:io" show File;
 import "dart:math" as math show sqrt, min, max;
-import "dart:typed_data" show ByteData;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
@@ -282,9 +281,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final time = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final imageData = await File(imagePath).readAsBytes();
-    final image = await decodeImageFromData(imageData);
-    final ByteData imageByteData = await getByteDataFromImage(image);
+    final (image, imageByteData) = await decodeImageFromPath(imagePath);
     _logger.info('Reading and decoding image took '
         '${DateTime.now().difference(time).inMilliseconds} ms');
     final decodedImageSize =
