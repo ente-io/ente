@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
@@ -18,6 +19,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -298,9 +300,12 @@ class FileAppBarState extends State<FileAppBar> {
         value: 6,
         child: Row(
           children: [
-            Icon(
-              Icons.people_outline_rounded,
-              color: Theme.of(context).iconTheme.color,
+            SvgPicture.asset(
+              "assets/icons/guest_view_icon.svg",
+              colorFilter: ColorFilter.mode(
+                getEnteColorScheme(context).textBase,
+                BlendMode.srcIn,
+              ),
             ),
             const Padding(
               padding: EdgeInsets.all(8),
