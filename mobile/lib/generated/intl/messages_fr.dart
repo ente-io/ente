@@ -417,6 +417,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Veuillez consulter votre boîte de courriels (et les indésirables) pour compléter la vérification"),
         "checking": MessageLookupByLibrary.simpleMessage("Vérification..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Sélectionnez des photos et essayez la \"Vue Invité\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Vous montrez des photos à un ami ? Pas de souci, il ne pourra pas trop faire défiler. La vue invité verrouille les photos que vous sélectionnez."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Vue Invité"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "Nous avons ajouté le support pour visionner des photos panoramiques avec des vues à 360 degrés. L\'expérience est immersive avec une navigation basée sur le mouvement !"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Visionneuse Panorama"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Découvrez notre nouveau lecteur vidéo avec de meilleurs contrôles de lecture et le support des vidéos HDR."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Lecteur Vidéo"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Réclamer le stockage gratuit"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Réclamez plus !"),

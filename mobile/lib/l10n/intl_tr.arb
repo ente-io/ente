@@ -1289,5 +1289,14 @@
   "removePublicLinks": "Remove public links",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
   "guestView": "Guest view",
-  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
+  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings.",
+
+  "cl_guest_view_title": "Misafir Görünümü",
+  "cl_guest_view_description": "Telefonunuzu bir arkadaşınıza fotoğraf göstermek için mi veriyorsunuz? Fazla kaydırmasından endişelenmeyin. Misafir görünümü seçtiğiniz fotoğraflarla sınırlı kalır.",
+  "cl_guest_view_call_to_action": "Fotoğrafları seçin ve \"Misafir Görünümü\"nü deneyin.",
+  "cl_panorama_viewer_title": "Panorama Görüntüleyici",
+  "cl_panorama_viewer_description": "360 derece görüşe sahip panorama fotoğrafları görüntüleme desteği ekledik. Hareket tabanlı gezinme ile etkileyici bir deneyim sunar!",
+  "cl_video_player_title": "Video Oynatıcı",
+  "cl_video_player_description": "Geliştirilmiş oynatma kontrolleri ve HDR video desteği ile yeni bir video oynatıcı sunuyoruz."
+
 }
