@@ -177,7 +177,7 @@ class MLDataDB {
     return result;
   }
 
-  Future<int> getIndexedFileCount({
+  Future<int> getFaceIndexedFileCount({
     int minimumMlVersion = faceMlVersion,
   }) async {
     final db = await instance.asyncDB;

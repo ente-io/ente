@@ -53,7 +53,8 @@ class FileMLInstruction {
 Future<IndexStatus> getIndexStatus() async {
   try {
     final int indexableFiles = (await getIndexableFileIDs()).length;
-    final int facesIndexedFiles = await MLDataDB.instance.getIndexedFileCount();
+    final int facesIndexedFiles =
+        await MLDataDB.instance.getFaceIndexedFileCount();
     final int clipIndexedFiles =
         await MLDataDB.instance.getClipIndexedFileCount();
     final int indexedFiles = math.min(facesIndexedFiles, clipIndexedFiles);
