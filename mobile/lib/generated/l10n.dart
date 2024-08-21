@@ -2056,6 +2056,46 @@ class S {
     );
   }
 
+  /// `Change your referral code`
+  String get changeYourReferralCode {
+    return Intl.message(
+      'Change your referral code',
+      name: 'changeYourReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change`
+  String get change {
+    return Intl.message(
+      'Change',
+      name: 'change',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this code is unavailable.`
+  String get unavailableReferralCode {
+    return Intl.message(
+      'Sorry, this code is unavailable.',
+      name: 'unavailableReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, you've reached the limit of code changes.`
+  String get codeChangeLimitReached {
+    return Intl.message(
+      'Sorry, you\'ve reached the limit of code changes.',
+      name: 'codeChangeLimitReached',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{storageAmountInGB} GB`
   String storageInGB(Object storageAmountInGB) {
     return Intl.message(
@@ -9375,10 +9415,10 @@ class S {
     );
   }
 
-  /// `Handing over your phone to show photos to a friend? Don't worry about them swiping too far.\nGuest view will lock them into the photos you select.`
+  /// `Handing over your phone to show photos to a friend? Don't worry about them swiping too far. Guest view will lock them into the photos you select.`
   String get cl_guest_view_description {
     return Intl.message(
-      'Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far.\nGuest view will lock them into the photos you select.',
+      'Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far. Guest view will lock them into the photos you select.',
       name: 'cl_guest_view_description',
       desc: '',
       args: [],

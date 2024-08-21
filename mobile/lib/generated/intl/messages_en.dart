@@ -413,6 +413,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
+        "change": MessageLookupByLibrary.simpleMessage("Change"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
@@ -422,6 +423,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Change password"),
         "changePermissions":
             MessageLookupByLibrary.simpleMessage("Change permissions?"),
+        "changeYourReferralCode":
+            MessageLookupByLibrary.simpleMessage("Change your referral code"),
         "checkForUpdates":
             MessageLookupByLibrary.simpleMessage("Check for updates"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
@@ -431,7 +434,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
             "Select photos and check out \"Guest view\"."),
         "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
-            "Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far.\nGuest view will lock them into the photos you select."),
+            "Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far. Guest view will lock them into the photos you select."),
         "cl_guest_view_title":
             MessageLookupByLibrary.simpleMessage("Guest View"),
         "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
@@ -465,6 +468,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
+        "codeChangeLimitReached": MessageLookupByLibrary.simpleMessage(
+            "Sorry, you\'ve reached the limit of code changes."),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Code copied to clipboard"),
         "codeUsedByYou":
@@ -1573,6 +1578,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Unarchive album"),
         "unarchiving": MessageLookupByLibrary.simpleMessage("Unarchiving..."),
+        "unavailableReferralCode": MessageLookupByLibrary.simpleMessage(
+            "Sorry, this code is unavailable."),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Uncategorized"),
         "unhide": MessageLookupByLibrary.simpleMessage("Unhide"),
         "unhideToAlbum":
