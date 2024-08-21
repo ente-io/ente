@@ -44,6 +44,7 @@ class SemanticSearchService {
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
   List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
+  bool _isCacheRefreshPending = true;
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -57,12 +58,9 @@ class SemanticSearchService {
     }
     _hasInitialized = true;
 
-    await _loadImageEmbeddings();
+    await _refreshClipCache();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      if (!_hasInitialized) return;
-      _reloadCacheDebouncer.run(() async {
-        await _loadImageEmbeddings();
-      });
+      _isCacheRefreshPending = true;
     });
 
     unawaited(_loadTextModel(delay: true));
@@ -77,6 +75,7 @@ class SemanticSearchService {
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
+    await _refreshClipCache();
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
@@ -114,7 +113,11 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<void> _loadImageEmbeddings() async {
+  Future<void> _refreshClipCache() async {
+    if (_isCacheRefreshPending == false) {
+      return;
+    }
+    _isCacheRefreshPending = false;
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
     _cachedImageEmbeddings = await MLDataDB.instance.getAll();
