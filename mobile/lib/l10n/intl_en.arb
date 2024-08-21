@@ -1305,7 +1305,7 @@
   "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings.",
 
   "cl_guest_view_title": "Guest View",
-  "cl_guest_view_description": "Handing over your phone to show photos to a friend? Don't worry about them swiping too far.\nGuest view will lock them into the photos you select.",
+  "cl_guest_view_description": "Handing over your phone to show photos to a friend? Don't worry about them swiping too far. Guest view will lock them into the photos you select.",
   "cl_guest_view_call_to_action": "Select photos and check out \"Guest view\".",
   "cl_panorama_viewer_title": "Panorama Viewer",
   "cl_panorama_viewer_description": "We've added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!",
