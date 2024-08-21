@@ -53,6 +53,15 @@ func (r *Repository) AddNewCode(ctx context.Context, userID int64, code string) 
 			HttpStatusCode: http.StatusTooManyRequests,
 		}, "max referral code change limit reached for user %d", userID)
 	}
+	// check if code already exists
+	var existCount int
+	err = r.DB.QueryRowContext(ctx, "SELECT COALESCE(COUNT(*),0) FROM referral_codes WHERE code = $1", code).Scan(&existCount)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to check if code already exists for user %d", userID)
+	}
+	if existCount > 0 {
+		return stacktrace.Propagate(entity.CodeAlreadyExistsErr, "storagebonus code %s already exists", code)
+	}
 	_, err = r.DB.ExecContext(ctx, "UPDATE referral_codes SET is_active = FALSE WHERE user_id = $1", userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to update remove existing code code for user %d", userID)
