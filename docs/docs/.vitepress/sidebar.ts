@@ -125,6 +125,10 @@ export const sidebar = [
                         text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",
                     },
+                    {
+                        text: "Photo dates",
+                        link: "/photos/faq/photo-dates",
+                    },
                 ],
             },
             {
