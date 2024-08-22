@@ -171,6 +171,8 @@ class MLService {
             'stopping indexing because user is not connected to wifi',
           );
           break;
+        } else {
+          await _ensureDownloadedModels();
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
@@ -498,6 +500,11 @@ class MLService {
     return _downloadModelLock.synchronized(() async {
       if (areModelsDownloaded) {
         _logger.finest("Models already downloaded");
+        return;
+      }
+      final goodInternet = await canUseHighBandwidth();
+      if (!goodInternet) {
+        _logger.info("Cannot download models because user is not connected to wifi");
         return;
       }
       _logger.info('Downloading models');

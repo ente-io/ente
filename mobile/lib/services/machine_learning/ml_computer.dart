@@ -158,8 +158,8 @@ class MLComputer {
   }
 
   Future<List<double>> runClipText(String query) async {
-    await _ensureLoadedClipTextModel();
     try {
+      await _ensureLoadedClipTextModel();
       final int clipAddress = ClipTextEncoder.instance.sessionAddress;
       final textEmbedding = await _runInIsolate(
         (
@@ -195,9 +195,10 @@ class MLComputer {
 
         // Load ClipText model
         final String modelName = ClipTextEncoder.instance.modelName;
-        final String modelRemotePath = ClipTextEncoder.instance.modelRemotePath;
-        final String modelPath =
-            await RemoteAssetsService.instance.getAssetPath(modelRemotePath);
+        final String? modelPath = await ClipTextEncoder.instance.downloadModelSafe();
+        if (modelPath == null) {
+          throw Exception("Could not download clip text model, no wifi");
+        }
         final address = await _runInIsolate(
           (
             MLComputerOperation.loadModel,
