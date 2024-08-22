@@ -2096,6 +2096,16 @@ class S {
     );
   }
 
+  /// `Please contact {familyAdminEmail} to change your code.`
+  String onlyFamilyAdminCanChangeCode(Object familyAdminEmail) {
+    return Intl.message(
+      'Please contact $familyAdminEmail to change your code.',
+      name: 'onlyFamilyAdminCanChangeCode',
+      desc: '',
+      args: [familyAdminEmail],
+    );
+  }
+
   /// `{storageAmountInGB} GB`
   String storageInGB(Object storageAmountInGB) {
     return Intl.message(
@@ -2966,10 +2976,10 @@ class S {
     );
   }
 
-  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.`
+  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.`
   String get mlIndexingDescription {
     return Intl.message(
-      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.',
+      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.',
       name: 'mlIndexingDescription',
       desc: '',
       args: [],

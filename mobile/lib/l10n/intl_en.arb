@@ -277,6 +277,7 @@
   "change": "Change",
   "unavailableReferralCode": "Sorry, this code is unavailable.",
   "codeChangeLimitReached": "Sorry, you've reached the limit of code changes.",
+  "onlyFamilyAdminCanChangeCode": "Please contact {familyAdminEmail} to change your code.",
   "storageInGB": "{storageAmountInGB} GB",
   "claimed": "Claimed",
   "@claimed": {
@@ -419,7 +420,7 @@
   "mlConsentPrivacy": "Please click here for more details about this feature in our privacy policy",
   "mlConsentConfirmation": "I understand, and wish to enable machine learning",
   "magicSearch": "Magic search",
-  "mlIndexingDescription": "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.",
+  "mlIndexingDescription": "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.",
   "loadingModel": "Downloading models...",
   "waitingForWifi": "Waiting for WiFi...",
   "status": "Status",
