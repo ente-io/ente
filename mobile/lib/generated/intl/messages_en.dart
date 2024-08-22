@@ -127,6 +127,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(name) => "Not ${name}?";
 
+  static String m71(familyAdminEmail) =>
+      "Please contact ${familyAdminEmail} to change your code.";
+
   static String m38(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
@@ -1067,6 +1070,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("On device"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "On <branding>ente</branding>"),
+        "onlyFamilyAdminCanChangeCode": m71,
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsCouldNotSaveEdits":
             MessageLookupByLibrary.simpleMessage("Oops, could not save edits"),
