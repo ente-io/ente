@@ -493,6 +493,13 @@ class MLService {
     }
   }
 
+  void triggerModelsDownload() {
+    if (!areModelsDownloaded && !_downloadModelLock.locked) {
+      _logger.info("Models not downloaded, starting download");
+      unawaited(_ensureDownloadedModels());
+    }
+  }
+
   Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {
     if (_downloadModelLock.locked) {
       _logger.finest("Download models already in progress");
@@ -504,7 +511,9 @@ class MLService {
       }
       final goodInternet = await canUseHighBandwidth();
       if (!goodInternet) {
-        _logger.info("Cannot download models because user is not connected to wifi");
+        _logger.info(
+          "Cannot download models because user is not connected to wifi",
+        );
         return;
       }
       _logger.info('Downloading models');
