@@ -7,7 +7,6 @@ import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_remote_flag_service.dart';
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/notification_widget.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
@@ -67,12 +66,6 @@ class _ErrorWarningHeaderState extends State<ErrorWarningHeader> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _showErrorBanner
-            ? Divider(
-                height: 8,
-                color: getEnteColorScheme(context).strokeFaint,
-              )
-            : const SizedBox.shrink(),
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
