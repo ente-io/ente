@@ -2926,10 +2926,10 @@ class S {
     );
   }
 
-  /// `If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted to remain private.`
+  /// `If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.`
   String get mlConsentDescription {
     return Intl.message(
-      'If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted to remain private.',
+      'If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.',
       name: 'mlConsentDescription',
       desc: '',
       args: [],
