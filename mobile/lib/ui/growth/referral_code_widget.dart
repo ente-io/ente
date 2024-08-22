@@ -3,6 +3,7 @@ import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/user_details.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -10,12 +11,14 @@ import "package:photos/utils/dialog_util.dart";
 // Figma: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=11219%3A62974&t=BRCLJhxXP11Q3Wyw-0
 class ReferralCodeWidget extends StatelessWidget {
   final String codeValue;
-  final bool shouldAllowEdit;
+  final bool shouldShowEdit;
+  final UserDetails? userDetails;
   final Function? notifyParent;
 
   const ReferralCodeWidget(
     this.codeValue, {
-    this.shouldAllowEdit = false,
+    this.shouldShowEdit = false,
+    this.userDetails,
     this.notifyParent,
     super.key,
   });
@@ -49,10 +52,26 @@ class ReferralCodeWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                shouldAllowEdit
+                shouldShowEdit
                     ? GestureDetector(
                         onTap: () {
-                          showUpdateReferralCodeDialog(context);
+                          if (userDetails!.isPartOfFamily() &&
+                              !userDetails!.isFamilyAdmin()) {
+                            final String familyAdmin = userDetails!
+                                .familyData!.members!
+                                .firstWhere((element) => element.isAdmin)
+                                .email;
+                            showInfoDialog(
+                              context,
+                              title: S.of(context).error,
+                              body: S
+                                  .of(context)
+                                  .onlyFamilyAdminCanChangeCode(familyAdmin),
+                              icon: Icons.error,
+                            );
+                          } else {
+                            showUpdateReferralCodeDialog(context);
+                          }
                         },
                         child: Icon(
                           Icons.edit,

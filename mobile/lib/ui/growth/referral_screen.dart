@@ -166,7 +166,8 @@ class ReferralWidget extends StatelessWidget {
                             const SizedBox(height: 12),
                             ReferralCodeWidget(
                               referralView.code,
-                              shouldAllowEdit: true,
+                              shouldShowEdit: true,
+                              userDetails: userDetails,
                               notifyParent: notifyParent,
                             ),
                             const SizedBox(height: 12),
