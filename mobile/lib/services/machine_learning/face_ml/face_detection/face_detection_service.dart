@@ -131,9 +131,15 @@ class FaceDetectionService extends MlModel {
     final runOptions = OrtRunOptions();
     final session = OrtSession.fromAddress(sessionAddress);
     final List<OrtValue?> outputs = session.run(runOptions, inputs);
-    // inputOrt.release();
-    // runOptions.release();
-    return outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+    final result =
+        outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+    inputOrt.release();
+    runOptions.release();
+    outputs.forEach((element) {
+      element?.release();
+    });
+
+    return result;
   }
 
   static Future<List<List<List<double>>>> _runPlatformPluginPredict(
