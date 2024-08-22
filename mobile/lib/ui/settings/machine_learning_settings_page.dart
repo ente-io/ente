@@ -363,6 +363,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      MLService.instance.triggerML();
       setState(() {});
     });
   }

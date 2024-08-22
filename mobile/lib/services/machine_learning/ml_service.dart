@@ -55,6 +55,7 @@ class MLService {
   bool _showClusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
+  bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
 
   static const int _fileDownloadLimit = 10;
@@ -118,6 +119,7 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (_cannotRunMLFunction() && !force) return;
+      _isRunningML = true;
 
       await sync();
 
@@ -134,6 +136,14 @@ class MLService {
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
       rethrow;
+    } finally {
+      _isRunningML = false;
+    }
+  }
+
+  void triggerML() {
+    if (_mlControllerStatus && !_isIndexingOrClusteringRunning && !_isRunningML) {
+      unawaited(runAllML());
     }
   }
 
