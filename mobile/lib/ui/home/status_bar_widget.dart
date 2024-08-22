@@ -38,6 +38,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   @override
   void initState() {
+    super.initState();
+
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       _logger.info("Received event " + event.status.toString());
       if (event.status == SyncStatus.error) {
@@ -72,7 +74,6 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         setState(() {});
       }
     });
-    super.initState();
   }
 
   @override
@@ -142,13 +143,14 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   @override
   void initState() {
+    super.initState();
+
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       setState(() {
         _event = event;
       });
     });
     _event = SyncService.instance.getLastSyncStatusEvent();
-    super.initState();
   }
 
   @override
