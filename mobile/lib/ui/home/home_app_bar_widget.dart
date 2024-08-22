@@ -78,7 +78,7 @@ class _HomeAppBarWidgetState extends State<HomeAppBarWidget> {
   AppBar build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return AppBar(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundElevated,
       elevation: 4,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.black.withOpacity(0.2),
