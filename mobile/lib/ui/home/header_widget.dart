@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import "package:photos/ui/home/error_warning_header_widget.dart";
 import "package:photos/ui/home/memories/memories_widget.dart";
-import 'package:photos/ui/home/status_bar_widget.dart';
 
 class HeaderWidget extends StatelessWidget {
   const HeaderWidget({
@@ -14,7 +14,7 @@ class HeaderWidget extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        StatusBarWidget(),
+        ErrorWarningHeader(),
         MemoriesWidget(),
       ],
     );
