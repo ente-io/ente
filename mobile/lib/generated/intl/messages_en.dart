@@ -991,7 +991,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
             "I understand, and wish to enable machine learning"),
         "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
-            "If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted."),
+            "If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted to remain private."),
         "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
             "Please click here for more details about this feature in our privacy policy"),
         "mlConsentTitle":
