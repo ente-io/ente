@@ -551,7 +551,7 @@ class MLService {
   }
 
   bool _cannotRunMLFunction({String function = ""}) {
-    if (kDebugMode && Platform.isIOS) {
+    if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
       return false;
     }
     if (_isIndexingOrClusteringRunning) {
