@@ -35,7 +35,7 @@ func (h *UserHandler) SendOTT(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Email id is missing"))
 		return
 	}
-	err := h.UserController.SendEmailOTT(c, email, request.Client, request.Purpose)
+	err := h.UserController.SendEmailOTT(c, email, request.Purpose)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

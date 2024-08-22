@@ -23,11 +23,11 @@ const (
 	FilesCollectedTemplateID            = "files_collected"
 	FilesCollectedSubject               = "You've got photos!"
 	SubscriptionUpgradedTemplate        = "subscription_upgraded.html"
-	SubscriptionUpgradedSubject         = "Thank you for choosing ente!"
+	SubscriptionUpgradedSubject         = "Thank you for choosing Ente!"
 	FilesCollectedMuteDurationInMinutes = 10
 	StorageLimitExceededSubject         = "[Alert] You have exceeded your storage limit"
 	ReferralSuccessfulTemplate          = "successful_referral.html"
-	ReferralSuccessfulSubject           = "You've earned 10 GB on ente! 🎁"
+	ReferralSuccessfulSubject           = "You've earned 10 GB on Ente! 🎁"
 )
 
 type EmailNotificationController struct {
