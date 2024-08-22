@@ -26,7 +26,7 @@ allows you to automate backups to ente's cloud.
    where you can add and remove watched folders.
 
 2. To start watching a folder, press the **Add folder** button and select the
-   folder on your laptop that you want to watch for any changes. You can also
+   folder on your system that you want to watch for any changes. You can also
    drag and drop the folder here.
 
 3. If the folder has nesting, you will see two options - **A single album** and
