@@ -165,12 +165,13 @@ class MLService {
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
 
+      stream:
       await for (final chunk in instructionStream) {
         if (!await canUseHighBandwidth()) {
           _logger.info(
             'stopping indexing because user is not connected to wifi',
           );
-          break;
+          break stream;
         } else {
           await _ensureDownloadedModels();
         }
@@ -178,7 +179,7 @@ class MLService {
         for (final instruction in chunk) {
           if (_shouldPauseIndexingAndClustering) {
             _logger.info("indexAllImages() was paused, stopping");
-            break;
+            break stream;
           }
           await _ensureLoadedModels(instruction);
           futures.add(processImage(instruction));
