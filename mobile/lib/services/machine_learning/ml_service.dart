@@ -57,7 +57,7 @@ class MLService {
   bool _isIndexingOrClusteringRunning = false;
   bool _shouldPauseIndexingAndClustering = false;
 
-  static const int _fileDownloadLimit = 10;
+  static final int _fileDownloadLimit = Platform.isIOS ? 5 : 10;
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]

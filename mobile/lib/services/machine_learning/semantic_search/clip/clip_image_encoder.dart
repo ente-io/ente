@@ -53,6 +53,9 @@ class ClipImageEncoder extends MlModel {
     final runOptions = OrtRunOptions();
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
+    inputOrt.release();
+    runOptions.release();
+    outputs.forEach((element) => element?.release());
     normalizeEmbedding(embedding);
     w.stopWithLog("done");
     return embedding;

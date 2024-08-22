@@ -13,6 +13,12 @@ class FileDataResponse {
     required this.pendingIndexFileIDs,
   });
 
+  // empty response
+  FileDataResponse.empty()
+      : data = {},
+        fetchErrorFileIDs = {},
+        pendingIndexFileIDs = {};
+
   String debugLog() {
     final nonZeroFetchErrorFileIDs = fetchErrorFileIDs.isNotEmpty
         ? 'errorForFileIDs: ${fetchErrorFileIDs.length}'
