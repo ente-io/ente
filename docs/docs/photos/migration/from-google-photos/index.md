@@ -40,9 +40,9 @@ it with Ente.
 
 9. Open [our desktop app](https://ente.io/download/desktop), click on "Upload",
    select "Google takeout" and pick the ZIP file you just downloaded.
-   
->  If you were provided with multiple ZIP files, please extract **all** the
->  files into one folder and select that folder instead.
+
+> If you were provided with multiple ZIP files, please extract **all** the files
+> into one folder and select that folder instead.
 
 ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
