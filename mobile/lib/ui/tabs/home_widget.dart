@@ -41,7 +41,6 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
-import "package:photos/ui/home/home_app_bar_widget.dart";
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/home_gallery_widget.dart';
 import 'package:photos/ui/home/landing_page_widget.dart';
@@ -369,7 +368,6 @@ class _HomeWidgetState extends State<HomeWidget> {
               backgroundColor: getEnteColorScheme(context).backgroundElevated,
             ),
           ),
-
           resizeToAvoidBottomInset: false,
         ),
       ),
@@ -430,25 +428,12 @@ class _HomeWidgetState extends State<HomeWidget> {
               children: [
                 _showShowBackupHook
                     ? const StartBackupHookWidget(headerWidget: _headerWidget)
-                    : Stack(
-                        children: [
-                          const Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: HomeAppBarWidget(),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: kToolbarHeight),
-                            child: HomeGalleryWidget(
-                              header: _headerWidget,
-                              footer: const SizedBox(
-                                height: 160,
-                              ),
-                              selectedFiles: _selectedFiles,
-                            ),
-                          ),
-                        ],
+                    : HomeGalleryWidget(
+                        header: _headerWidget,
+                        footer: const SizedBox(
+                          height: 160,
+                        ),
+                        selectedFiles: _selectedFiles,
                       ),
                 _userCollectionsTab,
                 _sharedCollectionTab,
