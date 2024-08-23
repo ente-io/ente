@@ -2591,17 +2591,17 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-onnxruntime-common@1.18.0:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/onnxruntime-common/-/onnxruntime-common-1.18.0.tgz#b904dc6ff134e7f21a3eab702fac17538f59e116"
-  integrity sha512-lufrSzX6QdKrktAELG5x5VkBpapbCeS3dQwrXbN0eD9rHvU0yAWl7Ztju9FvgAKWvwd/teEKJNj3OwM6eTZh3Q==
+onnxruntime-common@1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/onnxruntime-common/-/onnxruntime-common-1.19.0.tgz#1d913321caa5eda76775c496d9f0f831dd30bec6"
+  integrity sha512-Oo16UIJ/xLOtZDVGcL4bL8EP8MiNFztyBmR3pB14D+cl/UCpOgHHzEk0MADSmYXQ0FgyEegPXtOFcJqhq1YRsw==
 
-onnxruntime-node@^1.18:
-  version "1.18.0"
-  resolved "https://registry.yarnpkg.com/onnxruntime-node/-/onnxruntime-node-1.18.0.tgz#ad3947365ca038ec3a16fa4c48972708ccd294e9"
-  integrity sha512-iTnFcxKpmywCatx8ov4GTbECe3tJk2Bp1OA2mWRJde78q+7tpPYBhKMnwhlaoKy9oKQcy4UoEuuhoy2PSD13ww==
+onnxruntime-node@^1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/onnxruntime-node/-/onnxruntime-node-1.19.0.tgz#7ce538eb400cf2370023e7f07f7e7a4d7589cc1f"
+  integrity sha512-JivYcrZ9H9YPpHnP+5rTVTJjzuD+ZB0TsB0//e2La0ViYNG0hmTvnwFgmRoes6F7E1PyVMpyRftmcl9pnIWsnw==
   dependencies:
-    onnxruntime-common "1.18.0"
+    onnxruntime-common "1.19.0"
     tar "^7.0.1"
 
 optionator@^0.9.3:
