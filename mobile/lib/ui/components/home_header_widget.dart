@@ -1,83 +1,48 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/local_sync_service.dart";
-import "package:photos/theme/text_style.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/home/status_bar_widget.dart";
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 
-class HomeAppBarWidget extends StatefulWidget {
-  const HomeAppBarWidget({super.key});
+class HomeHeaderWidget extends StatefulWidget {
+  final Widget centerWidget;
+  const HomeHeaderWidget({required this.centerWidget, Key? key})
+      : super(key: key);
 
   @override
-  State<HomeAppBarWidget> createState() => _HomeAppBarWidgetState();
+  State<HomeHeaderWidget> createState() => _HomeHeaderWidgetState();
 }
 
-class _HomeAppBarWidgetState extends State<HomeAppBarWidget> {
-  bool _showStatus = false;
-  bool _showErrorBanner = false;
-
-  late StreamSubscription<SyncStatusUpdate> _subscription;
-  final _logger = Logger("HomeAppBarWidget");
-
+class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
-  void initState() {
-    super.initState();
-    _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      _logger.info("Received event " + event.status.toString());
-
-      if (event.status == SyncStatus.error) {
-        setState(() {
-          _showErrorBanner = true;
-        });
-      } else {
-        setState(() {
-          _showErrorBanner = false;
-        });
-      }
-
-      if (event.status == SyncStatus.completedFirstGalleryImport ||
-          event.status == SyncStatus.completedBackup) {
-        Future.delayed(const Duration(milliseconds: 2000), () {
-          if (mounted) {
-            setState(() {
-              _showStatus = false;
-            });
-          }
-        });
-      } else {
-        setState(() {
-          _showStatus = true;
-        });
-      }
-    });
-  }
-
-  dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-
-  @override
-  AppBar build(BuildContext context) {
-    return AppBar(
-      centerTitle: true,
-      title: _showStatus
-          ? _showErrorBanner
-              ? const Text("ente", style: brandStyleMedium)
-              : const SyncStatusWidget()
-          : const Text("ente", style: brandStyleMedium),
-      actions: [
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButtonWidget(
+              iconButtonType: IconButtonType.primary,
+              icon: Icons.menu_outlined,
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+          ],
+        ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: widget.centerWidget,
+        ),
         IconButtonWidget(
           icon: Icons.add_photo_alternate_outlined,
           iconButtonType: IconButtonType.primary,
