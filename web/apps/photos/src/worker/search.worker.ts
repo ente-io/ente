@@ -68,7 +68,7 @@ function isSearchedFile(file: EnteFile, search: Search) {
 }
 
 const isDateComponentsMatch = (
-    { year, month, day, weekday }: SearchDateComponents,
+    { year, month, day, weekday, hour }: SearchDateComponents,
     date: Date,
 ) => {
     // Components are guaranteed to have at least one attribute present, so
@@ -80,6 +80,7 @@ const isDateComponentsMatch = (
     if (match && month) match = date.getMonth() + 1 == month;
     if (match && day) match = date.getDate() == day;
     if (match && weekday) match = date.getDay() == weekday;
+    if (match && hour) match = date.getHours() == hour;
 
     return match;
 };

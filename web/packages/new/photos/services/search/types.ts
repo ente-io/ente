@@ -30,6 +30,11 @@ export interface SearchDateComponents {
      * specified one.
      */
     weekday?: number;
+    /**
+     * The hour of the day (0 to 23, with 0 as midnight), if the search string
+     * specified one.
+     */
+    hour?: number;
 }
 
 /**

@@ -40,15 +40,17 @@ export const parseChrono = (s: string): DateSearchResult[] =>
             const month = component("month");
             const day = component("day");
             const weekday = component("weekday");
+            const hour = component("hour");
 
-            if (!year && !month && !day && !weekday) return undefined;
-            const components = { year, month, day, weekday };
+            if (!year && !month && !day && !weekday && !hour) return undefined;
+            const components = { year, month, day, weekday, hour };
 
             const format: Intl.DateTimeFormatOptions = {};
             if (year) format.year = "numeric";
             if (month) format.month = "long";
             if (day) format.day = "numeric";
             if (weekday) format.weekday = "long";
+            if (hour) format.hour = "2-digit";
 
             const formatter = new Intl.DateTimeFormat(undefined, format);
             const label = formatter.format(p.date());
