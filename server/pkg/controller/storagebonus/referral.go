@@ -138,7 +138,7 @@ func (c *Controller) UpdateReferralCode(ctx *gin.Context, userID int64, code str
 	if !random.IsAlphanumeric(code) {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code is not alphanumeric"), "")
 	}
-	if len(code) < 4 || len(code) > 8 {
+	if len(code) < 4 || len(code) > 20 {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code length should be between 4 and 8"), "")
 	}
 	err := c.StorageBonus.AddNewCode(ctx, userID, code, isAdminEdit)
