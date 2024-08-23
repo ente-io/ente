@@ -2,6 +2,7 @@
 
 ## v1.7.4 (Unreleased)
 
+-   Improved date search, including support for day of week and hour of day.
 -   .
 
 ## v1.7.3
