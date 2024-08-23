@@ -1,32 +1,27 @@
+import { nullToUndefined } from "@/utils/transform";
+import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import type { SearchDateComponents } from "./types";
 
-const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
-
-export const parsePotentialDate = (
-    humanDate: string,
-): SearchDateComponents[] => {
-    const date = chrono.parseDate(humanDate);
-    const date1 = chrono.parseDate(`${humanDate} 1`);
-    if (date !== null) {
-        const dates = [
-            { month: date.getMonth() },
-            { date: date.getDate(), month: date.getMonth() },
-        ];
-        let reverse = false;
-        humanDate.split("").forEach((c) => {
-            if (DIGITS.has(c)) {
-                reverse = true;
-            }
-        });
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (reverse) {
-            return dates.reverse();
-        }
-        return dates;
-    }
-    if (date1) {
-        return [{ month: date1.getMonth() }];
-    }
-    return [];
-};
+/**
+ * Try to parse an arbitrary search string into sets of date components.
+ *
+ * e.g. "December 2022" will be parsed into a
+ *
+ *     [(year 2022, month 12, day undefined)]
+ *
+ * while "22 December 2022" will be parsed into
+ *
+ *     [(year 2022, month 12, day 22)]
+ */
+export const parseDateComponents = (s: string): SearchDateComponents[] =>
+    chrono.parse(s).map((result) => {
+        const p = result.start;
+        const component = (s: Component) =>
+            p.isCertain(s) ? nullToUndefined(p.get(s)) : undefined;
+        const year = component("year");
+        const month = component("month");
+        const day = component("day");
+        const date = p.date();
+        return { year, month, day, date };
+    });

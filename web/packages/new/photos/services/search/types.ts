@@ -10,18 +10,25 @@ import type { EnteFile } from "../../types/file";
  *
  * The components which were parsed will be set. The type doesn't enforce this,
  * but at least one component will be present.
- *
- * e.g. "December 2022" will be parsed into a (year 2022, month 12, day
- * undefined), while "22 December 2022" will be parsed into (year 2022, month
- * 12, day 22).
  */
 export interface SearchDateComponents {
-    /** The year, if the search string specified one. */
+    /**
+     * The year, if the search string specified one.
+     */
     year: number | undefined;
-    /** The month, if the search string specified one. */
+    /**
+     * The month, if the search string specified one.
+     */
     month: number | undefined;
-    /** The day of the month, if the search string specified one. */
+    /**
+     * The day of the month, if the search string specified one.
+     */
     day: number | undefined;
+    /**
+     * The "best" guess at the exact JavaScript {@link Date} that was intended
+     * by the search string.
+     */
+    date: Date;
 }
 
 /**
