@@ -64,7 +64,7 @@ export const ffmpegExec = async (
 
         await execAsync(cmd);
 
-        return fs.readFile(outputFilePath);
+        return await fs.readFile(outputFilePath);
     } finally {
         if (isInputFileTemporary)
             await deleteTempFileIgnoringErrors(inputFilePath);
