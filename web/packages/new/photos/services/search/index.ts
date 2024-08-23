@@ -1,7 +1,7 @@
 import { nullToUndefined } from "@/utils/transform";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
-import { t } from "i18next";
+import i18n, { t } from "i18next";
 import type { SearchDateComponents } from "./types";
 
 interface DateSearchResult {
@@ -50,9 +50,12 @@ export const parseChrono = (s: string): DateSearchResult[] =>
             if (month) format.month = "long";
             if (day) format.day = "numeric";
             if (weekday) format.weekday = "long";
-            if (hour) format.hour = "2-digit";
+            if (hour) {
+                format.hour = "numeric";
+                format.dayPeriod = "short";
+            }
 
-            const formatter = new Intl.DateTimeFormat(undefined, format);
+            const formatter = new Intl.DateTimeFormat(i18n.language, format);
             const label = formatter.format(p.date());
             return { components, label };
         })
