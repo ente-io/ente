@@ -7,7 +7,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
@@ -148,7 +148,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Run sync, indexing, clustering",
+            title: "Trigger run ML",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -166,7 +166,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Run indexing",
+            title: "Trigger run indexing",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -189,7 +189,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title:
-                      "Run clustering (${(100 * snapshot.data!).toStringAsFixed(0)}% done)",
+                      "Trigger clustering (${(100 * snapshot.data!).toStringAsFixed(0)}% done)",
                 );
               }
               return const SizedBox.shrink();
@@ -202,7 +202,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await PersonService.instance.fetchRemoteClusterFeedback();
               MLService.instance.debugIndexingDisabled = false;
-              await MLService.instance.clusterAllImages(clusterInBuckets: true);
+              await MLService.instance.clusterAllImages();
               Bus.instance.fire(PeopleChangedEvent());
               showShortToast(context, "Done");
             } catch (e, s) {
@@ -211,32 +211,32 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             }
           },
         ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Check for mixed clusters",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              final susClusters =
-                  await ClusterFeedbackService.instance.checkForMixedClusters();
-              for (final clusterinfo in susClusters) {
-                Future.delayed(const Duration(seconds: 4), () {
-                  showToast(
-                    context,
-                    'Cluster with ${clusterinfo.$2} photos is sus',
-                  );
-                });
-              }
-            } catch (e, s) {
-              logger.warning('Checking for mixed clusters failed', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
-        ),
+        // sectionOptionSpacing,
+        // MenuItemWidget(
+        //   captionedTextWidget: const CaptionedTextWidget(
+        //     title: "Check for mixed clusters",
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     try {
+        //       final susClusters =
+        //           await ClusterFeedbackService.instance.checkForMixedClusters();
+        //       for (final clusterinfo in susClusters) {
+        //         Future.delayed(const Duration(seconds: 4), () {
+        //           showToast(
+        //             context,
+        //             'Cluster with ${clusterinfo.$2} photos is sus',
+        //           );
+        //         });
+        //       }
+        //     } catch (e, s) {
+        //       logger.warning('Checking for mixed clusters failed', e, s);
+        //       await showGenericErrorDialog(context: context, error: e);
+        //     }
+        //   },
+        // ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
@@ -247,8 +247,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await PersonService.instance.reconcileClusters();
-              Bus.instance.fire(PeopleChangedEvent());
+              await FaceRecognitionService.instance.sync();
               showShortToast(context, "Done");
             } catch (e, s) {
               logger.warning('sync person mappings failed ', e, s);
@@ -270,11 +269,11 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "This will drop all people and their related feedback. It will keep clustering labels and embeddings untouched.",
+                  "This will drop all people and their related feedback stored locally. It will keep clustering labels and embeddings untouched, as well as persons stored on remote.",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
-                  await MLDataDB.instance.dropFeedbackTables();
+                  await MLDataDB.instance.dropFacesFeedbackTables();
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
@@ -298,7 +297,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "This will delete all people, their related feedback and clustering labels. It will keep embeddings untouched.",
+                  "This will delete all people (also from remote), their related feedback and clustering labels. It will keep embeddings untouched.",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
@@ -321,7 +320,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset faces everything (embeddings)",
+            title: "Reset all local faces",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -331,7 +330,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "You will need to again re-index all the faces. You can drop feedback if you want to label again",
+                  "This will drop all local faces data. You will need to again re-index faces.",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
@@ -349,7 +348,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         ),
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset clip embeddings",
+            title: "Reset all local clip",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,

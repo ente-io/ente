@@ -942,7 +942,7 @@ class MLDataDB {
   }
 
   /// WARNING: This will delete ALL data in the tables! Only use this for debug/testing purposes!
-  Future<void> dropFeedbackTables() async {
+  Future<void> dropFacesFeedbackTables() async {
     try {
       final db = await instance.asyncDB;
 
