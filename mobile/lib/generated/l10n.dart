@@ -2096,6 +2096,16 @@ class S {
     );
   }
 
+  /// `Please contact {familyAdminEmail} to change your code.`
+  String onlyFamilyAdminCanChangeCode(Object familyAdminEmail) {
+    return Intl.message(
+      'Please contact $familyAdminEmail to change your code.',
+      name: 'onlyFamilyAdminCanChangeCode',
+      desc: '',
+      args: [familyAdminEmail],
+    );
+  }
+
   /// `{storageAmountInGB} GB`
   String storageInGB(Object storageAmountInGB) {
     return Intl.message(

@@ -76,7 +76,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );
-  static const _headerWidget = HeaderWidget();
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
@@ -359,6 +358,15 @@ class _HomeWidgetState extends State<HomeWidget> {
               },
             ),
           ),
+
+          ///To fix the status bar not adapting it's color when switching
+          ///screens the have different appbar colours.
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(0),
+            child: AppBar(
+              backgroundColor: getEnteColorScheme(context).backgroundBase,
+            ),
+          ),
           resizeToAvoidBottomInset: false,
         ),
       ),
@@ -418,9 +426,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               physics: const BouncingScrollPhysics(),
               children: [
                 _showShowBackupHook
-                    ? const StartBackupHookWidget(headerWidget: _headerWidget)
+                    ? const StartBackupHookWidget(headerWidget: HeaderWidget())
                     : HomeGalleryWidget(
-                        header: _headerWidget,
+                        header: const HeaderWidget(),
                         footer: const SizedBox(
                           height: 160,
                         ),

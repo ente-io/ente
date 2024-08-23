@@ -277,6 +277,7 @@
   "change": "Change",
   "unavailableReferralCode": "Sorry, this code is unavailable.",
   "codeChangeLimitReached": "Sorry, you've reached the limit of code changes.",
+  "onlyFamilyAdminCanChangeCode": "Please contact {familyAdminEmail} to change your code.",
   "storageInGB": "{storageAmountInGB} GB",
   "claimed": "Claimed",
   "@claimed": {

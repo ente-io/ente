@@ -54,6 +54,9 @@ class ClipTextEncoder extends MlModel {
     final session = OrtSession.fromAddress(address);
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
+    inputOrt.release();
+    runOptions.release();
+    outputs.forEach((element) => element?.release());
     normalizeEmbedding(embedding);
     return embedding;
   }

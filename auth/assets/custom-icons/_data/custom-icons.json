@@ -236,6 +236,13 @@
       "title": "HTX"
     },
     {
+      "title": "HuggingFace",
+      "altNames": [
+        "Hugging Face"
+      ],
+      "slug": "huggingface"
+    },
+    {
       "title": "IceDrive",
       "slug": "Icedrive"
     },
