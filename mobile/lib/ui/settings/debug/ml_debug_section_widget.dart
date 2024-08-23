@@ -20,7 +20,7 @@ import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class MLDebugSectionWidget extends StatefulWidget {
-  const MLDebugSectionWidget({Key? key}) : super(key: key);
+  const MLDebugSectionWidget({super.key});
 
   @override
   State<MLDebugSectionWidget> createState() => _MLDebugSectionWidgetState();
@@ -54,7 +54,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final Logger _logger = Logger("MLDebugSectionWidget");
+    final Logger logger = Logger("MLDebugSectionWidget");
     return Column(
       children: [
         MenuItemWidget(
@@ -84,7 +84,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('indexing failed ', e, s);
+              logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -106,7 +106,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('Remote fetch toggle failed ', e, s);
+              logger.warning('Remote fetch toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -132,7 +132,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('debugIndexingDisabled toggle failed ', e, s);
+              logger.warning('debugIndexingDisabled toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -150,7 +150,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               MLService.instance.debugIndexingDisabled = false;
               unawaited(MLService.instance.runAllML());
             } catch (e, s) {
-              _logger.warning('indexAndClusterAll failed ', e, s);
+              logger.warning('indexAndClusterAll failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -168,7 +168,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               MLService.instance.debugIndexingDisabled = false;
               unawaited(MLService.instance.indexAllImages());
             } catch (e, s) {
-              _logger.warning('indexing failed ', e, s);
+              logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -198,7 +198,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               Bus.instance.fire(PeopleChangedEvent());
               showShortToast(context, "Done");
             } catch (e, s) {
-              _logger.warning('clustering failed ', e, s);
+              logger.warning('clustering failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -224,7 +224,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 });
               }
             } catch (e, s) {
-              _logger.warning('Checking for mixed clusters failed', e, s);
+              logger.warning('Checking for mixed clusters failed', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -243,7 +243,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               Bus.instance.fire(PeopleChangedEvent());
               showShortToast(context, "Done");
             } catch (e, s) {
-              _logger.warning('sync person mappings failed ', e, s);
+              logger.warning('sync person mappings failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -270,7 +270,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('reset feedback failed ', e, s);
+                  logger.warning('reset feedback failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
@@ -303,7 +303,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('peopleToPersonMapping remove failed ', e, s);
+                  logger.warning('peopleToPersonMapping remove failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
@@ -332,7 +332,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('drop feedback failed ', e, s);
+                  logger.warning('drop feedback failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
@@ -358,7 +358,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   await SemanticSearchService.instance.clearIndexes();
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('drop clip embeddings failed ', e, s);
+                  logger.warning('drop clip embeddings failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
