@@ -46,7 +46,6 @@ export const getAutoCompleteSuggestions =
             const suggestions: Suggestion[] = [
                 await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
-                ...getHolidaySuggestion(searchPhrase),
                 ...getDateSuggestion(searchPhrase),
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
@@ -110,33 +109,6 @@ function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
     );
 }
 
-function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
-    return [
-        {
-            label: t("CHRISTMAS"),
-            value: { month: 12, date: 25 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("CHRISTMAS_EVE"),
-            value: { month: 12, date: 24 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("NEW_YEAR"),
-            value: { month: 1, date: 1 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("NEW_YEAR_EVE"),
-            value: { month: 12, date: 31 },
-            type: SuggestionType.DATE,
-        },
-    ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase),
-    );
-}
-
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     try {
         const people = await getAllPeople(200);
@@ -187,10 +159,10 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
 }
 
 const getDateSuggestion = (searchPhrase: string): Suggestion[] =>
-    parseDateComponents(searchPhrase).map(({ components, formattedDate }) => ({
+    parseDateComponents(searchPhrase).map(({ components, label }) => ({
         type: SuggestionType.DATE,
         value: components,
-        label: formattedDate,
+        label,
     }));
 
 function getCollectionSuggestion(

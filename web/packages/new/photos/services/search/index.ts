@@ -1,11 +1,12 @@
 import { nullToUndefined } from "@/utils/transform";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
+import { t } from "i18next";
 import type { SearchDateComponents } from "./types";
 
 interface DateSearchResult {
     components: SearchDateComponents;
-    formattedDate: string;
+    label: string;
 }
 
 /**
@@ -22,12 +23,10 @@ interface DateSearchResult {
  * In addition, also return a formatted representation of the "best" guess at
  * the date that was intended by the search string.
  */
-export const parseDateComponents = (s: string): DateSearchResult[] => {
-    const result = parseChrono(s);
-    if (result.length) return result;
-    // chrono does not parse years like "2024", so do it manually.
-    return parseYearComponents(s);
-};
+export const parseDateComponents = (s: string): DateSearchResult[] =>
+    parseChrono(s)
+        .concat(parseYearComponents(s))
+        .concat(parseHolidayComponents(s));
 
 export const parseChrono = (s: string): DateSearchResult[] =>
     chrono
@@ -52,20 +51,30 @@ export const parseChrono = (s: string): DateSearchResult[] =>
             if (weekday) format.weekday = "long";
 
             const formatter = new Intl.DateTimeFormat(undefined, format);
-            const formattedDate = formatter.format(p.date());
-            return { components, formattedDate };
+            const label = formatter.format(p.date());
+            return { components, label };
         })
         .filter((x) => x !== undefined);
 
-/** Parse a string like "2024" into a date search result. */
+/** chrono does not parse years like "2024", so do it manually. */
 const parseYearComponents = (s: string): DateSearchResult[] => {
     // s is already trimmed.
     if (s.length == 4) {
         const year = parseInt(s);
         if (year && year <= 9999) {
             const components = { year };
-            return [{ components, formattedDate: s }];
+            return [{ components, label: s }];
         }
     }
     return [];
 };
+
+const holidays: DateSearchResult[] = [
+    { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
+    { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
+    { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },
+    { components: { month: 12, day: 31 }, label: t("NEW_YEAR_EVE") },
+];
+
+const parseHolidayComponents = (s: string) =>
+    holidays.filter(({ label }) => label.toLowerCase().includes(s));
