@@ -35,6 +35,12 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    packagingOptions {
+        pickFirst 'lib/arm64-v8a/libonnxruntime.so'
+        pickFirst 'lib/armeabi-v7a/libonnxruntime.so'
+
+    }
+
     lintOptions {
         disable 'InvalidPackage'
         warningsAsErrors false
