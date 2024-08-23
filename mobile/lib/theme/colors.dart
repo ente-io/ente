@@ -163,8 +163,8 @@ const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevated2Light = Color.fromRGBO(251, 251, 251, 1);
 
 const Color backgroundBaseDark = Color.fromRGBO(0, 0, 0, 1);
-const Color backgroundElevatedDark = Color.fromRGBO(9, 9, 9, 1);
-const Color backgroundElevated2Dark = Color.fromRGBO(18, 18, 18, 1);
+const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
+const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
 // Backdrop Colors
 const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
