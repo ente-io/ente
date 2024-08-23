@@ -69,7 +69,8 @@ const parseYearComponents = (s: string): DateSearchResult[] => {
     return [];
 };
 
-const holidays: DateSearchResult[] = [
+// This cannot be a const, it needs to be evaluated lazily for the t() to work.
+const holidays = (): DateSearchResult[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
     { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
     { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },
@@ -77,4 +78,4 @@ const holidays: DateSearchResult[] = [
 ];
 
 const parseHolidayComponents = (s: string) =>
-    holidays.filter(({ label }) => label.toLowerCase().includes(s));
+    holidays().filter(({ label }) => label.toLowerCase().includes(s));
