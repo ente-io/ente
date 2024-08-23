@@ -218,6 +218,9 @@ For more details, see [translations.md](translations.md).
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
 
+-   [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
+    language queries into dates for showing search results.
+
 ### Face search
 
 -   [transformation-matrix](https://github.com/chrvadala/transformation-matrix)

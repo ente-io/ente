@@ -12,7 +12,7 @@
         "@stripe/stripe-js": "^1.13.2",
         "bip39": "^3.0.4",
         "bs58": "^5.0.0",
-        "chrono-node": "^2.2.6",
+        "chrono-node": "^2.7.6",
         "debounce": "^2.0.0",
         "exifreader": "^4",
         "fast-srp-hap": "^2.0.4",
