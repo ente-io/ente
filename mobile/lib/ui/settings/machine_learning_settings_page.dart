@@ -204,6 +204,7 @@ class _MachineLearningSettingsPageState
       await SemanticSearchService.instance.init();
       unawaited(MLService.instance.runAllML(force: true));
     } else {
+      MLService.instance.pauseIndexingAndClustering();
       await UserRemoteFlagService.instance
           .setBoolValue(UserRemoteFlagService.mlEnabled, false);
     }
