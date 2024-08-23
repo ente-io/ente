@@ -121,8 +121,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: MLService.instance.debugIndexingDisabled
-                ? "Debug enable indexing again"
-                : "Debug disable indexing",
+                ? "Enable auto indexing (debug)"
+                : "Disable auto indexing (debug)",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -133,6 +133,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   !MLService.instance.debugIndexingDisabled;
               if (MLService.instance.debugIndexingDisabled) {
                 MLService.instance.pauseIndexingAndClustering();
+              } else {
+                unawaited(MLService.instance.runAllML());
               }
               if (mounted) {
                 setState(() {});
