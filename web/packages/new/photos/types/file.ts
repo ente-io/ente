@@ -1,6 +1,5 @@
-import type { Metadata } from "@/media/file-metadata";
+import { type Metadata, ItemVisibility } from "@/media/file-metadata";
 import {
-    VISIBILITY_STATE,
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
 } from "./magicMetadata";
@@ -35,6 +34,7 @@ export interface EncryptedEnteFile {
     updationTime: number;
 }
 
+// TODO: Move into media
 export interface EnteFile
     extends Omit<
         EncryptedEnteFile,
@@ -46,8 +46,22 @@ export interface EnteFile
     > {
     metadata: Metadata;
     magicMetadata: FileMagicMetadata;
-    pubMagicMetadata: FilePublicMagicMetadata;
+    /**
+     * The envelope containing the public magic metadata associated with this
+     * file.
+     *
+     * In almost all cases, files will have associated public magic metadata
+     * since newer clients have something or the other they need to add to it.
+     * But its presence is not guaranteed.
+     */
+    pubMagicMetadata?: FilePublicMagicMetadata;
     isTrashed?: boolean;
+    /**
+     * The base64 encoded encryption key associated with this file.
+     *
+     * This key is used to encrypt both the file's contents, and any associated
+     * data (e.g., metadatum, thumbnail) for the file.
+     */
     key: string;
     src?: string;
     srcURLs?: SourceURLs;
@@ -109,7 +123,15 @@ export interface FileWithUpdatedPublicMagicMetadata {
 }
 
 export interface FileMagicMetadataProps {
-    visibility?: VISIBILITY_STATE;
+    /**
+     * The visibility of the file
+     *
+     * The file's visibility is user specific attribute, and thus we keep it in
+     * the private magic metadata. This allows the file's owner to share a file
+     * and edit its visibility without making revealing their visibility
+     * preference to the people with whom they have shared the file.
+     */
+    visibility?: ItemVisibility;
     filePaths?: string[];
 }
 

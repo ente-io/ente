@@ -9,13 +9,10 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import "package:photos/events/file_swipe_lock_event.dart";
-import 'package:photos/events/files_updated_event.dart';
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/models/metadata/file_magic.dart";
-import "package:photos/services/file_magic_service.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
@@ -28,15 +25,17 @@ class ZoomableImage extends StatefulWidget {
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
   final bool shouldCover;
+  final bool isGuestView;
 
   const ZoomableImage(
     this.photo, {
-    Key? key,
+    super.key,
     this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
     this.shouldCover = false,
-  }) : super(key: key);
+    this.isGuestView = false,
+  });
 
   @override
   State<ZoomableImage> createState() => _ZoomableImageState();
@@ -56,9 +55,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
-  bool _isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
 
   @override
   void initState() {
@@ -74,17 +70,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
-      setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
-      });
-    });
   }
 
   @override
   void dispose() {
-    _fileSwipeLockEventSubscription.cancel();
     _photoViewController.dispose();
     _scaleStateController.dispose();
     super.dispose();
@@ -161,7 +150,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
 
     final GestureDragUpdateCallback? verticalDragCallback =
-        _isZooming || _isFileSwipeLocked
+        _isZooming || widget.isGuestView
             ? null
             : (d) => {
                   if (!_isZooming)
@@ -358,29 +347,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
     // forcefully get finalImageInfo is dimensions are not available in metadata
     if (finalImageInfo == null && canUpdateMetadata && !_photo.hasDimensions) {
       finalImageInfo = await getImageInfo(finalImageProvider);
-    }
-    if (finalImageInfo != null && canUpdateMetadata) {
-      _updateAspectRatioIfNeeded(_photo, finalImageInfo).ignore();
-    }
-  }
-
-  // Fallback logic to finish back fill and update aspect
-  // ratio if needed.
-  Future<void> _updateAspectRatioIfNeeded(
-    EnteFile enteFile,
-    ImageInfo imageInfo,
-  ) async {
-    final int h = imageInfo.image.height, w = imageInfo.image.width;
-    if (h != enteFile.height || w != enteFile.width) {
-      final logMessage =
-          'Updating aspect ratio for from ${enteFile.height}x${enteFile.width} to ${h}x$w';
-      _logger.info(logMessage);
-      await FileMagicService.instance.updatePublicMagicMetadata([
-        enteFile,
-      ], {
-        heightKey: h,
-        widthKey: w,
-      });
     }
   }
 

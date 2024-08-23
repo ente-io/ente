@@ -2,11 +2,11 @@ import "dart:io" show File;
 
 import "package:flutter/foundation.dart";
 import "package:photos/core/cache/lru_map.dart";
-import "package:photos/face/model/box.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/ml/face/box.dart";
+import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/image_isolate.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
 
@@ -53,7 +53,7 @@ Future<Map<String, Uint8List>?> getFaceCrops(
     faceBoxes.add(e.value);
   }
   final List<Uint8List> faceCrop =
-      await ImageIsolate.instance.generateFaceThumbnails(
+      await MLComputer.instance.generateFaceThumbnails(
     // await generateJpgFaceThumbnails(
     imagePath,
     faceBoxes,

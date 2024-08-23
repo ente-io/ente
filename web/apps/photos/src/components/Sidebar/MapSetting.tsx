@@ -13,11 +13,16 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getMapEnabledStatus } from "services/userService";
+import type { SettingsDrawerProps } from "./types";
 
-export default function MapSettings({ open, onClose, onRootClose }) {
+export const MapSettings: React.FC<SettingsDrawerProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
     const { mapEnabled, updateMapEnabled } = useContext(AppContext);
     const [modifyMapEnabledView, setModifyMapEnabledView] = useState(false);
 
@@ -87,7 +92,7 @@ export default function MapSettings({ open, onClose, onRootClose }) {
             />
         </EnteDrawer>
     );
-}
+};
 
 const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
     const { somethingWentWrong, updateMapEnabled } = useContext(AppContext);
@@ -174,6 +179,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                                 a: (
                                     <Link
                                         target="_blank"
+                                        rel="noopener"
                                         href="https://www.openstreetmap.org/"
                                     />
                                 ),
@@ -183,7 +189,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                 </Box>
                 <Stack px={"8px"} spacing={"8px"}>
                     <Button color={"accent"} size="large" onClick={enableMap}>
-                        {t("ENABLE")}
+                        {t("enable")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
                         {t("cancel")}
@@ -214,7 +220,7 @@ function DisableMap({ onClose, disableMap, onRootClose }) {
                         size="large"
                         onClick={disableMap}
                     >
-                        {t("DISABLE")}
+                        {t("disable")}
                     </Button>
                     <Button color={"secondary"} size="large" onClick={onClose}>
                         {t("cancel")}

@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
@@ -47,7 +47,7 @@ String _actionName(
 
 Future<dynamic> showAssignPersonAction(
   BuildContext context, {
-  required int clusterID,
+  required String clusterID,
   PersonActionType actionType = PersonActionType.assignPerson,
   bool showOptionToAddNewPerson = true,
 }) {
@@ -75,7 +75,7 @@ Future<dynamic> showAssignPersonAction(
 
 class PersonActionSheet extends StatefulWidget {
   final PersonActionType actionType;
-  final int cluserID;
+  final String cluserID;
   final bool showOptionToCreateNewPerson;
   const PersonActionSheet({
     required this.actionType,
@@ -248,7 +248,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                             return;
                           }
                           userAlreadyAssigned = true;
-                          await FaceMLDataDB.instance.assignClusterToPerson(
+                          await MLDataDB.instance.assignClusterToPerson(
                             personID: person.$1.remoteID,
                             clusterID: widget.cluserID,
                           );
@@ -276,7 +276,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   Future<void> addNewPerson(
     BuildContext context, {
     String initValue = '',
-    required int clusterID,
+    required String clusterID,
   }) async {
     final result = await showTextInputDialog(
       context,

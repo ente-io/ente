@@ -127,6 +127,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(name) => "Not ${name}?";
 
+  static String m71(familyAdminEmail) =>
+      "Please contact ${familyAdminEmail} to change your code.";
+
   static String m38(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
@@ -301,8 +304,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Authentication required"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
@@ -413,6 +416,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "castInstruction": MessageLookupByLibrary.simpleMessage(
             "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
+        "change": MessageLookupByLibrary.simpleMessage("Change"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Change location of selected items?"),
@@ -422,12 +426,28 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Change password"),
         "changePermissions":
             MessageLookupByLibrary.simpleMessage("Change permissions?"),
+        "changeYourReferralCode":
+            MessageLookupByLibrary.simpleMessage("Change your referral code"),
         "checkForUpdates":
             MessageLookupByLibrary.simpleMessage("Check for updates"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Please check your inbox (and spam) to complete verification"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Check status"),
         "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Select photos and check out \"Guest view\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far. Guest view will lock them into the photos you select."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Guest View"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "We\'ve added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Panorama Viewer"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Introducing a fresh new video player, with better playback controls and support for HDR videos."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Video Player"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim free storage"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
@@ -451,6 +471,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Clustering progress"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
+        "codeChangeLimitReached": MessageLookupByLibrary.simpleMessage(
+            "Sorry, you\'ve reached the limit of code changes."),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Code copied to clipboard"),
         "codeUsedByYou":
@@ -656,9 +678,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Email your logs"),
         "empty": MessageLookupByLibrary.simpleMessage("Empty"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Empty trash?"),
+        "enable": MessageLookupByLibrary.simpleMessage("Enable"),
+        "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
+            "Ente supports on-device machine learning for face recognition, magic search and other advanced search features"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Enable Maps"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
+        "enabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Encrypting backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
@@ -793,6 +819,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Grant permission"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "We don\'t track app installs. It\'d help if you told us where you found us!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -942,6 +971,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
+        "magicSearchHint": MessageLookupByLibrary.simpleMessage(
+            "Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
@@ -958,8 +989,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m34,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mlConsent":
+            MessageLookupByLibrary.simpleMessage("Enable machine learning"),
+        "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
+            "I understand, and wish to enable machine learning"),
+        "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
+            "If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted."),
+        "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Please click here for more details about this feature in our privacy policy"),
+        "mlConsentTitle":
+            MessageLookupByLibrary.simpleMessage("Enable machine learning?"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed."),
+            "Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
@@ -968,6 +1009,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moments": MessageLookupByLibrary.simpleMessage("Moments"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
+        "moreDetails": MessageLookupByLibrary.simpleMessage("More details"),
         "moveItem": m35,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
         "moveToHiddenAlbum":
@@ -1007,6 +1049,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "No photos are being backed up right now"),
         "noPhotosFoundHere":
             MessageLookupByLibrary.simpleMessage("No photos found here"),
+        "noQuickLinksSelected":
+            MessageLookupByLibrary.simpleMessage("No quick links selected"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("No recovery key?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1026,6 +1070,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("On device"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "On <branding>ente</branding>"),
+        "onlyFamilyAdminCanChangeCode": m71,
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsCouldNotSaveEdits":
             MessageLookupByLibrary.simpleMessage("Oops, could not save edits"),
@@ -1106,6 +1151,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please grant permissions"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Please login again"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Please select quick links to remove"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Please try again"),
@@ -1197,7 +1244,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeFromAlbumTitle":
             MessageLookupByLibrary.simpleMessage("Remove from album?"),
         "removeFromFavorite":
-            MessageLookupByLibrary.simpleMessage("Remove from favorite"),
+            MessageLookupByLibrary.simpleMessage("Remove from favorites"),
         "removeLink": MessageLookupByLibrary.simpleMessage("Remove link"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remove participant"),
@@ -1206,6 +1253,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remove public link"),
+        "removePublicLinks":
+            MessageLookupByLibrary.simpleMessage("Remove public links"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Some of the items you are removing were added by other people, and you will lose access to them"),
         "removeWithQuestionMark":
@@ -1232,6 +1281,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Restore to album"),
         "restoringFiles":
             MessageLookupByLibrary.simpleMessage("Restoring files..."),
+        "resumableUploads":
+            MessageLookupByLibrary.simpleMessage("Resumable uploads"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
@@ -1441,8 +1492,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Suggest features"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped": MessageLookupByLibrary.simpleMessage("Sync stopped"),
         "syncing": MessageLookupByLibrary.simpleMessage("Syncing..."),
@@ -1494,6 +1543,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This will log you out of the following device:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage(
+                "This will remove public links of all selected quick links."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "To enable app lock, please setup device passcode or screen lock in your system settings."),
@@ -1530,6 +1582,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Unarchive album"),
         "unarchiving": MessageLookupByLibrary.simpleMessage("Unarchiving..."),
+        "unavailableReferralCode": MessageLookupByLibrary.simpleMessage(
+            "Sorry, this code is unavailable."),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Uncategorized"),
         "unhide": MessageLookupByLibrary.simpleMessage("Unhide"),
         "unhideToAlbum":

@@ -18,6 +18,10 @@ type UserReferralPlanStat struct {
 	UpgradedCount int      `json:"upgradedCount"`
 }
 
+type UpdateReferralCodeRequest struct {
+	Code string `json:"code" binding:"required"`
+}
+
 // PlanInfo represents the referral plan metadata
 type PlanInfo struct {
 	// IsEnabled indicates if the referral plan is enabled for given user

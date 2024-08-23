@@ -36,12 +36,16 @@ const MenuWithPeople = (props) => {
     return (
         <Menu {...props}>
             <Box my={1}>
-                {((isMLEnabled() && indexStatus) ||
-                    (people && people.length > 0)) && (
-                    <Box>
-                        <Legend>{t("PEOPLE")}</Legend>
-                    </Box>
-                )}
+                {isMLEnabled() &&
+                    indexStatus &&
+                    (people && people.length > 0 ? (
+                        <Box>
+                            <Legend>{t("PEOPLE")}</Legend>
+                        </Box>
+                    ) : (
+                        <Box height={6} />
+                    ))}
+
                 {isMLEnabled() && indexStatus && (
                     <Box>
                         <Caption>{indexStatusSuggestion.label}</Caption>

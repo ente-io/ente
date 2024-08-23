@@ -7,6 +7,7 @@
 //
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
+import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
@@ -24,7 +25,6 @@ import {
     warpAffineFloat32List,
 } from "./image";
 import { clamp } from "./math";
-import type { MLWorkerElectron } from "./worker-types";
 
 /**
  * The version of the face indexing pipeline implemented by the current client.
@@ -139,6 +139,17 @@ export interface Face {
      * This ID is guaranteed to be unique for all the faces detected in all the
      * files for the user. In particular, each file can have multiple faces but
      * they all will get their own unique {@link faceID}.
+     *
+     * This ID is also meant to be stable across reindexing. That is, if the
+     * same algorithm and hyperparameters are used to reindex the file, then it
+     * should result in the same face IDs. This allows us leeway in letting
+     * unnecessary reindexing happen in rare cases without invalidating the
+     * clusters that rely on the presence of the given face ID.
+     *
+     * Finally, this face ID is not completely opaque. It consists of underscore
+     * separated components, the first of which is the ID of the
+     * {@link EnteFile} to which this face belongs. Client code can rely on this
+     * structure and can parse it if needed.
      */
     faceID: string;
     /**
@@ -236,13 +247,13 @@ export interface Box {
  *
  * @param image The file's contents.
  *
- * @param electron The {@link MLWorkerElectron} instance that allows us to call
+ * @param electron The {@link ElectronMLWorker} instance that allows us to call
  * our Node.js layer to run the ONNX inference.
  */
 export const indexFaces = async (
     enteFile: EnteFile,
     { data: imageData }: ImageBitmapAndData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<FaceIndex> => ({
     width: imageData.width,
     height: imageData.height,
@@ -252,7 +263,7 @@ export const indexFaces = async (
 const indexFaces_ = async (
     fileID: number,
     imageData: ImageData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<Face[]> => {
     const { width, height } = imageData;
     const imageDimensions = { width, height };
@@ -316,7 +327,7 @@ const indexFaces_ = async (
  */
 const detectFaces = async (
     imageData: ImageData,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<YOLOFaceDetection[]> => {
     const rect = ({ width, height }: Dimensions) => ({
         x: 0,
@@ -878,7 +889,7 @@ const mobileFaceNetEmbeddingSize = 192;
  */
 const computeEmbeddings = async (
     faceData: Float32Array,
-    electron: MLWorkerElectron,
+    electron: ElectronMLWorker,
 ): Promise<Float32Array[]> => {
     const outputData = await electron.computeFaceEmbeddings(faceData);
 

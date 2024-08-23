@@ -126,13 +126,13 @@ Your new plan will go into effect immediately, and you only have to pay the
 difference. We will adjust your remaining pro-rated balance on the old plan when
 invoicing you for the new plan.
 
-For example, if you are half way through the year on the 100 GB yearly plan, and
-upgrade to the 500 GB yearly plan, then
+For example, if you are half way through the year on the 50 GB yearly plan, and
+upgrade to the 200 GB yearly plan, then
 
--   The new 500 GB yearly plan will go into effect immediately.
+-   The new 200 GB yearly plan will go into effect immediately.
 
 -   But we will reduce the charges for the first year by subtracting the
-    remaining half year balance of the 100 GB yearly plan that you'd already
+    remaining half year balance of the 50 GB yearly plan that you'd already
     paid.
 
 The same applies to monthly plans.
@@ -152,13 +152,4 @@ you can gain more value out of a single subscription.
 
 ## Is there a forever-free plan?
 
-Sorry, since we're building a business that does not involve monetization of
-user data, we have to charge to remain sustainable.
-
-We do offer a generous free trial for you to experience the product.
-
-## Will I need to pay for Ente Auth after my Ente Photos free plan expires?
-
-No, you will not need to pay for Ente Auth after your Ente Photos free plan
-expires. Ente Auth is completely free to use, and the expiration of your Ente
-Photos free plan will not impact your ability to access or use Ente Auth.
+Yes, we offer 5 GB of storage for free.

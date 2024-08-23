@@ -77,7 +77,7 @@ Future<void> _pickAegisJsonFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
+      "${context.l10n.importFailureDescNew}\n Error: ${e.toString()}",
     );
   }
 }

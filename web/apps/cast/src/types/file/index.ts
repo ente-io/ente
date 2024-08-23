@@ -1,8 +1,8 @@
 import type { Metadata } from "@/media/file-metadata";
+import { ItemVisibility } from "@/media/file-metadata";
 import type {
     EncryptedMagicMetadata,
     MagicMetadataCore,
-    VISIBILITY_STATE,
 } from "@/new/photos/types/magicMetadata";
 
 export interface MetadataFileAttributes {
@@ -65,7 +65,7 @@ export interface EnteFile
 }
 
 export interface FileMagicMetadataProps {
-    visibility?: VISIBILITY_STATE;
+    visibility?: ItemVisibility;
     filePaths?: string[];
 }
 

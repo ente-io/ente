@@ -2,7 +2,6 @@ module github.com/ente-io/museum
 
 go 1.21
 
-
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/GoKillers/libsodium-go v0.0.0-20171022220152-dd733721c3cb
@@ -24,6 +23,7 @@ require (
 	github.com/kong/go-srp v0.0.0-20191210190804-cde1efa3c083
 	github.com/lib/pq v1.8.0
 	github.com/lithammer/shortuuid/v3 v3.0.4
+	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pquerna/otp v1.3.0
 	github.com/prometheus/client_golang v1.11.1

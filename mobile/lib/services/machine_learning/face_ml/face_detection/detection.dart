@@ -1,6 +1,6 @@
 import 'dart:math' show max, min;
 
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/dimension.dart";
 
 enum FaceDirection { left, right, straight }
 

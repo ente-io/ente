@@ -271,8 +271,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("安卓, iOS, 网页端, 桌面端"),
         "androidSignInTitle": MessageLookupByLibrary.simpleMessage("需要身份验证"),
         "appLock": MessageLookupByLibrary.simpleMessage("应用锁"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("应用"),
@@ -281,7 +281,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("AppStore 订阅"),
         "archive": MessageLookupByLibrary.simpleMessage("存档"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("存档相册"),
-        "archiving": MessageLookupByLibrary.simpleMessage("正在归档中..."),
+        "archiving": MessageLookupByLibrary.simpleMessage("正在存档..."),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage("您确定要离开家庭计划吗？"),
         "areYouSureYouWantToCancel":
@@ -330,9 +330,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您将在此处看到可用的 Cast 设备。"),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
             "请确保已在“设置”中为 Ente Photos 应用打开本地网络权限。"),
-        "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
-        "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
-            "Time after which the app locks after being put in the background"),
+        "autoLock": MessageLookupByLibrary.simpleMessage("自动锁定"),
+        "autoLockFeatureDescription":
+            MessageLookupByLibrary.simpleMessage("应用程序进入后台后锁定的时间"),
         "autoLogoutMessage": MessageLookupByLibrary.simpleMessage(
             "由于技术故障，您已退出登录。对于由此造成的不便，我们深表歉意。"),
         "autoPair": MessageLookupByLibrary.simpleMessage("自动配对"),
@@ -367,7 +367,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请确保您的设备与电视处于同一网络。"),
         "castIPMismatchTitle": MessageLookupByLibrary.simpleMessage("投放相册失败"),
         "castInstruction": MessageLookupByLibrary.simpleMessage(
-            "在您要配对的设备上访问 cast.ente.io。\n输入下面的代码即可在电视上播放相册。"),
+            "在您要配对的设备上访问 cast.ente.io。\n在下框中输入代码即可在电视上播放相册。"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
         "changeLocationOfSelectedItems":
@@ -380,6 +380,18 @@ class MessageLookup extends MessageLookupByLibrary {
             "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("检查状态"),
         "checking": MessageLookupByLibrary.simpleMessage("正在检查..."),
+        "cl_guest_view_call_to_action":
+            MessageLookupByLibrary.simpleMessage("选择照片并查看\"访客视图\"。"),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "要把手机递给朋友看照片？别担心他们滑动太远。访客视图将锁定您选择的照片。"),
+        "cl_guest_view_title": MessageLookupByLibrary.simpleMessage("访客视图"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "我们新增了支持 360 度全景照片查看功能。结合动作导航，体验更加身临其境！"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("全景查看器"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "推出全新的视频播放器，具有更好的播放控制功能并支持 HDR 视频。"),
+        "cl_video_player_title": MessageLookupByLibrary.simpleMessage("视频播放器"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage("领取免费存储"),
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),
@@ -669,6 +681,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请在手机“设置”中授权软件访问所有照片"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("授予权限"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
+        "guestView": MessageLookupByLibrary.simpleMessage("访客视图"),
+        "guestViewEnablePreSteps":
+            MessageLookupByLibrary.simpleMessage("要启用访客视图，请在系统设置中设置设备密码或屏幕锁。"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"),
         "hearUsWhereTitle":
@@ -676,11 +691,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("帮助"),
         "hidden": MessageLookupByLibrary.simpleMessage("已隐藏"),
         "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
-        "hideContent": MessageLookupByLibrary.simpleMessage("Hide content"),
-        "hideContentDescriptionAndroid": MessageLookupByLibrary.simpleMessage(
-            "Hides app content in the app switcher and disables screenshots"),
-        "hideContentDescriptionIos": MessageLookupByLibrary.simpleMessage(
-            "Hides app content in the app switcher"),
+        "hideContent": MessageLookupByLibrary.simpleMessage("隐藏内容"),
+        "hideContentDescriptionAndroid":
+            MessageLookupByLibrary.simpleMessage("在应用切换器中隐藏应用内容并禁用屏幕截图"),
+        "hideContentDescriptionIos":
+            MessageLookupByLibrary.simpleMessage("在应用切换器中隐藏应用内容"),
         "hiding": MessageLookupByLibrary.simpleMessage("正在隐藏..."),
         "hostedAtOsmFrance": MessageLookupByLibrary.simpleMessage("法国 OSM 主办"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("工作原理"),
@@ -694,7 +709,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("忽略"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "此相册中的某些文件在上传时会被忽略，因为它们之前已从 Ente 中删除。"),
-        "immediately": MessageLookupByLibrary.simpleMessage("Immediately"),
+        "immediately": MessageLookupByLibrary.simpleMessage("立即"),
         "importing": MessageLookupByLibrary.simpleMessage("正在导入..."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("代码错误"),
         "incorrectPasswordTitle": MessageLookupByLibrary.simpleMessage("密码错误"),
@@ -857,6 +872,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage("目前没有照片正在备份"),
         "noPhotosFoundHere": MessageLookupByLibrary.simpleMessage("这里没有找到照片"),
+        "noQuickLinksSelected": MessageLookupByLibrary.simpleMessage("未选择快速链接"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage("没有恢复密钥吗？"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "由于我们端到端加密协议的性质，如果没有您的密码或恢复密钥，您的数据将无法解密"),
@@ -899,7 +915,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordLock": MessageLookupByLibrary.simpleMessage("密码锁"),
         "passwordStrength": m38,
         "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
-            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
+            "密码强度的计算考虑了密码的长度、使用的字符以及密码是否出现在最常用的 10,000 个密码中"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "我们不储存这个密码，所以如果忘记， <underline>我们将无法解密您的数据</underline>"),
         "paymentDetails": MessageLookupByLibrary.simpleMessage("付款明细"),
@@ -939,6 +955,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseEmailUsAt": m41,
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage("请授予权限"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage("请重新登录"),
+        "pleaseSelectQuickLinksToRemove":
+            MessageLookupByLibrary.simpleMessage("请选择要删除的快速链接"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage("请重试"),
         "pleaseVerifyTheCodeYouHaveEntered":
@@ -1016,6 +1034,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeParticipantBody": m45,
         "removePersonLabel": MessageLookupByLibrary.simpleMessage("移除人物标签"),
         "removePublicLink": MessageLookupByLibrary.simpleMessage("删除公开链接"),
+        "removePublicLinks": MessageLookupByLibrary.simpleMessage("删除公开链接"),
         "removeShareItemsWarning":
             MessageLookupByLibrary.simpleMessage("您要删除的某些项目是由其他人添加的，您将无法访问它们"),
         "removeWithQuestionMark": MessageLookupByLibrary.simpleMessage("要移除吗?"),
@@ -1200,15 +1219,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您的订阅似乎已过期。请订阅以启用分享。"),
         "subscription": MessageLookupByLibrary.simpleMessage("订阅"),
         "success": MessageLookupByLibrary.simpleMessage("成功"),
-        "successfullyArchived": MessageLookupByLibrary.simpleMessage("归档成功"),
+        "successfullyArchived": MessageLookupByLibrary.simpleMessage("存档成功"),
         "successfullyHid": MessageLookupByLibrary.simpleMessage("已成功隐藏"),
         "successfullyUnarchived":
-            MessageLookupByLibrary.simpleMessage("取消归档成功"),
+            MessageLookupByLibrary.simpleMessage("取消存档成功"),
         "successfullyUnhid": MessageLookupByLibrary.simpleMessage("已成功取消隐藏"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("建议新功能"),
         "support": MessageLookupByLibrary.simpleMessage("支持"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped": MessageLookupByLibrary.simpleMessage("同步已停止"),
         "syncing": MessageLookupByLibrary.simpleMessage("正在同步···"),
@@ -1254,6 +1271,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("这将使您在以下设备中退出登录："),
         "thisWillLogYouOutOfThisDevice":
             MessageLookupByLibrary.simpleMessage("这将使您在此设备上退出登录！"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage("这将删除所有选定的快速链接的公共链接。"),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage("要启用应用锁，请在系统设置中设置设备密码或屏幕锁定。"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage("隐藏照片或视频"),
@@ -1283,7 +1302,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "twofactorSetup": MessageLookupByLibrary.simpleMessage("双重认证设置"),
         "unarchive": MessageLookupByLibrary.simpleMessage("取消存档"),
         "unarchiveAlbum": MessageLookupByLibrary.simpleMessage("取消存档相册"),
-        "unarchiving": MessageLookupByLibrary.simpleMessage("正在取消归档..."),
+        "unarchiving": MessageLookupByLibrary.simpleMessage("正在取消存档..."),
         "uncategorized": MessageLookupByLibrary.simpleMessage("未分类的"),
         "unhide": MessageLookupByLibrary.simpleMessage("取消隐藏"),
         "unhideToAlbum": MessageLookupByLibrary.simpleMessage("取消隐藏到相册"),

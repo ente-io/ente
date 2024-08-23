@@ -1,27 +1,20 @@
-import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { pt } from "@/base/i18n";
-import { MLSettingsBeta } from "@/new/photos/components/MLSettingsBeta";
-import { canEnableML } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import ChevronRight from "@mui/icons-material/ChevronRight";
-import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
+import type { SettingsDrawerProps } from "./types";
 
-export default function AdvancedSettings({ open, onClose, onRootClose }) {
+export const AdvancedSettings: React.FC<SettingsDrawerProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
     const appContext = useContext(AppContext);
 
-    const [showMLSettings, setShowMLSettings] = useState(false);
-    const [openMLSettings, setOpenMLSettings] = useState(false);
-
-    useEffect(() => {
-        if (isDesktop) void canEnableML().then(setShowMLSettings);
-    }, []);
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -51,7 +44,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("ADVANCED")}
+                    title={t("advanced")}
                     onRootClose={handleRootClose}
                 />
 
@@ -71,30 +64,8 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                             />
                         </Box>
                     </Stack>
-
-                    {showMLSettings && (
-                        <Box>
-                            <MenuSectionTitle
-                                title={t("LABS")}
-                                icon={<ScienceIcon />}
-                            />
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    endIcon={<ChevronRight />}
-                                    onClick={() => setOpenMLSettings(true)}
-                                    label={pt("ML search")}
-                                />
-                            </MenuItemGroup>
-                        </Box>
-                    )}
                 </Box>
             </Stack>
-
-            <MLSettingsBeta
-                open={openMLSettings}
-                onClose={() => setOpenMLSettings(false)}
-                onRootClose={handleRootClose}
-            />
         </EnteDrawer>
     );
-}
+};

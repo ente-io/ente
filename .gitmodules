@@ -9,9 +9,6 @@
 [submodule "auth/assets/simple-icons"]
 	path = auth/assets/simple-icons
 	url = https://github.com/simple-icons/simple-icons.git
-[submodule "mobile/plugins/clip_ggml"]
-	path = mobile/plugins/clip_ggml
-	url = https://github.com/ente-io/clip-ggml.git
 [submodule "web/apps/photos/thirdparty/ffmpeg-wasm"]
 	path = web/apps/photos/thirdparty/ffmpeg-wasm
 	url = https://github.com/abhinavkgrd/ffmpeg.wasm.git

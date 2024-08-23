@@ -35,6 +35,12 @@ func shouldSkipBodyLog(method string, path string) bool {
 	if method == "PUT" && path == "/embeddings" {
 		return true
 	}
+	if path == "/user-entity/entity" && (method == "POST" || method == "PUT") {
+		return true
+	}
+	if path == "/files/data" && method == "PUT" {
+		return true
+	}
 	return false
 }
 
@@ -71,14 +77,16 @@ func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 			"req_uri":        c.Request.URL.Path,
 			"ua":             userAgent,
 		})
-		if shouldSkipBodyLog(reqMethod, c.Request.URL.Path) {
+		skipRequestLogUnlessError := shouldSkipBodyLog(reqMethod, c.Request.URL.Path)
+		if skipRequestLogUnlessError {
 			reqContextLogger = reqContextLogger.WithField("req_body", "redacted")
 		} else {
 			body, err := readBody(rdr1)
 			if err != nil {
 				logrus.Error("Error reading body", err)
+			} else {
+				reqContextLogger = reqContextLogger.WithField("req_body", body)
 			}
-			reqContextLogger = reqContextLogger.WithField("req_body", body)
 		}
 		reqContextLogger.Info("incoming")
 		c.Request.Body = rdr2
@@ -91,6 +99,14 @@ func Logger(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 			latency.WithLabelValues(strconv.Itoa(statusCode), reqMethod,
 				c.Request.Host, reqURI).
 				Observe(float64(latencyTime.Milliseconds()))
+		}
+		if statusCode >= 400 && !skipRequestLogUnlessError {
+			body, err := readBody(rdr1)
+			if err != nil {
+				logrus.Error("Error reading body", err)
+			} else {
+				reqContextLogger = reqContextLogger.WithField("req_body", body)
+			}
 		}
 		reqContextLogger.WithFields(logrus.Fields{
 			"latency_time": latencyTime,

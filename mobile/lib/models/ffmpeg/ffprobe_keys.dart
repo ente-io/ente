@@ -28,7 +28,7 @@ class FFProbeKeys {
   static const date = 'date';
   static const disposition = 'disposition';
   static const duration = 'duration';
-  static const quickTimeLocation  ="com.apple.quicktime.location.ISO6709";
+  static const quickTimeLocation = "com.apple.quicktime.location.ISO6709";
   static const durationMicros = 'duration_us';
   static const encoder = 'encoder';
   static const extraDataSize = 'extradata_size';
@@ -70,6 +70,9 @@ class FFProbeKeys {
   static const vendorId = 'vendor_id';
   static const width = 'width';
   static const xiaomiSlowMoment = 'com.xiaomi.slow_moment';
+  static const sideDataList = 'side_data_list';
+  static const rotation = 'rotation';
+  static const sideDataType = 'side_data_type';
 }
 
 class MediaStreamTypes {
@@ -80,4 +83,17 @@ class MediaStreamTypes {
   static const timedText = 'timedtext';
   static const unknown = 'unknown';
   static const video = 'video';
+}
+
+enum SideDataType {
+  displayMatrix;
+
+  getString() {
+    switch (this) {
+      case SideDataType.displayMatrix:
+        return 'Display Matrix';
+      default:
+        assert(false, 'Unknown side data type: $this');
+    }
+  }
 }

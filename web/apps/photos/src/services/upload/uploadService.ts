@@ -1,16 +1,24 @@
+import {
+    ENCRYPTION_CHUNK_SIZE,
+    type B64EncryptionResult,
+} from "@/base/crypto/libsodium";
+import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
-import type { Metadata } from "@/media/file-metadata";
+import type {
+    Metadata,
+    ParsedMetadata,
+    PublicMagicMetadata,
+} from "@/media/file-metadata";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
-import { cmpNewLib, extractExif, wipNewLib } from "@/new/photos/services/exif";
+import { extractExif } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
-    NULL_LOCATION,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
@@ -23,16 +31,10 @@ import {
     type FilePublicMagicMetadataProps,
 } from "@/new/photos/types/file";
 import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
-import type { ParsedExtractedMetadata } from "@/new/photos/types/metadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { ensure } from "@/utils/ensure";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
-import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
-import { ENCRYPTION_CHUNK_SIZE } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError, handleUploadError } from "@ente/shared/error";
-import { parseImageMetadata } from "@ente/shared/utils/exif-old";
-import type { Remote } from "comlink";
 import { addToCollection } from "services/collectionService";
 import {
     PublicUploadProps,
@@ -245,6 +247,11 @@ interface LocalFileAttributes<
     decryptionHeader: string;
 }
 
+interface EncryptedMetadata {
+    encryptedDataB64: string;
+    decryptionHeaderB64: string;
+}
+
 interface EncryptionResult<
     T extends string | Uint8Array | EncryptedFileStream,
 > {
@@ -255,7 +262,7 @@ interface EncryptionResult<
 interface ProcessedFile {
     file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
-    metadata: LocalFileAttributes<string>;
+    metadata: EncryptedMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -314,7 +321,7 @@ export const uploader = async (
     uploaderName: string,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
@@ -675,7 +682,7 @@ const extractAssetMetadata = async (
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ): Promise<ExtractAssetMetadataResult> =>
     isLivePhoto
         ? await extractLivePhotoMetadata(
@@ -701,7 +708,7 @@ const extractLivePhotoMetadata = async (
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ) => {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FileType.image,
@@ -738,75 +745,74 @@ const extractImageOrVideoMetadata = async (
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
-    let extractedMetadata: ParsedExtractedMetadata;
-    if (fileType === FileType.image) {
-        extractedMetadata =
-            (await tryExtractImageMetadata(
-                uploadItem,
-                fileTypeInfo,
-                lastModifiedMs,
-            )) ?? NULL_EXTRACTED_METADATA;
-    } else if (fileType === FileType.video) {
-        extractedMetadata =
-            (await tryExtractVideoMetadata(uploadItem)) ??
-            NULL_EXTRACTED_METADATA;
+    let parsedMetadata: ParsedMetadata;
+    if (fileType == FileType.image) {
+        parsedMetadata = await tryExtractImageMetadata(
+            uploadItem,
+            lastModifiedMs,
+        );
+    } else if (fileType == FileType.video) {
+        parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
         throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
     }
 
     const hash = await computeHash(uploadItem, worker);
 
-    const modificationTime = lastModifiedMs * 1000;
-    const creationTime =
-        extractedMetadata.creationTime ??
-        tryParseEpochMicrosecondsFromFileName(fileName) ??
-        modificationTime;
-
-    const metadata: Metadata = {
-        title: fileName,
-        creationTime,
-        modificationTime,
-        latitude: extractedMetadata.location.latitude,
-        longitude: extractedMetadata.location.longitude,
-        fileType,
-        hash,
-    };
-
-    const publicMagicMetadata: FilePublicMagicMetadataProps = {
-        w: extractedMetadata.width,
-        h: extractedMetadata.height,
-    };
-
-    const takeoutMetadata = matchTakeoutMetadata(
+    const parsedMetadataJSON = matchTakeoutMetadata(
         fileName,
         collectionID,
         parsedMetadataJSONMap,
     );
 
-    if (takeoutMetadata)
-        for (const [key, value] of Object.entries(takeoutMetadata))
-            if (value) metadata[key] = value;
+    const publicMagicMetadata: PublicMagicMetadata = {};
+
+    const modificationTime =
+        parsedMetadataJSON?.modificationTime ?? lastModifiedMs * 1000;
+
+    let creationTime: number;
+    if (parsedMetadataJSON?.creationTime) {
+        creationTime = parsedMetadataJSON.creationTime;
+    } else if (parsedMetadata.creationDate) {
+        const { dateTime, offset, timestamp } = parsedMetadata.creationDate;
+        creationTime = timestamp;
+        publicMagicMetadata.dateTime = dateTime;
+        if (offset) publicMagicMetadata.offsetTime = offset;
+    } else {
+        creationTime =
+            tryParseEpochMicrosecondsFromFileName(fileName) ?? modificationTime;
+    }
+
+    const metadata: Metadata = {
+        fileType,
+        title: fileName,
+        creationTime,
+        modificationTime,
+        hash,
+    };
+
+    const location = parsedMetadataJSON?.location ?? parsedMetadata.location;
+    if (location) {
+        metadata.latitude = location.latitude;
+        metadata.longitude = location.longitude;
+    }
+
+    const { width: w, height: h } = parsedMetadata;
+    if (w) publicMagicMetadata.w = w;
+    if (h) publicMagicMetadata.h = h;
 
     return { metadata, publicMagicMetadata };
 };
 
-const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
-    location: { ...NULL_LOCATION },
-    creationTime: null,
-    width: null,
-    height: null,
-};
-
-async function tryExtractImageMetadata(
+const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
-): Promise<ParsedExtractedMetadata> {
+): Promise<ParsedMetadata> => {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         // The library we use for extracting Exif from images, ExifReader,
@@ -824,17 +830,12 @@ async function tryExtractImageMetadata(
     }
 
     try {
-        const oldLib = await parseImageMetadata(file, fileTypeInfo);
-        if (await wipNewLib()) {
-            const newLib = await extractExif(file);
-            cmpNewLib(oldLib, newLib);
-        }
-        return oldLib;
+        return extractExif(file);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;
     }
-}
+};
 
 const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
@@ -845,10 +846,7 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     }
 };
 
-const computeHash = async (
-    uploadItem: UploadItem,
-    worker: Remote<DedicatedCryptoWorker>,
-) => {
+const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
     const { stream, chunkCount } = await readUploadItem(uploadItem);
     const hashState = await worker.initChunkHashing();
 
@@ -1112,32 +1110,38 @@ const constructPublicMagicMetadata = async (
 const encryptFile = async (
     file: FileWithMetadata,
     encryptionKey: string,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ): Promise<EncryptedFile> => {
     const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
         file.fileStreamOrData,
         worker,
     );
 
-    const { file: encryptedThumbnail } = await worker.encryptThumbnail(
-        file.thumbnail,
-        fileKey,
-    );
+    const {
+        encryptedData: thumbEncryptedData,
+        decryptionHeader: thumbDecryptionHeader,
+    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
+    const encryptedThumbnail = {
+        encryptedData: thumbEncryptedData,
+        decryptionHeader: thumbDecryptionHeader,
+    };
 
-    const { file: encryptedMetadata } = await worker.encryptMetadata(
-        file.metadata,
-        fileKey,
-    );
+    const encryptedMetadata = await worker.encryptMetadataJSON({
+        jsonValue: file.metadata,
+        keyB64: fileKey,
+    });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     if (file.pubMagicMetadata) {
-        const { file: encryptedPubMagicMetadataData } =
-            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
+        const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
+            jsonValue: file.pubMagicMetadata.data,
+            keyB64: fileKey,
+        });
         encryptedPubMagicMetadata = {
             version: file.pubMagicMetadata.version,
             count: file.pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedData,
-            header: encryptedPubMagicMetadataData.decryptionHeader,
+            data: encryptedPubMagicMetadataData.encryptedDataB64,
+            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
         };
     }
 
@@ -1158,7 +1162,7 @@ const encryptFile = async (
 
 const encryptFiledata = async (
     fileStreamOrData: FileStream | Uint8Array,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ): Promise<EncryptionResult<Uint8Array | EncryptedFileStream>> =>
     fileStreamOrData instanceof Uint8Array
         ? await worker.encryptFile(fileStreamOrData)
@@ -1166,7 +1170,7 @@ const encryptFiledata = async (
 
 const encryptFileStream = async (
     fileData: FileStream,
-    worker: Remote<DedicatedCryptoWorker>,
+    worker: CryptoWorker,
 ) => {
     const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
@@ -1267,7 +1271,10 @@ const uploadToBucket = async (
                 decryptionHeader: file.thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
             },
-            metadata: file.metadata,
+            metadata: {
+                encryptedData: file.metadata.encryptedDataB64,
+                decryptionHeader: file.metadata.decryptionHeaderB64,
+            },
             pubMagicMetadata: file.pubMagicMetadata,
         };
         return backupedFile;

@@ -1,1 +1,26 @@
-{}
+{
+  "account": "Compte",
+  "unlock": "Desbloqueja",
+  "recoveryKey": "Clau de recuperació",
+  "counterAppBarTitle": "Comptador",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingGetStarted": "Primers passos",
+  "qrCode": "Codi QR",
+  "codeTagHint": "Etiqueta",
+  "accountKeyType": "Tipus de clau",
+  "sessionExpired": "La sessió ha caducat",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "Torna a iniciar sessió",
+  "verifyPassword": "Verifica la contrasenya",
+  "pleaseWait": "Si us plau, espera...",
+  "incorrectPasswordTitle": "Contrasenya incorrecta",
+  "welcomeBack": "Benvingut de nou!",
+  "madeWithLoveAtPrefix": "fet amb ❤️ a ",
+  "changeEmail": "Canvia el correu electrònic",
+  "changePassword": "Canvia la contrasenya",
+  "importTypePlainText": "Text pla"
+}

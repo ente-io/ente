@@ -45,8 +45,10 @@ By default, you only need to configure the endpoint for the first bucket.
 > instance uses these to perform replication.
 >
 > However, in a self hosted setup replication is off by default (you can turn it
-> on if you want). When replication is turned off, only the first bucket is
-> used, and you can remove the other two if you wish or just ignore them.
+> on if you want). When replication is turned off, only the first bucket (it
+> must be named `b2-eu-cen`) is used, and you can ignore the other two. Use the
+> `hot_bucket` option if you'd like to set one of the other predefined buckets
+> as the "first" bucket.
 
 The `endpoint` for the first bucket in the starter `credentials.yaml` is
 `localhost:3200`. The way this works then is that both museum (`2`) and minio

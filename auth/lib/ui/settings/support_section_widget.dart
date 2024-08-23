@@ -70,18 +70,18 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           },
         ),
         sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.email,
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await sendEmail(context, to: supportEmail);
-          },
-        ),
-        sectionOptionSpacing,
+        // MenuItemWidget(
+        //   captionedTextWidget: CaptionedTextWidget(
+        //     title: l10n.email,
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     await sendEmail(context, to: supportEmail);
+        //   },
+        // ),
+        // sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.reportABug,
@@ -90,7 +90,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await sendLogs(context, l10n.reportBug, "auth@ente.io");
+            await sendLogs(context, l10n.reportBug);
           },
           onDoubleTap: () async {
             try {

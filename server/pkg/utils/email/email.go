@@ -8,6 +8,7 @@ package email
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/smtp"
@@ -91,6 +92,9 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpServer)
 		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
 		if err != nil {
+			if strings.Contains(err.Error(), "Invalid RCPT TO address provided") {
+				return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), err.Error())
+			}
 			return stacktrace.Propagate(err, "")
 		}
 	}

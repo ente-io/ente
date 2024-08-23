@@ -55,7 +55,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   // indicates if user's subscription plan is still active
   late bool _hasActiveSubscription;
   bool _hideCurrentPlanSelection = false;
-  late FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
   bool _isLoading = false;
@@ -92,7 +91,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   // _filterPlansForUI is used for initializing initState & plan toggle states
   Future<void> _filterStripeForUI() async {
     final billingPlans = await _billingService.getBillingPlans();
-    _freePlan = billingPlans.freePlan;
     _plans = billingPlans.plans.where((plan) {
       if (plan.stripeID.isEmpty) {
         return false;
@@ -279,7 +277,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
           child: MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
+            captionedTextWidget: const CaptionedTextWidget(
               title: "Manage payment method",
             ),
             menuItemColor: colorScheme.fillFaint,

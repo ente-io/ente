@@ -305,8 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Kimlik doğrulaması gerekli"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple kimliği"),
         "apply": MessageLookupByLibrary.simpleMessage("Uygula"),
@@ -436,6 +436,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Lütfen doğrulama işlemini tamamlamak için gelen kutunuzu (ve spam klasörünüzü) kontrol edin"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Check status"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrol ediliyor..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Fotoğrafları seçin ve \"Misafir Görünümü\"nü deneyin."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Telefonunuzu bir arkadaşınıza fotoğraf göstermek için mi veriyorsunuz? Fazla kaydırmasından endişelenmeyin. Misafir görünümü seçtiğiniz fotoğraflarla sınırlı kalır."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Misafir Görünümü"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "360 derece görüşe sahip panorama fotoğrafları görüntüleme desteği ekledik. Hareket tabanlı gezinme ile etkileyici bir deneyim sunar!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Panorama Görüntüleyici"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Geliştirilmiş oynatma kontrolleri ve HDR video desteği ile yeni bir video oynatıcı sunuyoruz."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Video Oynatıcı"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Bedava alan talep edin"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Arttır!"),
@@ -813,6 +827,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("İzinleri değiştir"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Yakındaki fotoğrafları gruplandır"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Biz uygulama kurulumlarını takip etmiyoruz. Bizi nereden duyduğunuzdan bahsetmeniz bize çok yardımcı olacak!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1038,6 +1055,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Şu anda hiçbir fotoğraf yedeklenmiyor"),
         "noPhotosFoundHere":
             MessageLookupByLibrary.simpleMessage("Burada fotoğraf bulunamadı"),
+        "noQuickLinksSelected":
+            MessageLookupByLibrary.simpleMessage("No quick links selected"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Kurtarma kodunuz yok mu?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1138,6 +1157,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lütfen izin ver"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Lütfen tekrar giriş yapın"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Please select quick links to remove"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Lütfen tekrar deneyiniz"),
@@ -1241,6 +1262,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove person label"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Herkese açık link oluştur"),
+        "removePublicLinks":
+            MessageLookupByLibrary.simpleMessage("Remove public links"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Kaldırdığınız öğelerden bazıları başkaları tarafından eklenmiştir ve bunlara erişiminizi kaybedeceksiniz"),
         "removeWithQuestionMark":
@@ -1484,8 +1507,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Özellik önerin"),
         "support": MessageLookupByLibrary.simpleMessage("Destek"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Senkronizasyon durduruldu"),
@@ -1539,6 +1560,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Bu, sizi aşağıdaki cihazdan çıkış yapacak:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Bu cihazdaki oturumunuz kapatılacak!"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage(
+                "This will remove public links of all selected quick links."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "To enable app lock, please setup device passcode or screen lock in your system settings."),

@@ -40,7 +40,6 @@ import DeleteAccountModal from "components/DeleteAccountModal";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
-import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
 import {
     ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
@@ -51,7 +50,7 @@ import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import {
+import React, {
     MouseEventHandler,
     useContext,
     useEffect,
@@ -79,7 +78,7 @@ import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
-import Preferences from "./Preferences";
+import { Preferences } from "./Preferences";
 import SubscriptionCard from "./SubscriptionCard";
 
 interface Iprops {
@@ -289,14 +288,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     if (!hasAddOnBonus(userDetails.bonusData)) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isOnFreePlan(userDetails.subscription)) {
-                message = (
-                    <Trans
-                        i18nKey={"subscription_info_free"}
-                        values={{
-                            date: userDetails.subscription?.expiryTime,
-                        }}
-                    />
-                );
+                message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
                     date: userDetails.subscription?.expiryTime,
@@ -562,7 +554,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={openPreferencesOptions}
-                label={t("PREFERENCES")}
+                label={t("preferences")}
             />
             <RecoveryKey
                 show={recoverModalView}
@@ -614,11 +606,7 @@ const HelpSection: React.FC = () => {
             <EnteMenuItem
                 onClick={contactSupport}
                 labelComponent={
-                    <NoStyleAnchor href="mailto:support@ente.io">
-                        <Typography fontWeight={"bold"}>
-                            {t("SUPPORT")}
-                        </Typography>
-                    </NoStyleAnchor>
+                    <span title="support@ente.io">{t("SUPPORT")}</span>
                 }
                 variant="secondary"
             />

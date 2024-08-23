@@ -1,6 +1,7 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { ensureString } from "@/utils/ensure";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -12,7 +13,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
     const masterKey = await getActualKey();
     try {
         const authKeyData = await getAuthKey();
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker = await sharedCryptoWorker();
         const authenticatorKey = await cryptoWorker.decryptB64(
             authKeyData.encryptedKey,
             authKeyData.header,
@@ -29,12 +30,15 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                     if (!entity.header) return undefined;
                     try {
                         const decryptedCode =
-                            await cryptoWorker.decryptMetadata(
-                                entity.encryptedData,
-                                entity.header,
-                                authenticatorKey,
-                            );
-                        return codeFromURIString(entity.id, decryptedCode);
+                            await cryptoWorker.decryptMetadataJSON({
+                                encryptedDataB64: entity.encryptedData,
+                                decryptionHeaderB64: entity.header,
+                                keyB64: authenticatorKey,
+                            });
+                        return codeFromURIString(
+                            entity.id,
+                            ensureString(decryptedCode),
+                        );
                     } catch (e) {
                         log.error(`Failed to parse codeID ${entity.id}`, e);
                         return undefined;

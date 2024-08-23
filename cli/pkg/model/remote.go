@@ -47,6 +47,13 @@ type RemoteAlbum struct {
 	LastUpdatedAt int64                  `json:"lastUpdatedAt"`
 }
 
+func (r *RemoteAlbum) IsHidden() bool {
+	if value, ok := r.PrivateMeta["visibility"]; ok {
+		return int64(value.(float64)) == int64(2)
+	}
+	return false
+}
+
 type AlbumFileEntry struct {
 	FileID        int64 `json:"fileID"`
 	AlbumID       int64 `json:"albumID"`
@@ -144,7 +151,7 @@ func (r *RemoteFile) GetCreationTime() time.Time {
 func (r *RemoteFile) GetModificationTime() time.Time {
 	value, ok := r.Metadata["modificationTime"]
 	if !ok {
-		panic("creationTime not found in metadata")
+		panic("modificationTime not found in metadata")
 	}
 	return time.UnixMicro(int64(value.(float64)))
 }

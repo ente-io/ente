@@ -9,6 +9,7 @@ import "package:photos/db/upload_locks_db.dart";
 import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/crypto_util.dart";
 
@@ -51,16 +52,13 @@ class MultiPartUploader {
   }
 
   int get multipartPartSizeForUpload {
-    if (_featureFlagService.internalUser) {
-      return multipartPartSizeInternal;
-    }
     return multipartPartSize;
   }
 
   Future<int> calculatePartCount(int fileSize) async {
-    // Multipart upload is only enabled for internal users
-    // and debug builds till it's battle tested.
-    if (!_featureFlagService.internalUser) return 1;
+    // If the feature flag is disabled, return 1
+    if (!_featureFlagService.enableMobMultiPart) return 1;
+    if (!localSettings.userEnabledMultiplePart) return 1;
 
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
     return partCount;

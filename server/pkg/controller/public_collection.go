@@ -38,11 +38,11 @@ const (
 
 	DeviceLimitWarningThreshold = 2000
 
-	AbuseAlertSubject = "[Alert] Abuse report received against your album on ente"
+	AbuseAlertSubject = "[Alert] Abuse report received against your album on Ente"
 
 	AbuseAlertTeamSubject = "Abuse report received"
 
-	AbuseLimitExceededSubject = "[Alert] Too many abuse reports received against your album on ente"
+	AbuseLimitExceededSubject = "[Alert] Too many abuse reports received against your album on Ente"
 
 	AbuseAlertTemplate = "report_alert.html"
 

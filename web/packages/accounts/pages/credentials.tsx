@@ -1,3 +1,5 @@
+import { sharedCryptoWorker } from "@/base/crypto";
+import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -13,14 +15,12 @@ import {
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import type { B64EncryptionResult } from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
@@ -125,9 +125,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const electron = globalThis.electron;
             if (!key && electron) {
                 try {
-                    key = await electron.encryptionKey();
+                    key = await electron.masterKeyB64();
                 } catch (e) {
-                    log.error("Failed to get encryption key from electron", e);
+                    log.error("Failed to read master key from safe storage", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(
@@ -158,7 +158,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                const cryptoWorker = await sharedCryptoWorker();
                 const kek = await cryptoWorker.decryptB64(
                     kekEncryptedAttributes.encryptedData,
                     kekEncryptedAttributes.nonce,
@@ -207,7 +207,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 // before we let the user in.
                 if (sessionValidityCheck) await sessionValidityCheck;
 
-                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                const cryptoWorker = await sharedCryptoWorker();
                 const {
                     keyAttributes,
                     encryptedToken,

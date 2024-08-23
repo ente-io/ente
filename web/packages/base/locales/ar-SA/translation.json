@@ -1,76 +1,76 @@
 {
-    "HERO_SLIDE_1_TITLE": "",
-    "HERO_SLIDE_1": "",
-    "HERO_SLIDE_2_TITLE": "",
-    "HERO_SLIDE_2": "",
-    "HERO_SLIDE_3_TITLE": "",
-    "HERO_SLIDE_3": "",
-    "LOGIN": "",
-    "SIGN_UP": "",
-    "NEW_USER": "",
-    "EXISTING_USER": "",
-    "ENTER_NAME": "",
-    "PUBLIC_UPLOADER_NAME_MESSAGE": "",
-    "ENTER_EMAIL": "",
-    "EMAIL_ERROR": "",
-    "REQUIRED": "",
-    "EMAIL_SENT": "",
-    "CHECK_INBOX": "",
-    "ENTER_OTT": "",
-    "RESEND_MAIL": "",
-    "VERIFY": "",
-    "UNKNOWN_ERROR": "",
-    "INVALID_CODE": "",
-    "EXPIRED_CODE": "",
-    "SENDING": "",
-    "SENT": "",
-    "password": "",
-    "link_password_description": "",
-    "unlock": "",
-    "SET_PASSPHRASE": "",
-    "VERIFY_PASSPHRASE": "",
-    "INCORRECT_PASSPHRASE": "",
-    "ENTER_ENC_PASSPHRASE": "",
-    "PASSPHRASE_DISCLAIMER": "",
-    "WELCOME_TO_ENTE_HEADING": "",
+    "HERO_SLIDE_1_TITLE": "<div>نسخ احتياطية خاصة</div><div>لذكرياتك</div>",
+    "HERO_SLIDE_1": "تشفير من طرف إلى طرف بشكل افتراضي",
+    "HERO_SLIDE_2_TITLE": "<div>يتم تخزينها بأمان</div><div>في ملجأ للطوارئ</div>",
+    "HERO_SLIDE_2": "مصممة لتدوم",
+    "HERO_SLIDE_3_TITLE": "<div>متاح</div><div> في كل مكان</div>",
+    "HERO_SLIDE_3": "أندرويد، آي أو إس، ويب، سطح المكتب",
+    "LOGIN": "تسجيل الدخول",
+    "SIGN_UP": "تسجيل",
+    "NEW_USER": "جديد في Ente",
+    "EXISTING_USER": "مستخدم موجود",
+    "ENTER_NAME": "أدخل الاسم",
+    "PUBLIC_UPLOADER_NAME_MESSAGE": "أضف اسما حتى يتمكن أصدقاؤك من معرفة من يشكرون على هذه الصور الرائعة!",
+    "ENTER_EMAIL": "أدخل عنوان البريد الإلكتروني",
+    "EMAIL_ERROR": "أدخل بريد إلكتروني صالح",
+    "REQUIRED": "مطلوب",
+    "EMAIL_SENT": "تم إرسال رمز التحقق إلى <a>{{email}}</a>",
+    "CHECK_INBOX": "الرجاء التحقق من صندوق الوارد (والرسائل غير المرغوب فيها) لإكمال التحقق",
+    "ENTER_OTT": "رمز التحقق",
+    "RESEND_MAIL": "إعادة إرسال الرمز",
+    "VERIFY": "تحقق",
+    "UNKNOWN_ERROR": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
+    "INVALID_CODE": "رمز التحقق غير صالح",
+    "EXPIRED_CODE": "انتهت صلاحية رمز التحقق الخاص بك",
+    "SENDING": "إرسال...",
+    "SENT": "تم الإرسال!",
+    "password": "كلمة المرور",
+    "link_password_description": "أدخل كلمة المرور لفتح الألبوم",
+    "unlock": "فتح",
+    "SET_PASSPHRASE": "تعيين كلمة المرور",
+    "VERIFY_PASSPHRASE": "تسجل الدخول",
+    "INCORRECT_PASSPHRASE": "كلمة المرور غير صحيحة",
+    "ENTER_ENC_PASSPHRASE": "الرجاء إدخال كلمة المرور التي يمكننا استخدامها لتشفير بياناتك",
+    "PASSPHRASE_DISCLAIMER": "نحن لا نخزن كلمة مرورك، لذا إذا نسيتها، <strong>لن نتمكن من مساعدتك </strong>في استرداد بياناتك دون مفتاح الاسترداد.",
+    "WELCOME_TO_ENTE_HEADING": "مرحبا بك في <a/>",
     "WELCOME_TO_ENTE_SUBHEADING": "",
     "WHERE_YOUR_BEST_PHOTOS_LIVE": "",
-    "KEY_GENERATION_IN_PROGRESS_MESSAGE": "",
-    "PASSPHRASE_HINT": "",
-    "CONFIRM_PASSPHRASE": "",
-    "REFERRAL_CODE_HINT": "",
+    "KEY_GENERATION_IN_PROGRESS_MESSAGE": "جار توليد مفاتيح التشفير...",
+    "PASSPHRASE_HINT": "كلمة المرور",
+    "CONFIRM_PASSPHRASE": "تأكيد كلمة المرور",
+    "REFERRAL_CODE_HINT": "كيف سمعت عن Ente؟ (اختياري)",
     "REFERRAL_INFO": "",
-    "PASSPHRASE_MATCH_ERROR": "",
-    "CREATE_COLLECTION": "",
-    "ENTER_ALBUM_NAME": "",
-    "CLOSE_OPTION": "",
-    "ENTER_FILE_NAME": "",
-    "CLOSE": "",
-    "NO": "",
-    "NOTHING_HERE": "",
-    "upload": "",
-    "import": "",
-    "ADD_PHOTOS": "",
-    "ADD_MORE_PHOTOS": "",
-    "add_photos_one": "",
-    "add_photos_other": "",
-    "select_photos": "",
-    "FILE_UPLOAD": "",
+    "PASSPHRASE_MATCH_ERROR": "كلمات المرور غير متطابقة",
+    "CREATE_COLLECTION": "ألبوم جديد",
+    "ENTER_ALBUM_NAME": "اسم الألبوم",
+    "CLOSE_OPTION": "إغلاق (Esc)",
+    "ENTER_FILE_NAME": "إسم الملف",
+    "CLOSE": "إغلاق",
+    "NO": "لا",
+    "NOTHING_HERE": "لا شيء يمكن رؤيته هنا بعد 👀",
+    "upload": "تحميل",
+    "import": "استيراد",
+    "ADD_PHOTOS": "إضافة صور",
+    "ADD_MORE_PHOTOS": "إضافة المزيد من الصور",
+    "add_photos_count_one": "إضافة 1 عنصر",
+    "add_photos_count": "إضافة {{count, number}} عناصر",
+    "select_photos": "تحديد الصور",
+    "FILE_UPLOAD": "تحميل الملف",
     "UPLOAD_STAGE_MESSAGE": {
-        "0": "",
+        "0": "الإعداد للتحميل",
         "1": "",
         "2": "",
         "3": "",
         "4": "",
-        "5": ""
+        "5": "اكتمل النسخ الاحتياطي"
     },
-    "FILE_NOT_UPLOADED_LIST": "",
-    "INITIAL_LOAD_DELAY_WARNING": "",
-    "USER_DOES_NOT_EXIST": "",
-    "NO_ACCOUNT": "",
-    "ACCOUNT_EXISTS": "",
-    "CREATE": "",
-    "DOWNLOAD": "",
+    "FILE_NOT_UPLOADED_LIST": "لم يتم تحميل الملفات التالية",
+    "INITIAL_LOAD_DELAY_WARNING": "التحميل الأول قد يستغرق بعض الوقت",
+    "USER_DOES_NOT_EXIST": "عذرا، لم يتم العثور على مستخدم بهذا البريد الإلكتروني",
+    "NO_ACCOUNT": "ليس لديك حساب",
+    "ACCOUNT_EXISTS": "لديك حساب بالفعل",
+    "CREATE": "إنشاء",
+    "DOWNLOAD": "تنزيل",
     "DOWNLOAD_OPTION": "",
     "DOWNLOAD_FAVORITES": "",
     "DOWNLOAD_UNCATEGORIZED": "",
@@ -225,13 +225,14 @@
     },
     "photos_count_zero": "",
     "photos_count_one": "",
-    "photos_count_other": "",
+    "photos_count": "",
     "TERMS_AND_CONDITIONS": "",
     "ADD_TO_COLLECTION": "",
     "SELECTED": "",
     "PEOPLE": "",
     "indexing_scheduled": "",
     "indexing_photos": "",
+    "indexing_fetching": "",
     "indexing_people": "",
     "indexing_done": "",
     "UNIDENTIFIED_FACES": "",
@@ -263,14 +264,15 @@
     "TWO_FACTOR_MANUAL_CODE_INSTRUCTION": "",
     "SCAN_QR_CODE": "",
     "ENABLE_TWO_FACTOR": "",
-    "ENABLE": "",
+    "enable": "",
+    "enabled": "",
     "LOST_DEVICE": "",
     "INCORRECT_CODE": "",
     "TWO_FACTOR_INFO": "",
     "DISABLE_TWO_FACTOR_LABEL": "",
     "UPDATE_TWO_FACTOR_LABEL": "",
-    "DISABLE": "",
-    "RECONFIGURE": "",
+    "disable": "",
+    "reconfigure": "",
     "UPDATE_TWO_FACTOR": "",
     "UPDATE_TWO_FACTOR_MESSAGE": "",
     "UPDATE": "",
@@ -364,12 +366,12 @@
     "MODIFY_SHARING": "",
     "ADD_COLLABORATORS": "",
     "ADD_NEW_EMAIL": "",
-    "shared_with_people_zero": "",
-    "shared_with_people_one": "",
-    "shared_with_people_other": "",
-    "participants_zero": "",
-    "participants_one": "",
-    "participants_other": "",
+    "shared_with_people_count_zero": "",
+    "shared_with_people_count_one": "",
+    "shared_with_people_count": "",
+    "participants_count_zero": "",
+    "participants_count_one": "",
+    "participants_count": "",
     "ADD_VIEWERS": "",
     "CHANGE_PERMISSIONS_TO_VIEWER": "",
     "CHANGE_PERMISSIONS_TO_COLLABORATOR": "",
@@ -424,8 +426,8 @@
     "STOP_DOWNLOADS_HEADER": "",
     "YES_STOP_DOWNLOADS": "",
     "STOP_ALL_DOWNLOADS_MESSAGE": "",
-    "albums_one": "",
-    "albums_other": "",
+    "albums_count_one": "",
+    "albums_count": "",
     "ALL_ALBUMS": "",
     "ALBUMS": "",
     "ALL_HIDDEN_ALBUMS": "",
@@ -477,18 +479,29 @@
     "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE": "",
     "CHOSE_THEME": "",
     "more_details": "",
-    "ENABLE_FACE_SEARCH": "",
-    "ENABLE_FACE_SEARCH_TITLE": "",
-    "ENABLE_FACE_SEARCH_DESCRIPTION": "",
-    "ADVANCED": "",
-    "FACE_SEARCH_CONFIRMATION": "",
-    "LABS": "",
+    "ml_search": "",
+    "ml_search_description": "",
+    "ml_search_footnote": "",
+    "indexing": "",
+    "processed": "",
+    "indexing_status_running": "",
+    "indexing_status_fetching": "",
+    "indexing_status_scheduled": "",
+    "indexing_status_done": "",
+    "ml_search_disable": "",
+    "ml_search_disable_confirm": "",
+    "ml_consent": "",
+    "ml_consent_title": "",
+    "ml_consent_description": "",
+    "ml_consent_confirmation": "",
+    "labs": "",
     "YOURS": "",
     "passphrase_strength_weak": "",
     "passphrase_strength_moderate": "",
     "passphrase_strength_strong": "",
-    "PREFERENCES": "",
-    "LANGUAGE": "",
+    "preferences": "",
+    "language": "",
+    "advanced": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
     "SUBSCRIPTION_VERIFICATION_ERROR": "",

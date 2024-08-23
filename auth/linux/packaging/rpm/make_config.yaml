@@ -3,7 +3,7 @@ summary: 2FA app with free end-to-end encrypted backup and sync
 group: Application/Utility
 vendor: Ente.io
 packager: Ente.io Developers
-packagerEmail: human@ente.io
+packagerEmail: auth@ente.io
 license: GPLv3
 url: https://github.com/ente-io/ente
 

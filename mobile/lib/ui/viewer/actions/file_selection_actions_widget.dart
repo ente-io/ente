@@ -4,12 +4,13 @@ import 'package:fast_base58/fast_base58.dart';
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -18,6 +19,7 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
@@ -32,9 +34,9 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-// import 'package:photos/ui/sharing/manage_links_widget.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
@@ -51,7 +53,7 @@ class FileSelectionActionsWidget extends StatefulWidget {
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
   final PersonEntity? person;
-  final int? clusterID;
+  final String? clusterID;
 
   const FileSelectionActionsWidget(
     this.type,
@@ -114,6 +116,9 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
+    if (widget.selectedFiles.files.isEmpty) {
+      return const SizedBox();
+    }
     final ownedFilesCount = split.ownedByCurrentUser.length;
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;
@@ -271,7 +276,13 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
-
+    items.add(
+      SelectionActionButton(
+        svgAssetPath: "assets/icons/guest_view_icon.svg",
+        labelText: S.of(context).guestView,
+        onTap: _onGuestViewClick,
+      ),
+    );
     items.add(
       SelectionActionButton(
         icon: Icons.grid_view_outlined,
@@ -557,6 +568,31 @@ class _FileSelectionActionsWidgetState
     if (result) {
       widget.selectedFiles.clearAll();
     }
+  }
+
+  Future<void> _onGuestViewClick() async {
+    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
+    if (await LocalAuthentication().isDeviceSupported()) {
+      final page = DetailPage(
+        DetailPageConfiguration(
+          selectedFiles,
+          null,
+          0,
+          "guest_view",
+        ),
+      );
+      routeToPage(context, page, forceCustomPageRoute: true).ignore();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Bus.instance.fire(GuestViewEvent(true, false));
+      });
+    } else {
+      await showErrorDialog(
+        context,
+        S.of(context).noSystemLockFound,
+        S.of(context).guestViewEnablePreSteps,
+      );
+    }
+    widget.selectedFiles.clearAll();
   }
 
   Future<void> _onArchiveClick() async {

@@ -461,7 +461,7 @@
   "changePassword": "Passwort ändern",
   "authToChangeYourPassword": "Bitte authentifizieren, um das Passwort zu ändern",
   "emailVerificationToggle": "E-Mail-Verifizierung",
-  "authToChangeEmailVerificationSetting": "Bitte Authentifizieren um die E-Mail Bestätigung zu ändern",
+  "authToChangeEmailVerificationSetting": "Bitte authentifizieren, um die E-Mail-Bestätigung zu ändern",
   "exportYourData": "Daten exportieren",
   "logout": "Ausloggen",
   "authToInitiateAccountDeletion": "Bitte authentifizieren, um die Löschung des Kontos einzuleiten",
@@ -574,8 +574,8 @@
   "freeTrialValidTill": "Kostenlose Demo verfügbar bis zum {endDate}",
   "validTill": "Gültig bis {endDate}",
   "addOnValidTill": "Dein {storageAmount} Add-on ist gültig bis {endDate}",
-  "playStoreFreeTrialValidTill": "Kostenlose Testversion gültig bis {endDate}.\nSie können anschließend ein bezahltes Paket auswählen.",
-  "subWillBeCancelledOn": "Ihr Abo endet am {endDate}",
+  "playStoreFreeTrialValidTill": "Kostenlose Testversion gültig bis {endDate}.\nDu kannst anschließend ein bezahltes Paket auswählen.",
+  "subWillBeCancelledOn": "Dein Abo endet am {endDate}",
   "subscription": "Abonnement",
   "paymentDetails": "Zahlungsdetails",
   "manageFamily": "Familiengruppe verwalten",
@@ -601,7 +601,7 @@
   },
   "confirmPlanChange": "Aboänderungen bestätigen",
   "areYouSureYouWantToChangeYourPlan": "Bist du sicher, dass du deinen Tarif ändern möchtest?",
-  "youCannotDowngradeToThisPlan": "Sie können nicht auf diesen Tarif wechseln",
+  "youCannotDowngradeToThisPlan": "Du kannst nicht auf diesen Tarif wechseln",
   "cancelOtherSubscription": "Bitte kündige dein aktuelles Abo über {paymentProvider} zuerst",
   "@cancelOtherSubscription": {
     "description": "The text to display when the user has an existing subscription from a different payment provider",
@@ -613,13 +613,13 @@
       }
     }
   },
-  "optionalAsShortAsYouLike": "Bei Bedarf auch so kurz wie Sie wollen...",
+  "optionalAsShortAsYouLike": "Bei Bedarf auch so kurz wie du willst...",
   "send": "Absenden",
   "askCancelReason": "Dein Abonnement wurde gekündigt. Möchtest du uns den Grund mitteilen?",
   "thankYouForSubscribing": "Danke fürs Abonnieren!",
-  "yourPurchaseWasSuccessful": "Ihr Einkauf war erfolgreich!",
-  "yourPlanWasSuccessfullyUpgraded": "Ihr Abo wurde erfolgreich aufgestuft",
-  "yourPlanWasSuccessfullyDowngraded": "Ihr Tarif wurde erfolgreich heruntergestuft",
+  "yourPurchaseWasSuccessful": "Dein Einkauf war erfolgreich",
+  "yourPlanWasSuccessfullyUpgraded": "Dein Abo wurde erfolgreich hochgestuft",
+  "yourPlanWasSuccessfullyDowngraded": "Dein Tarif wurde erfolgreich heruntergestuft",
   "yourSubscriptionWasUpdatedSuccessfully": "Dein Abonnement wurde erfolgreich aktualisiert.",
   "googlePlayId": "Google Play ID",
   "appleId": "Apple ID",
@@ -672,7 +672,7 @@
   "mobileWebDesktop": "Mobil, Web, Desktop",
   "newToEnte": "Neu bei Ente",
   "pleaseLoginAgain": "Bitte logge dich erneut ein",
-  "autoLogoutMessage": "Aufgrund technischer Störungen wurden Sie abgemeldet. Wir entschuldigen uns für die Unannehmlichkeiten.",
+  "autoLogoutMessage": "Du wurdest aufgrund technischer Störungen abgemeldet. Wir entschuldigen uns für die Unannehmlichkeiten.",
   "yourSubscriptionHasExpired": "Dein Abonnement ist abgelaufen",
   "storageLimitExceeded": "Speichergrenze überschritten",
   "upgrade": "Upgrade",
@@ -688,7 +688,7 @@
   "grantPermission": "Zugriff gewähren",
   "privateSharing": "Privates Teilen",
   "shareOnlyWithThePeopleYouWant": "Teile mit ausgewählten Personen",
-  "usePublicLinksForPeopleNotOnEnte": "Verwenden Sie öffentliche Links für Personen, die kein Ente-Konto haben",
+  "usePublicLinksForPeopleNotOnEnte": "Verwende öffentliche Links für Personen, die kein Ente-Konto haben",
   "allowPeopleToAddPhotos": "Erlaube anderen das Hinzufügen von Fotos",
   "shareAnAlbumNow": "Teile jetzt ein Album",
   "collectEventPhotos": "Gemeinsam Event-Fotos sammeln",
@@ -729,7 +729,7 @@
   "permanentlyDelete": "Dauerhaft löschen",
   "canOnlyCreateLinkForFilesOwnedByYou": "Sie können nur Links für Dateien erstellen, die Ihnen gehören",
   "publicLinkCreated": "Öffentlicher Link erstellt",
-  "youCanManageYourLinksInTheShareTab": "Sie können Ihre Links im \"Teilen\"-Tab verwalten.",
+  "youCanManageYourLinksInTheShareTab": "Du kannst deine Links im \"Teilen\"-Tab verwalten.",
   "linkCopiedToClipboard": "Link in Zwischenablage kopiert",
   "restore": "Wiederherstellen",
   "@restore": {
@@ -775,7 +775,7 @@
   "movedSuccessfullyTo": "Erfolgreich zu {albumName} hinzugefügt",
   "thisAlbumAlreadyHDACollaborativeLink": "Dieses Album hat bereits einen kollaborativen Link",
   "collaborativeLinkCreatedFor": "Kollaborativer Link für {albumName} erstellt",
-  "askYourLovedOnesToShare": "Bitte deine Liebsten ums teilen",
+  "askYourLovedOnesToShare": "Bitte deine Liebsten ums Teilen",
   "invite": "Einladen",
   "shareYourFirstAlbum": "Teile dein erstes Album",
   "sharedWith": "Geteilt mit {emailIDs}",
@@ -1143,6 +1143,7 @@
   "successfullyHid": "Erfolgreich versteckt",
   "successfullyUnhid": "Erfolgreich eingeblendet",
   "crashReporting": "Absturzbericht",
+  "enableMultiPartUpload": "Mehrteiliges Hochladen aktivieren",
   "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
   "moveToHiddenAlbum": "Zu verstecktem Album verschieben",
   "fileTypes": "Dateitypen",
@@ -1252,18 +1253,6 @@
   "right": "Rechts",
   "whatsNew": "Neue Funktionen",
   "reviewSuggestions": "Vorschläge überprüfen",
-  "useAsCover": "Als Titelbild festlegen",
-  "notPersonLabel": "Nicht {name}?",
-  "@notPersonLabel": {
-    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
-    "placeholders": {
-      "name": {
-        "content": "{name}",
-        "type": "String"
-      }
-    }
-  },
-  "panorama": "Panorama",
   "reenterPassword": "Passwort erneut eingeben",
   "reenterPin": "PIN erneut eingeben",
   "deviceLock": "Gerätsperre",
@@ -1277,14 +1266,33 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfigurieren Sie bitte den Gerätepasscode oder die Bildschirmsperre in Ihren Systemeinstellungen.",
   "tapToUnlock": "Zum Entsperren antippen",
   "tooManyIncorrectAttempts": "Zu viele fehlerhafte Versuche",
+  "mlFunctions": "ML functions",
+  "useAsCover": "Als Titelbild festlegen",
+  "notPersonLabel": "Nicht {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  },
+  "panorama": "Panorama",
   "videoInfo": "Video-Informationen",
   "appLockDescription": "Wähle zwischen dem Standard-Sperrbildschirm deines Gerätes und einem eigenen Sperrbildschirm mit PIN oder Passwort.",
-  "swipeLockEnablePreSteps": "Um das Sperren beim Wischen zu aktivieren, richte bitte einen Gerätepasscode oder eine Bildschirmsperre in den Systemeinstellungen ein.",
   "autoLock": "Automatisches Sperren",
   "immediately": "Sofort",
   "autoLockFeatureDescription": "Zeit, nach der die App gesperrt wird, nachdem sie in den Hintergrund verschoben wurde",
   "hideContent": "Inhalte verstecken",
   "hideContentDescriptionAndroid": "Versteckt Inhalte der App beim Wechseln zwischen Apps und deaktiviert Screenshots",
   "hideContentDescriptionIos": "Versteckt Inhalte der App beim Wechseln zwischen Apps",
-  "passwordStrengthInfo": "Die Berechnung der Stärke des Passworts basiert auf dessen Länge, den verwendeten Zeichen, und ob es in den 10.000 am häufigsten verwendeten Passwörtern vorkommt"
+  "passwordStrengthInfo": "Die Berechnung der Stärke des Passworts basiert auf dessen Länge, den verwendeten Zeichen, und ob es in den 10.000 am häufigsten verwendeten Passwörtern vorkommt",
+  "noQuickLinksSelected": "Keine schnellen Links ausgewählt",
+  "pleaseSelectQuickLinksToRemove": "Bitte wähle die zu entfernenden schnellen Links",
+  "removePublicLinks": "Öffentliche Links entfernen",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Hiermit werden die öffentlichen Links aller ausgewählten schnellen Links entfernt.",
+  "guestView": "Gastansicht",
+  "guestViewEnablePreSteps": "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen.",
+  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password."
 }

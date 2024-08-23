@@ -65,7 +65,7 @@ func TestAddNewReferralCode(t *testing.T) {
 	assert.Nil(t, err)
 
 	newCode := "C22222"
-	err = repo.AddNewCode(context.Background(), userID, newCode)
+	err = repo.AddNewCode(context.Background(), userID, newCode, false)
 	assert.Nil(t, err)
 
 	referralCode, err := repo.GetCode(context.Background(), userID)

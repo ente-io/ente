@@ -1,14 +1,15 @@
+import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { ItemVisibility } from "@/media/file-metadata";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
     SUB_TYPE,
     UpdateMagicMetadataRequest,
-    VISIBILITY_STATE,
 } from "@/new/photos/types/magicMetadata";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
@@ -62,7 +63,6 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
-import { batch } from "utils/common";
 import {
     getUniqueFiles,
     groupFilesBasedOnCollectionID,
@@ -99,7 +99,7 @@ const getCollectionWithSecrets = async (
     collection: EncryptedCollection,
     masterKey: string,
 ): Promise<Collection> => {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     const userID = getData(LS_KEYS.USER).id;
     let collectionKey: string;
     if (collection.owner.id === userID) {
@@ -133,22 +133,22 @@ const getCollectionWithSecrets = async (
     if (collection.magicMetadata?.data) {
         collectionMagicMetadata = {
             ...collection.magicMetadata,
-            data: await cryptoWorker.decryptMetadata(
-                collection.magicMetadata.data,
-                collection.magicMetadata.header,
-                collectionKey,
-            ),
+            data: await cryptoWorker.decryptMetadataJSON({
+                encryptedDataB64: collection.magicMetadata.data,
+                decryptionHeaderB64: collection.magicMetadata.header,
+                keyB64: collectionKey,
+            }),
         };
     }
     let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
     if (collection.pubMagicMetadata?.data) {
         collectionPublicMagicMetadata = {
             ...collection.pubMagicMetadata,
-            data: await cryptoWorker.decryptMetadata(
-                collection.pubMagicMetadata.data,
-                collection.pubMagicMetadata.header,
-                collectionKey,
-            ),
+            data: await cryptoWorker.decryptMetadataJSON({
+                encryptedDataB64: collection.pubMagicMetadata.data,
+                decryptionHeaderB64: collection.pubMagicMetadata.header,
+                keyB64: collectionKey,
+            }),
         };
     }
 
@@ -156,11 +156,11 @@ const getCollectionWithSecrets = async (
     if (collection.sharedMagicMetadata?.data) {
         collectionShareeMagicMetadata = {
             ...collection.sharedMagicMetadata,
-            data: await cryptoWorker.decryptMetadata(
-                collection.sharedMagicMetadata.data,
-                collection.sharedMagicMetadata.header,
-                collectionKey,
-            ),
+            data: await cryptoWorker.decryptMetadataJSON({
+                encryptedDataB64: collection.sharedMagicMetadata.data,
+                decryptionHeaderB64: collection.sharedMagicMetadata.header,
+                keyB64: collectionKey,
+            }),
         };
     }
 
@@ -415,7 +415,7 @@ const createCollection = async (
     magicMetadataProps?: CollectionMagicMetadataProps,
 ): Promise<Collection> => {
     try {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker = await sharedCryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
         const collectionKey = await cryptoWorker.generateEncryptionKey();
@@ -426,16 +426,16 @@ const createCollection = async (
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
-            const { file: encryptedMagicMetadataProps } =
-                await cryptoWorker.encryptMetadata(
-                    magicMetadataProps,
-                    collectionKey,
-                );
+            const encryptedMagicMetadataProps =
+                await cryptoWorker.encryptMetadataJSON({
+                    jsonValue: magicMetadataProps,
+                    keyB64: collectionKey,
+                });
 
             encryptedMagicMetadata = {
                 ...magicMetadata,
-                data: encryptedMagicMetadataProps.encryptedData,
-                header: encryptedMagicMetadataProps.decryptionHeader,
+                data: encryptedMagicMetadataProps.encryptedDataB64,
+                header: encryptedMagicMetadataProps.decryptionHeaderB64,
             };
         }
         const newCollection: EncryptedCollection = {
@@ -607,7 +607,7 @@ const encryptWithNewCollectionKey = async (
     files: EnteFile[],
 ): Promise<EncryptedFileKey[]> => {
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     for (const file of files) {
         const newEncryptedKey = await cryptoWorker.encryptToB64(
             file.key,
@@ -797,11 +797,8 @@ export const updateCollectionMagicMetadata = async (
         return;
     }
 
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
-        updatedMagicMetadata.data,
-        collection.key,
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -809,8 +806,8 @@ export const updateCollectionMagicMetadata = async (
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedMagicMetadata.encryptedData,
-            header: encryptedMagicMetadata.decryptionHeader,
+            data: encryptedDataB64,
+            header: decryptionHeaderB64,
         },
     };
 
@@ -841,20 +838,16 @@ export const updateSharedCollectionMagicMetadata = async (
         return;
     }
 
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
-        updatedMagicMetadata.data,
-        collection.key,
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
     );
-
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedMagicMetadata.encryptedData,
-            header: encryptedMagicMetadata.decryptionHeader,
+            data: encryptedDataB64,
+            header: decryptionHeaderB64,
         },
     };
 
@@ -885,20 +878,16 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
-        updatedPublicMagicMetadata.data,
-        collection.key,
+    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
+        { jsonValue: updatedPublicMagicMetadata.data, keyB64: collection.key },
     );
-
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedPublicMagicMetadata.version,
             count: updatedPublicMagicMetadata.count,
-            data: encryptedMagicMetadata.encryptedData,
-            header: encryptedMagicMetadata.decryptionHeader,
+            data: encryptedDataB64,
+            header: decryptionHeaderB64,
         },
     };
 
@@ -929,7 +918,7 @@ export const renameCollection = async (
         await changeCollectionSubType(collection, SUB_TYPE.DEFAULT);
     }
     const token = getToken();
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
         await cryptoWorker.encryptUTF8(newCollectionName, collection.key);
     const collectionRenameRequest = {
@@ -953,7 +942,7 @@ export const shareCollection = async (
     role: string,
 ) => {
     try {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker = await sharedCryptoWorker();
         const token = getToken();
         const publicKey: string = await getPublicKey(withUserEmail);
         const encryptedKey = await cryptoWorker.boxSeal(
@@ -1372,7 +1361,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 export function createHiddenCollection() {
     return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
         subType: SUB_TYPE.DEFAULT_HIDDEN,
-        visibility: VISIBILITY_STATE.HIDDEN,
+        visibility: ItemVisibility.hidden,
     });
 }
 

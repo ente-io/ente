@@ -305,8 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Требуется аутентификация"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
         "appVersion": m7,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Применить"),
@@ -438,6 +438,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Проверить статус"),
         "checking": MessageLookupByLibrary.simpleMessage("Проверка..."),
+        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
+            "Выберите фото и попробуйте \"Режим гостя\"."),
+        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
+            "Показываете фото другу? Не переживайте, что он листнет слишком далеко. Режим гостя заблокирует те фото, которые вы выбрали."),
+        "cl_guest_view_title":
+            MessageLookupByLibrary.simpleMessage("Режим гостя"),
+        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
+            "Мы добавили поддержку просмотра панорамных фотографий с углом обзора 360 градусов. Погружение обеспечивается навигацией на основе движения!"),
+        "cl_panorama_viewer_title":
+            MessageLookupByLibrary.simpleMessage("Просмотр Панорамы"),
+        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
+            "Представляем новый видеоплеер с улучшенными элементами управления воспроизведением и поддержкой HDR видео."),
+        "cl_video_player_title":
+            MessageLookupByLibrary.simpleMessage("Видеоплеер"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Получить бесплатное хранилище"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Получите больше!"),
@@ -811,6 +825,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Предоставить разрешение"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Группировать фотографии рядом"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable guest view, please setup device passcode or screen lock in your system settings."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Будет полезно, если вы укажете, где нашли нас, так как мы не отслеживаем установки приложения!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1041,6 +1058,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "На данный момент резервных копий нет"),
         "noPhotosFoundHere":
             MessageLookupByLibrary.simpleMessage("Здесь нет фотографий"),
+        "noQuickLinksSelected":
+            MessageLookupByLibrary.simpleMessage("No quick links selected"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Нет ключа восстановления?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1144,6 +1163,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Предоставьте разрешение"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Пожалуйста, войдите снова"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Please select quick links to remove"),
         "pleaseSendTheLogsTo": m42,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, попробуйте ещё раз"),
@@ -1248,6 +1269,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить метку человека"),
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Удалить публичную ссылку"),
+        "removePublicLinks":
+            MessageLookupByLibrary.simpleMessage("Remove public links"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Некоторые элементы, которые вы удаляете, были добавлены другими людьми, и вы потеряете к ним доступ"),
         "removeWithQuestionMark":
@@ -1495,8 +1518,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Предложить идею"),
         "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
-        "swipeLockEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable swipe lock, please setup device passcode or screen lock in your system settings."),
         "syncProgress": m62,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Синхронизация остановлена"),
@@ -1551,6 +1572,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Вы выйдете из списка следующих устройств:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Совершив это действие, Вы выйдете из своей учетной записи!"),
+        "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
+            MessageLookupByLibrary.simpleMessage(
+                "This will remove public links of all selected quick links."),
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "To enable app lock, please setup device passcode or screen lock in your system settings."),

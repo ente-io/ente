@@ -9,6 +9,7 @@
  */
 
 import type { FSWatcher } from "chokidar";
+import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
@@ -42,15 +43,11 @@ import {
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
+import { createMLWorker } from "./services/ml";
 import {
-    computeCLIPImageEmbedding,
-    computeCLIPTextEmbeddingIfAvailable,
-} from "./services/ml-clip";
-import { computeFaceEmbeddings, detectFaces } from "./services/ml-face";
-import {
-    encryptionKey,
     lastShownChangelogVersion,
-    saveEncryptionKey,
+    masterKeyB64,
+    saveMasterKeyB64,
     setLastShownChangelogVersion,
 } from "./services/store";
 import {
@@ -106,10 +103,10 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
-    ipcMain.handle("encryptionKey", () => encryptionKey());
+    ipcMain.handle("masterKeyB64", () => masterKeyB64());
 
-    ipcMain.handle("saveEncryptionKey", (_, encryptionKey: string) =>
-        saveEncryptionKey(encryptionKey),
+    ipcMain.handle("saveMasterKeyB64", (_, masterKeyB64: string) =>
+        saveMasterKeyB64(masterKeyB64),
     );
 
     ipcMain.handle("lastShownChangelogVersion", () =>
@@ -184,24 +181,6 @@ export const attachIPCHandlers = () => {
         ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
     );
 
-    // - ML
-
-    ipcMain.handle("computeCLIPImageEmbedding", (_, input: Float32Array) =>
-        computeCLIPImageEmbedding(input),
-    );
-
-    ipcMain.handle("computeCLIPTextEmbeddingIfAvailable", (_, text: string) =>
-        computeCLIPTextEmbeddingIfAvailable(text),
-    );
-
-    ipcMain.handle("detectFaces", (_, input: Float32Array) =>
-        detectFaces(input),
-    );
-
-    ipcMain.handle("computeFaceEmbeddings", (_, input: Float32Array) =>
-        computeFaceEmbeddings(input),
-    );
-
     // - Upload
 
     ipcMain.handle("listZipItems", (_, zipPath: string) =>
@@ -229,6 +208,16 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
+};
+
+/**
+ * A subset of {@link attachIPCHandlers} for functions that need a reference to
+ * the main window to do their thing.
+ */
+export const attachMainWindowIPCHandlers = (mainWindow: BrowserWindow) => {
+    // - ML
+
+    ipcMain.on("createMLWorker", () => createMLWorker(mainWindow));
 };
 
 /**

@@ -12,32 +12,68 @@ import "package:photos/models/ffmpeg/mp4.dart";
 import "package:photos/models/location/location.dart";
 
 class FFProbeProps {
-  Map<String, dynamic>? prodData;
+  Map<String, dynamic>? propData;
   Location? location;
   DateTime? creationTimeUTC;
   String? bitrate;
   String? majorBrand;
   String? fps;
-  String? codecWidth;
-  String? codecHeight;
+  String? _width;
+  String? _height;
+  int? _rotation;
 
   // dot separated bitrate, fps, codecWidth, codecHeight. Ignore null value
   String get videoInfo {
     final List<String> info = [];
     if (bitrate != null) info.add('$bitrate');
     if (fps != null) info.add('ƒ/$fps');
-    if (codecWidth != null && codecHeight != null) {
-      info.add('$codecWidth x $codecHeight');
+    if (_width != null && _height != null) {
+      info.add('$_width x $_height');
     }
     return info.join(' * ');
+  }
+
+  int? get width {
+    if (_width == null || _height == null) return null;
+    final intWidth = int.tryParse(_width!);
+    if (_rotation == null) {
+      return intWidth;
+    } else {
+      if ((_rotation! ~/ 90).isEven) {
+        return intWidth;
+      } else {
+        return int.tryParse(_height!);
+      }
+    }
+  }
+
+  int? get height {
+    if (_width == null || _height == null) return null;
+    final intHeight = int.tryParse(_height!);
+    if (_rotation == null) {
+      return intHeight;
+    } else {
+      if ((_rotation! ~/ 90).isEven) {
+        return intHeight;
+      } else {
+        return int.tryParse(_width!);
+      }
+    }
+  }
+
+  double? get aspectRatio {
+    if (width == null || height == null || height == 0 || width == 0) {
+      return null;
+    }
+    return width! / height!;
   }
 
   // toString() method
   @override
   String toString() {
     final buffer = StringBuffer();
-    for (final key in prodData!.keys) {
-      final value = prodData![key];
+    for (final key in propData!.keys) {
+      final value = propData![key];
       if (value != null) {
         buffer.writeln('$key: $value');
       }
@@ -131,12 +167,41 @@ class FFProbeProps {
         if (key == FFProbeKeys.rFrameRate) {
           result.fps = _formatFPS(stream[key]);
           parsedData[key] = result.fps;
-        } else if (key == FFProbeKeys.codedWidth) {
-          result.codecWidth = stream[key].toString();
-          parsedData[key] = result.codecWidth;
+        }
+        //TODO: Use `height` and `width` instead of `codedHeight` and `codedWidth`
+        //for better accuracy. `height' and `width` will give the video's "visual"
+        //height and width.
+        else if (key == FFProbeKeys.codedWidth) {
+          final width = stream[key];
+          if (width != null && width != 0) {
+            result._width = width.toString();
+            parsedData[key] = result._width;
+          }
         } else if (key == FFProbeKeys.codedHeight) {
-          result.codecHeight = stream[key].toString();
-          parsedData[key] = result.codecHeight;
+          final height = stream[key];
+          if (height != null && height != 0) {
+            result._height = height.toString();
+            parsedData[key] = result._height;
+          }
+        } else if (key == FFProbeKeys.width) {
+          final width = stream[key];
+          if (width != null && width != 0) {
+            result._width = width.toString();
+            parsedData[key] = result._width;
+          }
+        } else if (key == FFProbeKeys.height) {
+          final height = stream[key];
+          if (height != null && height != 0) {
+            result._height = height.toString();
+            parsedData[key] = result._height;
+          }
+        } else if (key == FFProbeKeys.sideDataList) {
+          for (Map sideData in stream[key]) {
+            if (sideData["side_data_type"] == "Display Matrix") {
+              result._rotation = sideData[FFProbeKeys.rotation];
+              parsedData[FFProbeKeys.rotation] = result._rotation;
+            }
+          }
         }
       }
     }
@@ -144,7 +209,7 @@ class FFProbeProps {
       newStreams.add(metadata);
     }
     parsedData["streams"] = newStreams;
-    result.prodData = parsedData;
+    result.propData = parsedData;
     return result;
   }
 

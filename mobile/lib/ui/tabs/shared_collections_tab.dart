@@ -21,12 +21,13 @@ import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
-  const SharedCollectionsTab({Key? key}) : super(key: key);
+  const SharedCollectionsTab({super.key});
 
   @override
   State<SharedCollectionsTab> createState() => _SharedCollectionsTabState();
@@ -43,6 +44,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     const Duration(seconds: 2),
     executionInterval: const Duration(seconds: 5),
   );
+  static const heroTagPrefix = "outgoing_collection";
 
   @override
   void initState() {
@@ -82,7 +84,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
               (snapshot.data?.outgoing.length ?? 0) == 0) {
             return const Center(child: SharedEmptyStateWidget());
           }
-          return _getSharedCollectionsGallery(snapshot.data!);
+          return SafeArea(child: _getSharedCollectionsGallery(snapshot.data!));
         } else if (snapshot.hasError) {
           _logger.severe(
             "critical: failed to load share gallery",
@@ -99,7 +101,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const maxThumbnailWidth = 160.0;
-    const maxQuickLinks = 6;
+    const maxQuickLinks = 4;
     final numberOfQuickLinks = collections.quickLinks.length;
     const quickLinkTitleHeroTag = "quick_link_title";
     final SectionTitle sharedWithYou =
@@ -262,8 +264,24 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                           ),
                           physics: const NeverScrollableScrollPhysics(),
                           itemBuilder: (context, index) {
-                            return QuickLinkAlbumItem(
-                              c: collections.quickLinks[index],
+                            return GestureDetector(
+                              onTap: () async {
+                                final thumbnail = await CollectionsService
+                                    .instance
+                                    .getCover(collections.quickLinks[index]);
+                                final page = CollectionPage(
+                                  CollectionWithThumbnail(
+                                    collections.quickLinks[index],
+                                    thumbnail,
+                                  ),
+                                  tagPrefix: heroTagPrefix,
+                                );
+                                // ignore: unawaited_futures
+                                routeToPage(context, page);
+                              },
+                              child: QuickLinkAlbumItem(
+                                c: collections.quickLinks[index],
+                              ),
                             );
                           },
                           separatorBuilder: (context, index) {
@@ -312,7 +330,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 
