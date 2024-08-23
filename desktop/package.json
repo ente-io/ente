@@ -40,7 +40,7 @@
         "onnxruntime-node": "^1.19.0"
     },
     "devDependencies": {
-        "@eslint/js": "^9",
+        "@eslint/js": "^9.9.0",
         "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0.5",
         "@types/eslint__js": "^8.42.3",
@@ -55,7 +55,7 @@
         "prettier-plugin-packagejson": "^2.5.1",
         "shx": "^0.3.4",
         "typescript": "^5.5.4",
-        "typescript-eslint": "^8.0.0-alpha.41"
+        "typescript-eslint": "^8.2.0"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"
