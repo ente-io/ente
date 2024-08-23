@@ -300,6 +300,9 @@ const TransformMenu = () => {
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
+                    style={{
+                        transform: "rotateZ(90deg)"
+                    }}
                     onClick={createFlipCanvasHandler("vertical")}
                     label={t("FLIP_VERTICALLY")}
                 />
