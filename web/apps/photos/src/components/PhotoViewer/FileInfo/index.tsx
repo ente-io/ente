@@ -20,7 +20,7 @@ import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { getPublicMagicMetadataMTSync } from "@ente/shared/file-metadata";
+import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
@@ -366,7 +366,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const publicMagicMetadata = getPublicMagicMetadataMTSync(enteFile);
+    const publicMagicMetadata = getPublicMagicMetadataSync(enteFile);
     const originalDate = getUICreationDate(enteFile, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {

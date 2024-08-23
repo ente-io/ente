@@ -1,5 +1,7 @@
+import { getUICreationDate } from "@/media/file-metadata";
 import type { SearchDateComponents } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
+import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import * as Comlink from "comlink";
 import {
     isInsideCity,
@@ -31,7 +33,7 @@ function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.date) {
         return isDateComponentsMatch(
             search.date,
-            new Date(file.metadata.creationTime / 1000),
+            getUICreationDate(file, getPublicMagicMetadataSync(file)),
         );
     }
     if (search?.location) {
