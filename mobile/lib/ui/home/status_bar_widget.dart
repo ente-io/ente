@@ -1,57 +1,56 @@
-import "dart:async";
-import "dart:io";
+import 'dart:async';
 
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
-import "package:photo_manager/photo_manager.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/ente_theme_data.dart";
-import "package:photos/events/sync_status_update_event.dart";
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/notification_event.dart';
+import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/services/local_sync_service.dart";
-import "package:photos/services/sync_service.dart";
+import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/user_remote_flag_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
-import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/home/error_warning_header_widget.dart";
-import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
-import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/photo_manager_util.dart";
+import 'package:photos/theme/text_style.dart';
+import 'package:photos/ui/account/verify_recovery_page.dart';
+import 'package:photos/ui/components/home_header_widget.dart';
+import 'package:photos/ui/components/notification_widget.dart';
+import 'package:photos/ui/home/header_error_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 
-class HomeAppBarWidget extends StatefulWidget {
-  const HomeAppBarWidget({super.key});
+const double kContainerHeight = 36;
+
+class StatusBarWidget extends StatefulWidget {
+  const StatusBarWidget({Key? key}) : super(key: key);
 
   @override
-  State<HomeAppBarWidget> createState() => _HomeAppBarWidgetState();
+  State<StatusBarWidget> createState() => _StatusBarWidgetState();
 }
 
-class _HomeAppBarWidgetState extends State<HomeAppBarWidget> {
-  bool _showStatus = false;
-  bool _showErrorBanner = false;
+class _StatusBarWidgetState extends State<StatusBarWidget> {
+  static final _logger = Logger("StatusBarWidget");
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
-  final _logger = Logger("HomeAppBarWidget");
+  late StreamSubscription<NotificationEvent> _notificationSubscription;
+  bool _showStatus = false;
+  bool _showErrorBanner = false;
+  Error? _syncError;
 
   @override
   void initState() {
-    super.initState();
-
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       _logger.info("Received event " + event.status.toString());
-
       if (event.status == SyncStatus.error) {
         setState(() {
+          _syncError = event.error;
           _showErrorBanner = true;
         });
       } else {
         setState(() {
+          _syncError = null;
           _showErrorBanner = false;
         });
       }
-
       if (event.status == SyncStatus.completedFirstGalleryImport ||
           event.status == SyncStatus.completedBackup) {
         Future.delayed(const Duration(milliseconds: 2000), () {
@@ -67,90 +66,62 @@ class _HomeAppBarWidgetState extends State<HomeAppBarWidget> {
         });
       }
     });
+    _notificationSubscription =
+        Bus.instance.on<NotificationEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    super.initState();
   }
 
-  dispose() {
+  @override
+  void dispose() {
     _subscription.cancel();
+    _notificationSubscription.cancel();
     super.dispose();
   }
 
   @override
-  AppBar build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return AppBar(
-      backgroundColor: colorScheme.backgroundElevated,
-      elevation: 4,
-      surfaceTintColor: Colors.transparent,
-      shadowColor: Colors.black.withOpacity(0.2),
-      clipBehavior: Clip.none,
-      centerTitle: true,
-      title: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        switchInCurve: Curves.easeOutQuad,
-        switchOutCurve: Curves.easeInQuad,
-        child: _showStatus
-            ? AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                switchInCurve: Curves.easeOutQuad,
-                switchOutCurve: Curves.easeInQuad,
-                child: _showErrorBanner
-                    ? const Text("ente", style: brandStyleMedium)
-                    : const SyncStatusWidget(),
-              )
-            : const Text("ente", style: brandStyleMedium),
-      ),
-      actions: [
-        IconButtonWidget(
-          icon: Icons.add_photo_alternate_outlined,
-          iconButtonType: IconButtonType.primary,
-          onTap: () async {
-            try {
-              final PermissionState state =
-                  await requestPhotoMangerPermissions();
-              await LocalSyncService.instance.onUpdatePermission(state);
-            } on Exception catch (e) {
-              Logger("HomeHeaderWidget").severe(
-                "Failed to request permission: ${e.toString()}",
-                e,
-              );
-            }
-            if (!LocalSyncService.instance.hasGrantedFullPermission()) {
-              if (Platform.isAndroid) {
-                await PhotoManager.openSetting();
-              } else {
-                final bool hasGrantedLimit =
-                    LocalSyncService.instance.hasGrantedLimitedPermissions();
-                // ignore: unawaited_futures
-                showChoiceActionSheet(
-                  context,
-                  title: S.of(context).preserveMore,
-                  body: S.of(context).grantFullAccessPrompt,
-                  firstButtonLabel: S.of(context).openSettings,
-                  firstButtonOnTap: () async {
-                    await PhotoManager.openSetting();
-                  },
-                  secondButtonLabel: hasGrantedLimit
-                      ? S.of(context).selectMorePhotos
-                      : S.of(context).cancel,
-                  secondButtonOnTap: () async {
-                    if (hasGrantedLimit) {
-                      await PhotoManager.presentLimited();
-                    }
-                  },
-                );
-              }
-            } else {
-              unawaited(
-                routeToPage(
-                  context,
-                  BackupFolderSelectionPage(
-                    buttonText: S.of(context).backup,
-                  ),
-                ),
-              );
-            }
-          },
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        HomeHeaderWidget(
+          centerWidget: _showStatus
+              ? _showErrorBanner
+                  ? const Text("ente", style: brandStyleMedium)
+                  : const SyncStatusWidget()
+              : const Text("ente", style: brandStyleMedium),
         ),
+        _showErrorBanner
+            ? Divider(
+                height: 8,
+                color: getEnteColorScheme(context).strokeFaint,
+              )
+            : const SizedBox.shrink(),
+        _showErrorBanner
+            ? HeaderErrorWidget(error: _syncError)
+            : const SizedBox.shrink(),
+        UserRemoteFlagService.instance.shouldShowRecoveryVerification() &&
+                !_showErrorBanner
+            ? Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                child: NotificationWidget(
+                  startIcon: Icons.error_outline,
+                  actionIcon: Icons.arrow_forward,
+                  text: S.of(context).confirmYourRecoveryKey,
+                  type: NotificationType.banner,
+                  onTap: () async => {
+                    await routeToPage(
+                      context,
+                      const VerifyRecoveryPage(),
+                      forceCustomPageRoute: true,
+                    ),
+                  },
+                ),
+              )
+            : const SizedBox.shrink(),
       ],
     );
   }
@@ -171,14 +142,13 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   @override
   void initState() {
-    super.initState();
-
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       setState(() {
         _event = event;
       });
     });
     _event = SyncService.instance.getLastSyncStatusEvent();
+    super.initState();
   }
 
   @override
@@ -201,23 +171,18 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
       return const SizedBox.shrink();
     }
     if (_event!.status == SyncStatus.completedBackup) {
-      return const AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        switchInCurve: Curves.easeOutQuad,
-        switchOutCurve: Curves.easeInQuad,
-        child: SyncStatusCompletedWidget(),
-      );
+      return const SyncStatusCompletedWidget();
     }
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
-      switchInCurve: Curves.easeOutQuad,
-      switchOutCurve: Curves.easeInQuad,
-      child: RefreshIndicatorWidget(_event),
-    );
+    return RefreshIndicatorWidget(_event);
   }
 }
 
 class RefreshIndicatorWidget extends StatelessWidget {
+  static const _inProgressIcon = CircularProgressIndicator(
+    strokeWidth: 2,
+    valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(45, 194, 98, 1.0)),
+  );
+
   final SyncStatusUpdate? event;
 
   const RefreshIndicatorWidget(this.event, {Key? key}) : super(key: key);
@@ -237,13 +202,15 @@ class RefreshIndicatorWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                EnteLoadingWidget(
-                  color: getEnteColorScheme(context).primary400,
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  width: 22,
+                  height: 22,
+                  child: _inProgressIcon,
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  _getRefreshingText(context),
-                  style: getEnteTextTheme(context).small,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
+                  child: Text(_getRefreshingText(context)),
                 ),
               ],
             ),
@@ -291,9 +258,8 @@ class SyncStatusCompletedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return Container(
-      color: colorScheme.backdropBase,
+      color: Theme.of(context).colorScheme.defaultBackgroundColor,
       height: kContainerHeight,
       child: Align(
         alignment: Alignment.center,
@@ -312,10 +278,7 @@ class SyncStatusCompletedWidget extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text(
-                    S.of(context).allMemoriesPreserved,
-                    style: getEnteTextTheme(context).small,
-                  ),
+                  child: Text(S.of(context).allMemoriesPreserved),
                 ),
               ],
             ),
