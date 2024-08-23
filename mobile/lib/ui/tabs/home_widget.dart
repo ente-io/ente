@@ -360,10 +360,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               },
             ),
           ),
-          appBar: const PreferredSize(
-            preferredSize: const Size.fromHeight(kToolbarHeight),
-            child: HomeAppBarWidget(),
-          ),
+
           resizeToAvoidBottomInset: false,
         ),
       ),
@@ -424,12 +421,25 @@ class _HomeWidgetState extends State<HomeWidget> {
               children: [
                 _showShowBackupHook
                     ? const StartBackupHookWidget(headerWidget: _headerWidget)
-                    : HomeGalleryWidget(
-                        header: _headerWidget,
-                        footer: const SizedBox(
-                          height: 160,
-                        ),
-                        selectedFiles: _selectedFiles,
+                    : Stack(
+                        children: [
+                          const Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: HomeAppBarWidget(),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: kToolbarHeight),
+                            child: HomeGalleryWidget(
+                              header: _headerWidget,
+                              footer: const SizedBox(
+                                height: 160,
+                              ),
+                              selectedFiles: _selectedFiles,
+                            ),
+                          ),
+                        ],
                       ),
                 _userCollectionsTab,
                 _sharedCollectionTab,
