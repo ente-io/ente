@@ -8,8 +8,8 @@ import type { EnteFile } from "../../types/file";
 /**
  * A parsed version of a potential natural language date time string.
  *
- * The components which were parsed will be set. The type doesn't enforce this,
- * but at least one component will be present.
+ * All attributes which were parsed will be set. The type doesn't enforce this,
+ * but it is guaranteed that at least one attribute will be present.
  */
 export interface SearchDateComponents {
     /**

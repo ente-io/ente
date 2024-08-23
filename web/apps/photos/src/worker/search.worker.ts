@@ -71,8 +71,8 @@ const isDateComponentsMatch = (
     { year, month, day, weekday }: SearchDateComponents,
     date: Date,
 ) => {
-    // Components are guaranteed to have at least one component, so start by
-    // assuming true.
+    // Components are guaranteed to have at least one attribute present, so
+    // start by assuming true.
     let match = true;
 
     if (year) match = date.getFullYear() == year;

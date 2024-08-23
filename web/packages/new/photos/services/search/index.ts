@@ -30,34 +30,39 @@ export const parseDateComponents = (s: string): DateSearchResult[] => {
 };
 
 export const parseChrono = (s: string): DateSearchResult[] =>
-    chrono.parse(s).map((result) => {
-        const p = result.start;
-        const component = (s: Component) =>
-            p.isCertain(s) ? nullToUndefined(p.get(s)) : undefined;
+    chrono
+        .parse(s)
+        .map((result) => {
+            const p = result.start;
+            const component = (s: Component) =>
+                p.isCertain(s) ? nullToUndefined(p.get(s)) : undefined;
 
-        const year = component("year");
-        const month = component("month");
-        const day = component("day");
-        const weekday = component("weekday");
-        const components = { year, month, day, weekday };
+            const year = component("year");
+            const month = component("month");
+            const day = component("day");
+            const weekday = component("weekday");
 
-        const format: Intl.DateTimeFormatOptions = {};
-        if (year) format.year = "numeric";
-        if (month) format.month = "long";
-        if (day) format.day = "numeric";
-        if (weekday) format.weekday = "long";
+            if (!year && !month && !day && !weekday) return undefined;
+            const components = { year, month, day, weekday };
 
-        const formatter = new Intl.DateTimeFormat(undefined, format);
-        const formattedDate = formatter.format(p.date());
-        return { components, formattedDate };
-    });
+            const format: Intl.DateTimeFormatOptions = {};
+            if (year) format.year = "numeric";
+            if (month) format.month = "long";
+            if (day) format.day = "numeric";
+            if (weekday) format.weekday = "long";
+
+            const formatter = new Intl.DateTimeFormat(undefined, format);
+            const formattedDate = formatter.format(p.date());
+            return { components, formattedDate };
+        })
+        .filter((x) => x !== undefined);
 
 /** Parse a string like "2024" into a date search result. */
 const parseYearComponents = (s: string): DateSearchResult[] => {
-    // s is already trimmed
+    // s is already trimmed.
     if (s.length == 4) {
         const year = parseInt(s);
-        if (year > 0 && year <= 9999) {
+        if (year && year <= 9999) {
             const components = { year };
             return [{ components, formattedDate: s }];
         }
