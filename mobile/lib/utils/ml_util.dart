@@ -152,9 +152,8 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return sortedBylocalID;
 }
 
-Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions({
-  int yieldSize = fileDownloadMlLimit,
-}) async* {
+Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
+    int yieldSize,) async* {
   final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
   final List<List<FileMLInstruction>> chunks =
       filesToIndex.chunks(embeddingFetchLimit);
@@ -167,7 +166,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions({
       for (final batch in batches) {
         yield batch;
       }
-      continue; 
+      continue;
     }
     final Set<int> ids = {};
     final Map<int, FileMLInstruction> pendingIndex = {};

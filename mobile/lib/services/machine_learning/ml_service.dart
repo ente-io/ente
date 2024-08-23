@@ -170,7 +170,7 @@ class MLService {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
       final Stream<List<FileMLInstruction>> instructionStream =
-          fetchEmbeddingsAndInstructions();
+          fetchEmbeddingsAndInstructions(fileDownloadMlLimit);
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
