@@ -361,6 +361,15 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           ),
 
+          ///To fix the status bar not adapting it's color when switching
+          ///screens the have different appbar colours.
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(0),
+            child: AppBar(
+              backgroundColor: getEnteColorScheme(context).backgroundElevated,
+            ),
+          ),
+
           resizeToAvoidBottomInset: false,
         ),
       ),
