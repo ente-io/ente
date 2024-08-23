@@ -1,3 +1,4 @@
+import { EllipsizedTypography } from "@/base/components/Typography";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
@@ -259,7 +260,6 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
             <HorizontalFlex
                 sx={{
                     overflow: "hidden",
-                    textOverflow: "ellipsis",
                 }}
             >
                 {watch.collectionMapping === "root" ? (
@@ -273,7 +273,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                 )}
                 <EntryContainer>
                     <EntryHeading watch={watch} />
-                    <FolderPath variant="small">{watch.folderPath}</FolderPath>
+                    <FolderPath>{watch.folderPath}</FolderPath>
                 </EntryContainer>
             </HorizontalFlex>
             <EntryOptions {...{ confirmStopWatching }} />
@@ -283,7 +283,6 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
 
 const EntryContainer = styled(Box)({
     overflow: "hidden",
-    textOverflow: "ellipsis",
     marginLeft: "12px",
     marginRight: "6px",
     marginBottom: "12px",
@@ -306,11 +305,11 @@ const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
     );
 };
 
-const FolderPath = styled(Typography)(({ theme }) => ({
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    color: theme.colors.text.muted,
-}));
+const FolderPath: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <EllipsizedTypography variant="small" color="text.muted">
+        {children}
+    </EllipsizedTypography>
+);
 
 interface EntryOptionsProps {
     confirmStopWatching: () => void;

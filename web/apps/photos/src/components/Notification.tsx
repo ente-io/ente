@@ -1,4 +1,7 @@
+import { EllipsizedTypography } from "@/base/components/Typography";
+import { IconButtonWithBG } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     Button,
@@ -6,14 +9,9 @@ import {
     Stack,
     SxProps,
     Theme,
-    Typography,
-    styled,
     type ButtonProps,
 } from "@mui/material";
 import { NotificationAttributes } from "types/Notification";
-
-import { IconButtonWithBG } from "@ente/shared/components/Container";
-import InfoIcon from "@mui/icons-material/InfoOutlined";
 
 interface Iprops {
     open: boolean;
@@ -127,9 +125,3 @@ export default function Notification({
         </Snackbar>
     );
 }
-
-const EllipsizedTypography = styled(Typography)`
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-`;

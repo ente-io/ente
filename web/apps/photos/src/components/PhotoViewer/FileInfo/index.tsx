@@ -1,5 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
+import { EllipsizedTypography } from "@/base/components/Typography";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { ParsedMetadata } from "@/media/file-metadata";
@@ -609,16 +610,13 @@ const RawExif: React.FC<RawExifProps> = ({
                                 {namespace}
                             </Typography>
                         </Stack>
-                        <Typography
+                        <EllipsizedTypography
                             sx={{
                                 width: "100%",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
                             }}
                         >
                             {description}
-                        </Typography>
+                        </EllipsizedTypography>
                     </ExifItem>
                 ))}
             </Stack>
