@@ -3,7 +3,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import type { SearchPerson } from "../services/search";
+import type { SearchPerson } from "../services/search/types";
 
 export interface PeopleListProps {
     people: SearchPerson[];
