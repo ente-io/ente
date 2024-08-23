@@ -58,7 +58,6 @@ class MLService {
   bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
 
-  static const int _fileDownloadLimit = 10;
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
@@ -142,7 +141,9 @@ class MLService {
   }
 
   void triggerML() {
-    if (_mlControllerStatus && !_isIndexingOrClusteringRunning && !_isRunningML) {
+    if (_mlControllerStatus &&
+        !_isIndexingOrClusteringRunning &&
+        !_isRunningML) {
       unawaited(runAllML());
     }
   }
@@ -169,8 +170,7 @@ class MLService {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
       final Stream<List<FileMLInstruction>> instructionStream =
-          FaceRecognitionService.instance
-              .syncEmbeddings(yieldSize: _fileDownloadLimit);
+          fetchEmbeddingsAndInstructions();
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
