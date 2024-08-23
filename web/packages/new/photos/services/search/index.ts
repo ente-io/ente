@@ -31,7 +31,7 @@ export const parseDateComponents = (
 
         const format: Intl.DateTimeFormatOptions = {};
         if (year) format.year = "numeric";
-        if (month !== undefined) format.month = "long";
+        if (month) format.month = "long";
         if (day) format.day = "numeric";
 
         const formatter = new Intl.DateTimeFormat(undefined, format);

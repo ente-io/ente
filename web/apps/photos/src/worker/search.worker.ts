@@ -29,7 +29,8 @@ function isSearchedFile(file: EnteFile, search: Search) {
     }
 
     if (search?.date) {
-        return isSameDayAnyYear(search.date)(
+        return isDateComponentsMatch(
+            search.date,
             new Date(file.metadata.creationTime / 1000),
         );
     }
@@ -66,19 +67,18 @@ function isSearchedFile(file: EnteFile, search: Search) {
     return false;
 }
 
-const isSameDayAnyYear =
-    (baseDate: SearchDateComponents) => (compareDate: Date) => {
-        let same = true;
+const isDateComponentsMatch = (
+    { year, month, day }: SearchDateComponents,
+    date: Date,
+) => {
+    // Components are guaranteed to have at least one component, so start by
+    // assuming true.
+    let match = true;
 
-        if (baseDate.month || baseDate.month === 0) {
-            same = baseDate.month === compareDate.getMonth();
-        }
-        if (same && baseDate.day) {
-            same = baseDate.day === compareDate.getDate();
-        }
-        if (same && baseDate.year) {
-            same = baseDate.year === compareDate.getFullYear();
-        }
+    if (year) match = date.getFullYear() == year;
+    // JS getMonth is 0-indexed.
+    if (match && month) match = date.getMonth() + 1 == month;
+    if (match && day) match = date.getDate() == day;
 
-        return same;
-    };
+    return match;
+};

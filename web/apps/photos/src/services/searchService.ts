@@ -115,22 +115,22 @@ function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
             label: t("CHRISTMAS"),
-            value: { month: 11, date: 25 },
+            value: { month: 12, date: 25 },
             type: SuggestionType.DATE,
         },
         {
             label: t("CHRISTMAS_EVE"),
-            value: { month: 11, date: 24 },
+            value: { month: 12, date: 24 },
             type: SuggestionType.DATE,
         },
         {
             label: t("NEW_YEAR"),
-            value: { month: 0, date: 1 },
+            value: { month: 1, date: 1 },
             type: SuggestionType.DATE,
         },
         {
             label: t("NEW_YEAR_EVE"),
-            value: { month: 11, date: 31 },
+            value: { month: 12, date: 31 },
             type: SuggestionType.DATE,
         },
     ].filter((suggestion) =>

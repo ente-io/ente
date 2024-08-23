@@ -13,15 +13,16 @@ import type { EnteFile } from "../../types/file";
  */
 export interface SearchDateComponents {
     /**
-     * The year, if the search string specified one.
+     * The year, if the search string specified one. e.g. `2024`.
      */
     year?: number;
     /**
-     * The month, if the search string specified one.
+     * The month (1 to 12, with December being 12), if the search string
+     * specified one.
      */
     month?: number;
     /**
-     * The day of the month, if the search string specified one.
+     * The day of the month (1 to 31), if the search string specified one.
      */
     day?: number;
 }
