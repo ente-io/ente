@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.26+926
+version: 0.9.27+927
 publish_to: none
 
 environment:
@@ -128,7 +128,10 @@ dependencies:
   native_video_player: ^1.3.1
   onnx_dart:
     path: plugins/onnx_dart
-  onnxruntime: ^1.4.1
+  onnxruntime:
+    git:
+      url: https://github.com/ente-io/onnxruntime.git
+      ref: ente_onnxruntime
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
