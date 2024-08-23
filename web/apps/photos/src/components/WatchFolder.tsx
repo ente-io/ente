@@ -1,3 +1,4 @@
+import { EllipsizedTypography } from "@/base/components/Typography";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
@@ -307,14 +308,10 @@ const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
 };
 
 const FolderPath: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <FolderPath_ variant="small">{children}</FolderPath_>
+    <EllipsizedTypography variant="small" color="text.muted">
+        {children}
+    </EllipsizedTypography>
 );
-
-const FolderPath_ = styled(Typography)(({ theme }) => ({
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    color: theme.colors.text.muted,
-}));
 
 interface EntryOptionsProps {
     confirmStopWatching: () => void;
