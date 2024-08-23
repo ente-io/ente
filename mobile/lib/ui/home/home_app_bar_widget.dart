@@ -76,13 +76,7 @@ class _HomeAppBarWidgetState extends State<HomeAppBarWidget> {
 
   @override
   AppBar build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return AppBar(
-      backgroundColor: colorScheme.backgroundElevated,
-      elevation: 4,
-      surfaceTintColor: Colors.transparent,
-      shadowColor: Colors.black.withOpacity(0.2),
-      clipBehavior: Clip.none,
       centerTitle: true,
       title: AnimatedSwitcher(
         duration: const Duration(milliseconds: 500),
