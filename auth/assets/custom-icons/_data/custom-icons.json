@@ -672,6 +672,16 @@
       "title": "Newton",
       "altNames": ["Newton Crypto"],
       "slug": "newton"
+    },
+    {
+      "title": "Bethesda Softworks",
+      "altNames": ["Bethesda"],
+      "slug": "bethesda"
+    },
+    {
+      "title": "EVE Online",
+      "altNames": ["EVE"],
+      "slug": "eve"
     }
   ]
 }
