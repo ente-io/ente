@@ -47,7 +47,6 @@ export const getAutoCompleteSuggestions =
                 await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
                 ...getHolidaySuggestion(searchPhrase),
-                ...getYearSuggestion(searchPhrase),
                 ...getDateSuggestion(searchPhrase),
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
@@ -136,26 +135,6 @@ function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     ].filter((suggestion) =>
         suggestion.label.toLowerCase().includes(searchPhrase),
     );
-}
-
-function getYearSuggestion(searchPhrase: string): Suggestion[] {
-    if (searchPhrase.length === 4) {
-        try {
-            const year = parseInt(searchPhrase);
-            if (year >= 1970 && year <= new Date().getFullYear()) {
-                return [
-                    {
-                        label: searchPhrase,
-                        value: { year },
-                        type: SuggestionType.DATE,
-                    },
-                ];
-            }
-        } catch (e) {
-            log.error("getYearSuggestion failed", e);
-        }
-    }
-    return [];
 }
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
