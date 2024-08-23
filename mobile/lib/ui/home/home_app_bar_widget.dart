@@ -196,7 +196,7 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     }
     if (_event!.status == SyncStatus.completedBackup) {
       return const AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
+        duration: Duration(milliseconds: 500),
         switchInCurve: Curves.easeOutQuad,
         switchOutCurve: Curves.easeInQuad,
         child: SyncStatusCompletedWidget(),
