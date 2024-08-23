@@ -7,7 +7,7 @@ import {
     isMLSupported,
     mlStatusSnapshot,
 } from "@/new/photos/services/ml";
-import { parsePotentialDate } from "@/new/photos/services/search";
+import { parseDateComponents } from "@/new/photos/services/search";
 import type {
     SearchDateComponents,
     SearchPerson,
@@ -207,25 +207,12 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
     };
 }
 
-function getDateSuggestion(searchPhrase: string): Suggestion[] {
-    const searchedDates = parsePotentialDate(searchPhrase);
-
-    return searchedDates.map((searchedDate) => ({
+const getDateSuggestion = (searchPhrase: string): Suggestion[] =>
+    parseDateComponents(searchPhrase).map(({ components, formattedDate }) => ({
         type: SuggestionType.DATE,
-        value: searchedDate,
-        label: getFormattedDate(searchedDate),
+        value: components,
+        label: formattedDate,
     }));
-}
-
-export function getFormattedDate(date: SearchDateComponents) {
-    const options = {};
-    date.day && (options["day"] = "numeric");
-    (date.month || date.month === 0) && (options["month"] = "long");
-    date.year && (options["year"] = "numeric");
-    return new Intl.DateTimeFormat("en-IN", options).format(
-        new Date(date.year ?? 1, date.month ?? 1, date.day ?? 1),
-    );
-}
 
 function getCollectionSuggestion(
     searchPhrase: string,

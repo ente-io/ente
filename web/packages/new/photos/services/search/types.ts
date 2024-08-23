@@ -15,20 +15,15 @@ export interface SearchDateComponents {
     /**
      * The year, if the search string specified one.
      */
-    year: number | undefined;
+    year?: number;
     /**
      * The month, if the search string specified one.
      */
-    month: number | undefined;
+    month?: number;
     /**
      * The day of the month, if the search string specified one.
      */
-    day: number | undefined;
-    /**
-     * The "best" guess at the exact JavaScript {@link Date} that was intended
-     * by the search string.
-     */
-    date: Date;
+    day?: number;
 }
 
 /**
