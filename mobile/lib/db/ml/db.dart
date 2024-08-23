@@ -660,6 +660,14 @@ class MLDataDB {
     return maps.first['count'] as int;
   }
 
+  Future<int> getErroredFaceCount() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT COUNT(*) as count FROM $facesTable WHERE $faceScore < 0',
+    );
+    return maps.first['count'] as int;
+  }
+
   Future<int> getClusteredOrFacelessFileCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> clustered = await db.getAll(
@@ -942,7 +950,7 @@ class MLDataDB {
   }
 
   /// WARNING: This will delete ALL data in the tables! Only use this for debug/testing purposes!
-  Future<void> dropFeedbackTables() async {
+  Future<void> dropFacesFeedbackTables() async {
     try {
       final db = await instance.asyncDB;
 
