@@ -49,12 +49,12 @@ The root `package.json` also has a convenience dev dependency:
 ## Cryptography
 
 We use [libsodium](https://libsodium.gitbook.io/doc/) for our cryptography
-primitives. Specifically, we use its WebAssembly target, accessible via
-JavaScript wrappers maintained by the original authors of libsodium themselves -
+primitives. We use its WebAssembly target, accessible via JavaScript wrappers
+maintained by the original authors of libsodium themselves -
 [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
 
-We need to use the "sumo" variant, _libsodium-wrappers-sumo_, to get access to
-the `crypto_pwhash_*()` functions.
+More precisely, we use the sumo variant, "libsodium-wrappers-sumo", since the
+standard variant does not provide the `crypto_pwhash_*` functions.
 
 ## Meta frameworks
 
