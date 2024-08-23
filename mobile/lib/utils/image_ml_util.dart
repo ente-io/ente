@@ -231,7 +231,7 @@ Future<Float32List> preprocessImageClip(
   const int blueOff = 2 * requiredHeight * requiredWidth;
   for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
     for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-      final Color pixel = _getPixelBicubic(
+      final Color pixel = _getPixelBilinear(
         w / scale,
         h / scale,
         image,
