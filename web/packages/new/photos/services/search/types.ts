@@ -25,6 +25,11 @@ export interface SearchDateComponents {
      * The day of the month (1 to 31), if the search string specified one.
      */
     day?: number;
+    /**
+     * The day of the week (0 to 6, with Sunday being 0), if the search string
+     * specified one.
+     */
+    weekday?: number;
 }
 
 /**

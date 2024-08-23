@@ -28,13 +28,16 @@ export const parseDateComponents = (
         const year = component("year");
         const month = component("month");
         const day = component("day");
+        const weekday = component("weekday");
+        const components = { year, month, day, weekday };
 
         const format: Intl.DateTimeFormatOptions = {};
         if (year) format.year = "numeric";
         if (month) format.month = "long";
         if (day) format.day = "numeric";
+        if (weekday) format.weekday = "long";
 
         const formatter = new Intl.DateTimeFormat(undefined, format);
         const formattedDate = formatter.format(p.date());
-        return { components: { year, month, day }, formattedDate };
+        return { components, formattedDate };
     });
