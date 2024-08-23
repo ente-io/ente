@@ -8,7 +8,9 @@
  * 3.  libsodium-wrappers       (JavaScript bindings to libsodium)
  *
  * Our cryptography primitives are provided by libsodium, specifically, its
- * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer.
+ * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer. Note
+ * that we use the sumo variant, "libsodium-wrappers-sumo", since the standard
+ * variant does not provide the `crypto_pwhash_*` functions.
  *
  * Direct usage of "libsodium-wrappers" is restricted to `crypto/libsodium.ts`.
  * This is the next higher layer. Usually the functions in this file are thin
