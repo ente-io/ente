@@ -1,3 +1,4 @@
+import type { DateValue } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import * as Comlink from "comlink";
 import {
@@ -5,7 +6,6 @@ import {
     isInsideLocationTag,
 } from "services/locationSearchService";
 import { Search } from "types/search";
-import { isSameDayAnyYear } from "utils/search";
 
 export class DedicatedSearchWorker {
     private files: EnteFile[] = [];
@@ -65,3 +65,19 @@ function isSearchedFile(file: EnteFile, search: Search) {
     }
     return false;
 }
+
+const isSameDayAnyYear = (baseDate: DateValue) => (compareDate: Date) => {
+    let same = true;
+
+    if (baseDate.month || baseDate.month === 0) {
+        same = baseDate.month === compareDate.getMonth();
+    }
+    if (same && baseDate.date) {
+        same = baseDate.date === compareDate.getDate();
+    }
+    if (same && baseDate.year) {
+        same = baseDate.year === compareDate.getFullYear();
+    }
+
+    return same;
+};

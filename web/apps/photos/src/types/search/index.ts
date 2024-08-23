@@ -1,6 +1,9 @@
 import { FileType } from "@/media/file-type";
 import type { MLStatus } from "@/new/photos/services/ml";
-import type { SearchPerson } from "@/new/photos/services/search";
+import type {
+    DateValue,
+    SearchPerson,
+} from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { City } from "services/locationSearchService";
 import { LocationTagData } from "types/entity";
@@ -16,12 +19,6 @@ export enum SuggestionType {
     FILE_TYPE = "FILE_TYPE",
     CLIP = "CLIP",
     CITY = "CITY",
-}
-
-export interface DateValue {
-    date?: number;
-    month?: number;
-    year?: number;
 }
 
 export interface Suggestion {

@@ -7,15 +7,17 @@ import {
     isMLSupported,
     mlStatusSnapshot,
 } from "@/new/photos/services/ml";
-import type { SearchPerson } from "@/new/photos/services/search";
+import { parsePotentialDate } from "@/new/photos/services/search";
+import type {
+    DateValue,
+    SearchPerson,
+} from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
-import * as chrono from "chrono-node";
 import { t } from "i18next";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import {
     ClipSearchScores,
-    DateValue,
     Search,
     SearchOption,
     Suggestion,
@@ -23,11 +25,8 @@ import {
 } from "types/search";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
-import { getFormattedDate } from "utils/search";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
-
-const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
 export const getDefaultOptions = async () => {
     return [
@@ -209,13 +208,23 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
 }
 
 function getDateSuggestion(searchPhrase: string): Suggestion[] {
-    const searchedDates = parseHumanDate(searchPhrase);
+    const searchedDates = parsePotentialDate(searchPhrase);
 
     return searchedDates.map((searchedDate) => ({
         type: SuggestionType.DATE,
         value: searchedDate,
         label: getFormattedDate(searchedDate),
     }));
+}
+
+export function getFormattedDate(date: DateValue) {
+    const options = {};
+    date.date && (options["day"] = "numeric");
+    (date.month || date.month === 0) && (options["month"] = "long");
+    date.year && (options["year"] = "numeric");
+    return new Intl.DateTimeFormat("en-IN", options).format(
+        new Date(date.year ?? 1, date.month ?? 1, date.date ?? 1),
+    );
 }
 
 function getCollectionSuggestion(
@@ -330,31 +339,6 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
                 ?.toLowerCase()
                 .includes(searchPhrase),
     );
-}
-
-function parseHumanDate(humanDate: string): DateValue[] {
-    const date = chrono.parseDate(humanDate);
-    const date1 = chrono.parseDate(`${humanDate} 1`);
-    if (date !== null) {
-        const dates = [
-            { month: date.getMonth() },
-            { date: date.getDate(), month: date.getMonth() },
-        ];
-        let reverse = false;
-        humanDate.split("").forEach((c) => {
-            if (DIGITS.has(c)) {
-                reverse = true;
-            }
-        });
-        if (reverse) {
-            return dates.reverse();
-        }
-        return dates;
-    }
-    if (date1) {
-        return [{ month: date1.getMonth() }];
-    }
-    return [];
 }
 
 async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
