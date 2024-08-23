@@ -1,4 +1,4 @@
-import type { DateValue } from "@/new/photos/services/search/types";
+import type { SearchDateComponents } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import * as Comlink from "comlink";
 import {
@@ -66,18 +66,19 @@ function isSearchedFile(file: EnteFile, search: Search) {
     return false;
 }
 
-const isSameDayAnyYear = (baseDate: DateValue) => (compareDate: Date) => {
-    let same = true;
+const isSameDayAnyYear =
+    (baseDate: SearchDateComponents) => (compareDate: Date) => {
+        let same = true;
 
-    if (baseDate.month || baseDate.month === 0) {
-        same = baseDate.month === compareDate.getMonth();
-    }
-    if (same && baseDate.date) {
-        same = baseDate.date === compareDate.getDate();
-    }
-    if (same && baseDate.year) {
-        same = baseDate.year === compareDate.getFullYear();
-    }
+        if (baseDate.month || baseDate.month === 0) {
+            same = baseDate.month === compareDate.getMonth();
+        }
+        if (same && baseDate.day) {
+            same = baseDate.day === compareDate.getDate();
+        }
+        if (same && baseDate.year) {
+            same = baseDate.year === compareDate.getFullYear();
+        }
 
-    return same;
-};
+        return same;
+    };

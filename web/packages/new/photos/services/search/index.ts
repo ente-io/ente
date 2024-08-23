@@ -1,9 +1,11 @@
 import * as chrono from "chrono-node";
-import type { DateValue } from "./types";
+import type { SearchDateComponents } from "./types";
 
 const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
-export const parsePotentialDate = (humanDate: string): DateValue[] => {
+export const parsePotentialDate = (
+    humanDate: string,
+): SearchDateComponents[] => {
     const date = chrono.parseDate(humanDate);
     const date1 = chrono.parseDate(`${humanDate} 1`);
     if (date !== null) {

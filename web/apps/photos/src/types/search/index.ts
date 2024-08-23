@@ -1,7 +1,7 @@
 import { FileType } from "@/media/file-type";
 import type { MLStatus } from "@/new/photos/services/ml";
 import type {
-    DateValue,
+    SearchDateComponents,
     SearchPerson,
 } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
@@ -25,7 +25,7 @@ export interface Suggestion {
     type: SuggestionType;
     label: string;
     value:
-        | DateValue
+        | SearchDateComponents
         | number[]
         | SearchPerson
         | MLStatus
@@ -37,7 +37,7 @@ export interface Suggestion {
 }
 
 export type Search = {
-    date?: DateValue;
+    date?: SearchDateComponents;
     location?: LocationTagData;
     city?: City;
     collection?: number;

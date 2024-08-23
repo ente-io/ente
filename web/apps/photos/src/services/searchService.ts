@@ -9,7 +9,7 @@ import {
 } from "@/new/photos/services/ml";
 import { parsePotentialDate } from "@/new/photos/services/search";
 import type {
-    DateValue,
+    SearchDateComponents,
     SearchPerson,
 } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
@@ -217,13 +217,13 @@ function getDateSuggestion(searchPhrase: string): Suggestion[] {
     }));
 }
 
-export function getFormattedDate(date: DateValue) {
+export function getFormattedDate(date: SearchDateComponents) {
     const options = {};
-    date.date && (options["day"] = "numeric");
+    date.day && (options["day"] = "numeric");
     (date.month || date.month === 0) && (options["month"] = "long");
     date.year && (options["year"] = "numeric");
     return new Intl.DateTimeFormat("en-IN", options).format(
-        new Date(date.year ?? 1, date.month ?? 1, date.date ?? 1),
+        new Date(date.year ?? 1, date.month ?? 1, date.day ?? 1),
     );
 }
 
@@ -369,7 +369,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
     switch (option.type) {
         case SuggestionType.DATE:
             return {
-                date: option.value as DateValue,
+                date: option.value as SearchDateComponents,
             };
 
         case SuggestionType.LOCATION:
