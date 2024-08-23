@@ -65,12 +65,6 @@ class FaceRecognitionService {
 
   Future<void> sync() async {
     await _syncPersonFeedback();
-    if (localSettings.remoteFetchEnabled) {
-    } else {
-      _logger.severe(
-        'Not fetching embeddings because user manually disabled it in debug options',
-      );
-    }
   }
 
   Future<void> _syncPersonFeedback() async {
@@ -95,6 +89,10 @@ class FaceRecognitionService {
     List<FileMLInstruction> batchToYield = [];
 
     for (final chunk in chunks) {
+      if (!localSettings.remoteFetchEnabled) {
+        _logger.warning("remoteFetchEnabled is false, skiping embedding fetch");
+        yield chunk;
+      }
       final Set<int> ids = {};
       final Map<int, FileMLInstruction> pendingIndex = {};
       for (final instruction in chunk) {

@@ -17,6 +17,7 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/ml_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class MLDebugSectionWidget extends StatefulWidget {
@@ -58,14 +59,15 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     return Column(
       children: [
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<int>(
-            future: MLDataDB.instance.getFaceIndexedFileCount(),
+          captionedTextWidget: FutureBuilder<IndexStatus>(
+            future: getIndexStatus(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                final IndexStatus status = snapshot.data!;
                 return CaptionedTextWidget(
                   title: localSettings.isMLIndexingEnabled
-                      ? "Disable faces (${snapshot.data!} files done)"
-                      : "Enable faces (${snapshot.data!} files done)",
+                      ? "Disable ML (${status.indexedItems} files indexed)"
+                      : "Enable ML (${status.indexedItems} files indexed)",
                 );
               }
               return const SizedBox.shrink();
@@ -77,7 +79,11 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               final isEnabled = await localSettings.toggleMLIndexing();
-              if (!isEnabled) {
+              if (isEnabled) {
+                await MLService.instance.init();
+                await SemanticSearchService.instance.init();
+                unawaited(MLService.instance.runAllML(force: true));
+              } else {
                 MLService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
@@ -93,8 +99,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: localSettings.remoteFetchEnabled
-                ? "Remote fetch enabled"
-                : "Remote fetch disabled",
+                ? "Disable remote fetch"
+                : "Enable remote fetch",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
