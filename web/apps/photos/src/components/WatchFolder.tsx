@@ -273,7 +273,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                 )}
                 <EntryContainer>
                     <EntryHeading watch={watch} />
-                    <FolderPath variant="small">{watch.folderPath}</FolderPath>
+                    <FolderPath>{watch.folderPath}</FolderPath>
                 </EntryContainer>
             </HorizontalFlex>
             <EntryOptions {...{ confirmStopWatching }} />
@@ -306,7 +306,11 @@ const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
     );
 };
 
-const FolderPath = styled(Typography)(({ theme }) => ({
+const FolderPath: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <FolderPath_ variant="small">{children}</FolderPath_>
+);
+
+const FolderPath_ = styled(Typography)(({ theme }) => ({
     overflow: "hidden",
     textOverflow: "ellipsis",
     color: theme.colors.text.muted,
