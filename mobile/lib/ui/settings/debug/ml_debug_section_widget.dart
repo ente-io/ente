@@ -258,6 +258,19 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Show empty indexes",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            final emptyFaces = await MLDataDB.instance.getErroredFaceCount();
+            showShortToast(context, '$emptyFaces empty faces');
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Reset faces feedback",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -346,6 +359,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             );
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset all local clip",
