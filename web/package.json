@@ -32,9 +32,6 @@
         "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000",
         "preview:staff": "yarn workspace staff preview"
     },
-    "resolutions": {
-        "libsodium": "0.7.9"
-    },
     "devDependencies": {
         "concurrently": "^8.2.2",
         "eslint": "^8",

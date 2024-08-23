@@ -1,5 +1,5 @@
 import { expose } from "comlink";
-import type { StateAddress } from "libsodium-wrappers";
+import type { StateAddress } from "libsodium-wrappers-sumo";
 import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
 

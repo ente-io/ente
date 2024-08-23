@@ -10,7 +10,7 @@
  */
 import { mergeUint8Arrays } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
-import sodium, { type StateAddress } from "libsodium-wrappers";
+import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,
     EncryptedBlob,
