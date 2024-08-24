@@ -23,6 +23,26 @@ type UpdateReferralCodeRequest struct {
 	Code   string `json:"code" binding:"required"`
 }
 
+type AdminOttReq struct {
+	Email      string `json:"email" binding:"required"`
+	Code       string `json:"code" binding:"required"`
+	App        App    `json:"app" binding:"required"`
+	ExpiryTime int64  `json:"expiryTime" binding:"required"`
+}
+
+func (a AdminOttReq) Validate() error {
+	if !a.App.IsValid() {
+		return errors.New("invalid app")
+	}
+	if a.ExpiryTime < time.Now().UnixMicro() {
+		return errors.New("expiry time should be in future")
+	}
+	if len(a.Code) < 6 {
+		return errors.New("invalid code length, should be at least 6 digit")
+	}
+	return nil
+}
+
 type AdminOpsForUserRequest struct {
 	UserID int64 `json:"userID" binding:"required"`
 }

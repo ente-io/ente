@@ -307,6 +307,37 @@ func (h *AdminHandler) DisableEmailVerification(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) AddOtt(c *gin.Context) {
+	var request ente.AdminOttReq
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	if err := request.Validate(); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), "Bad request"))
+		return
+	}
+
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) adding custom ott", auth.GetUserID(c.Request.Header)))
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.Email,
+		"code":     request.Code,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "custom_ott",
+	})
+
+	err := h.UserController.AddAdminOtt(request)
+	if err != nil {
+		logger.WithError(err).Error("Failed to add ott")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Success added ott")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 	var request ente.AdminUpdateKeyValueRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
