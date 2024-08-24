@@ -143,7 +143,7 @@ func (c *Controller) UpdateReferralCode(ctx *gin.Context, userID int64, code str
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code length should be between 4 and 8"), "")
 	}
 
-// Check if the code contains any offensive language using the go-away library
+    // Check if the code contains any offensive language using the go-away library
     if goaway.IsProfane(code) {
         return stacktrace.Propagate(ente.NewBadRequestWithMessage("Referral code contains offensive language and cannot be used"), "")
     }
