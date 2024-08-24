@@ -98,8 +98,8 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
 		if err != nil {
 			errMsg := err.Error()
-			for _, knownError := range knownInvalidEmailErrors {
-				if strings.Contains(errMsg, knownError) {
+			for i := range knownInvalidEmailErrors {
+				if strings.Contains(errMsg, knownInvalidEmailErrors[i]) {
 					return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), errMsg)
 				}
 			}
