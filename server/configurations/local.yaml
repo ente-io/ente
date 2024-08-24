@@ -323,6 +323,7 @@ internal:
     #     local-domain-suffix: "@example.org"
     #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
+    # If this is not set, as a fallback, the first user is considered an admin.
     admins: []
 
 # Replication config

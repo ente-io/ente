@@ -91,6 +91,14 @@ func (m *AuthMiddleware) AdminAuthMiddleware() gin.HandlerFunc {
 				return
 			}
 		}
+		// if no admins are set, then check if the user is first user in the system
+		if len(admins) == 0 {
+			id, err := m.UserAuthRepo.GetMinUserID()
+			if err != nil && id == userID {
+				c.Next()
+				return
+			}
+		}
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "insufficient permissions"})
 	}
 }
