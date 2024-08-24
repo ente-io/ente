@@ -31,3 +31,10 @@ particular, you can use the `ente admin update-subscription` CLI command to
 increase the
 [storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
 of accounts on your instance.
+
+### How can I become an admin on my self hosted instance?
+
+The first user you create on your instance is treated as an admin.
+
+If you want, you can modify this behaviour by providing an explicit list of
+admins in the [configuration](/self-hosting/guides/admin#becoming-an-admin).

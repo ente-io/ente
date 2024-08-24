@@ -24,8 +24,31 @@ and subsequently increase the
 [storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
 using the CLI.
 
-For security purposes, we need to whitelist the user IDs that can perform admin
-actions on the server. To do this,
+> [!NOTE]
+>
+> The CLI command to add an account does not create Ente accounts. It only adds
+> existing accounts to the list of (existing) accounts that the CLI can use.
+
+## Becoming an admin
+
+By default, the first user (and only the first user) created on the system is
+considered as an admin.
+
+This facility is provided as a convenience for people who are getting started
+with self hosting. For more serious deployments, we recommend creating an
+explicit whitelist of admins.
+
+> [!NOTE]
+>
+> The first user is only treated as the admin if there are the list of admins in
+> the configuration is empty.
+>
+> Also, if at some point you delete the first user, then you will need to define
+> a whitelist to make some other user as the admin if you wish (since the first
+> account has been deleted).
+
+To whitelist the user IDs that can perform admin actions on the server, use the
+following steps:
 
 -   Create a `museum.yaml` in the directory where you're starting museum from.
     For example, if you're running using `docker compose up`, then this file
