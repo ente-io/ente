@@ -136,7 +136,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               final hasAuthenticated = await LocalAuthenticationService.instance
                   .requestLocalAuthentication(
                 context,
-                "Please authenticate to view your passkey",
+                S.of(context).authToViewPasskey,
               );
               if (hasAuthenticated) {
                 await onPasskeyClick(context);

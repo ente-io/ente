@@ -352,6 +352,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Пожалуйста, авторизуйтесь для настройки двухфакторной аутентификации"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, авторизуйтесь, чтобы начать удаление аккаунта"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, авторизуйтесь для просмотра активных сессий"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
