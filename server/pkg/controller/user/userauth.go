@@ -134,6 +134,20 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 	return nil
 }
 
+func (c *UserController) AddAdminOtt(req ente.AdminOttReq) error {
+	emailHash, err := crypto.GetHash(req.Email, c.HashingKey)
+	if err != nil {
+		log.WithError(err).Error("Failed to get hash")
+		return nil
+	}
+	err = c.UserAuthRepo.AddOTT(emailHash, req.App, req.Code, req.ExpiryTime)
+	if err != nil {
+		log.WithError(err).Error("Failed to add ott")
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 // verifyEmailOtt should be deprecated in favor of verifyEmailOttWithSession once clients are updated.
 func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott string) error {
 	ott = strings.TrimSpace(ott)
