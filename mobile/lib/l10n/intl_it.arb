@@ -1166,5 +1166,6 @@
   "cl_panorama_viewer_description": "Abbiamo aggiunto il supporto per visualizzare foto panoramiche con viste a 360 gradi. L'esperienza è immersiva con la navigazione basata sul movimento!",
   "cl_video_player_title": "Lettore Video",
   "cl_video_player_description": "Presentiamo un nuovo lettore video, con controlli di riproduzione migliorati e supporto per video HDR.",
-  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password."
+  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
+  "authToViewPasskey": "Please authenticate to view your passkey"
 }

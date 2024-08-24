@@ -352,6 +352,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "İki faktörlü kimlik doğrulamayı yapılandırmak için lütfen kimlik doğrulaması yapın"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Hesap silme işlemini başlatmak için lütfen kimlik doğrulaması yapın"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Aktif oturumlarınızı görüntülemek için lütfen kimliğinizi doğrulayın"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(

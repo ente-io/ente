@@ -351,6 +351,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Please authenticate to configure two-factor authentication"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to initiate account deletion"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your active sessions"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(

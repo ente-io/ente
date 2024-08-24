@@ -360,6 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Graag verifiëren om tweestapsverificatie te configureren"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Gelieve te verifiëren om het verwijderen van je account te starten"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Graag verifiëren om uw actieve sessies te bekijken"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(

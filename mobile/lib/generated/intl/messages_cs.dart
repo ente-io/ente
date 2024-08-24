@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
         "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Time after which the app locks after being put in the background"),
