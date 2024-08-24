@@ -306,7 +306,7 @@ class FaceClusteringService {
   Future<ClusteringResult> predictLinearComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
-    required Map<int, (Uint8List, int)> oldClusterSummaries,
+    required Map<String, (Uint8List, int)> oldClusterSummaries,
     double distanceThreshold = kRecommendedDistanceThreshold,
   }) async {
     if (input.isEmpty) {
@@ -545,7 +545,6 @@ ClusteringResult _runLinearClustering(Map args) {
       sortedFaceInfos[i].clusterId = sortedFaceInfos[closestIdx].clusterId;
     } else {
       clusterID = newClusterID();
-      ;
       sortedFaceInfos[i].clusterId = clusterID;
     }
   }
