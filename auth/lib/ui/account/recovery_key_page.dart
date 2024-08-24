@@ -314,8 +314,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
-    // ignore: deprecated_member_use
-    await Share.shareFiles([_recoveryKeyFile.path]);
+    await Share.shareXFiles([XFile(_recoveryKeyFile.path)]);
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
