@@ -114,7 +114,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                 CodeTimerProgress(
                   period: widget.code.period,
                 ),
-              const SizedBox(height: 16 + 12),
+              const SizedBox(height: 28),
               Row(
                 children: [
                   _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
@@ -129,9 +129,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20 + 12,
-              ),
+              const SizedBox(height: 32),
             ],
           ),
           if (widget.code.isPinned) ...[
