@@ -672,6 +672,10 @@
       "title": "Newton",
       "altNames": ["Newton Crypto"],
       "slug": "newton"
+    },
+    {
+      "title": "Upstox",
+      "slug": "upstox"
     }
   ]
 }
