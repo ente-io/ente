@@ -3,6 +3,7 @@ package ente
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // GetEmailsFromHashesRequest represents a request to convert hashes
@@ -44,7 +45,8 @@ func (a AdminOttReq) Validate() error {
 }
 
 type AdminOpsForUserRequest struct {
-	UserID int64 `json:"userID" binding:"required"`
+	UserID   int64 `json:"userID" binding:"required"`
+	EmailMFA *bool `json:"emailMFA"`
 }
 
 // ReQueueItemRequest puts an item back into the queue for processing.
