@@ -10,6 +10,7 @@ dependencies:
   adaptive_theme: ^3.1.0 # done
   app_links: ^3.5.0
   archive: ^3.3.7
+  auto_size_text: ^3.0.0
   base32: ^2.1.3
   bip39: ^1.0.6 #done
   bloc: ^8.1.2
