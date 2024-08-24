@@ -1,5 +1,5 @@
 ---
-title: Migrating from Authy
+title: (Obsolete) Migrating from Authy
 description: Guide for importing your existing Authy 2FA tokens into Ente Auth
 ---
 
@@ -9,9 +9,9 @@ A guide written by Green, an ente.io lover
 
 > [!WARNING]
 >
-> Authy will soon be dropping support for its desktop apps in the near future.
-> If you are looking to switch to Ente Authenticator from Authy, I heavily
-> recommend you export your codes as soon as you can.
+> Authy has dropped all support for its desktop apps. It is no longer possible
+> to export data from Authy using these methods. You will need to reconfigure
+> 2FA for each of your accounts.
 
 ---
 
