@@ -868,12 +868,11 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
  */
 export const uploadItemCreationDate = async (
     uploadItem: UploadItem,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
-    const { fileType } = fileTypeInfo;
 
     const parsedMetadataJSON = matchTakeoutMetadata(
         fileName,
@@ -893,7 +892,7 @@ export const uploadItemCreationDate = async (
         throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
     }
 
-    return parsedMetadata.creationDate;
+    return parsedMetadata.creationDate?.timestamp;
 };
 
 /**

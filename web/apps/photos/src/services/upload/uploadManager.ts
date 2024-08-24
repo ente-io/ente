@@ -35,6 +35,7 @@ import {
     type ParsedMetadataJSON,
 } from "./takeout";
 import UploadService, {
+    uploadItemCreationDate,
     uploadItemFileName,
     uploadItemSize,
     uploader,
@@ -427,7 +428,10 @@ class UploadManager {
             }
 
             if (mediaItems.length) {
-                const clusteredMediaItems = await clusterLivePhotos(mediaItems);
+                const clusteredMediaItems = await clusterLivePhotos(
+                    mediaItems,
+                    this.parsedMetadataJSONMap,
+                );
 
                 this.abortIfCancelled();
 
@@ -838,6 +842,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
  */
 const clusterLivePhotos = async (
     items: UploadItemWithCollectionIDAndName[],
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     const result: ClusteredUploadItem[] = [];
     items
@@ -865,7 +870,7 @@ const clusterLivePhotos = async (
             collectionID: g.collectionID,
             uploadItem: g.uploadItem,
         };
-        if (await areLivePhotoAssets(fa, ga)) {
+        if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
             const [image, video] =
                 fFileType == FileType.image ? [f, g] : [g, f];
             result.push({
@@ -906,6 +911,7 @@ interface PotentialLivePhotoAsset {
 const areLivePhotoAssets = async (
     f: PotentialLivePhotoAsset,
     g: PotentialLivePhotoAsset,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     if (f.collectionID != g.collectionID) return false;
 
@@ -951,6 +957,27 @@ const areLivePhotoAssets = async (
         );
         return false;
     }
+
+    // Finally, ensure that the creation times of the image and video are within
+    // some epsilon of each other. This is to avoid clubbing together unrelated
+    // items that coincidentally have the same name (this is not uncommon since,
+    // e.g. many cameras use a deterministic numbering scheme).
+
+    const fDate = await uploadItemCreationDate(
+        f.uploadItem,
+        f.fileType,
+        f.collectionID,
+        parsedMetadataJSONMap,
+    );
+    const gDate = await uploadItemCreationDate(
+        g.uploadItem,
+        g.fileType,
+        g.collectionID,
+        parsedMetadataJSONMap,
+    );
+    if (!fDate || !gDate) return false;
+    const secondDelta = Math.abs(fDate - gDate) / 1e6;
+    if (secondDelta > 5 * 60 /* 5 mins */) return false;
 
     return true;
 };
