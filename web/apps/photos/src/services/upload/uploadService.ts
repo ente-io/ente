@@ -764,6 +764,10 @@ const extractImageOrVideoMetadata = async (
 
     const hash = await computeHash(uploadItem, worker);
 
+    // Some of this logic is duplicated below in `uploadItemCreationDate`.
+    //
+    // See: [Note: Duplicate retrieval of creation date for live photo clubbing]
+
     const parsedMetadataJSON = matchTakeoutMetadata(
         fileName,
         collectionID,
@@ -811,7 +815,7 @@ const extractImageOrVideoMetadata = async (
 
 const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
-    lastModifiedMs: number,
+    lastModifiedMs: number | undefined,
 ): Promise<ParsedMetadata> => {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
@@ -820,9 +824,8 @@ const tryExtractImageMetadata = async (
         // reasonable to read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);
         const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        file = new File([await response.arrayBuffer()], basename(path), {
-            lastModified: lastModifiedMs,
-        });
+        const opts = lastModifiedMs ? { lastModified: lastModifiedMs } : {};
+        file = new File([await response.arrayBuffer()], basename(path), opts);
     } else if (uploadItem instanceof File) {
         file = uploadItem;
     } else {
@@ -844,6 +847,66 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
         log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
     }
+};
+
+/**
+ * Return the creation date for the given {@link uploadItem}.
+ *
+ * [Note: Duplicate retrieval of creation date for live photo clubbing]
+ *
+ * This function duplicates some logic of {@link extractImageOrVideoMetadata}.
+ * This duplication, while not good, is currently unavoidable with the way the
+ * code is structured since the live photo clubbing happens at an earlier time
+ * in the pipeline when we don't have the Exif data, but the Exif data is needed
+ * to determine the file's creation time (to ensure that we only club photos and
+ * videos with close by creation times, instead of just relying on file names).
+ *
+ * Note that unlike {@link extractImageOrVideoMetadata}, we don't try to
+ * fallback to the file's modification time. This is because for the purpose of
+ * live photo clubbing, we wish to use the creation date only in cases where we
+ * have it.
+ */
+export const uploadItemCreationDate = async (
+    uploadItem: UploadItem,
+    fileType: FileType,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+) => {
+    const fileName = uploadItemFileName(uploadItem);
+
+    const parsedMetadataJSON = matchTakeoutMetadata(
+        fileName,
+        collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    if (parsedMetadataJSON?.creationTime)
+        return parsedMetadataJSON?.creationTime;
+
+    let parsedMetadata: ParsedMetadata;
+    if (fileType == FileType.image) {
+        parsedMetadata = await tryExtractImageMetadata(uploadItem, undefined);
+    } else if (fileType == FileType.video) {
+        parsedMetadata = await tryExtractVideoMetadata(uploadItem);
+    } else {
+        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+    }
+
+    return parsedMetadata.creationDate?.timestamp;
+};
+
+/**
+ * Return the size of the given {@link uploadItem}.
+ */
+export const uploadItemSize = async (
+    uploadItem: UploadItem,
+): Promise<number> => {
+    if (uploadItem instanceof File) return uploadItem.size;
+    if (typeof uploadItem == "string")
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    if (Array.isArray(uploadItem))
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    return uploadItem.file.size;
 };
 
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
