@@ -846,6 +846,18 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     }
 };
 
+/**
+ * Return the size of the given {@link uploadItem}.
+ */
+export const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
+    if (uploadItem instanceof File) return uploadItem.size;
+    if (typeof uploadItem == "string")
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    if (Array.isArray(uploadItem))
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    return uploadItem.file.size;
+};
+
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
     const { stream, chunkCount } = await readUploadItem(uploadItem);
     const hashState = await worker.initChunkHashing();

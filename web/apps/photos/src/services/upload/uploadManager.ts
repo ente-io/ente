@@ -1,6 +1,5 @@
 import { createComlinkCryptoWorker } from "@/base/crypto";
 import { type CryptoWorker } from "@/base/crypto/worker";
-import { ensureElectron } from "@/base/electron";
 import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
@@ -35,7 +34,11 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, { uploadItemFileName, uploader } from "./uploadService";
+import UploadService, {
+    uploadItemFileName,
+    uploadItemSize,
+    uploader,
+} from "./uploadService";
 
 export type FileID = number;
 
@@ -976,18 +979,6 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
     }
 
     return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
-};
-
-/**
- * Return the size of the given {@link uploadItem}.
- */
-const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
-    if (uploadItem instanceof File) return uploadItem.size;
-    if (typeof uploadItem == "string")
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    if (Array.isArray(uploadItem))
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    return uploadItem.file.size;
 };
 
 /**
