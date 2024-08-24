@@ -20,6 +20,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+var knownInvalidEmailErrors = []string{
+	"Invalid RCPT TO address provided",
+	"Invalid domain name",
+}
+
 // Send sends an email
 func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
 	smtpHost := viper.GetString("smtp.host")
@@ -92,8 +97,11 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpServer)
 		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
 		if err != nil {
-			if strings.Contains(err.Error(), "Invalid RCPT TO address provided") {
-				return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), err.Error())
+			errMsg := err.Error()
+			for _, knownError := range knownInvalidEmailErrors {
+				if strings.Contains(errMsg, knownError) {
+					return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), errMsg)
+				}
 			}
 			return stacktrace.Propagate(err, "")
 		}
