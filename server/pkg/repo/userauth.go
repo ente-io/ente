@@ -175,7 +175,7 @@ func (repo *UserAuthRepository) GetActiveSessions(userID int64, app ente.App) ([
 
 // GetMinUserID returns the first user that was created in the system
 func (repo *UserAuthRepository) GetMinUserID() (int64, error) {
-	row := repo.DB.QueryRow(`select min(user_id) from users where encrypted_email is not null;`)
+	row := repo.DB.QueryRow(`select min(user_id) from users;`)
 	var id int64
 	err := row.Scan(&id)
 	if err != nil {
