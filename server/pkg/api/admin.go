@@ -281,6 +281,32 @@ func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) DisableEmailVerification(c *gin.Context) {
+	var request ente.AdminOpsForUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) removing email mfa for account %d", auth.GetUserID(c.Request.Header), request.UserID))
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.UserID,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "disable_email_mfa",
+	})
+	logger.Info("Initiate remove passkeys")
+	err := h.UserController.UpdateEmailMFA(c, request.UserID, false)
+	if err != nil {
+		logger.WithError(err).Error("Failed to disable email mfa")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Email MFA successfully removed")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 	var request ente.AdminUpdateKeyValueRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
