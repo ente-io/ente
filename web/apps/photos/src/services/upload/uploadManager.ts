@@ -977,7 +977,7 @@ const areLivePhotoAssets = async (
     );
     if (!fDate || !gDate) return false;
     const secondDelta = Math.abs(fDate - gDate) / 1e6;
-    if (secondDelta > 5 * 60 /* 5 mins */) return false;
+    if (secondDelta > 2 * 60 /* 2 mins */) return false;
 
     return true;
 };
