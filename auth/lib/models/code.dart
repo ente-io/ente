@@ -147,7 +147,9 @@ class Code {
         return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
         Logger("Code").warning(
-            'Error while parsing code for issuer $issuer, $account', e);
+          'Error while parsing code for issuer $issuer, $account',
+          e,
+        );
         rethrow;
       }
     }
