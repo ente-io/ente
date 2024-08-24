@@ -72,7 +72,7 @@ dependencies:
   local_auth_android: ^1.0.37
   local_auth_darwin: ^1.2.2
   logging: ^1.0.1
-  modal_bottom_sheet: ^3.0.0-pre
+  modal_bottom_sheet: ^3.0.0
   move_to_background: ^1.0.2
   otp: ^3.1.1
   package_info_plus: ^4.1.0
