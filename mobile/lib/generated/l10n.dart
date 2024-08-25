@@ -9484,6 +9484,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Please authenticate to view your passkey`
+  String get authToViewPasskey {
+    return Intl.message(
+      'Please authenticate to view your passkey',
+      name: 'authToViewPasskey',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -313,6 +313,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请进行身份验证以配置双重身份认证"),
         "authToInitiateAccountDeletion":
             MessageLookupByLibrary.simpleMessage("请进行身份验证以启动账户删除"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions":
             MessageLookupByLibrary.simpleMessage("请验证以查看您的活动会话"),
         "authToViewYourHiddenFiles":

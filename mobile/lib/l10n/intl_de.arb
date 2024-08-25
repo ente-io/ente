@@ -1294,5 +1294,6 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Hiermit werden die öffentlichen Links aller ausgewählten schnellen Links entfernt.",
   "guestView": "Gastansicht",
   "guestViewEnablePreSteps": "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen.",
-  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password."
+  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
+  "authToViewPasskey": "Please authenticate to view your passkey"
 }

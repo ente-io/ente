@@ -1301,5 +1301,6 @@
   "cl_panorama_viewer_description": "我们新增了支持 360 度全景照片查看功能。结合动作导航，体验更加身临其境！",
   "cl_video_player_title": "视频播放器",
   "cl_video_player_description": "推出全新的视频播放器，具有更好的播放控制功能并支持 HDR 视频。",
-  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password."
+  "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
+  "authToViewPasskey": "Please authenticate to view your passkey"
 }
