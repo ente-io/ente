@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" class="ms-ds-0 me-ds-0 mt-ds-0 mb-ds-0" viewBox="0 0 500 500">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
   <defs>
     <linearGradient id="a" x1=".425" x2="0" y1=".821" y2="0">
       <stop stop-color="#F4AAFF" stop-opacity="0"/>
@@ -10,9 +10,9 @@
     </linearGradient>
   </defs>
   <g stroke="null">
-    <rect width="500" height="500" x="0" y="0" fill="#7132F5" rx="64"/>
-    <rect width="500" height="500" x="0" y="0" fill="url(#a)" fill-opacity=".64" rx="64"/>
-    <rect width="500" height="500" x="0" y="0" fill="url(#b)" fill-opacity=".4" rx="64"/>
+    <rect width="500" height="500" fill="#7132F5" rx="64"/>
+    <rect width="500" height="500" fill="url(#a)" fill-opacity=".64" rx="64"/>
+    <rect width="500" height="500" fill="url(#b)" fill-opacity=".4" rx="64"/>
     <path fill="#fff" fill-rule="evenodd" d="M110.63 269.996v60.347c0 11.113 8.888 20.106 19.818 20.106 10.94 0 19.87-8.993 19.87-20.106v-60.347c0-11.129 8.842-20.137 19.828-20.137 10.948 0 19.829 9.008 19.829 20.137v60.347c0 11.113 8.887 20.106 19.827 20.106 10.98 0 19.864-8.993 19.864-20.106v-60.347c0-11.129 8.88-20.137 19.823-20.137 10.991 0 19.878 9.008 19.878 20.137v60.347c0 11.113 8.885 20.106 19.813 20.106 10.941 0 19.829-8.993 19.829-20.106v-60.347c0-11.129 8.883-20.137 19.87-20.137 10.945 0 19.828 9.008 19.828 20.137v60.347c0 11.113 8.888 20.106 19.86 20.106 10.944 0 19.828-8.993 19.828-20.106v-60.347c0-77.78-62.194-140.848-138.906-140.848-76.706 0-138.858 63.067-138.858 140.848z" clip-rule="evenodd"/>
   </g>
 </svg>
