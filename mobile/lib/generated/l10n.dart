@@ -3602,10 +3602,10 @@ class S {
     );
   }
 
-  /// `View files that are consuming the most amount of storage`
+  /// `View files that are consuming the most amount of storage.`
   String get viewLargeFilesDesc {
     return Intl.message(
-      'View files that are consuming the most amount of storage',
+      'View files that are consuming the most amount of storage.',
       name: 'viewLargeFilesDesc',
       desc: '',
       args: [],
