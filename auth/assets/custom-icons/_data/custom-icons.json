@@ -698,6 +698,13 @@
       "title": "Newton",
       "altNames": ["Newton Crypto"],
       "slug": "newton"
+    },
+    {
+      "title": "T-Mobile ID",
+      "altNames": [
+        "T-Mobile"
+      ],
+      "slug": "t-mobile"
     }
   ]
 }
