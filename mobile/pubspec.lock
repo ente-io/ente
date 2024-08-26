@@ -1667,11 +1667,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: ente_onnxruntime
-      resolved-ref: fb9393e36013790938b5bc995a4dca15fed3c944
+      ref: ios_only
+      resolved-ref: "70e163745e082b81235d7330b9d5e8c110ed68e4"
       url: "https://github.com/ente-io/onnxruntime.git"
     source: git
-    version: "1.1.0"
+    version: "1.4.1"
   open_mail_app:
     dependency: "direct main"
     description:
