@@ -82,9 +82,9 @@ in Ente will be similar to the original file sizes you have.
 
 ## Can I add photos from a shared album to albums that I created in Ente?
 
-Currently, Ente does not support adding photos from a shared album to your
-personal albums. If you want to include photos from a shared album in your own
-albums, you will need to ask the owner of the photos to add them to your album.
+On Ente's mobile apps, you can add photos from an album that's shared with you,
+into one of your own albums. This will create a copy of the item that you fully
+own, and will count against your storage quota.
 
 ## How do I ensure that the Ente desktop app stays up to date on my system?
 
