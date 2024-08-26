@@ -48,6 +48,12 @@ albums**.
     result in the creation of a new album – empty folders (or folders that only
     contain other folders) will be ignored.
 
+> [!NOTE]
+>
+> Ente albums cannot be nested currently. That is, in the **separate album**
+> mode described above, Ente will create a separate album for each nested
+> folder, but these Ente albums themselves will not be nested.
+
 ## Rename album
 
 Personalize your albums by giving them a meaningful name.
