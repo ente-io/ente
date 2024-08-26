@@ -207,7 +207,7 @@
     "SHARING_BAD_REQUEST_ERROR": "Partage d'album non autorisé",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "Le partage est désactivé pour les comptes gratuits",
     "DOWNLOAD_COLLECTION": "Télécharger l'album",
-    "CREATE_ALBUM_FAILED": "Échec de création de l'album , veuillez réessayer",
+    "CREATE_ALBUM_FAILED": "Échec de création de l'album, veuillez réessayer",
     "SEARCH": "Recherche",
     "SEARCH_RESULTS": "Résultats de la recherche",
     "NO_RESULTS": "Aucun résultat trouvé",
