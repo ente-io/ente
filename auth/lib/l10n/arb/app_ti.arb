@@ -174,7 +174,6 @@
   "security": "ድሕንነት",
   "lockscreen": "ስክሪን ምዕጻው",
   "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
-  "lockScreenEnablePreSteps": "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
   "viewActiveSessions": "View active sessions",
   "authToViewYourActiveSessions": "Please authenticate to view your active sessions",
   "searchHint": "Search...",

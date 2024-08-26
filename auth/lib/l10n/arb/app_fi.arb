@@ -149,7 +149,6 @@
   "language": "Kieli",
   "security": "Turvallisuus",
   "lockscreen": "Lukitusnäyttö",
-  "lockScreenEnablePreSteps": "Aktivoi lukitusnäyttö ottamalla käyttöön laitteen salasana tai näytön lukitus järjestelmäasetuksissa.",
   "searchHint": "Etsi...",
   "search": "Etsi",
   "noResult": "Ei tuloksia",

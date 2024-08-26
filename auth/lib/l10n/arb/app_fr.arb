@@ -182,7 +182,7 @@
   "security": "Sécurité",
   "lockscreen": "Ecran de vérouillage",
   "authToChangeLockscreenSetting": "Veuillez vous authentifier pour modifier les paramètres de l'écran de verrouillage",
-  "lockScreenEnablePreSteps": "Pour activer l'écran de verrouillage, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
+  "deviceLockEnablePreSteps": "Pour activer l'écran de verrouillage, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
   "viewActiveSessions": "Afficher les sessions actives",
   "authToViewYourActiveSessions": "Veuillez vous authentifier pour afficher vos sessions actives",
   "searchHint": "Rechercher...",
