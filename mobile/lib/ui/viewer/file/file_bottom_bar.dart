@@ -74,7 +74,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       }
     }
 
-    return SafeArea(child: _getBottomBar());
+    return _getBottomBar();
   }
 
   void safeRefresh() {
@@ -204,42 +204,46 @@ class FileBottomBarState extends State<FileBottomBar> {
                     stops: const [0, 0.8, 1],
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    widget.file.caption?.isNotEmpty ?? false
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              16,
-                              12,
-                              16,
-                              0,
-                            ),
-                            child: GestureDetector(
-                              onTap: () async {
-                                await _displayDetails(widget.file);
-                                await Future.delayed(
-                                  const Duration(milliseconds: 500),
-                                ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
-                                safeRefresh();
-                              },
-                              child: Text(
-                                widget.file.caption!,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: getEnteTextTheme(context)
-                                    .mini
-                                    .copyWith(color: textBaseDark),
-                                textAlign: TextAlign.center,
+                child: SafeArea(
+                  left: false,
+                  right: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      widget.file.caption?.isNotEmpty ?? false
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                12,
+                                16,
+                                0,
                               ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: children,
-                    ),
-                  ],
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await _displayDetails(widget.file);
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 500),
+                                  ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+                                  safeRefresh();
+                                },
+                                child: Text(
+                                  widget.file.caption!,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: getEnteTextTheme(context)
+                                      .mini
+                                      .copyWith(color: textBaseDark),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: children,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

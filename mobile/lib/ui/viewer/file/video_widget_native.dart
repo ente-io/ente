@@ -233,6 +233,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         right: 0,
                         left: 0,
                         child: SafeArea(
+                          left: false,
+                          right: false,
                           child: Padding(
                             padding: EdgeInsets.only(
                               bottom: widget.isFromMemories ? 32 : 0,
