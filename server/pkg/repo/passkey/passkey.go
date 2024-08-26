@@ -328,6 +328,10 @@ func (r *Repository) FinishRegistration(user *ente.User, friendlyName string, re
 
 	credential, err := r.webAuthnInstance.FinishRegistration(passkeyUser, *sessionData, req)
 	if err != nil {
+		if strings.Contains(err.Error(), "Error parsing attestation response") {
+			err = stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), "")
+			return
+		}
 		err = stacktrace.Propagate(err, "")
 		return
 	}
