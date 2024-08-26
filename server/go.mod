@@ -5,7 +5,6 @@ go 1.21
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/GoKillers/libsodium-go v0.0.0-20171022220152-dd733721c3cb
-        github.com/TwiN/go-away v1.0.5
 	github.com/avct/uasurfer v0.0.0-20191028135549-26b5daa857f1
 	github.com/awa/go-iap v1.3.16
 	github.com/aws/aws-sdk-go v1.34.13
@@ -38,8 +37,8 @@ require (
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	golang.org/x/crypto v0.21.0
-	golang.org/x/sync v0.1.0
-	golang.org/x/text v0.14.0
+	golang.org/x/sync v0.8.0
+	golang.org/x/text v0.17.0
 	google.golang.org/api v0.114.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
@@ -47,6 +46,7 @@ require (
 require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.4.1 // indirect
+	github.com/TwiN/ v1.6.13 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
