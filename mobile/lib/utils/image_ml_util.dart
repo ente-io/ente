@@ -35,7 +35,7 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
           await HeifConverter.convert(imagePath, format: 'jpg');
       if (jpgPath == null) {
         _logger.severe('Error converting $format to jpg:', e, s);
-        throw Exception('InvalidImageFormatException: Error decoding image');
+        throw Exception('InvalidImageFormatException: Error decoding image of format $format');
       }
       final imageData = await File(jpgPath).readAsBytes();
       final image = await decodeImageFromData(imageData);
@@ -43,11 +43,11 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
       return (image, imageByteData);
     } else {
       _logger.severe(
-        'Error decoding image of format ${imagePath.split('.').last}:',
+        'Error decoding image of format $format:',
         e,
         s,
       );
-      throw Exception('InvalidImageFormatException: Error decoding image');
+      throw Exception('InvalidImageFormatException: Error decoding image of format $format');
     }
   }
 }

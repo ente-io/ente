@@ -477,10 +477,9 @@ class MLService {
         );
         acceptedIssue = true;
       }
-      if (errorString
-          .contains('InvalidImageFormatException: Error decoding image')) {
+      if (errorString.contains('InvalidImageFormatException')) {
         _logger.severe(
-          'InvalidImageFormatException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
           e,
           s,
         );
