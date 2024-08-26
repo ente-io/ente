@@ -205,6 +205,7 @@ class FileBottomBarState extends State<FileBottomBar> {
                   ),
                 ),
                 child: SafeArea(
+                  top: false,
                   left: false,
                   right: false,
                   child: Column(
