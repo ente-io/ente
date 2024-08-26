@@ -4,9 +4,8 @@ name: "Verify build (docs)"
 # succeeding before we merge the PR into main.
 
 on:
-    # Run on every push to a branch other than main that changes docs/
-    push:
-        branches-ignore: [main]
+    # Run on every pull request (open or push to it) that changes docs/
+    pull_request:
         paths:
             - "docs/**"
             - ".github/workflows/docs-verify-build.yml"
