@@ -750,7 +750,7 @@ const extractImageOrVideoMetadata = async (
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
-    let parsedMetadata: ParsedMetadata;
+    let parsedMetadata: ParsedMetadata | undefined;
     if (fileType == FileType.image) {
         parsedMetadata = await tryExtractImageMetadata(
             uploadItem,
@@ -782,7 +782,7 @@ const extractImageOrVideoMetadata = async (
     let creationTime: number;
     if (parsedMetadataJSON?.creationTime) {
         creationTime = parsedMetadataJSON.creationTime;
-    } else if (parsedMetadata.creationDate) {
+    } else if (parsedMetadata?.creationDate) {
         const { dateTime, offset, timestamp } = parsedMetadata.creationDate;
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
@@ -800,15 +800,17 @@ const extractImageOrVideoMetadata = async (
         hash,
     };
 
-    const location = parsedMetadataJSON?.location ?? parsedMetadata.location;
+    const location = parsedMetadataJSON?.location ?? parsedMetadata?.location;
     if (location) {
         metadata.latitude = location.latitude;
         metadata.longitude = location.longitude;
     }
 
-    const { width: w, height: h } = parsedMetadata;
-    if (w) publicMagicMetadata.w = w;
-    if (h) publicMagicMetadata.h = h;
+    if (parsedMetadata) {
+        const { width: w, height: h } = parsedMetadata;
+        if (w) publicMagicMetadata.w = w;
+        if (h) publicMagicMetadata.h = h;
+    }
 
     return { metadata, publicMagicMetadata };
 };
@@ -883,7 +885,7 @@ export const uploadItemCreationDate = async (
     if (parsedMetadataJSON?.creationTime)
         return parsedMetadataJSON?.creationTime;
 
-    let parsedMetadata: ParsedMetadata;
+    let parsedMetadata: ParsedMetadata | undefined;
     if (fileType == FileType.image) {
         parsedMetadata = await tryExtractImageMetadata(uploadItem, undefined);
     } else if (fileType == FileType.video) {
@@ -892,7 +894,7 @@ export const uploadItemCreationDate = async (
         throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
     }
 
-    return parsedMetadata.creationDate?.timestamp;
+    return parsedMetadata?.creationDate?.timestamp;
 };
 
 /**
