@@ -17,7 +17,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/museum/pkg/utils/s3config"
 	"github.com/ente-io/stacktrace"
-	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -77,9 +76,6 @@ func New(repo *fileDataRepo.Repository,
 }
 
 func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataRequest) error {
-	startTime := gTime.Now()
-	opStartTime := gTime.Now()
-	logFields := log.Fields{}
 	if err := req.Validate(); err != nil {
 		return stacktrace.Propagate(err, "validation failed")
 	}
@@ -88,8 +84,6 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	logFields["validationTime"] = gTime.Since(opStartTime).Milliseconds()
-	opStartTime = gTime.Now()
 	if req.Type != ente.MlData && req.Type != ente.PreviewVideo {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
@@ -118,8 +112,6 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 		log.Error(uploadErr)
 		return stacktrace.Propagate(uploadErr, "")
 	}
-	logFields["uploadTime"] = gTime.Since(opStartTime).Milliseconds()
-	opStartTime = gTime.Now()
 
 	row := fileData.Row{
 		FileID:       req.FileID,
@@ -131,14 +123,6 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 	err = c.Repo.InsertOrUpdate(ctx, row)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
-	}
-	logFields["dbInsertTime"] = gTime.Since(opStartTime).Milliseconds()
-	// log if total time is more than 2 seconds
-	if gTime.Since(startTime) > 2*gTime.Second {
-		logFields["totalTime"] = gTime.Since(startTime).Milliseconds()
-		logFields["req_id"] = requestid.Get(ctx)
-		logFields["fileID"] = req.FileID
-		log.WithFields(logFields).Warn("slow request")
 	}
 
 	return nil
