@@ -133,7 +133,6 @@
   "security": "امنیت",
   "lockscreen": "قفل صفحه",
   "authToChangeLockscreenSetting": "لطفا جهت تغییر تنظیمات قفل صفحه، اعتبارسنجی کنید",
-  "lockScreenEnablePreSteps": "جهت فعالسازی قفل صفحه، لطفا در تنظیمات سیستم خود یک رمز یا قفل صفحه را فعال کنید.",
   "viewActiveSessions": "نمایش نشست‌های فعال",
   "authToViewYourActiveSessions": "لطفا جهت نمایش نشست‌های فعال خود، اعتبارسنجی کنید",
   "searchHint": "جستجو...",

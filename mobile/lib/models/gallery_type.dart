@@ -82,13 +82,13 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.quickLink:
       case GalleryType.peopleTag:
+      case GalleryType.cluster:
         return true;
       case GalleryType.trash:
       case GalleryType.archive:
       case GalleryType.hiddenSection:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.sharedCollection:
-      case GalleryType.cluster:
         return false;
     }
   }

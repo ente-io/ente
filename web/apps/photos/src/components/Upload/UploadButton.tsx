@@ -17,7 +17,7 @@ const Wrapper = styled("div")<{ $disableShrink: boolean }>`
         !$disableShrink &&
         `@media (max-width: 624px) {
         & .mobile-button {
-            display: block;
+            display: inline-flex;
         }
         & .desktop-button {
             display: none;

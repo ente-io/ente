@@ -374,7 +374,7 @@ export const updateAssumingLocalFiles = async (
  */
 export const indexableAndIndexedCounts = async () => {
     const db = await mlDB();
-    const tx = db.transaction("file-status", "readwrite");
+    const tx = db.transaction("file-status", "readonly");
     const indexableCount = await tx.store
         .index("status")
         .count(IDBKeyRange.only("indexable"));

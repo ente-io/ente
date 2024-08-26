@@ -7,7 +7,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
@@ -17,10 +17,11 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/ml_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class MLDebugSectionWidget extends StatefulWidget {
-  const MLDebugSectionWidget({Key? key}) : super(key: key);
+  const MLDebugSectionWidget({super.key});
 
   @override
   State<MLDebugSectionWidget> createState() => _MLDebugSectionWidgetState();
@@ -54,18 +55,19 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final Logger _logger = Logger("MLDebugSectionWidget");
+    final Logger logger = Logger("MLDebugSectionWidget");
     return Column(
       children: [
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<int>(
-            future: MLDataDB.instance.getFaceIndexedFileCount(),
+          captionedTextWidget: FutureBuilder<IndexStatus>(
+            future: getIndexStatus(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                final IndexStatus status = snapshot.data!;
                 return CaptionedTextWidget(
                   title: localSettings.isMLIndexingEnabled
-                      ? "Disable faces (${snapshot.data!} files done)"
-                      : "Enable faces (${snapshot.data!} files done)",
+                      ? "Disable ML (${status.indexedItems} files indexed)"
+                      : "Enable ML (${status.indexedItems} files indexed)",
                 );
               }
               return const SizedBox.shrink();
@@ -77,14 +79,18 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               final isEnabled = await localSettings.toggleMLIndexing();
-              if (!isEnabled) {
+              if (isEnabled) {
+                await MLService.instance.init();
+                await SemanticSearchService.instance.init();
+                unawaited(MLService.instance.runAllML(force: true));
+              } else {
                 MLService.instance.pauseIndexingAndClustering();
               }
               if (mounted) {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('indexing failed ', e, s);
+              logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -93,8 +99,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: localSettings.remoteFetchEnabled
-                ? "Remote fetch enabled"
-                : "Remote fetch disabled",
+                ? "Disable remote fetch"
+                : "Enable remote fetch",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -106,7 +112,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('Remote fetch toggle failed ', e, s);
+              logger.warning('Remote fetch toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -115,8 +121,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: MLService.instance.debugIndexingDisabled
-                ? "Debug enable indexing again"
-                : "Debug disable indexing",
+                ? "Enable auto indexing (debug)"
+                : "Disable auto indexing (debug)",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -127,12 +133,14 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   !MLService.instance.debugIndexingDisabled;
               if (MLService.instance.debugIndexingDisabled) {
                 MLService.instance.pauseIndexingAndClustering();
+              } else {
+                unawaited(MLService.instance.runAllML());
               }
               if (mounted) {
                 setState(() {});
               }
             } catch (e, s) {
-              _logger.warning('debugIndexingDisabled toggle failed ', e, s);
+              logger.warning('debugIndexingDisabled toggle failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -140,7 +148,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Run sync, indexing, clustering",
+            title: "Trigger run ML",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -150,7 +158,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               MLService.instance.debugIndexingDisabled = false;
               unawaited(MLService.instance.runAllML());
             } catch (e, s) {
-              _logger.warning('indexAndClusterAll failed ', e, s);
+              logger.warning('indexAndClusterAll failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -158,7 +166,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Run indexing",
+            title: "Trigger run indexing",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -168,7 +176,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               MLService.instance.debugIndexingDisabled = false;
               unawaited(MLService.instance.indexAllImages());
             } catch (e, s) {
-              _logger.warning('indexing failed ', e, s);
+              logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -181,7 +189,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               if (snapshot.hasData) {
                 return CaptionedTextWidget(
                   title:
-                      "Run clustering (${(100 * snapshot.data!).toStringAsFixed(0)}% done)",
+                      "Trigger clustering (${(100 * snapshot.data!).toStringAsFixed(0)}% done)",
                 );
               }
               return const SizedBox.shrink();
@@ -194,41 +202,41 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await PersonService.instance.fetchRemoteClusterFeedback();
               MLService.instance.debugIndexingDisabled = false;
-              await MLService.instance.clusterAllImages(clusterInBuckets: true);
+              await MLService.instance.clusterAllImages();
               Bus.instance.fire(PeopleChangedEvent());
               showShortToast(context, "Done");
             } catch (e, s) {
-              _logger.warning('clustering failed ', e, s);
+              logger.warning('clustering failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
         ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Check for mixed clusters",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              final susClusters =
-                  await ClusterFeedbackService.instance.checkForMixedClusters();
-              for (final clusterinfo in susClusters) {
-                Future.delayed(const Duration(seconds: 4), () {
-                  showToast(
-                    context,
-                    'Cluster with ${clusterinfo.$2} photos is sus',
-                  );
-                });
-              }
-            } catch (e, s) {
-              _logger.warning('Checking for mixed clusters failed', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
-        ),
+        // sectionOptionSpacing,
+        // MenuItemWidget(
+        //   captionedTextWidget: const CaptionedTextWidget(
+        //     title: "Check for mixed clusters",
+        //   ),
+        //   pressedColor: getEnteColorScheme(context).fillFaint,
+        //   trailingIcon: Icons.chevron_right_outlined,
+        //   trailingIconIsMuted: true,
+        //   onTap: () async {
+        //     try {
+        //       final susClusters =
+        //           await ClusterFeedbackService.instance.checkForMixedClusters();
+        //       for (final clusterinfo in susClusters) {
+        //         Future.delayed(const Duration(seconds: 4), () {
+        //           showToast(
+        //             context,
+        //             'Cluster with ${clusterinfo.$2} photos is sus',
+        //           );
+        //         });
+        //       }
+        //     } catch (e, s) {
+        //       logger.warning('Checking for mixed clusters failed', e, s);
+        //       await showGenericErrorDialog(context: context, error: e);
+        //     }
+        //   },
+        // ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
@@ -239,13 +247,25 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await PersonService.instance.reconcileClusters();
-              Bus.instance.fire(PeopleChangedEvent());
+              await FaceRecognitionService.instance.sync();
               showShortToast(context, "Done");
             } catch (e, s) {
-              _logger.warning('sync person mappings failed ', e, s);
+              logger.warning('sync person mappings failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Show empty indexes",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            final emptyFaces = await MLDataDB.instance.getErroredFaceCount();
+            showShortToast(context, '$emptyFaces empty faces');
           },
         ),
         sectionOptionSpacing,
@@ -262,15 +282,15 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "This will drop all people and their related feedback. It will keep clustering labels and embeddings untouched.",
+                  "This will drop all people and their related feedback stored locally. It will keep clustering labels and embeddings untouched, as well as persons stored on remote.",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
-                  await MLDataDB.instance.dropFeedbackTables();
+                  await MLDataDB.instance.dropFacesFeedbackTables();
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('reset feedback failed ', e, s);
+                  logger.warning('reset feedback failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
@@ -290,7 +310,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "This will delete all people, their related feedback and clustering labels. It will keep embeddings untouched.",
+                  "This will delete all people (also from remote), their related feedback and clustering labels. It will keep embeddings untouched.",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
@@ -303,7 +323,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('peopleToPersonMapping remove failed ', e, s);
+                  logger.warning('peopleToPersonMapping remove failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
@@ -313,7 +333,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset faces everything (embeddings)",
+            title: "Reset all local faces",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -323,7 +343,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               context,
               title: "Are you sure?",
               body:
-                  "You will need to again re-index all the faces. You can drop feedback if you want to label again",
+                  "This will drop all local faces data. You will need to again re-index faces.",
               firstButtonLabel: "Yes, confirm",
               firstButtonOnTap: () async {
                 try {
@@ -332,16 +352,17 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   Bus.instance.fire(PeopleChangedEvent());
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('drop feedback failed ', e, s);
+                  logger.warning('drop feedback failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },
             );
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset clip embeddings",
+            title: "Reset all local clip",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -358,7 +379,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   await SemanticSearchService.instance.clearIndexes();
                   showShortToast(context, "Done");
                 } catch (e, s) {
-                  _logger.warning('drop clip embeddings failed ', e, s);
+                  logger.warning('drop clip embeddings failed ', e, s);
                   await showGenericErrorDialog(context: context, error: e);
                 }
               },

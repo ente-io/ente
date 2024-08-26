@@ -182,7 +182,7 @@
   "security": "Bezpieczeństwo",
   "lockscreen": "Ekran blokady",
   "authToChangeLockscreenSetting": "Prosimy uwierzytelnić się, aby zmienić ustawienia ekranu blokady",
-  "lockScreenEnablePreSteps": "Aby włączyć ekran blokady, ustaw hasło urządzenia lub blokadę ekranu w ustawieniach systemu.",
+  "deviceLockEnablePreSteps": "Aby włączyć blokadę aplikacji, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu.",
   "viewActiveSessions": "Zobacz aktywne sesje",
   "authToViewYourActiveSessions": "Prosimy uwierzytelnić się, aby wyświetlić swoje aktywne sesje",
   "searchHint": "Szukaj...",
@@ -198,7 +198,7 @@
   "error": "Błąd",
   "recoveryKeyCopiedToClipboard": "Klucz odzyskiwania został skopiowany do schowka",
   "recoveryKeyOnForgotPassword": "Jeśli zapomnisz hasła, jedynym sposobem na odzyskanie danych jest ten klucz.",
-  "recoveryKeySaveDescription": "Nie przechowujemy tego klucza, proszę zachować ten 24 wyrazowy klucz w bezpiecznym miejscu.",
+  "recoveryKeySaveDescription": "Nie przechowujemy tego klucza, prosimy zachować ten 24-słowny klucz w bezpiecznym miejscu.",
   "doThisLater": "Zrób to później",
   "saveKey": "Zapisz klucz",
   "save": "Zapisz",
@@ -344,7 +344,7 @@
   "signInToBackup": "Zaloguj się, aby wykonać kopię zapasową swoich kodów",
   "singIn": "Zaloguj się",
   "sigInBackupReminder": "Prosimy wyeksportować swoje kody, aby upewnić się, że masz kopię zapasową, z której możesz przywrócić swoje kody.",
-  "offlineModeWarning": "Wybrałeś kontynuację bez kopii zapasowych. Proszę wykonywać ręczne kopie zapasowe, aby upewnić się, że Twoje kody są bezpieczne.",
+  "offlineModeWarning": "Zdecydowano się kontynuować bez kopii zapasowych. Prosimy wykonywać ręczne kopie zapasowe, aby upewnić się, że Twoje kody są bezpieczne.",
   "showLargeIcons": "Pokaż duże ikony",
   "shouldHideCode": "Ukryj kody",
   "doubleTapToViewHiddenCode": "Możesz kliknąć dwukrotnie na wpis, aby wyświetlić kod",
@@ -396,11 +396,11 @@
   "@androidGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
   },
-  "iOSLockOut": "Uwierzytelnianie biometryczne jest wyłączone. Proszę zablokować i odblokować ekran, aby je włączyć.",
+  "iOSLockOut": "Uwierzytelnianie biometryczne jest wyłączone. Prosimy zablokować i odblokować ekran, aby je włączyć.",
   "@iOSLockOut": {
     "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
   },
-  "iOSGoToSettingsDescription": "Uwierzytelnianie biometryczne nie jest skonfigurowane na Twoim urządzeniu. Proszę włączyć Touch ID lub Face ID na swoim telefonie.",
+  "iOSGoToSettingsDescription": "Uwierzytelnianie biometryczne nie jest skonfigurowane na Twoim urządzeniu. Prosimy włączyć Touch ID lub Face ID na swoim telefonie.",
   "@iOSGoToSettingsDescription": {
     "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
   },

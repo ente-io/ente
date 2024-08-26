@@ -499,10 +499,22 @@ func (c *FileController) GetFileInfo(ctx *gin.Context, userID int64, fileIDs []i
 	// prepare a list of FileInfoResponse
 	fileInfoList := make([]*ente.FileInfoResponse, 0)
 	for _, fileID := range fileIDs {
-		fileInfoList = append(fileInfoList, &ente.FileInfoResponse{
-			ID:       fileID,
-			FileInfo: *fileInfoResponse[fileID],
-		})
+		id := fileID
+		fileInfo := fileInfoResponse[id]
+		if fileInfo == nil {
+			// This should be happening only for older users who may have a stale
+			// collection_file entry for a file that user has deleted
+			log.WithField("fileID", id).Error("fileInfo not found")
+			fileInfoList = append(fileInfoList, &ente.FileInfoResponse{
+				ID:       id,
+				FileInfo: ente.FileInfo{FileSize: -1, ThumbnailSize: -1},
+			})
+		} else {
+			fileInfoList = append(fileInfoList, &ente.FileInfoResponse{
+				ID:       id,
+				FileInfo: *fileInfo,
+			})
+		}
 	}
 	return &ente.FilesInfoResponse{
 		FilesInfo: fileInfoList,

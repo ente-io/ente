@@ -357,6 +357,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Uwierzytelnij się, aby skonfigurować uwierzytelnianie dwustopniowe"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Prosimy uwierzytelnić się, aby zainicjować usuwanie konta"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your passkey"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Prosimy uwierzytelnić się, aby wyświetlić swoje aktywne sesje"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(

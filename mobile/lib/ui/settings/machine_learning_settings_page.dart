@@ -27,6 +27,7 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/utils/ml_util.dart";
+import "package:photos/utils/network_util.dart";
 import "package:photos/utils/wakelock_util.dart";
 
 class MachineLearningSettingsPage extends StatefulWidget {
@@ -203,6 +204,7 @@ class _MachineLearningSettingsPageState
       await SemanticSearchService.instance.init();
       unawaited(MLService.instance.runAllML(force: true));
     } else {
+      MLService.instance.pauseIndexingAndClustering();
       await UserRemoteFlagService.instance
           .setBoolValue(UserRemoteFlagService.mlEnabled, false);
     }
@@ -257,6 +259,8 @@ class ModelLoadingState extends StatefulWidget {
 class _ModelLoadingStateState extends State<ModelLoadingState> {
   StreamSubscription<(String, int, int)>? _progressStream;
   final Map<String, (int, int)> _progressMap = {};
+  Timer? _timer;
+
   @override
   void initState() {
     _progressStream =
@@ -277,6 +281,9 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         setState(() {});
       }
     });
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      setState(() {});
+    });
     super.initState();
   }
 
@@ -284,6 +291,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
   void dispose() {
     super.dispose();
     _progressStream?.cancel();
+    _timer?.cancel();
   }
 
   @override
@@ -292,8 +300,25 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
       children: [
         MenuSectionTitle(title: S.of(context).status),
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: _getTitle(context),
+          captionedTextWidget: FutureBuilder(
+            future: canUseHighBandwidth(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data!) {
+                  MLService.instance.triggerModelsDownload();
+                  return CaptionedTextWidget(
+                    title: S.of(context).loadingModel,
+                    key: const ValueKey("loading_model"),
+                  );
+                } else {
+                  return CaptionedTextWidget(
+                    title: S.of(context).waitingForWifi,
+                    key: const ValueKey("waiting_for_wifi"),
+                  );
+                }
+              }
+              return const CaptionedTextWidget(title: "");
+            },
           ),
           trailingWidget: EnteLoadingWidget(
             size: 12,
@@ -322,15 +347,6 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
       ],
     );
   }
-
-  String _getTitle(BuildContext context) {
-    // TODO: uncomment code below to actually check for high bandwidth
-    // final usableConnection = await canUseHighBandwidth();
-    // if (!usableConnection) {
-    //   return S.of(context).waitingForWifi;
-    // }
-    return S.of(context).loadingModel;
-  }
 }
 
 class MLStatusWidget extends StatefulWidget {
@@ -348,6 +364,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      MLService.instance.triggerML();
       setState(() {});
     });
   }

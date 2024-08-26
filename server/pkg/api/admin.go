@@ -281,6 +281,67 @@ func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
+	var request ente.AdminOpsForUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	if request.EmailMFA == nil {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("emailMFA is required"), ""))
+		return
+	}
+
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), request.EmailMFA, request.UserID))
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.UserID,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "disable_email_mfa",
+	})
+	logger.Info("Initiate remove passkeys")
+	err := h.UserController.UpdateEmailMFA(c, request.UserID, *request.EmailMFA)
+	if err != nil {
+		logger.WithError(err).Error("Failed to update email mfa")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Email MFA successfully updated")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) AddOtt(c *gin.Context) {
+	var request ente.AdminOttReq
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	if err := request.Validate(); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), "Bad request"))
+		return
+	}
+
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) adding custom ott", auth.GetUserID(c.Request.Header)))
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.Email,
+		"code":     request.Code,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "custom_ott",
+	})
+
+	err := h.UserController.AddAdminOtt(request)
+	if err != nil {
+		logger.WithError(err).Error("Failed to add ott")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Success added ott")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 	var request ente.AdminUpdateKeyValueRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

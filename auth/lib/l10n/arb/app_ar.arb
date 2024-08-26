@@ -182,7 +182,6 @@
   "security": "الأمان",
   "lockscreen": "شاشة القفل",
   "authToChangeLockscreenSetting": "الرجاء المصادقة لتغيير إعدادات شاشة القفل",
-  "lockScreenEnablePreSteps": "لتمكين شاشة القفل، الرجاء إعداد رمز مرور الجهاز أو قفل الشاشة في إعدادات النظام الخاص بك.",
   "viewActiveSessions": "عرض الجلسات النشطة",
   "authToViewYourActiveSessions": "الرجاء المصادقة لعرض جلساتك النشطة",
   "searchHint": "بحث...",

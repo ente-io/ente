@@ -47,13 +47,19 @@ class TagChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: state == TagChipState.selected ||
-                        Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white
-                    : colorScheme.tagTextUnselectedColor,
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: const TextScaler.linear(1),
+              ),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: state == TagChipState.selected ||
+                          Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : colorScheme.tagTextUnselectedColor,
+                  fontSize: 14,
+                ),
               ),
             ),
             if (state == TagChipState.selected &&

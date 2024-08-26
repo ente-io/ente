@@ -55,9 +55,9 @@ class MLService {
   bool _showClusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
+  bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
 
-  static final int _fileDownloadLimit = Platform.isIOS ? 5 : 10;
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
@@ -118,6 +118,7 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (_cannotRunMLFunction() && !force) return;
+      _isRunningML = true;
 
       await sync();
 
@@ -134,6 +135,16 @@ class MLService {
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
       rethrow;
+    } finally {
+      _isRunningML = false;
+    }
+  }
+
+  void triggerML() {
+    if (_mlControllerStatus &&
+        !_isIndexingOrClusteringRunning &&
+        !_isRunningML) {
+      unawaited(runAllML());
     }
   }
 
@@ -159,24 +170,26 @@ class MLService {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
       final Stream<List<FileMLInstruction>> instructionStream =
-          FaceRecognitionService.instance
-              .syncEmbeddings(yieldSize: _fileDownloadLimit);
+          fetchEmbeddingsAndInstructions(fileDownloadMlLimit);
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
 
+      stream:
       await for (final chunk in instructionStream) {
         if (!await canUseHighBandwidth()) {
           _logger.info(
             'stopping indexing because user is not connected to wifi',
           );
-          break;
+          break stream;
+        } else {
+          await _ensureDownloadedModels();
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
           if (_shouldPauseIndexingAndClustering) {
             _logger.info("indexAllImages() was paused, stopping");
-            break;
+            break stream;
           }
           await _ensureLoadedModels(instruction);
           futures.add(processImage(instruction));
@@ -491,6 +504,13 @@ class MLService {
     }
   }
 
+  void triggerModelsDownload() {
+    if (!areModelsDownloaded && !_downloadModelLock.locked) {
+      _logger.info("Models not downloaded, starting download");
+      unawaited(_ensureDownloadedModels());
+    }
+  }
+
   Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {
     if (_downloadModelLock.locked) {
       _logger.finest("Download models already in progress");
@@ -498,6 +518,13 @@ class MLService {
     return _downloadModelLock.synchronized(() async {
       if (areModelsDownloaded) {
         _logger.finest("Models already downloaded");
+        return;
+      }
+      final goodInternet = await canUseHighBandwidth();
+      if (!goodInternet) {
+        _logger.info(
+          "Cannot download models because user is not connected to wifi",
+        );
         return;
       }
       _logger.info('Downloading models');
@@ -534,7 +561,7 @@ class MLService {
   }
 
   bool _cannotRunMLFunction({String function = ""}) {
-    if (kDebugMode && Platform.isIOS) {
+    if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
       return false;
     }
     if (_isIndexingOrClusteringRunning) {

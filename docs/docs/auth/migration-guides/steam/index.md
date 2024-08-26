@@ -10,10 +10,8 @@ description: Guide for importing from Steam Authenticator to Ente Auth
 > Steam Authenticator code is only supported after auth-v3.0.3, check the app's
 > version number before migration.
 
-One way to migrate is to
-[use this tool by dyc3](https://github.com/dyc3/steamguard-cli/releases/latest)
-to simplify the process and skip directly to generating a qr code to Ente
-Authenticator.
+One way to migrate is to [use this tool by dyc3][releases] to simplify the
+process and skip directly to generating a qr code to Ente Authenticator.
 
 ## Download/Install steamguard-cli
 
@@ -75,3 +73,5 @@ Open Ente Auth, press the '+' button, select `Scan a QR code`, and scan the qr
 code.
 
 You should now have your steam code inside Ente Auth
+
+[releases]: https://github.com/dyc3/steamguard-cli/releases/latest

@@ -7,11 +7,16 @@ import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/extensions/list.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/dimension.dart";
+import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
@@ -68,6 +73,7 @@ Future<IndexStatus> getIndexStatus() async {
   }
 }
 
+/// Return a list of file instructions for files that should be indexed for ML
 Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info('getFilesForMlIndexing called');
   final time = DateTime.now();
@@ -146,7 +152,105 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return sortedBylocalID;
 }
 
-bool shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
+Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
+    int yieldSize,) async* {
+  final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
+  final List<List<FileMLInstruction>> chunks =
+      filesToIndex.chunks(embeddingFetchLimit);
+  List<FileMLInstruction> batchToYield = [];
+
+  for (final chunk in chunks) {
+    if (!localSettings.remoteFetchEnabled) {
+      _logger.warning("remoteFetchEnabled is false, skiping embedding fetch");
+      final batches = chunk.chunks(yieldSize);
+      for (final batch in batches) {
+        yield batch;
+      }
+      continue;
+    }
+    final Set<int> ids = {};
+    final Map<int, FileMLInstruction> pendingIndex = {};
+    for (final instruction in chunk) {
+      ids.add(instruction.file.uploadedFileID!);
+      pendingIndex[instruction.file.uploadedFileID!] = instruction;
+    }
+    _logger.info("fetching embeddings for ${ids.length} files");
+    final res = await FileDataService.instance.getFilesData(ids);
+    _logger.info("embeddingResponse ${res.debugLog()}");
+    final List<Face> faces = [];
+    final List<ClipEmbedding> clipEmbeddings = [];
+    for (FileDataEntity fileMl in res.data.values) {
+      final existingInstruction = pendingIndex[fileMl.fileID]!;
+      final facesFromRemoteEmbedding = _getFacesFromRemoteEmbedding(fileMl);
+      //Note: Always do null check, empty value means no face was found.
+      if (facesFromRemoteEmbedding != null) {
+        faces.addAll(facesFromRemoteEmbedding);
+        existingInstruction.shouldRunFaces = false;
+      }
+      if (fileMl.clipEmbedding != null &&
+          fileMl.clipEmbedding!.version >= clipMlVersion) {
+        clipEmbeddings.add(
+          ClipEmbedding(
+            fileID: fileMl.fileID,
+            embedding: fileMl.clipEmbedding!.embedding,
+            version: fileMl.clipEmbedding!.version,
+          ),
+        );
+        existingInstruction.shouldRunClip = false;
+      }
+      if (!existingInstruction.pendingML) {
+        pendingIndex.remove(fileMl.fileID);
+      } else {
+        existingInstruction.existingRemoteFileML = fileMl;
+        pendingIndex[fileMl.fileID] = existingInstruction;
+      }
+    }
+    for (final fileID in pendingIndex.keys) {
+      final instruction = pendingIndex[fileID]!;
+      if (instruction.pendingML) {
+        batchToYield.add(instruction);
+        if (batchToYield.length == yieldSize) {
+          _logger.info("queueing indexing for  $yieldSize");
+          yield batchToYield;
+          batchToYield = [];
+        }
+      }
+    }
+    await MLDataDB.instance.bulkInsertFaces(faces);
+    await MLDataDB.instance.putMany(clipEmbeddings);
+  }
+  // Yield any remaining instructions
+  if (batchToYield.isNotEmpty) {
+    _logger.info("queueing indexing for  ${batchToYield.length}");
+    yield batchToYield;
+  }
+}
+
+// Returns a list of faces from the given remote fileML. null if the version is less than the current version
+// or if the remote faceEmbedding is null.
+List<Face>? _getFacesFromRemoteEmbedding(FileDataEntity fileMl) {
+  final RemoteFaceEmbedding? remoteFaceEmbedding = fileMl.faceEmbedding;
+  if (_shouldDiscardRemoteEmbedding(fileMl)) {
+    return null;
+  }
+  final List<Face> faces = [];
+  if (remoteFaceEmbedding!.faces.isEmpty) {
+    faces.add(
+      Face.empty(fileMl.fileID),
+    );
+  } else {
+    for (final f in remoteFaceEmbedding.faces) {
+      f.fileInfo = FileInfo(
+        imageHeight: remoteFaceEmbedding.height,
+        imageWidth: remoteFaceEmbedding.width,
+      );
+      faces.add(f);
+    }
+  }
+  return faces;
+}
+
+bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
   final fileID = fileML.fileID;
   final RemoteFaceEmbedding? faceEmbedding = fileML.faceEmbedding;
   if (faceEmbedding == null || faceEmbedding.version < faceMlVersion) {

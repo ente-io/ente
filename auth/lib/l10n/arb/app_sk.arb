@@ -182,7 +182,6 @@
   "security": "Zabezpečenie",
   "lockscreen": "Uzamknutie obrazovky",
   "authToChangeLockscreenSetting": "Pre zmenu nastavenia uzamknutia obrazovky sa musíte overiť",
-  "lockScreenEnablePreSteps": "Pre povolenie uzamknutia obrazovky, nastavte prístupový kód zariadenia alebo zámok obrazovky v nastaveniach systému.",
   "viewActiveSessions": "Zobraziť aktívne relácie",
   "authToViewYourActiveSessions": "Pre zobrazenie vašich aktívnych relácii sa musíte overiť",
   "searchHint": "Hľadať...",

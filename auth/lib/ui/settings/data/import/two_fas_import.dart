@@ -152,14 +152,14 @@ Future<int?> _process2FasExportFile(
     // Build the OTP URL
     String otpUrl;
 
-    if (kind.toLowerCase() == 'totp') {
+    if (kind.toLowerCase() == 'totp' || kind.toLowerCase() == 'steam') {
       otpUrl =
           'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
     } else if (kind.toLowerCase() == 'hotp') {
       otpUrl =
           'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
     } else {
-      throw Exception('Invalid OTP type');
+      throw Exception('Invalid OTP type ${kind.toLowerCase()}');
     }
     parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }

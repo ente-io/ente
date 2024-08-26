@@ -8,7 +8,7 @@ import { fileLogID } from "@/new/photos/utils/file";
 
 /**
  * On-demand decrypt the public magic metadata for an {@link EnteFile} for code
- * running on the main thread, but do it synchronously.
+ * running synchronously.
  *
  * It both modifies the given file object, and also returns the decrypted
  * metadata.
@@ -18,7 +18,7 @@ import { fileLogID } from "@/new/photos/utils/file";
  * check and should be a no-op in usually. On debug builds it'll throw if it
  * finds its assumptions broken.
  */
-export const getPublicMagicMetadataMTSync = (enteFile: EnteFile) => {
+export const getPublicMagicMetadataSync = (enteFile: EnteFile) => {
     if (!enteFile.pubMagicMetadata) return undefined;
     if (typeof enteFile.pubMagicMetadata.data == "string") {
         if (isDevBuild)

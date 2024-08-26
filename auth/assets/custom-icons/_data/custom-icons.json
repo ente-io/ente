@@ -181,8 +181,7 @@
     },
     {
       "title": "enom"   
-    },
-   
+    },   
     {
       "title": "Epic Games",
       "slug": "epic_games",
@@ -266,7 +265,7 @@
     {
       "title": "Itch",
       "slug": "itch_io",
-      "hex": "e7685e"
+      "hex": "000000"
     },
     {
       "title": "IVPN",
@@ -373,6 +372,30 @@
     {
       "title": "MyFRITZ!Net",
       "slug": "myfritz"
+      "altNames": [
+        "MyFRITZ!",
+        "FritzBox",
+        "Fritz!Box",
+        "FritzBox 7590",
+        "FritzBox 7590 AX",
+        "FritzBox 7530",
+        "FritzBox 7530 AX",
+        "FritzBox 4040",
+        "FritzBox 4060",
+        "FritzBox 5530 Fiber",
+        "FritzBox 6490 Cable",
+        "FritzBox 6590 Cable",
+        "FritzBox 6591 Cable",
+        "FritzBox 6660 Cable",
+        "FritzBox 6820 LTE",
+        "FritzBox 6850 LTE",
+        "FritzBox 6850 5G",
+        "FritzBox 6890 LTE",
+        "FritzBox 7583",
+        "FritzBox 7520",
+        "FritzBox 7490",
+        "FritzBox 7583"
+      ]
     },
     {
       "title": "Name.com",
@@ -619,6 +642,9 @@
       "slug": "vikunja"
     },
     {
+      "title": "Wealthsimple"
+    },
+    {
       "title": "WHMCS"
     },
     {
@@ -682,6 +708,24 @@
       "title": "EVE Online",
       "altNames": ["EVE"],
       "slug": "eve"
+    },
+    {
+      "title": "T-Mobile ID",
+      "altNames": [
+        "T-Mobile"
+      ],
+      "slug": "t-mobile"
+    },
+    {
+      "title": "Wealthfront",
+      "slug": "wealthfront"
+    },
+    {
+      "title": "BinanceUS",
+      "altNames": [
+        "Binance US"
+      ],
+      "slug": "binance_us"
     }
   ]
 }
