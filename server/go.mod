@@ -33,6 +33,7 @@ require (
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/stripe/stripe-go/v72 v72.37.0
+	github.com/TwiN'go-away v1.6.13
 	github.com/ua-parser/uap-go v0.0.0-20211112212520-00c877edfe0f
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
@@ -46,7 +47,6 @@ require (
 require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.4.1 // indirect
-	github.com/TwiN/ v1.6.13 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
