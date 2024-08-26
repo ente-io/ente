@@ -57,11 +57,15 @@ in the unlikely event of a server breach, your data remains protected.
 
 ### What happens if I forget my password?
 
-You can reset your password using your recovery key. This key is a randomly
-generated string provided to you during account creation. Store it securely, as
-it's your lifeline if you forget your password. If you lose both your password
-and recovery key, we cannot recover your account or data due to our
-zero-knowledge architecture.
+You can reset your password using your recovery key that was provided to you
+during account creation. Please store this key securely, as it's your lifeline
+if you forget your password.
+
+If you lose both your password and recovery key, we cannot recover your account
+or data due to our end-to-end encrypted architecture.
+
+If you wish to delete your account in such scenarios, please reach out to
+support@ente.io and we will help you out.
 
 ### Can I change my password?
 
