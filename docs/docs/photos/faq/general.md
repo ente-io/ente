@@ -98,13 +98,6 @@ Yes, when you drag and drop the folder onto the desktop app, the app will detect
 the multiple folders and prompt you to choose whether you want to create a
 single album or separate albums for each folder.
 
-## What is the difference between **Magic** and **Content** search results on the desktop?
-
-**Magic** is where you can search for long queries. Like, "baby in red dress",
-or "dog playing at the beach".
-
-**Content** is where you can search for single-words. Like, "car" or "pizza".
-
 ## How do I identify which files experienced upload issues within the desktop app?
 
 Check the sections within the upload progress bar for "Failed Uploads," "Ignored
