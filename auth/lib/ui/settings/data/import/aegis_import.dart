@@ -129,8 +129,10 @@ Future<int?> _processAegisExportFile(
   }
   final Map<String, String> groupIDToName = {};
   try {
-    for (var item in aegisDB?['groups']) {
-      groupIDToName[item['uuid']] = item['name'];
+    if (aegisDB?['groups'] != null) {
+      for (var item in aegisDB?['groups']) {
+        groupIDToName[item['uuid']] = item['name'];
+      }
     }
   } catch (e) {
     Logger("AegisImport").warning("Failed to parse groups", e);
@@ -149,9 +151,11 @@ Future<int?> _processAegisExportFile(
     var digits = item['info']['digits'];
 
     var counter = item['info']['counter'];
-    for (var group in item['groups']) {
-      if (groupIDToName.containsKey(group)) {
-        tags.add(groupIDToName[group]!);
+    if (item['groups'] != null) {
+      for (var group in item['groups']) {
+        if (groupIDToName.containsKey(group)) {
+          tags.add(groupIDToName[group]!);
+        }
       }
     }
     // Build the OTP URL
