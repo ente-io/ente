@@ -685,6 +685,13 @@
     {
       "title": "Wealthfront",
       "slug": "wealthfront"
+    },
+    {
+      "title": "BinanceUS",
+      "altNames": [
+        "Binance US"
+      ],
+      "slug": "binance_us"
     }
   ]
 }
