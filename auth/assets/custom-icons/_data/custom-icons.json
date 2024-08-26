@@ -716,6 +716,11 @@
         "Binance US"
       ],
       "slug": "binance_us"
+    },
+    {
+      "title": "Bethesda Softworks",
+      "altNames": ["Bethesda"],
+      "slug": "bethesda"
     }
   ]
 }
