@@ -503,7 +503,7 @@
     "language": "Język",
     "advanced": "Zaawansowane",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Nieprawidłowy katalog eksportu",
-    "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Wybrany katalog eksportu nie istnieje.</p><p> Prosimy wybrać prawidłowy katalog.</p>",
+    "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Wybrany katalog eksportu nie istnieje.</p><p> Proszę wybrać prawidłowy katalog.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Weryfikacja subskrypcji nie powiodła się",
     "storage_unit": {
         "b": "B",

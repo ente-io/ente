@@ -232,7 +232,7 @@
     "PEOPLE": "Люди",
     "indexing_scheduled": "Индексация запланирована...",
     "indexing_photos": "Индексирование фотографий ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
-    "indexing_fetching": "",
+    "indexing_fetching": "Получение индексов ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
     "indexing_people": "Индексирование людей на {{nSyncedFiles, number}} фотографиях...",
     "indexing_done": "Проиндексировано {{nSyncedFiles, number}} фотографий",
     "UNIDENTIFIED_FACES": "Нераспознанные лица",
@@ -328,7 +328,7 @@
     "REMOVE": "Удалять",
     "YES_REMOVE": "Да, удалить",
     "REMOVE_FROM_COLLECTION": "Удалить из альбома",
-    "TRASH": "Мусор",
+    "TRASH": "Корзина",
     "MOVE_TO_TRASH": "Переместить в корзину",
     "TRASH_FILES_MESSAGE": "Выбранные файлы будут удалены из всех альбомов и перемещены в корзину.",
     "TRASH_FILE_MESSAGE": "Файл будет удален из всех альбомов и помещен в корзину.",
@@ -507,7 +507,7 @@
     "SUBSCRIPTION_VERIFICATION_ERROR": "Не удалось подтвердить подписку",
     "storage_unit": {
         "b": "B",
-        "kb": "БЗ",
+        "kb": "кб",
         "mb": "Мегабайт",
         "gb": "Гб",
         "tb": "Терабайт"
