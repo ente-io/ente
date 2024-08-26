@@ -681,6 +681,10 @@
         "T-Mobile"
       ],
       "slug": "t-mobile"
+    },
+    {
+      "title": "Wealthfront",
+      "slug": "wealthfront"
     }
   ]
 }
