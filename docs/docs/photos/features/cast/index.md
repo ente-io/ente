@@ -50,7 +50,7 @@ Chromecast TVs or any other internet-connected large screen devices.
 
 <div align="center">
 
-![Pairing screen](tv-pairing-screen.webp)
+![Pairing screen](tv-pairing-screen.png)
 
 </div>
 
