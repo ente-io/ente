@@ -82,9 +82,9 @@ in Ente will be similar to the original file sizes you have.
 
 ## Can I add photos from a shared album to albums that I created in Ente?
 
-Currently, Ente does not support adding photos from a shared album to your
-personal albums. If you want to include photos from a shared album in your own
-albums, you will need to ask the owner of the photos to add them to your album.
+On Ente's mobile apps, you can add photos from an album that's shared with you,
+into one of your own albums. This will create a copy of the item that you fully
+own, and will count against your storage quota.
 
 ## How do I ensure that the Ente desktop app stays up to date on my system?
 
@@ -97,13 +97,6 @@ to manually update the software.
 Yes, when you drag and drop the folder onto the desktop app, the app will detect
 the multiple folders and prompt you to choose whether you want to create a
 single album or separate albums for each folder.
-
-## What is the difference between **Magic** and **Content** search results on the desktop?
-
-**Magic** is where you can search for long queries. Like, "baby in red dress",
-or "dog playing at the beach".
-
-**Content** is where you can search for single-words. Like, "car" or "pizza".
 
 ## How do I identify which files experienced upload issues within the desktop app?
 
