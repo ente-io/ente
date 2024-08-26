@@ -137,6 +137,29 @@ upgrade to the 200 GB yearly plan, then
 
 The same applies to monthly plans.
 
+## What happens when I downgrade my plan?
+
+Your new plan will go into effect immediately. Any extra amount you have paid
+will be credited to your account. This credit will be discounted from your
+future invoices.
+
+For example, if you are half way through the year on the 200 GB yearly plan, and
+downgrade to the 50 GB yearly plan, then
+
+-   The new 50 GB yearly plan will go into effect immediately.
+
+-   We will calculate a credit by subtracting half the price of the 50 GB plan
+    from half the price of the 200 GB plan. This will be credited to your
+    account.
+
+-   This credited amount will be discounted from your next invoice, which will
+    be due in half a year.
+    
+The same applies to monthly plans.
+
+If you prefer to have this credit refunded to your original payment method,
+please contact support@ente.io, and we'll assist you.
+
 ## Is there an x GB plan?
 
 We have experimented quite a bit and have found it hard to design a single
