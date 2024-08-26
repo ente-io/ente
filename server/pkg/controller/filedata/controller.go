@@ -106,25 +106,28 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req *fileData.PutFileDataR
 		DecryptionHeader: *req.DecryptionHeader,
 		Client:           network.GetClientInfo(ctx),
 	}
+	// Start a goroutine to handle the upload and insert operations
+	go func() {
+		logger := log.WithField("objectKey", objectKey).WithField("fileID", req.FileID).WithField("type", req.Type)
+		size, uploadErr := c.uploadObject(obj, objectKey, bucketID)
+		if uploadErr != nil {
+			logger.WithError(uploadErr).Error("upload failed")
+			return
+		}
 
-	size, uploadErr := c.uploadObject(obj, objectKey, bucketID)
-	if uploadErr != nil {
-		log.Error(uploadErr)
-		return stacktrace.Propagate(uploadErr, "")
-	}
-
-	row := fileData.Row{
-		FileID:       req.FileID,
-		Type:         req.Type,
-		UserID:       fileOwnerID,
-		Size:         size,
-		LatestBucket: bucketID,
-	}
-	err = c.Repo.InsertOrUpdate(ctx, row)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-
+		row := fileData.Row{
+			FileID:       req.FileID,
+			Type:         req.Type,
+			UserID:       fileOwnerID,
+			Size:         size,
+			LatestBucket: bucketID,
+		}
+		dbInsertErr := c.Repo.InsertOrUpdate(context.Background(), row)
+		if dbInsertErr != nil {
+			logger.WithError(dbInsertErr).Error("insert or update failed")
+			return
+		}
+	}()
 	return nil
 }
 
