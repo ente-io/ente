@@ -40,6 +40,7 @@ import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -209,6 +210,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await _logFGHeartBeatInfo();
     _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
+    NotificationService.instance.init(preferences);
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via');
