@@ -39,9 +39,9 @@ Usually this discrepancy occurs because the time in your browser might be
 incorrect. In particular, multiple users who have reported that Firefox provides
 incorrect time when various privacy settings are enabled.
 
-### Does ente Authenticator require an account?
+### Does Ente Authenticator require an account?
 
-Answer: No, ente Authenticator does not require an account. You can choose to
+Answer: No, Ente Authenticator does not require an account. You can choose to
 use the app without backups if you prefer.
 
 ### Can I use the Ente 2FA app on multiple devices and sync them?
