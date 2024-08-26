@@ -1,6 +1,7 @@
 {
   "icons": [
-    { "title": "1xBet"
+    {
+      "title": "1xBet"
     },
     {
       "title": "3Commas"
@@ -434,7 +435,8 @@
         "openobserve ai"
       ]
     },
-    { "title": "okx",
+    {
+      "title": "okx",
       "hex": "000000" },
     {
       "title": "Parsec"
@@ -678,8 +680,9 @@
       ],
       "slug": "Yandex"
     },
-    { "title": "yahoo" },
-
+    {
+      "title": "yahoo"
+    },
     {
       "title": "YNAB",
       "altNames": [
