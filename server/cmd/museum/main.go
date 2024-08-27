@@ -483,7 +483,6 @@ func main() {
 	privateAPI.GET("/users/payment-token", userHandler.GetPaymentToken)
 	privateAPI.GET("/users/families-token", userHandler.GetFamiliesToken)
 	privateAPI.GET("/users/accounts-token", userHandler.GetAccountsToken)
-	privateAPI.GET("/users/details", userHandler.GetDetails)
 	privateAPI.GET("/users/details/v2", userHandler.GetDetailsV2)
 	privateAPI.POST("/users/change-email", userHandler.ChangeEmail)
 	privateAPI.GET("/users/sessions", userHandler.GetActiveSessions)
