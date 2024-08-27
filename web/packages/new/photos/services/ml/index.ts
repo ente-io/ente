@@ -13,14 +13,14 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
-import { throttled, wait } from "@/utils/promise";
+import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
-import { clusterFaces } from "./cluster-new";
+import { clusterFaces, type CGroup, type FaceCluster } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
 import {
     clearMLDB,
@@ -347,12 +347,21 @@ export const wipCluster = async () => {
 
     log.info("clustering");
     _wip_isClustering = true;
+    _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    await wait(2000);
-    _wip_searchPersons = undefined;
-
     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
+    const searchPersons = await convertToSearchPersons(clusters, cgroups);
+
+    _wip_isClustering = false;
+    _wip_searchPersons = searchPersons;
+    triggerStatusUpdate();
+};
+
+const convertToSearchPersons = async (
+    clusters: FaceCluster[],
+    cgroups: CGroup[],
+) => {
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     const localFiles = await getAllLocalFiles();
@@ -360,43 +369,38 @@ export const wipCluster = async () => {
 
     const result: SearchPerson[] = [];
     for (const cgroup of cgroups) {
-        let avatarFaceID = cgroup.avatarFaceID;
-        // TODO-Cluster
-        // Temp
-        if (!avatarFaceID) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            avatarFaceID = cgroup.clusterIDs
-                .map((id) => clusterByID.get(id))
-                .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
-        }
-        cgroup.clusterIDs;
-        const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
-        const avatarFaceFile = localFileByID.get(avatarFaceFileID ?? 0);
-        if (!avatarFaceFileID || !avatarFaceFile) {
-            assertionFailed(`Face ID ${avatarFaceID} without local file`);
+        const displayFaceID = cgroup.displayFaceID;
+        if (!displayFaceID) {
+            // TODO-Cluster
+            assertionFailed(`cgroup ${cgroup.id} without displayFaceID`);
             continue;
         }
-        const files = cgroup.clusterIDs
+
+        const displayFaceFileID = fileIDFromFaceID(displayFaceID);
+        if (!displayFaceFileID) continue;
+
+        const displayFaceFile = localFileByID.get(displayFaceFileID);
+        if (!displayFaceFile) {
+            assertionFailed(`Face ID ${displayFaceFileID} without local file`);
+            continue;
+        }
+
+        const fileIDs = cgroup.clusterIDs
             .map((id) => clusterByID.get(id))
             .flatMap((cluster) => cluster?.faceIDs ?? [])
             .map((faceID) => fileIDFromFaceID(faceID))
             .filter((fileID) => fileID !== undefined);
+
         result.push({
             id: cgroup.id,
             name: cgroup.name,
-            files,
-            displayFaceID: avatarFaceID,
-            displayFaceFile: avatarFaceFile,
+            files: [...new Set(fileIDs)],
+            displayFaceID,
+            displayFaceFile,
         });
     }
 
-    const searchPersons = result.sort(
-        (a, b) => b.files.length - a.files.length,
-    );
-
-    _wip_isClustering = false;
-    _wip_searchPersons = searchPersons;
-    triggerStatusUpdate();
+    return result.sort((a, b) => b.files.length - a.files.length);
 };
 
 export type MLStatus =
@@ -568,8 +572,7 @@ export const unidentifiedFaceIDs = async (
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
  */
-// TODO-Cluster: temporary export to supress linter
-export const fileIDFromFaceID = (faceID: string) => {
+const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
