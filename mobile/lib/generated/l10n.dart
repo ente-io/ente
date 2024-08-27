@@ -3172,6 +3172,26 @@ class S {
     );
   }
 
+  /// `Backup status`
+  String get backupStatus {
+    return Intl.message(
+      'Backup status',
+      name: 'backupStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Items that have been backed up will show up here`
+  String get backupStatusDescription {
+    return Intl.message(
+      'Items that have been backed up will show up here',
+      name: 'backupStatusDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Backup over mobile data`
   String get backupOverMobileData {
     return Intl.message(
@@ -9502,17 +9522,34 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'ar'),
+      Locale.fromSubtags(languageCode: 'bg'),
+      Locale.fromSubtags(languageCode: 'ca'),
       Locale.fromSubtags(languageCode: 'cs'),
+      Locale.fromSubtags(languageCode: 'da'),
       Locale.fromSubtags(languageCode: 'de'),
+      Locale.fromSubtags(languageCode: 'el'),
       Locale.fromSubtags(languageCode: 'es'),
+      Locale.fromSubtags(languageCode: 'et'),
+      Locale.fromSubtags(languageCode: 'fa'),
       Locale.fromSubtags(languageCode: 'fr'),
+      Locale.fromSubtags(languageCode: 'gu'),
+      Locale.fromSubtags(languageCode: 'he'),
+      Locale.fromSubtags(languageCode: 'hi'),
+      Locale.fromSubtags(languageCode: 'id'),
       Locale.fromSubtags(languageCode: 'it'),
+      Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'sv'),
+      Locale.fromSubtags(languageCode: 'te'),
+      Locale.fromSubtags(languageCode: 'th'),
+      Locale.fromSubtags(languageCode: 'ti'),
       Locale.fromSubtags(languageCode: 'tr'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
