@@ -163,19 +163,17 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // or fetched from remote).
     const clusters = await faceClusters();
 
-    // For fast reverse lookup - map from cluster ids to the index in the
+    // For fast reverse lookup - map from cluster ids to their index in the
     // clusters array.
     const clusterIndexForClusterID = new Map(clusters.map((c, i) => [c.id, i]));
 
     // For fast reverse lookup - map from face ids to the id of the cluster to
     // which they belong.
     const clusterIDForFaceID = new Map(
-        clusters.flatMap((c) =>
-            c.faceIDs.map((faceID) => [faceID, c.id] as const),
-        ),
+        clusters.flatMap((c) => c.faceIDs.map((id) => [id, c.id] as const)),
     );
 
-    // New cluster ID generator function.
+    // A function to generate new cluster IDs.
     const newClusterID = () => newNonSecureID("cluster_");
 
     // For each face,
@@ -247,40 +245,45 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // Prune too small clusters.
     const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
 
+    let cgroups = await clusterGroups();
+
+    // TODO-Cluster - Currently we're not syncing with remote or saving anything
+    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
+    // cgroup, one per cluster.
+    cgroups = cgroups.concat(
+        validClusters.map((c) => ({
+            id: c.id,
+            name: undefined,
+            clusterIDs: [c.id],
+            isHidden: false,
+            avatarFaceID: undefined,
+            displayFaceID: undefined,
+        })),
+    );
+
     // For each cluster group, use the highest scoring face in any of its
     // clusters as its display face.
-
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-    const cgroups = await clusterGroups();
-
     for (const cgroup of cgroups) {
-        cgroup.avatarFaceID = cgroup.clusterIDs
+        cgroup.displayFaceID = cgroup.clusterIDs
             .map((clusterID) => clusterIndexForClusterID.get(clusterID))
-            .map((clusterIndex) =>
-                clusterIndex ? clusters[clusterIndex] : undefined,
-            )
-            .filter((cluster) => !!cluster)
-            .flatMap((cluster) => cluster.faceIDs)
-            .map((id) => faceForFaceID.get(id))
+            .flatMap((i) => (i ? clusters[i]?.faceIDs : undefined) ?? [])
+            .map((faceID) => faceForFaceID.get(faceID))
             .filter((face) => !!face)
-            .reduce((topFace, face) =>
-                topFace.score > face.score ? topFace : face,
+            .reduce((max, face) =>
+                max.score > face.score ? max : face,
             ).faceID;
     }
 
-    log.debug(() => [
-        "ml/cluster",
-        {
-            faces,
-            validClusters,
-            clusterIndexForClusterID,
-            clusterIDForFaceID,
-            cgroups,
-        },
-    ]);
-    log.debug(
-        () =>
-            `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
+    log.info("ml/cluster", {
+        faces,
+        validClusters,
+        clusterIndexForClusterID,
+        clusterIDForFaceID,
+        cgroups,
+    });
+    log.info(
+        `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
     return { clusters: validClusters, cgroups };
