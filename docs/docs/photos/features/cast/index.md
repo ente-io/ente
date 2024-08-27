@@ -11,7 +11,7 @@ Chromecast TVs or any other internet-connected large screen devices.
 
 ## Get Started
 
-1. Open ente on the web or on your mobile device.
+1. Open Ente on the web or on your mobile device.
 2. Select the album you want to play on your large screen device.
 3. Click "Play album on TV" in the album menu.
 
@@ -50,7 +50,7 @@ Chromecast TVs or any other internet-connected large screen devices.
 
 <div align="center">
 
-![Pairing screen](tv-pairing-screen.webp)
+![Pairing screen](tv-pairing-screen.png)
 
 </div>
 

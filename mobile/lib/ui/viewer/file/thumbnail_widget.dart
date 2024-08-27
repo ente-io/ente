@@ -43,6 +43,7 @@ class ThumbnailWidget extends StatefulWidget {
   ///On video thumbnails, shows the video duration if true. If false,
   ///shows a centered play icon.
   final bool shouldShowVideoDuration;
+  final bool shouldShowVideoOverlayIcon;
 
   ThumbnailWidget(
     this.file, {
@@ -60,6 +61,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.thumbnailSize = thumbnailSmallSize,
     this.shouldShowFavoriteIcon = true,
     this.shouldShowVideoDuration = false,
+    this.shouldShowVideoOverlayIcon = true,
   }) : super(key: key ?? Key(file.tag));
 
   @override
@@ -157,7 +159,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         if (widget.shouldShowVideoDuration) {
           contentChildren
               .add(VideoOverlayDuration(duration: widget.file.duration!));
-        } else {
+        } else if (widget.shouldShowVideoOverlayIcon) {
           contentChildren.add(const VideoOverlayIcon());
         }
       } else if (widget.shouldShowLivePhotoOverlay &&
@@ -199,6 +201,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
     } else if (GalleryContextState.of(context)?.type == GroupType.size) {
       viewChildren.add(FileSizeOverlayText(widget.file));
+    } else if (widget.file.debugCaption != null) {
+      viewChildren.add(FileOverlayText(widget.file.debugCaption!));
     }
     // todo: Move this icon overlay to the collection widget.
     if (widget.shouldShowArchiveStatus) {

@@ -1,6 +1,6 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -69,7 +69,7 @@ export const configureSRP = async ({
 export const generateSRPSetupAttributes = async (
     loginSubKey: string,
 ): Promise<SRPSetupAttributes> => {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
 
     const srpSalt = await cryptoWorker.generateSaltToDeriveKey();
 

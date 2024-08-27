@@ -1,22 +1,23 @@
 import { isDesktop } from "@/base/app";
-import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
 import {
+    clipMatches,
     isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
 } from "@/new/photos/services/ml";
-import { clipMatches } from "@/new/photos/services/ml/clip";
-import type { Person } from "@/new/photos/services/ml/people";
+import { parseDateComponents } from "@/new/photos/services/search";
+import type {
+    SearchDateComponents,
+    SearchPerson,
+} from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
-import * as chrono from "chrono-node";
 import { t } from "i18next";
 import { Collection } from "types/collection";
 import { EntityType, LocationTag, LocationTagData } from "types/entity";
 import {
     ClipSearchScores,
-    DateValue,
     Search,
     SearchOption,
     Suggestion,
@@ -24,11 +25,8 @@ import {
 } from "types/search";
 import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
-import { getFormattedDate } from "utils/search";
 import { getLatestEntities } from "./entityService";
 import locationSearchService, { City } from "./locationSearchService";
-
-const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
 export const getDefaultOptions = async () => {
     return [
@@ -48,8 +46,6 @@ export const getAutoCompleteSuggestions =
             const suggestions: Suggestion[] = [
                 await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
-                ...getHolidaySuggestion(searchPhrase),
-                ...getYearSuggestion(searchPhrase),
                 ...getDateSuggestion(searchPhrase),
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
@@ -113,53 +109,6 @@ function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
     );
 }
 
-function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
-    return [
-        {
-            label: t("CHRISTMAS"),
-            value: { month: 11, date: 25 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("CHRISTMAS_EVE"),
-            value: { month: 11, date: 24 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("NEW_YEAR"),
-            value: { month: 0, date: 1 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("NEW_YEAR_EVE"),
-            value: { month: 11, date: 31 },
-            type: SuggestionType.DATE,
-        },
-    ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase),
-    );
-}
-
-function getYearSuggestion(searchPhrase: string): Suggestion[] {
-    if (searchPhrase.length === 4) {
-        try {
-            const year = parseInt(searchPhrase);
-            if (year >= 1970 && year <= new Date().getFullYear()) {
-                return [
-                    {
-                        label: searchPhrase,
-                        value: { year },
-                        type: SuggestionType.DATE,
-                    },
-                ];
-            }
-        } catch (e) {
-            log.error("getYearSuggestion failed", e);
-        }
-    }
-    return [];
-}
-
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     try {
         const people = await getAllPeople(200);
@@ -190,6 +139,9 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
         case "indexing":
             label = t("indexing_photos", status);
             break;
+        case "fetching":
+            label = t("indexing_fetching", status);
+            break;
         case "clustering":
             label = t("indexing_people", status);
             break;
@@ -206,15 +158,12 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
     };
 }
 
-function getDateSuggestion(searchPhrase: string): Suggestion[] {
-    const searchedDates = parseHumanDate(searchPhrase);
-
-    return searchedDates.map((searchedDate) => ({
+const getDateSuggestion = (searchPhrase: string): Suggestion[] =>
+    parseDateComponents(searchPhrase).map(({ components, label }) => ({
         type: SuggestionType.DATE,
-        value: searchedDate,
-        label: getFormattedDate(searchedDate),
+        value: components,
+        label,
     }));
-}
 
 function getCollectionSuggestion(
     searchPhrase: string,
@@ -330,31 +279,6 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
     );
 }
 
-function parseHumanDate(humanDate: string): DateValue[] {
-    const date = chrono.parseDate(humanDate);
-    const date1 = chrono.parseDate(`${humanDate} 1`);
-    if (date !== null) {
-        const dates = [
-            { month: date.getMonth() },
-            { date: date.getDate(), month: date.getMonth() },
-        ];
-        let reverse = false;
-        humanDate.split("").forEach((c) => {
-            if (DIGITS.has(c)) {
-                reverse = true;
-            }
-        });
-        if (reverse) {
-            return dates.reverse();
-        }
-        return dates;
-    }
-    if (date1) {
-        return [{ month: date1.getMonth() }];
-    }
-    return [];
-}
-
 async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
     const locationTags = await getLatestEntities<LocationTagData>(
         EntityType.LOCATION_TAG,
@@ -374,7 +298,7 @@ const searchClip = async (
     searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
     if (!isMLEnabled()) return undefined;
-    const matches = await clipMatches(searchPhrase, ensureElectron());
+    const matches = await clipMatches(searchPhrase);
     log.debug(() => ["clip/scores", matches]);
     return matches;
 };
@@ -383,7 +307,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
     switch (option.type) {
         case SuggestionType.DATE:
             return {
-                date: option.value as DateValue,
+                date: option.value as SearchDateComponents,
             };
 
         case SuggestionType.LOCATION:
@@ -404,7 +328,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { files: option.value as number[] };
 
         case SuggestionType.PERSON:
-            return { person: option.value as Person };
+            return { person: option.value as SearchPerson };
 
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FileType };
@@ -414,13 +338,30 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
     }
 }
 
-async function getAllPeople(limit: number = undefined) {
-    let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
-    // await mlPeopleStore.iterate<Person, void>((person) => {
-    //     people.push(person);
-    // });
-    people = people ?? [];
-    return people
-        .sort((p1, p2) => p2.files.length - p1.files.length)
-        .slice(0, limit);
+// let done = false;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getAllPeople(_limit: number = undefined) {
+    return [];
+    // if (!(await wipClusterEnable())) return [];
+    // if (done) return [];
+
+    // done = true;
+    // if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
+    //     await syncCGroups();
+    //     const people = await clusterGroups();
+    //     log.debug(() => ["people", { people }]);
+    // }
+
+    // let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
+    // people = await wipCluster();
+    // // await mlPeopleStore.iterate<Person, void>((person) => {
+    // //     people.push(person);
+    // // });
+    // people = people ?? [];
+    // const result = people
+    //     .sort((p1, p2) => p2.files.length - p1.files.length)
+    //     .slice(0, limit);
+    // // log.debug(() => ["getAllPeople", result]);
+
+    // return result;
 }

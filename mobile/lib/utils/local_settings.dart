@@ -8,22 +8,16 @@ enum AlbumSortKey {
 }
 
 class LocalSettings {
-  LocalSettings._privateConstructor();
-
-  static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
-  static const kEnableMagicSearch = "enable_magic_search";
-  static const kEnableFaceIndexing = "enable_face_indexing";
-  static const kEnableFaceClustering = "enable_face_clustering";
+  static const _kisMLIndexingEnabled = "ls.enable_ml_idx";
   static const kRateUsShownCount = "rate_us_shown_count";
+  static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
 
-  late SharedPreferences _prefs;
+  final SharedPreferences _prefs;
 
-  void init(SharedPreferences preferences) {
-    _prefs = preferences;
-  }
+  LocalSettings(this._prefs);
 
   AlbumSortKey albumSortKey() {
     return AlbumSortKey.values[_prefs.getInt(kCollectionSortPref) ?? 0];
@@ -45,17 +39,6 @@ class LocalSettings {
     await _prefs.setInt(kPhotoGridSize, value);
   }
 
-  bool hasEnabledMagicSearch() {
-    if (_prefs.containsKey(kEnableMagicSearch)) {
-      return _prefs.getBool(kEnableMagicSearch)!;
-    }
-    return false;
-  }
-
-  Future<void> setShouldEnableMagicSearch(bool value) async {
-    await _prefs.setBool(kEnableMagicSearch, value);
-  }
-
   int getRateUsShownCount() {
     if (_prefs.containsKey(kRateUsShownCount)) {
       return _prefs.getInt(kRateUsShownCount)!;
@@ -72,16 +55,24 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isFaceIndexingEnabled =>
-      _prefs.getBool(kEnableFaceIndexing) ?? false;
+  //  remove `enable_face_indexing`fallback after sometime, affects internal users only
+  bool get isMLIndexingEnabled =>
+      _prefs.getBool(_kisMLIndexingEnabled) ??
+      _prefs.getBool('enable_face_indexing') ??
+      false;
 
-  bool get isFaceClusteringEnabled =>
-      _prefs.getBool(kEnableFaceIndexing) ?? false;
+  bool get userEnabledMultiplePart =>
+      _prefs.getBool(kEnableMultiplePart) ?? false;
+
+  Future<bool> setUserEnabledMultiplePart(bool value) async {
+    await _prefs.setBool(kEnableMultiplePart, value);
+    return value;
+  }
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
-  Future<bool> toggleFaceIndexing() async {
-    await _prefs.setBool(kEnableFaceIndexing, !isFaceIndexingEnabled);
-    return isFaceIndexingEnabled;
+  Future<bool> toggleMLIndexing() async {
+    await _prefs.setBool(_kisMLIndexingEnabled, !isMLIndexingEnabled);
+    return isMLIndexingEnabled;
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see
@@ -91,10 +82,4 @@ class LocalSettings {
     await _prefs.setBool("remoteFetchEnabled", !remoteFetchEnabled);
   }
   //#endregion
-
-  /// toggleFaceClustering toggles the face clustering setting and returns the new value
-  Future<bool> toggleFaceClustering() async {
-    await _prefs.setBool(kEnableFaceClustering, !isFaceClusteringEnabled);
-    return isFaceClusteringEnabled;
-  }
 }

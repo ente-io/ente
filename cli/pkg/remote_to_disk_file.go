@@ -24,6 +24,17 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	if err != nil {
 		return err
 	}
+	albumsToSkip := make(map[int64]bool)
+	filter := ctx.Value(model.FilterKey).(model.Filter)
+	remoteAlbums, readAlbumErr := c.getRemoteAlbums(ctx)
+	if readAlbumErr != nil {
+		return readAlbumErr
+	}
+	for _, album := range remoteAlbums {
+		if !album.IsDeleted && filter.SkipAlbum(album, false) {
+			albumsToSkip[album.ID] = true
+		}
+	}
 	entries, err := c.getRemoteAlbumEntries(ctx)
 	if err != nil {
 		return err
@@ -34,6 +45,9 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	var albumDiskInfo *albumDiskInfo
 	for i, albumFileEntry := range entries {
 		if albumFileEntry.SyncedLocally {
+			continue
+		}
+		if _, ok := albumsToSkip[albumFileEntry.AlbumID]; ok {
 			continue
 		}
 		albumInfo, ok := albumIDToMetaMap[albumFileEntry.AlbumID]
@@ -74,6 +88,10 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 					log.Printf(fmt.Sprintf("err processing live photo %s (%d), %s", existingEntry.GetTitle(), existingEntry.ID, err.Error()))
 					continue
 				} else if existingEntry.IsLivePhoto() && errors.Is(err, model.ErrLiveZip) {
+					continue
+				} else if model.IsBadTimeStampError(err) {
+					log.Printf("Skipping file due to error %s (%d)", existingEntry.GetTitle(), existingEntry.ID)
+					log.Printf("CreationTime %v, ModidicationTime %v", existingEntry.GetCreationTime(), existingEntry.GetModificationTime())
 					continue
 				} else {
 					return err

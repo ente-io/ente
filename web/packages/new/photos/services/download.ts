@@ -3,6 +3,8 @@
 
 import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
+import { sharedCryptoWorker } from "@/base/crypto";
+import { type CryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
 import { FileType } from "@/media/file-type";
@@ -15,13 +17,10 @@ import type {
 } from "@/new/photos/types/file";
 import { renderableImageBlob } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { retryAsyncFunction } from "@ente/shared/utils";
-import type { Remote } from "comlink";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
@@ -52,7 +51,7 @@ class DownloadManagerImpl {
      * Only available when we're running in the desktop app.
      */
     private fileCache?: BlobCache;
-    private cryptoWorker: Remote<DedicatedCryptoWorker> | undefined;
+    private cryptoWorker: CryptoWorker | undefined;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
@@ -85,7 +84,7 @@ class DownloadManagerImpl {
         // } catch (e) {
         //     log.error("Failed to open file cache, will continue without it", e);
         // }
-        this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        this.cryptoWorker = await sharedCryptoWorker();
         this.ready = true;
     }
 
@@ -124,13 +123,12 @@ class DownloadManagerImpl {
     private downloadThumb = async (file: EnteFile) => {
         const { downloadClient, cryptoWorker } = this.ensureInitialized();
 
-        const encrypted = await downloadClient.downloadThumbnail(file);
-        const decrypted = await cryptoWorker.decryptThumbnail(
-            encrypted,
-            await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+        const encryptedData = await downloadClient.downloadThumbnail(file);
+        const decryptionHeader = file.thumbnail.decryptionHeader;
+        return cryptoWorker.decryptThumbnail(
+            { encryptedData, decryptionHeader },
             file.key,
         );
-        return decrypted;
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {

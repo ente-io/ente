@@ -1,235 +1,139 @@
-<html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
+  <meta content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1,
+  minimum-scale=1" />
+  <style>
+    body {
+      background-color: #f0f1f3;
+      font-family: "Helvetica Neue", "Segoe UI", Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 27px;
+      margin: 0;
+      color: #444;
+    }
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
-    <!--[if !mso]><!-->
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-    <!--<![endif]-->
-    <!--[if (gte mso 9)|(IE)]>
-    <xml>
-        <o:OfficeDocumentSettings>
-            <o:AllowPNG/>
-            <o:PixelsPerInch>96</o:PixelsPerInch>
-        </o:OfficeDocumentSettings>
-    </xml>
-    <![endif]-->
-    <!--[if (gte mso 9)|(IE)]>
-    <style type="text/css">
-        body {width: 600px;margin: 0 auto;}
-        table {border-collapse: collapse;}
-        table, td {mso-table-lspace: 0pt;mso-table-rspace: 0pt;}
-        img {-ms-interpolation-mode: bicubic;}
-    </style>
-    <![endif]-->
-    <style type="text/css">
-        body,
-        p,
-        div {
-            font-family: 'Open Sans', sans-serif;
-            font-size: 14px;
-        }
+    pre {
+      background: #f4f4f4f4;
+      padding: 2px;
+    }
 
-        body {
-            color: #000000;
-        }
+    table {
+      width: 100%;
+      border: 1px solid #ddd;
+    }
 
-        body a {
-            color: #1188E6;
-            text-decoration: none;
-        }
+    table td {
+      border-color: #ddd;
+      padding: 5px;
+    }
 
-        p {
-            margin: 0;
-            padding: 0;
-        }
+    .wrap {
+      background-color: #fff;
+      padding: 30px;
+      max-width: 525px;
+      margin: 0 auto;
+      border-radius: 5px;
+    }
 
-        table.wrapper {
-            width: 100% !important;
-            table-layout: fixed;
-            -webkit-font-smoothing: antialiased;
-            -webkit-text-size-adjust: 100%;
-            -moz-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
+    .button {
+      background: #0055d4;
+      border-radius: 3px;
+      text-decoration: none !important;
+      color: #fff !important;
+      font-weight: bold;
+      padding: 10px 30px;
+      display: inline-block;
+    }
 
-        img.max-width {
-            max-width: 100% !important;
-        }
+    .button:hover {
+      background: #111;
+    }
 
-        .column.of-2 {
-            width: 50%;
-        }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+    }
 
-        .column.of-3 {
-            width: 33.333%;
-        }
+    .footer a {
+      color: #888;
+      margin-right: 5px;
+    }
 
-        .column.of-4 {
-            width: 25%;
-        }
+    .gutter {
+      padding: 30px;
+    }
 
-        ul ul ul ul {
-            list-style-type: disc !important;
-        }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
 
-        ol ol {
-            list-style-type: lower-roman !important;
-        }
+    a {
+      color: #0055d4;
+    }
 
-        ol ol ol {
-            list-style-type: lower-latin !important;
-        }
+    a:hover {
+      color: #111;
+    }
 
-        ol ol ol ol {
-            list-style-type: decimal !important;
-        }
+    @media screen and (max-width: 600px) {
+      .wrap {
+        max-width: auto;
+      }
 
-        @media screen and (max-width:480px) {
-            .preheader .rightColumnContent,
-            .footer .rightColumnContent {
-                text-align: left !important;
-            }
-            .preheader .rightColumnContent div,
-            .preheader .rightColumnContent span,
-            .footer .rightColumnContent div,
-            .footer .rightColumnContent span {
-                text-align: left !important;
-            }
-            .preheader .rightColumnContent,
-            .preheader .leftColumnContent {
-                font-size: 80% !important;
-                padding: 5px 0;
-            }
-            table.wrapper-mobile {
-                width: 100% !important;
-                table-layout: fixed;
-            }
-            img.max-width {
-                height: auto !important;
-                max-width: 100% !important;
-            }
-            a.bulletproof-button {
-                display: block !important;
-                width: auto !important;
-                font-size: 80%;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-            }
-            .columns {
-                width: 100% !important;
-            }
-            .column {
-                display: block !important;
-                width: 100% !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
-            .social-icon-column {
-                display: inline-block !important;
-            }
-        }
-    </style>
-    <!--user entered Head Start-->
-    <!--End Head user entered-->
-</head>
+      .gutter {
+        padding: 10px;
+      }
+    }
 
-<body>
-<center class="wrapper" data-link-color="#1188E6" data-body-style="font-size:14px; font-family:'Open Sans', sans-serif; color:#000000; background-color:#FFFFFF;">
-    <div class="webkit">
-        <table class="wrapper" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#FFFFFF">
-            <tbody>
-            <tr>
-                <td width="100%" valign="top" bgcolor="#FFFFFF">
-                    <table role="content-container" class="outer" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-                        <tbody>
-                        <tr>
-                            <td width="100%">
-                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
-                                    <tbody>
-                                    <tr>
-                                        <td>
-                                            <!--[if mso]>
-                                            <center>
-                                                <table><tr><td width="600">
-                                            <![endif]-->
-                                            <table style="width:100%; max-width:600px;" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-                                                <tbody>
-                                                <tr>
-                                                    <td role="modules-container" style="padding:0px 0px 0px 0px; color:#000000; text-align:left;" width="100%" bgcolor="#FFFFFF" align="left">
-                                                        <table class="module preheader preheader-hide" role="module" data-type="preheader" style="display: none !important; mso-hide: all; visibility: hidden; opacity: 0; color: transparent; height: 0; width: 0;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                                            <tbody>
-                                                            <tr>
-                                                                <td role="module-content">
-                                                                    <p></p>
-                                                                </td>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                        <table class="module" role="module" data-type="text" style="table-layout: fixed;" data-muid="4d38f79c-f345-49d5-81f6-a0feac657ac3" data-mc-module-version="2019-10-22" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                                            <tbody>
-                                                            <tr>
-                                                                <td style="padding:18px 0px 18px 0px; line-height:22px; text-align:inherit;" role="module-content" valign="top" height="100%" bgcolor="">
-                                                                    <div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <span style="font-family: 'Open Sans', sans-serif">Hey,</span>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <br>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <span style="font-family: 'Open Sans', sans-serif">This is to alert you that your email address has been updated to {{.NewEmail}}.</span>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <br>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <span style="font-family: 'Open Sans', sans-serif">Please respond if you need any assistance.</span>
-                                                                        </div>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <br>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                                                    <span style="font-family: 'Open Sans', sans-serif">-
-                                                                                                        team@ente.io</span>
-                                                                        </div>
-                                                                        <div style="font-family: inherit; text-align: inherit">
-                                                                            <br>
-                                                                        </div>
-                                                                        <div></div>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <!--[if mso]>
-                                            </td>
-                                            </tr>
-                                            </table>
-                                            </center>
-                                            <![endif]-->
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    .footer-icons {
+      padding: 4px !important;
+      width: 24px !important;
+    }
+  </style>
+
+  <body>
+    <div class="gutter" style="padding: 4px">&nbsp;</div>
+    <div class="wrap" style=" background-color: rgb(255, 255, 255); padding: 2px
+    30px 30px 30px; max-width: 525px; margin: 0 auto; border-radius: 5px;
+    font-size: 16px; " >
+      <p>Hey,</p>
+
+      <p>This is to alert you that your email address has been updated to
+      {{.NewEmail}}.</p>
+
+      <p>Please respond if you need any assistance.</p>
     </div>
-</center>
-
-</body>
-
+    <br />
+    <div class="footer" style="text-align: center; font-size: 12px; color:
+    rgb(136, 136, 136)" >
+      <div>
+        <a href="https://ente.io" target="_blank" ><img
+        src="https://email-assets.ente.io/ente-green.png" style="width: 100px;
+        padding: 24px" title="Ente" alt="Ente" /></a>
+      </div>
+      <div>
+        <a href="https://fosstodon.org/@ente" target="_blank" ><img
+        src="https://email-assets.ente.io/mastodon-icon.png"
+        class="footer-icons" style="width: 24px; padding: 4px" title="Mastodon"
+        alt="Mastodon" /></a>
+        <a href="https://twitter.com/enteio" target="_blank" ><img
+        src="https://email-assets.ente.io/twitter-icon.png" class="footer-icons"
+        style="width: 24px; padding: 4px" title="Twitter" alt="Twitter" /></a>
+        <a href="https://discord.ente.io" target="_blank" ><img
+        src="https://email-assets.ente.io/discord-icon.png" class="footer-icons"
+        style="width: 24px; padding: 4px" title="Discord" alt="Discord" /></a>
+        <a href="https://github.com/ente-io" target="_blank" ><img
+        src="https://email-assets.ente.io/github-icon.png" class="footer-icons"
+        style="width: 24px; padding: 4px" title="GitHub" alt="GitHub" /></a>
+      </div>
+      <p>
+        Ente Technologies, Inc.
+        <br /> 1111B S Governors Ave 6032 Dover, DE 19904
+      </p>
+      <br />
+    </div>
+  </body>
 </html>

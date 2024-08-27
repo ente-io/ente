@@ -53,7 +53,7 @@ export function GalleryNavbar({
             ) : (
                 <>
                     {!isInSearchMode && (
-                        <IconButton onClick={openSidebar} sx={{ pl: 0 }}>
+                        <IconButton onClick={openSidebar}>
                             <MenuIcon />
                         </IconButton>
                     )}

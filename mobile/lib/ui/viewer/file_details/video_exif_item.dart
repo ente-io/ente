@@ -35,8 +35,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
       title: S.of(context).videoInfo,
-      subtitleSection:
-          _exifButton(context, widget.file, widget.props?.prodData),
+      subtitleSection: _exifButton(context, widget.file, widget.props),
       onTap: _onTap,
     );
   }
@@ -44,20 +43,20 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
   Future<List<Widget>> _exifButton(
     BuildContext context,
     EnteFile file,
-    Map<String, dynamic>? exif,
+    FFProbeProps? props,
   ) async {
     late final String label;
     late final VoidCallback? onTap;
-    if (exif == null) {
+    if (props?.propData == null) {
       label = S.of(context).loadingExifData;
       onTap = null;
-    } else if (exif.isNotEmpty) {
+    } else if (props!.propData!.isNotEmpty) {
       label = "${widget.props?.videoInfo ?? ''} ..";
       onTap = () => showBarModalBottomSheet(
             context: context,
             builder: (BuildContext context) {
               return VideoExifDialog(
-                probeData: exif,
+                props: props,
               );
             },
             shape: const RoundedRectangleBorder(

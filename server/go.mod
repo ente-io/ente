@@ -2,7 +2,6 @@ module github.com/ente-io/museum
 
 go 1.21
 
-
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/GoKillers/libsodium-go v0.0.0-20171022220152-dd733721c3cb
@@ -24,6 +23,7 @@ require (
 	github.com/kong/go-srp v0.0.0-20191210190804-cde1efa3c083
 	github.com/lib/pq v1.8.0
 	github.com/lithammer/shortuuid/v3 v3.0.4
+	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pquerna/otp v1.3.0
 	github.com/prometheus/client_golang v1.11.1
@@ -33,12 +33,13 @@ require (
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/stripe/stripe-go/v72 v72.37.0
+	github.com/TwiN/go-away v1.6.13
 	github.com/ua-parser/uap-go v0.0.0-20211112212520-00c877edfe0f
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	golang.org/x/crypto v0.21.0
-	golang.org/x/sync v0.1.0
-	golang.org/x/text v0.14.0
+	golang.org/x/sync v0.8.0
+	golang.org/x/text v0.17.0
 	google.golang.org/api v0.114.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

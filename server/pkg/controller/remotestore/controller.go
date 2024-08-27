@@ -55,6 +55,10 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 	response := &ente.FeatureFlagResponse{
 		EnableStripe:    true, // enable stripe for all
 		DisableCFWorker: false,
+		// When true, users will see an option to enable multiple part upload in the app
+		// Changing it to false will hide the option and disable multi part upload for everyone
+		// except internal user.rt
+		EnableMobMultiPart: true,
 	}
 	for key, value := range values {
 		flag := ente.FlagKey(key)

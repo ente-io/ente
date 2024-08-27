@@ -1,11 +1,11 @@
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getActualKey } from "@ente/shared/user";
 
 export async function decryptDeleteAccountChallenge(
     encryptedChallenge: string,
 ) {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await getActualKey();
     const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
     const secretKey = await cryptoWorker.decryptB64(

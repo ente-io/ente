@@ -1,7 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
@@ -124,7 +123,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={pt("ML search")}
+                        title={t("ml_search")}
                         onRootClose={onRootClose}
                     />
                     {component}
@@ -155,19 +154,17 @@ interface EnableMLProps {
 }
 
 const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
-    // TODO-ML: Update link.
-    const moreDetails = () => openURL("https://ente.io/blog/desktop-ml-beta");
+    const moreDetails = () =>
+        openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
         <Stack py={"20px"} px={"16px"} spacing={"32px"}>
             <Typography color="text.muted">
-                {pt(
-                    "Enable ML (Machine Learning) for face recognition, magic search and other advanced search features",
-                )}
+                {t("ml_search_description")}
             </Typography>
             <Stack spacing={"8px"}>
                 <Button color={"accent"} size="large" onClick={onEnable}>
-                    {t("ENABLE")}
+                    {t("enable")}
                 </Button>
 
                 <Button color="secondary" size="large" onClick={moreDetails}>
@@ -175,9 +172,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                 </Button>
             </Stack>
             <Typography color="text.faint" variant="small">
-                {pt(
-                    'Magic search allows to search photos by their contents (e.g. "car", "red car" or even "ferrari")',
-                )}
+                {t("ml_search_footnote")}
             </Typography>
         </Stack>
     );
@@ -210,6 +205,18 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
         else onClose();
     };
 
+    const privacyPolicyLink = (
+        <Link
+            target="_blank"
+            href="https://ente.io/privacy#8-biometric-information-privacy-policy"
+            underline="always"
+            sx={{
+                color: "inherit",
+                textDecorationColor: "inherit",
+            }}
+        />
+    );
+
     return (
         <EnteDrawer
             transitionDuration={0}
@@ -222,26 +229,14 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("ENABLE_FACE_SEARCH_TITLE")}
+                    title={t("ml_consent_title")}
                     onRootClose={handleRootClose}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                     <Typography component="div" color="text.muted" px={"8px"}>
                         <Trans
-                            i18nKey={"ENABLE_FACE_SEARCH_DESCRIPTION"}
-                            components={{
-                                a: (
-                                    <Link
-                                        target="_blank"
-                                        href="https://ente.io/privacy#8-biometric-information-privacy-policy"
-                                        underline="always"
-                                        sx={{
-                                            color: "inherit",
-                                            textDecorationColor: "inherit",
-                                        }}
-                                    />
-                                ),
-                            }}
+                            i18nKey={"ml_consent_description"}
+                            components={{ a: privacyPolicyLink }}
                         />
                     </Typography>
                     <FormGroup sx={{ width: "100%" }}>
@@ -260,7 +255,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                                     }
                                 />
                             }
-                            label={t("FACE_SEARCH_CONFIRMATION")}
+                            label={t("ml_consent_confirmation")}
                         />
                     </FormGroup>
                     <Stack px={"8px"} spacing={"8px"}>
@@ -270,7 +265,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                             disabled={!acceptTerms}
                             onClick={onConsent}
                         >
-                            {t("ENABLE_FACE_SEARCH")}
+                            {t("ml_consent")}
                         </Button>
                         <Button
                             color={"secondary"}
@@ -304,29 +299,30 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     let status: string;
     switch (phase) {
-        case "indexing":
-            status = pt("Indexing");
-            break;
         case "scheduled":
-            status = pt("Scheduled");
+            status = t("indexing_status_scheduled");
+            break;
+        case "fetching":
+            status = t("indexing_status_fetching");
+            break;
+        case "indexing":
+            status = t("indexing_status_running");
             break;
         // TODO: Clustering
         default:
-            status = pt("Done");
+            status = t("indexing_status_done");
             break;
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
-            title: pt("Disable ML search"),
-            content: pt(
-                "Do you want to disable ML search on all your devices?",
-            ),
+            title: t("ml_search_disable"),
+            content: t("ml_search_disable_confirm"),
             close: { text: t("cancel") },
             proceed: {
                 variant: "critical",
-                text: pt("Disable"),
+                text: t("disable"),
                 action: onDisableML,
             },
             buttonDirection: "row",
@@ -338,7 +334,7 @@ const ManageML: React.FC<ManageMLProps> = ({
             <Stack gap={3}>
                 <MenuItemGroup>
                     <EnteMenuItem
-                        label={pt("Enabled")}
+                        label={t("enabled")}
                         variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
@@ -356,7 +352,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.faint">
-                            {pt("Status")}
+                            {t("indexing")}
                         </Typography>
                         <Typography>{status}</Typography>
                     </Stack>
@@ -370,7 +366,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         justifyContent={"space-between"}
                     >
                         <Typography color="text.faint">
-                            {pt("Processed")}
+                            {t("processed")}
                         </Typography>
                         <Typography textAlign="right">{processed}</Typography>
                     </Stack>

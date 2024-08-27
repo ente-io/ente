@@ -342,8 +342,10 @@ Future<bool> deleteLocalFiles(
   final bool shouldDeleteInBatches =
       await isAndroidSDKVersionLowerThan(android11SDKINT);
   if (shouldDeleteInBatches) {
+    _logger.info("Deleting in batches");
     deletedIDs.addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
   } else {
+    _logger.info("Deleting in one shot");
     deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
   }
   // In IOS, the library returns no error and fail to delete any file is
@@ -373,8 +375,14 @@ Future<bool> deleteLocalFiles(
     );
     return true;
   } else {
-    showToast(context, S.of(context).couldNotFreeUpSpace);
-    return false;
+    //On android 10, even if files were deleted, deletedIDs is empty.
+    //This is a workaround so that users are not shown an error message on
+    //android 10
+    if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+      showToast(context, S.of(context).couldNotFreeUpSpace);
+      return false;
+    }
+    return true;
   }
 }
 
@@ -426,6 +434,7 @@ Future<List<String>> deleteLocalFilesInBatches(
     max(minimumBatchSize, (localIDs.length / minimumParts).round()),
     maximumBatchSize,
   );
+  _logger.info("Batch size: $batchSize");
   final List<String> deletedIDs = [];
   for (int index = 0; index < localIDs.length; index += batchSize) {
     if (dialogKey.currentState != null) {

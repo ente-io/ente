@@ -43,6 +43,10 @@ export const sidebar = [
                         text: "Location tags",
                         link: "/photos/features/location-tags",
                     },
+                    {
+                        text: "Machine learning",
+                        link: "/photos/features/machine-learning",
+                    },
                     { text: "Map", link: "/photos/features/map" },
                     {
                         text: "Passkeys",
@@ -121,6 +125,10 @@ export const sidebar = [
                         text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",
                     },
+                    {
+                        text: "Photo dates",
+                        link: "/photos/faq/photo-dates",
+                    },
                 ],
             },
             {
@@ -138,6 +146,14 @@ export const sidebar = [
                     {
                         text: "Missing thumbnails",
                         link: "/photos/troubleshooting/thumbnails",
+                    },
+                    {
+                        text: "Large uploads",
+                        link: "/photos/troubleshooting/large-uploads",
+                    },
+                    {
+                        text: "Network drives",
+                        link: "/photos/troubleshooting/nas",
                     },
                     {
                         text: "Sharing debug logs",

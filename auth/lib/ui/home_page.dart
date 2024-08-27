@@ -409,7 +409,7 @@ class _HomePageState extends State<HomePage> {
     final appLinks = AppLinks();
     try {
       String? initialLink;
-      initialLink = await appLinks.getInitialAppLinkString();
+      initialLink = await appLinks.getInitialLinkString();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {

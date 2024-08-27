@@ -1,15 +1,15 @@
 import { clientPackageName } from "@/base/app";
+import {
+    fromB64URLSafeNoPadding,
+    toB64URLSafeNoPadding,
+    toB64URLSafeNoPaddingString,
+} from "@/base/crypto/libsodium";
 import { isDevBuild } from "@/base/env";
 import { clientPackageHeader, ensureOk, HTTPError } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
-import {
-    fromB64URLSafeNoPadding,
-    toB64URLSafeNoPadding,
-    toB64URLSafeNoPaddingString,
-} from "@ente/shared/crypto/internal/libsodium";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -169,7 +169,7 @@ const beginPasskeyRegistration = async (token: string) => {
     // binary data.
     //
     // Binary data in the returned `PublicKeyCredentialCreationOptions` are
-    // serialized as a "URLEncodedBase64", which is a URL-encoded Base64 string
+    // serialized as a "URLEncodedBase64", which is a URL-encoded base64 string
     // without any padding. The library is following the WebAuthn recommendation
     // when it does this:
     //

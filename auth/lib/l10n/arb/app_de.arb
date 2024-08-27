@@ -182,7 +182,6 @@
   "security": "Sicherheit",
   "lockscreen": "Sperrbildschirm",
   "authToChangeLockscreenSetting": "Bitte authentifizieren um die Einstellungen des Sperrbildschirms zu ändern",
-  "lockScreenEnablePreSteps": "Um den Sperrbildschirm zu aktivieren, konfigurieren sie ein Gerätekennwort oder Gerätesperre in ihren Systemeinstellungen.",
   "viewActiveSessions": "Aktive Sitzungen anzeigen",
   "authToViewYourActiveSessions": "Bitte authentifizieren um, die aktiven Sitzungen zu sehen",
   "searchHint": "Suchen...",

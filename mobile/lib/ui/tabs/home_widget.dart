@@ -57,7 +57,6 @@ import 'package:photos/ui/viewer/search_tab/search_tab.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import "package:shared_preferences/shared_preferences.dart";
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -76,7 +75,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );
-  static const _headerWidget = HeaderWidget();
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
@@ -106,6 +104,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
+    super.initState();
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
@@ -222,13 +221,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
-
-    SharedPreferences.getInstance().then((preferences) {
-      NotificationService.instance
-          .init(_onDidReceiveNotificationResponse, preferences);
-    });
-
-    super.initState();
+    NotificationService.instance
+        .initialize(_onDidReceiveNotificationResponse)
+        .ignore();
   }
 
   Future<void> _autoLogoutAlert() async {
@@ -359,6 +354,15 @@ class _HomeWidgetState extends State<HomeWidget> {
               },
             ),
           ),
+
+          ///To fix the status bar not adapting it's color when switching
+          ///screens the have different appbar colours.
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(0),
+            child: AppBar(
+              backgroundColor: getEnteColorScheme(context).backgroundBase,
+            ),
+          ),
           resizeToAvoidBottomInset: false,
         ),
       ),
@@ -418,9 +422,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               physics: const BouncingScrollPhysics(),
               children: [
                 _showShowBackupHook
-                    ? const StartBackupHookWidget(headerWidget: _headerWidget)
+                    ? const StartBackupHookWidget(headerWidget: HeaderWidget())
                     : HomeGalleryWidget(
-                        header: _headerWidget,
+                        header: const HeaderWidget(),
                         footer: const SizedBox(
                           height: 160,
                         ),

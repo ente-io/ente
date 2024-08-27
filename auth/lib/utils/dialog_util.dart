@@ -31,12 +31,21 @@ Future<ButtonResult?> showErrorDialog(
     title: title,
     body: body,
     isDismissible: isDismissable,
-    buttons: const [
+    buttons: [
       ButtonWidget(
+        buttonType: ButtonType.primary,
+        labelText: context.l10n.contactSupport,
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+        onTap: () async {
+          await openSupportPage(body, null);
+        },
+      ),
+      const ButtonWidget(
         buttonType: ButtonType.secondary,
         labelText: "OK",
         isInAlert: true,
-        buttonAction: ButtonAction.first,
+        buttonAction: ButtonAction.second,
       ),
     ],
   );
@@ -158,7 +167,6 @@ Future<ButtonResult?> showGenericErrorDialog({
           await sendLogs(
             context,
             context.l10n.contactSupport,
-            "support@ente.io",
             postShare: () {},
           );
         },

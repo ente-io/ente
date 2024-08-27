@@ -91,6 +91,9 @@ db:
     # as ENTE_DB_USER and ENTE_DB_PASSWORD.
     user:
     password:
+    # This can be used to provide parameters that are appended verbatim to the
+    # generated DSN used for connecting to the DB.
+    # extra:
 
 # Map of data centers
 #
@@ -169,6 +172,18 @@ s3:
     # resolved, e.g. when running a local instance, or when using MinIO as a
     # production store.
     #use_path_style_urls: true
+    #
+    # Warning: For file-storage, do not specify buckets with any lock or versioning enabled.
+    # The application does not handle these cases. By default, we will use the derived-storage or hot storage bucket
+    # as the primary bucket for file-data-config.
+    # file-data-config:
+    #     mldata:
+    #         primaryBucket:
+    #         replicaBuckets: []
+    #     img_preview:
+    #         primaryBucket:
+    #         replicaBuckets: []
+
 
 # Key used for encrypting customer emails before storing them in DB
 #
@@ -308,6 +323,7 @@ internal:
     #     local-domain-suffix: "@example.org"
     #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
+    # If this is not set, as a fallback, the first user is considered an admin.
     admins: []
 
 # Replication config

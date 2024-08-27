@@ -12,6 +12,8 @@
         "i18next": "^23.11",
         "i18next-resources-to-backend": "^1.2",
         "is-electron": "^2.2",
+        "libsodium-wrappers-sumo": "^0.7.15",
+        "nanoid": "^5.0.7",
         "next": "^14.2",
         "react": "^18",
         "react-dom": "^18",
@@ -19,6 +21,7 @@
     },
     "devDependencies": {
         "@/build-config": "*",
+        "@types/libsodium-wrappers-sumo": "^0.7.8",
         "@types/react": "^18",
         "@types/react-dom": "^18"
     }

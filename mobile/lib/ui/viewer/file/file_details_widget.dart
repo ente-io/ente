@@ -34,7 +34,6 @@ import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/video_exif_item.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/local_settings.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final EnteFile file;
@@ -128,7 +127,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _videoMetadataNotifier.value = properties;
     if (kDebugMode) {
       log("videoCustomProps ${properties.toString()}");
-      log("PropData ${properties?.prodData.toString()}");
+      log("PropData ${properties?.propData.toString()}");
     }
     setState(() {});
   }
@@ -281,7 +280,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (LocalSettings.instance.isFaceIndexingEnabled) {
+    if (localSettings.isMLIndexingEnabled) {
       fileDetailsTiles.addAll([
         FacesItemWidget(file),
         const FileDetailsDivider(),

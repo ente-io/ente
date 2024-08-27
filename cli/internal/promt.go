@@ -214,10 +214,11 @@ func ValidateDirForWrite(dir string) (bool, error) {
 		return false, fmt.Errorf("write permission denied: %v", err)
 	}
 
-	// Delete temp file
-	defer os.Remove(tempFile.Name())
-	if err != nil {
-		return false, err
+	if tempErr := tempFile.Close(); tempErr != nil {
+		return false, fmt.Errorf("failed to close temp file: %v", tempErr)
+	}
+	if tempErr := os.Remove(tempFile.Name()); tempErr != nil {
+		return false, fmt.Errorf("failed to remove temp file: %v", tempErr)
 	}
 
 	return true, nil

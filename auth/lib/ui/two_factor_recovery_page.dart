@@ -1,7 +1,7 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
-import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
 class TwoFactorRecoveryPage extends StatefulWidget {
@@ -86,12 +86,8 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
           ),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () {
-              showErrorDialog(
-                context,
-                l10n.contactSupport,
-                l10n.contactSupportViaEmailMessage("support@ente.io"),
-              );
+            onTap: () async {
+              await openSupportPage(null, null);
             },
             child: Container(
               padding: const EdgeInsets.all(40),

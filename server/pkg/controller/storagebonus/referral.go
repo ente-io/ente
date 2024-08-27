@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/ente-io/museum/pkg/utils/random"
+	"strings"
 
 	"github.com/ente-io/museum/ente"
 	entity "github.com/ente-io/museum/ente/storagebonus"
@@ -16,6 +17,7 @@ import (
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
+	"github.com/TwiN/go-away"
 )
 
 const (
@@ -130,4 +132,25 @@ func (c *Controller) GetOrCreateReferralCode(ctx *gin.Context, userID int64) (*s
 		referralCode = &code
 	}
 	return referralCode, nil
+}
+
+func (c *Controller) UpdateReferralCode(ctx *gin.Context, userID int64, code string, isAdminEdit bool) error {
+	code = strings.ToUpper(code)
+	if !random.IsAlphanumeric(code) {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code is not alphanumeric"), "")
+	}
+	if len(code) < 4 || len(code) > 20 {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("code length should be between 4 and 8"), "")
+	}
+
+        // Check if the code contains any offensive language using the go-away library
+        if goaway.IsProfane(code) {
+        	return stacktrace.Propagate(ente.NewBadRequestWithMessage("Referral code contains offensive language and cannot be used"), "")
+        }
+	
+	err := c.StorageBonus.AddNewCode(ctx, userID, code, isAdminEdit)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to update referral code")
+	}
+	return nil
 }

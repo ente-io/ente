@@ -1,3 +1,4 @@
+import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
@@ -6,7 +7,6 @@ import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { boxSeal } from "@ente/shared/crypto/internal/libsodium";
 import castGateway from "@ente/shared/network/cast";
 import { Link, Typography } from "@mui/material";
 import { t } from "i18next";

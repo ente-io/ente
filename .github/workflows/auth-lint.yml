@@ -9,7 +9,7 @@ on:
             - ".github/workflows/auth-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.22.2"
+    FLUTTER_VERSION: "3.24.0"
 
 jobs:
     lint:

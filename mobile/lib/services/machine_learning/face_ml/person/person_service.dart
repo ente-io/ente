@@ -4,17 +4,17 @@ import "dart:developer";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
   final EntityService entityService;
-  final FaceMLDataDB faceMLDataDB;
+  final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
   // instance
@@ -30,14 +30,14 @@ class PersonService {
 
   static init(
     EntityService entityService,
-    FaceMLDataDB faceMLDataDB,
+    MLDataDB faceMLDataDB,
     SharedPreferences prefs,
   ) {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
   }
 
   Future<List<PersonEntity>> getPersons() async {
-    final entities = await entityService.getEntities(EntityType.person);
+    final entities = await entityService.getEntities(EntityType.cgroup);
     return entities
         .map(
           (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
@@ -46,7 +46,7 @@ class PersonService {
   }
 
   Future<PersonEntity?> getPerson(String id) {
-    return entityService.getEntity(EntityType.person, id).then((e) {
+    return entityService.getEntity(EntityType.cgroup, id).then((e) {
       if (e == null) {
         return null;
       }
@@ -55,7 +55,7 @@ class PersonService {
   }
 
   Future<Map<String, PersonEntity>> getPersonsMap() async {
-    final entities = await entityService.getEntities(EntityType.person);
+    final entities = await entityService.getEntities(EntityType.cgroup);
     final Map<String, PersonEntity> map = {};
     for (var e in entities) {
       final person =
@@ -82,7 +82,7 @@ class PersonService {
         continue;
       }
       final personData = person.data;
-      final Map<int, Set<String>> dbPersonCluster =
+      final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
       if (_shouldUpdateRemotePerson(personData, dbPersonCluster)) {
         final personData = person.data;
@@ -95,11 +95,7 @@ class PersonService {
             )
             .toList();
         entityService
-            .addOrUpdate(
-              EntityType.person,
-              json.encode(personData.toJson()),
-              id: personID,
-            )
+            .addOrUpdate(EntityType.cgroup, personData.toJson(), id: personID)
             .ignore();
         personData.logStats();
       }
@@ -109,7 +105,7 @@ class PersonService {
 
   bool _shouldUpdateRemotePerson(
     PersonData personData,
-    Map<int, Set<String>> dbPersonCluster,
+    Map<String, Set<String>> dbPersonCluster,
   ) {
     bool result = false;
     if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
@@ -152,7 +148,7 @@ class PersonService {
 
   Future<PersonEntity> addPerson(
     String name,
-    int clusterID, {
+    String clusterID, {
     bool isHidden = false,
   }) async {
     final faceIds = await faceMLDataDB.getFaceIDsForCluster(clusterID);
@@ -167,8 +163,8 @@ class PersonService {
       isHidden: isHidden,
     );
     final result = await entityService.addOrUpdate(
-      EntityType.person,
-      json.encode(data.toJson()),
+      EntityType.cgroup,
+      data.toJson(),
     );
     await faceMLDataDB.assignClusterToPerson(
       personID: result.id,
@@ -179,14 +175,14 @@ class PersonService {
 
   Future<void> removeClusterToPerson({
     required String personID,
-    required int clusterID,
+    required String clusterID,
   }) async {
     final person = (await getPerson(personID))!;
     final personData = person.data;
     personData.assigned!.removeWhere((element) => element.id != clusterID);
     await entityService.addOrUpdate(
-      EntityType.person,
-      json.encode(personData.toJson()),
+      EntityType.cgroup,
+      personData.toJson(),
       id: personID,
     );
     await faceMLDataDB.removeClusterToPerson(
@@ -201,7 +197,7 @@ class PersonService {
     required Set<String> faceIDs,
   }) async {
     final personData = person.data;
-    final List<int> emptiedClusters = [];
+    final List<String> emptiedClusters = [];
     for (final cluster in personData.assigned!) {
       cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
       if (cluster.faces.isEmpty) {
@@ -219,10 +215,9 @@ class PersonService {
       );
     }
 
-    
     await entityService.addOrUpdate(
-      EntityType.person,
-      json.encode(personData.toJson()),
+      EntityType.cgroup,
+      personData.toJson(),
       id: person.remoteID,
     );
     personData.logStats();
@@ -237,8 +232,8 @@ class PersonService {
       final PersonEntity justName =
           PersonEntity(personID, PersonData(name: entity.data.name));
       await entityService.addOrUpdate(
-        EntityType.person,
-        json.encode(justName.data.toJson()),
+        EntityType.cgroup,
+        justName.data.toJson(),
         id: personID,
       );
       await faceMLDataDB.removePerson(personID);
@@ -254,10 +249,10 @@ class PersonService {
 
   Future<void> fetchRemoteClusterFeedback() async {
     await entityService.syncEntities();
-    final entities = await entityService.getEntities(EntityType.person);
+    final entities = await entityService.getEntities(EntityType.cgroup);
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
-    final Map<String, int> faceIdToClusterID = {};
-    final Map<int, String> clusterToPersonID = {};
+    final Map<String, String> faceIdToClusterID = {};
+    final Map<String, String> clusterToPersonID = {};
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
       int faceCount = 0;
@@ -312,8 +307,8 @@ class PersonService {
 
   Future<void> _updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
-      EntityType.person,
-      json.encode(updatePerson.data.toJson()),
+      EntityType.cgroup,
+      updatePerson.data.toJson(),
       id: updatePerson.remoteID,
     );
     updatePerson.data.logStats();

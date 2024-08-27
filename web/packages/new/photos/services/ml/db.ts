@@ -3,31 +3,47 @@ import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
+import type { CGroup, FaceCluster } from "./cluster-new";
 import type { LocalFaceIndex } from "./face";
 
 /**
  * ML DB schema.
  *
- * The "ML" database is made of three object stores:
+ * The "ML" database is made of the lower level "index" object stores, and
+ * higher level "cluster" object stores.
  *
- * - "file-status": Contains {@link FileStatus} objects, one for each
- *   {@link EnteFile} that the ML subsystem knows about. Periodically (and when
- *   required), this is synced with the list of files that the current client
- *   knows about locally.
+ * The index related object stores are the following:
  *
- * - "face-index": Contains {@link LocalFaceIndex} objects, either indexed
- *   locally or fetched from remote.
+ * -   "file-status": Contains {@link FileStatus} objects, one for each
+ *     {@link EnteFile} that the ML subsystem knows about. Periodically (and
+ *     when required), this is synced with the list of files that the current
+ *     client knows about locally.
  *
- * - "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
- *   locally or fetched from remote.
+ * -   "face-index": Contains {@link LocalFaceIndex} objects, either indexed
+ *     locally or fetched from remote.
  *
- * All the stores are keyed by {@link fileID}. The "file-status" contains
+ * -   "clip-index": Contains {@link LocalCLIPIndex} objects, either indexed
+ *     locally or fetched from remote.
+ *
+ * These three stores are keyed by {@link fileID}. The "file-status" contains
  * book-keeping about the indexing process (whether or not a file needs
  * indexing, or if there were errors doing so), while the other stores contain
  * the actual indexing results.
  *
- * In tandem, these serve as the underlying storage for the functions exposed by
- * the ML database.
+ * In tandem, these serve as the underlying storage for the indexes maintained
+ * in the ML database.
+ *
+ * The cluster related object stores are the following:
+ *
+ * -   "face-cluster": Contains {@link FaceCluster} objects, one for each
+ *     cluster of faces that either the clustering algorithm produced locally or
+ *     were synced from remote. It is indexed by the (cluster) ID.
+ *
+ * -   "cluster-group": Contains {@link CGroup} objects, one for each group of
+ *     clusters that were synced from remote. The client can also locally
+ *     generate cluster groups on certain user interactions, but these too will
+ *     eventually get synced with remote. This object store is indexed by the
+ *     (cgroup) ID.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -42,6 +58,14 @@ interface MLDBSchema extends DBSchema {
     "clip-index": {
         key: number;
         value: LocalCLIPIndex;
+    };
+    "face-cluster": {
+        key: string;
+        value: FaceCluster;
+    };
+    "cluster-group": {
+        key: string;
+        value: CGroup;
     };
 }
 
@@ -85,8 +109,7 @@ let _mlDB: ReturnType<typeof openMLDB> | undefined;
 const openMLDB = async () => {
     deleteLegacyDB();
 
-    // TODO-ML: "face" => "ml", v2 => v1
-    const db = await openDB<MLDBSchema>("face", 2, {
+    const db = await openDB<MLDBSchema>("ml", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
             if (oldVersion < 1) {
@@ -94,9 +117,9 @@ const openMLDB = async () => {
                     keyPath: "fileID",
                 }).createIndex("status", "status");
                 db.createObjectStore("face-index", { keyPath: "fileID" });
-            }
-            if (oldVersion < 2) {
                 db.createObjectStore("clip-index", { keyPath: "fileID" });
+                db.createObjectStore("face-cluster", { keyPath: "id" });
+                db.createObjectStore("cluster-group", { keyPath: "id" });
             }
         },
         blocking() {
@@ -149,6 +172,12 @@ const deleteLegacyDB = () => {
         removeKV("embeddingSyncTime:onnx-clip"),
         removeKV("embeddingSyncTime:file-ml-clip-face"),
     ]);
+
+    // Delete the legacy face DB v2.
+    //
+    // This code was added Aug 2024 (v1.7.3-beta) and can be removed at some
+    // point when most clients have migrated (tag: Migration).
+    void deleteDB("face");
 };
 
 /**
@@ -229,6 +258,14 @@ const newFileStatus = (fileID: number): FileStatus => ({
 export const faceIndex = async (fileID: number) => {
     const db = await mlDB();
     return db.get("face-index", fileID);
+};
+
+/**
+ * Return all face indexes present locally.
+ */
+export const faceIndexes = async () => {
+    const db = await mlDB();
+    return await db.getAll("face-index");
 };
 
 /**
@@ -337,7 +374,7 @@ export const updateAssumingLocalFiles = async (
  */
 export const indexableAndIndexedCounts = async () => {
     const db = await mlDB();
-    const tx = db.transaction("file-status", "readwrite");
+    const tx = db.transaction("file-status", "readonly");
     const indexableCount = await tx.store
         .index("status")
         .count(IDBKeyRange.only("indexable"));
@@ -355,14 +392,23 @@ export const indexableAndIndexedCounts = async () => {
  * universe, we filter out fileIDs the files corresponding to which have already
  * been indexed, or which should be ignored.
  *
- * @param count Limit the result to up to {@link count} items.
+ * @param count Limit the result to up to {@link count} items. If there are more
+ * than {@link count} items present, the files with the higher file IDs (which
+ * can be taken as a approximate for their creation order) are preferred.
  */
-export const indexableFileIDs = async (count?: number) => {
+export const indexableFileIDs = async (count: number) => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
-    return tx.store
+    let cursor = await tx.store
         .index("status")
-        .getAllKeys(IDBKeyRange.only("indexable"), count);
+        .openKeyCursor(IDBKeyRange.only("indexable"), "prev");
+    const result: number[] = [];
+    while (cursor && count > 0) {
+        result.push(cursor.primaryKey);
+        cursor = await cursor.continue();
+        count -= 1;
+    }
+    return result;
 };
 
 /**
@@ -384,4 +430,78 @@ export const markIndexingFailed = async (fileID: number) => {
     fileStatus.status = "failed";
     fileStatus.failureCount = fileStatus.failureCount + 1;
     await Promise.all([tx.store.put(fileStatus), tx.done]);
+};
+
+/**
+ * Return all face clusters present locally.
+ */
+export const faceClusters = async () => {
+    const db = await mlDB();
+    return db.getAll("face-cluster");
+};
+
+/**
+ * Return all cluster group entries (aka "cgroups") present locally.
+ */
+export const clusterGroups = async () => {
+    const db = await mlDB();
+    return db.getAll("cluster-group");
+};
+
+/**
+ * Replace the face clusters stored locally with the given ones.
+ *
+ * This function deletes all entries from the face cluster object store, and
+ * then inserts the given {@link clusters} into it.
+ */
+export const setFaceClusters = async (clusters: FaceCluster[]) => {
+    const db = await mlDB();
+    const tx = db.transaction("face-cluster", "readwrite");
+    await tx.store.clear();
+    await Promise.all(clusters.map((cluster) => tx.store.put(cluster)));
+    return tx.done;
+};
+
+/**
+ * Update the cluster group store to reflect the given changes.
+ *
+ * @param diff A list of changes to apply. Each entry is either
+ *
+ * -   A string, in which case the cluster group with the given string as their
+ *     ID should be deleted from the store, or
+ *
+ * -   A cgroup, in which case it should add or overwrite the entry for the
+ *     corresponding cluster group (as identified by its {@link id}).
+ */
+export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
+    const db = await mlDB();
+    const tx = db.transaction("cluster-group", "readwrite");
+    // See: [Note: Diff response will have at most one entry for an id]
+    await Promise.all(
+        diff.map((d) =>
+            typeof d == "string" ? tx.store.delete(d) : tx.store.put(d),
+        ),
+    );
+    return tx.done;
+};
+
+/**
+ * Add or overwrite the entry for the given {@link cgroup}, as identified by
+ * their {@link id}.
+ */
+// TODO-Cluster: Remove me
+export const saveClusterGroup = async (cgroup: CGroup) => {
+    const db = await mlDB();
+    const tx = db.transaction("cluster-group", "readwrite");
+    await Promise.all([tx.store.put(cgroup), tx.done]);
+};
+
+/**
+ * Delete the entry (if any) for the cluster group with the given {@link id}.
+ */
+// TODO-Cluster: Remove me
+export const deleteClusterGroup = async (id: string) => {
+    const db = await mlDB();
+    const tx = db.transaction("cluster-group", "readwrite");
+    await Promise.all([tx.store.delete(id), tx.done]);
 };

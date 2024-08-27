@@ -1,16 +1,14 @@
+import { sharedCryptoWorker } from "@/base/crypto";
+import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
-import {
-    MagicMetadataCore,
-    VISIBILITY_STATE,
-} from "@/new/photos/types/magicMetadata";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";
 import { Collection } from "types/collection";
 
 export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {
         return false;
     }
-    return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+    return item.magicMetadata.data.visibility === ItemVisibility.archived;
 }
 
 export function isArchivedCollection(item: Collection): boolean {
@@ -19,13 +17,12 @@ export function isArchivedCollection(item: Collection): boolean {
     }
 
     if (item.magicMetadata && item.magicMetadata.data) {
-        return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+        return item.magicMetadata.data.visibility === ItemVisibility.archived;
     }
 
     if (item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
         return (
-            item.sharedMagicMetadata.data.visibility ===
-            VISIBILITY_STATE.ARCHIVED
+            item.sharedMagicMetadata.data.visibility === ItemVisibility.archived
         );
     }
     return false;
@@ -49,13 +46,14 @@ export async function updateMagicMetadata<T>(
     originalMagicMetadata?: MagicMetadataCore<T>,
     decryptionKey?: string,
 ): Promise<MagicMetadataCore<T>> {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
 
     if (!originalMagicMetadata) {
         originalMagicMetadata = getNewMagicMetadata<T>();
     }
 
     if (typeof originalMagicMetadata?.data === "string") {
+        // @ts-expect-error TODO: Need to use zod here.
         originalMagicMetadata.data = await cryptoWorker.decryptMetadata(
             originalMagicMetadata.data,
             originalMagicMetadata.header,

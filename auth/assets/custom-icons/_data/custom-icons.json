@@ -1,8 +1,7 @@
 {
   "icons": [
-    { "title": "1xBet",
-      "altNames": ["1x", "1x bet", "1x-bet"
-      ]
+    {
+      "title": "1xBet"
     },
     {
       "title": "3Commas"
@@ -32,10 +31,18 @@
       "title": "bitget"
     },
     {
-      "title": "Bitmart"
+      "titile":"bitget wallet",
+      "slug":"bitget_wallet"
+    },
+    {
+      "title": "Bitmart",
+      "hex":"000000"
     },
     {
       "title": "BitMEX"
+    },
+    {
+      "title": "BitOasis"
     },
     {
       "title": "BitSkins"
@@ -58,6 +65,15 @@
       ]
     },
     {
+      "title": "Blockchain",
+      "altNames": [
+        "blockchain.com",
+        "blockchain.com Wallet",
+        "blockchain.com Exchange"
+      ],
+      "slug": "blockchain"
+    },
+    {
       "title": "BorgBase",
       "altNames": [
         "borg"
@@ -65,8 +81,20 @@
       "slug": "BorgBase"
     },
     {
+      "title": "Booking",
+      "slug": "booking",
+      "altNames":[
+        "Booking.com"
+      ]
+    },
+    {
       "title": "Brave Creators",
-      "slug": "brave_creators"
+      "slug": "brave_creators",
+      "altNames":[
+        "Brave",
+        "Brave Rewards",
+        "Brave Browser"
+      ]
     },
     {
       "title": "Bybit"
@@ -107,8 +135,13 @@
       "title": "Crowdpear"
     },
     {
-      "title": "crypto.com",
-      "altNames": ["crypto"]
+      "title": "Crypto.com",
+      "slug": "crypto",
+      "altNames": [
+        "crypto",
+        "Crypto.com",
+        "Crypto com"
+      ]
     },
     {
       "title": "DCS",
@@ -140,9 +173,16 @@
       "slug": "dusnet"
     },
     {
+      "title":"ecitizen kenya",
+      "slug":"ecitizen_kenya"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
+    {
+      "title": "enom"   
+    },   
     {
       "title": "Epic Games",
       "slug": "epic_games",
@@ -155,16 +195,17 @@
       "title": "Estateguru"
     },
     {
-      "title": "Filen",
-      "hex": "858585"
+      "title": "Filen"
     },
     {
       "title": "Firefox",
       "slug": "mozilla"
     },
     {
-      "title": "GitHub",
-      "hex": "858585"
+      "title": "G2A"
+    },
+    {
+      "title": "GitHub"
     },
     {
       "title": "GitLab"
@@ -196,8 +237,19 @@
       "title": "HTX"
     },
     {
+      "title": "HuggingFace",
+      "altNames": [
+        "Hugging Face"
+      ],
+      "slug": "huggingface"
+    },
+    {
       "title": "IceDrive",
       "slug": "Icedrive"
+    },
+    {
+      "titile": "Infomaniak",
+      "slug": "infomaniak"
     },
     {
       "title": "ING"
@@ -213,8 +265,9 @@
       "title": "INWX"
     },
     {
-      "title": "Itch.io",
-      "slug": "itch_io"
+      "title": "Itch",
+      "slug": "itch_io",
+      "hex": "000000"
     },
     {
       "title": "IVPN",
@@ -320,7 +373,31 @@
     },
     {
       "title": "MyFRITZ!Net",
-      "slug": "myfritz"
+      "slug": "myfritz",
+      "altNames": [
+        "MyFRITZ!",
+        "FritzBox",
+        "Fritz!Box",
+        "FritzBox 7590",
+        "FritzBox 7590 AX",
+        "FritzBox 7530",
+        "FritzBox 7530 AX",
+        "FritzBox 4040",
+        "FritzBox 4060",
+        "FritzBox 5530 Fiber",
+        "FritzBox 6490 Cable",
+        "FritzBox 6590 Cable",
+        "FritzBox 6591 Cable",
+        "FritzBox 6660 Cable",
+        "FritzBox 6820 LTE",
+        "FritzBox 6850 LTE",
+        "FritzBox 6850 5G",
+        "FritzBox 6890 LTE",
+        "FritzBox 7583",
+        "FritzBox 7520",
+        "FritzBox 7490",
+        "FritzBox 7583"
+      ]
     },
     {
       "title": "Name.com",
@@ -352,8 +429,17 @@
     {
       "title": "Odido"
     },
-    { "title": "okx",
-      "hex": "858585" },
+    {
+      "titile": "OpenObserve",
+      "slug": "open_observe",
+      "altNames":[
+        "openobserve.ai",
+        "openobserve ai"
+      ]
+    },
+    {
+      "title": "okx",
+      "hex": "000000" },
     {
       "title": "Parsec"
     },
@@ -457,6 +543,18 @@
       "title": "Skinport"
     },
     {
+      "title": "SMSPool",
+      "slug": "sms_pool_net",
+      "altNames": [
+        "smspool.net",
+        "smspool net"
+      ]
+    },
+    {
+      "title": "SMTP2GO",
+      "slug": "smtp2go"
+    },
+    {
       "title": "Snapchat"
     },
     {
@@ -526,8 +624,7 @@
       ]
     },
     {
-      "title": "Ubisoft",
-      "hex": "4285f4"
+      "title": "Ubisoft"
     },
     {
       "title": "Ubuntu One",
@@ -541,6 +638,13 @@
       "title": "Uphold",
       "slug": "uphold",
       "hex": "6FE68A"
+    },
+    {
+      "titile": "Vikunja",
+      "slug": "vikunja"
+    },
+    {
+      "title": "Wealthsimple"
     },
     {
       "title": "WHMCS"
@@ -578,8 +682,9 @@
       ],
       "slug": "Yandex"
     },
-    { "title": "yahoo" },
-
+    {
+      "title": "yahoo"
+    },
     {
       "title": "YNAB",
       "altNames": [
@@ -587,6 +692,38 @@
       ],
       "slug": "ynab",
       "hex": "3B5EDA"
+    },
+    {
+      "title": "Shakepay",
+      "slug": "shakepay"
+    },
+    {
+      "title": "Newton",
+      "altNames": ["Newton Crypto"],
+      "slug": "newton"
+    },
+    {
+      "title": "T-Mobile ID",
+      "altNames": [
+        "T-Mobile"
+      ],
+      "slug": "t-mobile"
+    },
+    {
+      "title": "Wealthfront",
+      "slug": "wealthfront"
+    },
+    {
+      "title": "BinanceUS",
+      "altNames": [
+        "Binance US"
+      ],
+      "slug": "binance_us"
+    },
+    {
+      "title": "Bethesda Softworks",
+      "altNames": ["Bethesda"],
+      "slug": "bethesda"
     }
   ]
 }

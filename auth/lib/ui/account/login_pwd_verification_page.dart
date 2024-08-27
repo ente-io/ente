@@ -182,7 +182,6 @@ class _LoginPasswordVerificationPageState
       await sendLogs(
         context,
         context.l10n.contactSupport,
-        "auth@ente.io",
         postShare: () {},
       );
     }

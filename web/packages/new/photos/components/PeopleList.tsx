@@ -1,18 +1,14 @@
-import { blobCache } from "@/base/blob-cache";
-import {
-    regenerateFaceCropsIfNeeded,
-    unidentifiedFaceIDs,
-} from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
+import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import type { SearchPerson } from "../services/search/types";
 
 export interface PeopleListProps {
-    people: Person[];
+    people: SearchPerson[];
     maxRows: number;
-    onSelect?: (person: Person, index: number) => void;
+    onSelect?: (person: SearchPerson, index: number) => void;
 }
 
 export const PeopleList: React.FC<PeopleListProps> = ({
@@ -28,7 +24,10 @@ export const PeopleList: React.FC<PeopleListProps> = ({
                     clickable={!!onSelect}
                     onClick={() => onSelect && onSelect(person, index)}
                 >
-                    <FaceCropImageView faceID={person.displayFaceId} />
+                    <FaceCropImageView
+                        faceID={person.displayFaceID}
+                        enteFile={person.displayFaceFile}
+                    />
                 </FaceChip>
             ))}
         </FaceChipContainer>
@@ -61,7 +60,7 @@ const FaceChip = styled("div")<{ clickable?: boolean }>`
 
 export interface PhotoPeopleListProps {
     file: EnteFile;
-    onSelect?: (person: Person, index: number) => void;
+    onSelect?: (person: SearchPerson, index: number) => void;
 }
 
 export function PhotoPeopleList() {
@@ -80,7 +79,6 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
     enteFile,
 }) => {
     const [faceIDs, setFaceIDs] = useState<string[]>([]);
-    const [didRegen, setDidRegen] = useState(false);
 
     useEffect(() => {
         let didCancel = false;
@@ -88,13 +86,6 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
         const go = async () => {
             const faceIDs = await unidentifiedFaceIDs(enteFile);
             !didCancel && setFaceIDs(faceIDs);
-            // Don't block for the regeneration to happen. If anything got
-            // regenerated, the result will be true, in response to which we'll
-            // change the key of the face list and cause it to be rerendered
-            // (fetching the regenerated crops).
-            void regenerateFaceCropsIfNeeded(enteFile).then((r) =>
-                setDidRegen(r),
-            );
         };
 
         void go();
@@ -111,10 +102,10 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             <Typography variant="large" p={1}>
                 {t("UNIDENTIFIED_FACES")}
             </Typography>
-            <FaceChipContainer key={didRegen ? 1 : 0}>
+            <FaceChipContainer>
                 {faceIDs.map((faceID) => (
                     <FaceChip key={faceID}>
-                        <FaceCropImageView {...{ faceID }} />
+                        <FaceCropImageView {...{ enteFile, faceID }} />
                     </FaceChip>
                 ))}
             </FaceChipContainer>
@@ -123,39 +114,41 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
 };
 
 interface FaceCropImageViewProps {
+    /** The ID of the face to display. */
     faceID: string;
+    /** The {@link EnteFile} which contains this face. */
+    enteFile: EnteFile;
 }
 
 /**
- * An image view showing the face crop for the given {@link faceID}.
+ * An image view showing the face crop for the given face.
  *
- * The image is read from the "face-crops" {@link BlobCache}. While the image is
- * being fetched, or if it doesn't exist, a placeholder is shown.
+ * The image is read from the "face-crops" {@link BlobCache}, regenerating it if
+ * needed (which is why also need to pass the associated file).
+ *
+ * While the image is being fetched or regenerated, or if it doesn't exist, a
+ * placeholder is shown.
  */
-const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({ faceID }) => {
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+    faceID,
+    enteFile,
+}) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
         let didCancel = false;
-        if (faceID) {
-            void blobCache("face-crops")
-                .then((cache) => cache.get(faceID))
-                .then((data) => {
-                    if (data) {
-                        const blob = new Blob([data]);
-                        if (!didCancel) setObjectURL(URL.createObjectURL(blob));
-                    }
-                });
-        } else setObjectURL(undefined);
+        let thisObjectURL: string | undefined;
+
+        void faceCrop(faceID, enteFile).then((blob) => {
+            if (blob && !didCancel)
+                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
+        });
 
         return () => {
             didCancel = true;
-            if (objectURL) URL.revokeObjectURL(objectURL);
+            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
         };
-        // TODO: The linter warning is actually correct, objectURL should be a
-        // dependency, but adding that require reworking this code first.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [faceID]);
+    }, [faceID, enteFile]);
 
     return objectURL ? (
         <img style={{ objectFit: "cover" }} src={objectURL} />

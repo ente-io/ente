@@ -93,7 +93,7 @@ const (
 	// their account.
 	AccountDeletedEmailTemplate                       = "account_deleted.html"
 	AccountDeletedWithActiveSubscriptionEmailTemplate = "account_deleted_active_sub.html"
-	AccountDeletedEmailSubject                        = "Your ente account has been deleted"
+	AccountDeletedEmailSubject                        = "Your Ente account has been deleted"
 )
 
 func NewUserController(

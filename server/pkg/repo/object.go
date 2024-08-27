@@ -148,6 +148,10 @@ func (repo *ObjectRepository) MarkObjectsAsDeletedForFileIDs(ctx context.Context
 	for _, fileID := range fileIDs {
 		embeddingsToBeDeleted = append(embeddingsToBeDeleted, strconv.FormatInt(fileID, 10))
 	}
+	_, err = tx.ExecContext(ctx, `UPDATE file_data SET is_deleted = TRUE, pending_sync = TRUE WHERE file_id = ANY($1)`, pq.Array(fileIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 
 	err = repo.QueueRepo.AddItems(ctx, tx, DeleteEmbeddingsQueue, embeddingsToBeDeleted)
 	if err != nil {
@@ -200,8 +204,8 @@ func (repo *ObjectRepository) DoesObjectOrTempObjectExist(objectKey string) (boo
 //
 // Unknown objects (i.e. objectKeys for which there are no entries) are
 // considered as deleted.
-func (repo *ObjectRepository) GetObjectState(tx *sql.Tx, objectKey string) (ObjectState ente.ObjectState, err error) {
-	row := tx.QueryRow(`
+func (repo *ObjectRepository) GetObjectState(objectKey string) (ObjectState ente.ObjectState, err error) {
+	row := repo.DB.QueryRow(`
 	SELECT ok.is_deleted, u.encrypted_email IS NULL AS is_user_deleted, ok.size
 	FROM object_keys ok
 	JOIN files f ON ok.file_id = f.file_id

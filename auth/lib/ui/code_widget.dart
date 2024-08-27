@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -113,7 +114,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                 CodeTimerProgress(
                   period: widget.code.period,
                 ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 28),
               Row(
                 children: [
                   _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
@@ -128,9 +129,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 32),
             ],
           ),
           if (widget.code.isPinned) ...[
@@ -148,7 +147,6 @@ class _CodeWidgetState extends State<CodeWidget> {
 
     Widget clippedCard(AppLocalizations l10n) {
       return Container(
-        height: 132,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: Theme.of(context).colorScheme.codeCardBackgroundColor,
@@ -331,14 +329,16 @@ class _CodeWidgetState extends State<CodeWidget> {
               builder: (context, value, child) {
                 return Material(
                   type: MaterialType.transparency,
-                  child: Text(
+                  child: AutoSizeText(
                     _getFormattedCode(value),
                     style: const TextStyle(fontSize: 24),
+                    maxLines: 1,
                   ),
                 );
               },
             ),
           ),
+          const SizedBox(width: 8),
           widget.code.type.isTOTPCompatible
               ? GestureDetector(
                   onTap: () {
@@ -395,26 +395,28 @@ class _CodeWidgetState extends State<CodeWidget> {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                safeDecode(widget.code.issuer).trim(),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                safeDecode(widget.code.account).trim(),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  safeDecode(widget.code.issuer).trim(),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  safeDecode(widget.code.account).trim(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                ),
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

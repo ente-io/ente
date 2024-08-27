@@ -1,15 +1,12 @@
 import { clientPackageName, isDesktop } from "@/base/app";
+import { sharedCryptoWorker } from "@/base/crypto";
+import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
 import { clientPackageHeader, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import {
-    encryptToB64,
-    generateEncryptionKey,
-} from "@ente/shared/crypto/internal/libsodium";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
@@ -110,7 +107,7 @@ export const openAccountsManagePasskeysPage = async () => {
 
         const resetSecret = await generateEncryptionKey();
 
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker = await sharedCryptoWorker();
         const encryptionResult = await encryptToB64(
             resetSecret,
             await cryptoWorker.fromHex(recoveryKey),

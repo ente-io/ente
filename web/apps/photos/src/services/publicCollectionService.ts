@@ -1,8 +1,8 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
@@ -315,7 +315,7 @@ export const getPublicCollection = async (
         const fetchedCollection = resp.data.collection;
         const referralCode = resp.data.referralCode ?? "";
 
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker = await sharedCryptoWorker();
 
         const collectionName = (fetchedCollection.name =
             fetchedCollection.name ||
@@ -329,11 +329,12 @@ export const getPublicCollection = async (
         if (fetchedCollection.pubMagicMetadata?.data) {
             collectionPublicMagicMetadata = {
                 ...fetchedCollection.pubMagicMetadata,
-                data: await cryptoWorker.decryptMetadata(
-                    fetchedCollection.pubMagicMetadata.data,
-                    fetchedCollection.pubMagicMetadata.header,
-                    collectionKey,
-                ),
+                data: await cryptoWorker.decryptMetadataJSON({
+                    encryptedDataB64: fetchedCollection.pubMagicMetadata.data,
+                    decryptionHeaderB64:
+                        fetchedCollection.pubMagicMetadata.header,
+                    keyB64: collectionKey,
+                }),
             };
         }
 

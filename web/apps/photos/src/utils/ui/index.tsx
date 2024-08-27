@@ -145,6 +145,7 @@ export const getMapEnableConfirmationDialog = (
                 a: (
                     <Link
                         target="_blank"
+                        rel="noopener"
                         href="https://www.openstreetmap.org/"
                     />
                 ),
@@ -153,7 +154,7 @@ export const getMapEnableConfirmationDialog = (
     ),
     proceed: {
         action: enableMapHelper,
-        text: t("ENABLE"),
+        text: t("enable"),
         variant: "accent",
     },
     close: { text: t("cancel") },
@@ -166,7 +167,7 @@ export const getMapDisableConfirmationDialog = (
     content: <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />,
     proceed: {
         action: disableMapHelper,
-        text: t("DISABLE"),
+        text: t("disable"),
         variant: "accent",
     },
     close: { text: t("cancel") },

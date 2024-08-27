@@ -2056,6 +2056,56 @@ class S {
     );
   }
 
+  /// `Change your referral code`
+  String get changeYourReferralCode {
+    return Intl.message(
+      'Change your referral code',
+      name: 'changeYourReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change`
+  String get change {
+    return Intl.message(
+      'Change',
+      name: 'change',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this code is unavailable.`
+  String get unavailableReferralCode {
+    return Intl.message(
+      'Sorry, this code is unavailable.',
+      name: 'unavailableReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, you've reached the limit of code changes.`
+  String get codeChangeLimitReached {
+    return Intl.message(
+      'Sorry, you\'ve reached the limit of code changes.',
+      name: 'codeChangeLimitReached',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact {familyAdminEmail} to change your code.`
+  String onlyFamilyAdminCanChangeCode(Object familyAdminEmail) {
+    return Intl.message(
+      'Please contact $familyAdminEmail to change your code.',
+      name: 'onlyFamilyAdminCanChangeCode',
+      desc: '',
+      args: [familyAdminEmail],
+    );
+  }
+
   /// `{storageAmountInGB} GB`
   String storageInGB(Object storageAmountInGB) {
     return Intl.message(
@@ -2866,6 +2916,56 @@ class S {
     );
   }
 
+  /// `Enable machine learning`
+  String get mlConsent {
+    return Intl.message(
+      'Enable machine learning',
+      name: 'mlConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning?`
+  String get mlConsentTitle {
+    return Intl.message(
+      'Enable machine learning?',
+      name: 'mlConsentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.`
+  String get mlConsentDescription {
+    return Intl.message(
+      'If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.',
+      name: 'mlConsentDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please click here for more details about this feature in our privacy policy`
+  String get mlConsentPrivacy {
+    return Intl.message(
+      'Please click here for more details about this feature in our privacy policy',
+      name: 'mlConsentPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I understand, and wish to enable machine learning`
+  String get mlConsentConfirmation {
+    return Intl.message(
+      'I understand, and wish to enable machine learning',
+      name: 'mlConsentConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Magic search`
   String get magicSearch {
     return Intl.message(
@@ -2876,10 +2976,10 @@ class S {
     );
   }
 
-  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.`
+  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.`
   String get mlIndexingDescription {
     return Intl.message(
-      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.',
+      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.',
       name: 'mlIndexingDescription',
       desc: '',
       args: [],
@@ -3502,10 +3602,10 @@ class S {
     );
   }
 
-  /// `View files that are consuming the most amount of storage`
+  /// `View files that are consuming the most amount of storage.`
   String get viewLargeFilesDesc {
     return Intl.message(
-      'View files that are consuming the most amount of storage',
+      'View files that are consuming the most amount of storage.',
       name: 'viewLargeFilesDesc',
       desc: '',
       args: [],
@@ -5157,10 +5257,10 @@ class S {
     );
   }
 
-  /// `Remove from favorite`
+  /// `Remove from favorites`
   String get removeFromFavorite {
     return Intl.message(
-      'Remove from favorite',
+      'Remove from favorites',
       name: 'removeFromFavorite',
       desc: '',
       args: [],
@@ -7965,6 +8065,16 @@ class S {
     );
   }
 
+  /// `Resumable uploads`
+  String get resumableUploads {
+    return Intl.message(
+      'Resumable uploads',
+      name: 'resumableUploads',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to hidden album`
   String get addToHiddenAlbum {
     return Intl.message(
@@ -8965,6 +9075,56 @@ class S {
     );
   }
 
+  /// `Enable`
+  String get enable {
+    return Intl.message(
+      'Enable',
+      name: 'enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enabled`
+  String get enabled {
+    return Intl.message(
+      'Enabled',
+      name: 'enabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More details`
+  String get moreDetails {
+    return Intl.message(
+      'More details',
+      name: 'moreDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ente supports on-device machine learning for face recognition, magic search and other advanced search features`
+  String get enableMLIndexingDesc {
+    return Intl.message(
+      'Ente supports on-device machine learning for face recognition, magic search and other advanced search features',
+      name: 'enableMLIndexingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'`
+  String get magicSearchHint {
+    return Intl.message(
+      'Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'',
+      name: 'magicSearchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Panorama`
   String get panorama {
     return Intl.message(
@@ -9075,16 +9235,6 @@ class S {
     );
   }
 
-  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
-  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
-    return Intl.message(
-      'To enable app lock, please setup device passcode or screen lock in your system settings.',
-      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Tap to unlock`
   String get tapToUnlock {
     return Intl.message(
@@ -9110,26 +9260,6 @@ class S {
     return Intl.message(
       'Video Info',
       name: 'videoInfo',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.`
-  String get appLockDescription {
-    return Intl.message(
-      'Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password.',
-      name: 'appLockDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `To enable swipe lock, please setup device passcode or screen lock in your system settings.`
-  String get swipeLockEnablePreSteps {
-    return Intl.message(
-      'To enable swipe lock, please setup device passcode or screen lock in your system settings.',
-      name: 'swipeLockEnablePreSteps',
       desc: '',
       args: [],
     );
@@ -9200,6 +9330,166 @@ class S {
     return Intl.message(
       'Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords',
       name: 'passwordStrengthInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No quick links selected`
+  String get noQuickLinksSelected {
+    return Intl.message(
+      'No quick links selected',
+      name: 'noQuickLinksSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please select quick links to remove`
+  String get pleaseSelectQuickLinksToRemove {
+    return Intl.message(
+      'Please select quick links to remove',
+      name: 'pleaseSelectQuickLinksToRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove public links`
+  String get removePublicLinks {
+    return Intl.message(
+      'Remove public links',
+      name: 'removePublicLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove public links of all selected quick links.`
+  String get thisWillRemovePublicLinksOfAllSelectedQuickLinks {
+    return Intl.message(
+      'This will remove public links of all selected quick links.',
+      name: 'thisWillRemovePublicLinksOfAllSelectedQuickLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Guest view`
+  String get guestView {
+    return Intl.message(
+      'Guest view',
+      name: 'guestView',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable guest view, please setup device passcode or screen lock in your system settings.`
+  String get guestViewEnablePreSteps {
+    return Intl.message(
+      'To enable guest view, please setup device passcode or screen lock in your system settings.',
+      name: 'guestViewEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Guest View`
+  String get cl_guest_view_title {
+    return Intl.message(
+      'Guest View',
+      name: 'cl_guest_view_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Handing over your phone to show photos to a friend? Don't worry about them swiping too far. Guest view will lock them into the photos you select.`
+  String get cl_guest_view_description {
+    return Intl.message(
+      'Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far. Guest view will lock them into the photos you select.',
+      name: 'cl_guest_view_description',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select photos and check out "Guest view".`
+  String get cl_guest_view_call_to_action {
+    return Intl.message(
+      'Select photos and check out "Guest view".',
+      name: 'cl_guest_view_call_to_action',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Panorama Viewer`
+  String get cl_panorama_viewer_title {
+    return Intl.message(
+      'Panorama Viewer',
+      name: 'cl_panorama_viewer_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We've added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!`
+  String get cl_panorama_viewer_description {
+    return Intl.message(
+      'We\'ve added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!',
+      name: 'cl_panorama_viewer_description',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Video Player`
+  String get cl_video_player_title {
+    return Intl.message(
+      'Video Player',
+      name: 'cl_video_player_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Introducing a fresh new video player, with better playback controls and support for HDR videos.`
+  String get cl_video_player_description {
+    return Intl.message(
+      'Introducing a fresh new video player, with better playback controls and support for HDR videos.',
+      name: 'cl_video_player_description',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescriptions {
+    return Intl.message(
+      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
+    return Intl.message(
+      'To enable app lock, please setup device passcode or screen lock in your system settings.',
+      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your passkey`
+  String get authToViewPasskey {
+    return Intl.message(
+      'Please authenticate to view your passkey',
+      name: 'authToViewPasskey',
       desc: '',
       args: [],
     );

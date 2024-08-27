@@ -6,7 +6,7 @@ import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 
 class ClusterBreakupPage extends StatefulWidget {
-  final Map<int, List<EnteFile>> newClusterIDsToFiles;
+  final Map<String, List<EnteFile>> newClusterIDsToFiles;
   final String title;
 
   const ClusterBreakupPage(
@@ -32,7 +32,7 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
       body: ListView.builder(
         itemCount: widget.newClusterIDsToFiles.keys.length,
         itemBuilder: (context, index) {
-          final int clusterID = keys[index];
+          final String clusterID = keys[index];
           final List<EnteFile> files = clusterIDsToFiles[keys[index]]!;
           return InkWell(
             onTap: () {
@@ -40,7 +40,7 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
                 MaterialPageRoute(
                   builder: (context) => ClusterPage(
                     files,
-                    clusterID: index,
+                    clusterID: clusterID,
                     appendTitle: "(Analysis)",
                   ),
                 ),

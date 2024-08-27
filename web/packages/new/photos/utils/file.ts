@@ -39,20 +39,23 @@ export const fileLogID = (enteFile: EnteFile) =>
  * its filename.
  */
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => {
-        // TODO: Until the types reflect reality
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (file.pubMagicMetadata?.data.editedTime) {
-            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-        }
-        // TODO: Until the types reflect reality
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (file.pubMagicMetadata?.data.editedName) {
-            file.metadata.title = file.pubMagicMetadata.data.editedName;
-        }
+    return files.map((file) => mergeMetadata1(file));
+}
 
-        return file;
-    });
+export function mergeMetadata1(file: EnteFile): EnteFile {
+    if (file.pubMagicMetadata?.data.editedTime) {
+        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+    }
+    if (file.pubMagicMetadata?.data.editedName) {
+        file.metadata.title = file.pubMagicMetadata.data.editedName;
+    }
+    // In a very rare cases (have found only one so far, a very old file
+    // uploaded by an initial dev version of Ente) the photo has no modification
+    // time. Gracefully handle such cases.
+    if (!file.metadata.modificationTime)
+        file.metadata.modificationTime = file.metadata.creationTime;
+
+    return file;
 }
 
 /**

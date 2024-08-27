@@ -69,18 +69,22 @@ export interface Electron {
     logout: () => Promise<void>;
 
     /**
-     * Return the previously saved encryption key from persistent safe storage.
+     * Return the previously saved user's master key from the persistent safe
+     * storage accessible to the desktop app.
      *
-     * If no such key is found, return `undefined`.
+     * The key is returned as a base64 encoded string.
      *
-     * See also: {@link saveEncryptionKey}.
+     * If the key is not found, return `undefined`.
+     *
+     * See also: {@link saveMasterKeyB64}.
      */
-    encryptionKey: () => Promise<string | undefined>;
+    masterKeyB64: () => Promise<string | undefined>;
 
     /**
-     * Save the given {@link encryptionKey} into persistent safe storage.
+     * Save the given {@link masterKeyB64} (encoded as a base64 string) to the
+     * persistent safe storage accessible to the desktop app.
      */
-    saveEncryptionKey: (encryptionKey: string) => Promise<void>;
+    saveMasterKeyB64: (masterKeyB64: string) => Promise<void>;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes
@@ -335,57 +339,21 @@ export interface Electron {
     // - ML
 
     /**
-     * Return a CLIP embedding of the given image.
+     * Create a new ML worker, terminating the older ones (if any).
      *
-     * See: [Note: Natural language search using CLIP]
+     * This creates a new Node.js utility process, and sets things up so that we
+     * can communicate directly with that utility process using a
+     * {@link MessagePort} that gets posted using "createMLWorker/port".
      *
-     * The input is a opaque float32 array representing the image. The layout
-     * and exact encoding of the input is specific to our implementation and the
-     * ML model (CLIP) we use.
+     * At the other end of that port will be an object that conforms to the
+     * {@link ElectronMLWorker} interface.
      *
-     * @returns A CLIP embedding (an array of 512 floating point values).
+     * For more details about the IPC flow, see: [Note: ML IPC].
+     *
+     * Note: For simplicity of implementation, we assume that there is at most
+     * one outstanding call to {@link createMLWorker}.
      */
-    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
-
-    /**
-     * Return a CLIP embedding of the given image if we already have the model
-     * downloaded and prepped. If the model is not available return `undefined`.
-     *
-     * This differs from the other sibling ML functions in that it doesn't wait
-     * for the model download to finish. It does trigger a model download, but
-     * then immediately returns `undefined`. At some future point, when the
-     * model downloaded finishes, calls to this function will start returning
-     * the result we seek.
-     *
-     * The reason for doing it in this asymmetric way is because CLIP text
-     * embeddings are used as part of deducing user initiated search results,
-     * and we don't want to block that interaction on a large network request.
-     *
-     * See: [Note: Natural language search using CLIP]
-     *
-     * @param text The string whose embedding we want to compute.
-     *
-     * @returns A CLIP embedding.
-     */
-    computeCLIPTextEmbeddingIfAvailable: (
-        text: string,
-    ) => Promise<Float32Array | undefined>;
-
-    /**
-     * Detect faces in the given image using YOLO.
-     *
-     * Both the input and output are opaque binary data whose internal structure
-     * is specific to our implementation and the model (YOLO) we use.
-     */
-    detectFaces: (input: Float32Array) => Promise<Float32Array>;
-
-    /**
-     * Return a MobileFaceNet embeddings for the given faces.
-     *
-     * Both the input and output are opaque binary data whose internal structure
-     * is specific to our implementation and the model (MobileFaceNet) we use.
-     */
-    computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
+    createMLWorker: () => void;
 
     // - Watch
 
@@ -572,6 +540,65 @@ export interface Electron {
      * state it has kept around to speed up the upload.
      */
     clearPendingUploads: () => Promise<void>;
+}
+
+/**
+ * The shape of the object exposed by the Node.js ML worker process on the
+ * message port that the web layer obtains by doing {@link createMLWorker}.
+ */
+export interface ElectronMLWorker {
+    /**
+     * Return a CLIP embedding of the given image.
+     *
+     * See: [Note: Natural language search using CLIP]
+     *
+     * The input is a opaque float32 array representing the image. The layout
+     * and exact encoding of the input is specific to our implementation and the
+     * ML model (CLIP) we use.
+     *
+     * @returns A CLIP embedding (an array of 512 floating point values).
+     */
+    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
+
+    /**
+     * Return a CLIP embedding of the given image if we already have the model
+     * downloaded and prepped. If the model is not available return `undefined`.
+     *
+     * This differs from the other sibling ML functions in that it doesn't wait
+     * for the model download to finish. It does trigger a model download, but
+     * then immediately returns `undefined`. At some future point, when the
+     * model downloaded finishes, calls to this function will start returning
+     * the result we seek.
+     *
+     * The reason for doing it in this asymmetric way is because CLIP text
+     * embeddings are used as part of deducing user initiated search results,
+     * and we don't want to block that interaction on a large network request.
+     *
+     * See: [Note: Natural language search using CLIP]
+     *
+     * @param text The string whose embedding we want to compute.
+     *
+     * @returns A CLIP embedding.
+     */
+    computeCLIPTextEmbeddingIfAvailable: (
+        text: string,
+    ) => Promise<Float32Array | undefined>;
+
+    /**
+     * Detect faces in the given image using YOLO.
+     *
+     * Both the input and output are opaque binary data whose internal structure
+     * is specific to our implementation and the model (YOLO) we use.
+     */
+    detectFaces: (input: Float32Array) => Promise<Float32Array>;
+
+    /**
+     * Return a MobileFaceNet embeddings for the given faces.
+     *
+     * Both the input and output are opaque binary data whose internal structure
+     * is specific to our implementation and the model (MobileFaceNet) we use.
+     */
+    computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
 }
 
 /**

@@ -109,7 +109,7 @@ class _AllSectionsExamplesProviderState
     _onPeopleChangedEvent.cancel();
     _filesUpdatedEvent.cancel();
     _tabChangeEvent.cancel();
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 

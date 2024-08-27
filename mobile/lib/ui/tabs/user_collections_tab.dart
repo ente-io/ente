@@ -10,6 +10,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
@@ -88,7 +89,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         setState(() {});
       });
     });
-    sortKey = LocalSettings.instance.albumSortKey();
+    sortKey = localSettings.albumSortKey();
   }
 
   @override
@@ -277,7 +278,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               );
               if (selectedValue != null) {
                 sortKey = AlbumSortKey.values[selectedValue];
-                await LocalSettings.instance.setAlbumSortKey(sortKey!);
+                await localSettings.setAlbumSortKey(sortKey!);
                 setState(() {});
               }
             },
@@ -298,7 +299,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _loggedOutEvent.cancel();
     _favoritesServiceInitCompleteEvent.cancel();
     _scrollController.dispose();
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 

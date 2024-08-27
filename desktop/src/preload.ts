@@ -36,10 +36,33 @@
  * -    [main]      desktop/src/main/ipc.ts             contains impl
  */
 
+// This code runs in the (isolated) web layer. Contrary to the impression given
+// by the Electron docs (as of 2024), the window object is actually available to
+// the preload script, and it is necessary for legitimate uses too.
+//
+// > The isolated world is connected to the DOM just the same is the main world,
+// > it is just the JS contexts that are separated.
+// >
+// > https://github.com/electron/electron/issues/27024#issuecomment-745618327
+//
+// Adding this reference here tells TypeScript that DOM typings (in particular,
+// window) should be introduced in the ambient scope.
+//
+// [Note: Node and web stream type mismatch]
+//
+// Unfortunately, adding this reference causes the ReadableStream typings to
+// break since lib.dom.d.ts adds its own incompatible definitions of
+// ReadableStream to the global scope.
+//
+// https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/68407
+
+/// <reference lib="dom" />
+
 import { contextBridge, ipcRenderer, webUtils } from "electron/renderer";
 
 // While we can't import other code, we can import types since they're just
 // needed when compiling and will not be needed or looked around for at runtime.
+import type { IpcRendererEvent } from "electron";
 import type {
     AppUpdate,
     CollectionMapping,
@@ -47,6 +70,19 @@ import type {
     PendingUploads,
     ZipItem,
 } from "./types/ipc";
+
+// - Infrastructure
+
+// We need to wait until the renderer is ready before sending ports via
+// postMessage, and this promise comes handy in such cases. We create the
+// promise at the top level so that it is guaranteed to be registered before the
+// load event is fired.
+//
+// See: https://www.electronjs.org/docs/latest/tutorial/message-ports
+
+const windowLoaded = new Promise((resolve) => {
+    window.onload = resolve;
+});
 
 // - General
 
@@ -67,10 +103,10 @@ const logout = () => {
     return ipcRenderer.invoke("logout");
 };
 
-const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
+const masterKeyB64 = () => ipcRenderer.invoke("masterKeyB64");
 
-const saveEncryptionKey = (encryptionKey: string) =>
-    ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
+const saveMasterKeyB64 = (masterKeyB64: string) =>
+    ipcRenderer.invoke("saveMasterKeyB64", masterKeyB64);
 
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
@@ -163,17 +199,17 @@ const ffmpegExec = (
 
 // - ML
 
-const computeCLIPImageEmbedding = (input: Float32Array) =>
-    ipcRenderer.invoke("computeCLIPImageEmbedding", input);
-
-const computeCLIPTextEmbeddingIfAvailable = (text: string) =>
-    ipcRenderer.invoke("computeCLIPTextEmbeddingIfAvailable", text);
-
-const detectFaces = (input: Float32Array) =>
-    ipcRenderer.invoke("detectFaces", input);
-
-const computeFaceEmbeddings = (input: Float32Array) =>
-    ipcRenderer.invoke("computeFaceEmbeddings", input);
+const createMLWorker = () => {
+    const l = (event: IpcRendererEvent) => {
+        void windowLoaded.then(() => {
+            // "*"" is the origin to send to.
+            window.postMessage("createMLWorker/port", "*", event.ports);
+            ipcRenderer.off("createMLWorker/port", l);
+        });
+    };
+    ipcRenderer.on("createMLWorker/port", l);
+    ipcRenderer.send("createMLWorker");
+};
 
 // - Watch
 
@@ -281,8 +317,11 @@ const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
  * operation when it happens across threads.
  * https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
  *
- * In our case though, we're not dealing with threads but separate processes. So
- * the ArrayBuffer will be copied:
+ * In our case though, we're not dealing with threads but separate processes.
+ * Electron currently only supports transferring MessagePorts:
+ * https://github.com/electron/electron/issues/34905
+ *
+ * So the ArrayBuffer will be copied:
  *
  * > "parameters, errors and return values are **copied** when they're sent over
  * > the bridge".
@@ -303,8 +342,8 @@ contextBridge.exposeInMainWorld("electron", {
     openLogDirectory,
     selectDirectory,
     logout,
-    encryptionKey,
-    saveEncryptionKey,
+    masterKeyB64,
+    saveMasterKeyB64,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     onMainWindowFocus,
@@ -339,10 +378,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - ML
 
-    computeCLIPImageEmbedding,
-    computeCLIPTextEmbeddingIfAvailable,
-    detectFaces,
-    computeFaceEmbeddings,
+    createMLWorker,
 
     // - Watch
 

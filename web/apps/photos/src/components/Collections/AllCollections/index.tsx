@@ -44,6 +44,7 @@ export default function AllCollections(props: Iprops) {
             onClose={onClose}
             open={open}
             fullScreen={isMobile}
+            fullWidth={true}
         >
             <AllCollectionsHeader
                 isInHiddenSection={isInHiddenSection}

@@ -30,6 +30,7 @@ import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import "package:photos/models/metadata/collection_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/file_magic_service.dart';
@@ -399,7 +400,7 @@ class CollectionsService {
   }
 
   Future<List<Collection>> getCollectionForOnEnteSection() async {
-    final AlbumSortKey sortKey = LocalSettings.instance.albumSortKey();
+    final AlbumSortKey sortKey = localSettings.albumSortKey();
     final List<Collection> collections =
         CollectionsService.instance.getCollectionsForUI();
     final bool hasFavorites = FavoritesService.instance.hasFavorites();

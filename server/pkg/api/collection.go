@@ -129,8 +129,6 @@ func (h *CollectionHandler) ShareURL(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	// todo:[2/Sep/23] change device limit to 0 once both web and mobile clients are updated
-	request.DeviceLimit = controller.DeviceLimitThreshold
 	response, err := h.Controller.ShareURL(c, auth.GetUserID(c.Request.Header), request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

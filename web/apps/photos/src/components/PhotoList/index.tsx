@@ -550,14 +550,14 @@ export function PhotoList({
                                     <Link
                                         href="https://play.google.com/store/apps/details?id=io.ente.photos"
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener"
                                     />
                                 ),
                                 b: (
                                     <Link
                                         href="https://apps.apple.com/in/app/ente-photos/id1542026904"
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener"
                                     />
                                 ),
                             }}
@@ -579,13 +579,22 @@ export function PhotoList({
                     span={columns}
                     hasReferral={!!publicCollectionGalleryContext.referralCode}
                 >
+                    {/* Make the entire area tappable, otherwise it is hard to
+                        get at on mobile devices. */}
                     <Box width={"100%"}>
-                        <Typography variant="small" display={"block"}>
-                            {t("SHARED_USING")}{" "}
-                            <Link target="_blank" href={"https://ente.io"}>
-                                ente.io
-                            </Link>
-                        </Typography>
+                        <Link
+                            color="text.base"
+                            sx={{ "&:hover": { color: "inherit" } }}
+                            target="_blank"
+                            href={"https://ente.io"}
+                        >
+                            <Typography variant="small" display={"block"}>
+                                {t("SHARED_USING")}{" "}
+                                <Link target="_blank" href={"https://ente.io"}>
+                                    ente.io
+                                </Link>
+                            </Typography>
+                        </Link>
                         {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography

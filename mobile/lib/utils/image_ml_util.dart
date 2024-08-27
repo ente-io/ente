@@ -1,13 +1,16 @@
 import "dart:async";
 import "dart:developer" show log;
-import "dart:math" show min;
+import "dart:io" show File, Platform;
+import "dart:math" show max, min;
 import "dart:typed_data" show Float32List, Uint8List, ByteData;
 import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
+import "package:heif_converter/heif_converter.dart";
+import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
-import "package:photos/face/model/box.dart";
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/similarity_transform.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -15,6 +18,39 @@ import 'package:photos/services/machine_learning/face_ml/face_filtering/blur_det
 
 /// All of the functions in this file are helper functions for using inside an isolate.
 /// Don't use them outside of a isolate, unless you are okay with UI jank!!!!
+
+final _logger = Logger("ImageMlUtil");
+
+Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
+  try {
+    final imageData = await File(imagePath).readAsBytes();
+    final image = await decodeImageFromData(imageData);
+    final ByteData imageByteData = await getByteDataFromImage(image);
+    return (image, imageByteData);
+  } catch (e, s) {
+    final format = imagePath.split('.').last;
+    if ((format == 'heic' || format == 'heif') && Platform.isAndroid) {
+      _logger.info('Cannot decode $format, converting to JPG format');
+      final String? jpgPath =
+          await HeifConverter.convert(imagePath, format: 'jpg');
+      if (jpgPath == null) {
+        _logger.severe('Error converting $format to jpg:', e, s);
+        throw Exception('InvalidImageFormatException: Error decoding image of format $format');
+      }
+      final imageData = await File(jpgPath).readAsBytes();
+      final image = await decodeImageFromData(imageData);
+      final ByteData imageByteData = await getByteDataFromImage(image);
+      return (image, imageByteData);
+    } else {
+      _logger.severe(
+        'Error decoding image of format $format:',
+        e,
+        s,
+      );
+      throw Exception('InvalidImageFormatException: Error decoding image of format $format');
+    }
+  }
+}
 
 /// Decodes [Uint8List] image data to an ui.[Image] object.
 Future<Image> decodeImageFromData(Uint8List imageData) async {
@@ -120,8 +156,7 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   }
 }
 
-Future<(Float32List, Dimensions, Dimensions)>
-    preprocessImageToFloat32ChannelsFirst(
+Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
   Image image,
   ByteData imgByteData, {
   required int normalization,
@@ -135,19 +170,6 @@ Future<(Float32List, Dimensions, Dimensions)>
       : normalization == 1
           ? _normalizePixelRange1
           : _normalizePixelNoRange;
-  final originalSize = Dimensions(width: image.width, height: image.height);
-
-  if (image.width == requiredWidth && image.height == requiredHeight) {
-    return (
-      _createFloat32ListFromImageChannelsFirst(
-        image,
-        imgByteData,
-        normFunction: normFunction,
-      ),
-      originalSize,
-      originalSize
-    );
-  }
 
   double scaleW = requiredWidth / image.width;
   double scaleH = requiredHeight / image.height;
@@ -186,11 +208,43 @@ Future<(Float32List, Dimensions, Dimensions)>
     }
   }
 
-  return (
-    processedBytes,
-    originalSize,
-    Dimensions(width: scaledWidth, height: scaledHeight)
-  );
+  return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
+}
+
+Future<Float32List> preprocessImageClip(
+  Image image,
+  ByteData imgByteData,
+) async {
+  const int requiredWidth = 256;
+  const int requiredHeight = 256;
+  const int requiredSize = 3 * requiredWidth * requiredHeight;
+  final scale = max(requiredWidth / image.width, requiredHeight / image.height);
+  final scaledWidth = (image.width * scale).round();
+  final scaledHeight = (image.height * scale).round();
+  final widthOffset = max(0, scaledWidth - requiredWidth) / 2;
+  final heightOffset = max(0, scaledHeight - requiredHeight) / 2;
+
+  final processedBytes = Float32List(requiredSize);
+  final buffer = Float32List.view(processedBytes.buffer);
+  int pixelIndex = 0;
+  const int greenOff = requiredHeight * requiredWidth;
+  const int blueOff = 2 * requiredHeight * requiredWidth;
+  for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
+    for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
+      final Color pixel = _getPixelBilinear(
+        w / scale,
+        h / scale,
+        image,
+        imgByteData,
+      );
+      buffer[pixelIndex] = pixel.red / 255;
+      buffer[pixelIndex + greenOff] = pixel.green / 255;
+      buffer[pixelIndex + blueOff] = pixel.blue / 255;
+      pixelIndex++;
+    }
+  }
+
+  return processedBytes;
 }
 
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
@@ -225,7 +279,9 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
         SimilarityTransform.estimate(face.allKeypoints);
     if (!correctlyEstimated) {
       log('Face alignment failed because not able to estimate SimilarityTransform, for face: $face');
-      throw Exception('Face alignment failed because not able to estimate SimilarityTransform');
+      throw Exception(
+        'Face alignment failed because not able to estimate SimilarityTransform',
+      );
     }
     alignmentResults.add(alignmentResult);
 

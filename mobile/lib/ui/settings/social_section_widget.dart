@@ -55,7 +55,7 @@ class SocialSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         SocialsMenuItemWidget(
           S.of(context).mastodon,
-          "https://mstdn.social/@ente",
+          "https://fosstodon.org/@ente",
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(

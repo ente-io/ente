@@ -33,8 +33,6 @@ export const updateExifIfNeededAndPossible = async (
     if (enteFile.metadata.fileType != FileType.image) return stream;
 
     // Not needed: Time was not edited.
-    // TODO: Until the types reflect reality
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!enteFile.pubMagicMetadata?.data.editedTime) return stream;
 
     const fileName = enteFile.metadata.title;

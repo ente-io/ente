@@ -67,3 +67,21 @@ double cosineDistForNormVectors(List<double> vector1, List<double> vector2) {
   }
   return 1.0 - dotProduct;
 }
+
+/// NOTE: This function assumes that both embeddings are normalized!
+@pragma("vm:prefer-inline")
+double computeCosineSimilarity(
+  List<double> embedding1,
+  List<double> embedding2,
+) {
+  assert(
+    embedding1.length == embedding2.length,
+    "The two embeddings should have the same length",
+  );
+  double cosineSimilarity = 0;
+  final length = embedding1.length;
+  for (int index = 0; index < length; index++) {
+    cosineSimilarity += embedding1[index] * embedding2[index];
+  }
+  return cosineSimilarity;
+}

@@ -1,6 +1,6 @@
+import { decryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -15,30 +15,6 @@ import {
 } from "types/entity";
 import { getLatestVersionEntities } from "utils/entity";
 
-/**
- * The maximum number of items to fetch in a single diff
- *
- * [Note: Limit of returned items in /diff requests]
- *
- * The various GET /diff API methods, which tell the client what all has changed
- * since a timestamp (provided by the client) take a limit parameter.
- *
- * These diff API calls return all items whose updated at is greater
- * (non-inclusive) than the timestamp we provide. So there is no mechanism for
- * pagination of items which have the same exact updated at.
- *
- * Conceptually, it may happen that there are more items than the limit we've
- * provided, but there are practical safeguards.
- *
- * For file diff, the limit is advisory, and remote may return less, equal or
- * more items than the provided limit. The scenario where it returns more is
- * when more files than the limit have the same updated at. Theoretically it
- * would make the diff response unbounded, however in practice file
- * modifications themselves are all batched. Even if the user were to select all
- * the files in their library and updates them all in one go in the UI, their
- * client app is required to use batched API calls to make those updates, and
- * each of those batches would get distinct updated at.
- */
 const DIFF_LIMIT = 500;
 
 const ENTITY_TABLES: Record<EntityType, string> = {
@@ -71,7 +47,8 @@ const getCachedEntityKey = async (type: EntityType) => {
     return entityKey;
 };
 
-const getEntityKey = async (type: EntityType) => {
+// TODO: unexport
+export const getEntityKey = async (type: EntityType) => {
     try {
         const entityKey = await getCachedEntityKey(type);
         if (entityKey) {
@@ -91,7 +68,7 @@ const getEntityKey = async (type: EntityType) => {
             },
         );
         const encryptedEntityKey: EncryptedEntityKey = resp.data;
-        const worker = await ComlinkCryptoWorker.getInstance();
+        const worker = await sharedCryptoWorker();
         const masterKey = await getActualKey();
         const { encryptedKey, header, ...rest } = encryptedEntityKey;
         const decryptedData = await worker.decryptB64(
@@ -143,6 +120,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
             }
 
             const entityKey = await getEntityKey(type);
+            // @ts-expect-error TODO: Need to use zod here.
             const newDecryptedEntities: Array<Entity<T>> = await Promise.all(
                 response.diff.map(async (entity: EncryptedEntity) => {
                     if (entity.isDeleted) {
@@ -151,12 +129,11 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
                         return entity as unknown as Entity<T>;
                     }
                     const { encryptedData, header, ...rest } = entity;
-                    const worker = await ComlinkCryptoWorker.getInstance();
-                    const decryptedData = await worker.decryptMetadata(
-                        encryptedData,
-                        header,
-                        entityKey.data,
-                    );
+                    const decryptedData = await decryptMetadataJSON({
+                        encryptedDataB64: encryptedData,
+                        decryptionHeaderB64: header,
+                        keyB64: entityKey.data,
+                    });
                     return {
                         ...rest,
                         data: decryptedData,

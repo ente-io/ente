@@ -1,66 +1,48 @@
-import "dart:async";
-import "dart:collection";
+import "dart:async" show unawaited;
+import "dart:developer" as dev show log;
 import "dart:math" show min;
+import "dart:ui" show Image;
 
 import "package:computer/computer.dart";
-import "package:flutter/services.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/events/diff_sync_complete_event.dart";
+import "package:photos/db/ml/clip_db.dart";
+import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
-import "package:photos/events/file_uploaded_event.dart";
-import "package:photos/events/machine_learning_control_event.dart";
-import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
-import 'package:photos/services/machine_learning/semantic_search/frameworks/ggml.dart';
-import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
-import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx.dart';
-import "package:photos/utils/debouncer.dart";
-import "package:photos/utils/device_info.dart";
-import "package:photos/utils/local_settings.dart";
-import "package:photos/utils/ml_util.dart";
-import "package:photos/utils/thumbnail_util.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
+import "package:photos/services/machine_learning/ml_computer.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
+  final _logger = Logger("SemanticSearchService");
   SemanticSearchService._privateConstructor();
 
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
+
   static final Computer _computer = Computer.shared();
-  static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
+  final LRUMap<String, List<double>> _queryCache = LRUMap(20);
+  static const kMinimumSimilarityThreshold = 0.175;
 
-  static const kEmbeddingLength = 512;
-  static const kScoreThreshold = 0.23;
-  static const kShouldPushEmbeddings = true;
-  static const kDebounceDuration = Duration(milliseconds: 4000);
-
-  final _logger = Logger("SemanticSearchService");
-  final _queue = Queue<EnteFile>();
-  final _frameworkInitialization = Completer<bool>();
-  final _embeddingLoaderDebouncer =
-      Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
-
-  late Model _currentModel;
-  late MLFramework _mlFramework;
   bool _hasInitialized = false;
-  bool _isComputingEmbeddings = false;
-  bool _isSyncing = false;
-  List<Embedding> _cachedEmbeddings = <Embedding>[];
+  bool _textModelIsLoaded = false;
+  bool _isCacheRefreshPending = true;
+  List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
-  Completer<void> _mlController = Completer<void>();
-
-  get hasInitialized => _hasInitialized;
-
-  Future<void> init({bool shouldSyncImmediately = false}) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+  Future<void> init() async {
+    if (!localSettings.isMLIndexingEnabled) {
       return;
     }
     if (_hasInitialized) {
@@ -68,79 +50,31 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
-    final shouldDownloadOverMobileData =
-        Configuration.instance.shouldBackupOverMobileData();
-    _currentModel = await _getCurrentModel();
-    _mlFramework = _currentModel == Model.onnxClip
-        ? ONNX(shouldDownloadOverMobileData)
-        : GGML(shouldDownloadOverMobileData);
-    await EmbeddingStore.instance.init();
-    await EmbeddingsDB.instance.init();
-    await _loadEmbeddings();
+
+    await _refreshClipCache();
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      _embeddingLoaderDebouncer.run(() async {
-        await _loadEmbeddings();
-      });
+      _isCacheRefreshPending = true;
     });
-    Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {
-      // Diff sync is complete, we can now pull embeddings from remote
-      unawaited(sync());
-    });
-    if (Configuration.instance.hasConfiguredAccount() &&
-        kShouldPushEmbeddings) {
-      unawaited(EmbeddingStore.instance.pushEmbeddings());
-    }
 
-    // ignore: unawaited_futures
-    _loadModels().then((v) async {
-      _logger.info("Getting text embedding");
-      await _getTextEmbedding("warm up text encoder");
-      _logger.info("Got text embedding");
-    });
-    // Adding to queue only on init?
-    Bus.instance.on<FileUploadedEvent>().listen((event) async {
-      _addToQueue(event.file);
-    });
-    if (shouldSyncImmediately) {
-      unawaited(sync());
-    }
-    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (event.shouldRun) {
-        _startIndexing();
-      } else {
-        _pauseIndexing();
-      }
-    });
-  }
-
-  Future<void> release() async {
-    if (_frameworkInitialization.isCompleted) {
-      await _mlFramework.release();
-    }
-  }
-
-  Future<void> sync() async {
-    if (_isSyncing) {
-      return;
-    }
-    _isSyncing = true;
-    final fetchCompleted =
-        await EmbeddingStore.instance.pullEmbeddings(_currentModel);
-    if (fetchCompleted) {
-      await _backFill();
-    }
-    _isSyncing = false;
+    unawaited(_loadTextModel(delay: true));
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return LocalSettings.instance.hasEnabledMagicSearch() &&
-        _frameworkInitialization.isCompleted;
+    return localSettings.isMLIndexingEnabled &&
+        _textModelIsLoaded &&
+        _cachedImageEmbeddings.isNotEmpty;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
+    await _refreshClipCache();
     if (!isMagicSearchEnabledAndReady()) {
+      if (flagService.internalUser) {
+        _logger.info(
+          "Magic search enabled ${localSettings.isMLIndexingEnabled}, loaded $_textModelIsLoaded cached ${_cachedImageEmbeddings.isNotEmpty}",
+        );
+      }
       return (query, <EnteFile>[]);
     }
     // If there's an ongoing request, just update the last query and return its future.
@@ -165,79 +99,61 @@ class SemanticSearchService {
     }
   }
 
-  Future<IndexStatus> getIndexStatus() async {
-    final indexableFileIDs = await getIndexableFileIDs();
-    return IndexStatus(
-      min(_cachedEmbeddings.length, indexableFileIDs.length),
-      (await _getFileIDsToBeIndexed()).length,
-    );
-  }
-
-  InitializationState getFrameworkInitializationState() {
-    if (!_hasInitialized) {
-      return InitializationState.notInitialized;
-    }
-    return _mlFramework.initializationState;
-  }
-
   Future<void> clearIndexes() async {
-    await EmbeddingStore.instance.clearEmbeddings(_currentModel);
-    _logger.info("Indexes cleared for $_currentModel");
+    await MLDataDB.instance.deleteClipIndexes();
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove("sync_time_embeddings_v3");
+    _logger.info("Indexes cleared");
   }
 
-  Future<void> _loadEmbeddings() async {
+  Future<void> _refreshClipCache() async {
+    if (_isCacheRefreshPending == false) {
+      return;
+    }
+    _isCacheRefreshPending = false;
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
-    _cachedEmbeddings = await EmbeddingsDB.instance.getAll(_currentModel);
+    _cachedImageEmbeddings = await MLDataDB.instance.getAll();
     final endTime = DateTime.now();
     _logger.info(
-      "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+      "Loading ${_cachedImageEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
     Bus.instance.fire(EmbeddingCacheUpdatedEvent());
-    _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
-  }
-
-  Future<void> _backFill() async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !MLFramework.kImageEncoderEnabled) {
-      return;
-    }
-    await _frameworkInitialization.future;
-    _logger.info("Attempting backfill for image embeddings");
-    final fileIDs = await _getFileIDsToBeIndexed();
-    if (fileIDs.isEmpty) {
-      return;
-    }
-    final files = await FilesDB.instance.getUploadedFiles(fileIDs);
-    _logger.info(files.length.toString() + " to be embedded");
-    // await _cacheThumbnails(files);
-    _queue.addAll(files);
-    unawaited(_pollQueue());
-  }
-
-  Future<List<int>> _getFileIDsToBeIndexed() async {
-    final uploadedFileIDs = await getIndexableFileIDs();
-    final embeddedFileIDs =
-        await EmbeddingsDB.instance.getFileIDs(_currentModel);
-
-    uploadedFileIDs.removeWhere(
-      (id) => embeddedFileIDs.contains(id),
-    );
-    return uploadedFileIDs;
-  }
-
-  Future<void> clearQueue() async {
-    _queue.clear();
+    _logger
+        .info("Cached embeddings: " + _cachedImageEmbeddings.length.toString());
   }
 
   Future<List<EnteFile>> getMatchingFiles(
     String query, {
     double? scoreThreshold,
   }) async {
+    bool showScore = false;
+    // if the query starts with 0.xxx, the split the query to get score threshold and actual query
+    if (query.startsWith(RegExp(r"0\.\d+"))) {
+      final parts = query.split(" ");
+      if (parts.length > 1) {
+        scoreThreshold = double.parse(parts[0]);
+        query = parts.sublist(1).join(" ");
+        showScore = true;
+      }
+    }
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults =
-        await _getScores(textEmbedding, scoreThreshold: scoreThreshold);
+    final queryResults = await _getSimilarities(
+      textEmbedding,
+      minimumSimilarity: scoreThreshold,
+    );
+
+    // print query for top ten scores
+    for (int i = 0; i < min(10, queryResults.length); i++) {
+      final result = queryResults[i];
+      dev.log("Query: $query, Score: ${result.score}, index $i");
+    }
+
+    final Map<int, double> fileIDToScoreMap = {};
+    for (final result in queryResults) {
+      fileIDToScoreMap[result.id] = result.score;
+    }
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
@@ -251,8 +167,13 @@ class SemanticSearchService {
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
+        if (showScore) {
+          file.debugCaption =
+              "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
+        }
         results.add(file);
       }
+
       if (file == null) {
         deletedEntries.add(result.id);
       }
@@ -261,17 +182,22 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(EmbeddingsDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
     }
 
     return results;
   }
 
-  Future<List<int>> getMatchingFileIDs(String query, double minScore) async {
+  Future<List<int>> getMatchingFileIDs(
+    String query,
+    double minimumSimilarity,
+  ) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults =
-        await _getScores(textEmbedding, scoreThreshold: minScore);
+    final queryResults = await _getSimilarities(
+      textEmbedding,
+      minimumSimilarity: minimumSimilarity,
+    );
 
     final queryResultIds = <int>[];
     for (QueryResult result in queryResults) {
@@ -299,7 +225,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(EmbeddingsDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
     }
 
     final matchingFileIDs = <int>[];
@@ -310,91 +236,30 @@ class SemanticSearchService {
     return matchingFileIDs;
   }
 
-  void _addToQueue(EnteFile file) {
-    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
-      return;
-    }
-    _logger.info("Adding " + file.toString() + " to the queue");
-    _queue.add(file);
-    _pollQueue();
-  }
-
-  Future<void> _loadModels() async {
-    _logger.info("Initializing ML framework");
+  Future<void> _loadTextModel({bool delay = false}) async {
+    _logger.info("Initializing ClipText");
     try {
-      await _mlFramework.init();
-      _frameworkInitialization.complete(true);
+      if (delay) await Future.delayed(const Duration(seconds: 5));
+      await MLComputer.instance.runClipText("warm up text encoder");
+      _textModelIsLoaded = true;
     } catch (e, s) {
-      _logger.severe("ML framework initialization failed", e, s);
+      _logger.severe("Clip text loading failed", e, s);
     }
-    _logger.info("ML framework initialized");
+    _logger.info("Clip text model loaded");
   }
 
-  Future<void> _pollQueue() async {
-    if (_isComputingEmbeddings) {
-      return;
-    }
-    _isComputingEmbeddings = true;
-
-    while (_queue.isNotEmpty) {
-      await computeImageEmbedding(_queue.removeLast());
-    }
-
-    _isComputingEmbeddings = false;
+  static Future<void> storeClipImageResult(ClipResult clipResult) async {
+    final embedding = ClipEmbedding(
+      fileID: clipResult.fileID,
+      embedding: clipResult.embedding,
+      version: clipMlVersion,
+    );
+    await MLDataDB.instance.put(embedding);
   }
 
-  Future<void> computeImageEmbedding(EnteFile file) async {
-    if (!MLFramework.kImageEncoderEnabled) {
-      return;
-    }
-    if (!_frameworkInitialization.isCompleted) {
-      return;
-    }
-    if (!_mlController.isCompleted) {
-      _logger.info("Waiting for a green signal from controller...");
-      await _mlController.future;
-    }
-    try {
-      final thumbnail = await getThumbnailForUploadedFile(file);
-      if (thumbnail == null) {
-        _logger.warning("Could not get thumbnail for $file");
-        return;
-      }
-      final filePath = thumbnail.path;
-      _logger.info("Running clip over $file");
-      final result = await _mlFramework.getImageEmbedding(filePath);
-      if (result.length != kEmbeddingLength) {
-        _logger.severe("Discovered incorrect embedding for $file - $result");
-        return;
-      }
-
-      final embedding = Embedding(
-        fileID: file.uploadedFileID!,
-        model: _currentModel,
-        embedding: result,
-      );
-      await EmbeddingStore.instance.storeEmbedding(
-        file,
-        embedding,
-      );
-    } on FormatException catch (e, _) {
-      _logger.severe(
-        "Could not get embedding for $file because FormatException occured, storing empty result locally",
-        e,
-      );
-      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
-      await EmbeddingsDB.instance.put(embedding);
-    } on PlatformException catch (e, s) {
-      _logger.severe(
-        "Could not get thumbnail for $file due to PlatformException related to thumbnails, storing empty result locally",
-        e,
-        s,
-      );
-      final embedding = Embedding.empty(file.uploadedFileID!, _currentModel);
-      await EmbeddingsDB.instance.put(embedding);
-    } catch (e, s) {
-      _logger.severe(e, s);
-    }
+  static Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
+    final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
+    await MLDataDB.instance.put(embedding);
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
@@ -403,27 +268,22 @@ class SemanticSearchService {
     if (cachedResult != null) {
       return cachedResult;
     }
-    try {
-      final result = await _mlFramework.getTextEmbedding(query);
-      _queryCache.put(query, result);
-      return result;
-    } catch (e) {
-      _logger.severe("Could not get text embedding", e);
-      return [];
-    }
+    final textEmbedding = await MLComputer.instance.runClipText(query);
+    _queryCache.put(query, textEmbedding);
+    return textEmbedding;
   }
 
-  Future<List<QueryResult>> _getScores(
+  Future<List<QueryResult>> _getSimilarities(
     List<double> textEmbedding, {
-    double? scoreThreshold,
+    double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
     final List<QueryResult> queryResults = await _computer.compute(
-      computeBulkScore,
+      computeBulkSimilarities,
       param: {
-        "imageEmbeddings": _cachedEmbeddings,
+        "imageEmbeddings": _cachedImageEmbeddings,
         "textEmbedding": textEmbedding,
-        "scoreThreshold": scoreThreshold,
+        "minimumSimilarity": minimumSimilarity,
       },
       taskName: "computeBulkScore",
     );
@@ -437,60 +297,53 @@ class SemanticSearchService {
     return queryResults;
   }
 
-  Future<Model> _getCurrentModel() async {
-    if (await isGrapheneOS()) {
-      return Model.ggmlClip;
-    } else {
-      return Model.onnxClip;
-    }
-  }
+  static Future<ClipResult> runClipImage(
+    int enteFileID,
+    Image image,
+    ByteData imageByteData,
+    int clipImageAddress,
+  ) async {
+    final startTime = DateTime.now();
+    final embedding = await ClipImageEncoder.predict(
+      image,
+      imageByteData,
+      clipImageAddress,
+    );
 
-  void _startIndexing() {
-    _logger.info("Start indexing");
-    if (!_mlController.isCompleted) {
-      _mlController.complete();
-    }
-  }
+    final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);
 
-  void _pauseIndexing() {
-    if (_mlController.isCompleted) {
-      _logger.info("Pausing indexing");
-      _mlController = Completer<void>();
-    }
+    dev.log('Finished running ClipImage for $enteFileID in '
+        '${DateTime.now().difference(startTime).inMilliseconds} ms');
+
+    return clipResult;
   }
 }
 
-List<QueryResult> computeBulkScore(Map args) {
+List<QueryResult> computeBulkSimilarities(Map args) {
   final queryResults = <QueryResult>[];
-  final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
+  final imageEmbeddings = args["imageEmbeddings"] as List<ClipEmbedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
-  final scoreThreshold =
-      args["scoreThreshold"] ?? SemanticSearchService.kScoreThreshold;
+  final minimumSimilarity = args["minimumSimilarity"] ??
+      SemanticSearchService.kMinimumSimilarityThreshold;
+  double bestScore = 0.0;
   for (final imageEmbedding in imageEmbeddings) {
-    final score = computeScore(
+    final score = computeCosineSimilarity(
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (score >= scoreThreshold) {
+    if (score >= minimumSimilarity) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
+    if (score > bestScore) {
+      bestScore = score;
+    }
+  }
+  if (kDebugMode && queryResults.isEmpty) {
+    dev.log("No results found for query with best score: $bestScore");
   }
 
   queryResults.sort((first, second) => second.score.compareTo(first.score));
   return queryResults;
-}
-
-double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
-  assert(
-    imageEmbedding.length == textEmbedding.length,
-    "The two embeddings should have the same length",
-  );
-  double score = 0;
-  final length = imageEmbedding.length;
-  for (int index = 0; index < length; index++) {
-    score += imageEmbedding[index] * textEmbedding[index];
-  }
-  return score;
 }
 
 class QueryResult {
@@ -498,10 +351,4 @@ class QueryResult {
   final double score;
 
   QueryResult(this.id, this.score);
-}
-
-class IndexStatus {
-  final int indexedItems, pendingItems;
-
-  IndexStatus(this.indexedItems, this.pendingItems);
 }
