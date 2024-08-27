@@ -226,19 +226,19 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
                     id: newClusterID(),
                     faceIDs: [faceID, nn.faceID],
                 };
-                clusters.push(cluster);
                 clusterIndexForClusterID.set(cluster.id, clusters.length);
                 clusterIDForFaceID.set(faceID, cluster.id);
                 clusterIDForFaceID.set(nn.faceID, cluster.id);
+                clusters.push(cluster);
             }
         } else {
             // We didn't find a neighbour within the threshold. Create a new
             // cluster with only this face.
 
             const cluster = { id: newClusterID(), faceIDs: [faceID] };
-            clusters.push(cluster);
             clusterIndexForClusterID.set(cluster.id, clusters.length);
             clusterIDForFaceID.set(faceID, cluster.id);
+            clusters.push(cluster);
         }
     }
 
