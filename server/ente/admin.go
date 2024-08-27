@@ -87,6 +87,7 @@ const (
 )
 
 type SupportUpdateBonus struct {
+	BonusType   string      `json:"bonusType" binding:"required"`
 	Action      AddOnAction `json:"action" binding:"required"`
 	UserID      int64       `json:"userID" binding:"required"`
 	Year        int         `json:"year"`
@@ -105,17 +106,26 @@ func (u SupportUpdateBonus) UpdateLog() string {
 }
 
 func (u SupportUpdateBonus) Validate() error {
+	isSupportBonus := u.BonusType == "ADD_ON_SUPPORT"
+	if u.BonusType != "ADD_ON_SUPPORT" && u.BonusType != "ADD_ON_BF_2023" {
+		return errors.New("invalid bonus type")
+	}
 	if u.Action == ADD || u.Action == UPDATE {
 		if u.Testing {
 			if u.StorageInMB == 0 && u.Minute == 0 {
 				return errors.New("invalid input, set in MB and minute for test")
 			}
 		} else {
-			if u.StorageInGB != 100 && u.StorageInGB != 2000 && u.StorageInGB != 500 {
+			if u.StorageInGB != 200 && u.StorageInGB != 2000 && u.StorageInGB != 500 {
 				return errors.New("invalid input for deal, only 100, 500, 2000 allowed")
 			}
-			if u.Year != 3 && u.Year != 5 {
+			if isSupportBonus {
+				if u.Year == 0 || u.Year > 100 {
+					return errors.New("invalid input for year, only 1-100")
+				}
+			} else if u.Year != 3 && u.Year != 5 {
 				return errors.New("invalid input for year, only 3 or 5")
+
 			}
 		}
 	}

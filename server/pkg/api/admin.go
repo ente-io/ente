@@ -472,13 +472,14 @@ func (h *AdminHandler) UpdateBonus(c *gin.Context) {
 		validTill = gTime.Now().AddDate(r.Year, 0, 0).UnixMicro()
 	}
 	var err error
+	bonusType := bonusEntity.BonusType(r.BonusType)
 	switch r.Action {
 	case ente.ADD:
-		err = h.StorageBonusRepo.InsertAddOnBonus(c, bonusEntity.AddOnBf2023, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.InsertAddOnBonus(c, bonusType, r.UserID, validTill, storage)
 	case ente.UPDATE:
-		err = h.StorageBonusRepo.UpdateAddOnBonus(c, bonusEntity.AddOnBf2023, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.UpdateAddOnBonus(c, bonusType, r.UserID, validTill, storage)
 	case ente.REMOVE:
-		_, err = h.StorageBonusRepo.RemoveAddOnBonus(c, bonusEntity.AddOnBf2023, r.UserID)
+		_, err = h.StorageBonusRepo.RemoveAddOnBonus(c, bonusType, r.UserID)
 	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
