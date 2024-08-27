@@ -423,7 +423,7 @@ func (t *TrashRepository) EmptyTrash(ctx context.Context, userID int64, lastUpda
 }
 
 func (t *TrashRepository) GetTrashUpdatedAt(userID int64) (int64, error) {
-	row := t.DB.QueryRow(`SELECT max(updated_at) FROM trash WHERE user_id = $1`, userID)
+	row := t.DB.QueryRow(`SELECT coalesce(max(updated_at),0) FROM trash WHERE user_id = $1`, userID)
 	var updatedAt int64
 	err := row.Scan(&updatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
