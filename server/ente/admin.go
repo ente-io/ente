@@ -116,16 +116,21 @@ func (u SupportUpdateBonus) Validate() error {
 				return errors.New("invalid input, set in MB and minute for test")
 			}
 		} else {
-			if u.StorageInGB != 200 && u.StorageInGB != 2000 && u.StorageInGB != 1000 {
-				return errors.New("invalid input for deal, only 200, 1000, 2000 allowed")
-			}
+
 			if isSupportBonus {
 				if u.Year == 0 || u.Year > 100 {
 					return errors.New("invalid input for year, only 1-100")
 				}
-			} else if u.Year != 3 && u.Year != 5 {
-				return errors.New("invalid input for year, only 3 or 5")
-
+				if u.StorageInGB == 0 || u.StorageInGB > 2000 {
+					return errors.New("invalid GB storage, only 1-2000")
+				}
+			} else {
+				if u.StorageInGB != 200 && u.StorageInGB != 2000 && u.StorageInGB != 1000 && u.StorageInGB != 50 {
+					return errors.New("invalid input for deal, only 50, 200, 1000, 2000 allowed")
+				}
+				if u.Year != 3 && u.Year != 5 {
+					return errors.New("invalid input for year, only 3 or 5")
+				}
 			}
 		}
 	}
