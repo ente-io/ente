@@ -496,7 +496,6 @@
   "removeDuplicates": "Duplikate entfernen",
   "removeDuplicatesDesc": "Überprüfe und lösche Dateien, die exakte Duplikate sind.",
   "viewLargeFiles": "Große Dateien",
-  "viewLargeFilesDesc": "Dateien anzeigen, die den meisten Speicherplatz belegen",
   "noDuplicates": "✨ Keine Duplikate",
   "youveNoDuplicateFilesThatCanBeCleared": "Du hast keine Duplikate, die gelöscht werden können",
   "success": "Abgeschlossen",
