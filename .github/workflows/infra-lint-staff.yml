@@ -1,9 +1,8 @@
 name: "Lint (staff)"
 
 on:
-    # Run on every push to a branch other than main that changes infra/staff/
-    push:
-        branches-ignore: [main]
+    # Run on every pull request (open or push to it) that changes infra/staff/
+    pull_request:
         paths:
             - "infra/staff/**"
             - ".github/workflows/infra-deploy-staff.yml"
