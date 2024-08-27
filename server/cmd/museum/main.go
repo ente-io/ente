@@ -653,7 +653,7 @@ func main() {
 	adminAPI.POST("/emails-from-hashes", adminHandler.GetEmailsFromHashes)
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
 	adminAPI.POST("/queue/re-queue", adminHandler.ReQueueItem)
-	adminAPI.POST("/user/bf-2013", adminHandler.UpdateBFDeal)
+	adminAPI.POST("/user/bonus", adminHandler.UpdateBonus)
 	adminAPI.POST("/job/clear-orphan-objects", adminHandler.ClearOrphanObjects)
 
 	userEntityController := &userEntityCtrl.Controller{Repo: userEntityRepo}

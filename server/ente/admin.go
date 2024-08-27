@@ -86,7 +86,7 @@ const (
 	UPDATE AddOnAction = "UPDATE"
 )
 
-type UpdateBlackFridayDeal struct {
+type SupportUpdateBonus struct {
 	Action      AddOnAction `json:"action" binding:"required"`
 	UserID      int64       `json:"userID" binding:"required"`
 	Year        int         `json:"year"`
@@ -96,15 +96,15 @@ type UpdateBlackFridayDeal struct {
 	Minute      int64       `json:"minute"`
 }
 
-func (u UpdateBlackFridayDeal) UpdateLog() string {
+func (u SupportUpdateBonus) UpdateLog() string {
 	if u.Testing {
-		return fmt.Sprintf("BF_UPDATE_TESTING: %s, storageInMB: %d, minute: %d", u.Action, u.StorageInMB, u.Minute)
+		return fmt.Sprintf("SupportUpdateBonus: %s, storageInMB: %d, minute: %d", u.Action, u.StorageInMB, u.Minute)
 	} else {
 		return fmt.Sprintf("BF_UPDATE: %s, storageInGB: %d, year: %d", u.Action, u.StorageInGB, u.Year)
 	}
 }
 
-func (u UpdateBlackFridayDeal) Validate() error {
+func (u SupportUpdateBonus) Validate() error {
 	if u.Action == ADD || u.Action == UPDATE {
 		if u.Testing {
 			if u.StorageInMB == 0 && u.Minute == 0 {

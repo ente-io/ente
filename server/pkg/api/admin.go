@@ -452,8 +452,8 @@ func (h *AdminHandler) ReQueueItem(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *AdminHandler) UpdateBFDeal(c *gin.Context) {
-	var r ente.UpdateBlackFridayDeal
+func (h *AdminHandler) UpdateBonus(c *gin.Context) {
+	var r ente.SupportUpdateBonus
 	if err := c.ShouldBindJSON(&r); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
 		return
