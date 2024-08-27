@@ -60,6 +60,31 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
+            - name: Create universal ffmpeg binaries for macOS
+              if: startsWith(matrix.os, 'ubuntu')
+              # Currently, the ffmpeg-static binaries are not universal (Not
+              # their fault, we thank them for their useful package, the issue
+              # is that there don't seem to be well known upstream sources that
+              # provide a universal binary).
+              #
+              # As a workaround, we invoke ffmpeg-static twice to download both
+              # the Intel and ARM binaries, and combine them into a single
+              # universal binary using lipo.
+              #
+              # Note that the yarn install will run again, as part of the
+              # "build:ci" step, so we're relying on ffmpeg-static install.js's
+              # behaviour of not overwriting the existing file named `ffmpeg`.
+              run: |
+                  rm -f node_modules/ffmpeg-static/ffmpeg
+                  npm rebuild --arch=arm64 -f ffmpeg-static
+                  mv node_modules/ffmpeg-static/ffmpeg node_modules/ffmpeg-static/ffmpeg-arm64
+                  npm rebuild --arch=x64 -f ffmpeg-static
+                  mv node_modules/ffmpeg-static/ffmpeg node_modules/ffmpeg-static/ffmpeg-x64
+                  cd node_modules/ffmpeg-static/
+                  lipo -create ffmpeg-arm64 ffmpeg-x64 -output ffmpeg
+                  rm ffmpeg-arm64 ffmpeg-x64
+                  file ffmpeg     # print what we ended up with
+
             - name: Install libarchive-tools for pacman build
               if: startsWith(matrix.os, 'ubuntu')
               # See:
