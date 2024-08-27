@@ -4,6 +4,7 @@ preserve_hierarchy: true
 files:
   - source: /lib/l10n/intl_en.arb
     translation: /lib/l10n/intl_%two_letters_code%.arb
+    dest: /%original_file_name%
     type: arb
   - source: /fastlane/metadata/playstore/en-US/*.txt
     translation: /fastlane/metadata/playstore/%two_letters_code%/%original_file_name%
