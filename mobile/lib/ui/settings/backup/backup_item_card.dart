@@ -96,6 +96,8 @@ class _BackupItemCardState extends State<BackupItemCard> {
                 const SizedBox(height: 4),
                 Text(
                   folderName ?? "",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 14,
                     height: 17 / 14,
