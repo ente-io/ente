@@ -10,6 +10,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/controller/family"
 
+	bonusEntity "github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 
 	gTime "time"
@@ -451,8 +452,8 @@ func (h *AdminHandler) ReQueueItem(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *AdminHandler) UpdateBFDeal(c *gin.Context) {
-	var r ente.UpdateBlackFridayDeal
+func (h *AdminHandler) UpdateBonus(c *gin.Context) {
+	var r ente.SupportUpdateBonus
 	if err := c.ShouldBindJSON(&r); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
 		return
@@ -471,13 +472,14 @@ func (h *AdminHandler) UpdateBFDeal(c *gin.Context) {
 		validTill = gTime.Now().AddDate(r.Year, 0, 0).UnixMicro()
 	}
 	var err error
+	bonusType := bonusEntity.BonusType(r.BonusType)
 	switch r.Action {
 	case ente.ADD:
-		err = h.StorageBonusRepo.InsertBFBonus(c, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.InsertAddOnBonus(c, bonusType, r.UserID, validTill, storage)
 	case ente.UPDATE:
-		err = h.StorageBonusRepo.UpdateBFBonus(c, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.UpdateAddOnBonus(c, bonusType, r.UserID, validTill, storage)
 	case ente.REMOVE:
-		_, err = h.StorageBonusRepo.RemoveBFBonus(c, r.UserID)
+		_, err = h.StorageBonusRepo.RemoveAddOnBonus(c, bonusType, r.UserID)
 	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

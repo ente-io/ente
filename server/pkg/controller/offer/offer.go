@@ -10,6 +10,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
 	"github.com/ente-io/museum/ente"
+	storeageBonusEntity "github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -105,7 +106,7 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 		}
 	}
 
-	err = c.StorageBonusRepo.InsertBFBonus(context.Background(), userID, validTill, offerToBeApplied.Storage)
+	err = c.StorageBonusRepo.InsertAddOnBonus(context.Background(), storeageBonusEntity.AddOnBf2023, userID, validTill, offerToBeApplied.Storage)
 	if err != nil {
 		c.DiscordController.Notify("Error inserting bonus")
 		return stacktrace.Propagate(err, "")
