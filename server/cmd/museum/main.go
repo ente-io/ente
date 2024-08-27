@@ -188,7 +188,9 @@ func main() {
 	}
 
 	userCache := cache2.NewUserCache()
-	userCacheCtrl := &usercache.Controller{UserCache: userCache, FileRepo: fileRepo, StoreBonusRepo: storagBonusRepo}
+	userCacheCtrl := &usercache.Controller{UserCache: userCache, FileRepo: fileRepo,
+		UsageRepo: usageRepo, TrashRepo: trashRepo,
+		StoreBonusRepo: storagBonusRepo}
 	offerController := offer.NewOfferController(*userRepo, discordController, storagBonusRepo, userCacheCtrl)
 	plans := billing.GetPlans()
 	defaultPlan := billing.GetDefaultPlans(plans)
@@ -483,7 +485,6 @@ func main() {
 	privateAPI.GET("/users/payment-token", userHandler.GetPaymentToken)
 	privateAPI.GET("/users/families-token", userHandler.GetFamiliesToken)
 	privateAPI.GET("/users/accounts-token", userHandler.GetAccountsToken)
-	privateAPI.GET("/users/details", userHandler.GetDetails)
 	privateAPI.GET("/users/details/v2", userHandler.GetDetailsV2)
 	privateAPI.POST("/users/change-email", userHandler.ChangeEmail)
 	privateAPI.GET("/users/sessions", userHandler.GetActiveSessions)
@@ -654,7 +655,7 @@ func main() {
 	adminAPI.POST("/emails-from-hashes", adminHandler.GetEmailsFromHashes)
 	adminAPI.PUT("/user/subscription", adminHandler.UpdateSubscription)
 	adminAPI.POST("/queue/re-queue", adminHandler.ReQueueItem)
-	adminAPI.POST("/user/bf-2013", adminHandler.UpdateBFDeal)
+	adminAPI.POST("/user/bonus", adminHandler.UpdateBonus)
 	adminAPI.POST("/job/clear-orphan-objects", adminHandler.ClearOrphanObjects)
 
 	userEntityController := &userEntityCtrl.Controller{Repo: userEntityRepo}

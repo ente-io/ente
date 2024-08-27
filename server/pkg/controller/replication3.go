@@ -26,6 +26,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	slowUploadThreshold = 2 * time.Second
+	slowSpeedThreshold  = 0.5 // MB/s
+)
+
 // ReplicationController3 oversees version 3 of our object replication.
 //
 // The user's encrypted data starts off in 1 hot storage (Backblaze "b2"). This
@@ -423,6 +428,7 @@ type UploadInput struct {
 
 // Upload, verify and then update the DB to mark replication to dest.
 func (c *ReplicationController3) replicateFile(in *UploadInput, dest *UploadDestination, dbUpdateCopies func() error) error {
+	start := time.Now()
 	logger := in.Logger.WithFields(log.Fields{
 		"destination": dest.Label,
 		"bucket":      *dest.Bucket,
@@ -437,6 +443,19 @@ func (c *ReplicationController3) replicateFile(in *UploadInput, dest *UploadDest
 	err := c.uploadFile(in, dest)
 	if err != nil {
 		return failure(stacktrace.Propagate(err, "Failed to upload object"))
+	}
+	// log if time taken is more than 2 seconds and speed is less than .5MB/s
+	if dest.Label == "wasabi" && time.Since(start) > slowUploadThreshold {
+		elapsed := time.Since(start)
+		uploadSpeedMBps := float64(in.ExpectedSize) / (elapsed.Seconds() * 1024 * 1024)
+
+		if uploadSpeedMBps < slowSpeedThreshold {
+			logger.WithFields(log.Fields{
+				"sizeBytes":   in.ExpectedSize,
+				"speedMBps":   uploadSpeedMBps,
+				"elapsedSecs": elapsed.Seconds(),
+			}).Infof("Slow replication upload to %s: %.2f seconds, speed: %.2f MB/s", dest.Label, elapsed.Seconds(), uploadSpeedMBps)
+		}
 	}
 
 	err = c.verifyUploadedFileSize(in, dest)

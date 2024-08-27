@@ -95,6 +95,10 @@ Some extra ones specific to the code here are:
     for allowing us to set environment variables in a way that also works on
     Windows.
 
+-   We don't need `ajv`, but it is a transitive dependency which breaks the
+    build if we let its version be resolved via the yarn resolution mechanism.
+    Taking a direct dependency on it is the easiest workaround for now.
+
 ## Functionality
 
 ### Format conversion

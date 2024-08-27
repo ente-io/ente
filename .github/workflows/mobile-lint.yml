@@ -1,16 +1,15 @@
 name: "Lint (mobile)"
 
 on:
-    # Run on every push to a branch other than main that changes mobile/
-    push:
-        branches-ignore: [main, f-droid]
+    # Run on every pull request (open or push to it) that changes mobile/
+    pull_request:
         paths:
             - "mobile/**"
             - ".github/workflows/mobile-lint.yml"
 
 env:
 
-    FLUTTER_VERSION: "3.22.2"
+    FLUTTER_VERSION: "3.24.1"
 
 jobs:
     lint:

@@ -45,6 +45,7 @@
         "@types/auto-launch": "^5.0.5",
         "@types/eslint__js": "^8.42.3",
         "@types/ffmpeg-static": "^3.0.3",
+        "ajv": "^8.17.1",
         "concurrently": "^8.2.2",
         "cross-env": "^7.0.3",
         "electron": "^30.4.0",

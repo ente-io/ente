@@ -1,9 +1,8 @@
 name: "Lint (desktop)"
 
 on:
-    # Run on every push to a branch other than main that changes desktop/
-    push:
-        branches-ignore: [main]
+    # Run on every pull request (open or push to it) that changes desktop/
+    pull_request:
         paths:
             - "desktop/**"
             - ".github/workflows/desktop-lint.yml"
