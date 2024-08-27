@@ -495,7 +495,7 @@ class MLService {
         return true;
       }
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID}. Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID} and format ${instruction.file.displayName.split('.').last} (${instruction.file.fileType}). Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );
