@@ -16,6 +16,7 @@ import { ensure } from "@/utils/ensure";
 import { throttled, wait } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
+import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
@@ -29,7 +30,6 @@ import {
 } from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
-import { getAllLocalFiles } from "../files";
 
 /**
  * Internal state of the ML subsystem.
@@ -353,12 +353,10 @@ export const wipCluster = async () => {
     _wip_searchPersons = undefined;
 
     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-    const clusterByID = new Map(
-        clusters.map((cluster) => [cluster.id, cluster]),
-    );
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     const localFiles = await getAllLocalFiles();
-    const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
     const result: SearchPerson[] = [];
     for (const cgroup of cgroups) {
@@ -373,7 +371,7 @@ export const wipCluster = async () => {
         }
         cgroup.clusterIDs;
         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
-        const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
+        const avatarFaceFile = localFileByID.get(avatarFaceFileID ?? 0);
         if (!avatarFaceFileID || !avatarFaceFile) {
             assertionFailed(`Face ID ${avatarFaceID} without local file`);
             continue;
@@ -392,7 +390,9 @@ export const wipCluster = async () => {
         });
     }
 
-    const searchPersons = result.sort((a, b) => b.files.length - a.files.length);
+    const searchPersons = result.sort(
+        (a, b) => b.files.length - a.files.length,
+    );
 
     _wip_isClustering = false;
     _wip_searchPersons = searchPersons;
