@@ -22,6 +22,11 @@ canvas.
 
 ## Desktop
 
+> [!NOTE]
+>
+> This issue has been fixed in the latest beta releases, and the fix will be
+> also out in the next release, 1.7.4.
+
 The only known case where thumbnails might be missing on desktop is when
 uploading **videos** during a Google Takeout or watched folder sync on **Intel
 macOS** machines. This is because the bundled ffmpeg that we use does not work
