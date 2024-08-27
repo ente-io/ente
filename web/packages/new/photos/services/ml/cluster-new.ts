@@ -267,7 +267,8 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     for (const cgroup of cgroups) {
         cgroup.displayFaceID = cgroup.clusterIDs
             .map((clusterID) => clusterIndexForClusterID.get(clusterID))
-            .flatMap((i) => (i ? clusters[i]?.faceIDs : undefined) ?? [])
+            .filter((i) => i !== undefined) /* 0 is a valid index */
+            .flatMap((i) => clusters[i]?.faceIDs ?? [])
             .map((faceID) => faceForFaceID.get(faceID))
             .filter((face) => !!face)
             .reduce((max, face) =>
@@ -278,8 +279,8 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     log.info("ml/cluster", {
         faces,
         validClusters,
-        clusterIndexForClusterID,
-        clusterIDForFaceID,
+        clusterIndexForClusterID: Object.fromEntries(clusterIndexForClusterID),
+        clusterIDForFaceID: Object.fromEntries(clusterIDForFaceID),
         cgroups,
     });
     log.info(
