@@ -393,7 +393,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create clusters locally, afresh. Existing local clusters will be overwritten. Nothing will be synced to remote.",
+                            "Create clusters locally, afresh and in-memory. Existing local clusters will be overwritten. Nothing will be saved or synced to remote.",
                         )}
                     />
                 </Box>

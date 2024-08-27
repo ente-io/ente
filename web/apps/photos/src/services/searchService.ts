@@ -6,7 +6,7 @@ import {
     isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
-    wipClusterEnable,
+    wipSearchPersons,
 } from "@/new/photos/services/ml";
 import { parseDateComponents } from "@/new/photos/services/search";
 import type {
@@ -339,11 +339,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
     }
 }
 
-// let done = false;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getAllPeople(_limit: number = undefined) {
-    if (!(await wipClusterEnable())) return [];
-    return [];
+async function getAllPeople(limit: number = undefined) {
+    return (await wipSearchPersons()).slice(0, limit);
+    // TODO-Clustetr
     // if (done) return [];
 
     // done = true;
