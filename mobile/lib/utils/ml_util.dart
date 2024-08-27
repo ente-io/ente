@@ -299,7 +299,8 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
 
   final stopwatch = Stopwatch()..start();
   File? file;
-  if (enteFile.fileType == FileType.video) {
+  final bool isVideo = enteFile.fileType == FileType.video;
+  if (isVideo) {
     try {
       file = await getThumbnailForUploadedFile(enteFile);
     } on PlatformException catch (e, s) {
@@ -328,8 +329,8 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
   );
 
   if (imagePath == null) {
-    _logger.warning(
-      "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null",
+    _logger.severe(
+      "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID} since its file path is null (isVideo: $isVideo)",
     );
     throw CouldNotRetrieveAnyFileData();
   }
