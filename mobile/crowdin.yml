@@ -6,6 +6,7 @@ files:
     translation: /lib/l10n/intl_%two_letters_code%.arb
     dest: /%original_file_name%
     type: arb
+    skip_untranslated_strings: false
     skip_untranslated_files: false
   - source: /fastlane/metadata/playstore/en-US/*.txt
     translation: /fastlane/metadata/playstore/%two_letters_code%/%original_file_name%
