@@ -473,11 +473,11 @@ func (h *AdminHandler) UpdateBFDeal(c *gin.Context) {
 	var err error
 	switch r.Action {
 	case ente.ADD:
-		err = h.StorageBonusRepo.InsertBFBonus(c, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.InsertAddOnBonus(c, r.UserID, validTill, storage)
 	case ente.UPDATE:
-		err = h.StorageBonusRepo.UpdateBFBonus(c, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.UpdateAddOnBonus(c, r.UserID, validTill, storage)
 	case ente.REMOVE:
-		_, err = h.StorageBonusRepo.RemoveBFBonus(c, r.UserID)
+		_, err = h.StorageBonusRepo.RemoveAddOnBonus(c, r.UserID)
 	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
