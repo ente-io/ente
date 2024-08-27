@@ -101,7 +101,7 @@ func (u SupportUpdateBonus) UpdateLog() string {
 	if u.Testing {
 		return fmt.Sprintf("SupportUpdateBonus: %s, storageInMB: %d, minute: %d", u.Action, u.StorageInMB, u.Minute)
 	} else {
-		return fmt.Sprintf("BF_UPDATE: %s, storageInGB: %d, year: %d", u.Action, u.StorageInGB, u.Year)
+		return fmt.Sprintf("%s: %s, storageInGB: %d, year: %d", u.BonusType, u.Action, u.StorageInGB, u.Year)
 	}
 }
 
