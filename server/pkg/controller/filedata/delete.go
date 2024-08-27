@@ -15,7 +15,7 @@ import (
 
 // StartDataDeletion clears associated file data from the object store
 func (c *Controller) StartDataDeletion() {
-	go c.startDeleteWorkers(5)
+	go c.startDeleteWorkers(1)
 }
 
 func (c *Controller) startDeleteWorkers(n int) {
@@ -24,7 +24,7 @@ func (c *Controller) startDeleteWorkers(n int) {
 	for i := 0; i < n; i++ {
 		go c.delete(i)
 		// Stagger the workers
-		time.Sleep(time.Duration(2*i+1) * time.Second)
+		time.Sleep(time.Duration(2*i+1) * time.Minute)
 	}
 }
 
