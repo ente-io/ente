@@ -61,7 +61,7 @@ jobs:
               run: yarn install
 
             - name: Create universal ffmpeg binaries for macOS
-              if: startsWith(matrix.os, 'ubuntu')
+              if: startsWith(matrix.os, 'macos')
               # Currently, the ffmpeg-static binaries are not universal (Not
               # their fault, we thank them for their useful package, the issue
               # is that there don't seem to be well known upstream sources that
