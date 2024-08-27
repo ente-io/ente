@@ -1,12 +1,15 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup } from "@/base/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipCluster,
+    wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -295,7 +298,10 @@ const ManageML: React.FC<ManageMLProps> = ({
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
+    const [showClusterOpt, setShowClusterOpt] = useState(false);
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+
+    useEffect(() => void wipClusterEnable().then(setShowClusterOpt), []);
 
     let status: string;
     switch (phase) {
@@ -308,7 +314,10 @@ const ManageML: React.FC<ManageMLProps> = ({
         case "indexing":
             status = t("indexing_status_running");
             break;
-        // TODO: Clustering
+        case "clustering":
+            // TODO-Cluster
+            status = pt("Grouping faces");
+            break;
         default:
             status = t("indexing_status_done");
             break;
@@ -328,6 +337,8 @@ const ManageML: React.FC<ManageMLProps> = ({
             buttonDirection: "row",
         });
     };
+
+    const wipClusterNow = () => void wipCluster();
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -372,6 +383,21 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </Stack>
                 </Stack>
             </Paper>
+            {showClusterOpt && (
+                <Box>
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            label={ut("Cluster   ––– internal only option")}
+                            onClick={wipClusterNow}
+                        />
+                    </MenuItemGroup>
+                    <MenuSectionTitle
+                        title={ut(
+                            "Create clusters locally, afresh and in-memory. Existing local clusters will be overwritten. Nothing will be saved or synced to remote.",
+                        )}
+                    />
+                </Box>
+            )}
         </Stack>
     );
 };

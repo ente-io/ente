@@ -60,15 +60,17 @@ export interface CGroup {
     /**
      * A nanoid for this cluster group.
      *
-     * This is the ID of the "cgroup" user entity, it is not contained as part
-     * of the group entity payload itself.
+     * This is the ID of the "cgroup" user entity (the envelope), and it is not
+     * contained as part of the group entity payload itself.
      */
     id: string;
     /**
      * A name assigned by the user to this cluster group.
      *
-     * This should be set to an empty string for an unnamed cluster that was
-     * hidden.
+     * The client should handle both empty strings and undefined as indicating a
+     * cgroup without a name. When the client needs to set this to an "empty"
+     * value, which happens when hiding an unnamed cluster, it should it to an
+     * empty string. That is, expect `"" | undefined`, but set `""`.
      */
     name: string | undefined;
     /**
@@ -92,13 +94,20 @@ export interface CGroup {
      * The ID of the face that should be used as the cover photo for this
      * cluster group (if the user has set one).
      *
-     * {@link avatarFaceID} is the user selected face. {@link displayFaceID} is
-     * the automatic placeholder.
+     * This is similar to the [@link displayFaceID}, the difference being:
+     *
+     * -   {@link avatarFaceID} is the face selected by the user.
+     *
+     * -   {@link displayFaceID} is the automatic placeholder, and only comes
+     *     into effect if the user has not explicitly selected a face.
      */
     avatarFaceID: string | undefined;
     /**
      * Locally determined ID of the "best" face that should be used as the
      * display face, to represent this cluster group in the UI.
+     *
+     * This property is not synced with remote. For more details, see
+     * {@link avatarFaceID}.
      */
     displayFaceID: string | undefined;
 }
@@ -108,16 +117,16 @@ export interface CGroup {
  *
  * [Note: Face clustering algorithm]
  *
- * A (cluster) group consists of clusters, each of which itself is a set of
- * faces.
+ * A cgroup (cluster group) consists of clusters, each of which itself is a set
+ * of faces.
  *
- * The clusters are generated using locally by clients using the following
- * (pseudo-) algorithm:
+ *     cgroup << cluster << face
+ *
+ * The clusters are generated locally by clients using the following algorithm:
  *
  * 1.  clusters = [] initially, or fetched from remote.
  *
- * 2.  For each face, find its nearest neighbour in the embedding space from
- *     amongst the faces that have already been clustered.
+ * 2.  For each face, find its nearest neighbour in the embedding space.
  *
  * 3.  If no such neighbour is found within our threshold, create a new cluster.
  *
@@ -126,12 +135,13 @@ export interface CGroup {
  * This user can then tweak the output of the algorithm by performing the
  * following actions to the list of clusters that they can see:
  *
- * -   They can provide a name for a cluster. This upgrades a cluster into a
- *     "cgroup", which then gets synced via remote to all their devices.
+ * -   They can provide a name for a cluster ("name a person"). This upgrades a
+ *     cluster into a "cgroup", which is an entity that gets synced via remote
+ *     to the user's other clients.
  *
- * -   They can attach more clusters to a cgroup.
+ * -   They can attach more clusters to a cgroup ("merge clusters")
  *
- * -   They can remove a cluster from a cgroup.
+ * -   They can remove a cluster from a cgroup ("break clusters").
  *
  * After clustering, we also do some routine cleanup. Faces belonging to files
  * that have been deleted (including those in Trash) should be pruned off.
@@ -140,8 +150,8 @@ export interface CGroup {
  * In particular, the same face ID can be in different clusters. In such cases
  * we should assign it arbitrarily assign it to the last cluster we find it in.
  * Such leeway is intentionally provided to allow clients some slack in how they
- * implement the sync without making an blocking API request for every user
- * interaction.
+ * implement the sync without needing to make an blocking API request for every
+ * user interaction.
  */
 export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
@@ -153,19 +163,17 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // or fetched from remote).
     const clusters = await faceClusters();
 
-    // For fast reverse lookup - map from cluster ids to the index in the
+    // For fast reverse lookup - map from cluster ids to their index in the
     // clusters array.
     const clusterIndexForClusterID = new Map(clusters.map((c, i) => [c.id, i]));
 
     // For fast reverse lookup - map from face ids to the id of the cluster to
     // which they belong.
     const clusterIDForFaceID = new Map(
-        clusters.flatMap((c) =>
-            c.faceIDs.map((faceID) => [faceID, c.id] as const),
-        ),
+        clusters.flatMap((c) => c.faceIDs.map((id) => [id, c.id] as const)),
     );
 
-    // New cluster ID generator function.
+    // A function to generate new cluster IDs.
     const newClusterID = () => newNonSecureID("cluster_");
 
     // For each face,
@@ -218,59 +226,65 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
                     id: newClusterID(),
                     faceIDs: [faceID, nn.faceID],
                 };
-                clusters.push(cluster);
                 clusterIndexForClusterID.set(cluster.id, clusters.length);
                 clusterIDForFaceID.set(faceID, cluster.id);
                 clusterIDForFaceID.set(nn.faceID, cluster.id);
+                clusters.push(cluster);
             }
         } else {
             // We didn't find a neighbour within the threshold. Create a new
             // cluster with only this face.
 
             const cluster = { id: newClusterID(), faceIDs: [faceID] };
-            clusters.push(cluster);
             clusterIndexForClusterID.set(cluster.id, clusters.length);
             clusterIDForFaceID.set(faceID, cluster.id);
+            clusters.push(cluster);
         }
     }
 
     // Prune too small clusters.
     const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
 
+    let cgroups = await clusterGroups();
+
+    // TODO-Cluster - Currently we're not syncing with remote or saving anything
+    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
+    // cgroup, one per cluster.
+    cgroups = cgroups.concat(
+        validClusters.map((c) => ({
+            id: c.id,
+            name: undefined,
+            clusterIDs: [c.id],
+            isHidden: false,
+            avatarFaceID: undefined,
+            displayFaceID: undefined,
+        })),
+    );
+
     // For each cluster group, use the highest scoring face in any of its
     // clusters as its display face.
-
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-    const cgroups = await clusterGroups();
-
     for (const cgroup of cgroups) {
-        cgroup.avatarFaceID = cgroup.clusterIDs
+        cgroup.displayFaceID = cgroup.clusterIDs
             .map((clusterID) => clusterIndexForClusterID.get(clusterID))
-            .map((clusterIndex) =>
-                clusterIndex ? clusters[clusterIndex] : undefined,
-            )
-            .filter((cluster) => !!cluster)
-            .flatMap((cluster) => cluster.faceIDs)
-            .map((id) => faceForFaceID.get(id))
+            .filter((i) => i !== undefined) /* 0 is a valid index */
+            .flatMap((i) => clusters[i]?.faceIDs ?? [])
+            .map((faceID) => faceForFaceID.get(faceID))
             .filter((face) => !!face)
-            .reduce((topFace, face) =>
-                topFace.score > face.score ? topFace : face,
+            .reduce((max, face) =>
+                max.score > face.score ? max : face,
             ).faceID;
     }
 
-    log.debug(() => [
-        "ml/cluster",
-        {
-            faces,
-            validClusters,
-            clusterIndexForClusterID,
-            clusterIDForFaceID,
-            cgroups,
-        },
-    ]);
-    log.debug(
-        () =>
-            `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
+    log.info("ml/cluster", {
+        faces,
+        validClusters,
+        clusterIndexForClusterID: Object.fromEntries(clusterIndexForClusterID),
+        clusterIDForFaceID: Object.fromEntries(clusterIDForFaceID),
+        cgroups,
+    });
+    log.info(
+        `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
     return { clusters: validClusters, cgroups };
@@ -278,7 +292,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
 
 /**
  * A generator function that returns a stream of {faceID, embedding} values,
- * flattening all the all the faces present in the given {@link faceIndices}.
+ * flattening all the the faces present in the given {@link faceIndices}.
  */
 function* enumerateFaces(faceIndices: FaceIndex[]) {
     for (const fi of faceIndices) {

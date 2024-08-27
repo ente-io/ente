@@ -2,7 +2,18 @@ name: "Lint (web)"
 
 on:
     # Run on every pull request (open or push to it) that changes web/
+    #
+    # This is for running lints on pull requests from external contributors.
     pull_request:
+        paths:
+            - "web/**"
+            - ".github/workflows/web-lint.yml"
+    # Run on every push (to a non-main branch) that changes web/
+    #
+    # This reduces the delay in waiting for the pull_request to kick in for the
+    # PRs from existing contributors.
+    push:
+        branches-ignore: [main]
         paths:
             - "web/**"
             - ".github/workflows/web-lint.yml"
