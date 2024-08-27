@@ -1,7 +1,6 @@
 {
   "icons": [
-    {
-      "title": "1xBet"
+    { "title": "1xBet"
     },
     {
       "title": "3Commas"
@@ -195,17 +194,16 @@
       "title": "Estateguru"
     },
     {
-      "title": "Filen"
+      "title": "Filen",
+      "hex": "858585"
     },
     {
       "title": "Firefox",
       "slug": "mozilla"
     },
     {
-      "title": "G2A"
-    },
-    {
-      "title": "GitHub"
+      "title": "GitHub",
+      "hex": "000000"
     },
     {
       "title": "GitLab"
@@ -373,7 +371,7 @@
     },
     {
       "title": "MyFRITZ!Net",
-      "slug": "myfritz",
+      "slug": "myfritz"
       "altNames": [
         "MyFRITZ!",
         "FritzBox",
@@ -437,8 +435,7 @@
         "openobserve ai"
       ]
     },
-    {
-      "title": "okx",
+    { "title": "okx",
       "hex": "000000" },
     {
       "title": "Parsec"
@@ -624,7 +621,8 @@
       ]
     },
     {
-      "title": "Ubisoft"
+      "title": "Ubisoft",
+      "hex": "4285f4"
     },
     {
       "title": "Ubuntu One",
@@ -682,9 +680,8 @@
       ],
       "slug": "Yandex"
     },
-    {
-      "title": "yahoo"
-    },
+    { "title": "yahoo" },
+
     {
       "title": "YNAB",
       "altNames": [
