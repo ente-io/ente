@@ -11,27 +11,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (c *UserController) getUserFileCountWithCache(userID int64, app ente.App) (int64, error) {
-	// Check if the value is present in the cache
-	if count, ok := c.UserCache.GetFileCount(userID, app); ok {
-		// Cache hit, update the cache asynchronously
-		go func() {
-			_, _ = c.getUserCountAndUpdateCache(userID, app)
-		}()
-		return count, nil
-	}
-	return c.getUserCountAndUpdateCache(userID, app)
-}
-
-func (c *UserController) getUserCountAndUpdateCache(userID int64, app ente.App) (int64, error) {
-	count, err := c.FileRepo.GetFileCountForUser(userID, app)
-	if err != nil {
-		return 0, stacktrace.Propagate(err, "")
-	}
-	c.UserCache.SetFileCount(userID, count, app)
-	return count, nil
-}
-
 func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemoryCount bool, app ente.App) (details.UserDetailsResponse, error) {
 
 	g := new(errgroup.Group)
@@ -86,7 +65,7 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 
 	if fetchMemoryCount {
 		g.Go(func() error {
-			fCount, err := c.getUserFileCountWithCache(userID, app)
+			fCount, err := c.UserCacheController.GetUserFileCountWithCache(userID, app)
 			if err == nil {
 				fileCount = fCount
 			}

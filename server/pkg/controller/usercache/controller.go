@@ -14,6 +14,8 @@ import (
 // Avoid adding any direct dependencies to the other controller.
 type Controller struct {
 	FileRepo       *repo.FileRepository
+	UsageRepo      *repo.UsageRepository
+	TrashRepo      *repo.TrashRepository
 	StoreBonusRepo *storagebonus.Repository
 	UserCache      *cache.UserCache
 }

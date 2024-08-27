@@ -188,7 +188,9 @@ func main() {
 	}
 
 	userCache := cache2.NewUserCache()
-	userCacheCtrl := &usercache.Controller{UserCache: userCache, FileRepo: fileRepo, StoreBonusRepo: storagBonusRepo}
+	userCacheCtrl := &usercache.Controller{UserCache: userCache, FileRepo: fileRepo,
+		UsageRepo: usageRepo, TrashRepo: trashRepo,
+		StoreBonusRepo: storagBonusRepo}
 	offerController := offer.NewOfferController(*userRepo, discordController, storagBonusRepo, userCacheCtrl)
 	plans := billing.GetPlans()
 	defaultPlan := billing.GetDefaultPlans(plans)
