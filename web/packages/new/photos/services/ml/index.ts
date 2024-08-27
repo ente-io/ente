@@ -13,7 +13,7 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
-import { throttled } from "@/utils/promise";
+import { throttled, wait } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
@@ -317,9 +317,6 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-// // TODO-Cluster temporary import here
-// let last: SearchPerson[] | undefined;
-
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
  */
@@ -328,54 +325,67 @@ export const wipClusterEnable = async (): Promise<boolean> =>
     isDevBuild &&
     (await isInternalUser());
 
-// export const wipCluster = async () => {
-//     if (!(await wipClusterEnable())) return;
+// // TODO-Cluster temporary import here
+// let last: SearchPerson[] | undefined;
+let _wip_isClustering = false;
 
-//     if (last) return last;
+export const wipCluster = async () => {
+    if (!(await wipClusterEnable())) return;
 
-//     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-//     const clusterByID = new Map(
-//         clusters.map((cluster) => [cluster.id, cluster]),
-//     );
+    log.info("clustering");
+    _wip_isClustering = true;
+    triggerStatusUpdate();
 
-//     const localFiles = await getAllLocalFiles();
-//     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+    await wait(2000);
 
-//     const result: SearchPerson[] = [];
-//     for (const cgroup of cgroups) {
-//         let avatarFaceID = cgroup.avatarFaceID;
-//         // TODO-Cluster
-//         // Temp
-//         if (!avatarFaceID) {
-//             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//             avatarFaceID = cgroup.clusterIDs
-//                 .map((id) => clusterByID.get(id))
-//                 .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
-//         }
-//         cgroup.clusterIDs;
-//         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
-//         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
-//         if (!avatarFaceFileID || !avatarFaceFile) {
-//             assertionFailed(`Face ID ${avatarFaceID} without local file`);
-//             continue;
-//         }
-//         const files = cgroup.clusterIDs
-//             .map((id) => clusterByID.get(id))
-//             .flatMap((cluster) => cluster?.faceIDs ?? [])
-//             .map((faceID) => fileIDFromFaceID(faceID))
-//             .filter((fileID) => fileID !== undefined);
-//         result.push({
-//             id: cgroup.id,
-//             name: cgroup.name,
-//             files,
-//             displayFaceID: avatarFaceID,
-//             displayFaceFile: avatarFaceFile,
-//         });
-//     }
+    //     if (last) return last;
 
-//     last = result;
-//     return result;
-// };
+    //     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
+    //     const clusterByID = new Map(
+    //         clusters.map((cluster) => [cluster.id, cluster]),
+    //     );
+
+    //     const localFiles = await getAllLocalFiles();
+    //     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+
+    //     const result: SearchPerson[] = [];
+    //     for (const cgroup of cgroups) {
+    //         let avatarFaceID = cgroup.avatarFaceID;
+    //         // TODO-Cluster
+    //         // Temp
+    //         if (!avatarFaceID) {
+    //             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //             avatarFaceID = cgroup.clusterIDs
+    //                 .map((id) => clusterByID.get(id))
+    //                 .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
+    //         }
+    //         cgroup.clusterIDs;
+    //         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
+    //         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
+    //         if (!avatarFaceFileID || !avatarFaceFile) {
+    //             assertionFailed(`Face ID ${avatarFaceID} without local file`);
+    //             continue;
+    //         }
+    //         const files = cgroup.clusterIDs
+    //             .map((id) => clusterByID.get(id))
+    //             .flatMap((cluster) => cluster?.faceIDs ?? [])
+    //             .map((faceID) => fileIDFromFaceID(faceID))
+    //             .filter((fileID) => fileID !== undefined);
+    //         result.push({
+    //             id: cgroup.id,
+    //             name: cgroup.name,
+    //             files,
+    //             displayFaceID: avatarFaceID,
+    //             displayFaceFile: avatarFaceFile,
+    //         });
+    //     }
+
+    _wip_isClustering = false;
+    triggerStatusUpdate();
+
+    //     last = result;
+    //     return result;
+};
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
@@ -476,6 +486,8 @@ const getMLStatus = async (): Promise<MLStatus> => {
     const state = await (await worker()).state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
+    } else if (_wip_isClustering) {
+        phase = "clustering";
     } else if (state == "init" || indexableCount > 0) {
         phase = "scheduled";
     } else {

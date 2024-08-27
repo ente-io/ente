@@ -1,13 +1,14 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { ut } from "@/base/i18n";
+import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
@@ -313,7 +314,10 @@ const ManageML: React.FC<ManageMLProps> = ({
         case "indexing":
             status = t("indexing_status_running");
             break;
-        // TODO: Clustering
+        case "clustering":
+            // TODO-Cluster
+            status = pt("Grouping faces");
+            break;
         default:
             status = t("indexing_status_done");
             break;
@@ -333,6 +337,8 @@ const ManageML: React.FC<ManageMLProps> = ({
             buttonDirection: "row",
         });
     };
+
+    const wipClusterNow = () => void wipCluster();
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -382,12 +388,12 @@ const ManageML: React.FC<ManageMLProps> = ({
                     <MenuItemGroup>
                         <EnteMenuItem
                             label={ut("Cluster   ––– internal only option")}
-                            onClick={confirmDisableML}
+                            onClick={wipClusterNow}
                         />
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "(Re)-Create clusters locally, afresh. They will not be synced to remote.",
+                            "Create clusters locally, afresh. Existing local clusters will be overwritten. Nothing will be synced to remote.",
                         )}
                     />
                 </Box>
