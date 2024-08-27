@@ -36,8 +36,8 @@ class SemanticSearchService {
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
-  bool _isCacheRefreshPending = true;
-  List<ClipEmbedding> _cachedImageEmbeddings = <ClipEmbedding>[];
+
+  Future<List<ClipEmbedding>>? _cachedImageEmbeddings;
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -51,28 +51,28 @@ class SemanticSearchService {
     }
     _hasInitialized = true;
 
-    await _refreshClipCache();
+    // call getClipEmbeddings after 5 seconds
+    Future.delayed(const Duration(seconds: 5), () async {
+      await getClipEmbeddings();
+    });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      _isCacheRefreshPending = true;
+      _cachedImageEmbeddings = null;
     });
 
     unawaited(_loadTextModel(delay: true));
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return localSettings.isMLIndexingEnabled &&
-        _textModelIsLoaded &&
-        _cachedImageEmbeddings.isNotEmpty;
+    return localSettings.isMLIndexingEnabled && _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
   // If there are multiple call tho this method, then for all the calls, the result will be the same as the last query.
   Future<(String, List<EnteFile>)> searchScreenQuery(String query) async {
-    await _refreshClipCache();
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "Magic search enabled ${localSettings.isMLIndexingEnabled}, loaded $_textModelIsLoaded cached ${_cachedImageEmbeddings.isNotEmpty}",
+          "Magic search enabled ${localSettings.isMLIndexingEnabled}, loaded $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -106,21 +106,10 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<void> _refreshClipCache() async {
-    if (_isCacheRefreshPending == false) {
-      return;
-    }
-    _isCacheRefreshPending = false;
+  Future<List<ClipEmbedding>> getClipEmbeddings() async {
     _logger.info("Pulling cached embeddings");
-    final startTime = DateTime.now();
-    _cachedImageEmbeddings = await MLDataDB.instance.getAll();
-    final endTime = DateTime.now();
-    _logger.info(
-      "Loading ${_cachedImageEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
-    );
-    Bus.instance.fire(EmbeddingCacheUpdatedEvent());
-    _logger
-        .info("Cached embeddings: " + _cachedImageEmbeddings.length.toString());
+    _cachedImageEmbeddings ??= MLDataDB.instance.getAll();
+    return _cachedImageEmbeddings!;
   }
 
   Future<List<EnteFile>> getMatchingFiles(
@@ -278,10 +267,11 @@ class SemanticSearchService {
     double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
+    final embeddings = await getClipEmbeddings();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkSimilarities,
       param: {
-        "imageEmbeddings": _cachedImageEmbeddings,
+        "imageEmbeddings": embeddings,
         "textEmbedding": textEmbedding,
         "minimumSimilarity": minimumSimilarity,
       },
