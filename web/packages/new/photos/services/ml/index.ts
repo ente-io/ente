@@ -6,6 +6,7 @@ import { isDesktop } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
+import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -14,6 +15,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
+import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
@@ -318,14 +320,13 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
 // // TODO-Cluster temporary import here
 // let last: SearchPerson[] | undefined;
 
-// /**
-//  * WIP! Don't enable, dragon eggs are hatching here.
-//  */
-// export const wipClusterEnable = async () => {
-//     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
-//     if (!isDevBuild || !(await isInternalUser())) return false;
-//     return true;
-// };
+/**
+ * WIP! Don't enable, dragon eggs are hatching here.
+ */
+export const wipClusterEnable = async () =>
+    process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
+    isDevBuild &&
+    (await isInternalUser());
 
 // export const wipCluster = async () => {
 //     if (!(await wipClusterEnable())) return;
