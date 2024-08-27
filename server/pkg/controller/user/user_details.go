@@ -4,47 +4,12 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/details"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
-	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/recover"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/sync/errgroup"
 )
-
-func (c *UserController) GetDetails(ctx *gin.Context) (details.UserDetailsResponse, error) {
-
-	enteApp := ctx.MustGet("app").(ente.App)
-
-	userID := auth.GetUserID(ctx.Request.Header)
-	user, err := c.UserRepo.Get(userID)
-	if err != nil {
-		return details.UserDetailsResponse{}, stacktrace.Propagate(err, "")
-	}
-	usage, err := c.FileRepo.GetUsage(userID)
-	if err != nil {
-		return details.UserDetailsResponse{}, stacktrace.Propagate(err, "")
-	}
-	fileCount, err := c.FileRepo.GetFileCountForUser(userID, enteApp)
-	if err != nil {
-		return details.UserDetailsResponse{}, stacktrace.Propagate(err, "")
-	}
-	sharedCollectionsCount, err := c.CollectionRepo.GetSharedCollectionsCount(userID)
-	if err != nil {
-		return details.UserDetailsResponse{}, stacktrace.Propagate(err, "")
-	}
-	subscription, err := c.BillingController.GetSubscription(ctx, userID)
-	if err != nil {
-		return details.UserDetailsResponse{}, stacktrace.Propagate(err, "")
-	}
-	return details.UserDetailsResponse{
-		Email:                  user.Email,
-		Usage:                  usage,
-		FileCount:              &fileCount,
-		SharedCollectionsCount: &sharedCollectionsCount,
-		Subscription:           subscription,
-	}, nil
-}
 
 func (c *UserController) getUserFileCountWithCache(userID int64, app ente.App) (int64, error) {
 	// Check if the value is present in the cache
