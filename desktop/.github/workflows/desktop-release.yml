@@ -91,7 +91,7 @@ jobs:
               run: sudo apt-get install libarchive-tools
 
             - name: Build
-              uses: ente-io/action-electron-builder@v1.0.0
+              uses: ente-io/action-electron-builder
               with:
                   package_root: desktop
                   build_script_name: build:ci
