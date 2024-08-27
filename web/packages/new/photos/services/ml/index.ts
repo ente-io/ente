@@ -323,8 +323,8 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
  */
-export const wipClusterEnable = async () =>
-    process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
+export const wipClusterEnable = async (): Promise<boolean> =>
+    !!process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
     isDevBuild &&
     (await isInternalUser());
 

@@ -1,12 +1,14 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup } from "@/base/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -295,7 +297,10 @@ const ManageML: React.FC<ManageMLProps> = ({
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
+    const [showClusterOpt, setShowClusterOpt] = useState(false);
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+
+    useEffect(() => void wipClusterEnable().then(setShowClusterOpt), []);
 
     let status: string;
     switch (phase) {
@@ -372,6 +377,21 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </Stack>
                 </Stack>
             </Paper>
+            {showClusterOpt && (
+                <Box>
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            label={ut("Cluster   ––– internal only option")}
+                            onClick={confirmDisableML}
+                        />
+                    </MenuItemGroup>
+                    <MenuSectionTitle
+                        title={ut(
+                            "(Re)-Create clusters locally, afresh. They will not be synced to remote.",
+                        )}
+                    />
+                </Box>
+            )}
         </Stack>
     );
 };
