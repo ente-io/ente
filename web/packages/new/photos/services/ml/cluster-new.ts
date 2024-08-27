@@ -60,15 +60,17 @@ export interface CGroup {
     /**
      * A nanoid for this cluster group.
      *
-     * This is the ID of the "cgroup" user entity, it is not contained as part
-     * of the group entity payload itself.
+     * This is the ID of the "cgroup" user entity (the envelope), and it is not
+     * contained as part of the group entity payload itself.
      */
     id: string;
     /**
      * A name assigned by the user to this cluster group.
      *
-     * This should be set to an empty string for an unnamed cluster that was
-     * hidden.
+     * The client should handle both empty strings and undefined as indicating a
+     * cgroup without a name. When the client needs to set this to an "empty"
+     * value, which happens when hiding an unnamed cluster, it should it to an
+     * empty string. That is, expect `"" | undefined`, but set `""`.
      */
     name: string | undefined;
     /**
@@ -92,13 +94,20 @@ export interface CGroup {
      * The ID of the face that should be used as the cover photo for this
      * cluster group (if the user has set one).
      *
-     * {@link avatarFaceID} is the user selected face. {@link displayFaceID} is
-     * the automatic placeholder.
+     * This is similar to the [@link displayFaceID}, the difference being:
+     *
+     * -   {@link avatarFaceID} is the face selected by the user.
+     *
+     * -   {@link displayFaceID} is the automatic placeholder, and only comes
+     *     into effect if the user has not explicitly selected a face.
      */
     avatarFaceID: string | undefined;
     /**
      * Locally determined ID of the "best" face that should be used as the
      * display face, to represent this cluster group in the UI.
+     *
+     * This property is not synced with remote. For more details, see
+     * {@link avatarFaceID}.
      */
     displayFaceID: string | undefined;
 }
@@ -108,16 +117,16 @@ export interface CGroup {
  *
  * [Note: Face clustering algorithm]
  *
- * A (cluster) group consists of clusters, each of which itself is a set of
- * faces.
+ * A cgroup (cluster group) consists of clusters, each of which itself is a set
+ * of faces.
  *
- * The clusters are generated using locally by clients using the following
- * (pseudo-) algorithm:
+ *     cgroup << cluster << face
+ *
+ * The clusters are generated locally by clients using the following algorithm:
  *
  * 1.  clusters = [] initially, or fetched from remote.
  *
- * 2.  For each face, find its nearest neighbour in the embedding space from
- *     amongst the faces that have already been clustered.
+ * 2.  For each face, find its nearest neighbour in the embedding space.
  *
  * 3.  If no such neighbour is found within our threshold, create a new cluster.
  *
@@ -126,12 +135,13 @@ export interface CGroup {
  * This user can then tweak the output of the algorithm by performing the
  * following actions to the list of clusters that they can see:
  *
- * -   They can provide a name for a cluster. This upgrades a cluster into a
- *     "cgroup", which then gets synced via remote to all their devices.
+ * -   They can provide a name for a cluster ("name a person"). This upgrades a
+ *     cluster into a "cgroup", which is an entity that gets synced via remote
+ *     to the user's other clients.
  *
- * -   They can attach more clusters to a cgroup.
+ * -   They can attach more clusters to a cgroup ("merge clusters")
  *
- * -   They can remove a cluster from a cgroup.
+ * -   They can remove a cluster from a cgroup ("break clusters").
  *
  * After clustering, we also do some routine cleanup. Faces belonging to files
  * that have been deleted (including those in Trash) should be pruned off.
@@ -140,8 +150,8 @@ export interface CGroup {
  * In particular, the same face ID can be in different clusters. In such cases
  * we should assign it arbitrarily assign it to the last cluster we find it in.
  * Such leeway is intentionally provided to allow clients some slack in how they
- * implement the sync without making an blocking API request for every user
- * interaction.
+ * implement the sync without needing to make an blocking API request for every
+ * user interaction.
  */
 export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
@@ -278,7 +288,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
 
 /**
  * A generator function that returns a stream of {faceID, embedding} values,
- * flattening all the all the faces present in the given {@link faceIndices}.
+ * flattening all the the faces present in the given {@link faceIndices}.
  */
 function* enumerateFaces(faceIndices: FaceIndex[]) {
     for (const fi of faceIndices) {
