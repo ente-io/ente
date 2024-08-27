@@ -3172,6 +3172,26 @@ class S {
     );
   }
 
+  /// `Backup status`
+  String get backupStatus {
+    return Intl.message(
+      'Backup status',
+      name: 'backupStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Items that have been backed up will show up here`
+  String get backupStatusDescription {
+    return Intl.message(
+      'Items that have been backed up will show up here',
+      name: 'backupStatusDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Backup over mobile data`
   String get backupOverMobileData {
     return Intl.message(

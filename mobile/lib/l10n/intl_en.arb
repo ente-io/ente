@@ -453,6 +453,8 @@
   "showMemories": "Show memories",
   "yearsAgo": "{count, plural, one{{count} year ago} other{{count} years ago}}",
   "backupSettings": "Backup settings",
+  "backupStatus": "Backup status",
+  "backupStatusDescription": "Items that have been backed up will show up here",
   "backupOverMobileData": "Backup over mobile data",
   "backupVideos": "Backup videos",
   "disableAutoLock": "Disable auto lock",
