@@ -6,15 +6,19 @@ files:
     translation: /lib/l10n/intl_%two_letters_code%.arb
     dest: /%original_file_name%
     type: arb
+    skip_untranslated_files: false
   - source: /fastlane/metadata/playstore/en-US/*.txt
     translation: /fastlane/metadata/playstore/%two_letters_code%/%original_file_name%
     dest: /playstore/%original_file_name%
     type: txt
+    skip_untranslated_files: true
   - source: /fastlane/metadata/android/en-US/*.txt
     translation: /fastlane/metadata/android/%two_letters_code%/%original_file_name%
     dest: /fdroid/%original_file_name%
     type: txt
+    skip_untranslated_files: true
   - source: /fastlane/metadata/ios/en-US/*.txt
     translation: /fastlane/metadata/ios/%two_letters_code%/%original_file_name%
     dest: /appstore/%original_file_name%
     type: txt
+    skip_untranslated_files: true
