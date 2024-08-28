@@ -668,6 +668,22 @@ class MLDataDB {
     return maps.first['count'] as int;
   }
 
+  Future<Set<int>> getErroredFileIDs() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT DISTINCT $fileIDColumn FROM $facesTable WHERE $faceScore < 0',
+    );
+    return maps.map((e) => e[fileIDColumn] as int).toSet();
+  }
+
+  Future<void> deleteFaceIndexForFiles(List<int> fileIDs) async {
+    final db = await instance.asyncDB;
+    final String sql = '''
+      DELETE FROM $facesTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})
+    ''';
+    await db.execute(sql);
+  }
+
   Future<int> getClusteredOrFacelessFileCount() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> clustered = await db.getAll(
