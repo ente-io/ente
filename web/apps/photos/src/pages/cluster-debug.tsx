@@ -1,8 +1,11 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import { pt } from "@/base/i18n";
-import { faceCrop, wipClusterPageContents } from "@/new/photos/services/ml";
-import type { Face } from "@/new/photos/services/ml/face";
-import { EnteFile } from "@/new/photos/types/file";
+import {
+    faceCrop,
+    wipClusterPageContents,
+    type FaceFileNeighbour,
+    type FaceFileNeighbours,
+} from "@/new/photos/services/ml";
 import {
     FlexWrapper,
     FluidContainer,
@@ -10,22 +13,17 @@ import {
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
-import { Box, IconButton, styled } from "@mui/material";
+import { Box, IconButton, styled, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList } from "react-window";
 
-export interface UICluster {
-    files: EnteFile[];
-    face: Face;
-}
-
 // TODO-Cluster Temporary component for debugging
-export default function Deduplicate() {
+export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
-    const [clusters, setClusters] = useState<UICluster[]>(null);
+    const [faceFNs, setFaceFNs] = useState<FaceFileNeighbours[]>(null);
 
     useEffect(() => {
         showNavBar(true);
@@ -34,26 +32,20 @@ export default function Deduplicate() {
 
     const cluster = async () => {
         startLoading();
-        const faceAndFiles = await wipClusterPageContents();
-        setClusters(
-            faceAndFiles.map(({ face, file }) => ({
-                files: [file],
-                face,
-            })),
-        );
+        setFaceFNs(await wipClusterPageContents());
         finishLoading();
     };
 
     return (
         <>
-            {clusters ? (
+            {faceFNs ? (
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => (
                             <ClusterPhotoList
                                 width={width}
                                 height={height}
-                                clusters={clusters}
+                                faceFNs={faceFNs}
                             />
                         )}
                     </AutoSizer>
@@ -99,13 +91,13 @@ const Container = styled("div")`
 interface ClusterPhotoListProps {
     height: number;
     width: number;
-    clusters: UICluster[];
+    faceFNs: FaceFileNeighbours[];
 }
 
 const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     height,
     width,
-    clusters,
+    faceFNs,
 }) => {
     const [itemList, setItemList] = useState<ItemListItem[]>([]);
     const listRef = useRef(null);
@@ -119,24 +111,23 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const listItemHeight = 120 * shrinkRatio + 4;
 
     useEffect(() => {
-        setItemList(itemListFromClusters(clusters, columns));
-    }, [columns, clusters]);
+        setItemList(itemListFromFaceFNs(faceFNs, columns));
+    }, [columns, faceFNs]);
 
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
     }, [itemList]);
 
     const getItemSize = (i: number) =>
-        itemList[i].score !== undefined ? 36 : listItemHeight;
+        typeof itemList[i] == "number" ? 36 : listItemHeight;
 
     const generateKey = (i: number) =>
-        itemList[i].score !== undefined
-            ? `${itemList[i].score}-${i}`
-            : `${itemList[i].files[0].id}-${itemList[i].files.slice(-1)[0].id}`;
+        typeof itemList[i] == "number"
+            ? `${itemList[i]}-${i}`
+            : `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`;
 
     return (
         <VariableSizeList
-            key={`${0}`}
             itemData={{ itemList, columns, shrinkRatio }}
             ref={listRef}
             itemSize={getItemSize}
@@ -156,18 +147,13 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
                             columns={columns}
                             shrinkRatio={shrinkRatio}
                         >
-                            {item.score !== undefined ? (
+                            {typeof item == "number" ? (
                                 <LabelContainer span={columns}>
-                                    {`${item.fileCount} files, score ${item.score.toFixed(2)}`}
+                                    {`score ${item.toFixed(2)}`}
                                 </LabelContainer>
                             ) : (
-                                item.files.map((enteFile) => (
-                                    <FaceChip key={`${enteFile.id}`}>
-                                        <FaceCropImageView
-                                            enteFile={enteFile}
-                                            faceID={item.face?.faceID}
-                                        />
-                                    </FaceChip>
+                                item.map((ffn, i) => (
+                                    <FaceItem key={i.toString()} {...ffn} />
                                 ))
                             )}
                         </ListContainer>
@@ -178,20 +164,41 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     );
 };
 
-const FaceChip = styled(Box)`
-    width: 120px;
-    height: 120px;
-`;
+type ItemListItem = number | FaceFileNeighbour[];
 
-interface FaceCropImageViewProps {
-    faceID: string;
-    enteFile: EnteFile;
-}
+const itemListFromFaceFNs = (
+    faceFNs: FaceFileNeighbours[],
+    columns: number,
+) => {
+    const result: ItemListItem[] = [];
+    for (let index = 0; index < faceFNs.length; index++) {
+        const { face, neighbours } = faceFNs[index];
+        result.push(face.score);
+        let lastIndex = 0;
+        while (lastIndex < neighbours.length) {
+            result.push(neighbours.slice(lastIndex, lastIndex + columns));
+            lastIndex += columns;
+        }
+    }
+    return result;
+};
 
-const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
-    faceID,
+const getFractionFittableColumns = (width: number) =>
+    (width - 2 * getGapFromScreenEdge(width) + 4) / (120 + 4);
+
+const getGapFromScreenEdge = (width: number) => (width > 4 * 120 ? 24 : 4);
+
+const getShrinkRatio = (width: number, columns: number) =>
+    (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
+    (columns * 120);
+
+const FaceItem: React.FC<FaceFileNeighbour> = ({
+    face,
     enteFile,
+    cosineSimilarity,
 }) => {
+    const { faceID } = face;
+
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
     useEffect(() => {
@@ -209,17 +216,33 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         };
     }, [faceID, enteFile]);
 
-    return objectURL ? (
-        <img
-            style={{ objectFit: "cover", width: "100%", height: "100%" }}
-            src={objectURL}
-        />
-    ) : (
-        <div />
+    return (
+        <FaceChip>
+            {objectURL && (
+                <img
+                    style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                    }}
+                    src={objectURL}
+                />
+            )}
+            <Typography variant="small" textAlign="right">
+                {cosineSimilarity.toFixed(2)}
+            </Typography>
+        </FaceChip>
     );
 };
 
-const ListContainer = styled(Box)<{
+const FaceChip = styled(Box)`
+    width: 120px;
+    height: 120px;
+`;
+
+const ListContainer = styled(Box, {
+    shouldForwardProp: (propName) => propName != "shrinkRatio",
+})<{
     columns: number;
     shrinkRatio: number;
 }>`
@@ -240,49 +263,7 @@ const LabelContainer = styled(ListItemContainer)`
     height: 32px;
 `;
 
-interface ItemListItem {
-    score?: number;
-    face?: Face;
-    files?: EnteFile[];
-    itemStartIndex?: number;
-    fileCount?: number;
-}
-
 const ListItem = styled("div")`
     display: flex;
     justify-content: center;
 `;
-
-function getFractionFittableColumns(width: number): number {
-    return (width - 2 * getGapFromScreenEdge(width) + 4) / (120 + 4);
-}
-
-const getGapFromScreenEdge = (width: number) => (width > 4 * 120 ? 24 : 4);
-
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
-        (columns * 120)
-    );
-}
-
-const itemListFromClusters = (clusters: UICluster[], columns: number) => {
-    const result: ItemListItem[] = [];
-    for (let index = 0; index < clusters.length; index++) {
-        const dupes = clusters[index];
-        result.push({
-            score: dupes.face.score,
-            fileCount: dupes.files.length,
-        });
-        let lastIndex = 0;
-        while (lastIndex < dupes.files.length) {
-            result.push({
-                files: dupes.files.slice(lastIndex, lastIndex + columns),
-                face: dupes.face,
-                itemStartIndex: index,
-            });
-            lastIndex += columns;
-        }
-    }
-    return result;
-};

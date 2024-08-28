@@ -343,6 +343,17 @@ export const wipSearchPersons = async () => {
     return _wip_searchPersons ?? [];
 };
 
+export interface FaceFileNeighbours {
+    face: Face;
+    neighbours: FaceFileNeighbour[];
+}
+
+export interface FaceFileNeighbour {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity: number;
+}
+
 export const wipClusterPageContents = async () => {
     if (!(await wipClusterEnable())) return [];
 
@@ -351,21 +362,24 @@ export const wipClusterPageContents = async () => {
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const { faces } = await clusterFaces(await faceIndexes());
+    const { faceAndNeigbours } = await clusterFaces(await faceIndexes());
     // const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+    const fileForFace = ({ faceID }: Face) =>
+        localFileByID.get(ensure(fileIDFromFaceID(faceID)));
 
-    const result1: { file: EnteFile; face: Face }[] = [];
-    for (const face of faces) {
-        const file = ensure(
-            localFileByID.get(ensure(fileIDFromFaceID(face.faceID))),
-        );
-        result1.push({ file, face });
-    }
-
-    const result = result1.sort((a, b) => b.face.score - a.face.score);
+    const result = faceAndNeigbours
+        .map(({ face, neighbours }) => ({
+            face,
+            neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+                face,
+                enteFile: fileForFace(face),
+                cosineSimilarity,
+            })),
+        }))
+        .sort((a, b) => b.face.score - a.face.score);
 
     _wip_isClustering = false;
     // _wip_searchPersons = searchPersons;

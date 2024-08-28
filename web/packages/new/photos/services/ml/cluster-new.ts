@@ -112,6 +112,17 @@ export interface CGroup {
     displayFaceID: string | undefined;
 }
 
+// TODO-Cluster
+export interface FaceNeighbours {
+    face: Face;
+    neighbours: FaceNeighbour[];
+}
+
+interface FaceNeighbour {
+    face: Face;
+    cosineSimilarity: number;
+}
+
 /**
  * Cluster faces into groups.
  *
@@ -176,6 +187,8 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // A function to generate new cluster IDs.
     const newClusterID = () => newNonSecureID("cluster_");
 
+    const faceAndNeigbours: FaceNeighbours[] = [];
+
     // For each face,
     for (const [i, { faceID, embedding }] of faces.entries()) {
         // If the face is already part of a cluster, then skip it.
@@ -184,11 +197,13 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         // Find the nearest neighbour from among all the other faces.
         let nn: Face | undefined;
         let nnCosineSimilarity = 0;
+        let neighbours: FaceNeighbour[] = [];
         for (let j = 0; j < faces.length; j++) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // Skip ourselves.
-            if (i == j) continue;
+            // TODO-Cluster
+            // // Skip ourselves.
+            // if (i == j) continue;
 
             // Can't find a way of avoiding the null assertion here.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -197,11 +212,26 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(embedding, n.embedding);
+
+            // Skip ourselves.
+            if (i == j) {
+                neighbours.push({ face: n, cosineSimilarity: csim });
+                continue;
+            }
+
             if (csim > 0.76 && csim > nnCosineSimilarity) {
                 nn = n;
                 nnCosineSimilarity = csim;
             }
+
+            neighbours.push({ face: n, cosineSimilarity: csim });
         }
+
+        neighbours = neighbours.sort(
+            (a, b) => b.cosineSimilarity - a.cosineSimilarity,
+        );
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        faceAndNeigbours.push({ face: faces[i]!, neighbours });
 
         if (nn) {
             // Found a neighbour near enough.
@@ -287,7 +317,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return { faces, clusters: validClusters, cgroups };
+    return { faces, clusters: validClusters, cgroups, faceAndNeigbours };
 };
 
 /**
