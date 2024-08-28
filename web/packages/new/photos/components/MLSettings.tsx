@@ -397,7 +397,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create in-memory clusters from arbitrary 900 photos. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
+                            "Create in-memory clusters from arbitrary 2k photos. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
                         )}
                     />
                 </Box>
