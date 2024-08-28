@@ -471,13 +471,16 @@ class MLService {
       return actuallyRanML;
     } catch (e, s) {
       final String errorString = e.toString();
+      final String format = instruction.file.displayName.split('.').last;
+      final int? size = instruction.file.fileSize;
+      final fileType = instruction.file.fileType;
       final bool acceptedIssue =
           errorString.contains('ThumbnailRetrievalException') ||
               errorString.contains('InvalidImageFormatException') ||
               errorString.contains('FileSizeTooLargeForMobileIndexing');
       if (acceptedIssue) {
         _logger.severe(
-          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          '$errorString with ID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
           e,
           s,
         );
@@ -490,7 +493,7 @@ class MLService {
         return true;
       }
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID} and format ${instruction.file.displayName.split('.').last} (${instruction.file.fileType}). Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to index file with ID: ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );
