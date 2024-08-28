@@ -1,143 +1,81 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import { pt } from "@/base/i18n";
-import log from "@/base/log";
 import { wipClusterPageContents } from "@/new/photos/services/ml";
+import type { Face } from "@/new/photos/services/ml/face";
 import { EnteFile } from "@/new/photos/types/file";
 import {
+    FlexWrapper,
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import { Box, IconButton, styled } from "@mui/material";
-import Typography from "@mui/material/Typography";
-import { DedupePhotoList } from "components/PhotoList/dedupe";
 import PreviewCard from "components/pages/gallery/PreviewCard";
-import { ALL_SECTION } from "constants/collection";
+import {
+    DATE_CONTAINER_HEIGHT,
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+    SIZE_AND_COUNT_CONTAINER_HEIGHT,
+} from "constants/gallery";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { getLocalCollections } from "services/collectionService";
-import { Duplicate } from "services/deduplicationService";
-import {
-    DeduplicateContextType,
-    DefaultDeduplicateContext,
-} from "types/deduplicate";
-import { updateFileMsrcProps } from "utils/photoFrame";
+import { VariableSizeList as List } from "react-window";
 
-const DeduplicateContext = createContext<DeduplicateContextType>(
-    DefaultDeduplicateContext,
-);
-
-const Info = styled("div")`
-    padding: 24px;
-    font-size: 18px;
-`;
+export interface UICluster {
+    files: EnteFile[];
+    face: Face;
+}
 
 // TODO-Cluster Temporary component for debugging
 export default function Deduplicate() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
-    const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
-    const [collectionNameMap, setCollectionNameMap] = useState(
-        new Map<number, string>(),
-    );
+    const [clusters, setClusters] = useState<UICluster[]>(null);
 
     useEffect(() => {
         showNavBar(true);
+        cluster();
     }, []);
 
-    useEffect(() => {
-        syncWithRemote();
-    }, []);
-
-    const syncWithRemote = async () => {
+    const cluster = async () => {
         startLoading();
-        const collections = await getLocalCollections();
-        const collectionNameMap = new Map<number, string>();
-        for (const collection of collections) {
-            collectionNameMap.set(collection.id, collection.name);
-        }
-        setCollectionNameMap(collectionNameMap);
         const faceAndFiles = await wipClusterPageContents();
-        // const files = await getLocalFiles();
-        // const duplicateFiles = await getDuplicates(files, collectionNameMap);
-        const duplicateFiles = faceAndFiles.map(({ face, file }) => ({
-            files: [file],
-            size: face.score,
-        }));
-        const currFileSizeMap = new Map<number, number>();
-        let toSelectFileIDs: number[] = [];
-        let count = 0;
-        for (const dupe of duplicateFiles) {
-            // select all except first file
-            toSelectFileIDs = [
-                ...toSelectFileIDs,
-                ...dupe.files.slice(1).map((f) => f.id),
-            ];
-            count += dupe.files.length - 1;
-
-            for (const file of dupe.files) {
-                currFileSizeMap.set(file.id, dupe.size);
-            }
-        }
-        setDuplicates(duplicateFiles);
-        const selectedFiles = {
-            count: count,
-            ownCount: count,
-            collectionID: ALL_SECTION,
-        };
-        for (const fileID of toSelectFileIDs) {
-            selectedFiles[fileID] = true;
-        }
-
+        setClusters(
+            faceAndFiles.map(({ face, file }) => ({
+                files: [file],
+                face,
+            })),
+        );
         finishLoading();
     };
 
-    const duplicateFiles = useMemoSingleThreaded(() => {
-        return (duplicates ?? []).reduce((acc, dupe) => {
-            return [...acc, ...dupe.files];
-        }, []);
-    }, [duplicates]);
-
-    if (!duplicates) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
-
     return (
-        <DeduplicateContext.Provider
-            value={{
-                ...DefaultDeduplicateContext,
-                collectionNameMap,
-                isOnDeduplicatePage: true,
-            }}
-        >
-            {duplicateFiles.length > 0 && (
-                <Info>{t("DEDUPLICATE_BASED_ON_SIZE")}</Info>
-            )}
-            {duplicateFiles.length === 0 ? (
-                <VerticallyCentered>
-                    <Typography variant="large" color="text.muted">
-                        {t("NO_DUPLICATES_FOUND")}
-                    </Typography>
-                </VerticallyCentered>
+        <>
+            {clusters ? (
+                <Container>
+                    <AutoSizer>
+                        {({ height, width }) => (
+                            <ClusterPhotoList
+                                width={width}
+                                height={height}
+                                clusters={clusters}
+                            />
+                        )}
+                    </AutoSizer>
+                </Container>
             ) : (
-                <ClusterDebugPhotoFrame
-                    files={duplicateFiles}
-                    duplicates={duplicates}
-                    activeCollectionID={ALL_SECTION}
-                />
+                <VerticallyCentered>
+                    <EnteSpinner />
+                </VerticallyCentered>
             )}
             <Options />
-        </DeduplicateContext.Provider>
+        </>
     );
 }
 
@@ -160,86 +98,6 @@ const Options: React.FC = () => {
     );
 };
 
-interface ClusterDebugPhotoFrameProps {
-    files: EnteFile[];
-    duplicates?: Duplicate[];
-    activeCollectionID: number;
-}
-
-const ClusterDebugPhotoFrame: React.FC<ClusterDebugPhotoFrameProps> = ({
-    duplicates,
-    files,
-    activeCollectionID,
-}) => {
-    const displayFiles = useMemoSingleThreaded(() => {
-        return files.map((item) => {
-            const filteredItem = {
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            };
-            return filteredItem;
-        });
-    }, [files]);
-
-    const updateURL =
-        (index: number) => (id: number, url: string, forceUpdate?: boolean) => {
-            const file = displayFiles[index];
-            // this is to prevent outdated updateURL call from updating the wrong file
-            if (file.id !== id) {
-                log.info(
-                    `[${id}]PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`,
-                );
-                throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
-            }
-            if (file.msrc && !forceUpdate) {
-                throw Error(CustomError.URL_ALREADY_SET);
-            }
-            updateFileMsrcProps(file, url);
-        };
-
-    const getThumbnail = (
-        item: EnteFile,
-        index: number,
-        isScrolling: boolean,
-    ) => (
-        <PreviewCard
-            key={`tile-${item.id}`}
-            file={item}
-            updateURL={updateURL(index)}
-            onClick={() => {}}
-            selectable={false}
-            onSelect={() => {}}
-            selected={false}
-            selectOnClick={false}
-            onHover={() => {}}
-            onRangeSelect={() => {}}
-            isRangeSelectActive={false}
-            isInsSelectRange={false}
-            activeCollectionID={activeCollectionID}
-            showPlaceholder={isScrolling}
-        />
-    );
-
-    return (
-        <Container>
-            <AutoSizer>
-                {({ height, width }) => (
-                    <DedupePhotoList /*PhotoList*/
-                        width={width}
-                        height={height}
-                        getThumbnail={getThumbnail}
-                        duplicates={duplicates}
-                        activeCollectionID={activeCollectionID}
-                        showAppDownloadBanner={false}
-                    />
-                )}
-            </AutoSizer>
-        </Container>
-    );
-};
-
 const Container = styled("div")`
     display: block;
     flex: 1;
@@ -249,6 +107,198 @@ const Container = styled("div")`
     overflow: hidden;
     .pswp-thumbnail {
         display: inline-block;
-        cursor: pointer;
     }
 `;
+
+interface ClusterPhotoListProps {
+    height: number;
+    width: number;
+    clusters: UICluster[];
+}
+
+const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
+    height,
+    width,
+    clusters,
+}) => {
+    const [itemList, setItemList] = useState<ItemListItem[]>([]);
+    const listRef = useRef(null);
+
+    const getThumbnail = (
+        item: EnteFile,
+        index: number,
+        isScrolling: boolean,
+    ) => (
+        <PreviewCard
+            key={`tile-${item.id}`}
+            file={item}
+            updateURL={() => {}}
+            onClick={() => {}}
+            selectable={false}
+            onSelect={() => {}}
+            selected={false}
+            selectOnClick={false}
+            onHover={() => {}}
+            onRangeSelect={() => {}}
+            isRangeSelectActive={false}
+            isInsSelectRange={false}
+            activeCollectionID={0}
+            showPlaceholder={isScrolling}
+        />
+    );
+
+    const columns = useMemo(() => {
+        const fittableColumns = getFractionFittableColumns(width);
+        let columns = Math.floor(fittableColumns);
+        if (columns < MIN_COLUMNS) {
+            columns = MIN_COLUMNS;
+        }
+        return columns;
+    }, [width]);
+
+    const shrinkRatio = getShrinkRatio(width, columns);
+    const listItemHeight =
+        IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
+
+    useEffect(() => {
+        setItemList(itemListFromClusters(clusters, columns));
+    }, [columns, clusters]);
+
+    useEffect(() => {
+        listRef.current?.resetAfterIndex(0);
+    }, [itemList]);
+
+    const getItemSize = (i: number) =>
+        itemList[i].score !== undefined
+            ? SIZE_AND_COUNT_CONTAINER_HEIGHT
+            : listItemHeight;
+
+    const generateKey = (i: number) =>
+        itemList[i].score !== undefined
+            ? `${itemList[i].score}-${i}`
+            : `${itemList[i].files[0].id}-${itemList[i].files.slice(-1)[0].id}`;
+
+    const renderListItem = (listItem: ItemListItem, isScrolling: boolean) =>
+        listItem.score !== undefined ? (
+            <SizeAndCountContainer span={columns}>
+                {listItem.fileCount} {t("FILES")},{" score "}
+                {listItem.score.toFixed(2)}
+            </SizeAndCountContainer>
+        ) : (
+            listItem.files.map((item, idx) =>
+                getThumbnail(item, listItem.itemStartIndex + idx, isScrolling),
+            )
+        );
+
+    return (
+        <List
+            key={`${0}`}
+            itemData={{ itemList, columns, shrinkRatio, renderListItem }}
+            ref={listRef}
+            itemSize={getItemSize}
+            height={height}
+            width={width}
+            itemCount={itemList.length}
+            itemKey={generateKey}
+            overscanCount={3}
+            useIsScrolling
+        >
+            {({ index, style, isScrolling, data }) => {
+                const { itemList, columns, shrinkRatio, renderListItem } = data;
+                return (
+                    <ListItem style={style}>
+                        <ListContainer
+                            columns={columns}
+                            shrinkRatio={shrinkRatio}
+                        >
+                            {renderListItem(itemList[index], isScrolling)}
+                        </ListContainer>
+                    </ListItem>
+                );
+            }}
+        </List>
+    );
+};
+
+const ListContainer = styled(Box)<{
+    columns: number;
+    shrinkRatio: number;
+}>`
+    display: grid;
+    grid-template-columns: ${({ columns, shrinkRatio }) =>
+        `repeat(${columns},${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`};
+    grid-column-gap: ${GAP_BTW_TILES}px;
+    width: 100%;
+    color: #fff;
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
+`;
+
+const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
+    grid-column: span ${(props) => props.span};
+`;
+
+const SizeAndCountContainer = styled(ListItemContainer)`
+    height: ${DATE_CONTAINER_HEIGHT}px;
+    color: ${({ theme }) => theme.colors.text.muted};
+    margin-top: 1rem;
+    height: ${SIZE_AND_COUNT_CONTAINER_HEIGHT}px;
+`;
+
+interface ItemListItem {
+    score?: number;
+    files?: EnteFile[];
+    itemStartIndex?: number;
+    fileCount?: number;
+}
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
+`;
+
+function getFractionFittableColumns(width: number): number {
+    return (
+        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
+        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
+    );
+}
+
+function getGapFromScreenEdge(width: number) {
+    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
+        return 24;
+    } else {
+        return 4;
+    }
+}
+
+function getShrinkRatio(width: number, columns: number) {
+    return (
+        (width -
+            2 * getGapFromScreenEdge(width) -
+            (columns - 1) * GAP_BTW_TILES) /
+        (columns * IMAGE_CONTAINER_MAX_WIDTH)
+    );
+}
+
+const itemListFromClusters = (clusters: UICluster[], columns: number) => {
+    const result: ItemListItem[] = [];
+    for (let index = 0; index < clusters.length; index++) {
+        const dupes = clusters[index];
+        result.push({
+            score: dupes.face.score,
+            fileCount: dupes.files.length,
+        });
+        let lastIndex = 0;
+        while (lastIndex < dupes.files.length) {
+            result.push({
+                files: dupes.files.slice(lastIndex, lastIndex + columns),
+                itemStartIndex: index,
+            });
+            lastIndex += columns;
+        }
+    }
+    return result;
+};
