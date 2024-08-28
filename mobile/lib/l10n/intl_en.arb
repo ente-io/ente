@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "We are sorry to see you go. Please share your feedback to help us improve.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Kindly help us with this information",
-  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data.",
+  "confirmDeletePrompt": "Yes, I want to permanently delete this account and its data across all apps.",
   "confirmAccountDeletion": "Confirm Account Deletion",
   "deleteAccountPermanentlyButton": "Delete Account Permanently",
   "yourAccountHasBeenDeleted": "Your account has been deleted",
