@@ -8,6 +8,7 @@ import {
     type SupportedLocale,
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/MLSettings";
+import { isMLSupported } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -78,19 +79,21 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                             endIcon={<ChevronRight />}
                             label={t("advanced")}
                         />
-                        <Box>
-                            <MenuSectionTitle
-                                title={t("labs")}
-                                icon={<ScienceIcon />}
-                            />
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    endIcon={<ChevronRight />}
-                                    onClick={() => setOpenMLSettings(true)}
-                                    label={t("ml_search")}
+                        {isMLSupported && (
+                            <Box>
+                                <MenuSectionTitle
+                                    title={t("labs")}
+                                    icon={<ScienceIcon />}
                                 />
-                            </MenuItemGroup>
-                        </Box>
+                                <MenuItemGroup>
+                                    <EnteMenuItem
+                                        endIcon={<ChevronRight />}
+                                        onClick={() => setOpenMLSettings(true)}
+                                        label={t("ml_search")}
+                                    />
+                                </MenuItemGroup>
+                            </Box>
+                        )}
                     </Stack>
                 </Box>
             </Stack>

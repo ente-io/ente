@@ -6,6 +6,7 @@ import { isDesktop } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
+import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -14,10 +15,20 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
+import { isInternalUser } from "../feature-flags";
+import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
+import { clusterFaces, type CGroup, type FaceCluster } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import {
+    clearMLDB,
+    faceIndex,
+    faceIndexes,
+    indexableAndIndexedCounts,
+} from "./db";
+import type { Face } from "./face";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -315,66 +326,141 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-// // TODO-Cluster temporary import here
-// let last: SearchPerson[] | undefined;
+/**
+ * WIP! Don't enable, dragon eggs are hatching here.
+ */
+export const wipClusterEnable = async (): Promise<boolean> =>
+    (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
+    (await isInternalUser());
 
-// /**
-//  * WIP! Don't enable, dragon eggs are hatching here.
-//  */
-// export const wipClusterEnable = async () => {
-//     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
-//     if (!isDevBuild || !(await isInternalUser())) return false;
-//     return true;
-// };
+// // TODO-Cluster temporary state here
+let _wip_isClustering = false;
+let _wip_searchPersons: SearchPerson[] | undefined;
+let _wip_hasSwitchedOnce = false;
 
-// export const wipCluster = async () => {
-//     if (!(await wipClusterEnable())) return;
+export const wipHasSwitchedOnceCmpAndSet = () => {
+    if (_wip_hasSwitchedOnce) return true;
+    _wip_hasSwitchedOnce = true;
+    return false;
+};
 
-//     if (last) return last;
+export const wipSearchPersons = async () => {
+    if (!(await wipClusterEnable())) return [];
+    return _wip_searchPersons ?? [];
+};
 
-//     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-//     const clusterByID = new Map(
-//         clusters.map((cluster) => [cluster.id, cluster]),
-//     );
+export interface FaceFileNeighbours {
+    face: Face;
+    neighbours: FaceFileNeighbour[];
+}
 
-//     const localFiles = await getAllLocalFiles();
-//     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+export interface FaceFileNeighbour {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity: number;
+}
 
-//     const result: SearchPerson[] = [];
-//     for (const cgroup of cgroups) {
-//         let avatarFaceID = cgroup.avatarFaceID;
-//         // TODO-Cluster
-//         // Temp
-//         if (!avatarFaceID) {
-//             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//             avatarFaceID = cgroup.clusterIDs
-//                 .map((id) => clusterByID.get(id))
-//                 .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
-//         }
-//         cgroup.clusterIDs;
-//         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
-//         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
-//         if (!avatarFaceFileID || !avatarFaceFile) {
-//             assertionFailed(`Face ID ${avatarFaceID} without local file`);
-//             continue;
-//         }
-//         const files = cgroup.clusterIDs
-//             .map((id) => clusterByID.get(id))
-//             .flatMap((cluster) => cluster?.faceIDs ?? [])
-//             .map((faceID) => fileIDFromFaceID(faceID))
-//             .filter((fileID) => fileID !== undefined);
-//         result.push({
-//             id: cgroup.id,
-//             name: cgroup.name,
-//             files,
-//             displayFaceID: avatarFaceID,
-//             displayFaceFile: avatarFaceFile,
-//         });
-//     }
+export interface ClusterDebugPageContents {
+    faceFNs: FaceFileNeighbours[];
+    clusters: FaceCluster[];
+    clusterIDForFaceID: Map<string, string>;
+}
 
-//     last = result;
-//     return result;
-// };
+export const wipClusterDebugPageContents = async (): Promise<
+    ClusterDebugPageContents | undefined
+> => {
+    if (!(await wipClusterEnable())) return undefined;
+
+    log.info("clustering");
+    _wip_isClustering = true;
+    _wip_searchPersons = undefined;
+    triggerStatusUpdate();
+
+    const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
+        await faceIndexes(),
+    );
+    const searchPersons = await convertToSearchPersons(clusters, cgroups);
+
+    const localFiles = await getAllLocalFiles();
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+    const fileForFace = ({ faceID }: Face) =>
+        ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
+
+    const faceFNs = faceAndNeigbours
+        .map(({ face, neighbours }) => ({
+            face,
+            neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+                face,
+                enteFile: fileForFace(face),
+                cosineSimilarity,
+            })),
+        }))
+        .sort((a, b) => b.face.score - a.face.score);
+
+    const clusterIDForFaceID = new Map(
+        clusters.flatMap((cluster) =>
+            cluster.faceIDs.map((id) => [id, cluster.id]),
+        ),
+    );
+
+    _wip_isClustering = false;
+    _wip_searchPersons = searchPersons;
+    triggerStatusUpdate();
+
+    const prunedFaceFNs = faceFNs.slice(0, 30).map(({ face, neighbours }) => ({
+        face,
+        neighbours: neighbours.slice(0, 30),
+    }));
+
+    return { faceFNs: prunedFaceFNs, clusters, clusterIDForFaceID };
+};
+
+export const wipCluster = () => void wipClusterDebugPageContents();
+
+const convertToSearchPersons = async (
+    clusters: FaceCluster[],
+    cgroups: CGroup[],
+) => {
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    const localFiles = await getAllLocalFiles();
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+
+    const result: SearchPerson[] = [];
+    for (const cgroup of cgroups) {
+        const displayFaceID = cgroup.displayFaceID;
+        if (!displayFaceID) {
+            // TODO-Cluster
+            assertionFailed(`cgroup ${cgroup.id} without displayFaceID`);
+            continue;
+        }
+
+        const displayFaceFileID = fileIDFromFaceID(displayFaceID);
+        if (!displayFaceFileID) continue;
+
+        const displayFaceFile = localFileByID.get(displayFaceFileID);
+        if (!displayFaceFile) {
+            assertionFailed(`Face ID ${displayFaceFileID} without local file`);
+            continue;
+        }
+
+        const fileIDs = cgroup.clusterIDs
+            .map((id) => clusterByID.get(id))
+            .flatMap((cluster) => cluster?.faceIDs ?? [])
+            .map((faceID) => fileIDFromFaceID(faceID))
+            .filter((fileID) => fileID !== undefined);
+
+        result.push({
+            id: cgroup.id,
+            name: cgroup.name,
+            files: [...new Set(fileIDs)],
+            displayFaceID,
+            displayFaceFile,
+        });
+    }
+
+    return result.sort((a, b) => b.files.length - a.files.length);
+};
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
@@ -475,6 +561,8 @@ const getMLStatus = async (): Promise<MLStatus> => {
     const state = await (await worker()).state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
+    } else if (_wip_isClustering) {
+        phase = "clustering";
     } else if (state == "init" || indexableCount > 0) {
         phase = "scheduled";
     } else {
@@ -543,8 +631,7 @@ export const unidentifiedFaceIDs = async (
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
  */
-// TODO-Cluster: temporary export to supress linter
-export const fileIDFromFaceID = (faceID: string) => {
+const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
