@@ -190,7 +190,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const faceAndNeigbours: FaceNeighbours[] = [];
 
     // For each face,
-    for (const [i, { faceID, embedding }] of faces.entries()) {
+    for (const [i, { faceID, blur, embedding }] of faces.entries()) {
         // If the face is already part of a cluster, then skip it.
         if (clusterIDForFaceID.get(faceID)) continue;
 
@@ -220,7 +220,8 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
                 continue;
             }
 
-            if (csim > 0.76 && csim > nnCosineSimilarity) {
+            const threshold = blur < 100 || n.blur < 100 ? 0.7 : 0.6;
+            if (csim > threshold && csim > nnCosineSimilarity) {
                 nn = n;
                 nnCosineSimilarity = csim;
             }

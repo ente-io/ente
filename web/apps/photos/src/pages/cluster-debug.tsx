@@ -256,7 +256,7 @@ const FaceChip = styled(Box)`
 `;
 
 const outlineForCluster = (clusterID: string | undefined) =>
-    clusterID ? `1px solid oklch(0.7 0.1 ${hForID(clusterID)})` : undefined;
+    clusterID ? `1px solid oklch(0.8 0.2 ${hForID(clusterID)})` : undefined;
 
 const hForID = (id: string) =>
     ([...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 10) * 36;
