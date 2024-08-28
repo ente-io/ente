@@ -3,6 +3,7 @@
 ## v1.7.4 (Unreleased)
 
 -   Improved date search, including support for day of week and hour of day.
+-   Fix video thumbnail generation and upload on Intel macOS.
 -   .
 
 ## v1.7.3
