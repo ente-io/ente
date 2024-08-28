@@ -39,10 +39,21 @@ it with Ente.
 8. Wait for Google to send you your data.
 
 9. Open [our desktop app](https://ente.io/download/desktop), click on "Upload",
-   select "Google takeout" and pick the ZIP file you just downloaded.
+   select "Google takeout" and pick the ZIP file you just downloaded. If you
+   were provided with multiple ZIP files, please extract **all** the ZIP files
+   into one folder and select that folder instead.
 
-> If you were provided with multiple ZIP files, please extract **all** the files
-> into one folder and select that folder instead.
+> While the app supports uploading multiple ZIPs too, we recommend unzipping
+> them all into a single folder and uploading that folder instead so that your
+> photo dates are imported properly
+> ([details](/photos/faq/photo-dates#importing-from-google-takeout)).
+>
+> <br />
+>
+> Note that you can still preserve your albums even when uploading a single
+> folder - select the create new album option and the app will ask you if you
+> want to put each leaf folder into a separate album
+> ([details](/photos/features/albums#uploading-a-nested-folder)).
 
 ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
