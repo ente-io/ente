@@ -92,7 +92,7 @@ mandatory, you can add more volumes for your export directory.
 Build the docker image
 
 ```shell
-docker build -t ente:latest .
+docker build -t ente-cli:latest .
 ```
 
 Note that [BuildKit](https://docs.docker.com/go/buildkit/) is needed to build
