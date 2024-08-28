@@ -470,33 +470,17 @@ class MLService {
       _logger.info("Results for file ${result.fileId} stored locally");
       return actuallyRanML;
     } catch (e, s) {
-      bool acceptedIssue = false;
       final String errorString = e.toString();
-      if (errorString.contains('ThumbnailRetrievalException')) {
-        _logger.severe(
-          'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
-          e,
-          s,
-        );
-        acceptedIssue = true;
-      }
-      if (errorString.contains('InvalidImageFormatException')) {
-        _logger.severe(
-          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
-          e,
-          s,
-        );
-        acceptedIssue = true;
-      }
-      if (errorString.contains('FileSizeTooLargeForMobileIndexing')) {
-        _logger.severe(
-          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
-          e,
-          s,
-        );
-        acceptedIssue = true;
-      }
+      final bool acceptedIssue =
+          errorString.contains('ThumbnailRetrievalException') ||
+              errorString.contains('InvalidImageFormatException') ||
+              errorString.contains('FileSizeTooLargeForMobileIndexing');
       if (acceptedIssue) {
+        _logger.severe(
+          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
         await MLDataDB.instance.bulkInsertFaces(
           [Face.empty(instruction.file.uploadedFileID!, error: true)],
         );
