@@ -3,18 +3,16 @@ import "dart:io" show Platform;
 import "dart:math" show min;
 import "dart:typed_data" show Uint8List;
 
-import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/box.dart";
-import "package:photos/face/model/detection.dart" as face_detection;
-import "package:photos/face/model/face.dart";
-import "package:photos/face/model/landmark.dart";
+import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
@@ -25,7 +23,6 @@ import 'package:photos/services/machine_learning/face_ml/face_embedding/face_emb
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/machine_learning/ml_exceptions.dart';
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
@@ -58,14 +55,14 @@ class MLService {
   bool _showClusteringIsHappening = false;
   bool _mlControllerStatus = false;
   bool _isIndexingOrClusteringRunning = false;
+  bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
 
-  static const int _fileDownloadLimit = 10;
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init({bool firstTime = false}) async {
-    if (localSettings.isFaceIndexingEnabled == false || _isInitialized) {
+    if (localSettings.isMLIndexingEnabled == false || _isInitialized) {
       return;
     }
     _logger.info("init called");
@@ -83,7 +80,7 @@ class MLService {
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (localSettings.isFaceIndexingEnabled == false) {
+      if (localSettings.isMLIndexingEnabled == false) {
         return;
       }
       _mlControllerStatus = event.shouldRun;
@@ -121,11 +118,12 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (_cannotRunMLFunction() && !force) return;
+      _isRunningML = true;
 
       await sync();
 
       final int unclusteredFacesCount =
-          await FaceMLDataDB.instance.getUnclusteredFaceCount();
+          await MLDataDB.instance.getUnclusteredFaceCount();
       if (unclusteredFacesCount > _kForceClusteringFaceCount) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
@@ -137,6 +135,16 @@ class MLService {
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
       rethrow;
+    } finally {
+      _isRunningML = false;
+    }
+  }
+
+  void triggerML() {
+    if (_mlControllerStatus &&
+        !_isIndexingOrClusteringRunning &&
+        !_isRunningML) {
+      unawaited(runAllML());
     }
   }
 
@@ -162,24 +170,26 @@ class MLService {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
       final Stream<List<FileMLInstruction>> instructionStream =
-          FaceRecognitionService.instance
-              .syncEmbeddings(yieldSize: _fileDownloadLimit);
+          fetchEmbeddingsAndInstructions(fileDownloadMlLimit);
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
 
+      stream:
       await for (final chunk in instructionStream) {
         if (!await canUseHighBandwidth()) {
           _logger.info(
             'stopping indexing because user is not connected to wifi',
           );
-          break;
+          break stream;
+        } else {
+          await _ensureDownloadedModels();
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
           if (_shouldPauseIndexingAndClustering) {
             _logger.info("indexAllImages() was paused, stopping");
-            break;
+            break stream;
           }
           await _ensureLoadedModels(instruction);
           futures.add(processImage(instruction));
@@ -220,13 +230,13 @@ class MLService {
       _showClusteringIsHappening = true;
 
       // Get a sense of the total number of faces in the database
-      final int totalFaces = await FaceMLDataDB.instance
-          .getTotalFaceCount(minFaceScore: minFaceScore);
+      final int totalFaces =
+          await MLDataDB.instance.getTotalFaceCount(minFaceScore: minFaceScore);
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final result = await FaceMLDataDB.instance.getFaceInfoForClustering(
+      final result = await MLDataDB.instance.getFaceInfoForClustering(
         minScore: minFaceScore,
         maxFaces: totalFaces,
       );
@@ -250,8 +260,8 @@ class MLService {
       );
 
       // Get the current cluster statistics
-      final Map<int, (Uint8List, int)> oldClusterSummaries =
-          await FaceMLDataDB.instance.getAllClusterSummary();
+      final Map<String, (Uint8List, int)> oldClusterSummaries =
+          await MLDataDB.instance.getAllClusterSummary();
 
       if (clusterInBuckets) {
         const int bucketSize = 10000;
@@ -310,9 +320,9 @@ class MLService {
             return;
           }
 
-          await FaceMLDataDB.instance
+          await MLDataDB.instance
               .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-          await FaceMLDataDB.instance
+          await MLDataDB.instance
               .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
           Bus.instance.fire(PeopleChangedEvent());
           for (final faceInfo in faceInfoForClustering) {
@@ -355,9 +365,9 @@ class MLService {
         _logger.info(
           'Updating ${clusteringResult.newFaceIdToCluster.length} FaceIDs with clusterIDs in the DB',
         );
-        await FaceMLDataDB.instance
+        await MLDataDB.instance
             .updateFaceIdToClusterId(clusteringResult.newFaceIdToCluster);
-        await FaceMLDataDB.instance
+        await MLDataDB.instance
             .clusterSummaryUpdate(clusteringResult.newClusterSummaries);
         Bus.instance.fire(PeopleChangedEvent());
         _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
@@ -375,7 +385,6 @@ class MLService {
   }
 
   Future<bool> processImage(FileMLInstruction instruction) async {
-    // TODO: clean this function up
     _logger.info(
       "`processImage` start processing image with uploadedFileID: ${instruction.file.uploadedFileID}",
     );
@@ -385,6 +394,7 @@ class MLService {
       final MLResult? result = await MLIndexingIsolate.instance.analyzeImage(
         instruction,
       );
+      // Check if there's no result simply because MLController paused indexing
       if (result == null) {
         if (!_shouldPauseIndexingAndClustering) {
           _logger.severe(
@@ -393,129 +403,111 @@ class MLService {
         }
         return actuallyRanML;
       }
+      // Check anything actually ran
+      actuallyRanML = result.ranML;
+      if (!actuallyRanML) return actuallyRanML;
+      // Prepare storing data on remote
+      final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
+          FileDataEntity.empty(
+            instruction.file.uploadedFileID!,
+            DataType.mlData,
+          );
+      // Faces results
+      final List<Face> faces = [];
       if (result.facesRan) {
-        actuallyRanML = true;
-        final List<Face> faces = [];
-        if (result.foundNoFaces) {
-          debugPrint(
-            'No faces detected for file with name:${instruction.file.displayName}',
-          );
-          faces.add(
-            Face.empty(result.fileId, error: result.errorOccured),
-          );
+        if (result.faces!.isEmpty) {
+          faces.add(Face.empty(result.fileId));
+          _logger.info("no face detected, storing empty for ${result.fileId}");
         }
-        if (result.foundFaces) {
-          if (result.decodedImageSize.width == -1 ||
-              result.decodedImageSize.height == -1) {
-            _logger.severe(
-                "decodedImageSize is not stored correctly for image with "
-                "ID: ${instruction.file.uploadedFileID}");
-            _logger.info(
-              "Using aligned image size for image with ID: ${instruction.file.uploadedFileID}. This size is ${result.decodedImageSize.width}x${result.decodedImageSize.height} compared to size of ${instruction.file.width}x${instruction.file.height} in the metadata",
-            );
-          }
+        if (result.faces!.isNotEmpty) {
           for (int i = 0; i < result.faces!.length; ++i) {
-            final FaceResult faceRes = result.faces![i];
-            final detection = face_detection.Detection(
-              box: FaceBox(
-                x: faceRes.detection.xMinBox,
-                y: faceRes.detection.yMinBox,
-                width: faceRes.detection.width,
-                height: faceRes.detection.height,
-              ),
-              landmarks: faceRes.detection.allKeypoints
-                  .map(
-                    (keypoint) => Landmark(
-                      x: keypoint[0],
-                      y: keypoint[1],
-                    ),
-                  )
-                  .toList(),
-            );
             faces.add(
-              Face(
-                faceRes.faceId,
+              Face.fromFaceResult(
+                result.faces![i],
                 result.fileId,
-                faceRes.embedding,
-                faceRes.detection.score,
-                detection,
-                faceRes.blurValue,
-                fileInfo: FileInfo(
-                  imageHeight: result.decodedImageSize.height,
-                  imageWidth: result.decodedImageSize.width,
-                ),
+                result.decodedImageSize,
               ),
             );
           }
+          _logger.info("storing ${faces.length} faces for ${result.fileId}");
         }
-        _logger.info("inserting ${faces.length} faces for ${result.fileId}");
-        if (!result.errorOccured) {
-          final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
-              FileDataEntity.empty(
-                instruction.file.uploadedFileID!,
-                DataType.mlData,
-              );
-          if (result.facesRan) {
-            dataEntity.putFace(
-              RemoteFaceEmbedding(
-                faces,
-                result.mlVersion,
-                client: client,
-                height: result.decodedImageSize.height,
-                width: result.decodedImageSize.width,
-              ),
-            );
-          }
-          if (result.clipRan) {
-            dataEntity.putClip(
-              RemoteClipEmbedding(
-                result.clip!.embedding,
-                version: result.mlVersion,
-                client: client,
-              ),
-            );
-          }
-          await FileDataService.instance.putFileData(
-            instruction.file,
-            dataEntity,
-          );
-        } else {
-          _logger.warning(
-            'Skipped putting embedding because of error ${result.toJsonString()}',
-          );
-        }
-        await FaceMLDataDB.instance.bulkInsertFaces(faces);
-      }
-
-      if (result.clipRan) {
-        actuallyRanML = true;
-        await SemanticSearchService.storeClipImageResult(
-          result.clip!,
-          instruction.file,
+        dataEntity.putFace(
+          RemoteFaceEmbedding(
+            faces,
+            faceMlVersion,
+            client: client,
+            height: result.decodedImageSize.height,
+            width: result.decodedImageSize.width,
+          ),
         );
       }
-    } on ThumbnailRetrievalException catch (e, s) {
-      _logger.severe(
-        'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty face so indexing does not get stuck',
-        e,
-        s,
-      );
-      await FaceMLDataDB.instance.bulkInsertFaces(
-        [Face.empty(instruction.file.uploadedFileID!, error: true)],
-      );
-      await SemanticSearchService.storeEmptyClipImageResult(
+      // Clip results
+      if (result.clipRan) {
+        dataEntity.putClip(
+          RemoteClipEmbedding(
+            result.clip!.embedding,
+            version: clipMlVersion,
+            client: client,
+          ),
+        );
+      }
+      // Storing results on remote
+      await FileDataService.instance.putFileData(
         instruction.file,
+        dataEntity,
       );
-      return true;
+      _logger.info("Results for file ${result.fileId} stored on remote");
+      // Storing results locally
+      if (result.facesRan) await MLDataDB.instance.bulkInsertFaces(faces);
+      if (result.clipRan) {
+        await SemanticSearchService.storeClipImageResult(
+          result.clip!,
+        );
+      }
+      _logger.info("Results for file ${result.fileId} stored locally");
+      return actuallyRanML;
     } catch (e, s) {
+      bool acceptedIssue = false;
+      final String errorString = e.toString();
+      if (errorString.contains('ThumbnailRetrievalException')) {
+        _logger.severe(
+          'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
+        acceptedIssue = true;
+      }
+      if (errorString.contains('InvalidImageFormatException')) {
+        _logger.severe(
+          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
+        acceptedIssue = true;
+      }
+      if (acceptedIssue) {
+        await MLDataDB.instance.bulkInsertFaces(
+          [Face.empty(instruction.file.uploadedFileID!, error: true)],
+        );
+        await SemanticSearchService.storeEmptyClipImageResult(
+          instruction.file,
+        );
+        return true;
+      }
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID}. Not storing any faces, which means it will be automatically retried later.",
+        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID} and format ${instruction.file.displayName.split('.').last} (${instruction.file.fileType}). Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );
       return false;
     }
-    return actuallyRanML;
+  }
+
+  void triggerModelsDownload() {
+    if (!areModelsDownloaded && !_downloadModelLock.locked) {
+      _logger.info("Models not downloaded, starting download");
+      unawaited(_ensureDownloadedModels());
+    }
   }
 
   Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {
@@ -525,6 +517,13 @@ class MLService {
     return _downloadModelLock.synchronized(() async {
       if (areModelsDownloaded) {
         _logger.finest("Models already downloaded");
+        return;
+      }
+      final goodInternet = await canUseHighBandwidth();
+      if (!goodInternet) {
+        _logger.info(
+          "Cannot download models because user is not connected to wifi",
+        );
         return;
       }
       _logger.info('Downloading models');
@@ -561,7 +560,7 @@ class MLService {
   }
 
   bool _cannotRunMLFunction({String function = ""}) {
-    if (kDebugMode && Platform.isIOS) {
+    if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
       return false;
     }
     if (_isIndexingOrClusteringRunning) {
@@ -599,7 +598,7 @@ class MLService {
   void _logStatus() {
     final String status = '''
     isInternalUser: ${flagService.internalUser}
-    isFaceIndexingEnabled: ${localSettings.isFaceIndexingEnabled}
+    isMLIndexingEnabled: ${localSettings.isMLIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering

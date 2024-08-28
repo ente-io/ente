@@ -3,8 +3,8 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -32,12 +32,13 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
       appBar: AppBar(
         title: Text(widget.person.data.name),
       ),
-      body: FutureBuilder<Map<int, List<EnteFile>>>(
-        future: SearchService.instance.getClusterFilesForPersonID(widget.person.remoteID),
+      body: FutureBuilder<Map<String, List<EnteFile>>>(
+        future: SearchService.instance
+            .getClusterFilesForPersonID(widget.person.remoteID),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final clusters = snapshot.data!;
-            final List<int> keys = clusters.keys.toList();
+            final List<String> keys = clusters.keys.toList();
             // Sort the clusters by the number of files in each cluster, largest first
             keys.sort(
               (b, a) => clusters[a]!.length.compareTo(clusters[b]!.length),
@@ -45,7 +46,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
             return ListView.builder(
               itemCount: keys.length,
               itemBuilder: (context, index) {
-                final int clusterID = keys[index];
+                final String clusterID = keys[index];
                 final List<EnteFile> files = clusters[clusterID]!;
                 return InkWell(
                   onTap: () {
@@ -54,7 +55,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                         builder: (context) => ClusterPage(
                           files,
                           personID: widget.person,
-                          clusterID: index,
+                          clusterID: clusterID,
                           showNamingBanner: false,
                         ),
                       ),
@@ -91,7 +92,8 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                         ), // Add some spacing between the thumbnail and the text
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
@@ -103,14 +105,16 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                                     ? GestureDetector(
                                         onTap: () async {
                                           try {
-                                            await PersonService.instance.removeClusterToPerson(
+                                            await PersonService.instance
+                                                .removeClusterToPerson(
                                               personID: widget.person.remoteID,
                                               clusterID: clusterID,
                                             );
                                             _logger.info(
                                               "Removed cluster $clusterID from person ${widget.person.remoteID}",
                                             );
-                                            Bus.instance.fire(PeopleChangedEvent());
+                                            Bus.instance
+                                                .fire(PeopleChangedEvent());
                                             setState(() {});
                                           } catch (e) {
                                             _logger.severe(

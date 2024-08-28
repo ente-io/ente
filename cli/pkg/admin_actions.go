@@ -186,7 +186,7 @@ func (c *ClICtrl) buildAdminContext(ctx context.Context, adminEmail string) (con
 	if err != nil {
 		return nil, err
 	}
-	accountCtx := c.buildRequestContext(ctx, *acc)
+	accountCtx := c.buildRequestContext(ctx, *acc, model.Filter{})
 	c.Client.AddToken(acc.AccountKey(), secretInfo.TokenStr())
 	return accountCtx, nil
 }

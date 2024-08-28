@@ -1,71 +1,10 @@
-import { isDevBuild } from "@/base/env";
-import { nameAndExtension } from "@/base/file";
-import log from "@/base/log";
+import { inWorker } from "@/base/env";
 import {
     parseMetadataDate,
     type ParsedMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { parseImageMetadata } from "@ente/shared/utils/exif-old";
 import ExifReader from "exifreader";
-import type { EnteFile } from "../types/file";
-import type { ParsedExtractedMetadata } from "../types/metadata";
-import { isInternalUser } from "./feature-flags";
-
-// TODO: Exif: WIP flag to inspect the migration from old to new lib.
-export const wipNewLib = async () => isDevBuild && (await isInternalUser());
-
-const cmpTsEq = (a: number | undefined | null, b: number | undefined) => {
-    if (!a && !b) return true;
-    if (!a || !b) return false;
-    if (a == b) return true;
-    if (Math.floor(a / 1e6) == Math.floor(b / 1e6)) return true;
-    return false;
-};
-
-export const cmpNewLib = (
-    oldLib: ParsedExtractedMetadata,
-    newLib: ParsedMetadata,
-) => {
-    const logM = (r: string) =>
-        log.info("[exif]", r, JSON.stringify({ old: oldLib, new: newLib }));
-    if (
-        cmpTsEq(oldLib.creationTime, newLib.creationDate?.timestamp) &&
-        oldLib.location.latitude == newLib.location?.latitude &&
-        oldLib.location.longitude == newLib.location?.longitude
-    ) {
-        if (
-            oldLib.width == newLib.width &&
-            oldLib.height == newLib.height &&
-            oldLib.creationTime == newLib.creationDate?.timestamp
-        )
-            logM("exact match");
-        else logM("enhanced match");
-        log.debug(() => ["exif/cmp", { oldLib, newLib }]);
-    } else {
-        logM("potential mismatch ❗️🚩");
-    }
-};
-
-export const cmpNewLib2 = async (
-    enteFile: EnteFile,
-    blob: Blob,
-    _exif: unknown,
-) => {
-    const [, ext] = nameAndExtension(enteFile.metadata.title);
-    const oldLib = await parseImageMetadata(
-        new File([blob], enteFile.metadata.title),
-        {
-            fileType: FileType.image,
-            extension: ext ?? "",
-        },
-    );
-    // cast is fine here, this is just temporary debugging code.
-    const rawExif = _exif as RawExifTags;
-    const newLib = parseExif(rawExif);
-    cmpNewLib(oldLib, newLib);
-};
 
 /**
  * Extract Exif and other metadata from the given file.
@@ -170,8 +109,6 @@ const parseDates = (tags: RawExifTags) => {
     const exif = parseExifDates(tags);
     const iptc = parseIPTCDates(tags);
     const xmp = parseXMPDates(tags);
-
-    log.debug(() => ["exif/dates", { exif, iptc, xmp }]);
 
     return {
         DateTimeOriginal:
@@ -538,6 +475,17 @@ export type RawExifTags = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
  * to know about ExifReader specifically.
  */
 export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
+    // The browser's DOMParser is not available in web workers. So if this
+    // function gets called in from a web worker, then it would not be able to
+    // parse XMP tags.
+    //
+    // There is a way around this problem, by also installing ExifReader's
+    // optional peer dependency "@xmldom/xmldom". But since we currently have no
+    // use case for calling this code in a web worker, we just abort immediately
+    // to let future us know that we need to install it.
+    if (inWorker())
+        throw new Error("DOMParser is not available in web workers");
+
     const tags = await ExifReader.load(await blob.arrayBuffer(), {
         async: true,
         expanded: true,

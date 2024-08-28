@@ -1,9 +1,14 @@
 # CHANGELOG
 
-## v1.7.3 (Unreleased)
+## v1.7.4 (Unreleased)
 
--   Support Polish translations.
+-   Improved date search, including support for day of week and hour of day.
 -   .
+
+## v1.7.3
+
+-   Face recognition and magic search (public beta).
+-   Support Polish translations.
 
 ## v1.7.2
 

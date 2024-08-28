@@ -1,11 +1,11 @@
 import type { SRPAttributes } from "@/accounts/types/srp";
+import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { Input, type ButtonProps } from "@mui/material";
 import { t } from "i18next";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "../components/SingleInputForm";
-import ComlinkCryptoWorker from "../crypto";
 import { CustomError } from "../error";
 import type { KeyAttributes, User } from "../user/types";
 
@@ -45,7 +45,7 @@ export default function VerifyMasterPasswordForm({
         setFieldError,
     ) => {
         try {
-            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const cryptoWorker = await sharedCryptoWorker();
             let kek: string;
             try {
                 if (srpAttributes) {

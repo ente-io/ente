@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.16+916
+version: 0.9.30+930
 publish_to: none
 
 environment:
@@ -95,6 +95,7 @@ dependencies:
   fraction: ^5.0.2
   freezed_annotation: ^2.4.1
   google_nav_bar: ^5.0.5
+  heif_converter: ^1.0.0
   home_widget: ^0.6.0
   html_unescape: ^2.0.0
   http: ^1.1.0
@@ -112,6 +113,7 @@ dependencies:
   local_auth_ios:
   logging: ^1.0.1
   lottie: ^1.2.2
+  maps_launcher: ^2.2.1
   media_extension: ^1.0.1
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
@@ -123,16 +125,21 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
+  nanoid: ^1.0.0
+  native_video_player: ^1.3.1
   onnx_dart:
     path: plugins/onnx_dart
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git
-      ref: ente_onnxruntime
+      ref: ios_only
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
-  panorama_viewer: ^1.0.5
+  panorama:
+    git:
+      url: https://github.com/ente-io/panorama_blur.git
+      ref: blur
   password_strength: ^0.2.0
   path: #dart
   path_provider: ^2.1.1
@@ -248,6 +255,7 @@ flutter:
   assets:
     - assets/
     - assets/video-editor/
+    - assets/icons/
   fonts:
     - family: Inter
       fonts:

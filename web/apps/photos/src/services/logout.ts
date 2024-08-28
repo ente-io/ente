@@ -33,6 +33,8 @@ export const photosLogout = async () => {
 
     // - Photos specific logout
 
+    log.info("logout (photos)");
+
     try {
         clearFeatureFlagSessionState();
     } catch (e) {

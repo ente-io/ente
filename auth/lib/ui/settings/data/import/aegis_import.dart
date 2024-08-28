@@ -77,7 +77,7 @@ Future<void> _pickAegisJsonFile(BuildContext context) async {
     await showErrorDialog(
       context,
       context.l10n.sorry,
-      "${context.l10n.importFailureDesc}\n Error: ${e.toString()}",
+      "${context.l10n.importFailureDescNew}\n Error: ${e.toString()}",
     );
   }
 }
@@ -129,8 +129,10 @@ Future<int?> _processAegisExportFile(
   }
   final Map<String, String> groupIDToName = {};
   try {
-    for (var item in aegisDB?['groups']) {
-      groupIDToName[item['uuid']] = item['name'];
+    if (aegisDB?['groups'] != null) {
+      for (var item in aegisDB?['groups']) {
+        groupIDToName[item['uuid']] = item['name'];
+      }
     }
   } catch (e) {
     Logger("AegisImport").warning("Failed to parse groups", e);
@@ -141,17 +143,19 @@ Future<int?> _processAegisExportFile(
     bool isFavorite = item['favorite'] ?? false;
     List<String> tags = [];
     var kind = item['type'];
-    var account = item['name'];
-    var issuer = item['issuer'];
+    var account = Uri.encodeComponent(item['name']);
+    var issuer = Uri.encodeComponent(item['issuer']);
     var algorithm = item['info']['algo'];
     var secret = item['info']['secret'];
     var timer = item['info']['period'];
     var digits = item['info']['digits'];
 
     var counter = item['info']['counter'];
-    for (var group in item['groups']) {
-      if (groupIDToName.containsKey(group)) {
-        tags.add(groupIDToName[group]!);
+    if (item['groups'] != null) {
+      for (var group in item['groups']) {
+        if (groupIDToName.containsKey(group)) {
+          tags.add(groupIDToName[group]!);
+        }
       }
     }
     // Build the OTP URL

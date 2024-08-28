@@ -35,6 +35,24 @@ func FreeSpace(path string) (uint64, error) {
 	return fs.Bfree * uint64(fs.Bsize), nil
 }
 
+// EnsureSufficientSpace Return an error if we risk running out of disk space if we try to download
+// and write a file of size.
+// This function keeps a buffer of 2 GB free space in its calculations.
+func EnsureSufficientSpace(size int64) error {
+	free, err := FreeSpace("/")
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to fetch free space")
+	}
+
+	gb := uint64(1024) * 1024 * 1024
+	need := uint64(size) + (2 * gb)
+	if free < need {
+		return fmt.Errorf("insufficient space on disk (need %d bytes, free %d bytes)", size, free)
+	}
+
+	return nil
+}
+
 func GetLockNameForObject(objectKey string) string {
 	return fmt.Sprintf("Object:%s", objectKey)
 }

@@ -5,7 +5,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/linear_progress_widget.dart';
 import 'package:ente_auth/ui/tools/debug/raw_codes_viewer.dart';
-import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
 class CodeErrorWidget extends StatelessWidget {
@@ -114,12 +114,7 @@ class CodeErrorWidget extends StatelessWidget {
                       text: context.l10n.contactSupport,
                       fontSize: 10,
                       onTap: () async {
-                        await showErrorDialog(
-                          context,
-                          context.l10n.contactSupport,
-                          context.l10n
-                              .contactSupportViaEmailMessage("support@ente.io"),
-                        );
+                        await openSupportPage(null, null);
                       },
                       borderWidth: 0.6,
                       borderRadius: 6,

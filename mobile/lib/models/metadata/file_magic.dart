@@ -8,6 +8,7 @@ const captionKey = "caption";
 const uploaderNameKey = "uploaderName";
 const widthKey = 'w';
 const heightKey = 'h';
+const mediaTypeKey = 'mediaType';
 const latKey = "lat";
 const longKey = "long";
 const motionVideoIndexKey = "mvi";
@@ -56,6 +57,11 @@ class PubMagicMetadata {
   // should have exact same hash with should match the constant `blackThumbnailBase64`
   bool? noThumb;
 
+  // null -> not computed
+  // 0 -> normal
+  // 1 -> panorama
+  int? mediaType;
+
   PubMagicMetadata({
     this.editedTime,
     this.editedName,
@@ -67,6 +73,7 @@ class PubMagicMetadata {
     this.long,
     this.mvi,
     this.noThumb,
+    this.mediaType,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -88,6 +95,7 @@ class PubMagicMetadata {
       long: map[longKey],
       mvi: map[motionVideoIndexKey],
       noThumb: map[noThumbKey],
+      mediaType: map[mediaTypeKey],
     );
   }
 }

@@ -299,7 +299,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _loggedOutEvent.cancel();
     _favoritesServiceInitCompleteEvent.cancel();
     _scrollController.dispose();
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 

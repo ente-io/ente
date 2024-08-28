@@ -67,9 +67,11 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
-  bool get faceSearchEnabled => internalUser || flags.betaUser;
-
-  bool get passKeyEnabled => flags.passKeyEnabled || internalOrBetaUser;
+  bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
+
+  bool get hasGrantedMLConsent => flags.faceSearchEnabled;
+
+  bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 }

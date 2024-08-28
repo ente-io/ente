@@ -23,8 +23,9 @@ a _renderer_ process.
 -   The _renderer_ process is a regular web app that gets loaded into the
     embedded Chromium. When the main process starts, it creates a new "window"
     that shows this embedded Chromium. In our case, we build and bundle a static
-    export of the [Photos web app](../web/README.md) in the generated app. This
-    gets loaded by the embedded Chromium at runtime, acting as the app's UI.
+    export of the [Photos web app](../../web/README.md) in the generated desktop
+    app. This gets loaded by the embedded Chromium at runtime, acting as the
+    desktop app's UI.
 
 There is also a third environment that gets temporarily created:
 
@@ -93,6 +94,10 @@ Some extra ones specific to the code here are:
 -   [cross-env](https://github.com/kentcdodds/cross-env) is similar to shx, but
     for allowing us to set environment variables in a way that also works on
     Windows.
+
+-   We don't need `ajv`, but it is a transitive dependency which breaks the
+    build if we let its version be resolved via the yarn resolution mechanism.
+    Taking a direct dependency on it is the easiest workaround for now.
 
 ## Functionality
 

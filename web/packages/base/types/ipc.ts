@@ -69,18 +69,22 @@ export interface Electron {
     logout: () => Promise<void>;
 
     /**
-     * Return the previously saved encryption key from persistent safe storage.
+     * Return the previously saved user's master key from the persistent safe
+     * storage accessible to the desktop app.
      *
-     * If no such key is found, return `undefined`.
+     * The key is returned as a base64 encoded string.
      *
-     * See also: {@link saveEncryptionKey}.
+     * If the key is not found, return `undefined`.
+     *
+     * See also: {@link saveMasterKeyB64}.
      */
-    encryptionKey: () => Promise<string | undefined>;
+    masterKeyB64: () => Promise<string | undefined>;
 
     /**
-     * Save the given {@link encryptionKey} into persistent safe storage.
+     * Save the given {@link masterKeyB64} (encoded as a base64 string) to the
+     * persistent safe storage accessible to the desktop app.
      */
-    saveEncryptionKey: (encryptionKey: string) => Promise<void>;
+    saveMasterKeyB64: (masterKeyB64: string) => Promise<void>;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes

@@ -48,25 +48,13 @@ The root `package.json` also has a convenience dev dependency:
 
 ## Cryptography
 
-We use [libsodium](https://libsodium.gitbook.io/doc/) for encryption, key
-generation etc. Specifically, we use its WebAssembly and JS wrappers made using
-Emscripten, maintained by the original authors of libsodium themselves -
+We use [libsodium](https://libsodium.gitbook.io/doc/) for our cryptography
+primitives. We use its WebAssembly target, accessible via JavaScript wrappers
+maintained by the original authors of libsodium themselves -
 [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
 
-Currently, we've pinned the version to 0.7.9 since later versions remove the
-`crypto_pwhash_*` functionality that we use (they've not been deprecated,
-they've just been moved to a different NPM package). From the (upstream)
-[release notes](https://github.com/jedisct1/libsodium/releases/tag/1.0.19-RELEASE):
-
-> Emscripten: the `crypto_pwhash_*()` functions have been removed from Sumo
-> builds, as they reserve a substantial amount of JavaScript memory, even when
-> not used.
-
-This wording is a bit incorrect, they've actually been _added_ to the sumo
-builds (See this [issue](https://github.com/jedisct1/libsodium.js/issues/326)).
-
-Updating it is not a big problem, it is just a pending chore - we want to test a
-bit more exhaustively when changing the crypto layer.
+More precisely, we use the sumo variant, "libsodium-wrappers-sumo", since the
+standard variant does not provide the `crypto_pwhash_*` functions.
 
 ## Meta frameworks
 
@@ -193,6 +181,9 @@ For more details, see [translations.md](translations.md).
 -   [zod](https://github.com/colinhacks/zod) is used for runtime typechecking
     (e.g. verifying that API responses match the expected TypeScript shape).
 
+-   [nanoid](https://github.com/ai/nanoid) is used for generating unique
+    identifiers.
+
 -   [debounce](https://github.com/sindresorhus/debounce) and its
     promise-supporting sibling
     [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
@@ -201,11 +192,8 @@ For more details, see [translations.md](translations.md).
 ## Media
 
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
-    parsing. We also need its optional peer dependency
-    [@xmldom/xmldom](https://github.com/xmldom/xmldom) since the browser's
-    DOMParser is not available in web workers.
-    [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing back
-    Exif (only supports JPEG).
+    parsing. [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing
+    back Exif (only supports JPEG).
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
     web code (Live photos are zip files under the hood). Note that the desktop
@@ -229,6 +217,9 @@ For more details, see [translations.md](translations.md).
 -   [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
+
+-   [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
+    language queries into dates for showing search results.
 
 ### Face search
 

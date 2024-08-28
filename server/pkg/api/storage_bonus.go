@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
+	entity "github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
@@ -22,6 +23,21 @@ func (h StorageBonusHandler) GetReferralView(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, response)
+}
+
+func (h StorageBonusHandler) UpdateReferralCode(context *gin.Context) {
+	var request entity.UpdateReferralCodeRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		handler.Error(context, stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), ""))
+		return
+	}
+	userID := auth.GetUserID(context.Request.Header)
+	err := h.Controller.UpdateReferralCode(context, userID, request.Code, false)
+	if err != nil {
+		handler.Error(context, stacktrace.Propagate(err, ""))
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{})
 }
 
 func (h StorageBonusHandler) GetStorageBonusDetails(context *gin.Context) {

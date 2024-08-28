@@ -24,13 +24,13 @@ export const clearStores = () => {
  * On macOS, `safeStorage` stores our data under a Keychain entry named
  * "<app-name> Safe Storage". In our case, "ente Safe Storage".
  */
-export const saveEncryptionKey = (encryptionKey: string) => {
-    const encryptedKey = safeStorage.encryptString(encryptionKey);
+export const saveMasterKeyB64 = (masterKeyB64: string) => {
+    const encryptedKey = safeStorage.encryptString(masterKeyB64);
     const b64EncryptedKey = Buffer.from(encryptedKey).toString("base64");
     safeStorageStore.set("encryptionKey", b64EncryptedKey);
 };
 
-export const encryptionKey = (): string | undefined => {
+export const masterKeyB64 = (): string | undefined => {
     const b64EncryptedKey = safeStorageStore.get("encryptionKey");
     if (!b64EncryptedKey) return undefined;
     const keyBuffer = Buffer.from(b64EncryptedKey, "base64");

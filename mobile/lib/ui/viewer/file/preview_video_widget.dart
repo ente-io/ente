@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
+import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -49,8 +49,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
   bool _isPlaying = false;
   final EnteWakeLock _wakeLock = EnteWakeLock();
   bool _isFileSwipeLocked = false;
-  late final StreamSubscription<FileSwipeLockEvent>
-      _fileSwipeLockEventSubscription;
+  late final StreamSubscription<GuestViewEvent> _fileSwipeLockEventSubscription;
 
   @override
   void initState() {
@@ -81,9 +80,9 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       });
     }
     _fileSwipeLockEventSubscription =
-        Bus.instance.on<FileSwipeLockEvent>().listen((event) {
+        Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
-        _isFileSwipeLocked = event.shouldSwipeLock;
+        _isFileSwipeLocked = event.swipeLocked;
       });
     });
   }

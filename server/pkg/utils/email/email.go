@@ -8,6 +8,7 @@ package email
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/smtp"
@@ -18,6 +19,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
+
+var knownInvalidEmailErrors = []string{
+	"Invalid RCPT TO address provided",
+	"Invalid domain name",
+}
 
 // Send sends an email
 func Send(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
@@ -91,6 +97,12 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 		auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpServer)
 		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
 		if err != nil {
+			errMsg := err.Error()
+			for i := range knownInvalidEmailErrors {
+				if strings.Contains(errMsg, knownInvalidEmailErrors[i]) {
+					return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid email %s", toEmail)), errMsg)
+				}
+			}
 			return stacktrace.Propagate(err, "")
 		}
 	}

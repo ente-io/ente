@@ -422,6 +422,16 @@ func (t *TrashRepository) EmptyTrash(ctx context.Context, userID int64, lastUpda
 	return t.QueueRepo.InsertItem(ctx, TrashEmptyQueue, itemID)
 }
 
+func (t *TrashRepository) GetTrashUpdatedAt(userID int64) (int64, error) {
+	row := t.DB.QueryRow(`SELECT coalesce(max(updated_at),0) FROM trash WHERE user_id = $1`, userID)
+	var updatedAt int64
+	err := row.Scan(&updatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	return updatedAt, stacktrace.Propagate(err, "")
+}
+
 func convertRowsToTrash(rows *sql.Rows) ([]ente.Trash, error) {
 	defer rows.Close()
 	trashFiles := make([]ente.Trash, 0)

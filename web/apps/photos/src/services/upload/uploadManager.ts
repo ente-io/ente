@@ -1,4 +1,5 @@
-import { ensureElectron } from "@/base/electron";
+import { createComlinkCryptoWorker } from "@/base/crypto";
+import { type CryptoWorker } from "@/base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
@@ -16,11 +17,8 @@ import {
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
-import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";
-import type { Remote } from "comlink";
 import isElectron from "is-electron";
 import {
     getLocalPublicFiles,
@@ -36,7 +34,12 @@ import {
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
 } from "./takeout";
-import UploadService, { uploadItemFileName, uploader } from "./uploadService";
+import UploadService, {
+    uploadItemCreationDate,
+    uploadItemFileName,
+    uploadItemSize,
+    uploader,
+} from "./uploadService";
 
 export type FileID = number;
 
@@ -316,8 +319,8 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 };
 
 class UploadManager {
-    private cryptoWorkers = new Array<
-        ComlinkWorker<typeof DedicatedCryptoWorker>
+    private comlinkCryptoWorkers = new Array<
+        ComlinkWorker<typeof CryptoWorker>
     >(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private itemsToBeUploaded: ClusteredUploadItem[];
@@ -425,7 +428,10 @@ class UploadManager {
             }
 
             if (mediaItems.length) {
-                const clusteredMediaItems = await clusterLivePhotos(mediaItems);
+                const clusteredMediaItems = await clusterLivePhotos(
+                    mediaItems,
+                    this.parsedMetadataJSONMap,
+                );
 
                 this.abortIfCancelled();
 
@@ -448,7 +454,7 @@ class UploadManager {
             this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
             void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
-                this.cryptoWorkers[i]?.terminate();
+                this.comlinkCryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
             clearInterval(logInterval);
@@ -510,14 +516,14 @@ class UploadManager {
             i < maxConcurrentUploads && this.itemsToBeUploaded.length > 0;
             i++
         ) {
-            this.cryptoWorkers[i] = getDedicatedCryptoWorker();
-            const worker = await this.cryptoWorkers[i].remote;
+            this.comlinkCryptoWorkers[i] = createComlinkCryptoWorker();
+            const worker = await this.comlinkCryptoWorkers[i].remote;
             uploadProcesses.push(this.uploadNextItemInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextItemInQueue(worker: Remote<DedicatedCryptoWorker>) {
+    private async uploadNextItemInQueue(worker: CryptoWorker) {
         const uiService = this.uiService;
 
         while (this.itemsToBeUploaded.length > 0) {
@@ -836,6 +842,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
  */
 const clusterLivePhotos = async (
     items: UploadItemWithCollectionIDAndName[],
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     const result: ClusteredUploadItem[] = [];
     items
@@ -863,7 +870,7 @@ const clusterLivePhotos = async (
             collectionID: g.collectionID,
             uploadItem: g.uploadItem,
         };
-        if (await areLivePhotoAssets(fa, ga)) {
+        if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
             const [image, video] =
                 fFileType == FileType.image ? [f, g] : [g, f];
             result.push({
@@ -904,6 +911,7 @@ interface PotentialLivePhotoAsset {
 const areLivePhotoAssets = async (
     f: PotentialLivePhotoAsset,
     g: PotentialLivePhotoAsset,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     if (f.collectionID != g.collectionID) return false;
 
@@ -950,6 +958,27 @@ const areLivePhotoAssets = async (
         return false;
     }
 
+    // Finally, ensure that the creation times of the image and video are within
+    // some epsilon of each other. This is to avoid clubbing together unrelated
+    // items that coincidentally have the same name (this is not uncommon since,
+    // e.g. many cameras use a deterministic numbering scheme).
+
+    const fDate = await uploadItemCreationDate(
+        f.uploadItem,
+        f.fileType,
+        f.collectionID,
+        parsedMetadataJSONMap,
+    );
+    const gDate = await uploadItemCreationDate(
+        g.uploadItem,
+        g.fileType,
+        g.collectionID,
+        parsedMetadataJSONMap,
+    );
+    if (!fDate || !gDate) return false;
+    const secondDelta = Math.abs(fDate - gDate) / 1e6;
+    if (secondDelta > 2 * 60 /* 2 mins */) return false;
+
     return true;
 };
 
@@ -977,18 +1006,6 @@ const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
     }
 
     return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
-};
-
-/**
- * Return the size of the given {@link uploadItem}.
- */
-const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
-    if (uploadItem instanceof File) return uploadItem.size;
-    if (typeof uploadItem == "string")
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    if (Array.isArray(uploadItem))
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    return uploadItem.file.size;
 };
 
 /**

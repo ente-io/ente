@@ -58,6 +58,7 @@ Future<Map<String, IfdTag>?> getExifFromSourceFile(File originFile) async {
 
 Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
   try {
+    final stopwatch = Stopwatch()..start();
     final Map<int, StringBuffer> logs = {};
     final completer = Completer<MediaInformation?>();
 
@@ -95,11 +96,19 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
       return null;
     }
     final properties = await FFProbeUtil.getProperties(mediaInfo);
+    _logger.info("getVideoPropsAsync took ${stopwatch.elapsedMilliseconds}ms");
+    stopwatch.stop();
     return properties;
   } catch (e, s) {
     _logger.severe("Failed to getVideoProps", e, s);
     return null;
   }
+}
+
+bool? checkPanoramaFromEXIF(File? file, Map<String, IfdTag>? exifData) {
+  final element = exifData?["EXIF CustomRendered"];
+  if (element?.printable == null) return null;
+  return element?.printable == "6";
 }
 
 Future<DateTime?> getCreationTimeFromEXIF(

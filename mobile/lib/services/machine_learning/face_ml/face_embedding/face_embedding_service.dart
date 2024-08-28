@@ -74,6 +74,9 @@ class FaceEmbeddingService extends MlModel {
     for (final embedding in embeddings) {
       normalizeEmbedding(embedding);
     }
+    inputOrt.release();
+    runOptions.release();
+    outputs.forEach((element) => element?.release());
     stopwatch.stop();
     _logger.info(
       'MobileFaceNetFFI interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',

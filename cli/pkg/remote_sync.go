@@ -50,11 +50,16 @@ func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
 
 func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 	albums, err := c.getRemoteAlbums(ctx)
+	filter := ctx.Value(model.FilterKey).(model.Filter)
 	if err != nil {
 		return err
 	}
+
 	for _, album := range albums {
 		if album.IsDeleted {
+			continue
+		}
+		if filter.SkipAlbum(album, true) {
 			continue
 		}
 

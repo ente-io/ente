@@ -1,8 +1,7 @@
 import "dart:convert" show jsonEncode, jsonDecode;
 
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
-import "package:photos/models/ml/ml_versions.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
@@ -15,50 +14,26 @@ class MLResult {
 
   Dimensions decodedImageSize;
 
-  int mlVersion;
-  bool errorOccured;
-  bool onlyThumbnailUsed;
-
+  bool get ranML => facesRan || clipRan;
   bool get facesRan => faces != null;
   bool get clipRan => clip != null;
 
-  bool get foundFaces => facesRan && faces!.isNotEmpty;
-  bool get foundNoFaces => facesRan && faces!.isEmpty;
-
   MLResult({
     this.fileId = -1,
-    this.faces = const <FaceResult>[],
+    this.faces,
     this.clip,
-    this.mlVersion = faceMlVersion,
-    this.errorOccured = false,
-    this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
   MLResult.fromEnteFileID(
     fileID, {
-    this.mlVersion = faceMlVersion,
-    this.errorOccured = false,
-    this.onlyThumbnailUsed = false,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
-
-  void noFaceDetected() {
-    faces = <FaceResult>[];
-  }
-
-  void errorOccurred() {
-    noFaceDetected();
-    errorOccured = true;
-  }
 
   Map<String, dynamic> _toJson() => {
         'fileId': fileId,
         'faces': faces?.map((face) => face.toJson()).toList(),
         'clip': clip?.toJson(),
-        'mlVersion': mlVersion,
-        'errorOccured': errorOccured,
-        'onlyThumbnailUsed': onlyThumbnailUsed,
         'decodedImageSize': {
           'width': decodedImageSize.width,
           'height': decodedImageSize.height,
@@ -78,9 +53,6 @@ class MLResult {
       clip: json['clip'] != null
           ? ClipResult.fromJson(json['clip'] as Map<String, dynamic>)
           : null,
-      mlVersion: json['mlVersion'],
-      errorOccured: json['errorOccured'] ?? false,
-      onlyThumbnailUsed: json['onlyThumbnailUsed'] ?? false,
       decodedImageSize: json['decodedImageSize'] != null
           ? Dimensions(
               width: json['decodedImageSize']['width'],

@@ -1,7 +1,7 @@
+import { sharedCryptoWorker } from "@/base/crypto";
 import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";
-import ComlinkCryptoWorker from "@ente/shared/crypto";
 import { Collection } from "types/collection";
 
 export function isArchivedFile(item: EnteFile): boolean {
@@ -46,7 +46,7 @@ export async function updateMagicMetadata<T>(
     originalMagicMetadata?: MagicMetadataCore<T>,
     decryptionKey?: string,
 ): Promise<MagicMetadataCore<T>> {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const cryptoWorker = await sharedCryptoWorker();
 
     if (!originalMagicMetadata) {
         originalMagicMetadata = getNewMagicMetadata<T>();

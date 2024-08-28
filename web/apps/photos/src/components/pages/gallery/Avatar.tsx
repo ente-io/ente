@@ -56,7 +56,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 setUserLetter(email[0].toUpperCase());
                 setColorCode(colorCode);
             } else if (file.ownerID === user.id) {
-                const uploaderName = file.pubMagicMetadata.data.uploaderName;
+                const uploaderName = file.pubMagicMetadata?.data.uploaderName;
                 if (!uploaderName) {
                     log.error(
                         "uploaderName not found in file.pubMagicMetadata.data",

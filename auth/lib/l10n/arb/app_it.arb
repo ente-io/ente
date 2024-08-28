@@ -182,7 +182,7 @@
   "security": "Sicurezza",
   "lockscreen": "Schermata di blocco",
   "authToChangeLockscreenSetting": "Autenticati per modificare le impostazioni della schermata di blocco",
-  "lockScreenEnablePreSteps": "Per abilitare la schermata di blocco, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema.",
+  "deviceLockEnablePreSteps": "Per attivare il blocco del dispositivo, impostare il codice di accesso o il blocco dello schermo nelle impostazioni del sistema.",
   "viewActiveSessions": "Visualizza sessioni attive",
   "authToViewYourActiveSessions": "Autenticati per visualizzare le sessioni attive",
   "searchHint": "Cerca...",
@@ -465,5 +465,6 @@
   "appLockDescription": "Scegli tra la schermata di blocco predefinita del dispositivo e una schermata di blocco personalizzata con PIN o password.",
   "pinLock": "Blocco con PIN",
   "enterPin": "Inserisci PIN",
-  "setNewPin": "Imposta un nuovo PIN"
+  "setNewPin": "Imposta un nuovo PIN",
+  "importFailureDescNew": "Impossibile elaborare il file selezionato."
 }

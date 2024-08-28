@@ -71,11 +71,15 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
               },
             ),
             DeferPointer(
-              child: FileSelectionOverlayBar(
-                GalleryType.searchResults,
-                _selectedFiles,
-                backgroundColor:
-                    getEnteColorScheme(context).backgroundElevated2,
+              //This is to make the FileSelectionOverlayBar respect SafeArea
+              child: MediaQuery(
+                data: MediaQueryData.fromView(View.of(context)),
+                child: FileSelectionOverlayBar(
+                  GalleryType.searchResults,
+                  _selectedFiles,
+                  backgroundColor:
+                      getEnteColorScheme(context).backgroundElevated2,
+                ),
               ),
             ),
           ],

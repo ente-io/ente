@@ -6,7 +6,7 @@ import 'dart:ui' as ui show Image;
 import 'package:logging/logging.dart';
 import "package:onnx_dart/onnx_dart.dart";
 import 'package:onnxruntime/onnxruntime.dart';
-import "package:photos/face/model/dimension.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
@@ -131,9 +131,15 @@ class FaceDetectionService extends MlModel {
     final runOptions = OrtRunOptions();
     final session = OrtSession.fromAddress(sessionAddress);
     final List<OrtValue?> outputs = session.run(runOptions, inputs);
-    // inputOrt.release();
-    // runOptions.release();
-    return outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+    final result =
+        outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+    inputOrt.release();
+    runOptions.release();
+    outputs.forEach((element) {
+      element?.release();
+    });
+
+    return result;
   }
 
   static Future<List<List<List<double>>>> _runPlatformPluginPredict(

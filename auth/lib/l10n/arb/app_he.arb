@@ -168,7 +168,6 @@
   "security": "אבטחה",
   "lockscreen": "מסך נעילה",
   "authToChangeLockscreenSetting": "אנא בצע אימות כדי לשנות את הגדרות מסך הנעילה",
-  "lockScreenEnablePreSteps": "כדי לאפשר את מסך הנעילה, אנא הגדר קוד גישה למכשיר או לנעילת מסך בהגדרות המערכת שלך.",
   "viewActiveSessions": "צפה בחיבורים פעילים",
   "authToViewYourActiveSessions": "אנא בצע איומת על מנת לראות את החיבורים הפעילים שלך",
   "searchHint": "חיפוש...",

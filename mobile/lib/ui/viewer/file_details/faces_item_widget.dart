@@ -3,11 +3,11 @@ import "dart:developer" as dev show log;
 import "package:flutter/foundation.dart" show Uint8List, kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:photos/face/db.dart";
-import "package:photos/face/model/box.dart";
-import "package:photos/face/model/face.dart";
-import "package:photos/face/model/person.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -66,8 +66,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      final List<Face>? faces = await FaceMLDataDB.instance
-          .getFacesForGivenFileID(file.uploadedFileID!);
+      final List<Face>? faces =
+          await MLDataDB.instance.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
         return [
           const ChipButtonWidget(
@@ -93,12 +93,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ];
       }
 
-      final faceIdsToClusterIds = await FaceMLDataDB.instance
+      final faceIdsToClusterIds = await MLDataDB.instance
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
       final Map<String, PersonEntity> persons =
           await PersonService.instance.getPersonsMap();
       final clusterIDToPerson =
-          await FaceMLDataDB.instance.getClusterIDToPersonID();
+          await MLDataDB.instance.getClusterIDToPersonID();
 
       // Sort faces by name and score
       final faceIdToPersonID = <String, String>{};
@@ -146,7 +146,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       final faceCrops = getRelevantFaceCrops(faces);
       for (final Face face in faces) {
-        final int? clusterID = faceIdsToClusterIds[face.faceID];
+        final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
             ? persons[clusterIDToPerson[clusterID]!]
             : null;
@@ -175,8 +175,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   Future<Map<String, Uint8List>?> getRelevantFaceCrops(
     Iterable<Face> faces, {
     int fetchAttempt = 1,
-    }
-  ) async {
+  }) async {
     try {
       final faceIdToCrop = <String, Uint8List>{};
       final facesWithoutCrops = <String, FaceBox>{};
@@ -226,7 +225,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         stackTrace: s,
       );
       resetPool(fullFile: true);
-      if(fetchAttempt <= retryLimit) {
+      if (fetchAttempt <= retryLimit) {
         return getRelevantFaceCrops(faces, fetchAttempt: fetchAttempt + 1);
       }
       return null;

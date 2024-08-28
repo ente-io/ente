@@ -35,7 +35,7 @@ func (h *UserHandler) SendOTT(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Email id is missing"))
 		return
 	}
-	err := h.UserController.SendEmailOTT(c, email, request.Client, request.Purpose)
+	err := h.UserController.SendEmailOTT(c, email, request.Purpose)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -52,18 +52,6 @@ func (h *UserHandler) Logout(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})
-}
-
-// GetDetails returns details about the requesting user
-func (h *UserHandler) GetDetails(c *gin.Context) {
-	details, err := h.UserController.GetDetails(c)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"details": details,
-	})
 }
 
 // GetDetailsV2 returns details about the requesting user
@@ -188,7 +176,7 @@ func (h *UserHandler) GetSessionValidityV2(c *gin.Context) {
 	keyAttributes, err := h.UserController.GetAttributes(userID)
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"hasSetKeys": true,
+			"hasSetKeys":    true,
 			"keyAttributes": keyAttributes,
 		})
 	} else {

@@ -227,9 +227,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             ? executionStateNotifier.value = ExecutionState.successful
             : null;
       },
-      onError: (error, stackTrace) => _debouncer.cancelDebounce(),
+      onError: (error, stackTrace) => _debouncer.cancelDebounceTimer(),
     );
-    _debouncer.cancelDebounce();
+    _debouncer.cancelDebounceTimer();
     if (widget.alwaysShowSuccessState) {
       Future.delayed(const Duration(seconds: 2), () {
         executionStateNotifier.value = ExecutionState.idle;

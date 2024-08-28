@@ -11,15 +11,14 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
-import "package:photos/db/embeddings_db.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
+import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import "package:photos/face/db.dart";
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
@@ -28,7 +27,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
-import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -205,12 +203,9 @@ class Configuration {
     _cachedToken = null;
     _secretKey = null;
     await FilesDB.instance.clearTable();
-    SemanticSearchService.instance.hasInitialized
-        ? await EmbeddingsDB.instance.clearTable()
-        : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
-    await FaceMLDataDB.instance.clearTable();
+    await MLDataDB.instance.clearTable();
 
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();

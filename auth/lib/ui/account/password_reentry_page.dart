@@ -140,7 +140,6 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         await sendLogs(
           context,
           context.l10n.contactSupport,
-          "support@ente.io",
           postShare: () {},
         );
       }

@@ -144,11 +144,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          if (await LocalAuthenticationService.instance
-              .isLocalAuthSupportedOnDevice()) {
+          if (await Configuration.instance.shouldShowLockScreen()) {
             final bool result = await requestAuthentication(
               context,
-              context.l10n.authToChangeLockscreenSetting,
+              context.l10n.about,
             );
             if (result) {
               await Navigator.of(context).push(
@@ -160,10 +159,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               );
             }
           } else {
-            await showErrorDialog(
-              context,
-              context.l10n.noSystemLockFound,
-              context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const LockScreenOptions();
+                },
+              ),
             );
           }
         },

@@ -10,9 +10,9 @@ Collecting memories from events is now a breeze!
 -   Whether it's a birthday party, vacation trip or wedding, easily share your
     album using a unique, secure, end-to-end encrypted link.
 -   Introduce the 'collect photos' feature to your friends and family who can
-    contribute without an ente account.
+    contribute without an Ente account.
 -   This allows them to effortlessly add, view, and download photos from the
-    link without an ente account.
+    link without an Ente account.
 -   Also preserves metadata and photo quality.
 
 ## How to collect photos on mobile?

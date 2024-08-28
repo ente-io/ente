@@ -18,18 +18,26 @@ extension FilePropsExtn on EnteFile {
 
   bool get hasDims => height > 0 && width > 0;
 
-  // return true if the file is a panorama image, null if the dimensions are not available
+  // return true if the file can be a panorama image, null if the dimensions are not available
   bool? isPanorama() {
     if (fileType != FileType.image) {
       return false;
     }
+    if (pubMagicMetadata?.mediaType != null) {
+      return (pubMagicMetadata!.mediaType! & 1) == 1;
+    }
+    return null;
+  }
+
+  bool canBePanorama() {
     if (hasDims) {
+      if (height < 8000 && width < 8000) return false;
       if (height > width) {
         return height / width >= 2.0;
       }
       return width / height >= 2.0;
     }
-    return null;
+    return false;
   }
 
   bool get canEditMetaInfo => isUploaded && isOwner;

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_swipe_lock_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
@@ -19,7 +18,6 @@ import "package:photos/ui/viewer/file/preview_video_widget.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
 import "package:photos/ui/viewer/file/video_widget.dart";
-import "package:photos/ui/viewer/file/video_widget_new.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -111,7 +109,7 @@ class _VideoViewWidgetState extends State<VideoViewWidget> {
         playbackCallback: widget.playbackCallback,
       );
     }
-    return VideoWidgetNew(
+    return VideoWidget(
       widget.file,
       tagPrefix: widget.tagPrefix,
       playbackCallback: widget.playbackCallback,

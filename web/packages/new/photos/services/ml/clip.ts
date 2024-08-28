@@ -1,7 +1,7 @@
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
-import { pixelRGBBicubic } from "./image";
+import { pixelRGBBilinear } from "./image";
 import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
@@ -39,8 +39,9 @@ export const clipIndexingVersion = 1;
  * initial launch of this feature using the GGML runtime.
  *
  * Since the initial launch, we've switched over to another runtime,
- * [ONNX](https://onnxruntime.ai) and have made other implementation changes,
- * but the overall gist remains the same.
+ * [ONNX](https://onnxruntime.ai), started using Apple's
+ * [MobileCLIP](https://github.com/apple/ml-mobileclip/) as the model and have
+ * made other implementation changes, but the overall gist remains the same.
  *
  * Note that we don't train the neural network - we only use one of the publicly
  * available pre-trained neural networks for inference. These neural networks
@@ -117,14 +118,10 @@ const computeEmbedding = async (
 };
 
 /**
- * Convert {@link imageData} into the format that the CLIP model expects.
+ * Convert {@link imageData} into the format that the MobileCLIP model expects.
  */
 const convertToCLIPInput = (imageData: ImageData) => {
-    const requiredWidth = 224;
-    const requiredHeight = 224;
-
-    const mean = [0.48145466, 0.4578275, 0.40821073] as const;
-    const std = [0.26862954, 0.26130258, 0.27577711] as const;
+    const [requiredWidth, requiredHeight] = [256, 256];
 
     const { width, height, data: pixelData } = imageData;
 
@@ -144,16 +141,16 @@ const convertToCLIPInput = (imageData: ImageData) => {
     const cOffsetB = 2 * requiredHeight * requiredWidth; // ChannelOffsetBlue
     for (let h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
         for (let w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-            const { r, g, b } = pixelRGBBicubic(
+            const { r, g, b } = pixelRGBBilinear(
                 w / scale,
                 h / scale,
                 pixelData,
                 width,
                 height,
             );
-            clipInput[pi] = (r / 255.0 - mean[0]) / std[0];
-            clipInput[pi + cOffsetG] = (g / 255.0 - mean[1]) / std[1];
-            clipInput[pi + cOffsetB] = (b / 255.0 - mean[2]) / std[2];
+            clipInput[pi] = r / 255.0;
+            clipInput[pi + cOffsetG] = g / 255.0;
+            clipInput[pi + cOffsetB] = b / 255.0;
             pi++;
         }
     }
@@ -189,5 +186,8 @@ export const clipMatches = async (
             // This code is on the hot path, so these optimizations help.
             [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
-    return new Map(items.filter(([, score]) => score >= 0.23));
+    // This score threshold was obtain heuristically. 0.2 generally gives solid
+    // results, and around 0.15 we start getting many false positives (all this
+    // is query dependent too).
+    return new Map(items.filter(([, score]) => score >= 0.175));
 };

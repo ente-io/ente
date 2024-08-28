@@ -33,7 +33,11 @@ export const ValueContainerWithIcon: SelectComponents<
 >["ValueContainer"] = (props) => (
     <ValueContainer {...props}>
         <FlexWrapper>
-            <Box className="icon" mr={1.5} color="stroke.muted">
+            <Box
+                style={{ display: "inline-flex" }}
+                mr={1.5}
+                color={(theme) => theme.colors.stroke.muted}
+            >
                 {getIconByType(props.getValue()[0]?.type)}
             </Box>
             {props.children}
