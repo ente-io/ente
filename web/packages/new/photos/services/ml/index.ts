@@ -330,66 +330,92 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
  * WIP! Don't enable, dragon eggs are hatching here.
  */
 export const wipClusterEnable = async (): Promise<boolean> =>
-    !!process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
-    isDevBuild &&
+    (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
     (await isInternalUser());
 
 // // TODO-Cluster temporary state here
 let _wip_isClustering = false;
 let _wip_searchPersons: SearchPerson[] | undefined;
+let _wip_hasSwitchedOnce = false;
+
+export const wipHasSwitchedOnceCmpAndSet = () => {
+    if (_wip_hasSwitchedOnce) return true;
+    _wip_hasSwitchedOnce = true;
+    return false;
+};
 
 export const wipSearchPersons = async () => {
     if (!(await wipClusterEnable())) return [];
     return _wip_searchPersons ?? [];
 };
 
-export const wipClusterPageContents = async () => {
-    if (!(await wipClusterEnable())) return [];
+export interface FaceFileNeighbours {
+    face: Face;
+    neighbours: FaceFileNeighbour[];
+}
+
+export interface FaceFileNeighbour {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity: number;
+}
+
+export interface ClusterDebugPageContents {
+    faceFNs: FaceFileNeighbours[];
+    clusters: FaceCluster[];
+    clusterIDForFaceID: Map<string, string>;
+}
+
+export const wipClusterDebugPageContents = async (): Promise<
+    ClusterDebugPageContents | undefined
+> => {
+    if (!(await wipClusterEnable())) return undefined;
 
     log.info("clustering");
     _wip_isClustering = true;
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const { faces } = await clusterFaces(await faceIndexes());
-    // const searchPersons = await convertToSearchPersons(clusters, cgroups);
+    const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
+        await faceIndexes(),
+    );
+    const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+    const fileForFace = ({ faceID }: Face) =>
+        ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
-    const result1: { file: EnteFile; face: Face }[] = [];
-    for (const face of faces) {
-        const file = ensure(
-            localFileByID.get(ensure(fileIDFromFaceID(face.faceID))),
-        );
-        result1.push({ file, face });
-    }
+    const faceFNs = faceAndNeigbours
+        .map(({ face, neighbours }) => ({
+            face,
+            neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+                face,
+                enteFile: fileForFace(face),
+                cosineSimilarity,
+            })),
+        }))
+        .sort((a, b) => b.face.score - a.face.score);
 
-    const result = result1.sort((a, b) => b.face.score - a.face.score);
-
-    _wip_isClustering = false;
-    // _wip_searchPersons = searchPersons;
-    triggerStatusUpdate();
-
-    // return { faces, clusters, cgroups };
-    return result;
-};
-
-export const wipCluster = async () => {
-    if (!(await wipClusterEnable())) return;
-
-    log.info("clustering");
-    _wip_isClustering = true;
-    _wip_searchPersons = undefined;
-    triggerStatusUpdate();
-
-    const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-    const searchPersons = await convertToSearchPersons(clusters, cgroups);
+    const clusterIDForFaceID = new Map(
+        clusters.flatMap((cluster) =>
+            cluster.faceIDs.map((id) => [id, cluster.id]),
+        ),
+    );
 
     _wip_isClustering = false;
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
+
+    const prunedFaceFNs = faceFNs.slice(0, 30).map(({ face, neighbours }) => ({
+        face,
+        neighbours: neighbours.slice(0, 30),
+    }));
+
+    return { faceFNs: prunedFaceFNs, clusters, clusterIDForFaceID };
 };
+
+export const wipCluster = () => void wipClusterDebugPageContents();
 
 const convertToSearchPersons = async (
     clusters: FaceCluster[],

@@ -112,6 +112,17 @@ export interface CGroup {
     displayFaceID: string | undefined;
 }
 
+// TODO-Cluster
+export interface FaceNeighbours {
+    face: Face;
+    neighbours: FaceNeighbour[];
+}
+
+interface FaceNeighbour {
+    face: Face;
+    cosineSimilarity: number;
+}
+
 /**
  * Cluster faces into groups.
  *
@@ -157,7 +168,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
     // A flattened array of faces.
-    const faces = [...enumerateFaces(faceIndexes)];
+    const faces = [...enumerateFaces(faceIndexes)].slice(0, 2000);
 
     // Start with the clusters we already have (either from a previous indexing,
     // or fetched from remote).
@@ -176,35 +187,59 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     // A function to generate new cluster IDs.
     const newClusterID = () => newNonSecureID("cluster_");
 
+    const faceAndNeigbours: FaceNeighbours[] = [];
+
     // For each face,
-    for (const [i, { faceID, embedding }] of faces.entries()) {
+    for (const [i, fi] of faces.entries()) {
         // If the face is already part of a cluster, then skip it.
-        if (clusterIDForFaceID.get(faceID)) continue;
+        if (clusterIDForFaceID.get(fi.faceID)) continue;
 
         // Find the nearest neighbour from among all the other faces.
         let nn: Face | undefined;
         let nnCosineSimilarity = 0;
+        let neighbours: FaceNeighbour[] = [];
         for (let j = 0; j < faces.length; j++) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // Skip ourselves.
-            if (i == j) continue;
+            // TODO-Cluster Commenting this here and moving it downward
+            // // Skip ourselves.
+            // if (i == j) continue;
 
             // Can't find a way of avoiding the null assertion here.
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const n = faces[j]!;
+            const fj = faces[j]!;
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
-            const csim = dotProduct(embedding, n.embedding);
-            if (csim > 0.76 && csim > nnCosineSimilarity) {
-                nn = n;
+            const csim = dotProduct(fi.embedding, fj.embedding);
+
+            // TODO-Cluster Delete me and uncomment the check above
+            // Skip ourselves.
+            if (i == j) {
+                neighbours.push({ face: fj, cosineSimilarity: csim });
+                continue;
+            }
+
+            const threshold = fi.blur < 100 || fj.blur < 100 ? 0.7 : 0.6;
+            if (csim > threshold && csim > nnCosineSimilarity) {
+                nn = fj;
                 nnCosineSimilarity = csim;
             }
+
+            neighbours.push({ face: fj, cosineSimilarity: csim });
         }
+
+        neighbours = neighbours.sort(
+            (a, b) => b.cosineSimilarity - a.cosineSimilarity,
+        );
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        faceAndNeigbours.push({ face: faces[i]!, neighbours });
+
+        const { faceID } = fi;
 
         if (nn) {
             // Found a neighbour near enough.
+            const nnFaceID = nn.faceID;
 
             // Find the cluster the nearest neighbour belongs to, if any.
             const nnClusterID = clusterIDForFaceID.get(nn.faceID);
@@ -224,11 +259,11 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
 
                 const cluster = {
                     id: newClusterID(),
-                    faceIDs: [faceID, nn.faceID],
+                    faceIDs: [faceID, nnFaceID],
                 };
                 clusterIndexForClusterID.set(cluster.id, clusters.length);
                 clusterIDForFaceID.set(faceID, cluster.id);
-                clusterIDForFaceID.set(nn.faceID, cluster.id);
+                clusterIDForFaceID.set(nnFaceID, cluster.id);
                 clusters.push(cluster);
             }
         } else {
@@ -287,7 +322,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return { faces, clusters: validClusters, cgroups };
+    return { faces, clusters: validClusters, cgroups, faceAndNeigbours };
 };
 
 /**

@@ -1,5 +1,5 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup } from "@/base/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
@@ -8,6 +8,7 @@ import {
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
@@ -339,9 +340,9 @@ const ManageML: React.FC<ManageMLProps> = ({
     };
 
     // TODO-Cluster
-    // const wipClusterNow = () => void wipCluster();
     const router = useRouter();
-    const wipClusterNow = () => router.push("/cluster-debug");
+    const wipClusterNow = () => wipCluster();
+    const wipClusterShowNow = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -390,17 +391,30 @@ const ManageML: React.FC<ManageMLProps> = ({
                 <Box>
                     <MenuItemGroup>
                         <EnteMenuItem
-                            label={ut(
-                                "View clusters   ––– internal only option",
-                            )}
+                            label={ut("Create clusters • internal only option")}
                             onClick={wipClusterNow}
                         />
                     </MenuItemGroup>
-                    {/* <MenuSectionTitle
+                    <MenuSectionTitle
                         title={ut(
-                            "Create clusters locally, afresh and in-memory. Existing local clusters will be overwritten. Nothing will be saved or synced to remote.",
+                            "Create in-memory clusters from arbitrary 2k photos. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
                         )}
-                    /> */}
+                    />
+                </Box>
+            )}
+            {showClusterOpt && (
+                <Box>
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            label={ut("View clusters • internal only option")}
+                            onClick={wipClusterShowNow}
+                        />
+                    </MenuItemGroup>
+                    <MenuSectionTitle
+                        title={ut(
+                            "Variant of above that opens a page with debug info.",
+                        )}
+                    />
                 </Box>
             )}
         </Stack>
