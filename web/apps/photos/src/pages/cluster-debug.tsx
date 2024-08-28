@@ -7,6 +7,7 @@ import {
     type FaceFileNeighbour,
     type FaceFileNeighbours,
 } from "@/new/photos/services/ml";
+import type { Face } from "@/new/photos/services/ml/face";
 import {
     FlexWrapper,
     FluidContainer,
@@ -123,12 +124,12 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     }, [itemList]);
 
     const getItemSize = (i: number) =>
-        typeof itemList[i] == "number" ? 36 : listItemHeight;
+        Array.isArray(itemList[i]) ? listItemHeight : 36;
 
     const generateKey = (i: number) =>
-        typeof itemList[i] == "number"
-            ? `${itemList[i]}-${i}`
-            : `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`;
+        Array.isArray(itemList[i])
+            ? `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`
+            : `${itemList[i].faceID}-${i}`;
 
     return (
         <VariableSizeList
@@ -151,9 +152,9 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
                             columns={columns}
                             shrinkRatio={shrinkRatio}
                         >
-                            {typeof item == "number" ? (
+                            {!Array.isArray(item) ? (
                                 <LabelContainer span={columns}>
-                                    {`score ${item.toFixed(2)}`}
+                                    {`score ${item.score.toFixed(2)} blur ${item.blur.toFixed(0)}`}
                                 </LabelContainer>
                             ) : (
                                 item.map((faceFN, i) => (
@@ -171,7 +172,7 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     );
 };
 
-type ItemListItem = number | FaceFileNeighbour[];
+type ItemListItem = Face | FaceFileNeighbour[];
 
 const itemListFromFaceFNs = (
     faceFNs: FaceFileNeighbours[],
@@ -180,7 +181,7 @@ const itemListFromFaceFNs = (
     const result: ItemListItem[] = [];
     for (let index = 0; index < faceFNs.length; index++) {
         const { face, neighbours } = faceFNs[index];
-        result.push(face.score);
+        result.push(face);
         let lastIndex = 0;
         while (lastIndex < neighbours.length) {
             result.push(neighbours.slice(lastIndex, lastIndex + columns));

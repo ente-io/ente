@@ -201,7 +201,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         for (let j = 0; j < faces.length; j++) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // TODO-Cluster
+            // TODO-Cluster Commenting this here and moving it downward
             // // Skip ourselves.
             // if (i == j) continue;
 
@@ -213,6 +213,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
             // dot product as their cosine similarity.
             const csim = dotProduct(embedding, n.embedding);
 
+            // TODO-Cluster Delete me and uncomment the check above
             // Skip ourselves.
             if (i == j) {
                 neighbours.push({ face: n, cosineSimilarity: csim });
