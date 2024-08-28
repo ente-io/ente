@@ -397,7 +397,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create clusters locally, afresh and in-memory. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
+                            "Create in-memory clusters from arbitrary 900 photos. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
                         )}
                     />
                 </Box>
@@ -412,7 +412,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Variant of above that opens a page with debug info. WARNING: Unoptimized, likely will cause a crash for accounts with few k photos.",
+                            "Variant of above that opens a page with debug info.",
                         )}
                     />
                 </Box>

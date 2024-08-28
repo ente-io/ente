@@ -408,7 +408,12 @@ export const wipClusterDebugPageContents = async (): Promise<
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    return { faceFNs, clusters, clusterIDForFaceID };
+    const prunedFaceFNs = faceFNs.slice(0, 30).map(({ face, neighbours }) => ({
+        face,
+        neighbours: neighbours.slice(0, 30),
+    }));
+
+    return { faceFNs: prunedFaceFNs, clusters, clusterIDForFaceID };
 };
 
 export const wipCluster = () => void wipClusterDebugPageContents();

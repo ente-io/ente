@@ -40,25 +40,34 @@ export default function ClusterDebug() {
         finishLoading();
     };
 
+    if (!clusterRes) {
+        return (
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
+        );
+    }
     return (
         <>
-            {clusterRes ? (
-                <Container>
-                    <AutoSizer>
-                        {({ height, width }) => (
-                            <ClusterPhotoList
-                                width={width}
-                                height={height}
-                                clusterRes={clusterRes}
-                            />
-                        )}
-                    </AutoSizer>
-                </Container>
-            ) : (
-                <VerticallyCentered>
-                    <EnteSpinner />
-                </VerticallyCentered>
-            )}
+            <Typography variant="small">
+                {`${clusterRes.clusters.length} clusters`}
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Showing only upto first 30 faces (and only upto 30 nearest
+                neighbours of each).
+            </Typography>
+            <hr />
+            <Container>
+                <AutoSizer>
+                    {({ height, width }) => (
+                        <ClusterPhotoList
+                            width={width}
+                            height={height}
+                            clusterRes={clusterRes}
+                        />
+                    )}
+                </AutoSizer>
+            </Container>
             <Options />
         </>
     );

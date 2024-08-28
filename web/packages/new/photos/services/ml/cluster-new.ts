@@ -168,7 +168,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
     // A flattened array of faces.
-    const faces = [...enumerateFaces(faceIndexes)];
+    const faces = [...enumerateFaces(faceIndexes)].slice(0, 900);
 
     // Start with the clusters we already have (either from a previous indexing,
     // or fetched from remote).
