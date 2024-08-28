@@ -354,23 +354,33 @@ export interface FaceFileNeighbour {
     cosineSimilarity: number;
 }
 
-export const wipClusterPageContents = async () => {
-    if (!(await wipClusterEnable())) return [];
+export interface ClusterDebugPageContents {
+    faceFNs: FaceFileNeighbours[];
+    clusters: FaceCluster[];
+    clusterIDForFaceID: Map<string, string>;
+}
+
+export const wipClusterDebugPageContents = async (): Promise<
+    ClusterDebugPageContents | undefined
+> => {
+    if (!(await wipClusterEnable())) return undefined;
 
     log.info("clustering");
     _wip_isClustering = true;
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const { faceAndNeigbours } = await clusterFaces(await faceIndexes());
+    const { faceAndNeigbours, clusters } = await clusterFaces(
+        await faceIndexes(),
+    );
     // const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
     const fileForFace = ({ faceID }: Face) =>
-        localFileByID.get(ensure(fileIDFromFaceID(faceID)));
+        ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
-    const result = faceAndNeigbours
+    const faceFNs = faceAndNeigbours
         .map(({ face, neighbours }) => ({
             face,
             neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
@@ -381,12 +391,18 @@ export const wipClusterPageContents = async () => {
         }))
         .sort((a, b) => b.face.score - a.face.score);
 
+    const clusterIDForFaceID = new Map(
+        clusters.flatMap((cluster) =>
+            cluster.faceIDs.map((id) => [id, cluster.id]),
+        ),
+    );
+
     _wip_isClustering = false;
     // _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
     // return { faces, clusters, cgroups };
-    return result;
+    return { faceFNs, clusters, clusterIDForFaceID };
 };
 
 export const wipCluster = async () => {

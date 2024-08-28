@@ -2,7 +2,8 @@ import { SelectionBar } from "@/base/components/Navbar";
 import { pt } from "@/base/i18n";
 import {
     faceCrop,
-    wipClusterPageContents,
+    wipClusterDebugPageContents,
+    type ClusterDebugPageContents,
     type FaceFileNeighbour,
     type FaceFileNeighbours,
 } from "@/new/photos/services/ml";
@@ -23,7 +24,9 @@ import { VariableSizeList } from "react-window";
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
-    const [faceFNs, setFaceFNs] = useState<FaceFileNeighbours[]>(null);
+    const [clusterRes, setClusterRes] = useState<
+        ClusterDebugPageContents | undefined
+    >();
 
     useEffect(() => {
         showNavBar(true);
@@ -32,20 +35,20 @@ export default function ClusterDebug() {
 
     const cluster = async () => {
         startLoading();
-        setFaceFNs(await wipClusterPageContents());
+        setClusterRes(await wipClusterDebugPageContents());
         finishLoading();
     };
 
     return (
         <>
-            {faceFNs ? (
+            {clusterRes ? (
                 <Container>
                     <AutoSizer>
                         {({ height, width }) => (
                             <ClusterPhotoList
                                 width={width}
                                 height={height}
-                                faceFNs={faceFNs}
+                                clusterRes={clusterRes}
                             />
                         )}
                     </AutoSizer>
@@ -91,14 +94,15 @@ const Container = styled("div")`
 interface ClusterPhotoListProps {
     height: number;
     width: number;
-    faceFNs: FaceFileNeighbours[];
+    clusterRes: ClusterDebugPageContents;
 }
 
 const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     height,
     width,
-    faceFNs,
+    clusterRes,
 }) => {
+    const { faceFNs, clusterIDForFaceID } = clusterRes;
     const [itemList, setItemList] = useState<ItemListItem[]>([]);
     const listRef = useRef(null);
 
@@ -108,7 +112,7 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     );
 
     const shrinkRatio = getShrinkRatio(width, columns);
-    const listItemHeight = 120 * shrinkRatio + 4;
+    const listItemHeight = 120 * shrinkRatio + 24 + 4;
 
     useEffect(() => {
         setItemList(itemListFromFaceFNs(faceFNs, columns));
@@ -152,8 +156,11 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
                                     {`score ${item.toFixed(2)}`}
                                 </LabelContainer>
                             ) : (
-                                item.map((ffn, i) => (
-                                    <FaceItem key={i.toString()} {...ffn} />
+                                item.map((faceFN, i) => (
+                                    <FaceItem
+                                        key={i.toString()}
+                                        {...{ faceFN, clusterIDForFaceID }}
+                                    />
                                 ))
                             )}
                         </ListContainer>
@@ -192,11 +199,13 @@ const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
 
-const FaceItem: React.FC<FaceFileNeighbour> = ({
-    face,
-    enteFile,
-    cosineSimilarity,
-}) => {
+interface FaceItemProps {
+    faceFN: FaceFileNeighbour;
+    clusterIDForFaceID: Map<string, string>;
+}
+
+const FaceItem: React.FC<FaceItemProps> = ({ faceFN, clusterIDForFaceID }) => {
+    const { face, enteFile, cosineSimilarity } = faceFN;
     const { faceID } = face;
 
     const [objectURL, setObjectURL] = useState<string | undefined>();
@@ -217,7 +226,12 @@ const FaceItem: React.FC<FaceFileNeighbour> = ({
     }, [faceID, enteFile]);
 
     return (
-        <FaceChip>
+        <FaceChip
+            style={{
+                outline: outlineForCluster(clusterIDForFaceID.get(faceID)),
+                outlineOffset: "2px",
+            }}
+        >
             {objectURL && (
                 <img
                     style={{
@@ -228,7 +242,7 @@ const FaceItem: React.FC<FaceFileNeighbour> = ({
                     src={objectURL}
                 />
             )}
-            <Typography variant="small" textAlign="right">
+            <Typography variant="small" color="text.muted" textAlign="right">
                 {cosineSimilarity.toFixed(2)}
             </Typography>
         </FaceChip>
@@ -239,6 +253,12 @@ const FaceChip = styled(Box)`
     width: 120px;
     height: 120px;
 `;
+
+const outlineForCluster = (clusterID: string | undefined) =>
+    clusterID ? `1px solid oklch(0.7 0.1 ${hForID(clusterID)})` : undefined;
+
+const hForID = (id: string) =>
+    ([...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 10) * 36;
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "shrinkRatio",
