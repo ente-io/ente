@@ -219,6 +219,7 @@ class FileUploader {
       _queue.remove(id)?.completer.completeError(reason);
       _allBackups[id] = _allBackups[id]!.copyWith(
         status: BackupItemStatus.retry,
+        error: reason,
       );
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
@@ -243,8 +244,8 @@ class FileUploader {
     });
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id)?.completer.completeError(reason);
-      _allBackups[id] =
-          _allBackups[id]!.copyWith(status: BackupItemStatus.retry);
+      _allBackups[id] = _allBackups[id]!
+          .copyWith(status: BackupItemStatus.retry, error: reason);
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     _logger.info(
@@ -283,6 +284,10 @@ class FileUploader {
       }
       if (pendingEntry != null) {
         pendingEntry.status = UploadStatus.inProgress;
+        _allBackups[pendingEntry.file.localID!] =
+            _allBackups[pendingEntry.file.localID]!
+                .copyWith(status: BackupItemStatus.uploading);
+        Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         _encryptAndUploadFileToCollection(
           pendingEntry.file,
           pendingEntry.collectionID,
@@ -314,6 +319,7 @@ class FileUploader {
       _queue.remove(localID)!.completer.complete(uploadedFile);
       _allBackups[localID] =
           _allBackups[localID]!.copyWith(status: BackupItemStatus.completed);
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
@@ -324,8 +330,8 @@ class FileUploader {
         return _queue[localID]!.completer.future;
       } else {
         _queue.remove(localID)!.completer.completeError(e);
-        _allBackups[localID] =
-            _allBackups[localID]!.copyWith(status: BackupItemStatus.retry);
+        _allBackups[localID] = _allBackups[localID]!
+            .copyWith(status: BackupItemStatus.retry, error: e);
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         return null;
       }
@@ -435,18 +441,24 @@ class FileUploader {
 
   Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
     _hasInitiatedForceUpload = true;
+    final isInQueue = _allBackups[file.localID!] != null;
     try {
       final result = await _tryToUpload(file, collectionID, true);
-      _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
-        status: BackupItemStatus.completed,
-      );
-      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+      if (isInQueue) {
+        _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
+          status: BackupItemStatus.completed,
+        );
+        Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+      }
       return result;
-    } catch (_) {
-      _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
-        status: BackupItemStatus.retry,
-      );
-      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    } catch (error) {
+      if (isInQueue) {
+        _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
+          status: BackupItemStatus.retry,
+          error: error,
+        );
+        Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+      }
       rethrow;
     }
   }
@@ -1335,8 +1347,10 @@ class FileUploader {
         } else {
           _logger.info("Background upload failure detected");
           completer?.completeError(SilentlyCancelUploadsError());
-          _allBackups[upload.key] =
-              _allBackups[upload.key]!.copyWith(status: BackupItemStatus.retry);
+          _allBackups[upload.key] = _allBackups[upload.key]!.copyWith(
+            status: BackupItemStatus.retry,
+            error: SilentlyCancelUploadsError(),
+          );
         }
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       }
