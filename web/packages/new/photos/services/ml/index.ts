@@ -337,6 +337,13 @@ export const wipClusterEnable = async (): Promise<boolean> =>
 // // TODO-Cluster temporary state here
 let _wip_isClustering = false;
 let _wip_searchPersons: SearchPerson[] | undefined;
+let _wip_hasSwitchedOnce = false;
+
+export const wipHasSwitchedOnceCmpAndSet = () => {
+    if (_wip_hasSwitchedOnce) return true;
+    _wip_hasSwitchedOnce = true;
+    return false;
+};
 
 export const wipSearchPersons = async () => {
     if (!(await wipClusterEnable())) return [];
@@ -370,10 +377,10 @@ export const wipClusterDebugPageContents = async (): Promise<
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const { faceAndNeigbours, clusters } = await clusterFaces(
+    const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
         await faceIndexes(),
     );
-    // const searchPersons = await convertToSearchPersons(clusters, cgroups);
+    const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
@@ -398,10 +405,9 @@ export const wipClusterDebugPageContents = async (): Promise<
     );
 
     _wip_isClustering = false;
-    // _wip_searchPersons = searchPersons;
+    _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    // return { faces, clusters, cgroups };
     return { faceFNs, clusters, clusterIDForFaceID };
 };
 
