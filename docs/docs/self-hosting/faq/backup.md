@@ -24,8 +24,8 @@ from each of these:
 
 1. For museum, you'd want to backup your `museum.yaml`, `credentials.yaml` or
    any other custom configuration that you created. In particular, you should
-   backup the [secrets that are specific to your
-   instance](https://github.com/ente-io/ente/blob/74377a93d8e20e969d9a2531f32f577b5f0ef090/server/configurations/local.yaml#L188)
+   backup the
+   [secrets that are specific to your instance](https://github.com/ente-io/ente/blob/74377a93d8e20e969d9a2531f32f577b5f0ef090/server/configurations/local.yaml#L188)
    (`key.encryption`, `key.hash` and `jwt.secret`).
 
 2. For postgres, the entire data volume needs to be backed up.
