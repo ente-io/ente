@@ -28,6 +28,7 @@ import {
     faceIndexes,
     indexableAndIndexedCounts,
 } from "./db";
+import type { Face } from "./face";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -340,6 +341,38 @@ let _wip_searchPersons: SearchPerson[] | undefined;
 export const wipSearchPersons = async () => {
     if (!(await wipClusterEnable())) return [];
     return _wip_searchPersons ?? [];
+};
+
+export const wipClusterPageContents = async () => {
+    if (!(await wipClusterEnable())) return [];
+
+    log.info("clustering");
+    _wip_isClustering = true;
+    _wip_searchPersons = undefined;
+    triggerStatusUpdate();
+
+    const { faces } = await clusterFaces(await faceIndexes());
+    // const searchPersons = await convertToSearchPersons(clusters, cgroups);
+
+    const localFiles = await getAllLocalFiles();
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+
+    const result1: { file: EnteFile; face: Face }[] = [];
+    for (const face of faces) {
+        const file = ensure(
+            localFileByID.get(ensure(fileIDFromFaceID(face.faceID))),
+        );
+        result1.push({ file, face });
+    }
+
+    const result = result1.sort((a, b) => b.face.score - a.face.score);
+
+    _wip_isClustering = false;
+    // _wip_searchPersons = searchPersons;
+    triggerStatusUpdate();
+
+    // return { faces, clusters, cgroups };
+    return result;
 };
 
 export const wipCluster = async () => {
