@@ -1,6 +1,6 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import { pt } from "@/base/i18n";
-import { wipClusterPageContents } from "@/new/photos/services/ml";
+import { faceCrop, wipClusterPageContents } from "@/new/photos/services/ml";
 import type { Face } from "@/new/photos/services/ml/face";
 import { EnteFile } from "@/new/photos/types/file";
 import {
@@ -9,24 +9,13 @@ import {
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import { Box, IconButton, styled } from "@mui/material";
-import PreviewCard from "components/pages/gallery/PreviewCard";
-import {
-    DATE_CONTAINER_HEIGHT,
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-} from "constants/gallery";
-import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { VariableSizeList as List } from "react-window";
+import { VariableSizeList } from "react-window";
 
 export interface UICluster {
     files: EnteFile[];
@@ -82,9 +71,7 @@ export default function Deduplicate() {
 const Options: React.FC = () => {
     const router = useRouter();
 
-    const close = () => {
-        router.push(PAGES.GALLERY);
-    };
+    const close = () => router.push("/gallery");
 
     return (
         <SelectionBar>
@@ -103,7 +90,6 @@ const Container = styled("div")`
     flex: 1;
     width: 100%;
     flex-wrap: wrap;
-    margin: 0 auto;
     overflow: hidden;
     .pswp-thumbnail {
         display: inline-block;
@@ -124,41 +110,13 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const [itemList, setItemList] = useState<ItemListItem[]>([]);
     const listRef = useRef(null);
 
-    const getThumbnail = (
-        item: EnteFile,
-        index: number,
-        isScrolling: boolean,
-    ) => (
-        <PreviewCard
-            key={`tile-${item.id}`}
-            file={item}
-            updateURL={() => {}}
-            onClick={() => {}}
-            selectable={false}
-            onSelect={() => {}}
-            selected={false}
-            selectOnClick={false}
-            onHover={() => {}}
-            onRangeSelect={() => {}}
-            isRangeSelectActive={false}
-            isInsSelectRange={false}
-            activeCollectionID={0}
-            showPlaceholder={isScrolling}
-        />
+    const columns = useMemo(
+        () => Math.max(Math.floor(getFractionFittableColumns(width)), 4),
+        [width],
     );
 
-    const columns = useMemo(() => {
-        const fittableColumns = getFractionFittableColumns(width);
-        let columns = Math.floor(fittableColumns);
-        if (columns < MIN_COLUMNS) {
-            columns = MIN_COLUMNS;
-        }
-        return columns;
-    }, [width]);
-
     const shrinkRatio = getShrinkRatio(width, columns);
-    const listItemHeight =
-        IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
+    const listItemHeight = 120 * shrinkRatio + 4;
 
     useEffect(() => {
         setItemList(itemListFromClusters(clusters, columns));
@@ -169,31 +127,17 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     }, [itemList]);
 
     const getItemSize = (i: number) =>
-        itemList[i].score !== undefined
-            ? SIZE_AND_COUNT_CONTAINER_HEIGHT
-            : listItemHeight;
+        itemList[i].score !== undefined ? 36 : listItemHeight;
 
     const generateKey = (i: number) =>
         itemList[i].score !== undefined
             ? `${itemList[i].score}-${i}`
             : `${itemList[i].files[0].id}-${itemList[i].files.slice(-1)[0].id}`;
 
-    const renderListItem = (listItem: ItemListItem, isScrolling: boolean) =>
-        listItem.score !== undefined ? (
-            <SizeAndCountContainer span={columns}>
-                {listItem.fileCount} {t("FILES")},{" score "}
-                {listItem.score.toFixed(2)}
-            </SizeAndCountContainer>
-        ) : (
-            listItem.files.map((item, idx) =>
-                getThumbnail(item, listItem.itemStartIndex + idx, isScrolling),
-            )
-        );
-
     return (
-        <List
+        <VariableSizeList
             key={`${0}`}
-            itemData={{ itemList, columns, shrinkRatio, renderListItem }}
+            itemData={{ itemList, columns, shrinkRatio }}
             ref={listRef}
             itemSize={getItemSize}
             height={height}
@@ -203,20 +147,75 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
             overscanCount={3}
             useIsScrolling
         >
-            {({ index, style, isScrolling, data }) => {
-                const { itemList, columns, shrinkRatio, renderListItem } = data;
+            {({ index, style, data }) => {
+                const { itemList, columns, shrinkRatio } = data;
+                const item = itemList[index];
                 return (
                     <ListItem style={style}>
                         <ListContainer
                             columns={columns}
                             shrinkRatio={shrinkRatio}
                         >
-                            {renderListItem(itemList[index], isScrolling)}
+                            {item.score !== undefined ? (
+                                <LabelContainer span={columns}>
+                                    {`${item.fileCount} files, score ${item.score.toFixed(2)}`}
+                                </LabelContainer>
+                            ) : (
+                                item.files.map((enteFile) => (
+                                    <FaceChip key={`${enteFile.id}`}>
+                                        <FaceCropImageView
+                                            enteFile={enteFile}
+                                            faceID={item.face?.faceID}
+                                        />
+                                    </FaceChip>
+                                ))
+                            )}
                         </ListContainer>
                     </ListItem>
                 );
             }}
-        </List>
+        </VariableSizeList>
+    );
+};
+
+const FaceChip = styled(Box)`
+    width: 120px;
+    height: 120px;
+`;
+
+interface FaceCropImageViewProps {
+    faceID: string;
+    enteFile: EnteFile;
+}
+
+const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
+    faceID,
+    enteFile,
+}) => {
+    const [objectURL, setObjectURL] = useState<string | undefined>();
+
+    useEffect(() => {
+        let didCancel = false;
+        let thisObjectURL: string | undefined;
+
+        void faceCrop(faceID, enteFile).then((blob) => {
+            if (blob && !didCancel)
+                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
+        });
+
+        return () => {
+            didCancel = true;
+            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
+        };
+    }, [faceID, enteFile]);
+
+    return objectURL ? (
+        <img
+            style={{ objectFit: "cover", width: "100%", height: "100%" }}
+            src={objectURL}
+        />
+    ) : (
+        <div />
     );
 };
 
@@ -226,29 +225,24 @@ const ListContainer = styled(Box)<{
 }>`
     display: grid;
     grid-template-columns: ${({ columns, shrinkRatio }) =>
-        `repeat(${columns},${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`};
-    grid-column-gap: ${GAP_BTW_TILES}px;
+        `repeat(${columns},${120 * shrinkRatio}px)`};
+    grid-column-gap: 4px;
     width: 100%;
-    color: #fff;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
+    padding: 4px;
 `;
 
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
 `;
 
-const SizeAndCountContainer = styled(ListItemContainer)`
-    height: ${DATE_CONTAINER_HEIGHT}px;
+const LabelContainer = styled(ListItemContainer)`
     color: ${({ theme }) => theme.colors.text.muted};
-    margin-top: 1rem;
-    height: ${SIZE_AND_COUNT_CONTAINER_HEIGHT}px;
+    height: 32px;
 `;
 
 interface ItemListItem {
     score?: number;
+    face?: Face;
     files?: EnteFile[];
     itemStartIndex?: number;
     fileCount?: number;
@@ -260,26 +254,15 @@ const ListItem = styled("div")`
 `;
 
 function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
+    return (width - 2 * getGapFromScreenEdge(width) + 4) / (120 + 4);
 }
 
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
+const getGapFromScreenEdge = (width: number) => (width > 4 * 120 ? 24 : 4);
 
 function getShrinkRatio(width: number, columns: number) {
     return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
+        (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
+        (columns * 120)
     );
 }
 
@@ -295,6 +278,7 @@ const itemListFromClusters = (clusters: UICluster[], columns: number) => {
         while (lastIndex < dupes.files.length) {
             result.push({
                 files: dupes.files.slice(lastIndex, lastIndex + columns),
+                face: dupes.face,
                 itemStartIndex: index,
             });
             lastIndex += columns;
