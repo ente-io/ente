@@ -91,12 +91,13 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                           vertical: 20,
                           horizontal: 16,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            for (final item in items)
-                              BackupItemCard(item: item),
-                          ],
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          itemBuilder: (context, index) {
+                            return BackupItemCard(item: items[index]);
+                          },
+                          itemCount: items.length,
                         ),
                       );
                     },

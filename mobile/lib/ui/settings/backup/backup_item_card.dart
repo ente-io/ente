@@ -147,17 +147,17 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       color: Color(0xFFFDB816),
                     ),
                     onPressed: () async {
-                      await FileUploader.instance.forceUpload(
+                      await FileUploader.instance.upload(
                         widget.item.file,
                         widget.item.collectionID,
                       );
                     },
                   ),
                 BackupItemStatus.inBackground => SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: Icon(
-                      Icons.lock_reset,
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.0,
                       color: Theme.of(context).brightness == Brightness.light
                           ? const Color.fromRGBO(0, 0, 0, .6)
                           : const Color.fromRGBO(255, 255, 255, .6),
