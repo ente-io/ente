@@ -154,7 +154,7 @@ downgrade to the 50 GB yearly plan, then
 
 -   This credited amount will be discounted from your next invoice, which will
     be due in half a year.
-    
+
 The same applies to monthly plans.
 
 If you prefer to have this credit refunded to your original payment method,

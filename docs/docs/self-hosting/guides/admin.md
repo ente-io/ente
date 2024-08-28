@@ -78,3 +78,7 @@ internal:
 You can use
 [account list](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_account_list.md)
 command to find the user id of any account.
+
+## Backups
+
+See this [FAQ](/self-hosting/faq/backup).
