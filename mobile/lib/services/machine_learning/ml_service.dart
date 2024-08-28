@@ -391,8 +391,11 @@ class MLService {
     bool actuallyRanML = false;
 
     try {
+      final String filePath = await getImagePathForML(instruction.file);
+
       final MLResult? result = await MLIndexingIsolate.instance.analyzeImage(
         instruction,
+        filePath,
       );
       // Check if there's no result simply because MLController paused indexing
       if (result == null) {
