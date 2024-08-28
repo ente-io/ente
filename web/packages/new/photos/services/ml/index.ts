@@ -411,21 +411,7 @@ export const wipClusterDebugPageContents = async (): Promise<
     return { faceFNs, clusters, clusterIDForFaceID };
 };
 
-export const wipCluster = async () => {
-    if (!(await wipClusterEnable())) return;
-
-    log.info("clustering");
-    _wip_isClustering = true;
-    _wip_searchPersons = undefined;
-    triggerStatusUpdate();
-
-    const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-    const searchPersons = await convertToSearchPersons(clusters, cgroups);
-
-    _wip_isClustering = false;
-    _wip_searchPersons = searchPersons;
-    triggerStatusUpdate();
-};
+export const wipCluster = () => void wipClusterDebugPageContents();
 
 const convertToSearchPersons = async (
     clusters: FaceCluster[],

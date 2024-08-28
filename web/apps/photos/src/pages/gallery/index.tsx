@@ -675,7 +675,7 @@ export default function Gallery() {
 
     useEffect(() => {
         // TODO-Cluster
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
             setTimeout(() => {
                 if (!wipHasSwitchedOnceCmpAndSet()) {
                     void wipClusterEnable().then(
