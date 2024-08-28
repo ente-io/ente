@@ -488,6 +488,14 @@ class MLService {
         );
         acceptedIssue = true;
       }
+      if (errorString.contains('FileSizeTooLargeForMobileIndexing')) {
+        _logger.severe(
+          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
+        acceptedIssue = true;
+      }
       if (acceptedIssue) {
         await MLDataDB.instance.bulkInsertFaces(
           [Face.empty(instruction.file.uploadedFileID!, error: true)],
