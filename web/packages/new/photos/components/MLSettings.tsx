@@ -1,5 +1,5 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import { MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
@@ -8,7 +8,6 @@ import {
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
@@ -28,6 +27,7 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
@@ -338,7 +338,10 @@ const ManageML: React.FC<ManageMLProps> = ({
         });
     };
 
-    const wipClusterNow = () => void wipCluster();
+    // TODO-Cluster
+    // const wipClusterNow = () => void wipCluster();
+    const router = useRouter();
+    const wipClusterNow = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -387,15 +390,17 @@ const ManageML: React.FC<ManageMLProps> = ({
                 <Box>
                     <MenuItemGroup>
                         <EnteMenuItem
-                            label={ut("Cluster   ––– internal only option")}
+                            label={ut(
+                                "View clusters   ––– internal only option",
+                            )}
                             onClick={wipClusterNow}
                         />
                     </MenuItemGroup>
-                    <MenuSectionTitle
+                    {/* <MenuSectionTitle
                         title={ut(
                             "Create clusters locally, afresh and in-memory. Existing local clusters will be overwritten. Nothing will be saved or synced to remote.",
                         )}
-                    />
+                    /> */}
                 </Box>
             )}
         </Stack>
