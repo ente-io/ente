@@ -12,13 +12,13 @@ RUN go mod download
 COPY . .
 # the --mount option requires BuildKit. Refer to https://docs.docker.com/go/buildkit/ to learn how to build images with BuildKit enabled
 RUN --mount=type=cache,target=/root/.cache/go-build \
-  go build -o ente-cli main.go
+  go build -o ente main.go
 
 FROM alpine:3.17
 RUN apk add libsodium-dev
-COPY --from=builder /etc/ente/ente-cli .
+COPY --from=builder /etc/ente/ente .
 
 ARG GIT_COMMIT
 ENV GIT_COMMIT=$GIT_COMMIT
 
-CMD ["./ente-cli"]
+CMD ["./ente"]
