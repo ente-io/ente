@@ -26,6 +26,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
+import "package:photos/ui/settings/ml/ml_user_dev_screen.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/wakelock_util.dart";
@@ -42,6 +43,8 @@ class _MachineLearningSettingsPageState
     extends State<MachineLearningSettingsPage> {
   final EnteWakeLock _wakeLock = EnteWakeLock();
   Timer? _timer;
+  int _titleTapCount = 0;
+  Timer? _advancedOptionsTimer;
 
   @override
   void initState() {
@@ -55,6 +58,9 @@ class _MachineLearningSettingsPageState
         }
       });
     }
+    _advancedOptionsTimer = Timer.periodic(const Duration(seconds: 7), (timer) {
+      _titleTapCount = 0;
+    });
   }
 
   @override
@@ -63,6 +69,7 @@ class _MachineLearningSettingsPageState
     _wakeLock.disable();
     MachineLearningController.instance.forceOverrideML(turnOn: false);
     _timer?.cancel();
+    _advancedOptionsTimer?.cancel();
   }
 
   @override
@@ -73,8 +80,26 @@ class _MachineLearningSettingsPageState
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).machineLearning,
+            flexibleSpaceTitle: GestureDetector(
+              child: TitleBarTitleWidget(
+                title: S.of(context).machineLearning,
+              ),
+              onTap: () {
+                setState(() {
+                  _titleTapCount++;
+                  if (_titleTapCount >= 7) {
+                    _titleTapCount = 0;
+                    // showShortToast(context, "Advanced options enabled");
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return const MLUserDeveloperOptions();
+                        },
+                      ),
+                    ).ignore();
+                  }
+                });
+              },
             ),
             actionIcons: [
               IconButtonWidget(

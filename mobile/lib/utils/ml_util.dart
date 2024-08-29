@@ -153,7 +153,8 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
 }
 
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
-    int yieldSize,) async* {
+  int yieldSize,
+) async* {
   final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
   final List<List<FileMLInstruction>> chunks =
       filesToIndex.chunks(embeddingFetchLimit);
@@ -312,6 +313,12 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
       throw ThumbnailRetrievalException(e.toString(), s);
     }
   } else {
+    // Don't process the file if it's too large (more than 100MB)
+    if (enteFile.fileSize != null && enteFile.fileSize! > maxFileDownloadSize) {
+      throw Exception(
+        "FileSizeTooLargeForMobileIndexing: size is ${enteFile.fileSize}",
+      );
+    }
     try {
       file = await getFile(enteFile, isOrigin: true);
     } catch (e, s) {

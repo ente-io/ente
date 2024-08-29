@@ -189,9 +189,8 @@ class MLIndexingIsolate {
   /// Analyzes the given image data by running the full pipeline for faces, using [_analyzeImageSync] in the isolate.
   Future<MLResult?> analyzeImage(
     FileMLInstruction instruction,
+    String filePath,
   ) async {
-    final String filePath = await getImagePathForML(instruction.file);
-
     final Stopwatch stopwatch = Stopwatch()..start();
     late MLResult result;
 
