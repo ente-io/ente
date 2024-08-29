@@ -14,6 +14,7 @@ import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
+import "package:photos/audio_session_handler.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
@@ -73,6 +74,10 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
+  //For audio to work on vidoes in iOS when in silent mode.
+  if (Platform.isIOS) {
+    unawaited(AudioSessionHandler.setAudioSessionCategory());
+  }
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
