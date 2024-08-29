@@ -124,6 +124,16 @@ interface FaceNeighbour {
     cosineSimilarity: number;
 }
 
+export interface ClusterPreview {
+    clusterSize: number;
+    faces: ClusterPreviewFace[];
+}
+
+interface ClusterPreviewFace {
+    face: Face;
+    cosineSimilarity: number;
+}
+
 /**
  * Cluster faces into groups.
  *
@@ -455,22 +465,56 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     }
 
     // Convert into the data structure we're using to debug/visualize.
-    const faceAndNeigbours: FaceNeighbours[] = [];
-    const topFaces = faces.sort((a, b) => b.score - a.score).slice(0, 30);
-    for (const fi of topFaces) {
-        let neighbours: FaceNeighbour[] = [];
-        for (const fj of faces) {
-            // The vectors are already normalized, so we can directly use their
-            // dot product as their cosine similarity.
-            const csim = dotProduct(fi.embedding, fj.embedding);
-            neighbours.push({ face: fj, cosineSimilarity: csim });
+    // const faceAndNeigbours: FaceNeighbours[] = [];
+    // const topFaces = faces.sort((a, b) => b.score - a.score).slice(0, 30);
+    // for (const fi of topFaces) {
+    //     let neighbours: FaceNeighbour[] = [];
+    //     for (const fj of faces) {
+    //         // The vectors are already normalized, so we can directly use their
+    //         // dot product as their cosine similarity.
+    //         const csim = dotProduct(fi.embedding, fj.embedding);
+    //         neighbours.push({ face: fj, cosineSimilarity: csim });
+    //     }
+
+    //     neighbours = neighbours
+    //         .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
+    //         .slice(0, 30);
+
+    //     faceAndNeigbours.push({ face: fi, neighbours });
+    // }
+
+    // Convert into the data structure we're using to debug/visualize.
+    //
+    // > Showing only top 20 and bottom 10 clusters (and only up to 50 faces in
+    // > each, sorted by cosine distance to highest scoring face in the
+    // > cluster).
+
+    const sortedClusters = clusters.sort(
+        (a, b) => b.faceIDs.length - a.faceIDs.length,
+    );
+    const debugClusters =
+        sortedClusters.length < 30
+            ? sortedClusters
+            : sortedClusters.slice(0, 20).concat(sortedClusters.slice(-10));
+    const clusterPreviews: ClusterPreview[] = [];
+    for (const cluster of debugClusters) {
+        const faces = cluster.faceIDs.map((id) =>
+            ensure(faceForFaceID.get(id)),
+        );
+        const topFace = faces.reduce((max, face) =>
+            max.score > face.score ? max : face,
+        );
+        const previewFaces: ClusterPreviewFace[] = [];
+        for (const face of faces) {
+            const csim = dotProduct(topFace.embedding, face.embedding);
+            previewFaces.push({ face, cosineSimilarity: csim });
         }
-
-        neighbours = neighbours
-            .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
-            .slice(0, 30);
-
-        faceAndNeigbours.push({ face: fi, neighbours });
+        clusterPreviews.push({
+            clusterSize: cluster.faceIDs.length,
+            faces: previewFaces
+                .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
+                .slice(0, 50),
+        });
     }
 
     // Prune too small clusters.
@@ -518,5 +562,5 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
         `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );
 
-    return { faces, clusters: validClusters, cgroups, faceAndNeigbours };
+    return { faces, clusters: validClusters, cgroups, clusterPreviews };
 };

@@ -53,8 +53,8 @@ export default function ClusterDebug() {
                 {`${clusterRes.clusters.length} clusters`}
             </Typography>
             <Typography variant="small" color="text.muted">
-                Showing only upto first 30 faces (and only upto 30 nearest
-                neighbours of each).
+                Showing only top 20 and bottom 10 clusters (and only up to 50 faces in
+                each, sorted by cosine distance to highest scoring face in the cluster).
             </Typography>
             <hr />
             <Container>

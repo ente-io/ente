@@ -360,6 +360,18 @@ export interface FaceFileNeighbour {
     cosineSimilarity: number;
 }
 
+// "with file"
+export interface ClusterPreviewWF {
+    clusterSize: number;
+    faces: ClusterPreviewFaceWF[];
+}
+
+interface ClusterPreviewFaceWF {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity: number;
+}
+
 export interface ClusterDebugPageContents {
     faceFNs: FaceFileNeighbours[];
     clusters: FaceCluster[];
@@ -377,7 +389,7 @@ export const wipClusterDebugPageContents = async (): Promise<
     triggerStatusUpdate();
 
     // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
-    const { faceAndNeigbours, clusters, cgroups } = await clusterFacesHdb(
+    const { clusterPreviews, clusters, cgroups } = await clusterFacesHdb(
         await faceIndexes(),
     );
     const searchPersons = await convertToSearchPersons(clusters, cgroups);
@@ -387,9 +399,19 @@ export const wipClusterDebugPageContents = async (): Promise<
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
-    const faceFNs = faceAndNeigbours.map(({ face, neighbours }) => ({
-        face,
-        neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+    // const faceFNs = faceAndNeigbours.map(
+    //     ({ topFace: face, faces: neighbours }) => ({
+    //         face,
+    //         neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+    //             face,
+    //             enteFile: fileForFace(face),
+    //             cosineSimilarity,
+    //         })),
+    //     }),
+    // );
+    const clusterPreviewWFs = clusterPreviews.map(({ clusterSize, faces }) => ({
+        clusterSize,
+        faces: faces.map(({ face, cosineSimilarity }) => ({
             face,
             enteFile: fileForFace(face),
             cosineSimilarity,
@@ -406,7 +428,7 @@ export const wipClusterDebugPageContents = async (): Promise<
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    return { faceFNs, clusters, clusterIDForFaceID };
+    return { clusterPreviewWFs, clusters, clusterIDForFaceID };
 };
 
 export const wipCluster = () => void wipClusterDebugPageContents();
