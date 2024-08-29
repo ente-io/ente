@@ -1,5 +1,6 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
+import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -25,7 +26,6 @@ import { CustomError } from "@ente/shared/error";
 import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
-    clearData,
     getData,
     setData,
     setLSUser,
@@ -177,7 +177,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     (!user?.token && !user?.encryptedToken) ||
                     (keyAttributes && !keyAttributes.memLimit)
                 ) {
-                    clearData();
+                    clearLocalStorage();
                     router.push("/");
                     return;
                 }
