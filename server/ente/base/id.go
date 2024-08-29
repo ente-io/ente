@@ -3,6 +3,7 @@ package base
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/matoous/go-nanoid/v2"
 )
 
@@ -27,4 +28,13 @@ func NewID(prefix string) (*string, error) {
 	}
 	result := fmt.Sprintf("%s_%s", prefix, id)
 	return &result, nil
+}
+
+func ServerReqID() string {
+	// Generate a nanoid with a custom alphabet and length of 22
+	id, err := NewID("ser")
+	if err != nil {
+		return "ser_" + uuid.New().String()
+	}
+	return *id
 }
