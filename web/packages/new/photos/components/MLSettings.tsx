@@ -8,7 +8,6 @@ import {
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
@@ -341,7 +340,7 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     // TODO-Cluster
     const router = useRouter();
-    const wipClusterNow = () => wipCluster();
+    // const wipClusterNow = () => wipCluster();
     const wipClusterShowNow = () => router.push("/cluster-debug");
 
     return (
@@ -391,18 +390,20 @@ const ManageML: React.FC<ManageMLProps> = ({
                 <Box>
                     <MenuItemGroup>
                         <EnteMenuItem
-                            label={ut("Create clusters • internal only option")}
-                            onClick={wipClusterNow}
+                            label={ut(
+                                "Create clusters   • internal only option",
+                            )}
+                            onClick={wipClusterShowNow}
                         />
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create in-memory clusters from arbitrary 2k photos. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
+                            "Create and show in-memory clusters. Takes ~ 1 min. Nothing will be saved or synced to remote. You can also view all clusters in the search dropdown later.",
                         )}
                     />
                 </Box>
             )}
-            {showClusterOpt && (
+            {/* {showClusterOpt && (
                 <Box>
                     <MenuItemGroup>
                         <EnteMenuItem
@@ -416,7 +417,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         )}
                     />
                 </Box>
-            )}
+            )} */}
         </Stack>
     );
 };

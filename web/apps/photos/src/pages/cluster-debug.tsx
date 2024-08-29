@@ -4,10 +4,10 @@ import {
     faceCrop,
     wipClusterDebugPageContents,
     type ClusterDebugPageContents,
-    type FaceFileNeighbour,
-    type FaceFileNeighbours,
+    type ClusterPreviewFaceWF,
+    type ClusterPreviewWF,
 } from "@/new/photos/services/ml";
-import type { Face } from "@/new/photos/services/ml/face";
+import { faceDirection } from "@/new/photos/services/ml/face";
 import {
     FlexWrapper,
     FluidContainer,
@@ -15,7 +15,7 @@ import {
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
-import { Box, IconButton, styled, Typography } from "@mui/material";
+import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -49,13 +49,22 @@ export default function ClusterDebug() {
     }
     return (
         <>
-            <Typography variant="small">
-                {`${clusterRes.clusters.length} clusters`}
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Showing only upto first 30 faces (and only upto 30 nearest
-                neighbours of each).
-            </Typography>
+            <Stack m={1}>
+                <Typography variant="small" mb={1}>
+                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Showing only top 30 and bottom 30 clusters.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    For each cluster showing only up to 50 faces, sorted by
+                    cosine similarity to highest scoring face in the cluster.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Below each face is its{" "}
+                    <b>blur - score - cosineSimilarity - direction</b>
+                </Typography>
+            </Stack>
             <hr />
             <Container>
                 <AutoSizer>
@@ -112,7 +121,7 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     width,
     clusterRes,
 }) => {
-    const { faceFNs, clusterIDForFaceID } = clusterRes;
+    const { clusterPreviewWFs, clusterIDForFaceID } = clusterRes;
     const [itemList, setItemList] = useState<ItemListItem[]>([]);
     const listRef = useRef(null);
 
@@ -125,8 +134,8 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
 
     useEffect(() => {
-        setItemList(itemListFromFaceFNs(faceFNs, columns));
-    }, [columns, faceFNs]);
+        setItemList(itemListFromClusterPreviewWFs(clusterPreviewWFs, columns));
+    }, [columns, clusterPreviewWFs]);
 
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
@@ -138,7 +147,7 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const generateKey = (i: number) =>
         Array.isArray(itemList[i])
             ? `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`
-            : `${itemList[i].faceID}-${i}`;
+            : `${itemList[i]}-${i}`;
 
     return (
         <VariableSizeList
@@ -163,13 +172,13 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
                         >
                             {!Array.isArray(item) ? (
                                 <LabelContainer span={columns}>
-                                    {`score ${item.score.toFixed(2)} blur ${item.blur.toFixed(0)}`}
+                                    {`cluster size ${item.toFixed(2)}`}
                                 </LabelContainer>
                             ) : (
-                                item.map((faceFN, i) => (
+                                item.map((faceWF, i) => (
                                     <FaceItem
                                         key={i.toString()}
-                                        {...{ faceFN, clusterIDForFaceID }}
+                                        {...{ faceWF, clusterIDForFaceID }}
                                     />
                                 ))
                             )}
@@ -181,19 +190,20 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     );
 };
 
-type ItemListItem = Face | FaceFileNeighbour[];
+// type ItemListItem = Face | FaceFileNeighbour[];
+type ItemListItem = number | ClusterPreviewFaceWF[];
 
-const itemListFromFaceFNs = (
-    faceFNs: FaceFileNeighbours[],
+const itemListFromClusterPreviewWFs = (
+    clusterPreviewWFs: ClusterPreviewWF[],
     columns: number,
 ) => {
     const result: ItemListItem[] = [];
-    for (let index = 0; index < faceFNs.length; index++) {
-        const { face, neighbours } = faceFNs[index];
-        result.push(face);
+    for (let index = 0; index < clusterPreviewWFs.length; index++) {
+        const { clusterSize, faces } = clusterPreviewWFs[index];
+        result.push(clusterSize);
         let lastIndex = 0;
-        while (lastIndex < neighbours.length) {
-            result.push(neighbours.slice(lastIndex, lastIndex + columns));
+        while (lastIndex < faces.length) {
+            result.push(faces.slice(lastIndex, lastIndex + columns));
             lastIndex += columns;
         }
     }
@@ -210,12 +220,12 @@ const getShrinkRatio = (width: number, columns: number) =>
     (columns * 120);
 
 interface FaceItemProps {
-    faceFN: FaceFileNeighbour;
+    faceWF: ClusterPreviewFaceWF;
     clusterIDForFaceID: Map<string, string>;
 }
 
-const FaceItem: React.FC<FaceItemProps> = ({ faceFN, clusterIDForFaceID }) => {
-    const { face, enteFile, cosineSimilarity } = faceFN;
+const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
+    const { face, enteFile, cosineSimilarity } = faceWF;
     const { faceID } = face;
 
     const [objectURL, setObjectURL] = useState<string | undefined>();
@@ -235,6 +245,8 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceFN, clusterIDForFaceID }) => {
         };
     }, [faceID, enteFile]);
 
+    const fd = faceDirection(face.detection);
+    const d = fd == "straight" ? "•" : fd == "left" ? "←" : "→";
     return (
         <FaceChip
             style={{
@@ -252,9 +264,20 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceFN, clusterIDForFaceID }) => {
                     src={objectURL}
                 />
             )}
-            <Typography variant="small" color="text.muted" textAlign="right">
-                {cosineSimilarity.toFixed(2)}
-            </Typography>
+            <Stack direction="row" justifyContent="space-between">
+                <Typography variant="small" color="text.muted">
+                    {`b${face.blur.toFixed(0)} `}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`s${face.score.toFixed(1)}`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`c${cosineSimilarity.toFixed(1)}`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`d${d}`}
+                </Typography>
+            </Stack>
         </FaceChip>
     );
 };

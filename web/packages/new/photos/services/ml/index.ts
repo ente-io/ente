@@ -20,14 +20,9 @@ import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
-import { clusterFacesHdb, type CGroup, type FaceCluster } from "./cluster-new";
+import { type CGroup, type FaceCluster } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
-import {
-    clearMLDB,
-    faceIndex,
-    faceIndexes,
-    indexableAndIndexedCounts,
-} from "./db";
+import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import type { Face } from "./face";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
@@ -360,8 +355,23 @@ export interface FaceFileNeighbour {
     cosineSimilarity: number;
 }
 
+// "with file"
+export interface ClusterPreviewWF {
+    clusterSize: number;
+    faces: ClusterPreviewFaceWF[];
+}
+
+export interface ClusterPreviewFaceWF {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity: number;
+}
+
 export interface ClusterDebugPageContents {
-    faceFNs: FaceFileNeighbours[];
+    clusteredCount: number;
+    unclusteredCount: number;
+    // faceFNs: FaceFileNeighbours[];
+    clusterPreviewWFs: ClusterPreviewWF[];
     clusters: FaceCluster[];
     clusterIDForFaceID: Map<string, string>;
 }
@@ -377,48 +387,84 @@ export const wipClusterDebugPageContents = async (): Promise<
     triggerStatusUpdate();
 
     // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
-    const { faceAndNeigbours, clusters, cgroups } = await clusterFacesHdb(
-        await faceIndexes(),
-    );
-    const searchPersons = await convertToSearchPersons(clusters, cgroups);
+    const {
+        clusteredCount,
+        unclusteredCount,
+        clusterPreviews,
+        clusters,
+        cgroups,
+        clusterIDForFaceID,
+    } = await worker().then((w) => w.clusterFacesHdb());
+
+    // const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
-    const faceFNs = faceAndNeigbours
-        .map(({ face, neighbours }) => ({
+    // const faceFNs = faceAndNeigbours.map(
+    //     ({ topFace: face, faces: neighbours }) => ({
+    //         face,
+    //         neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+    //             face,
+    //             enteFile: fileForFace(face),
+    //             cosineSimilarity,
+    //         })),
+    //     }),
+    // );
+    const clusterPreviewWFs = clusterPreviews.map(({ clusterSize, faces }) => ({
+        clusterSize,
+        faces: faces.map(({ face, cosineSimilarity }) => ({
             face,
-            neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
-                face,
-                enteFile: fileForFace(face),
-                cosineSimilarity,
-            })),
-        }))
-        .sort((a, b) => b.face.score - a.face.score);
+            enteFile: fileForFace(face),
+            cosineSimilarity,
+        })),
+    }));
 
-    const clusterIDForFaceID = new Map(
-        clusters.flatMap((cluster) =>
-            cluster.faceIDs.map((id) => [id, cluster.id]),
-        ),
-    );
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    const searchPersons = cgroups
+        .map((cgroup) => {
+            const faceID = ensure(cgroup.displayFaceID);
+            const fileID = ensure(fileIDFromFaceID(faceID));
+            const file = ensure(localFileByID.get(fileID));
+
+            const faceIDs = cgroup.clusterIDs
+                .map((id) => ensure(clusterByID.get(id)))
+                .flatMap((cluster) => cluster.faceIDs);
+            const fileIDs = faceIDs
+                .map((faceID) => fileIDFromFaceID(faceID))
+                .filter((fileID) => fileID !== undefined);
+
+            return {
+                id: cgroup.id,
+                name: cgroup.name,
+                faceIDs,
+                files: [...new Set(fileIDs)],
+                displayFaceID: faceID,
+                displayFaceFile: file,
+            };
+        })
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    const prunedFaceFNs = faceFNs.slice(0, 30).map(({ face, neighbours }) => ({
-        face,
-        neighbours: neighbours.slice(0, 30),
-    }));
-
-    return { faceFNs: prunedFaceFNs, clusters, clusterIDForFaceID };
+    return {
+        clusteredCount,
+        unclusteredCount,
+        clusterPreviewWFs,
+        clusters,
+        clusterIDForFaceID,
+    };
 };
 
 export const wipCluster = () => void wipClusterDebugPageContents();
 
-const convertToSearchPersons = async (
+// TODO-Cluster remove me
+export const convertToSearchPersons = async (
     clusters: FaceCluster[],
     cgroups: CGroup[],
 ) => {
