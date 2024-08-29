@@ -113,10 +113,10 @@ export const clearCachedThumbnailsIfChanged = async (
     for (const newFile of newFiles) {
         const existingFile = existingFileByID.get(newFile.id);
         const m1 = existingFile?.metadata;
-        if (!m1) continue;
-        // Need to audit the types, until the add a ?? to be safe.
+        const m2 = newFile.metadata;
+        // TODO: Add an extra truthy check the EnteFile type is null safe
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        const m2 = newFile.metadata ?? {};
+        if (!m1 || !m2) continue;
         // Both files exist, have metadata, but their (appropriate) hashes
         // differ, which indicates that the change was in the file's contents,
         // not the metadata itself, and thus we should refresh the thumbnail.
