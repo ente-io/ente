@@ -399,7 +399,7 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
         neighbours = neighbours.sort(
             (a, b) => b.cosineSimilarity - a.cosineSimilarity,
         );
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
         faceAndNeigbours.push({ face: fi, neighbours });
     }
 
