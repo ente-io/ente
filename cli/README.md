@@ -92,7 +92,7 @@ mandatory, you can add more volumes for your export directory.
 Build the docker image
 
 ```shell
-docker build -t ente-cli:latest .
+docker build -t ente:latest .
 ```
 
 Note that [BuildKit](https://docs.docker.com/go/buildkit/) is needed to build
@@ -107,7 +107,7 @@ docker-compose up -d
 
 `exec` into the container
 ```shell
-docker-compose exec ente-cli /bin/sh -c "./ente-cli version"
-docker-compose exec ente-cli /bin/sh -c "./ente-cli account add" 
+docker-compose exec ente /bin/sh -c "./ente-cli version"
+docker-compose exec ente /bin/sh -c "./ente-cli account add" 
 ```
 
