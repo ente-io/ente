@@ -1,9 +1,9 @@
 import { clearBlobCaches } from "@/base/blob-cache";
 import { clearKVDB } from "@/base/kv";
+import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
 import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
-import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import { logout as remoteLogout } from "../api/user";
 
@@ -39,7 +39,7 @@ export const accountLogout = async () => {
         ignoreError("Session storage", e);
     }
     try {
-        clearData();
+        clearLocalStorage();
     } catch (e) {
         ignoreError("Local storage", e);
     }
