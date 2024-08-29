@@ -525,34 +525,56 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     // TODO-Cluster this is likely not needed since hdbscan already has a min?
     const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
 
-    let cgroups = await clusterGroups();
+    // let cgroups = await clusterGroups();
+
+    // // TODO-Cluster - Currently we're not syncing with remote or saving anything
+    // // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
+    // // cgroup, one per cluster.
+    // cgroups = cgroups.concat(
+    //     validClusters.map((c) => ({
+    //         id: c.id,
+    //         name: undefined,
+    //         clusterIDs: [c.id],
+    //         isHidden: false,
+    //         avatarFaceID: undefined,
+    //         displayFaceID: undefined,
+    //     })),
+    // );
+
+    // // For each cluster group, use the highest scoring face in any of its
+    // // clusters as its display face.
+    // for (const cgroup of cgroups) {
+    //     cgroup.displayFaceID = cgroup.clusterIDs
+    //         .map((clusterID) => clusterIndexForClusterID.get(clusterID))
+    //         .filter((i) => i !== undefined) /* 0 is a valid index */
+    //         .flatMap((i) => clusters[i]?.faceIDs ?? [])
+    //         .map((faceID) => faceForFaceID.get(faceID))
+    //         .filter((face) => !!face)
+    //         .reduce((max, face) =>
+    //             max.score > face.score ? max : face,
+    //         ).faceID;
+    // }
 
     // TODO-Cluster - Currently we're not syncing with remote or saving anything
     // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
     // cgroup, one per cluster.
-    cgroups = cgroups.concat(
-        validClusters.map((c) => ({
-            id: c.id,
+
+    const cgroups: CGroup[] = [];
+    for (const cluster of sortedClusters) {
+        const faces = cluster.faceIDs.map((id) =>
+            ensure(faceForFaceID.get(id)),
+        );
+        const topFace = faces.reduce((max, face) =>
+            max.score > face.score ? max : face,
+        );
+        cgroups.push({
+            id: cluster.id,
             name: undefined,
-            clusterIDs: [c.id],
+            clusterIDs: [cluster.id],
             isHidden: false,
             avatarFaceID: undefined,
-            displayFaceID: undefined,
-        })),
-    );
-
-    // For each cluster group, use the highest scoring face in any of its
-    // clusters as its display face.
-    for (const cgroup of cgroups) {
-        cgroup.displayFaceID = cgroup.clusterIDs
-            .map((clusterID) => clusterIndexForClusterID.get(clusterID))
-            .filter((i) => i !== undefined) /* 0 is a valid index */
-            .flatMap((i) => clusters[i]?.faceIDs ?? [])
-            .map((faceID) => faceForFaceID.get(faceID))
-            .filter((face) => !!face)
-            .reduce((max, face) =>
-                max.score > face.score ? max : face,
-            ).faceID;
+            displayFaceID: topFace.faceID,
+        });
     }
 
     // log.info("ml/cluster", {
@@ -566,7 +588,7 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
         `Clustered ${faces.length} faces into ${validClusters.length} clusters, with ${faces.length - clusterIDForFaceID.size} faces remaining unclustered (${Date.now() - t} ms)`,
     );
 
-    const clusteredCount = clusterIDForFaceID.size
+    const clusteredCount = clusterIDForFaceID.size;
     const unclusteredCount = faces.length - clusteredCount;
 
     return {

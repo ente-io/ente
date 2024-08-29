@@ -396,7 +396,7 @@ export const wipClusterDebugPageContents = async (): Promise<
         clusterIDForFaceID,
     } = await worker().then((w) => w.clusterFacesHdb());
 
-    const searchPersons = await convertToSearchPersons(clusters, cgroups);
+    // const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
@@ -422,6 +422,32 @@ export const wipClusterDebugPageContents = async (): Promise<
         })),
     }));
 
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    const searchPersons = cgroups
+        .map((cgroup) => {
+            const faceID = ensure(cgroup.displayFaceID);
+            const fileID = ensure(fileIDFromFaceID(faceID));
+            const file = ensure(localFileByID.get(fileID));
+
+            const faceIDs = cgroup.clusterIDs
+                .map((id) => ensure(clusterByID.get(id)))
+                .flatMap((cluster) => cluster.faceIDs);
+            const fileIDs = faceIDs
+                .map((faceID) => fileIDFromFaceID(faceID))
+                .filter((fileID) => fileID !== undefined);
+
+            return {
+                id: cgroup.id,
+                name: cgroup.name,
+                faceIDs,
+                files: [...new Set(fileIDs)],
+                displayFaceID: faceID,
+                displayFaceFile: file,
+            };
+        })
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
+
     _wip_isClustering = false;
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
@@ -437,7 +463,8 @@ export const wipClusterDebugPageContents = async (): Promise<
 
 export const wipCluster = () => void wipClusterDebugPageContents();
 
-const convertToSearchPersons = async (
+// TODO-Cluster remove me
+export const convertToSearchPersons = async (
     clusters: FaceCluster[],
     cgroups: CGroup[],
 ) => {
