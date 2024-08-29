@@ -356,7 +356,7 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
-	user, err := h.UserController.UserRepo.Get(userID)
+	user, err := h.UserController.GetUser(userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

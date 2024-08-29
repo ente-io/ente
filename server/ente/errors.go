@@ -141,6 +141,12 @@ var ErrNotFoundError = ApiError{
 	HttpStatusCode: http.StatusNotFound,
 }
 
+var ErrUserNotFound = &ApiError{
+	Code:           "USER_NOT_FOUND",
+	Message:        "User is either deleted or not found",
+	HttpStatusCode: http.StatusNotFound,
+}
+
 var ErrMaxPasskeysReached = ApiError{
 	Code:           MaxPasskeysReached,
 	Message:        "Max passkeys limit reached",
