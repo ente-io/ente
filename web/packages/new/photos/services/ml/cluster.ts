@@ -15,7 +15,7 @@ export interface ClusterFacesResult {
  * pipeline. Each embedding is for a face detected in an image (a single image
  * may have multiple faces detected within it).
  */
-export const clusterFaces = (
+export const clusterFacesHdbscan = (
     faceEmbeddings: number[][],
 ): ClusterFacesResult => {
     const hdbscan = new Hdbscan({

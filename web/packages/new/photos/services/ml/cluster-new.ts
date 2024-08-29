@@ -1,6 +1,7 @@
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
+import { clusterFacesHdbscan } from "./cluster";
 import { clusterGroups, faceClusters } from "./db";
 import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
@@ -168,6 +169,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
     // A flattened array of faces.
+    // TODO-Cluster note the 2k slice
     const faces = [...enumerateFaces(faceIndexes)].slice(0, 2000);
 
     // Start with the clusters we already have (either from a previous indexing,
@@ -232,8 +234,7 @@ export const clusterFaces = async (faceIndexes: FaceIndex[]) => {
         neighbours = neighbours.sort(
             (a, b) => b.cosineSimilarity - a.cosineSimilarity,
         );
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        faceAndNeigbours.push({ face: faces[i]!, neighbours });
+        faceAndNeigbours.push({ face: fi, neighbours });
 
         const { faceID } = fi;
 
@@ -336,3 +337,116 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
         }
     }
 }
+
+export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
+    const t = Date.now();
+
+    // A flattened array of faces.
+    // TODO-Cluster note the 2k slice
+    const faces = [...enumerateFaces(faceIndexes)].slice(0, 2000);
+
+    const faceEmbeddings = faces.map(({ embedding }) => embedding);
+
+    const {
+        clusters: clusterIndices,
+        noise,
+        debugInfo,
+    } = clusterFacesHdbscan(faceEmbeddings);
+
+    log.info({ method: "hdbscan", clusterIndices, noise, debugInfo });
+    log.info(
+        `Clustered ${faces.length} faces into ${clusterIndices.length} clusters (${Date.now() - t} ms)`,
+    );
+
+    // For fast reverse lookup - map from cluster ids to their index in the
+    // clusters array.
+    const clusterIndexForClusterID = new Map<string, number>();
+
+    // For fast reverse lookup - map from face ids to the id of the cluster to
+    // which they belong.
+    const clusterIDForFaceID = new Map<string, string>();
+
+    // A function to generate new cluster IDs.
+    const newClusterID = () => newNonSecureID("cluster_");
+
+    // Convert the numerical face indices into the result.
+    const clusters: FaceCluster[] = [];
+    for (const [ci, faceIndices] of clusterIndices.entries()) {
+        const clusterID = newClusterID();
+        const faceIDs: string[] = [];
+        clusterIndexForClusterID.set(clusterID, ci);
+        for (const fi of faceIndices) {
+            // Can't find a way of avoiding the null assertion here.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const face = faces[fi]!;
+            clusterIDForFaceID.set(face.faceID, clusterID);
+            faceIDs.push(face.faceID);
+        }
+        clusters.push({ id: clusterID, faceIDs });
+    }
+
+    // Convert into the data structure we're using to debug/visualize.
+    const faceAndNeigbours: FaceNeighbours[] = [];
+    for (const fi of faces) {
+        let neighbours: FaceNeighbour[] = [];
+        for (const fj of faces) {
+            // The vectors are already normalized, so we can directly use their
+            // dot product as their cosine similarity.
+            const csim = dotProduct(fi.embedding, fj.embedding);
+            neighbours.push({ face: fj, cosineSimilarity: csim });
+        }
+
+        neighbours = neighbours.sort(
+            (a, b) => b.cosineSimilarity - a.cosineSimilarity,
+        );
+
+        faceAndNeigbours.push({ face: fi, neighbours });
+    }
+
+    // Prune too small clusters.
+    const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
+
+    let cgroups = await clusterGroups();
+
+    // TODO-Cluster - Currently we're not syncing with remote or saving anything
+    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
+    // cgroup, one per cluster.
+    cgroups = cgroups.concat(
+        validClusters.map((c) => ({
+            id: c.id,
+            name: undefined,
+            clusterIDs: [c.id],
+            isHidden: false,
+            avatarFaceID: undefined,
+            displayFaceID: undefined,
+        })),
+    );
+
+    // For each cluster group, use the highest scoring face in any of its
+    // clusters as its display face.
+    const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
+    for (const cgroup of cgroups) {
+        cgroup.displayFaceID = cgroup.clusterIDs
+            .map((clusterID) => clusterIndexForClusterID.get(clusterID))
+            .filter((i) => i !== undefined) /* 0 is a valid index */
+            .flatMap((i) => clusters[i]?.faceIDs ?? [])
+            .map((faceID) => faceForFaceID.get(faceID))
+            .filter((face) => !!face)
+            .reduce((max, face) =>
+                max.score > face.score ? max : face,
+            ).faceID;
+    }
+
+    log.info("ml/cluster", {
+        faces,
+        validClusters,
+        clusterIndexForClusterID: Object.fromEntries(clusterIndexForClusterID),
+        clusterIDForFaceID: Object.fromEntries(clusterIDForFaceID),
+        cgroups,
+    });
+    log.info(
+        `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
+    );
+
+    return { faces, clusters: validClusters, cgroups, faceAndNeigbours };
+};
