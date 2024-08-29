@@ -46,7 +46,6 @@ export const getData = (key: LS_KEYS) => {
     }
 };
 
-
 // TODO: Migrate this to `local-user.ts`, with (a) more precise optionality
 // indication of the constituent fields, (b) moving any fields that need to be
 // accessed from web workers to KV DB.
