@@ -20,7 +20,7 @@ import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
-import { clusterFaces, type CGroup, type FaceCluster } from "./cluster-new";
+import { clusterFacesHdb, type CGroup, type FaceCluster } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
 import {
     clearMLDB,
@@ -376,7 +376,8 @@ export const wipClusterDebugPageContents = async (): Promise<
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
+    // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
+    const { faceAndNeigbours, clusters, cgroups } = await clusterFacesHdb(
         await faceIndexes(),
     );
     const searchPersons = await convertToSearchPersons(clusters, cgroups);
