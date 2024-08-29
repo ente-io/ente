@@ -343,17 +343,18 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
 
     // A flattened array of faces.
     // TODO-Cluster note the 2k slice
-    const faces = [...enumerateFaces(faceIndexes)].slice(0, 2000);
+    const faces0 = [...enumerateFaces(faceIndexes)];//.slice(0, 2000);
+    const faces = Array(1).fill(0).flatMap(() => faces0);
 
     const faceEmbeddings = faces.map(({ embedding }) => embedding);
 
     const {
         clusters: clusterIndices,
-        noise,
-        debugInfo,
+        // noise,
+        // debugInfo,
     } = clusterFacesHdbscan(faceEmbeddings);
 
-    log.info({ method: "hdbscan", clusterIndices, noise, debugInfo });
+    // log.info({ method: "hdbscan", clusterIndices, noise, debugInfo });
     log.info(
         `Clustered ${faces.length} faces into ${clusterIndices.length} clusters (${Date.now() - t} ms)`,
     );
@@ -387,7 +388,8 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
 
     // Convert into the data structure we're using to debug/visualize.
     const faceAndNeigbours: FaceNeighbours[] = [];
-    for (const fi of faces) {
+    const topFaces = faces.sort((a, b) => b.score - a.score).slice(0, 30);
+    for (const fi of topFaces) {
         let neighbours: FaceNeighbour[] = [];
         for (const fj of faces) {
             // The vectors are already normalized, so we can directly use their
@@ -437,13 +439,13 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
             ).faceID;
     }
 
-    log.info("ml/cluster", {
-        faces,
-        validClusters,
-        clusterIndexForClusterID: Object.fromEntries(clusterIndexForClusterID),
-        clusterIDForFaceID: Object.fromEntries(clusterIDForFaceID),
-        cgroups,
-    });
+    // log.info("ml/cluster", {
+    //     faces,
+    //     validClusters,
+    //     clusterIndexForClusterID: Object.fromEntries(clusterIndexForClusterID),
+    //     clusterIDForFaceID: Object.fromEntries(clusterIDForFaceID),
+    //     cgroups,
+    // });
     log.info(
         `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
     );

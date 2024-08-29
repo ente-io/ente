@@ -24,7 +24,7 @@ export const clusterFacesHdbscan = (
         minSamples: 5,
         clusterSelectionEpsilon: 0.6,
         clusterSelectionMethod: "leaf",
-        debug: true,
+        debug: false,
     });
 
     return {
