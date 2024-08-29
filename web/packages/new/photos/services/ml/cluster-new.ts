@@ -399,7 +399,8 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     // by restructuring the code, but hours of uninterruptible work is anyways
     // not feasible.
 
-    const batchSize = 10_000;
+    // const batchSize = 10_000; // TODO-Cluster
+    const batchSize = 1_000;
     for (let i = 0; i < faceEmbeddings.length; i += batchSize) {
         const embeddings = faceEmbeddings.slice(i, i + batchSize);
         const { clusters: hdbClusters } = clusterFacesHdbscan(embeddings);
@@ -562,8 +563,14 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     //     cgroups,
     // });
     log.info(
-        `Clustered ${faces.length} faces into ${validClusters.length} clusters (${Date.now() - t} ms)`,
+        `Clustered ${faces.length} faces into ${validClusters.length} clusters, with ${faces.length - clusterIDForFaceID.size} faces remaining unclustered (${Date.now() - t} ms)`,
     );
 
-    return { faces, clusters: validClusters, cgroups, clusterPreviews };
+    return {
+        faces,
+        clusters: validClusters,
+        cgroups,
+        clusterPreviews,
+        clusterIDForFaceID,
+    };
 };

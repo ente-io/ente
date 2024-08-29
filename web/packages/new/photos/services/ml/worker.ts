@@ -24,8 +24,10 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
+import { clusterFacesHdb } from "./cluster-new";
 import { saveFaceCrops } from "./crop";
 import {
+    faceIndexes,
     indexableFileIDs,
     markIndexingFailed,
     saveIndexes,
@@ -271,6 +273,11 @@ export class MLWorker {
             uploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
+    }
+
+    // TODO-Cluster
+    async clusterFacesHdb() {
+        return clusterFacesHdb(await faceIndexes());
     }
 }
 

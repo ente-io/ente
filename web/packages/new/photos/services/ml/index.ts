@@ -20,14 +20,9 @@ import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
-import { clusterFacesHdb, type CGroup, type FaceCluster } from "./cluster-new";
+import { type CGroup, type FaceCluster } from "./cluster-new";
 import { regenerateFaceCrops } from "./crop";
-import {
-    clearMLDB,
-    faceIndex,
-    faceIndexes,
-    indexableAndIndexedCounts,
-} from "./db";
+import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import type { Face } from "./face";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
@@ -390,9 +385,9 @@ export const wipClusterDebugPageContents = async (): Promise<
     triggerStatusUpdate();
 
     // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
-    const { clusterPreviews, clusters, cgroups } = await clusterFacesHdb(
-        await faceIndexes(),
-    );
+    const { clusterPreviews, clusters, cgroups, clusterIDForFaceID } =
+        await worker().then((w) => w.clusterFacesHdb());
+
     const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
     const localFiles = await getAllLocalFiles();
@@ -418,12 +413,6 @@ export const wipClusterDebugPageContents = async (): Promise<
             cosineSimilarity,
         })),
     }));
-
-    const clusterIDForFaceID = new Map(
-        clusters.flatMap((cluster) =>
-            cluster.faceIDs.map((id) => [id, cluster.id]),
-        ),
-    );
 
     _wip_isClustering = false;
     _wip_searchPersons = searchPersons;
