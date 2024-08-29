@@ -355,7 +355,7 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     // TODO-Cluster ad-hoc filtering and slicing
     const faces0 = [...enumerateFaces(faceIndexes)]
         .filter((f) => f.blur > 50)
-        .slice(0, 1000);
+        .slice(0, 6000);
     // TODO-Cluster testing code, can be removed once done
     const faces = Array(1)
         .fill(0)

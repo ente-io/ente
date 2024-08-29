@@ -255,11 +255,13 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
             )}
             <Stack direction="row" justifyContent="space-between">
                 <Typography variant="small" color="text.muted">
-                    {`${face.blur.toFixed(0)} blr`}
+                    {`b ${face.blur.toFixed(0)} b`}
                 </Typography>
-
                 <Typography variant="small" color="text.muted">
-                    {`cos ${cosineSimilarity.toFixed(2)}`}
+                    {`s ${face.score.toFixed(2)}`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`c ${cosineSimilarity.toFixed(2)}`}
                 </Typography>
             </Stack>
         </FaceChip>
