@@ -8,7 +8,6 @@ import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { clearData } from "@ente/shared/storage/localStorage";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline } from "@mui/material";
@@ -30,12 +29,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         disableDiskLogs();
-        // The accounts app has no local state, but some older builds might've
-        // leftover some scraps. Clear it out.
-        //
-        // This code added on 1 July 2024, can be removed soon since this data
-        // was never saved before this was released (tag: Migration).
-        clearData();
         void setupI18n().finally(() => setIsI18nReady(true));
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
