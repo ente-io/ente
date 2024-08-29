@@ -49,14 +49,22 @@ export default function ClusterDebug() {
     }
     return (
         <>
-            <Typography variant="small">
-                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Showing only top 20 and bottom 10 clusters (and only up to 50
-                faces in each, sorted by cosine distance to highest scoring face
-                in the cluster).
-            </Typography>
+            <Stack m={1}>
+                <Typography variant="small" mb={1}>
+                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Showing only top 30 and bottom 30 clusters.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    For each cluster showing only up to 50 faces, sorted by
+                    cosine similarity to highest scoring face in the cluster.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Below each face is its{" "}
+                    <b>blur - score - cosineSimilarity - direction</b>
+                </Typography>
+            </Stack>
             <hr />
             <Container>
                 <AutoSizer>

@@ -348,14 +348,13 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
     }
 }
 
-export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
+export const clusterFacesHdb = (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
     // A flattened array of faces.
     // TODO-Cluster ad-hoc filtering and slicing
-    const faces0 = [...enumerateFaces(faceIndexes)]
-        .filter((f) => f.blur > 99)
-        .slice(0, 6000);
+    const faces0 = [...enumerateFaces(faceIndexes)].filter((f) => f.blur > 99);
+    // .slice(0, 6000);
     // TODO-Cluster testing code, can be removed once done
     const faces = Array(1)
         .fill(0)
@@ -386,27 +385,28 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     // be list of existing clusters we fetch from remote.
     const clusters: FaceCluster[] = [];
 
-    // Process the faces in batches of 10k. The faces are already sorted by file
-    // ID, which is a monotonically increasing integer, so we will also have
-    // some temporal locality.
+    // Process the faces in batches. The faces are already sorted by file ID,
+    // which is a monotonically increasing integer, so we will also have some
+    // temporal locality.
     //
-    // The number 10k was derived by ad-hoc observations. On a particular test
-    // dataset, clustering 10k took ~2 mins, while 20k took ~8 mins. Memory
-    // usage was constant in both cases.
+    // The number 2500 was derived by ad-hoc observations and takes a few
+    // seconds. On a particular test dataset and a particular machine,
+    // clustering 1k took ~2 seconds, 10k took ~2 mins, while 20k took ~8 mins.
+    // Memory usage was constant in all these cases.
     //
     // At around 100k faces, the clustering starts taking hours, and we start
     // running into stack overflows. The stack overflows can perhaps be avoided
     // by restructuring the code, but hours of uninterruptible work is anyways
     // not feasible.
 
-    // const batchSize = 10_000; // TODO-Cluster
-    const batchSize = 1_000;
+    const batchSize = 2500;
     for (let i = 0; i < faceEmbeddings.length; i += batchSize) {
+        const it = Date.now();
         const embeddings = faceEmbeddings.slice(i, i + batchSize);
         const { clusters: hdbClusters } = clusterFacesHdbscan(embeddings);
 
         log.info(
-            `hdbscan produced ${hdbClusters.length} clusters from ${embeddings.length} faces (${Date.now() - t} ms)`,
+            `hdbscan produced ${hdbClusters.length} clusters from ${embeddings.length} faces (${Date.now() - it} ms)`,
         );
 
         // Merge the new clusters we got from hdbscan into the existing clusters
@@ -489,7 +489,7 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
 
     // Convert into the data structure we're using to debug/visualize.
     //
-    // > Showing only top 20 and bottom 10 clusters (and only up to 50 faces in
+    // > Showing only top 30 and bottom 30 clusters (and only up to 50 faces in
     // > each, sorted by cosine distance to highest scoring face in the
     // > cluster).
 
@@ -497,9 +497,9 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
         (a, b) => b.faceIDs.length - a.faceIDs.length,
     );
     const debugClusters =
-        sortedClusters.length < 30
+        sortedClusters.length < 60
             ? sortedClusters
-            : sortedClusters.slice(0, 20).concat(sortedClusters.slice(-10));
+            : sortedClusters.slice(0, 30).concat(sortedClusters.slice(-30));
     const clusterPreviews: ClusterPreview[] = [];
     for (const cluster of debugClusters) {
         const faces = cluster.faceIDs.map((id) =>
