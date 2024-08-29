@@ -342,48 +342,116 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     const t = Date.now();
 
     // A flattened array of faces.
-    // TODO-Cluster note the 2k slice
-    const faces0 = [...enumerateFaces(faceIndexes)];//.slice(0, 2000);
-    const faces = Array(1).fill(0).flatMap(() => faces0);
+    const faces0 = [...enumerateFaces(faceIndexes)];
+    // TODO-Cluster testing code, can be removed once done
+    const faces = Array(1)
+        .fill(0)
+        .flatMap(() => faces0);
+
+    // For fast reverse lookup - map from face ids to the face.
+    const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
 
     const faceEmbeddings = faces.map(({ embedding }) => embedding);
-
-    const {
-        clusters: clusterIndices,
-        // noise,
-        // debugInfo,
-    } = clusterFacesHdbscan(faceEmbeddings);
-
-    // log.info({ method: "hdbscan", clusterIndices, noise, debugInfo });
-    log.info(
-        `Clustered ${faces.length} faces into ${clusterIndices.length} clusters (${Date.now() - t} ms)`,
-    );
 
     // For fast reverse lookup - map from cluster ids to their index in the
     // clusters array.
     const clusterIndexForClusterID = new Map<string, number>();
 
-    // For fast reverse lookup - map from face ids to the id of the cluster to
-    // which they belong.
+    // For fast reverse lookup - map from the id of a face to the id of the
+    // cluster to which it belongs.
     const clusterIDForFaceID = new Map<string, string>();
+
+    // A function to chain two reverse lookup.
+    const firstFaceOfCluster = (cluster: FaceCluster) =>
+        ensure(faceForFaceID.get(ensure(cluster.faceIDs[0])));
 
     // A function to generate new cluster IDs.
     const newClusterID = () => newNonSecureID("cluster_");
 
-    // Convert the numerical face indices into the result.
+    // The resultant clusters.
+    // TODO-Cluster Later on, instead of starting from a blank slate, this will
+    // be list of existing clusters we fetch from remote.
     const clusters: FaceCluster[] = [];
-    for (const [ci, faceIndices] of clusterIndices.entries()) {
-        const clusterID = newClusterID();
-        const faceIDs: string[] = [];
-        clusterIndexForClusterID.set(clusterID, ci);
-        for (const fi of faceIndices) {
-            // Can't find a way of avoiding the null assertion here.
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const face = faces[fi]!;
-            clusterIDForFaceID.set(face.faceID, clusterID);
-            faceIDs.push(face.faceID);
+
+    // Process the faces in batches of 10k. The faces are already sorted by file
+    // ID, which is a monotonically increasing integer, so we will also have
+    // some temporal locality.
+    //
+    // The number 10k was derived by ad-hoc observations. On a particular test
+    // dataset, clustering 10k took ~2 mins, while 20k took ~8 mins. Memory
+    // usage was constant in both cases.
+    //
+    // At around 100k faces, the clustering starts taking hours, and we start
+    // running into stack overflows. The stack overflows can perhaps be avoided
+    // by restructuring the code, but hours of uninterruptible work is anyways
+    // not feasible.
+
+    const batchSize = 10_000;
+    for (let i = 0; i < faceEmbeddings.length; i += batchSize) {
+        const embeddings = faceEmbeddings.slice(i, i + batchSize);
+        const { clusters: hdbClusters } = clusterFacesHdbscan(embeddings);
+
+        log.info(
+            `hdbscan produced ${hdbClusters.length} clusters from ${embeddings.length} faces (${Date.now() - t} ms)`,
+        );
+
+        // Merge the new clusters we got from hdbscan into the existing clusters
+        // if they are "near" them (using some heuristic).
+        //
+        // We need to ensure we don't change any of the existing cluster IDs,
+        // since these might be existing clusters we got from remote.
+
+        for (const hdbCluster of hdbClusters) {
+            // Find the existing cluster whose (arbitrarily chosen) first face
+            // is the nearest neighbour of the (arbitrarily chosen) first face
+            // of the cluster produced by hdbscan.
+
+            const newFace = ensure(faces[i + ensure(hdbCluster[0])]);
+
+            let nnCluster: FaceCluster | undefined;
+            let nnCosineSimilarity = 0;
+            for (const existingCluster of clusters) {
+                const existingFace = firstFaceOfCluster(existingCluster);
+
+                // The vectors are already normalized, so we can directly use their
+                // dot product as their cosine similarity.
+                const csim = dotProduct(
+                    existingFace.embedding,
+                    newFace.embedding,
+                );
+
+                // Use a higher cosine similarity threshold if either of the two
+                // faces are blurry.
+                const threshold =
+                    existingFace.blur < 100 || newFace.blur < 100 ? 0.84 : 0.7;
+                if (csim > threshold && csim > nnCosineSimilarity) {
+                    nnCluster = existingCluster;
+                    nnCosineSimilarity = csim;
+                }
+            }
+
+            if (nnCluster) {
+                // If we found an existing cluster that is near enough,
+                // sublimate the cluster produced by hdbscan into that cluster.
+                for (const j of hdbCluster) {
+                    const { faceID } = ensure(faces[i + j]);
+                    nnCluster.faceIDs.push(faceID);
+                    clusterIDForFaceID.set(faceID, nnCluster.id);
+                }
+            } else {
+                // Otherwise make a new cluster from the cluster produced by
+                // hdbscan.
+                const clusterID = newClusterID();
+                const faceIDs: string[] = [];
+                for (const j of hdbCluster) {
+                    const { faceID } = ensure(faces[i + j]);
+                    faceIDs.push(faceID);
+                    clusterIDForFaceID.set(faceID, clusterID);
+                }
+                clusterIndexForClusterID.set(clusterID, clusters.length);
+                clusters.push({ id: clusterID, faceIDs });
+            }
         }
-        clusters.push({ id: clusterID, faceIDs });
     }
 
     // Convert into the data structure we're using to debug/visualize.
@@ -398,14 +466,15 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
             neighbours.push({ face: fj, cosineSimilarity: csim });
         }
 
-        neighbours = neighbours.sort(
-            (a, b) => b.cosineSimilarity - a.cosineSimilarity,
-        );
+        neighbours = neighbours
+            .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
+            .slice(0, 30);
 
         faceAndNeigbours.push({ face: fi, neighbours });
     }
 
     // Prune too small clusters.
+    // TODO-Cluster this is likely not needed since hdbscan already has a min?
     const validClusters = clusters.filter(({ faceIDs }) => faceIDs.length > 1);
 
     let cgroups = await clusterGroups();
@@ -426,7 +495,6 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
 
     // For each cluster group, use the highest scoring face in any of its
     // clusters as its display face.
-    const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
     for (const cgroup of cgroups) {
         cgroup.displayFaceID = cgroup.clusterIDs
             .map((clusterID) => clusterIndexForClusterID.get(clusterID))
