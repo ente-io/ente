@@ -7,6 +7,7 @@ import {
     type ClusterPreviewFaceWF,
     type ClusterPreviewWF,
 } from "@/new/photos/services/ml";
+import { faceDirection } from "@/new/photos/services/ml/face";
 import {
     FlexWrapper,
     FluidContainer,
@@ -236,6 +237,8 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
         };
     }, [faceID, enteFile]);
 
+    const fd = faceDirection(face.detection);
+    const d = fd == "straight" ? "•" : fd == "left" ? "←" : "→";
     return (
         <FaceChip
             style={{
@@ -255,13 +258,19 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
             )}
             <Stack direction="row" justifyContent="space-between">
                 <Typography variant="small" color="text.muted">
-                    {`b ${face.blur.toFixed(0)} b`}
+                    {`b${face.blur.toFixed(0)} `}
                 </Typography>
                 <Typography variant="small" color="text.muted">
-                    {`s ${face.score.toFixed(2)}`}
+                    {`s${face.score.toFixed(1)}`}
                 </Typography>
                 <Typography variant="small" color="text.muted">
-                    {`c ${cosineSimilarity.toFixed(2)}`}
+                    {`c${cosineSimilarity.toFixed(1)}`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`c${cosineSimilarity.toFixed(1)}`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`d${d}`}
                 </Typography>
             </Stack>
         </FaceChip>
