@@ -366,14 +366,15 @@ export interface ClusterPreviewWF {
     faces: ClusterPreviewFaceWF[];
 }
 
-interface ClusterPreviewFaceWF {
+export interface ClusterPreviewFaceWF {
     face: Face;
     enteFile: EnteFile;
     cosineSimilarity: number;
 }
 
 export interface ClusterDebugPageContents {
-    faceFNs: FaceFileNeighbours[];
+    // faceFNs: FaceFileNeighbours[];
+    clusterPreviewWFs: ClusterPreviewWF[];
     clusters: FaceCluster[];
     clusterIDForFaceID: Map<string, string>;
 }
