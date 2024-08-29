@@ -387,16 +387,14 @@ export const wipClusterDebugPageContents = async (): Promise<
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
-    const faceFNs = faceAndNeigbours
-        .map(({ face, neighbours }) => ({
+    const faceFNs = faceAndNeigbours.map(({ face, neighbours }) => ({
+        face,
+        neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
             face,
-            neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
-                face,
-                enteFile: fileForFace(face),
-                cosineSimilarity,
-            })),
-        }))
-        .sort((a, b) => b.face.score - a.face.score);
+            enteFile: fileForFace(face),
+            cosineSimilarity,
+        })),
+    }));
 
     const clusterIDForFaceID = new Map(
         clusters.flatMap((cluster) =>
@@ -408,12 +406,7 @@ export const wipClusterDebugPageContents = async (): Promise<
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    const prunedFaceFNs = faceFNs.slice(0, 30).map(({ face, neighbours }) => ({
-        face,
-        neighbours: neighbours.slice(0, 30),
-    }));
-
-    return { faceFNs: prunedFaceFNs, clusters, clusterIDForFaceID };
+    return { faceFNs, clusters, clusterIDForFaceID };
 };
 
 export const wipCluster = () => void wipClusterDebugPageContents();
