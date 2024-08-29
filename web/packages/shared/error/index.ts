@@ -18,7 +18,8 @@ export class ApiError extends Error {
 }
 
 export function isApiErrorResponse(object: any): object is ApiErrorResponse {
-    return object && "code" in object && "message" in object;
+    return object && typeof object != "string" && "code" in object
+      && "message" in object;
 }
 
 export const CustomError = {
