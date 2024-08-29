@@ -50,7 +50,7 @@ export default function ClusterDebug() {
     return (
         <>
             <Typography variant="small">
-                {`${clusterRes.clusters.length} clusters`}
+                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
             </Typography>
             <Typography variant="small" color="text.muted">
                 Showing only top 20 and bottom 10 clusters (and only up to 50
@@ -262,9 +262,6 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
                 </Typography>
                 <Typography variant="small" color="text.muted">
                     {`s${face.score.toFixed(1)}`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    {`c${cosineSimilarity.toFixed(1)}`}
                 </Typography>
                 <Typography variant="small" color="text.muted">
                     {`c${cosineSimilarity.toFixed(1)}`}

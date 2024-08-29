@@ -354,7 +354,7 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
     // A flattened array of faces.
     // TODO-Cluster ad-hoc filtering and slicing
     const faces0 = [...enumerateFaces(faceIndexes)]
-        .filter((f) => f.blur > 50)
+        .filter((f) => f.blur > 99)
         .slice(0, 6000);
     // TODO-Cluster testing code, can be removed once done
     const faces = Array(1)
@@ -437,7 +437,7 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
                 // Use a higher cosine similarity threshold if either of the two
                 // faces are blurry.
                 const threshold =
-                    existingFace.blur < 100 || newFace.blur < 100 ? 0.9 : 0.7;
+                    existingFace.blur < 200 || newFace.blur < 200 ? 0.9 : 0.7;
                 if (csim > threshold && csim > nnCosineSimilarity) {
                     nnCluster = existingCluster;
                     nnCosineSimilarity = csim;
@@ -566,8 +566,13 @@ export const clusterFacesHdb = async (faceIndexes: FaceIndex[]) => {
         `Clustered ${faces.length} faces into ${validClusters.length} clusters, with ${faces.length - clusterIDForFaceID.size} faces remaining unclustered (${Date.now() - t} ms)`,
     );
 
+    const clusteredCount = clusterIDForFaceID.size
+    const unclusteredCount = faces.length - clusteredCount;
+
     return {
-        faces,
+        // faces,
+        clusteredCount,
+        unclusteredCount,
         clusters: validClusters,
         cgroups,
         clusterPreviews,

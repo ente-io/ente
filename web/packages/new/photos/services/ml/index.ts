@@ -368,6 +368,8 @@ export interface ClusterPreviewFaceWF {
 }
 
 export interface ClusterDebugPageContents {
+    clusteredCount: number;
+    unclusteredCount: number;
     // faceFNs: FaceFileNeighbours[];
     clusterPreviewWFs: ClusterPreviewWF[];
     clusters: FaceCluster[];
@@ -385,8 +387,14 @@ export const wipClusterDebugPageContents = async (): Promise<
     triggerStatusUpdate();
 
     // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
-    const { clusterPreviews, clusters, cgroups, clusterIDForFaceID } =
-        await worker().then((w) => w.clusterFacesHdb());
+    const {
+        clusteredCount,
+        unclusteredCount,
+        clusterPreviews,
+        clusters,
+        cgroups,
+        clusterIDForFaceID,
+    } = await worker().then((w) => w.clusterFacesHdb());
 
     const searchPersons = await convertToSearchPersons(clusters, cgroups);
 
@@ -418,7 +426,13 @@ export const wipClusterDebugPageContents = async (): Promise<
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    return { clusterPreviewWFs, clusters, clusterIDForFaceID };
+    return {
+        clusteredCount,
+        unclusteredCount,
+        clusterPreviewWFs,
+        clusters,
+        clusterIDForFaceID,
+    };
 };
 
 export const wipCluster = () => void wipClusterDebugPageContents();
