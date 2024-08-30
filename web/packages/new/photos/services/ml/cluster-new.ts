@@ -113,15 +113,10 @@ export interface CGroup {
     displayFaceID: string | undefined;
 }
 
-// TODO-Cluster
-export interface FaceNeighbours {
-    face: Face;
-    neighbours: FaceNeighbour[];
-}
-
-interface FaceNeighbour {
-    face: Face;
-    cosineSimilarity: number;
+export interface ClusteringOpts {
+    method: "linear" | "hdbscan";
+    batchSize: number;
+    joinThreshold: number;
 }
 
 export interface ClusterPreview {
@@ -129,9 +124,10 @@ export interface ClusterPreview {
     faces: ClusterPreviewFace[];
 }
 
-interface ClusterPreviewFace {
+export interface ClusterPreviewFace {
     face: Face;
     cosineSimilarity: number;
+    wasMerged: boolean;
 }
 
 /**
@@ -348,7 +344,11 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
     }
 }
 
-export const clusterFacesHdb = (faceIndexes: FaceIndex[]) => {
+export const clusterFacesHdb = (
+    faceIndexes: FaceIndex[],
+    opts: ClusteringOpts,
+) => {
+    const { batch } = opts;
     const t = Date.now();
 
     // A flattened array of faces.

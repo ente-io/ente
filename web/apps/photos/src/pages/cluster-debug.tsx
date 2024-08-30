@@ -2,11 +2,12 @@ import { SelectionBar } from "@/base/components/Navbar";
 import { pt } from "@/base/i18n";
 import {
     faceCrop,
+    wipClusterDebugPageContents,
     type ClusterDebugPageContents,
-    type ClusterPreviewFaceWF,
+    type ClusterPreviewFaceWithFile,
 } from "@/new/photos/services/ml";
+import { type ClusteringOpts } from "@/new/photos/services/ml/cluster-new";
 import { faceDirection } from "@/new/photos/services/ml/face";
-import { wait } from "@/utils/promise";
 import {
     FlexWrapper,
     FluidContainer,
@@ -87,12 +88,6 @@ interface ClusterListProps {
     width: number;
 }
 
-interface ClusteringOpts {
-    method: "linear" | "hdbscan";
-    batchSize: number;
-    joinThreshold: number;
-}
-
 const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const { startLoading, finishLoading } = useContext(AppContext);
 
@@ -105,18 +100,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const cluster = async (opts: ClusteringOpts) => {
         startLoading();
-        // setClusterRes(await wipClusterDebugPageContents());
-        console.log(opts);
-        await wait(5000);
-        setClusterRes({
-            clusteredCount: 1,
-            unclusteredCount: 2,
-            clusterPreviewWFs: Array(100)
-                .fill(0)
-                .map(() => ({ clusterSize: 0, faces: [] })),
-            clusters: [],
-            clusterIDForFaceID: new Map(),
-        });
+        setClusterRes(await wipClusterDebugPageContents(opts));
         finishLoading();
     };
 
@@ -135,8 +119,6 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
     }, [items]);
-
-    const clusterIDForFaceID = clusterRes?.clusterIDForFaceID;
 
     const getItemSize = (index: number) =>
         index === 0
@@ -177,10 +159,10 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                                     {`cluster size ${item.toFixed(2)}`}
                                 </LabelContainer>
                             ) : (
-                                item.map((faceWF, i) => (
+                                item.map((f, i) => (
                                     <FaceItem
                                         key={i.toString()}
-                                        {...{ faceWF, clusterIDForFaceID }}
+                                        faceWithFile={f}
                                     />
                                 ))
                             )}
@@ -192,17 +174,17 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     );
 };
 
-type Item = number | ClusterPreviewFaceWF[];
+type Item = number | ClusterPreviewFaceWithFile[];
 
 const itemsFromClusterRes = (
     clusterRes: ClusterDebugPageContents,
     columns: number,
 ) => {
-    const { clusterPreviewWFs } = clusterRes;
+    const { clusterPreviewsWithFile } = clusterRes;
 
     const result: Item[] = [];
-    for (let index = 0; index < clusterPreviewWFs.length; index++) {
-        const { clusterSize, faces } = clusterPreviewWFs[index];
+    for (let index = 0; index < clusterPreviewsWithFile.length; index++) {
+        const { clusterSize, faces } = clusterPreviewsWithFile[index];
         result.push(clusterSize);
         let lastIndex = 0;
         while (lastIndex < faces.length) {
@@ -315,7 +297,7 @@ const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
     const clusterInfo = clusterRes && (
         <Stack m={1}>
             <Typography variant="small" mb={1}>
-                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
+                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
             </Typography>
             <Typography variant="small" color="text.muted">
                 Showing only top 30 and bottom 30 clusters.
@@ -326,7 +308,10 @@ const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
             </Typography>
             <Typography variant="small" color="text.muted">
                 Below each face is its{" "}
-                <b>blur - score - cosineSimilarity - direction</b>
+                <b>blur - score - cosineSimilarity - direction</b>.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Faces added to the cluster as a result of merging are outlined.
             </Typography>
         </Stack>
     );
@@ -347,12 +332,11 @@ const Loader = () => (
 );
 
 interface FaceItemProps {
-    faceWF: ClusterPreviewFaceWF;
-    clusterIDForFaceID: Map<string, string> | undefined;
+    faceWithFile: ClusterPreviewFaceWithFile;
 }
 
-const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
-    const { face, enteFile, cosineSimilarity } = faceWF;
+const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
+    const { face, enteFile, cosineSimilarity, wasMerged } = faceWithFile;
     const { faceID } = face;
 
     const [objectURL, setObjectURL] = useState<string | undefined>();
@@ -377,7 +361,7 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
     return (
         <FaceChip
             style={{
-                outline: outlineForCluster(clusterIDForFaceID?.get(faceID)),
+                outline: wasMerged ? `1px solid gray` : undefined,
                 outlineOffset: "2px",
             }}
         >
@@ -413,9 +397,3 @@ const FaceChip = styled(Box)`
     width: 120px;
     height: 120px;
 `;
-
-const outlineForCluster = (clusterID: string | undefined) =>
-    clusterID ? `1px solid oklch(0.8 0.2 ${hForID(clusterID)})` : undefined;
-
-const hForID = (id: string) =>
-    ([...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 10) * 36;
