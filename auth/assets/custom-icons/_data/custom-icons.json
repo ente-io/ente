@@ -64,8 +64,7 @@
       "title": "Bitstamp"
     },
     {
-      "title": "Bitvavo",
-      "hex": "0051FF"
+      "title": "Bitvavo"
     },
     {
       "title": "Bitwarden"
@@ -137,8 +136,7 @@
     },
     {
       "title": "Control D",
-      "slug": "controld",
-      "hex": "5FD800"
+      "slug": "controld"
     },
     {
       "title": "Crowdpear"
@@ -291,8 +289,7 @@
       "title": "Kagi"
     },
     {
-      "title": "Kick",
-      "hex": "53FC19"
+      "title": "Kick"
     },
     {
       "title": "Kite"
@@ -305,15 +302,13 @@
       "color": "00CC00"
     },
     {
-      "title": "Kraken",
-      "hex": "5848D5"
+      "title": "Kraken"
     },
     {
       "title": "Kronos"
     },
     {
-      "title": "KuCoin",
-      "hex": "01BC8D"
+      "title": "KuCoin"
     },
     {
       "title": "La Poste",
@@ -458,12 +453,10 @@
       "title": "pCloud"
     },
     {
-      "title": "Peerberry",
-      "hex": "03E5A5"
+      "title": "Peerberry"
     },
     {
-      "title": "Pingvin Share",
-      "hex": "485099"
+      "title": "Pingvin Share"
     },
     {
       "title": "Plutus",
@@ -473,12 +466,10 @@
       "title": "Poloniex"
     },
     {
-      "title": "Porkbun",
-      "hex": "F27777"
+      "title": "Porkbun"
     },
     {
-      "title": "PostNL",
-      "color": "EF8300"
+      "title": "PostNL"
     },
     {
       "title": "Privacy Guides",
@@ -521,8 +512,7 @@
       "slug": "rockstar_games"
     },
     {
-      "title": "RuneMate",
-      "hex": "2ECC71"
+      "title": "RuneMate"
     },
     {
       "title": "Rust Language Forum",
@@ -570,8 +560,7 @@
     },
     {
       "title": "Standard Notes",
-      "slug": "standardnotes",
-      "hex": "2173E6"
+      "slug": "standardnotes"
     },
     {
       "title": "Surfshark"
@@ -606,8 +595,7 @@
       "title": "TorGuard"
     },
     {
-      "title": "Trading 212",
-      "hex": "4BA4DE"
+      "title": "Trading 212"
     },
     {
       "title": "TradingView"
@@ -644,8 +632,7 @@
       "hex": "858585"
     },
     {
-      "title": "Uphold",
-      "hex": "6FE68A"
+      "title": "Uphold"
     },
     {
       "title": "Upstox"
@@ -693,8 +680,7 @@
       "title": "YNAB",
       "altNames": [
         "You Need A Budget"
-      ],
-      "hex": "3B5EDA"
+      ]
     }
   ]
 }
