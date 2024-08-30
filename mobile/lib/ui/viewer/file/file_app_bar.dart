@@ -57,6 +57,7 @@ class FileAppBarState extends State<FileAppBar> {
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool isGuestView = false;
   bool shouldLoopVideo = Configuration.instance.shouldLoopVideo();
+  bool _reloadActions = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -89,8 +90,9 @@ class FileAppBarState extends State<FileAppBar> {
 
     //When the widget is initialized, the actions are not available.
     //Cannot call _getActions() in initState.
-    if (_actions.isEmpty) {
+    if (_actions.isEmpty || _reloadActions) {
       _getActions();
+      _reloadActions = false;
     }
 
     final isTrashedFile = widget.file is TrashFile;
@@ -372,6 +374,7 @@ class FileAppBarState extends State<FileAppBar> {
   _onToggleVideoLoop() {
     Configuration.instance.setShouldLoopVideo(!shouldLoopVideo);
     setState(() {
+      _reloadActions = true;
       shouldLoopVideo = !shouldLoopVideo;
     });
   }
