@@ -67,9 +67,7 @@ class MLIndexingIsolate {
   @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
-    Logger.root.onRecord.listen((LogRecord rec) {
-      debugPrint('[MLIsolate] ${rec.toPrettyString()}');
-    });
+    Logger.root.onRecord.listen(SuperLogging.onLogRecord);
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
     receivePort.listen((message) async {
@@ -81,11 +79,7 @@ class MLIndexingIsolate {
       try {
         switch (function) {
           case MLIndexingOperation.analyzeImage:
-            final time = DateTime.now();
             final MLResult result = await analyzeImageStatic(args);
-            _logger.info(
-              "`analyzeImageSync` function executed in ${DateTime.now().difference(time).inMilliseconds} ms",
-            );
             sendPort.send(result.toJsonString());
             break;
           case MLIndexingOperation.loadModels:
@@ -93,6 +87,7 @@ class MLIndexingIsolate {
             final modelPaths = args['modelPaths'] as List<String>;
             final addresses = <int>[];
             for (int i = 0; i < modelNames.length; i++) {
+              // TODO:lau check logging here
               final int address = await MlModel.loadModel(
                 modelNames[i],
                 modelPaths[i],
@@ -102,6 +97,7 @@ class MLIndexingIsolate {
             sendPort.send(List<int>.from(addresses, growable: false));
             break;
           case MLIndexingOperation.releaseModels:
+            // TODO:lau check logging here
             final modelNames = args['modelNames'] as List<String>;
             final modelAddresses = args['modelAddresses'] as List<int>;
             for (int i = 0; i < modelNames.length; i++) {

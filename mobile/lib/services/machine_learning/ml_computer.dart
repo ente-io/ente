@@ -102,6 +102,7 @@ class MLComputer {
             sendPort.send(true);
             break;
           case MLComputerOperation.runClipText:
+            //TODO:lau check logging here
             final textEmbedding = await ClipTextEncoder.predict(args);
             sendPort.send(List<double>.from(textEmbedding, growable: false));
             break;
@@ -199,7 +200,8 @@ class MLComputer {
 
         // Load ClipText model
         final String modelName = ClipTextEncoder.instance.modelName;
-        final String? modelPath = await ClipTextEncoder.instance.downloadModelSafe();
+        final String? modelPath =
+            await ClipTextEncoder.instance.downloadModelSafe();
         if (modelPath == null) {
           throw Exception("Could not download clip text model, no wifi");
         }

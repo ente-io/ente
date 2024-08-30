@@ -46,9 +46,11 @@ class FaceEmbeddingService extends MlModel {
       } else {
         return _runFFIBasedPredict(input, sessionAddress);
       }
-    } catch (e) {
-      _logger.info(
-        'MobileFaceNet  (PlatformPlugin: $MlModel.usePlatformPlugin)Error while running inference: $e',
+    } catch (e, s) {
+      _logger.severe(
+        'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
+        e,
+        s,
       );
       throw MobileFaceNetInterpreterRunException();
     }

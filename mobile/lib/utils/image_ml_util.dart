@@ -35,7 +35,9 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
           await HeifConverter.convert(imagePath, format: 'jpg');
       if (jpgPath == null) {
         _logger.severe('Error converting $format to jpg:', e, s);
-        throw Exception('InvalidImageFormatException: Error decoding image of format $format');
+        throw Exception(
+          'InvalidImageFormatException: Error decoding image of format $format',
+        );
       }
       final imageData = await File(jpgPath).readAsBytes();
       final image = await decodeImageFromData(imageData);
@@ -47,7 +49,9 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
         e,
         s,
       );
-      throw Exception('InvalidImageFormatException: Error decoding image of format $format');
+      throw Exception(
+        'InvalidImageFormatException: Error decoding image of format $format',
+      );
     }
   }
 }
@@ -278,7 +282,9 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     final (alignmentResult, correctlyEstimated) =
         SimilarityTransform.estimate(face.allKeypoints);
     if (!correctlyEstimated) {
-      log('Face alignment failed because not able to estimate SimilarityTransform, for face: $face');
+      _logger.severe(
+        'Face alignment failed because not able to estimate SimilarityTransform, for face: $face',
+      );
       throw Exception(
         'Face alignment failed because not able to estimate SimilarityTransform',
       );

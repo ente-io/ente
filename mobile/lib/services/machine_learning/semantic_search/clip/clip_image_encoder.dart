@@ -31,14 +31,27 @@ class ClipImageEncoder extends MlModel {
   static Future<List<double>> predict(
     Image image,
     ByteData imageByteData,
-    int sessionAddress,
-  ) async {
+    int sessionAddress, [
+    int? enteFileID,
+  ]) async {
+    final startTime = DateTime.now();
     final inputList = await preprocessImageClip(image, imageByteData);
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
+    late List<double> result;
     if (MlModel.usePlatformPlugin) {
-      return await _runPlatformPluginPredict(inputList);
+      result = await _runPlatformPluginPredict(inputList);
     } else {
-      return _runFFIBasedPredict(inputList, sessionAddress);
+      result = _runFFIBasedPredict(inputList, sessionAddress);
     }
+    final inferTime = DateTime.now();
+    final inferenceMs = inferTime.difference(preprocessingTime).inMilliseconds;
+    final totalMs = inferTime.difference(startTime).inMilliseconds;
+    _logger.info(
+      "Clip predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (nference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
+    );
+    return result;
   }
 
   static List<double> _runFFIBasedPredict(

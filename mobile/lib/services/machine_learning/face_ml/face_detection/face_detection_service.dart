@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:developer" as dev show log;
 import 'dart:typed_data' show ByteData, Float32List;
 import 'dart:ui' as ui show Image;
 
@@ -55,9 +54,8 @@ class FaceDetectionService extends MlModel {
       'sessionAddress should be valid',
     );
 
-    final stopwatch = Stopwatch()..start();
+    final startTime = DateTime.now();
 
-    final stopwatchPreprocessing = Stopwatch()..start();
     final (inputImageList, newSize) =
         await preprocessImageToFloat32ChannelsFirst(
       image,
@@ -67,17 +65,12 @@ class FaceDetectionService extends MlModel {
       requiredHeight: kInputHeight,
       maintainAspectRatio: true,
     );
-    stopwatchPreprocessing.stop();
-    dev.log(
-      'Face detection image preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
-    );
+    final preprocessingTime = DateTime.now();
     _logger.info(
-      'Image decoding and preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
+      'Face detection preprocessing is finished, in ${preprocessingTime.difference(startTime).inMilliseconds} ms',
     );
 
     // Run inference
-    final stopwatchInterpreter = Stopwatch()..start();
-
     List<List<List<double>>>? nestedResults = [];
     try {
       if (MlModel.usePlatformPlugin) {
@@ -88,23 +81,16 @@ class FaceDetectionService extends MlModel {
           inputImageList,
         ); // [1, 25200, 16]
       }
+      _logger.info(
+        'inference is finished, in ${DateTime.now().difference(preprocessingTime).inMilliseconds} ms',
+      );
     } catch (e, s) {
-      dev.log('Error while running inference', error: e, stackTrace: s);
+      _logger.severe('Error while running inference', e, s);
       throw YOLOFaceInterpreterRunException();
     }
-    stopwatchInterpreter.stop();
     try {
-      _logger.info(
-        'interpreter.run is finished, in ${stopwatchInterpreter.elapsedMilliseconds} ms',
-      );
-
       final relativeDetections =
           _yoloPostProcessOutputs(nestedResults!, newSize);
-      stopwatch.stop();
-      _logger.info(
-        'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',
-      );
-
       return relativeDetections;
     } catch (e, s) {
       _logger.severe('Error while post processing', e, s);

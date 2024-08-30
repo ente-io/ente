@@ -388,18 +388,20 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final int clipImageAddress = args["clipImageAddress"] as int;
 
     _logger.info(
-      "Start analyzing image with uploadedFileID: $enteFileID inside the isolate",
+      "Start analyzeImageStatic with fileID: $enteFileID (runFaces: $runFaces, runClip: $runClip)",
     );
-    final time = DateTime.now();
+    final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
     final (image, imageByteData) = await decodeImageFromPath(imagePath);
-    _logger.info('Reading and decoding image took '
-        '${DateTime.now().difference(time).inMilliseconds} ms');
     final decodedImageSize =
         Dimensions(height: image.height, width: image.width);
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = decodedImageSize;
+    final decodeTime = DateTime.now();
+    _logger.info(
+      'Reading and decoding image took ${decodeTime.difference(startTime).inMilliseconds} ms (fileID: $enteFileID)',
+    );
 
     if (runFaces) {
       final resultFaces = await FaceRecognitionService.runFacesPipeline(
@@ -425,6 +427,11 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       );
       result.clip = clipResult;
     }
+
+    final endTime = DateTime.now();
+    _logger.info(
+      'Finished analyzeImageStatic with fileID: $enteFileID, in ${endTime.difference(startTime).inMilliseconds} ms',
+    );
 
     return result;
   } catch (e, s) {
