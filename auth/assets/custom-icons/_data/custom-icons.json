@@ -70,19 +70,16 @@
         "blockchain.com",
         "blockchain.com Wallet",
         "blockchain.com Exchange"
-      ],
-      "slug": "blockchain"
+      ]
     },
     {
       "title": "BorgBase",
       "altNames": [
         "borg"
-      ],
-      "slug": "BorgBase"
+      ]
     },
     {
       "title": "Booking",
-      "slug": "booking",
       "altNames":[
         "Booking.com"
       ]
@@ -117,8 +114,7 @@
       "title": "CloudAMQP"
     },
     {
-      "title": "ConfigCat",
-      "slug": "configcat"
+      "title": "ConfigCat"
     },
     {
       "title": "CoinDCX"
@@ -147,8 +143,7 @@
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
-      ],
-      "slug": "dcs"
+      ]
     },
     {
       "title": "DEGIRO"
@@ -240,16 +235,13 @@
       "title": "HuggingFace",
       "altNames": [
         "Hugging Face"
-      ],
-      "slug": "huggingface"
+      ]
     },
     {
-      "title": "IceDrive",
-      "slug": "Icedrive"
+      "title": "IceDrive"
     },
     {
-      "titile": "Infomaniak",
-      "slug": "infomaniak"
+      "titile": "Infomaniak"
     },
     {
       "title": "ING"
@@ -270,8 +262,7 @@
       "hex": "000000"
     },
     {
-      "title": "IVPN",
-      "slug": "IVPN"
+      "title": "IVPN"
     },
     {
       "title": "Jagex",
@@ -333,7 +324,6 @@
         "mathstodon",
         "fosstodon"
       ],
-      "slug": "mastodon",
       "hex": "6364FF"
     },
     {
@@ -420,8 +410,7 @@
       "title": "Notion"
     },
     {
-      "title": "NuCommunity",
-      "slug": "nucommunity"
+      "title": "NuCommunity"
     },
     {
       "title": "NVIDIA"
@@ -447,8 +436,7 @@
       "title": "PayPal"
     },
     {
-      "title": "pCloud",
-      "slug": "pCloud"
+      "title": "pCloud"
     },
     {
       "title": "Peerberry",
@@ -495,7 +483,6 @@
       "title": "Registro br",
       "slug": "registro_br",
       "altNames": [
-        "Registro br",
         "registrobr",
         "Registro.br"
       ]
@@ -551,8 +538,7 @@
       ]
     },
     {
-      "title": "SMTP2GO",
-      "slug": "smtp2go"
+      "title": "SMTP2GO"
     },
     {
       "title": "Snapchat"
@@ -571,7 +557,6 @@
     },
     {
       "title": "TCPShield",
-      "slug": "tcpshield",
       "hex": "FFFFFF"
     },
     {
@@ -597,7 +582,6 @@
     },
     {
       "title": "Trading 212",
-      "slug": "trading212",
       "hex": "4BA4DE"
     },
     {
@@ -636,7 +620,6 @@
     },
     {
       "title": "Uphold",
-      "slug": "uphold",
       "hex": "6FE68A"
     },
     {
@@ -660,12 +643,10 @@
       "title": "Wise"
     },
     {
-      "title": "WYZE",
-      "slug": "wyze"
+      "title": "WYZE"
     },
     {
       "title": "WorkOS",
-      "slug": "workos",
       "altNames": [
         "Work OS"
       ]
@@ -675,8 +656,7 @@
       "altNames": [
         "Ya",
         "Яндекс"
-      ],
-      "slug": "Yandex"
+      ]
     },
     {
       "title": "yahoo"
@@ -686,21 +666,17 @@
       "altNames": [
         "You Need A Budget"
       ],
-      "slug": "ynab",
       "hex": "3B5EDA"
     },
     {
-      "title": "Shakepay",
-      "slug": "shakepay"
+      "title": "Shakepay"
     },
     {
       "title": "Newton",
-      "altNames": ["Newton Crypto"],
-      "slug": "newton"
+      "altNames": ["Newton Crypto"]
     },
     {
-      "title": "RippleMatch",
-      "slug": "ripplematch"
+      "title": "RippleMatch"
     },
     {
       "title": "T-Mobile ID",
