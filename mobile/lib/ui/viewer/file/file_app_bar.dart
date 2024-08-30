@@ -6,6 +6,7 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -55,6 +56,7 @@ class FileAppBarState extends State<FileAppBar> {
   final List<Widget> _actions = [];
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool isGuestView = false;
+  bool shouldLoopVideo = Configuration.instance.shouldLoopVideo();
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -315,6 +317,29 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       ),
     );
+
+    if (widget.file.isVideo) {
+      items.add(
+        PopupMenuItem(
+          value: 7,
+          child: Row(
+            children: [
+              Icon(
+                Icons.repeat_rounded,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              shouldLoopVideo
+                  ? const Text("Video loop on")
+                  : const Text("Video loop off"),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (items.isNotEmpty) {
       _actions.add(
         PopupMenuButton(
@@ -334,12 +359,21 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleUnHideRequest(context);
             } else if (value == 6) {
               await _onTapGuestView();
+            } else if (value == 7) {
+              _onToggleVideoLoop();
             }
           },
         ),
       );
     }
     return _actions;
+  }
+
+  _onToggleVideoLoop() {
+    Configuration.instance.setShouldLoopVideo(!shouldLoopVideo);
+    setState(() {
+      shouldLoopVideo = !shouldLoopVideo;
+    });
   }
 
   Future<void> _handleHideRequest(BuildContext context) async {
