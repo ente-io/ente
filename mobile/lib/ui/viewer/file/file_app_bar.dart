@@ -334,8 +334,8 @@ class FileAppBarState extends State<FileAppBar> {
                 padding: EdgeInsets.all(8),
               ),
               shouldLoopVideo
-                  ? const Text("Video loop on")
-                  : const Text("Video loop off"),
+                  ? const Text("Loop video on")
+                  : const Text("Loop video off"),
             ],
           ),
         ),
@@ -362,7 +362,7 @@ class FileAppBarState extends State<FileAppBar> {
             } else if (value == 6) {
               await _onTapGuestView();
             } else if (value == 7) {
-              _onToggleVideoLoop();
+              _onToggleLoopVideo();
             }
           },
         ),
@@ -371,7 +371,7 @@ class FileAppBarState extends State<FileAppBar> {
     return _actions;
   }
 
-  _onToggleVideoLoop() {
+  _onToggleLoopVideo() {
     Configuration.instance.setShouldLoopVideo(!shouldLoopVideo);
     setState(() {
       _reloadActions = true;
