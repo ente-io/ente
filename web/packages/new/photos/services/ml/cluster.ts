@@ -114,6 +114,8 @@ export interface CGroup {
 
 export interface ClusteringOpts {
     method: "linear" | "hdbscan";
+    minBlur: number;
+    minScore: number;
     batchSize: number;
     joinThreshold: number;
 }
@@ -174,11 +176,13 @@ export const clusterFaces = (
     faceIndexes: FaceIndex[],
     opts: ClusteringOpts,
 ) => {
-    const { method, batchSize, joinThreshold } = opts;
+    const { method, batchSize, minBlur, minScore, joinThreshold } = opts;
     const t = Date.now();
 
     // A flattened array of faces.
-    const faces = [...enumerateFaces(faceIndexes)].filter((f) => f.blur > 99);
+    const faces = [...enumerateFaces(faceIndexes)]
+        .filter((f) => f.blur > minBlur)
+        .filter((f) => f.score > minScore);
 
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
@@ -439,7 +443,7 @@ const clusterLinear = (
         }
     }
 
-    // Prune singletone clusters.
+    // Prune singleton clusters.
     const validClusters = clusters.filter((cs) => cs.length > 1);
 
     return { clusters: validClusters };
