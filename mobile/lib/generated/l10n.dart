@@ -170,10 +170,10 @@ class S {
     );
   }
 
-  /// `Yes, I want to permanently delete this account and all its data.`
+  /// `Yes, I want to permanently delete this account and its data across all apps.`
   String get confirmDeletePrompt {
     return Intl.message(
-      'Yes, I want to permanently delete this account and all its data.',
+      'Yes, I want to permanently delete this account and its data across all apps.',
       name: 'confirmDeletePrompt',
       desc: '',
       args: [],

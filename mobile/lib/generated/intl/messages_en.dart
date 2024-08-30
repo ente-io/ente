@@ -504,7 +504,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Yes, I want to permanently delete this account and all its data."),
+            "Yes, I want to permanently delete this account and its data across all apps."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Confirm password"),
         "confirmPlanChange":
