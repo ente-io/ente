@@ -14,7 +14,16 @@ import {
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
-import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    MenuItem,
+    Stack,
+    styled,
+    TextField,
+    Typography,
+} from "@mui/material";
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -55,7 +64,7 @@ const Options: React.FC = () => {
                 <IconButton onClick={close}>
                     <BackButton />
                 </IconButton>
-                <Box sx={{ marginInline: "auto" }}>{pt("Faces")}</Box>
+                <Box sx={{ marginInline: "auto" }}>{pt("Face Clusters")}</Box>
             </FluidContainer>
         </SelectionBar>
     );
@@ -79,7 +88,7 @@ interface ClusterListProps {
 }
 
 interface ClusteringOpts {
-    method: "hdbscan";
+    method: "linear" | "hdbscan";
     batchSize: number;
     joinThreshold: number;
 }
@@ -131,7 +140,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
 
     const getItemSize = (index: number) =>
         index === 0
-            ? 100
+            ? 270
             : Array.isArray(items[index - 1])
               ? listItemHeight
               : 36;
@@ -151,7 +160,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                         <div style={style}>
                             <Header
                                 clusterRes={clusterRes}
-                                onCluster={(opts) => void cluster(opts)}
+                                onCluster={cluster}
                             />
                         </div>
                     );
@@ -243,26 +252,68 @@ const ListItem = styled("div")`
 
 interface HeaderProps {
     clusterRes: ClusterDebugPageContents | undefined;
-    onCluster: (opts: ClusteringOpts) => void;
+    onCluster: (opts: ClusteringOpts) => Promise<void>;
 }
 
 const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
-    const formik = useFormik<ClusteringOpts>({
-        initialValues: {
-            method: "hdbscan",
-            batchSize: 2500,
-            joinThreshold: 0.7,
-        },
-        onSubmit: onCluster,
-    });
+    const { values, handleSubmit, handleChange, isSubmitting } =
+        useFormik<ClusteringOpts>({
+            initialValues: {
+                method: "hdbscan",
+                joinThreshold: 0.7,
+                batchSize: 2500,
+            },
+            onSubmit: onCluster,
+        });
 
-    const clusterInfo = !clusterRes ? (
-        <Loader />
-    ) : (
+    const form = (
+        <form onSubmit={handleSubmit}>
+            <Stack>
+                <Typography paddingInline={1}>Parameters</Typography>
+                <Stack direction="row" gap={1}>
+                    <TextField
+                        id="method"
+                        name="method"
+                        label="method"
+                        value={values.method}
+                        select
+                        size="small"
+                        onChange={handleChange}
+                    >
+                        {["hdbscan", "linear"].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        id="joinThreshold"
+                        name="joinThreshold"
+                        label="joinThreshold"
+                        value={values.joinThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        id="batchSize"
+                        name="batchSize"
+                        label="batchSize"
+                        value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Box marginInlineStart={"auto"} p={1}>
+                    <Button color="secondary" type="submit">
+                        Cluster
+                    </Button>
+                </Box>
+            </Stack>
+        </form>
+    );
+
+    const clusterInfo = clusterRes && (
         <Stack m={1}>
-            <form>
-                <input key={""}></input>
-            </form>
             <Typography variant="small" mb={1}>
                 {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
             </Typography>
@@ -280,11 +331,17 @@ const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
         </Stack>
     );
 
-    return <div>{clusterInfo}</div>;
+    return (
+        <div>
+            {form}
+            {isSubmitting && <Loader />}
+            {clusterInfo}
+        </div>
+    );
 };
 
 const Loader = () => (
-    <VerticallyCentered>
+    <VerticallyCentered mt={4}>
         <EnteSpinner />
     </VerticallyCentered>
 );
