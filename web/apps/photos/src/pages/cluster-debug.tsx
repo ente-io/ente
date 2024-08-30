@@ -25,7 +25,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { useFormik, type Formik } from "formik";
+import { useFormik, type FormikContextType } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -250,7 +250,7 @@ const ListItem = styled("div")`
 `;
 
 interface HeaderProps {
-    formik: Formik<ClusteringOpts>;
+    formik: FormikContextType<ClusteringOpts>;
     clusterRes: ClusterDebugPageContents | undefined;
 }
 
