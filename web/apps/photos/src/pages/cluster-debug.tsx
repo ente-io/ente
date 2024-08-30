@@ -4,10 +4,10 @@ import {
     faceCrop,
     wipClusterDebugPageContents,
     type ClusterDebugPageContents,
-    type ClusterPreviewFaceWF,
-    type ClusterPreviewWF,
 } from "@/new/photos/services/ml";
-import { faceDirection } from "@/new/photos/services/ml/face";
+import { type ClusteringOpts } from "@/new/photos/services/ml/cluster";
+import { faceDirection, type Face } from "@/new/photos/services/ml/face";
+import type { EnteFile } from "@/new/photos/types/file";
 import {
     FlexWrapper,
     FluidContainer,
@@ -15,7 +15,17 @@ import {
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
-import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    MenuItem,
+    Stack,
+    styled,
+    TextField,
+    Typography,
+} from "@mui/material";
+import { useFormik, type FormikProps } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -24,56 +34,18 @@ import { VariableSizeList } from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
-    const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
-    const [clusterRes, setClusterRes] = useState<
-        ClusterDebugPageContents | undefined
-    >();
+    const { showNavBar } = useContext(AppContext);
 
     useEffect(() => {
         showNavBar(true);
-        cluster();
     }, []);
 
-    const cluster = async () => {
-        startLoading();
-        setClusterRes(await wipClusterDebugPageContents());
-        finishLoading();
-    };
-
-    if (!clusterRes) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
     return (
         <>
-            <Stack m={1}>
-                <Typography variant="small" mb={1}>
-                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Showing only top 30 and bottom 30 clusters.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    For each cluster showing only up to 50 faces, sorted by
-                    cosine similarity to highest scoring face in the cluster.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Below each face is its{" "}
-                    <b>blur - score - cosineSimilarity - direction</b>
-                </Typography>
-            </Stack>
-            <hr />
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
-                        <ClusterPhotoList
-                            width={width}
-                            height={height}
-                            clusterRes={clusterRes}
-                        />
+                        <ClusterList width={width} height={height} />
                     )}
                 </AutoSizer>
             </Container>
@@ -93,7 +65,7 @@ const Options: React.FC = () => {
                 <IconButton onClick={close}>
                     <BackButton />
                 </IconButton>
-                <Box sx={{ marginInline: "auto" }}>{pt("Faces")}</Box>
+                <Box sx={{ marginInline: "auto" }}>{pt("Face Clusters")}</Box>
             </FluidContainer>
         </SelectionBar>
     );
@@ -110,20 +82,35 @@ const Container = styled("div")`
     }
 `;
 
-interface ClusterPhotoListProps {
+interface ClusterListProps {
     height: number;
     width: number;
-    clusterRes: ClusterDebugPageContents;
 }
 
-const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
-    height,
-    width,
-    clusterRes,
-}) => {
-    const { clusterPreviewWFs, clusterIDForFaceID } = clusterRes;
-    const [itemList, setItemList] = useState<ItemListItem[]>([]);
+const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
+    const { startLoading, finishLoading } = useContext(AppContext);
+
+    const [clusterRes, setClusterRes] = useState<
+        ClusterDebugPageContents | undefined
+    >();
+    const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
+
+    const cluster = async (opts: ClusteringOpts) => {
+        setClusterRes(undefined);
+        startLoading();
+        setClusterRes(await wipClusterDebugPageContents(opts));
+        finishLoading();
+    };
+
+    const formik = useFormik<ClusteringOpts>({
+        initialValues: {
+            method: "hdbscan",
+            joinThreshold: 0.7,
+            batchSize: 2500,
+        },
+        onSubmit: cluster,
+    });
 
     const columns = useMemo(
         () => Math.max(Math.floor(getFractionFittableColumns(width)), 4),
@@ -134,36 +121,38 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
 
     useEffect(() => {
-        setItemList(itemListFromClusterPreviewWFs(clusterPreviewWFs, columns));
-    }, [columns, clusterPreviewWFs]);
+        setItems(clusterRes ? itemsFromClusterRes(clusterRes, columns) : []);
+    }, [columns, clusterRes]);
 
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
-    }, [itemList]);
+    }, [items]);
 
-    const getItemSize = (i: number) =>
-        Array.isArray(itemList[i]) ? listItemHeight : 36;
-
-    const generateKey = (i: number) =>
-        Array.isArray(itemList[i])
-            ? `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`
-            : `${itemList[i]}-${i}`;
+    const getItemSize = (index: number) =>
+        index === 0
+            ? 270
+            : Array.isArray(items[index - 1])
+              ? listItemHeight
+              : 36;
 
     return (
         <VariableSizeList
-            itemData={{ itemList, columns, shrinkRatio }}
-            ref={listRef}
-            itemSize={getItemSize}
             height={height}
             width={width}
-            itemCount={itemList.length}
-            itemKey={generateKey}
+            ref={listRef}
+            itemCount={1 + items.length}
+            itemSize={getItemSize}
             overscanCount={3}
-            useIsScrolling
         >
-            {({ index, style, data }) => {
-                const { itemList, columns, shrinkRatio } = data;
-                const item = itemList[index];
+            {({ index, style }) => {
+                if (index === 0)
+                    return (
+                        <div style={style}>
+                            <Header formik={formik} clusterRes={clusterRes} />
+                        </div>
+                    );
+
+                const item = items[index - 1];
                 return (
                     <ListItem style={style}>
                         <ListContainer
@@ -172,13 +161,13 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
                         >
                             {!Array.isArray(item) ? (
                                 <LabelContainer span={columns}>
-                                    {`cluster size ${item.toFixed(2)}`}
+                                    {item}
                                 </LabelContainer>
                             ) : (
-                                item.map((faceWF, i) => (
+                                item.map((f, i) => (
                                     <FaceItem
                                         key={i.toString()}
-                                        {...{ faceWF, clusterIDForFaceID }}
+                                        faceWithFile={f}
                                     />
                                 ))
                             )}
@@ -190,23 +179,36 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     );
 };
 
-// type ItemListItem = Face | FaceFileNeighbour[];
-type ItemListItem = number | ClusterPreviewFaceWF[];
+type Item = string | FaceWithFile[];
 
-const itemListFromClusterPreviewWFs = (
-    clusterPreviewWFs: ClusterPreviewWF[],
+const itemsFromClusterRes = (
+    clusterRes: ClusterDebugPageContents,
     columns: number,
 ) => {
-    const result: ItemListItem[] = [];
-    for (let index = 0; index < clusterPreviewWFs.length; index++) {
-        const { clusterSize, faces } = clusterPreviewWFs[index];
-        result.push(clusterSize);
+    const { clusterPreviewsWithFile, unclusteredFacesWithFile } = clusterRes;
+
+    const result: Item[] = [];
+    for (let index = 0; index < clusterPreviewsWithFile.length; index++) {
+        const { clusterSize, faces } = clusterPreviewsWithFile[index];
+        result.push(`cluster size ${clusterSize.toFixed(2)}`);
         let lastIndex = 0;
         while (lastIndex < faces.length) {
             result.push(faces.slice(lastIndex, lastIndex + columns));
             lastIndex += columns;
         }
     }
+
+    if (unclusteredFacesWithFile.length) {
+        result.push(`•• unclustered faces ${unclusteredFacesWithFile.length}`);
+        let lastIndex = 0;
+        while (lastIndex < unclusteredFacesWithFile.length) {
+            result.push(
+                unclusteredFacesWithFile.slice(lastIndex, lastIndex + columns),
+            );
+            lastIndex += columns;
+        }
+    }
+
     return result;
 };
 
@@ -218,80 +220,6 @@ const getGapFromScreenEdge = (width: number) => (width > 4 * 120 ? 24 : 4);
 const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
-
-interface FaceItemProps {
-    faceWF: ClusterPreviewFaceWF;
-    clusterIDForFaceID: Map<string, string>;
-}
-
-const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
-    const { face, enteFile, cosineSimilarity } = faceWF;
-    const { faceID } = face;
-
-    const [objectURL, setObjectURL] = useState<string | undefined>();
-
-    useEffect(() => {
-        let didCancel = false;
-        let thisObjectURL: string | undefined;
-
-        void faceCrop(faceID, enteFile).then((blob) => {
-            if (blob && !didCancel)
-                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
-        });
-
-        return () => {
-            didCancel = true;
-            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
-        };
-    }, [faceID, enteFile]);
-
-    const fd = faceDirection(face.detection);
-    const d = fd == "straight" ? "•" : fd == "left" ? "←" : "→";
-    return (
-        <FaceChip
-            style={{
-                outline: outlineForCluster(clusterIDForFaceID.get(faceID)),
-                outlineOffset: "2px",
-            }}
-        >
-            {objectURL && (
-                <img
-                    style={{
-                        objectFit: "cover",
-                        width: "100%",
-                        height: "100%",
-                    }}
-                    src={objectURL}
-                />
-            )}
-            <Stack direction="row" justifyContent="space-between">
-                <Typography variant="small" color="text.muted">
-                    {`b${face.blur.toFixed(0)} `}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    {`s${face.score.toFixed(1)}`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    {`c${cosineSimilarity.toFixed(1)}`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    {`d${d}`}
-                </Typography>
-            </Stack>
-        </FaceChip>
-    );
-};
-
-const FaceChip = styled(Box)`
-    width: 120px;
-    height: 120px;
-`;
-
-const outlineForCluster = (clusterID: string | undefined) =>
-    clusterID ? `1px solid oklch(0.8 0.2 ${hForID(clusterID)})` : undefined;
-
-const hForID = (id: string) =>
-    ([...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 10) * 36;
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "shrinkRatio",
@@ -319,4 +247,170 @@ const LabelContainer = styled(ListItemContainer)`
 const ListItem = styled("div")`
     display: flex;
     justify-content: center;
+`;
+
+interface HeaderProps {
+    formik: FormikProps<ClusteringOpts>;
+    clusterRes: ClusterDebugPageContents | undefined;
+}
+
+const Header: React.FC<HeaderProps> = ({ formik, clusterRes }) => {
+    const { values, handleSubmit, handleChange, isSubmitting } = formik;
+    const form = (
+        <form onSubmit={handleSubmit}>
+            <Stack>
+                <Typography paddingInline={1}>Parameters</Typography>
+                <Stack direction="row" gap={1}>
+                    <TextField
+                        id="method"
+                        name="method"
+                        label="method"
+                        value={values.method}
+                        select
+                        size="small"
+                        onChange={handleChange}
+                    >
+                        {["hdbscan", "linear"].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        id="joinThreshold"
+                        name="joinThreshold"
+                        label="joinThreshold"
+                        value={values.joinThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        id="batchSize"
+                        name="batchSize"
+                        label="batchSize"
+                        value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Box marginInlineStart={"auto"} p={1}>
+                    <Button color="secondary" type="submit">
+                        Cluster
+                    </Button>
+                </Box>
+            </Stack>
+        </form>
+    );
+
+    const clusterInfo = clusterRes && (
+        <Stack m={1}>
+            <Typography variant="small" mb={1}>
+                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces in ${(clusterRes.timeTakenMs / 1000).toFixed(0)} seconds. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Showing only top 30 and bottom 30 clusters.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                For each cluster showing only up to 50 faces, sorted by cosine
+                similarity to highest scoring face in the cluster.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Below each face is its{" "}
+                <b>blur - score - cosineSimilarity - direction</b>.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Faces added to the cluster as a result of merging are outlined.
+            </Typography>
+        </Stack>
+    );
+
+    return (
+        <div>
+            {form}
+            {isSubmitting && <Loader />}
+            {clusterInfo}
+        </div>
+    );
+};
+
+const Loader = () => (
+    <VerticallyCentered mt={4}>
+        <EnteSpinner />
+    </VerticallyCentered>
+);
+
+interface FaceItemProps {
+    faceWithFile: FaceWithFile;
+}
+
+interface FaceWithFile {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity?: number;
+    wasMerged?: boolean;
+}
+
+const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
+    const { face, enteFile, cosineSimilarity, wasMerged } = faceWithFile;
+    const { faceID } = face;
+
+    const [objectURL, setObjectURL] = useState<string | undefined>();
+
+    useEffect(() => {
+        let didCancel = false;
+        let thisObjectURL: string | undefined;
+
+        void faceCrop(faceID, enteFile).then((blob) => {
+            if (blob && !didCancel)
+                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
+        });
+
+        return () => {
+            didCancel = true;
+            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
+        };
+    }, [faceID, enteFile]);
+
+    const fd = faceDirection(face.detection);
+    const d = fd == "straight" ? "•" : fd == "left" ? "←" : "→";
+    return (
+        <FaceChip
+            style={{
+                outline: wasMerged ? `1px solid gray` : undefined,
+                outlineOffset: "2px",
+            }}
+        >
+            {objectURL && (
+                <img
+                    style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                    }}
+                    src={objectURL}
+                />
+            )}
+            <Stack direction="row" justifyContent="space-between">
+                <Typography variant="small" color="text.muted">
+                    {`b${face.blur.toFixed(0)} `}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`s${face.score.toFixed(1)}`}
+                </Typography>
+                {cosineSimilarity && (
+                    <Typography variant="small" color="text.muted">
+                        {`c${cosineSimilarity.toFixed(1)}`}
+                    </Typography>
+                )}
+                <Typography variant="small" color="text.muted">
+                    {`d${d}`}
+                </Typography>
+            </Stack>
+        </FaceChip>
+    );
+};
+
+const FaceChip = styled(Box)`
+    width: 120px;
+    height: 120px;
 `;

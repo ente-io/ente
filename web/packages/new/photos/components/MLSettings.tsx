@@ -340,8 +340,7 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     // TODO-Cluster
     const router = useRouter();
-    // const wipClusterNow = () => wipCluster();
-    const wipClusterShowNow = () => router.push("/cluster-debug");
+    const wipClusterDebug = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -393,31 +392,16 @@ const ManageML: React.FC<ManageMLProps> = ({
                             label={ut(
                                 "Create clusters   • internal only option",
                             )}
-                            onClick={wipClusterShowNow}
+                            onClick={wipClusterDebug}
                         />
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create and show in-memory clusters. Takes ~ 1 min. Nothing will be saved or synced to remote. You can also view all clusters in the search dropdown later.",
+                            "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
                         )}
                     />
                 </Box>
             )}
-            {/* {showClusterOpt && (
-                <Box>
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            label={ut("View clusters • internal only option")}
-                            onClick={wipClusterShowNow}
-                        />
-                    </MenuItemGroup>
-                    <MenuSectionTitle
-                        title={ut(
-                            "Variant of above that opens a page with debug info.",
-                        )}
-                    />
-                </Box>
-            )} */}
         </Stack>
     );
 };

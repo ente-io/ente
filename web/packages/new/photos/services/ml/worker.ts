@@ -24,7 +24,7 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import { clusterFacesHdb } from "./cluster-new";
+import { clusterFaces, type ClusteringOpts } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
     faceIndexes,
@@ -276,8 +276,8 @@ export class MLWorker {
     }
 
     // TODO-Cluster
-    async clusterFacesHdb() {
-        return clusterFacesHdb(await faceIndexes());
+    async clusterFaces(opts: ClusteringOpts) {
+        return clusterFaces(await faceIndexes(), opts);
     }
 }
 
