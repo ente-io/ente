@@ -4,7 +4,9 @@ import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -59,6 +61,8 @@ class MLComputer {
 
   @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
+    Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+    Logger.root.onRecord.listen(SuperLogging.onLogRecord);
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
 

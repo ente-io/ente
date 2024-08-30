@@ -56,7 +56,9 @@ class ClipTextEncoder extends MlModel {
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
     inputOrt.release();
     runOptions.release();
-    outputs.forEach((element) => element?.release());
+    for (var element in outputs) {
+      element?.release();
+    }
     normalizeEmbedding(embedding);
     return embedding;
   }

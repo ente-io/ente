@@ -150,8 +150,8 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
         await Future.wait(futureFaceThumbnails);
     return faceThumbnails;
   } catch (e) {
-    log('[ImageMlUtils] Error generating face thumbnails: $e');
-    log('[ImageMlUtils] cropImage problematic input argument: ${faceBoxes[i]}');
+    _logger.severe('Error generating face thumbnails: $e');
+    _logger.severe('cropImage problematic input argument: ${faceBoxes[i]}');
     return [];
   }
 }
