@@ -20,18 +20,6 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
         .addListener(_onPlaybackStatusChanged);
   }
 
-  _onPlaybackStatusChanged() {
-    if (_playbackStatus == PlaybackStatus.playing) {
-      setState(() {
-        _isPlaying = true;
-      });
-    } else {
-      setState(() {
-        _isPlaying = false;
-      });
-    }
-  }
-
   @override
   void dispose() {
     widget.controller?.onPlaybackStatusChanged
@@ -88,4 +76,16 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
 
   PlaybackStatus? get _playbackStatus =>
       widget.controller?.playbackInfo?.status;
+
+  void _onPlaybackStatusChanged() {
+    if (_playbackStatus == PlaybackStatus.playing) {
+      setState(() {
+        _isPlaying = true;
+      });
+    } else {
+      setState(() {
+        _isPlaying = false;
+      });
+    }
+  }
 }

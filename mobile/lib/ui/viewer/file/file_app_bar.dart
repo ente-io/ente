@@ -336,7 +336,7 @@ class FileAppBarState extends State<FileAppBar> {
                   shouldLoopVideo
                       ? const SizedBox.shrink()
                       : Transform.rotate(
-                          angle: (3.14 / 4) * 1,
+                          angle: 3.14 / 4,
                           child: Container(
                             width: 2,
                             height: 24,
