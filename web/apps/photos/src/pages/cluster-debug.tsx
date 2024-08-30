@@ -6,6 +6,7 @@ import {
     type ClusterPreviewFaceWF,
 } from "@/new/photos/services/ml";
 import { faceDirection } from "@/new/photos/services/ml/face";
+import { wait } from "@/utils/promise";
 import {
     FlexWrapper,
     FluidContainer,
@@ -14,6 +15,7 @@ import {
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import { Box, IconButton, Stack, styled, Typography } from "@mui/material";
+import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -76,6 +78,12 @@ interface ClusterListProps {
     width: number;
 }
 
+interface ClusteringOpts {
+    method: "hdbscan";
+    batchSize: number;
+    joinThreshold: number;
+}
+
 const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const { startLoading, finishLoading } = useContext(AppContext);
 
@@ -86,9 +94,11 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const listRef = useRef(null);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const cluster = async () => {
+    const cluster = async (opts: ClusteringOpts) => {
         startLoading();
         // setClusterRes(await wipClusterDebugPageContents());
+        console.log(opts);
+        await wait(5000);
         setClusterRes({
             clusteredCount: 1,
             unclusteredCount: 2,
@@ -139,7 +149,10 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                 if (index === 0)
                     return (
                         <div style={style}>
-                            <Header clusterRes={clusterRes} />
+                            <Header
+                                clusterRes={clusterRes}
+                                onCluster={(opts) => void cluster(opts)}
+                            />
                         </div>
                     );
 
@@ -230,12 +243,26 @@ const ListItem = styled("div")`
 
 interface HeaderProps {
     clusterRes: ClusterDebugPageContents | undefined;
+    onCluster: (opts: ClusteringOpts) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ clusterRes }) => {
-    if (!clusterRes) return <Loader />;
-    return (
+const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
+    const formik = useFormik<ClusteringOpts>({
+        initialValues: {
+            method: "hdbscan",
+            batchSize: 2500,
+            joinThreshold: 0.7,
+        },
+        onSubmit: onCluster,
+    });
+
+    const clusterInfo = !clusterRes ? (
+        <Loader />
+    ) : (
         <Stack m={1}>
+            <form>
+                <input key={""}></input>
+            </form>
             <Typography variant="small" mb={1}>
                 {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
             </Typography>
@@ -252,6 +279,8 @@ const Header: React.FC<HeaderProps> = ({ clusterRes }) => {
             </Typography>
         </Stack>
     );
+
+    return <div>{clusterInfo}</div>;
 };
 
 const Loader = () => (
