@@ -2,6 +2,17 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+class CodeTimerProgressCache {
+  static final Map<int, CodeTimerProgress> _cache = {};
+
+  static CodeTimerProgress getCachedWidget(int period) {
+    if (!_cache.containsKey(period)) {
+      _cache[period] = CodeTimerProgress(period: period);
+    }
+    return _cache[period]!;
+  }
+}
+
 class CodeTimerProgress extends StatefulWidget {
   final int period;
 
