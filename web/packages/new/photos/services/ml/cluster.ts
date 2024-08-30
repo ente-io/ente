@@ -209,31 +209,37 @@ export const clusterFaces = (
     // be list of existing clusters we fetch from remote.
     const clusters: FaceCluster[] = [];
 
-    // Process the faces in batches. The faces are already sorted by file ID,
-    // which is a monotonically increasing integer, so we will also have some
-    // temporal locality.
-
+    // Process the faces in batches.
     for (let i = 0; i < faceEmbeddings.length; i += batchSize) {
         const it = Date.now();
-        const embeddings = faceEmbeddings.slice(i, i + batchSize);
-        const { clusters: hdbClusters } = clusterHdbscan(embeddings);
+
+        const embeddingBatch = faceEmbeddings.slice(i, i + batchSize);
+        let embeddingClusters: EmbeddingCluster[];
+        if (method == "hdbscan") {
+            ({ clusters: embeddingClusters } = clusterHdbscan(embeddingBatch));
+        } else {
+            ({ clusters: embeddingClusters } = clusterLinear(
+                embeddingBatch,
+                joinThreshold,
+            ));
+        }
 
         log.info(
-            `hdbscan produced ${hdbClusters.length} clusters from ${embeddings.length} faces (${Date.now() - it} ms)`,
+            `${method} produced ${embeddingClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
         );
 
-        // Merge the new clusters we got from hdbscan into the existing clusters
-        // if they are "near" them (using some heuristic).
+        // Merge the new clusters we got from this batch into the existing
+        // clusters if they are "near" enough (using some heuristic).
         //
         // We need to ensure we don't change any of the existing cluster IDs,
         // since these might be existing clusters we got from remote.
 
-        for (const hdbCluster of hdbClusters) {
+        for (const newCluster of embeddingClusters) {
             // Find the existing cluster whose (arbitrarily chosen) first face
             // is the nearest neighbour of the (arbitrarily chosen) first face
-            // of the cluster produced by hdbscan.
+            // of the cluster produced in this batch.
 
-            const newFace = ensure(faces[i + ensure(hdbCluster[0])]);
+            const newFace = ensure(faces[i + ensure(newCluster[0])]);
 
             let nnCluster: FaceCluster | undefined;
             let nnCosineSimilarity = 0;
@@ -250,27 +256,29 @@ export const clusterFaces = (
                 // Use a higher cosine similarity threshold if either of the two
                 // faces are blurry.
                 const threshold =
-                    existingFace.blur < 200 || newFace.blur < 200 ? 0.9 : 0.7;
+                    existingFace.blur < 200 || newFace.blur < 200
+                        ? 0.9
+                        : joinThreshold;
                 if (csim > threshold && csim > nnCosineSimilarity) {
                     nnCluster = existingCluster;
                     nnCosineSimilarity = csim;
                 }
             }
 
+            // If we found an existing cluster that is near enough, merge the
+            // new cluster into the existing cluster.
             if (nnCluster) {
-                // If we found an existing cluster that is near enough,
-                // sublimate the cluster produced by hdbscan into that cluster.
-                for (const j of hdbCluster) {
+                for (const j of newCluster) {
                     const { faceID } = ensure(faces[i + j]);
+                    wasMergedFaceIDs.add(faceID);
                     nnCluster.faceIDs.push(faceID);
                     clusterIDForFaceID.set(faceID, nnCluster.id);
                 }
             } else {
-                // Otherwise make a new cluster from the cluster produced by
-                // hdbscan.
+                // Otherwise retain the new cluster.
                 const clusterID = newClusterID();
                 const faceIDs: string[] = [];
-                for (const j of hdbCluster) {
+                for (const j of newCluster) {
                     const { faceID } = ensure(faces[i + j]);
                     faceIDs.push(faceID);
                     clusterIDForFaceID.set(faceID, clusterID);
