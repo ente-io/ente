@@ -97,7 +97,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     const cluster = async (opts: ClusteringOpts) => {
         startLoading();
         setClusterRes(await wipClusterDebugPageContents(opts));
