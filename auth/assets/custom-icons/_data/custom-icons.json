@@ -31,12 +31,12 @@
       "title": "bitget"
     },
     {
-      "titile":"bitget wallet",
-      "slug":"bitget_wallet"
+      "titile": "bitget wallet",
+      "slug": "bitget_wallet"
     },
     {
       "title": "Bitmart",
-      "hex":"000000"
+      "hex": "000000"
     },
     {
       "title": "BitMEX"
@@ -80,14 +80,14 @@
     },
     {
       "title": "Booking",
-      "altNames":[
+      "altNames": [
         "Booking.com"
       ]
     },
     {
       "title": "Brave Creators",
       "slug": "brave_creators",
-      "altNames":[
+      "altNames": [
         "Brave",
         "Brave Rewards",
         "Brave Browser"
@@ -168,8 +168,8 @@
       "slug": "dusnet"
     },
     {
-      "title":"ecitizen kenya",
-      "slug":"ecitizen_kenya"
+      "title": "ecitizen kenya",
+      "slug": "ecitizen_kenya"
     },
     {
       "title": "ente",
@@ -213,10 +213,10 @@
     },
     {
       "title": "Gosuslugi",
+      "slug": "Gosuslugi",
       "altNames": [
         "Госуслуги"
-      ],
-      "slug": "Gosuslugi"
+      ]
     },
     {
       "title": "Habbo"
@@ -355,11 +355,10 @@
       "title": "Mozilla"
     },
     {
-      "title": "Murena",
+      "title": "ecloud",
       "altNames": [
-        "eCloud"
-      ],
-      "slug": "ecloud"
+        "Murena"
+      ]
     },
     {
       "title": "MyFRITZ!Net",
@@ -421,14 +420,15 @@
     {
       "titile": "OpenObserve",
       "slug": "open_observe",
-      "altNames":[
+      "altNames": [
         "openobserve.ai",
         "openobserve ai"
       ]
     },
     {
       "title": "okx",
-      "hex": "000000" },
+      "hex": "000000"
+    },
     {
       "title": "Parsec"
     },
@@ -673,32 +673,35 @@
     },
     {
       "title": "Newton",
-      "altNames": ["Newton Crypto"]
+      "altNames": [
+        "Newton Crypto"
+      ]
     },
     {
       "title": "RippleMatch"
     },
     {
-      "title": "T-Mobile ID",
+      "title": "T-Mobile",
       "altNames": [
-        "T-Mobile"
-      ],
-      "slug": "t-mobile"
+        "T-Mobile ID"
+      ]
     },
     {
       "title": "Wealthfront"
     },
     {
       "title": "BinanceUS",
+      "slug": "binance_us",
       "altNames": [
         "Binance US"
-      ],
-      "slug": "binance_us"
+      ]
     },
     {
       "title": "Bethesda Softworks",
-      "altNames": ["Bethesda"],
-      "slug": "bethesda"
+      "slug": "bethesda",
+      "altNames": [
+        "Bethesda"
+      ]
     }
   ]
 }
