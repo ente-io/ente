@@ -106,6 +106,8 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const formik = useFormik<ClusteringOpts>({
         initialValues: {
             method: "hdbscan",
+            minBlur: 99,
+            minScore: 0,
             joinThreshold: 0.7,
             batchSize: 2500,
         },
@@ -276,6 +278,22 @@ const Header: React.FC<HeaderProps> = ({ formik, clusterRes }) => {
                             </MenuItem>
                         ))}
                     </TextField>
+                    <TextField
+                        id="minBlur"
+                        name="minBlur"
+                        label="minBlur"
+                        value={values.minBlur}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        id="minScore"
+                        name="minScore"
+                        label="minScore"
+                        value={values.minScore}
+                        size="small"
+                        onChange={handleChange}
+                    />
                     <TextField
                         id="joinThreshold"
                         name="joinThreshold"
