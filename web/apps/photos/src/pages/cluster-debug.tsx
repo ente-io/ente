@@ -25,16 +25,39 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { useFormik, type FormikProps } from "formik";
+import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { VariableSizeList } from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
-    const { showNavBar } = useContext(AppContext);
+    const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
+
+    const [clusterRes, setClusterRes] = useState<
+        ClusterDebugPageContents | undefined
+    >();
+
+    const cluster = useCallback((opts: ClusteringOpts) => {
+        return new Promise<boolean>((resolve) => {
+            setClusterRes(undefined);
+            startLoading();
+            wipClusterDebugPageContents(opts).then((v) => {
+                setClusterRes(v);
+                finishLoading();
+                resolve(true);
+            });
+        });
+    }, []);
 
     useEffect(() => {
         showNavBar(true);
@@ -45,7 +68,10 @@ export default function ClusterDebug() {
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
-                        <ClusterList width={width} height={height} />
+                        <ClusterList
+                            {...{ width, height, clusterRes }}
+                            onCluster={cluster}
+                        />
                     )}
                 </AutoSizer>
             </Container>
@@ -82,42 +108,28 @@ const Container = styled("div")`
     }
 `;
 
-interface ClusterListProps {
-    height: number;
-    width: number;
-}
-
-const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
-    const { startLoading, finishLoading } = useContext(AppContext);
-
-    const [clusterRes, setClusterRes] = useState<
-        ClusterDebugPageContents | undefined
-    >();
-    const [items, setItems] = useState<Item[]>([]);
-    const listRef = useRef(null);
-
-    const cluster = async (opts: ClusteringOpts) => {
-        setClusterRes(undefined);
-        startLoading();
-        setClusterRes(await wipClusterDebugPageContents(opts));
-        finishLoading();
+type ClusterListProps = Header1Props &
+    Header2Props & {
+        height: number;
+        width: number;
     };
 
-    const formik = useFormik<ClusteringOpts>({
-        initialValues: {
-            method: "hdbscan",
-            minBlur: 99,
-            minScore: 0,
-            joinThreshold: 0.7,
-            batchSize: 2500,
-        },
-        onSubmit: cluster,
-    });
+const ClusterList: React.FC<ClusterListProps> = ({
+    width,
+    height,
+    onCluster,
+    clusterRes,
+}) => {
+    const [items, setItems] = useState<Item[]>([]);
+    const listRef = useRef(null);
 
     const columns = useMemo(
         () => Math.max(Math.floor(getFractionFittableColumns(width)), 4),
         [width],
     );
+
+    const Header1Memo = React.memo(Header1);
+    const Header2Memo = React.memo(Header2);
 
     const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
@@ -130,19 +142,25 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
         listRef.current?.resetAfterIndex(0);
     }, [items]);
 
+    const itemKey = (index: number) =>
+        index === 0 || index === 1 ? `header-${index}` : `item-${index}`;
+
     const getItemSize = (index: number) =>
         index === 0
-            ? 270
-            : Array.isArray(items[index - 1])
-              ? listItemHeight
-              : 36;
+            ? 140
+            : index === 1
+              ? 130
+              : Array.isArray(items[index - 1 - 1])
+                ? listItemHeight
+                : 36;
 
     return (
         <VariableSizeList
             height={height}
             width={width}
+            itemKey={itemKey}
             ref={listRef}
-            itemCount={1 + items.length}
+            itemCount={1 + 1 + items.length}
             itemSize={getItemSize}
             overscanCount={3}
         >
@@ -150,11 +168,18 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                 if (index === 0)
                     return (
                         <div style={style}>
-                            <Header formik={formik} clusterRes={clusterRes} />
+                            <Header1Memo onCluster={onCluster} />
                         </div>
                     );
 
-                const item = items[index - 1];
+                if (index === 1)
+                    return (
+                        <div style={style}>
+                            <Header2Memo clusterRes={clusterRes} />
+                        </div>
+                    );
+
+                const item = items[index - 2];
                 return (
                     <ListItem style={style}>
                         <ListContainer
@@ -251,14 +276,33 @@ const ListItem = styled("div")`
     justify-content: center;
 `;
 
-interface HeaderProps {
-    formik: FormikProps<ClusteringOpts>;
-    clusterRes: ClusterDebugPageContents | undefined;
+interface Header1Props {
+    onCluster: (opts: ClusteringOpts) => Promise<boolean>;
 }
 
-const Header: React.FC<HeaderProps> = ({ formik, clusterRes }) => {
-    const { values, handleSubmit, handleChange, isSubmitting } = formik;
-    const form = (
+const Header1: React.FC<Header1Props> = ({ onCluster }) => {
+    const toFloat = (n: number | string) =>
+        typeof n == "string" ? parseFloat(n) : n;
+    const { values, handleSubmit, handleChange, isSubmitting } =
+        useFormik<ClusteringOpts>({
+            initialValues: {
+                method: "linear",
+                minBlur: 10,
+                minScore: 0.8,
+                joinThreshold: 0.7,
+                batchSize: 12500,
+            },
+            onSubmit: (values) =>
+                onCluster({
+                    method: values.method,
+                    minBlur: toFloat(values.minBlur),
+                    minScore: toFloat(values.minScore),
+                    joinThreshold: toFloat(values.joinThreshold),
+                    batchSize: toFloat(values.batchSize),
+                }),
+        });
+
+    return (
         <form onSubmit={handleSubmit}>
             <Stack>
                 <Typography paddingInline={1}>Parameters</Typography>
@@ -316,38 +360,40 @@ const Header: React.FC<HeaderProps> = ({ formik, clusterRes }) => {
                         Cluster
                     </Button>
                 </Box>
+                {isSubmitting && <Loader />}
             </Stack>
         </form>
     );
+};
 
-    const clusterInfo = clusterRes && (
-        <Stack m={1}>
-            <Typography variant="small" mb={1}>
-                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces in ${(clusterRes.timeTakenMs / 1000).toFixed(0)} seconds. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Showing only top 30 and bottom 30 clusters.
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                For each cluster showing only up to 50 faces, sorted by cosine
-                similarity to highest scoring face in the cluster.
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Below each face is its{" "}
-                <b>blur - score - cosineSimilarity - direction</b>.
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Faces added to the cluster as a result of merging are outlined.
-            </Typography>
-        </Stack>
-    );
+interface Header2Props {
+    clusterRes: ClusterDebugPageContents | undefined;
+}
 
+const Header2: React.FC<Header2Props> = ({ clusterRes }) => {
     return (
-        <div>
-            {form}
-            {isSubmitting && <Loader />}
-            {clusterInfo}
-        </div>
+        clusterRes && (
+            <Stack m={1}>
+                <Typography variant="small" mb={1}>
+                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces in ${(clusterRes.timeTakenMs / 1000).toFixed(0)} seconds. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Showing only top 30 and bottom 30 clusters.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    For each cluster showing only up to 50 faces, sorted by
+                    cosine similarity to highest scoring face in the cluster.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Below each face is its{" "}
+                    <b>blur - score - cosineSimilarity - direction</b>.
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    Faces added to the cluster as a result of merging are
+                    outlined.
+                </Typography>
+            </Stack>
+        )
     );
 };
 
