@@ -25,13 +25,26 @@
       "title": "AscendEX"
     },
     {
+      "title": "Bethesda",
+      "altNames": [
+        "Bethesda Softworks"
+      ]
+    },
+    {
+      "title": "BinanceUS",
+      "slug": "binance_us",
+      "altNames": [
+        "Binance US"
+      ]
+    },
+    {
       "title": "Bitfinex"
     },
     {
       "title": "bitget"
     },
     {
-      "title": "bitget wallet",
+      "titile": "bitget wallet",
       "slug": "bitget_wallet"
     },
     {
@@ -108,16 +121,16 @@
       "hex": "D14633"
     },
     {
-      "title": "Cloudflare"
-    },
-    {
       "title": "CloudAMQP"
     },
     {
-      "title": "ConfigCat"
+      "title": "Cloudflare"
     },
     {
       "title": "CoinDCX"
+    },
+    {
+      "title": "ConfigCat"
     },
     {
       "title": "ConfigCat"
@@ -170,6 +183,12 @@
     {
       "title": "ecitizen kenya",
       "slug": "ecitizen_kenya"
+    },
+    {
+      "title": "ecloud",
+      "altNames": [
+        "Murena"
+      ]
     },
     {
       "title": "ente",
@@ -241,7 +260,7 @@
       "title": "IceDrive"
     },
     {
-      "title": "Infomaniak"
+      "titile": "Infomaniak"
     },
     {
       "title": "ING"
@@ -355,12 +374,6 @@
       "title": "Mozilla"
     },
     {
-      "title": "ecloud",
-      "altNames": [
-        "Murena"
-      ]
-    },
-    {
       "title": "MyFRITZ!Net",
       "slug": "myfritz",
       "altNames": [
@@ -396,6 +409,12 @@
       "title": "NextDNS"
     },
     {
+      "title": "Newton",
+      "altNames": [
+        "Newton Crypto"
+      ]
+    },
+    {
       "title": "ngrok",
       "hex": "858585"
     },
@@ -418,7 +437,7 @@
       "title": "Odido"
     },
     {
-      "title": "OpenObserve",
+      "titile": "OpenObserve",
       "slug": "open_observe",
       "altNames": [
         "openobserve.ai",
@@ -495,6 +514,9 @@
       "hex": "858585"
     },
     {
+      "title": "RippleMatch"
+    },
+    {
       "title": "Rockstar Games",
       "slug": "rockstar_games"
     },
@@ -515,6 +537,9 @@
     },
     {
       "title": "service-bw"
+    },
+    {
+      "title": "Shakepay"
     },
     {
       "title": "SimpleLogin"
@@ -626,8 +651,11 @@
       "title": "Upstox"
     },
     {
-      "title": "Vikunja",
+      "titile": "Vikunja",
       "slug": "vikunja"
+    },
+    {
+      "title": "Wealthfront"
     },
     {
       "title": "Wealthsimple"
@@ -643,13 +671,16 @@
       "title": "Wise"
     },
     {
-      "title": "WYZE"
-    },
-    {
       "title": "WorkOS",
       "altNames": [
         "Work OS"
       ]
+    },
+    {
+      "title": "WYZE"
+    },
+    {
+      "title": "yahoo"
     },
     {
       "title": "Yandex",
@@ -659,48 +690,11 @@
       ]
     },
     {
-      "title": "yahoo"
-    },
-    {
       "title": "YNAB",
       "altNames": [
         "You Need A Budget"
       ],
       "hex": "3B5EDA"
-    },
-    {
-      "title": "Shakepay"
-    },
-    {
-      "title": "Newton",
-      "altNames": [
-        "Newton Crypto"
-      ]
-    },
-    {
-      "title": "RippleMatch"
-    },
-    {
-      "title": "T-Mobile",
-      "altNames": [
-        "T-Mobile ID"
-      ]
-    },
-    {
-      "title": "Wealthfront"
-    },
-    {
-      "title": "BinanceUS",
-      "slug": "binance_us",
-      "altNames": [
-        "Binance US"
-      ]
-    },
-    {
-      "title": "Bethesda",
-      "altNames": [
-        "Bethesda Softworks"
-      ]
     }
   ]
 }
