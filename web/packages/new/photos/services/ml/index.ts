@@ -24,7 +24,7 @@ import {
     type ClusteringOpts,
     type ClusterPreviewFace,
     type FaceCluster,
-} from "./cluster-new";
+} from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import type { Face } from "./face";
@@ -386,7 +386,7 @@ export const wipClusterDebugPageContents = async (
         clusters,
         cgroups,
         unclusteredFaces,
-    } = await worker().then((w) => w.clusterFacesHdb(opts));
+    } = await worker().then((w) => w.clusterFaces(opts));
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));

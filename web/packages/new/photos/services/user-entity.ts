@@ -12,7 +12,7 @@ import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
-import type { CGroup } from "./ml/cluster-new";
+import type { CGroup } from "./ml/cluster";
 import { applyCGroupDiff } from "./ml/db";
 
 /**
