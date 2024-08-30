@@ -73,7 +73,6 @@ const Options: React.FC = () => {
 
 const Container = styled("div")`
     display: block;
-    border: 1px solid tomato;
     flex: 1;
     width: 100%;
     flex-wrap: wrap;
@@ -91,14 +90,16 @@ interface ClusterListProps {
 const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const { startLoading, finishLoading } = useContext(AppContext);
 
+    const [clusteringOpts, setClusteringOpts] = useState<ClusteringOpts>();
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
     const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
 
-     
     const cluster = async (opts: ClusteringOpts) => {
+        setClusteringOpts(opts);
+        setClusterRes(undefined);
         startLoading();
         setClusterRes(await wipClusterDebugPageContents(opts));
         finishLoading();
@@ -141,6 +142,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                     return (
                         <div style={style}>
                             <Header
+                                clusteringOpts={clusteringOpts}
                                 clusterRes={clusterRes}
                                 onCluster={cluster}
                             />
@@ -233,20 +235,20 @@ const ListItem = styled("div")`
 `;
 
 interface HeaderProps {
+    clusteringOpts: ClusteringOpts;
     clusterRes: ClusterDebugPageContents | undefined;
     onCluster: (opts: ClusteringOpts) => Promise<void>;
 }
 
-const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
-    const { values, handleSubmit, handleChange, isSubmitting } =
-        useFormik<ClusteringOpts>({
-            initialValues: {
-                method: "hdbscan",
-                joinThreshold: 0.7,
-                batchSize: 2500,
-            },
-            onSubmit: onCluster,
-        });
+const Header: React.FC<HeaderProps> = ({
+    clusteringOpts,
+    clusterRes,
+    onCluster,
+}) => {
+    const { values, handleSubmit, handleChange, isSubmitting } = useFormik({
+        initialValues: clusteringOpts,
+        onSubmit: onCluster,
+    });
 
     const form = (
         <form onSubmit={handleSubmit}>
