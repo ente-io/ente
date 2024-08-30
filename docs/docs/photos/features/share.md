@@ -57,6 +57,26 @@ If you wish to collect photos from folks who are not Ente, you can do so with
 our Links. Simply tick the box that says "Allow uploads", and anyone who has
 access to the link will be able to add photos to your album.
 
+## Organization
+
+You can favorite items that have been shared with you, and organize them into
+your own albums.
+
+When you perform these operations, Ente will create a hard copy of these items,
+that you fully own. This means, these copied items will count against your
+storage space.
+
+We understand there are use cases where this approach will consume extra space
+(for eg. if you are organizing photos of a family member). We chose hard copies
+as a first version to avoid complexities regarding the ownership of shared
+items, in case the original owner were to delete it from their own library.
+
+We plan to tackle these complexities in the future, by copying a reference to
+the item that was shared, instead of the actual file, so that your storage will
+only get consumed if the original owner deletes it from their library. If this
+sounds useful to you, please participate in [this
+discussion](https://github.com/ente-io/ente/discussions/790).
+
 ## Technical details
 
 More details, including technical aspect about how the sharing features were
