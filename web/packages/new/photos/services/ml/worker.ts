@@ -24,7 +24,7 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import { type ClusteringOpts } from "./cluster";
+import { clusterFaces, type ClusteringOpts } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
     faceIndexes,
@@ -277,7 +277,7 @@ export class MLWorker {
 
     // TODO-Cluster
     async clusterFaces(opts: ClusteringOpts) {
-        return clusterFace(await faceIndexes(), opts);
+        return clusterFaces(await faceIndexes(), opts);
     }
 }
 

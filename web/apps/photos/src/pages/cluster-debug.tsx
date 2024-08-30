@@ -6,7 +6,7 @@ import {
     type ClusterDebugPageContents,
     type ClusterPreviewFaceWithFile,
 } from "@/new/photos/services/ml";
-import { type ClusteringOpts } from "@/new/photos/services/ml/cluster-new";
+import { type ClusteringOpts } from "@/new/photos/services/ml/cluster";
 import { faceDirection } from "@/new/photos/services/ml/face";
 import {
     FlexWrapper,
@@ -297,7 +297,7 @@ const Header: React.FC<HeaderProps> = ({ clusterRes, onCluster }) => {
     const clusterInfo = clusterRes && (
         <Stack m={1}>
             <Typography variant="small" mb={1}>
-                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
+                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces in ${(clusterRes.timeTakenMs / 1000).toFixed(0)} seconds. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
             </Typography>
             <Typography variant="small" color="text.muted">
                 Showing only top 30 and bottom 30 clusters.

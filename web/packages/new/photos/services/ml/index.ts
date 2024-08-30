@@ -365,7 +365,8 @@ export interface ClusterDebugPageContents {
     unclusteredFacesWithFile: {
         face: Face;
         enteFile: EnteFile;
-    };
+    }[];
+    timeTakenMs: number;
 }
 
 export const wipClusterDebugPageContents = async (
@@ -378,7 +379,6 @@ export const wipClusterDebugPageContents = async (
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
     const {
         clusteredFaceCount,
         unclusteredFaceCount,
@@ -386,6 +386,7 @@ export const wipClusterDebugPageContents = async (
         clusters,
         cgroups,
         unclusteredFaces,
+        timeTakenMs,
     } = await worker().then((w) => w.clusterFaces(opts));
 
     const localFiles = await getAllLocalFiles();
@@ -396,10 +397,10 @@ export const wipClusterDebugPageContents = async (
     const clusterPreviewsWithFile = clusterPreviews.map(
         ({ clusterSize, faces }) => ({
             clusterSize,
-            faces: faces.map(({ face, cosineSimilarity }) => ({
+            faces: faces.map(({ face, ...rest }) => ({
                 face,
                 enteFile: fileForFace(face),
-                cosineSimilarity,
+                ...rest,
             })),
         }),
     );
@@ -445,6 +446,7 @@ export const wipClusterDebugPageContents = async (
         clusters,
         clusterPreviewsWithFile,
         unclusteredFacesWithFile,
+        timeTakenMs,
     };
 };
 
