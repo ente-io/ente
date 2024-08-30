@@ -249,6 +249,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "با کلیک بر روی ورود به سیستم، من با <u-terms>شرایط خدمات</u-terms> و <u-policy>سیاست حفظ حریم خصوصی</u-policy> موافقم"),
         "logout": MessageLookupByLibrary.simpleMessage("خروج"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "manage": MessageLookupByLibrary.simpleMessage("مدیریت"),
         "manageFamily": MessageLookupByLibrary.simpleMessage("مدیریت خانواده"),
         "manageLink": MessageLookupByLibrary.simpleMessage("مدیریت پیوند"),

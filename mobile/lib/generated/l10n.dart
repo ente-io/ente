@@ -170,10 +170,10 @@ class S {
     );
   }
 
-  /// `Yes, I want to permanently delete this account and all its data.`
+  /// `Yes, I want to permanently delete this account and its data across all apps.`
   String get confirmDeletePrompt {
     return Intl.message(
-      'Yes, I want to permanently delete this account and all its data.',
+      'Yes, I want to permanently delete this account and its data across all apps.',
       name: 'confirmDeletePrompt',
       desc: '',
       args: [],
@@ -9490,6 +9490,26 @@ class S {
     return Intl.message(
       'Please authenticate to view your passkey',
       name: 'authToViewPasskey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loop video on`
+  String get loopVideoOn {
+    return Intl.message(
+      'Loop video on',
+      name: 'loopVideoOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loop video off`
+  String get loopVideoOff {
+    return Intl.message(
+      'Loop video off',
+      name: 'loopVideoOff',
       desc: '',
       args: [],
     );

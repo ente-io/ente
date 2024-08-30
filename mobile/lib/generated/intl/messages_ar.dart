@@ -41,6 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مفتاح الاسترداد غير صحيح"),
         "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
             "عنوان البريد الإلكتروني غير صالح"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

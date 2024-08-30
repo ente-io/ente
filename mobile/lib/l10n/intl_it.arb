@@ -1103,5 +1103,7 @@
   "selectALocation": "Seleziona un luogo",
   "selectALocationFirst": "Scegli prima una posizione",
   "changeLocationOfSelectedItems": "Cambiare la posizione degli elementi selezionati?",
-  "editsToLocationWillOnlyBeSeenWithinEnte": "Le modifiche alla posizione saranno visibili solo all'interno di Ente"
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Le modifiche alla posizione saranno visibili solo all'interno di Ente",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

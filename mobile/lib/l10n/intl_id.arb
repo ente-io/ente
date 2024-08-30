@@ -1065,5 +1065,7 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

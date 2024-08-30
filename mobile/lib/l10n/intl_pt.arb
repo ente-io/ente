@@ -1315,5 +1315,7 @@
   "cl_video_player_description": "Apresentando um novo reprodutor de vídeo, com melhores controles de reprodução e suporte para vídeos HDR.",
   "appLockDescriptions": "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio do app, configure uma senha no dispositivo ou tela de bloqueio nas configurações do sistema.",
-  "authToViewPasskey": "Por favor, autentique-se para ver sua chave de acesso"
+  "authToViewPasskey": "Por favor, autentique-se para ver sua chave de acesso",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

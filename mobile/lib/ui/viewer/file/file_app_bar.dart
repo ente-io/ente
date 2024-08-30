@@ -334,8 +334,8 @@ class FileAppBarState extends State<FileAppBar> {
                 padding: EdgeInsets.all(8),
               ),
               shouldLoopVideo
-                  ? const Text("Loop video on")
-                  : const Text("Loop video off"),
+                  ? Text(S.of(context).loopVideoOn)
+                  : Text(S.of(context).loopVideoOff),
             ],
           ),
         ),

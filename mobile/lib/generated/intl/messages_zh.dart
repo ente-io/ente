@@ -825,6 +825,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("长按电子邮件以验证端到端加密。"),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("长按一个项目来全屏查看"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("设备丢失？"),
         "machineLearning": MessageLookupByLibrary.simpleMessage("机器学习"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("魔法搜索"),

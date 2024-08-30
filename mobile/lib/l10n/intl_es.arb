@@ -1287,5 +1287,7 @@
   "removePublicLinks": "Eliminar enlaces públicos",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Esto eliminará los enlaces públicos de todos los enlaces rápidos seleccionados.",
   "guestView": "Vista de invitado",
-  "guestViewEnablePreSteps": "Para habilitar la vista de invitados, por favor configure el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de su sistema."
+  "guestViewEnablePreSteps": "Para habilitar la vista de invitados, por favor configure el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de su sistema.",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

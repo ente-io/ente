@@ -1313,5 +1313,7 @@
   "cl_video_player_title": "Videospeler",
   "cl_video_player_description": "Een verfrissende nieuwe videospeler, met betere afspeelknoppen en ondersteuning voor HDR-video's.",
   "appLockDescriptions": "Kies tussen het standaard vergrendelscherm van uw apparaat en een aangepast vergrendelscherm met een pincode of wachtwoord.",
-  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

@@ -1315,5 +1315,7 @@
   "cl_video_player_description": "推出全新的视频播放器，提供更好的播放控制并添加了对 HDR 视频的支持。",
   "appLockDescriptions": "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁。",
-  "authToViewPasskey": "请验证身份以查看您的通行密钥"
+  "authToViewPasskey": "请验证身份以查看您的通行密钥",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

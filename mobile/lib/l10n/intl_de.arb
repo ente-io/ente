@@ -1314,5 +1314,7 @@
   "cl_video_player_description": "Einführung eines neuen Video-Players mit besserer Wiedergabesteuerung und Unterstützung für HDR-Videos.",
   "appLockDescriptions": "Wähle zwischen dem Standard-Sperrbildschirm deines Gerätes und einem eigenen Sperrbildschirm mit PIN oder Passwort.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfiguriere bitte den Gerätepasscode oder die Bildschirmsperre in den Systemeinstellungen.",
-  "authToViewPasskey": "Bitte authentifizieren, um deinen Passkey zu sehen"
+  "authToViewPasskey": "Bitte authentifizieren, um deinen Passkey zu sehen",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

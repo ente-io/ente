@@ -297,5 +297,7 @@
     "description": "Label for the map view"
   },
   "maps": "แผนที่",
-  "enableMaps": "เปิดใช้งานแผนที่"
+  "enableMaps": "เปิดใช้งานแผนที่",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }
