@@ -340,13 +340,17 @@ export const clusterFaces = (
         });
     }
 
+    const clusteredFaceCount = clusterIDForFaceID.size;
+    const unclusteredFaceCount = faces.length - clusteredFaceCount;
+
+    const unclusteredFaces = faces.filter(
+        ({ faceID }) => !clusterIDForFaceID.has(faceID),
+    );
+
     const timeTakenMs = Date.now() - t;
     log.info(
         `Clustered ${faces.length} faces into ${clusters.length} clusters, with ${faces.length - clusterIDForFaceID.size} faces remaining unclustered (${timeTakenMs} ms)`,
     );
-
-    const clusteredFaceCount = clusterIDForFaceID.size;
-    const unclusteredFaceCount = faces.length - clusteredFaceCount;
 
     return {
         clusteredFaceCount,
@@ -354,7 +358,7 @@ export const clusterFaces = (
         clusterPreviews,
         clusters: sortedClusters,
         cgroups,
-        unclusteredFaces: [],
+        unclusteredFaces: unclusteredFaces,
         timeTakenMs,
     };
 };

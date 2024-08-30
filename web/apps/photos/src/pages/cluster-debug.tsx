@@ -4,10 +4,10 @@ import {
     faceCrop,
     wipClusterDebugPageContents,
     type ClusterDebugPageContents,
-    type ClusterPreviewFaceWithFile,
 } from "@/new/photos/services/ml";
 import { type ClusteringOpts } from "@/new/photos/services/ml/cluster";
-import { faceDirection } from "@/new/photos/services/ml/face";
+import { faceDirection, type Face } from "@/new/photos/services/ml/face";
+import type { EnteFile } from "@/new/photos/types/file";
 import {
     FlexWrapper,
     FluidContainer,
@@ -90,7 +90,11 @@ interface ClusterListProps {
 const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const { startLoading, finishLoading } = useContext(AppContext);
 
-    const [clusteringOpts, setClusteringOpts] = useState<ClusteringOpts>();
+    const [clusteringOpts, setClusteringOpts] = useState<ClusteringOpts>({
+        method: "hdbscan",
+        joinThreshold: 0.7,
+        batchSize: 2500,
+    });
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
@@ -158,7 +162,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                         >
                             {!Array.isArray(item) ? (
                                 <LabelContainer span={columns}>
-                                    {`cluster size ${item.toFixed(2)}`}
+                                    {item}
                                 </LabelContainer>
                             ) : (
                                 item.map((f, i) => (
@@ -176,24 +180,36 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     );
 };
 
-type Item = number | ClusterPreviewFaceWithFile[];
+type Item = string | FaceWithFile[];
 
 const itemsFromClusterRes = (
     clusterRes: ClusterDebugPageContents,
     columns: number,
 ) => {
-    const { clusterPreviewsWithFile } = clusterRes;
+    const { clusterPreviewsWithFile, unclusteredFacesWithFile } = clusterRes;
 
     const result: Item[] = [];
     for (let index = 0; index < clusterPreviewsWithFile.length; index++) {
         const { clusterSize, faces } = clusterPreviewsWithFile[index];
-        result.push(clusterSize);
+        result.push(`cluster size ${clusterSize.toFixed(2)}`);
         let lastIndex = 0;
         while (lastIndex < faces.length) {
             result.push(faces.slice(lastIndex, lastIndex + columns));
             lastIndex += columns;
         }
     }
+
+    if (unclusteredFacesWithFile.length) {
+        result.push(`•• unclustered faces ${unclusteredFacesWithFile.length}`);
+        let lastIndex = 0;
+        while (lastIndex < unclusteredFacesWithFile.length) {
+            result.push(
+                unclusteredFacesWithFile.slice(lastIndex, lastIndex + columns),
+            );
+            lastIndex += columns;
+        }
+    }
+
     return result;
 };
 
@@ -334,7 +350,14 @@ const Loader = () => (
 );
 
 interface FaceItemProps {
-    faceWithFile: ClusterPreviewFaceWithFile;
+    faceWithFile: FaceWithFile;
+}
+
+interface FaceWithFile {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity?: number;
+    wasMerged?: boolean;
 }
 
 const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
@@ -384,9 +407,11 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
                 <Typography variant="small" color="text.muted">
                     {`s${face.score.toFixed(1)}`}
                 </Typography>
-                <Typography variant="small" color="text.muted">
-                    {`c${cosineSimilarity.toFixed(1)}`}
-                </Typography>
+                {cosineSimilarity && (
+                    <Typography variant="small" color="text.muted">
+                        {`c${cosineSimilarity.toFixed(1)}`}
+                    </Typography>
+                )}
                 <Typography variant="small" color="text.muted">
                     {`d${d}`}
                 </Typography>
