@@ -25,7 +25,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { useFormik } from "formik";
+import { useFormik, type Formik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -90,11 +90,6 @@ interface ClusterListProps {
 const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const { startLoading, finishLoading } = useContext(AppContext);
 
-    const [clusteringOpts, setClusteringOpts] = useState<ClusteringOpts>({
-        method: "hdbscan",
-        joinThreshold: 0.7,
-        batchSize: 2500,
-    });
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
@@ -102,12 +97,20 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
     const listRef = useRef(null);
 
     const cluster = async (opts: ClusteringOpts) => {
-        setClusteringOpts(opts);
         setClusterRes(undefined);
         startLoading();
         setClusterRes(await wipClusterDebugPageContents(opts));
         finishLoading();
     };
+
+    const formik = useFormik<ClusteringOpts>({
+        initialValues: {
+            method: "hdbscan",
+            joinThreshold: 0.7,
+            batchSize: 2500,
+        },
+        onSubmit: cluster,
+    });
 
     const columns = useMemo(
         () => Math.max(Math.floor(getFractionFittableColumns(width)), 4),
@@ -145,11 +148,7 @@ const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
                 if (index === 0)
                     return (
                         <div style={style}>
-                            <Header
-                                clusteringOpts={clusteringOpts}
-                                clusterRes={clusterRes}
-                                onCluster={cluster}
-                            />
+                            <Header formik={formik} clusterRes={clusterRes} />
                         </div>
                     );
 
@@ -251,21 +250,12 @@ const ListItem = styled("div")`
 `;
 
 interface HeaderProps {
-    clusteringOpts: ClusteringOpts;
+    formik: Formik<ClusteringOpts>;
     clusterRes: ClusterDebugPageContents | undefined;
-    onCluster: (opts: ClusteringOpts) => Promise<void>;
 }
 
-const Header: React.FC<HeaderProps> = ({
-    clusteringOpts,
-    clusterRes,
-    onCluster,
-}) => {
-    const { values, handleSubmit, handleChange, isSubmitting } = useFormik({
-        initialValues: clusteringOpts,
-        onSubmit: onCluster,
-    });
-
+const Header: React.FC<HeaderProps> = ({ formik, clusterRes }) => {
+    const { values, handleSubmit, handleChange, isSubmitting } = formik;
     const form = (
         <form onSubmit={handleSubmit}>
             <Stack>

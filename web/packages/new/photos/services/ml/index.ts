@@ -374,7 +374,7 @@ export const wipClusterDebugPageContents = async (
 ): Promise<ClusterDebugPageContents> => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    log.info("clustering");
+    log.info("clustering", opts);
     _wip_isClustering = true;
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
