@@ -43,12 +43,20 @@ import { VariableSizeList } from "react-window";
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
 
+    const [clusteringOptions, setClusteringOptions] = useState<ClusteringOpts>({
+        method: "linear",
+        minBlur: 10,
+        minScore: 0.8,
+        joinThreshold: 0.7,
+        batchSize: 12500,
+    });
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
 
     const cluster = useCallback((opts: ClusteringOpts) => {
         return new Promise<boolean>((resolve) => {
+            setClusteringOptions(opts);
             setClusterRes(undefined);
             startLoading();
             wipClusterDebugPageContents(opts).then((v) => {
@@ -69,8 +77,13 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList
-                            {...{ width, height, clusterRes }}
-                            onCluster={cluster}
+                            {...{
+                                width,
+                                height,
+                                clusteringOptions,
+                                clusterRes,
+                                onCluster: cluster,
+                            }}
                         />
                     )}
                 </AutoSizer>
@@ -117,6 +130,7 @@ type ClusterListProps = Header1Props &
 const ClusterList: React.FC<ClusterListProps> = ({
     width,
     height,
+    clusteringOptions,
     onCluster,
     clusterRes,
 }) => {
@@ -168,7 +182,9 @@ const ClusterList: React.FC<ClusterListProps> = ({
                 if (index === 0)
                     return (
                         <div style={style}>
-                            <Header1Memo onCluster={onCluster} />
+                            <Header1Memo
+                                {...{ clusteringOptions, onCluster }}
+                            />
                         </div>
                     );
 
@@ -277,21 +293,16 @@ const ListItem = styled("div")`
 `;
 
 interface Header1Props {
+    clusteringOptions: ClusteringOpts;
     onCluster: (opts: ClusteringOpts) => Promise<boolean>;
 }
 
-const Header1: React.FC<Header1Props> = ({ onCluster }) => {
+const Header1: React.FC<Header1Props> = ({ clusteringOptions, onCluster }) => {
     const toFloat = (n: number | string) =>
         typeof n == "string" ? parseFloat(n) : n;
     const { values, handleSubmit, handleChange, isSubmitting } =
         useFormik<ClusteringOpts>({
-            initialValues: {
-                method: "linear",
-                minBlur: 10,
-                minScore: 0.8,
-                joinThreshold: 0.7,
-                batchSize: 12500,
-            },
+            initialValues: clusteringOptions,
             onSubmit: (values) =>
                 onCluster({
                     method: values.method,
