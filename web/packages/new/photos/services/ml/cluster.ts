@@ -234,6 +234,10 @@ export const clusterFaces = (
         // We need to ensure we don't change any of the existing cluster IDs,
         // since these might be existing clusters we got from remote.
 
+        // Create a copy so that we don't modify existing clusters as we're
+        // iterating.
+        const existingClusters = [...clusters];
+
         for (const newCluster of embeddingClusters) {
             // Find the existing cluster whose (arbitrarily chosen) first face
             // is the nearest neighbour of the (arbitrarily chosen) first face
@@ -243,7 +247,7 @@ export const clusterFaces = (
 
             let nnCluster: FaceCluster | undefined;
             let nnCosineSimilarity = 0;
-            for (const existingCluster of clusters) {
+            for (const existingCluster of existingClusters) {
                 const existingFace = firstFaceOfCluster(existingCluster);
 
                 // The vectors are already normalized, so we can directly use their
