@@ -111,8 +111,8 @@ class _CodeWidgetState extends State<CodeWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (widget.code.type.isTOTPCompatible)
-                CodeTimerProgress(
-                  period: widget.code.period,
+                CodeTimerProgressCache.getCachedWidget(
+                  widget.code.period,
                 ),
               const SizedBox(height: 28),
               Row(
