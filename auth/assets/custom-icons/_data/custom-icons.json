@@ -25,6 +25,14 @@
       "title": "AscendEX"
     },
     {
+      "title": "Battle.net",
+      "slug": "battlenet",
+      "altNames": [
+        "Battle net",
+        "Blizzard"
+      ]
+    },
+    {
       "title": "Bethesda",
       "altNames": [
         "Bethesda Softworks"
