@@ -2,10 +2,8 @@ import { SelectionBar } from "@/base/components/Navbar";
 import { pt } from "@/base/i18n";
 import {
     faceCrop,
-    wipClusterDebugPageContents,
     type ClusterDebugPageContents,
     type ClusterPreviewFaceWF,
-    type ClusterPreviewWF,
 } from "@/new/photos/services/ml";
 import { faceDirection } from "@/new/photos/services/ml/face";
 import {
@@ -24,56 +22,18 @@ import { VariableSizeList } from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
-    const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
-    const [clusterRes, setClusterRes] = useState<
-        ClusterDebugPageContents | undefined
-    >();
+    const { showNavBar } = useContext(AppContext);
 
     useEffect(() => {
         showNavBar(true);
-        cluster();
     }, []);
 
-    const cluster = async () => {
-        startLoading();
-        setClusterRes(await wipClusterDebugPageContents());
-        finishLoading();
-    };
-
-    if (!clusterRes) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
     return (
         <>
-            <Stack m={1}>
-                <Typography variant="small" mb={1}>
-                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Showing only top 30 and bottom 30 clusters.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    For each cluster showing only up to 50 faces, sorted by
-                    cosine similarity to highest scoring face in the cluster.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Below each face is its{" "}
-                    <b>blur - score - cosineSimilarity - direction</b>
-                </Typography>
-            </Stack>
-            <hr />
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
-                        <ClusterPhotoList
-                            width={width}
-                            height={height}
-                            clusterRes={clusterRes}
-                        />
+                        <ClusterList width={width} height={height} />
                     )}
                 </AutoSizer>
             </Container>
@@ -101,6 +61,7 @@ const Options: React.FC = () => {
 
 const Container = styled("div")`
     display: block;
+    border: 1px solid tomato;
     flex: 1;
     width: 100%;
     flex-wrap: wrap;
@@ -110,20 +71,35 @@ const Container = styled("div")`
     }
 `;
 
-interface ClusterPhotoListProps {
+interface ClusterListProps {
     height: number;
     width: number;
-    clusterRes: ClusterDebugPageContents;
 }
 
-const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
-    height,
-    width,
-    clusterRes,
-}) => {
-    const { clusterPreviewWFs, clusterIDForFaceID } = clusterRes;
-    const [itemList, setItemList] = useState<ItemListItem[]>([]);
+const ClusterList: React.FC<ClusterListProps> = ({ height, width }) => {
+    const { startLoading, finishLoading } = useContext(AppContext);
+
+    const [clusterRes, setClusterRes] = useState<
+        ClusterDebugPageContents | undefined
+    >();
+    const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const cluster = async () => {
+        startLoading();
+        // setClusterRes(await wipClusterDebugPageContents());
+        setClusterRes({
+            clusteredCount: 1,
+            unclusteredCount: 2,
+            clusterPreviewWFs: Array(100)
+                .fill(0)
+                .map(() => ({ clusterSize: 0, faces: [] })),
+            clusters: [],
+            clusterIDForFaceID: new Map(),
+        });
+        finishLoading();
+    };
 
     const columns = useMemo(
         () => Math.max(Math.floor(getFractionFittableColumns(width)), 4),
@@ -134,36 +110,40 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
 
     useEffect(() => {
-        setItemList(itemListFromClusterPreviewWFs(clusterPreviewWFs, columns));
-    }, [columns, clusterPreviewWFs]);
+        setItems(clusterRes ? itemsFromClusterRes(clusterRes, columns) : []);
+    }, [columns, clusterRes]);
 
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
-    }, [itemList]);
+    }, [items]);
 
-    const getItemSize = (i: number) =>
-        Array.isArray(itemList[i]) ? listItemHeight : 36;
+    const clusterIDForFaceID = clusterRes?.clusterIDForFaceID;
 
-    const generateKey = (i: number) =>
-        Array.isArray(itemList[i])
-            ? `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`
-            : `${itemList[i]}-${i}`;
+    const getItemSize = (index: number) =>
+        index === 0
+            ? 100
+            : Array.isArray(items[index - 1])
+              ? listItemHeight
+              : 36;
 
     return (
         <VariableSizeList
-            itemData={{ itemList, columns, shrinkRatio }}
-            ref={listRef}
-            itemSize={getItemSize}
             height={height}
             width={width}
-            itemCount={itemList.length}
-            itemKey={generateKey}
+            ref={listRef}
+            itemCount={1 + items.length}
+            itemSize={getItemSize}
             overscanCount={3}
-            useIsScrolling
         >
-            {({ index, style, data }) => {
-                const { itemList, columns, shrinkRatio } = data;
-                const item = itemList[index];
+            {({ index, style }) => {
+                if (index === 0)
+                    return (
+                        <div style={style}>
+                            <Header clusterRes={clusterRes} />
+                        </div>
+                    );
+
+                const item = items[index - 1];
                 return (
                     <ListItem style={style}>
                         <ListContainer
@@ -190,14 +170,15 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     );
 };
 
-// type ItemListItem = Face | FaceFileNeighbour[];
-type ItemListItem = number | ClusterPreviewFaceWF[];
+type Item = number | ClusterPreviewFaceWF[];
 
-const itemListFromClusterPreviewWFs = (
-    clusterPreviewWFs: ClusterPreviewWF[],
+const itemsFromClusterRes = (
+    clusterRes: ClusterDebugPageContents,
     columns: number,
 ) => {
-    const result: ItemListItem[] = [];
+    const { clusterPreviewWFs } = clusterRes;
+
+    const result: Item[] = [];
     for (let index = 0; index < clusterPreviewWFs.length; index++) {
         const { clusterSize, faces } = clusterPreviewWFs[index];
         result.push(clusterSize);
@@ -219,9 +200,69 @@ const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
 
+const ListContainer = styled(Box, {
+    shouldForwardProp: (propName) => propName != "shrinkRatio",
+})<{
+    columns: number;
+    shrinkRatio: number;
+}>`
+    display: grid;
+    grid-template-columns: ${({ columns, shrinkRatio }) =>
+        `repeat(${columns},${120 * shrinkRatio}px)`};
+    grid-column-gap: 4px;
+    width: 100%;
+    padding: 4px;
+`;
+
+const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
+    grid-column: span ${(props) => props.span};
+`;
+
+const LabelContainer = styled(ListItemContainer)`
+    color: ${({ theme }) => theme.colors.text.muted};
+    height: 32px;
+`;
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
+`;
+
+interface HeaderProps {
+    clusterRes: ClusterDebugPageContents | undefined;
+}
+
+const Header: React.FC<HeaderProps> = ({ clusterRes }) => {
+    if (!clusterRes) return <Loader />;
+    return (
+        <Stack m={1}>
+            <Typography variant="small" mb={1}>
+                {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredCount} faces. ${clusterRes.unclusteredCount} unclustered faces.`}
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Showing only top 30 and bottom 30 clusters.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                For each cluster showing only up to 50 faces, sorted by cosine
+                similarity to highest scoring face in the cluster.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Below each face is its{" "}
+                <b>blur - score - cosineSimilarity - direction</b>
+            </Typography>
+        </Stack>
+    );
+};
+
+const Loader = () => (
+    <VerticallyCentered>
+        <EnteSpinner />
+    </VerticallyCentered>
+);
+
 interface FaceItemProps {
     faceWF: ClusterPreviewFaceWF;
-    clusterIDForFaceID: Map<string, string>;
+    clusterIDForFaceID: Map<string, string> | undefined;
 }
 
 const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
@@ -250,7 +291,7 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWF, clusterIDForFaceID }) => {
     return (
         <FaceChip
             style={{
-                outline: outlineForCluster(clusterIDForFaceID.get(faceID)),
+                outline: outlineForCluster(clusterIDForFaceID?.get(faceID)),
                 outlineOffset: "2px",
             }}
         >
@@ -292,31 +333,3 @@ const outlineForCluster = (clusterID: string | undefined) =>
 
 const hForID = (id: string) =>
     ([...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 10) * 36;
-
-const ListContainer = styled(Box, {
-    shouldForwardProp: (propName) => propName != "shrinkRatio",
-})<{
-    columns: number;
-    shrinkRatio: number;
-}>`
-    display: grid;
-    grid-template-columns: ${({ columns, shrinkRatio }) =>
-        `repeat(${columns},${120 * shrinkRatio}px)`};
-    grid-column-gap: 4px;
-    width: 100%;
-    padding: 4px;
-`;
-
-const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
-    grid-column: span ${(props) => props.span};
-`;
-
-const LabelContainer = styled(ListItemContainer)`
-    color: ${({ theme }) => theme.colors.text.muted};
-    height: 32px;
-`;
-
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
-`;
