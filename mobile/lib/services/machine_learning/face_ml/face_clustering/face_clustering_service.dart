@@ -8,6 +8,7 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
@@ -118,6 +119,8 @@ class FaceClusteringService {
 
   /// The main execution function of the isolate.
   static void _isolateMain(SendPort mainSendPort) async {
+    Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
+    Logger.root.onRecord.listen(SuperLogging.onLogRecord);
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
 
@@ -407,6 +410,8 @@ class FaceClusteringService {
   }
 }
 
+final _logger = Logger("FaceLinearClustering");
+
 ClusteringResult _runLinearClustering(Map args) {
   // final input = args['input'] as Map<String, (int?, Uint8List)>;
   final input = args['input'] as Set<FaceDbInfoForClustering>;
@@ -419,8 +424,8 @@ ClusteringResult _runLinearClustering(Map args) {
   final oldClusterSummaries =
       args['oldClusterSummaries'] as Map<String, (Uint8List, int)>?;
 
-  log(
-    "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${input.length} faces",
+  _logger.info(
+    "Copied to isolate ${input.length} faces",
   );
 
   // Organize everything into a list of FaceInfo objects
@@ -470,13 +475,10 @@ ClusteringResult _runLinearClustering(Map args) {
     }
   }
   final alreadyClusteredCount = facesWithClusterID.length;
+  final newToClusterCount = facesWithoutClusterID.length;
   final sortedFaceInfos = <FaceInfo>[];
   sortedFaceInfos.addAll(facesWithClusterID);
   sortedFaceInfos.addAll(facesWithoutClusterID);
-
-  log(
-    "[ClusterIsolate] ${DateTime.now()} Clustering ${facesWithoutClusterID.length} new faces without clusterId, and $alreadyClusteredCount faces with clusterId",
-  );
 
   // Make sure the first face has a clusterId
   final int totalFaces = sortedFaceInfos.length;
@@ -487,8 +489,8 @@ ClusteringResult _runLinearClustering(Map args) {
   }
 
   // Start actual clustering
-  log(
-    "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces in total in this round ${offset != null ? "on top of ${offset + facesWithClusterID.length} earlier processed faces" : ""}",
+  _logger.info(
+    "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces ($newToClusterCount new, $alreadyClusteredCount already done) in total in this round ${offset != null ? "on top of ${offset + facesWithClusterID.length} earlier processed faces" : ""}",
   );
   // set current epoch time as clusterID
   String clusterID = newClusterID();
@@ -517,7 +519,7 @@ ClusteringResult _runLinearClustering(Map args) {
       thresholdValue = distanceThreshold;
     }
     if (i % 250 == 0) {
-      log("[ClusterIsolate] ${DateTime.now()} Processed ${offset != null ? i + offset : i} faces");
+      _logger.info("Processed ${offset != null ? i + offset : i} faces");
     }
     // WARNING: The loop below is now O(n^2) so be very careful with anything you put in there!
     for (int j = i - 1; j >= 0; j--) {
@@ -536,8 +538,8 @@ ClusteringResult _runLinearClustering(Map args) {
     if (closestDistance < thresholdValue) {
       if (sortedFaceInfos[closestIdx].clusterId == null) {
         // Ideally this should never happen, but just in case log it
-        log(
-          " [ClusterIsolate] [WARNING] ${DateTime.now()} Found new cluster $clusterID",
+        _logger.severe(
+          "Found new cluster $clusterID, but closest face has no clusterId",
         );
         clusterID = newClusterID();
         sortedFaceInfos[closestIdx].clusterId = clusterID;
@@ -568,12 +570,12 @@ ClusteringResult _runLinearClustering(Map args) {
   }
 
   stopwatchClustering.stop();
-  log(
-    ' [ClusterIsolate] ${DateTime.now()} Clustering for ${sortedFaceInfos.length} embeddings executed in ${stopwatchClustering.elapsedMilliseconds}ms',
+  _logger.info(
+    'Clustering for ${sortedFaceInfos.length} embeddings executed in ${stopwatchClustering.elapsedMilliseconds}ms',
   );
   if (useDynamicThreshold) {
-    log(
-      "[ClusterIsolate] ${DateTime.now()} Dynamic thresholding: $dynamicThresholdCount faces had a low face score or low blur clarity",
+    _logger.info(
+      "Dynamic thresholding: $dynamicThresholdCount faces had a low face score or low blur clarity",
     );
   }
 
@@ -838,8 +840,8 @@ Map<String, (Uint8List, int)> _updateClusterSummaries({
       );
     }
   }
-  log(
-    "[ClusterIsolate] ${DateTime.now()} Calculated cluster summaries in ${DateTime.now().difference(calcSummariesStart).inMilliseconds}ms",
+  _logger.info(
+    "Calculated cluster summaries in ${DateTime.now().difference(calcSummariesStart).inMilliseconds}ms",
   );
 
   return newClusterSummaries;
