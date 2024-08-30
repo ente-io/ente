@@ -326,9 +326,27 @@ class FileAppBarState extends State<FileAppBar> {
           value: 7,
           child: Row(
             children: [
-              Icon(
-                Icons.repeat_rounded,
-                color: Theme.of(context).iconTheme.color,
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(
+                    Icons.loop_rounded,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
+                  shouldLoopVideo
+                      ? const SizedBox.shrink()
+                      : Transform.rotate(
+                          angle: (3.14 / 4) * 1,
+                          child: Container(
+                            width: 2,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).iconTheme.color,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                        ),
+                ],
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
