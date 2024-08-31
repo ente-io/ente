@@ -4,6 +4,7 @@
 
 -   Improved date search, including support for day of week and hour of day.
 -   Fix video thumbnail generation and upload on Intel macOS.
+-   Club a photo and video into a live photo only if both are within 2 minutes.
 -   .
 
 ## v1.7.3
