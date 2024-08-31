@@ -135,7 +135,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                     sx={{ ".MuiFormControl-root": { flex: "1" } }}
                 >
                     <TextField
-                        id="method"
                         name="method"
                         label="method"
                         value={values.method}
@@ -150,7 +149,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         ))}
                     </TextField>
                     <TextField
-                        id="minBlur"
                         name="minBlur"
                         label="minBlur"
                         value={values.minBlur}
@@ -158,7 +156,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         onChange={handleChange}
                     />
                     <TextField
-                        id="minScore"
                         name="minScore"
                         label="minScore"
                         value={values.minScore}
@@ -166,7 +163,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         onChange={handleChange}
                     />
                     <TextField
-                        id="joinThreshold"
                         name="joinThreshold"
                         label="joinThreshold"
                         value={values.joinThreshold}
@@ -174,7 +170,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         onChange={handleChange}
                     />
                     <TextField
-                        id="batchSize"
                         name="batchSize"
                         label="batchSize"
                         value={values.batchSize}
