@@ -23,9 +23,7 @@ export default function AddCollectionButton({ showNextModal }: Iprops) {
             onClick={() => showNextModal()}
             coverFile={null}
         >
-            <AllCollectionTileText>
-                {t("CREATE_COLLECTION")}
-            </AllCollectionTileText>
+            <AllCollectionTileText>{t("create_albums")}</AllCollectionTileText>
             <ImageContainer>
                 <CenteredFlex>+</CenteredFlex>
             </ImageContainer>
