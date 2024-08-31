@@ -37,13 +37,11 @@ import React, {
     useState,
 } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { VariableSizeList } from "react-window";
+import { areEqual, VariableSizeList } from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
-
-    const Header1Memo = React.memo(Header1);
 
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
@@ -52,7 +50,7 @@ export default function ClusterDebug() {
     const cluster = useCallback((opts: ClusteringOpts) => {
         return new Promise<boolean>((resolve) => {
             startLoading();
-            // setClusterRes(undefined);
+            setClusterRes(undefined);
             wipClusterDebugPageContents(opts).then((res) => {
                 setClusterRes(res);
                 finishLoading();
@@ -73,7 +71,9 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <Header1Memo onCluster={cluster} />
+                            <Row>
+                                <Header1Memo onCluster={cluster} />
+                            </Row>
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -127,15 +127,6 @@ const Header1: React.FC<Header1Props> = ({ onCluster }) => {
                 joinThreshold: 0.7,
                 batchSize: 12500,
             },
-            // onSubmit1: (values) => {
-            //     console.log("onSubmit");
-            //     return new Promise((resolve) => {
-            //         console.log("onSubmit will resolve promise", {
-            //             isSubmitting,
-            //         });
-            //         setTimeout(resolve, 2000);
-            //     });
-            // },
             onSubmit: (values) =>
                 onCluster({
                     method: values.method,
@@ -212,6 +203,21 @@ const Header1: React.FC<Header1Props> = ({ onCluster }) => {
     );
 };
 
+const Header1Memo = React.memo(Header1);
+
+const Row = React.memo(
+    (props) => {
+        const { style, children } = props;
+        console.log("Rendering row", props);
+        return <div style={style}>{children}</div>;
+    },
+    // areEqual,
+    (...args) => {
+        console.log("areEqual called", args);
+        return true;
+    },
+);
+
 type ClusterListProps = Header2Props & {
     height: number;
     width: number;
@@ -231,8 +237,6 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
         [width],
     );
 
-    const Header2Memo = React.memo(Header2);
-
     const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
 
@@ -243,9 +247,6 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
     }, [items]);
-
-    const itemKey = (index: number) =>
-        index === 0 || index === 1 ? `header-${index}` : `item-${index}`;
 
     const getItemSize = (index: number) =>
         index === 0
@@ -262,48 +263,44 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
         <VariableSizeList
             height={height}
             width={width}
-            itemKey={itemKey}
+            itemData={{ items, clusterRes, columns, shrinkRatio, children }}
             ref={listRef}
             itemCount={1 + 1 + items.length}
             itemSize={getItemSize}
             overscanCount={3}
         >
-            {({ index, style }) => {
-                if (index === 0) return <div style={style}>{children}</div>;
-
-                if (index === 1)
-                    return (
-                        <div style={style}>
-                            <Header2Memo clusterRes={clusterRes} />
-                        </div>
-                    );
-
-                const item = items[index - 2];
-                return (
-                    <ListItem style={style}>
-                        <ListContainer
-                            columns={columns}
-                            shrinkRatio={shrinkRatio}
-                        >
-                            {!Array.isArray(item) ? (
-                                <LabelContainer span={columns}>
-                                    {item}
-                                </LabelContainer>
-                            ) : (
-                                item.map((f, i) => (
-                                    <FaceItem
-                                        key={i.toString()}
-                                        faceWithFile={f}
-                                    />
-                                ))
-                            )}
-                        </ListContainer>
-                    </ListItem>
-                );
-            }}
+            {DefineMeOutside}
         </VariableSizeList>
     );
 };
+
+const DefineMeOutside = React.memo(({ index, style, data }) => {
+    const { clusterRes, columns, shrinkRatio, items, children } = data;
+
+    if (index === 0) return children;
+
+    if (index === 1)
+        return (
+            <div style={style}>
+                <Header2Memo clusterRes={clusterRes} />
+            </div>
+        );
+
+    const item = items[index - 2];
+    return (
+        <ListItem style={style}>
+            <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
+                {!Array.isArray(item) ? (
+                    <LabelContainer span={columns}>{item}</LabelContainer>
+                ) : (
+                    item.map((f, i) => (
+                        <FaceItem key={i.toString()} faceWithFile={f} />
+                    ))
+                )}
+            </ListContainer>
+        </ListItem>
+    );
+}, areEqual);
 
 type Item = string | FaceWithFile[];
 
@@ -405,6 +402,8 @@ const Header2: React.FC<Header2Props> = ({ clusterRes }) => {
         )
     );
 };
+
+const Header2Memo = React.memo(Header2);
 
 const Loader = () => (
     <VerticallyCentered mt={4}>
