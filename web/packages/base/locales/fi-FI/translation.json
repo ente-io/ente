@@ -41,6 +41,7 @@
     "REFERRAL_CODE_HINT": "Miten kuulit Entestä? (valinnainen)",
     "REFERRAL_INFO": "Emme seuraa sovelluksen asennuksia. Se auttaisi meitä, jos kertoisit mistä löysit meidät!",
     "PASSPHRASE_MATCH_ERROR": "Salasanat eivät täsmää",
+    "create_albums": "",
     "CREATE_COLLECTION": "Uusi albumi",
     "ENTER_ALBUM_NAME": "Albumin nimi",
     "CLOSE_OPTION": "Sulje (Esc)",
