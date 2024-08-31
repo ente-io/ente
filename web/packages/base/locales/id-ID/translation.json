@@ -41,6 +41,7 @@
     "REFERRAL_CODE_HINT": "Dari mana Anda menemukan Ente? (opsional)",
     "REFERRAL_INFO": "Kami tidak melacak pemasangan aplikasi, Ini akan membantu kami jika Anda memberi tahu kami di mana Anda menemukan kami!",
     "PASSPHRASE_MATCH_ERROR": "Kata sandi tidak cocok",
+    "create_albums": "",
     "CREATE_COLLECTION": "Album baru",
     "ENTER_ALBUM_NAME": "Nama album",
     "CLOSE_OPTION": "Tutup (Esc)",
