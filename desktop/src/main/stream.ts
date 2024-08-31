@@ -4,6 +4,7 @@
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
+import { Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ffmpegConvertToMP4 } from "./services/ffmpeg";
@@ -15,7 +16,6 @@ import {
     deleteTempFileIgnoringErrors,
     makeTempFilePath,
 } from "./utils/temp";
-const { Readable } = require("node:stream");
 
 /**
  * Register a protocol handler that we use for streaming large files between the
@@ -119,21 +119,15 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
         return new Response("", { status: 404 });
     }
 
-    const { writable, readable } = new TransformStream();
-    const writer = writable.getWriter();
-
     // zip.stream returns an "old style" NodeJS.ReadableStream. We then write it
     // to the writable end of the web stream pipe, the readable end of which is
     // relayed back to the renderer as the response.
+    const { writable, readable } = new TransformStream();
     const stream = await zip.stream(entry);
 
-    stream.on("data", (chunk: Buffer) => {
-        void writer.write(chunk);
-    });
+    stream.pipe(Writable.fromWeb(writable));
 
-    stream.on("end", () => {
-        void writer.close();
-    });
+
 
     // While it is documented that entry.time is the modification time,
     // the units are not mentioned. By seeing the source code, we can
