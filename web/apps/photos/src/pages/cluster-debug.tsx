@@ -43,24 +43,18 @@ import { VariableSizeList } from "react-window";
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
 
-    const [clusteringOptions, setClusteringOptions] = useState<ClusteringOpts>({
-        method: "linear",
-        minBlur: 10,
-        minScore: 0.8,
-        joinThreshold: 0.7,
-        batchSize: 12500,
-    });
+    const Header1Memo = React.memo(Header1);
+
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
 
     const cluster = useCallback((opts: ClusteringOpts) => {
         return new Promise<boolean>((resolve) => {
-            setClusteringOptions(opts);
-            setClusterRes(undefined);
             startLoading();
-            wipClusterDebugPageContents(opts).then((v) => {
-                setClusterRes(v);
+            // setClusterRes(undefined);
+            wipClusterDebugPageContents(opts).then((res) => {
+                setClusterRes(res);
                 finishLoading();
                 resolve(true);
             });
@@ -71,20 +65,16 @@ export default function ClusterDebug() {
         showNavBar(true);
     }, []);
 
+    console.log("rendering Top", clusterRes);
+
     return (
         <>
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
-                        <ClusterList
-                            {...{
-                                width,
-                                height,
-                                clusteringOptions,
-                                clusterRes,
-                                onCluster: cluster,
-                            }}
-                        />
+                        <ClusterList {...{ width, height, clusterRes }}>
+                            <Header1Memo onCluster={cluster} />
+                        </ClusterList>
                     )}
                 </AutoSizer>
             </Container>
@@ -121,18 +111,117 @@ const Container = styled("div")`
     }
 `;
 
-type ClusterListProps = Header1Props &
-    Header2Props & {
-        height: number;
-        width: number;
-    };
+interface Header1Props {
+    onCluster: (opts: ClusteringOpts) => Promise<boolean>;
+}
 
-const ClusterList: React.FC<ClusterListProps> = ({
+const Header1: React.FC<Header1Props> = ({ onCluster }) => {
+    const toFloat = (n: number | string) =>
+        typeof n == "string" ? parseFloat(n) : n;
+    const { values, handleSubmit, handleChange, isSubmitting } =
+        useFormik<ClusteringOpts>({
+            initialValues: {
+                method: "linear",
+                minBlur: 10,
+                minScore: 0.8,
+                joinThreshold: 0.7,
+                batchSize: 12500,
+            },
+            // onSubmit1: (values) => {
+            //     console.log("onSubmit");
+            //     return new Promise((resolve) => {
+            //         console.log("onSubmit will resolve promise", {
+            //             isSubmitting,
+            //         });
+            //         setTimeout(resolve, 2000);
+            //     });
+            // },
+            onSubmit: (values) =>
+                onCluster({
+                    method: values.method,
+                    minBlur: toFloat(values.minBlur),
+                    minScore: toFloat(values.minScore),
+                    joinThreshold: toFloat(values.joinThreshold),
+                    batchSize: toFloat(values.batchSize),
+                }),
+        });
+
+    console.log("rendering form", { isSubmitting });
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <Stack>
+                <Typography paddingInline={1}>Parameters</Typography>
+                <Stack direction="row" gap={1}>
+                    <TextField
+                        id="method"
+                        name="method"
+                        label="method"
+                        value={values.method}
+                        select
+                        size="small"
+                        onChange={handleChange}
+                    >
+                        {["hdbscan", "linear"].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        id="minBlur"
+                        name="minBlur"
+                        label="minBlur"
+                        value={values.minBlur}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        id="minScore"
+                        name="minScore"
+                        label="minScore"
+                        value={values.minScore}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        id="joinThreshold"
+                        name="joinThreshold"
+                        label="joinThreshold"
+                        value={values.joinThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        id="batchSize"
+                        name="batchSize"
+                        label="batchSize"
+                        value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Box marginInlineStart={"auto"} p={1}>
+                    <Button color="secondary" type="submit">
+                        Cluster
+                    </Button>
+                </Box>
+                {isSubmitting && <Loader />}
+            </Stack>
+        </form>
+    );
+};
+
+type ClusterListProps = Header2Props & {
+    height: number;
+    width: number;
+};
+
+const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
     width,
     height,
-    clusteringOptions,
-    onCluster,
     clusterRes,
+    children,
 }) => {
     const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
@@ -142,7 +231,6 @@ const ClusterList: React.FC<ClusterListProps> = ({
         [width],
     );
 
-    const Header1Memo = React.memo(Header1);
     const Header2Memo = React.memo(Header2);
 
     const shrinkRatio = getShrinkRatio(width, columns);
@@ -168,6 +256,8 @@ const ClusterList: React.FC<ClusterListProps> = ({
                 ? listItemHeight
                 : 36;
 
+    console.log("rendering Within AutoSizer", clusterRes, listRef);
+
     return (
         <VariableSizeList
             height={height}
@@ -179,14 +269,7 @@ const ClusterList: React.FC<ClusterListProps> = ({
             overscanCount={3}
         >
             {({ index, style }) => {
-                if (index === 0)
-                    return (
-                        <div style={style}>
-                            <Header1Memo
-                                {...{ clusteringOptions, onCluster }}
-                            />
-                        </div>
-                    );
+                if (index === 0) return <div style={style}>{children}</div>;
 
                 if (index === 1)
                     return (
@@ -291,91 +374,6 @@ const ListItem = styled("div")`
     display: flex;
     justify-content: center;
 `;
-
-interface Header1Props {
-    clusteringOptions: ClusteringOpts;
-    onCluster: (opts: ClusteringOpts) => Promise<boolean>;
-}
-
-const Header1: React.FC<Header1Props> = ({ clusteringOptions, onCluster }) => {
-    const toFloat = (n: number | string) =>
-        typeof n == "string" ? parseFloat(n) : n;
-    const { values, handleSubmit, handleChange, isSubmitting } =
-        useFormik<ClusteringOpts>({
-            initialValues: clusteringOptions,
-            onSubmit: (values) =>
-                onCluster({
-                    method: values.method,
-                    minBlur: toFloat(values.minBlur),
-                    minScore: toFloat(values.minScore),
-                    joinThreshold: toFloat(values.joinThreshold),
-                    batchSize: toFloat(values.batchSize),
-                }),
-        });
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <Stack>
-                <Typography paddingInline={1}>Parameters</Typography>
-                <Stack direction="row" gap={1}>
-                    <TextField
-                        id="method"
-                        name="method"
-                        label="method"
-                        value={values.method}
-                        select
-                        size="small"
-                        onChange={handleChange}
-                    >
-                        {["hdbscan", "linear"].map((v) => (
-                            <MenuItem key={v} value={v}>
-                                {v}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <TextField
-                        id="minBlur"
-                        name="minBlur"
-                        label="minBlur"
-                        value={values.minBlur}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        id="minScore"
-                        name="minScore"
-                        label="minScore"
-                        value={values.minScore}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        id="joinThreshold"
-                        name="joinThreshold"
-                        label="joinThreshold"
-                        value={values.joinThreshold}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        id="batchSize"
-                        name="batchSize"
-                        label="batchSize"
-                        value={values.batchSize}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                </Stack>
-                <Box marginInlineStart={"auto"} p={1}>
-                    <Button color="secondary" type="submit">
-                        Cluster
-                    </Button>
-                </Box>
-                {isSubmitting && <Loader />}
-            </Stack>
-        </form>
-    );
-};
 
 interface Header2Props {
     clusterRes: ClusterDebugPageContents | undefined;
