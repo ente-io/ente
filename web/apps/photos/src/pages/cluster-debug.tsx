@@ -129,7 +129,11 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
         <form onSubmit={handleSubmit}>
             <Stack>
                 <Typography paddingInline={1}>Parameters</Typography>
-                <Stack direction="row" gap={1}>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
                     <TextField
                         id="method"
                         name="method"
