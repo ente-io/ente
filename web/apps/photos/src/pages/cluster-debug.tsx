@@ -30,7 +30,11 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { areEqual, VariableSizeList } from "react-window";
+import {
+    areEqual,
+    VariableSizeList,
+    type ListChildComponentProps,
+} from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
@@ -47,9 +51,7 @@ export default function ClusterDebug() {
         finishLoading();
     };
 
-    useEffect(() => {
-        showNavBar(true);
-    }, []);
+    useEffect(() => showNavBar(true), []);
 
     return (
         <>
@@ -283,40 +285,36 @@ const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
 
-const ClusterListItemRenderer = React.memo(({ index, style, data }) => {
-    const { clusterRes, columns, shrinkRatio, items, children } = data;
+// It in necessary to define the item renderer otherwise it gets recreated every
+// time the parent rerenders, causing the form to lose its submitting state.
+const ClusterListItemRenderer = React.memo<ListChildComponentProps>(
+    ({ index, style, data }) => {
+        const { clusterRes, columns, shrinkRatio, items, children } = data;
 
-    if (index == 0) {
-        // It in necessary to memoize the div that contains the form otherwise
-        // the form loses its submitting state on unnecessary re-renders.
-        return <DivMemo>{children}</DivMemo>;
-    }
+        if (index == 0) return <div style={style}>{children}</div>;
 
-    if (index == 1)
+        if (index == 1)
+            return (
+                <div style={style}>
+                    <ClusterResHeader clusterRes={clusterRes} />
+                </div>
+            );
+
+        const item = items[index - 2];
         return (
-            <div style={style}>
-                <ClusterResHeader clusterRes={clusterRes} />
-            </div>
+            <ListItem style={style}>
+                <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
+                    {!Array.isArray(item) ? (
+                        <LabelContainer span={columns}>{item}</LabelContainer>
+                    ) : (
+                        item.map((f, i) => (
+                            <FaceItem key={i.toString()} faceWithFile={f} />
+                        ))
+                    )}
+                </ListContainer>
+            </ListItem>
         );
-
-    const item = items[index - 2];
-    return (
-        <ListItem style={style}>
-            <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
-                {!Array.isArray(item) ? (
-                    <LabelContainer span={columns}>{item}</LabelContainer>
-                ) : (
-                    item.map((f, i) => (
-                        <FaceItem key={i.toString()} faceWithFile={f} />
-                    ))
-                )}
-            </ListContainer>
-        </ListItem>
-    );
-}, areEqual);
-
-const DivMemo = React.memo(
-    ({ style, children }) => <div style={style}>{children}</div>,
+    },
     areEqual,
 );
 
