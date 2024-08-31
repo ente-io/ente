@@ -4,8 +4,6 @@
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
-import { Readable } from "node:stream";
-import { ReadableStream } from "node:stream/web";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ffmpegConvertToMP4 } from "./services/ffmpeg";
@@ -17,6 +15,7 @@ import {
     deleteTempFileIgnoringErrors,
     makeTempFilePath,
 } from "./utils/temp";
+const { Readable } = require("node:stream");
 
 /**
  * Register a protocol handler that we use for streaming large files between the
@@ -120,20 +119,21 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
         return new Response("", { status: 404 });
     }
 
-    // This returns an "old style" NodeJS.ReadableStream.
-    const stream = await zip.stream(entry);
-    // Convert it into a new style NodeJS.Readable.
-    const nodeReadable = new Readable({ emitClose: true }).wrap(stream);
-    // Then convert it into a Web stream.
-    const webReadableStreamAny = Readable.toWeb(nodeReadable);
-    // However, we get a ReadableStream<any> now. This doesn't go into the
-    // `BodyInit` expected by the Response constructor, which wants a
-    // ReadableStream<Uint8Array>. Force a cast.
-    const webReadableStream =
-        webReadableStreamAny as ReadableStream<Uint8Array>;
+    const { writable, readable } = new TransformStream();
+    const writer = writable.getWriter();
 
-    // Let go of the zip handle when the underlying stream closes.
-    nodeReadable.on("close", () => markClosableZip(zipPath));
+    // zip.stream returns an "old style" NodeJS.ReadableStream. We then write it
+    // to the writable end of the web stream pipe, the readable end of which is
+    // relayed back to the renderer as the response.
+    const stream = await zip.stream(entry);
+
+    stream.on("data", (chunk: Buffer) => {
+        void writer.write(chunk);
+    });
+
+    stream.on("end", () => {
+        void writer.close();
+    });
 
     // While it is documented that entry.time is the modification time,
     // the units are not mentioned. By seeing the source code, we can
@@ -142,8 +142,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     // https://github.com/antelle/node-stream-zip/blob/master/node_stream_zip.js
     const modifiedMs = entry.time;
 
-    // @ts-expect-error [Note: Node and web stream type mismatch]
-    return new Response(webReadableStream, {
+    return new Response(readable, {
         headers: {
             // We don't know the exact type, but it doesn't really matter, just
             // set it to a generic binary content-type so that the browser
