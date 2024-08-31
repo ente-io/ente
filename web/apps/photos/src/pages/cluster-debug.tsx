@@ -324,16 +324,23 @@ interface ClusterResHeaderProps {
 const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
     if (!clusterRes) return null;
 
-    const { clusteredFaceCount, unclusteredFaceCount, timeTakenMs, clusters } =
-        clusterRes;
+    const {
+        totalFaceCount,
+        filteredFaceCount,
+        clusteredFaceCount,
+        unclusteredFaceCount,
+        timeTakenMs,
+        clusters,
+    } = clusterRes;
 
     return (
         <Stack m={1}>
             <Typography variant="small" mb={1}>
-                {`${clusters.length} clusters from ${clusteredFaceCount} faces in ${(timeTakenMs / 1000).toFixed(0)} seconds. ${unclusteredFaceCount} unclustered faces.`}
+                {`${clusters.length} clusters in ${(timeTakenMs / 1000).toFixed(0)} seconds. Faces total ${totalFaceCount} filtered ${filteredFaceCount} clustered ${clusteredFaceCount} unclustered ${unclusteredFaceCount}.`}
             </Typography>
             <Typography variant="small" color="text.muted">
-                Showing only top 30 and bottom 30 clusters.
+                Showing only top 30 clusters, bottom 30 clusters, and
+                unclustered faces.
             </Typography>
             <Typography variant="small" color="text.muted">
                 For each cluster showing only up to 50 faces, sorted by cosine
@@ -344,7 +351,8 @@ const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
                 <b>blur - score - cosineSimilarity - direction</b>.
             </Typography>
             <Typography variant="small" color="text.muted">
-                Faces added to the cluster as a result of merging are outlined.
+                Faces added to the cluster as a result of next batch merging are
+                outlined.
             </Typography>
         </Stack>
     );
