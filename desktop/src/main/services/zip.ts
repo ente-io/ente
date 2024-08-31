@@ -65,9 +65,9 @@ export const markClosableZip = (zipPath: string) => {
  */
 export const clearOpenZipCache = () => {
     if (_refCount.size > 0) {
-        const keys = JSON.stringify([..._refCount.keys()]);
+        const kvs = JSON.stringify([..._refCount.entries()]);
         throw new Error(
-            `Attempting to clear zip file cache when some items are still in use: ${keys}`,
+            `Attempting to clear zip file cache when some items are still in use: ${kvs}`,
         );
     }
     _cache.clear();

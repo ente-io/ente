@@ -137,6 +137,10 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
         log.error("Error event for the writable end of zip stream", e);
     });
 
+    nodeWritable.on("close", () => {
+        markClosableZip(zipPath);
+    });
+
     // While it is documented that entry.time is the modification time,
     // the units are not mentioned. By seeing the source code, we can
     // verify that it is indeed epoch milliseconds. See `parseZipTime`
