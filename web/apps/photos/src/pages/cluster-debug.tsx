@@ -57,7 +57,7 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <Header1 onCluster={cluster} />
+                            <OptionsForm onCluster={cluster} />
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -95,11 +95,11 @@ const Container = styled("div")`
     }
 `;
 
-interface Header1Props {
+interface OptionsFormProps {
     onCluster: (opts: ClusteringOpts) => Promise<void>;
 }
 
-const Header1: React.FC<Header1Props> = ({ onCluster }) => {
+const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
     const toFloat = (n: number | string) =>
         typeof n == "string" ? parseFloat(n) : n;
     const { values, handleSubmit, handleChange, isSubmitting } =
@@ -187,14 +187,7 @@ const Header1: React.FC<Header1Props> = ({ onCluster }) => {
     );
 };
 
-const Header1Memo = React.memo(Header1);
-
-const DivMemo = React.memo(
-    ({ style, children }) => <div style={style}>{children}</div>,
-    areEqual,
-);
-
-type ClusterListProps = Header2Props & {
+type ClusterListProps = ClusterResHeaderProps & {
     height: number;
     width: number;
 };
@@ -248,36 +241,6 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
     );
 };
 
-const ClusterListItemRenderer = React.memo(({ index, style, data }) => {
-    const { clusterRes, columns, shrinkRatio, items, children } = data;
-
-    if (index === 0) {
-        return <DivMemo>{children}</DivMemo>;
-    }
-
-    if (index === 1)
-        return (
-            <div style={style}>
-                <Header2Memo clusterRes={clusterRes} />
-            </div>
-        );
-
-    const item = items[index - 2];
-    return (
-        <ListItem style={style}>
-            <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
-                {!Array.isArray(item) ? (
-                    <LabelContainer span={columns}>{item}</LabelContainer>
-                ) : (
-                    item.map((f, i) => (
-                        <FaceItem key={i.toString()} faceWithFile={f} />
-                    ))
-                )}
-            </ListContainer>
-        </ListItem>
-    );
-}, areEqual);
-
 type Item = string | FaceWithFile[];
 
 const itemsFromClusterRes = (
@@ -320,6 +283,87 @@ const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
 
+const ClusterListItemRenderer = React.memo(({ index, style, data }) => {
+    const { clusterRes, columns, shrinkRatio, items, children } = data;
+
+    if (index == 0) {
+        // It in necessary to memoize the div that contains the form otherwise
+        // the form loses its submitting state on unnecessary re-renders.
+        return <DivMemo>{children}</DivMemo>;
+    }
+
+    if (index == 1)
+        return (
+            <div style={style}>
+                <ClusterResHeader clusterRes={clusterRes} />
+            </div>
+        );
+
+    const item = items[index - 2];
+    return (
+        <ListItem style={style}>
+            <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
+                {!Array.isArray(item) ? (
+                    <LabelContainer span={columns}>{item}</LabelContainer>
+                ) : (
+                    item.map((f, i) => (
+                        <FaceItem key={i.toString()} faceWithFile={f} />
+                    ))
+                )}
+            </ListContainer>
+        </ListItem>
+    );
+}, areEqual);
+
+const DivMemo = React.memo(
+    ({ style, children }) => <div style={style}>{children}</div>,
+    areEqual,
+);
+
+interface ClusterResHeaderProps {
+    clusterRes: ClusterDebugPageContents | undefined;
+}
+
+const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
+    if (!clusterRes) return null;
+
+    const { clusteredFaceCount, unclusteredFaceCount, timeTakenMs, clusters } =
+        clusterRes;
+
+    return (
+        <Stack m={1}>
+            <Typography variant="small" mb={1}>
+                {`${clusters.length} clusters from ${clusteredFaceCount} faces in ${(timeTakenMs / 1000).toFixed(0)} seconds. ${unclusteredFaceCount} unclustered faces.`}
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Showing only top 30 and bottom 30 clusters.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                For each cluster showing only up to 50 faces, sorted by cosine
+                similarity to highest scoring face in the cluster.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Below each face is its{" "}
+                <b>blur - score - cosineSimilarity - direction</b>.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Faces added to the cluster as a result of merging are outlined.
+            </Typography>
+        </Stack>
+    );
+};
+
+const Loader = () => (
+    <VerticallyCentered mt={4}>
+        <EnteSpinner />
+    </VerticallyCentered>
+);
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
+`;
+
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "shrinkRatio",
 })<{
@@ -342,50 +386,6 @@ const LabelContainer = styled(ListItemContainer)`
     color: ${({ theme }) => theme.colors.text.muted};
     height: 32px;
 `;
-
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
-`;
-
-interface Header2Props {
-    clusterRes: ClusterDebugPageContents | undefined;
-}
-
-const Header2: React.FC<Header2Props> = ({ clusterRes }) => {
-    return (
-        clusterRes && (
-            <Stack m={1}>
-                <Typography variant="small" mb={1}>
-                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces in ${(clusterRes.timeTakenMs / 1000).toFixed(0)} seconds. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Showing only top 30 and bottom 30 clusters.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    For each cluster showing only up to 50 faces, sorted by
-                    cosine similarity to highest scoring face in the cluster.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Below each face is its{" "}
-                    <b>blur - score - cosineSimilarity - direction</b>.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Faces added to the cluster as a result of merging are
-                    outlined.
-                </Typography>
-            </Stack>
-        )
-    );
-};
-
-const Header2Memo = React.memo(Header2);
-
-const Loader = () => (
-    <VerticallyCentered mt={4}>
-        <EnteSpinner />
-    </VerticallyCentered>
-);
 
 interface FaceItemProps {
     faceWithFile: FaceWithFile;
