@@ -102,8 +102,10 @@ interface OptionsFormProps {
 }
 
 const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
+    // Formik converts nums to a string on edit.
     const toFloat = (n: number | string) =>
         typeof n == "string" ? parseFloat(n) : n;
+
     const { values, handleSubmit, handleChange, isSubmitting } =
         useFormik<ClusteringOpts>({
             initialValues: {
@@ -122,8 +124,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                     batchSize: toFloat(values.batchSize),
                 }),
         });
-
-    console.log("rendering form", { isSubmitting });
 
     return (
         <form onSubmit={handleSubmit}>
@@ -178,7 +178,11 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                     />
                 </Stack>
                 <Box marginInlineStart={"auto"} p={1}>
-                    <Button color="secondary" type="submit">
+                    <Button
+                        color="secondary"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
                         Cluster
                     </Button>
                 </Box>
@@ -335,8 +339,8 @@ const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
 
     return (
         <Stack m={1}>
-            <Typography variant="small" mb={1}>
-                {`${clusters.length} clusters in ${(timeTakenMs / 1000).toFixed(0)} seconds. Faces total ${totalFaceCount} filtered ${filteredFaceCount} clustered ${clusteredFaceCount} unclustered ${unclusteredFaceCount}.`}
+            <Typography mb={1} variant="small">
+                {`${clusters.length} clusters in ${(timeTakenMs / 1000).toFixed(0)} seconds • ${totalFaceCount} faces ${filteredFaceCount} filtered ${clusteredFaceCount} clustered ${unclusteredFaceCount} unclustered`}
             </Typography>
             <Typography variant="small" color="text.muted">
                 Showing only top 30 clusters, bottom 30 clusters, and
