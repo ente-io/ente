@@ -125,9 +125,17 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     const { writable, readable } = new TransformStream();
     const stream = await zip.stream(entry);
 
-    stream.pipe(Writable.fromWeb(writable));
+    const nodeWritable = Writable.fromWeb(writable);
+    stream.pipe(nodeWritable);
 
-
+    nodeWritable.on("error", (e: unknown) => {
+        // If the renderer process closes the network connection (say when it
+        // only needs the content-length and doesn't care about the body), we
+        // get an AbortError. Handle them here otherwise they litter the logs
+        // with unhandled exceptions.
+        if (e instanceof Error && e.name == "AbortError") return;
+        log.error("Error event for the writable end of zip stream", e);
+    });
 
     // While it is documented that entry.time is the modification time,
     // the units are not mentioned. By seeing the source code, we can
