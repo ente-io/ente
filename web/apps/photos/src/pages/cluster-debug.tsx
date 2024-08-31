@@ -49,8 +49,8 @@ export default function ClusterDebug() {
 
     const cluster = useCallback((opts: ClusteringOpts) => {
         return new Promise<boolean>((resolve) => {
-            startLoading();
             setClusterRes(undefined);
+            startLoading();
             wipClusterDebugPageContents(opts).then((res) => {
                 setClusterRes(res);
                 finishLoading();
@@ -63,17 +63,13 @@ export default function ClusterDebug() {
         showNavBar(true);
     }, []);
 
-    console.log("rendering Top", clusterRes);
-
     return (
         <>
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <Row>
-                                <Header1Memo onCluster={cluster} />
-                            </Row>
+                            <Header1Memo onCluster={cluster} />
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -205,17 +201,9 @@ const Header1: React.FC<Header1Props> = ({ onCluster }) => {
 
 const Header1Memo = React.memo(Header1);
 
-const Row = React.memo(
-    (props) => {
-        const { style, children } = props;
-        console.log("Rendering row", props);
-        return <div style={style}>{children}</div>;
-    },
-    // areEqual,
-    (...args) => {
-        console.log("areEqual called", args);
-        return true;
-    },
+const DivMemo = React.memo(
+    ({ style, children }) => <div style={style}>{children}</div>,
+    areEqual,
 );
 
 type ClusterListProps = Header2Props & {
@@ -248,36 +236,36 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
         listRef.current?.resetAfterIndex(0);
     }, [items]);
 
-    const getItemSize = (index: number) =>
+    const itemSize = (index: number) =>
         index === 0
             ? 140
             : index === 1
               ? 130
-              : Array.isArray(items[index - 1 - 1])
+              : Array.isArray(items[index - 2])
                 ? listItemHeight
                 : 36;
-
-    console.log("rendering Within AutoSizer", clusterRes, listRef);
 
     return (
         <VariableSizeList
             height={height}
             width={width}
-            itemData={{ items, clusterRes, columns, shrinkRatio, children }}
             ref={listRef}
-            itemCount={1 + 1 + items.length}
-            itemSize={getItemSize}
+            itemData={{ items, clusterRes, columns, shrinkRatio, children }}
+            itemCount={2 + items.length}
+            itemSize={itemSize}
             overscanCount={3}
         >
-            {DefineMeOutside}
+            {ClusterListItemRenderer}
         </VariableSizeList>
     );
 };
 
-const DefineMeOutside = React.memo(({ index, style, data }) => {
+const ClusterListItemRenderer = React.memo(({ index, style, data }) => {
     const { clusterRes, columns, shrinkRatio, items, children } = data;
 
-    if (index === 0) return children;
+    if (index === 0) {
+        return <DivMemo>{children}</DivMemo>;
+    }
 
     if (index === 1)
         return (

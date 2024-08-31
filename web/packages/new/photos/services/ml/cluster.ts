@@ -182,7 +182,8 @@ export const clusterFaces = (
     // A flattened array of faces.
     const faces = [...enumerateFaces(faceIndexes)]
         .filter((f) => f.blur > minBlur)
-        .filter((f) => f.score > minScore);
+        .filter((f) => f.score > minScore)
+        .slice(0, 2000);
 
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
