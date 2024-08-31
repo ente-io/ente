@@ -28,14 +28,7 @@ import {
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { areEqual, VariableSizeList } from "react-window";
 
@@ -47,17 +40,12 @@ export default function ClusterDebug() {
         ClusterDebugPageContents | undefined
     >();
 
-    const cluster = useCallback((opts: ClusteringOpts) => {
-        return new Promise<boolean>((resolve) => {
-            setClusterRes(undefined);
-            startLoading();
-            wipClusterDebugPageContents(opts).then((res) => {
-                setClusterRes(res);
-                finishLoading();
-                resolve(true);
-            });
-        });
-    }, []);
+    const cluster = async (opts: ClusteringOpts) => {
+        setClusterRes(undefined);
+        startLoading();
+        setClusterRes(await wipClusterDebugPageContents(opts));
+        finishLoading();
+    };
 
     useEffect(() => {
         showNavBar(true);
@@ -69,7 +57,7 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <Header1Memo onCluster={cluster} />
+                            <Header1 onCluster={cluster} />
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -108,7 +96,7 @@ const Container = styled("div")`
 `;
 
 interface Header1Props {
-    onCluster: (opts: ClusteringOpts) => Promise<boolean>;
+    onCluster: (opts: ClusteringOpts) => Promise<void>;
 }
 
 const Header1: React.FC<Header1Props> = ({ onCluster }) => {
