@@ -28,63 +28,39 @@ import {
 import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { VariableSizeList } from "react-window";
+import {
+    areEqual,
+    VariableSizeList,
+    type ListChildComponentProps,
+} from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
 
-    const [clusteringOptions, setClusteringOptions] = useState<ClusteringOpts>({
-        method: "linear",
-        minBlur: 10,
-        minScore: 0.8,
-        joinThreshold: 0.7,
-        batchSize: 12500,
-    });
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
 
-    const cluster = useCallback((opts: ClusteringOpts) => {
-        return new Promise<boolean>((resolve) => {
-            setClusteringOptions(opts);
-            setClusterRes(undefined);
-            startLoading();
-            wipClusterDebugPageContents(opts).then((v) => {
-                setClusterRes(v);
-                finishLoading();
-                resolve(true);
-            });
-        });
-    }, []);
+    const cluster = async (opts: ClusteringOpts) => {
+        setClusterRes(undefined);
+        startLoading();
+        setClusterRes(await wipClusterDebugPageContents(opts));
+        finishLoading();
+    };
 
-    useEffect(() => {
-        showNavBar(true);
-    }, []);
+    useEffect(() => showNavBar(true), []);
 
     return (
         <>
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
-                        <ClusterList
-                            {...{
-                                width,
-                                height,
-                                clusteringOptions,
-                                clusterRes,
-                                onCluster: cluster,
-                            }}
-                        />
+                        <ClusterList {...{ width, height, clusterRes }}>
+                            <OptionsForm onCluster={cluster} />
+                        </ClusterList>
                     )}
                 </AutoSizer>
             </Container>
@@ -121,18 +97,111 @@ const Container = styled("div")`
     }
 `;
 
-type ClusterListProps = Header1Props &
-    Header2Props & {
-        height: number;
-        width: number;
-    };
+interface OptionsFormProps {
+    onCluster: (opts: ClusteringOpts) => Promise<void>;
+}
 
-const ClusterList: React.FC<ClusterListProps> = ({
+const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
+    // Formik converts nums to a string on edit.
+    const toFloat = (n: number | string) =>
+        typeof n == "string" ? parseFloat(n) : n;
+
+    const { values, handleSubmit, handleChange, isSubmitting } =
+        useFormik<ClusteringOpts>({
+            initialValues: {
+                method: "linear",
+                minBlur: 10,
+                minScore: 0.8,
+                joinThreshold: 0.7,
+                batchSize: 12500,
+            },
+            onSubmit: (values) =>
+                onCluster({
+                    method: values.method,
+                    minBlur: toFloat(values.minBlur),
+                    minScore: toFloat(values.minScore),
+                    joinThreshold: toFloat(values.joinThreshold),
+                    batchSize: toFloat(values.batchSize),
+                }),
+        });
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <Stack>
+                <Typography paddingInline={1}>Parameters</Typography>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
+                    <TextField
+                        name="method"
+                        label="method"
+                        value={values.method}
+                        select
+                        size="small"
+                        onChange={handleChange}
+                    >
+                        {["hdbscan", "linear"].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        name="minBlur"
+                        label="minBlur"
+                        value={values.minBlur}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="minScore"
+                        label="minScore"
+                        value={values.minScore}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="joinThreshold"
+                        label="joinThreshold"
+                        value={values.joinThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="batchSize"
+                        label="batchSize"
+                        value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Box marginInlineStart={"auto"} p={1}>
+                    <Button
+                        color="secondary"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        Cluster
+                    </Button>
+                </Box>
+                {isSubmitting && <Loader />}
+            </Stack>
+        </form>
+    );
+};
+
+type ClusterListProps = ClusterResHeaderProps & {
+    height: number;
+    width: number;
+};
+
+const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
     width,
     height,
-    clusteringOptions,
-    onCluster,
     clusterRes,
+    children,
 }) => {
     const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
@@ -141,9 +210,6 @@ const ClusterList: React.FC<ClusterListProps> = ({
         () => Math.max(Math.floor(getFractionFittableColumns(width)), 4),
         [width],
     );
-
-    const Header1Memo = React.memo(Header1);
-    const Header2Memo = React.memo(Header2);
 
     const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
@@ -156,15 +222,12 @@ const ClusterList: React.FC<ClusterListProps> = ({
         listRef.current?.resetAfterIndex(0);
     }, [items]);
 
-    const itemKey = (index: number) =>
-        index === 0 || index === 1 ? `header-${index}` : `item-${index}`;
-
-    const getItemSize = (index: number) =>
+    const itemSize = (index: number) =>
         index === 0
             ? 140
             : index === 1
               ? 130
-              : Array.isArray(items[index - 1 - 1])
+              : Array.isArray(items[index - 2])
                 ? listItemHeight
                 : 36;
 
@@ -172,52 +235,13 @@ const ClusterList: React.FC<ClusterListProps> = ({
         <VariableSizeList
             height={height}
             width={width}
-            itemKey={itemKey}
             ref={listRef}
-            itemCount={1 + 1 + items.length}
-            itemSize={getItemSize}
+            itemData={{ items, clusterRes, columns, shrinkRatio, children }}
+            itemCount={2 + items.length}
+            itemSize={itemSize}
             overscanCount={3}
         >
-            {({ index, style }) => {
-                if (index === 0)
-                    return (
-                        <div style={style}>
-                            <Header1Memo
-                                {...{ clusteringOptions, onCluster }}
-                            />
-                        </div>
-                    );
-
-                if (index === 1)
-                    return (
-                        <div style={style}>
-                            <Header2Memo clusterRes={clusterRes} />
-                        </div>
-                    );
-
-                const item = items[index - 2];
-                return (
-                    <ListItem style={style}>
-                        <ListContainer
-                            columns={columns}
-                            shrinkRatio={shrinkRatio}
-                        >
-                            {!Array.isArray(item) ? (
-                                <LabelContainer span={columns}>
-                                    {item}
-                                </LabelContainer>
-                            ) : (
-                                item.map((f, i) => (
-                                    <FaceItem
-                                        key={i.toString()}
-                                        faceWithFile={f}
-                                    />
-                                ))
-                            )}
-                        </ListContainer>
-                    </ListItem>
-                );
-            }}
+            {ClusterListItemRenderer}
         </VariableSizeList>
     );
 };
@@ -264,6 +288,91 @@ const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
 
+// It in necessary to define the item renderer otherwise it gets recreated every
+// time the parent rerenders, causing the form to lose its submitting state.
+const ClusterListItemRenderer = React.memo<ListChildComponentProps>(
+    ({ index, style, data }) => {
+        const { clusterRes, columns, shrinkRatio, items, children } = data;
+
+        if (index == 0) return <div style={style}>{children}</div>;
+
+        if (index == 1)
+            return (
+                <div style={style}>
+                    <ClusterResHeader clusterRes={clusterRes} />
+                </div>
+            );
+
+        const item = items[index - 2];
+        return (
+            <ListItem style={style}>
+                <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
+                    {!Array.isArray(item) ? (
+                        <LabelContainer span={columns}>{item}</LabelContainer>
+                    ) : (
+                        item.map((f, i) => (
+                            <FaceItem key={i.toString()} faceWithFile={f} />
+                        ))
+                    )}
+                </ListContainer>
+            </ListItem>
+        );
+    },
+    areEqual,
+);
+
+interface ClusterResHeaderProps {
+    clusterRes: ClusterDebugPageContents | undefined;
+}
+
+const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
+    if (!clusterRes) return null;
+
+    const {
+        totalFaceCount,
+        filteredFaceCount,
+        clusteredFaceCount,
+        unclusteredFaceCount,
+        timeTakenMs,
+        clusters,
+    } = clusterRes;
+
+    return (
+        <Stack m={1}>
+            <Typography mb={1} variant="small">
+                {`${clusters.length} clusters in ${(timeTakenMs / 1000).toFixed(0)} seconds • ${totalFaceCount} faces ${filteredFaceCount} filtered ${clusteredFaceCount} clustered ${unclusteredFaceCount} unclustered`}
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Showing only top 30 clusters, bottom 30 clusters, and
+                unclustered faces.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                For each cluster showing only up to 50 faces, sorted by cosine
+                similarity to highest scoring face in the cluster.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Below each face is its{" "}
+                <b>blur - score - cosineSimilarity - direction</b>.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Faces added to the cluster as a result of next batch merging are
+                outlined.
+            </Typography>
+        </Stack>
+    );
+};
+
+const Loader = () => (
+    <VerticallyCentered mt={4}>
+        <EnteSpinner />
+    </VerticallyCentered>
+);
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
+`;
+
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "shrinkRatio",
 })<{
@@ -286,133 +395,6 @@ const LabelContainer = styled(ListItemContainer)`
     color: ${({ theme }) => theme.colors.text.muted};
     height: 32px;
 `;
-
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
-`;
-
-interface Header1Props {
-    clusteringOptions: ClusteringOpts;
-    onCluster: (opts: ClusteringOpts) => Promise<boolean>;
-}
-
-const Header1: React.FC<Header1Props> = ({ clusteringOptions, onCluster }) => {
-    const toFloat = (n: number | string) =>
-        typeof n == "string" ? parseFloat(n) : n;
-    const { values, handleSubmit, handleChange, isSubmitting } =
-        useFormik<ClusteringOpts>({
-            initialValues: clusteringOptions,
-            onSubmit: (values) =>
-                onCluster({
-                    method: values.method,
-                    minBlur: toFloat(values.minBlur),
-                    minScore: toFloat(values.minScore),
-                    joinThreshold: toFloat(values.joinThreshold),
-                    batchSize: toFloat(values.batchSize),
-                }),
-        });
-
-    return (
-        <form onSubmit={handleSubmit}>
-            <Stack>
-                <Typography paddingInline={1}>Parameters</Typography>
-                <Stack direction="row" gap={1}>
-                    <TextField
-                        id="method"
-                        name="method"
-                        label="method"
-                        value={values.method}
-                        select
-                        size="small"
-                        onChange={handleChange}
-                    >
-                        {["hdbscan", "linear"].map((v) => (
-                            <MenuItem key={v} value={v}>
-                                {v}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <TextField
-                        id="minBlur"
-                        name="minBlur"
-                        label="minBlur"
-                        value={values.minBlur}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        id="minScore"
-                        name="minScore"
-                        label="minScore"
-                        value={values.minScore}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        id="joinThreshold"
-                        name="joinThreshold"
-                        label="joinThreshold"
-                        value={values.joinThreshold}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        id="batchSize"
-                        name="batchSize"
-                        label="batchSize"
-                        value={values.batchSize}
-                        size="small"
-                        onChange={handleChange}
-                    />
-                </Stack>
-                <Box marginInlineStart={"auto"} p={1}>
-                    <Button color="secondary" type="submit">
-                        Cluster
-                    </Button>
-                </Box>
-                {isSubmitting && <Loader />}
-            </Stack>
-        </form>
-    );
-};
-
-interface Header2Props {
-    clusterRes: ClusterDebugPageContents | undefined;
-}
-
-const Header2: React.FC<Header2Props> = ({ clusterRes }) => {
-    return (
-        clusterRes && (
-            <Stack m={1}>
-                <Typography variant="small" mb={1}>
-                    {`${clusterRes.clusters.length} clusters from ${clusterRes.clusteredFaceCount} faces in ${(clusterRes.timeTakenMs / 1000).toFixed(0)} seconds. ${clusterRes.unclusteredFaceCount} unclustered faces.`}
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Showing only top 30 and bottom 30 clusters.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    For each cluster showing only up to 50 faces, sorted by
-                    cosine similarity to highest scoring face in the cluster.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Below each face is its{" "}
-                    <b>blur - score - cosineSimilarity - direction</b>.
-                </Typography>
-                <Typography variant="small" color="text.muted">
-                    Faces added to the cluster as a result of merging are
-                    outlined.
-                </Typography>
-            </Stack>
-        )
-    );
-};
-
-const Loader = () => (
-    <VerticallyCentered mt={4}>
-        <EnteSpinner />
-    </VerticallyCentered>
-);
 
 interface FaceItemProps {
     faceWithFile: FaceWithFile;

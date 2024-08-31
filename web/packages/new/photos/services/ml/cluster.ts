@@ -180,9 +180,11 @@ export const clusterFaces = (
     const t = Date.now();
 
     // A flattened array of faces.
-    const faces = [...enumerateFaces(faceIndexes)]
+    const allFaces = [...enumerateFaces(faceIndexes)];
+    const faces = allFaces
         .filter((f) => f.blur > minBlur)
         .filter((f) => f.score > minScore);
+    // .slice(0, 2000);
 
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
@@ -348,8 +350,10 @@ export const clusterFaces = (
         });
     }
 
+    const totalFaceCount = allFaces.length;
+    const filteredFaceCount = faces.length;
     const clusteredFaceCount = clusterIDForFaceID.size;
-    const unclusteredFaceCount = faces.length - clusteredFaceCount;
+    const unclusteredFaceCount = filteredFaceCount - clusteredFaceCount;
 
     const unclusteredFaces = faces.filter(
         ({ faceID }) => !clusterIDForFaceID.has(faceID),
@@ -357,10 +361,12 @@ export const clusterFaces = (
 
     const timeTakenMs = Date.now() - t;
     log.info(
-        `Clustered ${faces.length} faces into ${clusters.length} clusters, with ${faces.length - clusterIDForFaceID.size} faces remaining unclustered (${timeTakenMs} ms)`,
+        `Clustered ${faces.length} faces into ${clusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
     );
 
     return {
+        totalFaceCount,
+        filteredFaceCount,
         clusteredFaceCount,
         unclusteredFaceCount,
         clusterPreviews,
