@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:collection" show Queue;
 import "dart:io" show File;
 import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
@@ -6,7 +7,7 @@ import 'dart:typed_data' show Uint8List;
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
-import "package:photos/core/error-reporting/super_logging.dart";
+import "package:photos/core/error-reporting/isolate_logging.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -20,6 +21,7 @@ enum MLComputerOperation {
   loadModel,
   initializeClipTokenizer,
   runClipText,
+  testLogging,
 }
 
 class MLComputer {
@@ -62,7 +64,8 @@ class MLComputer {
   @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
-    Logger.root.onRecord.listen(SuperLogging.onLogRecord);
+    final IsolateLogger isolateLogger = IsolateLogger();
+    Logger.root.onRecord.listen(isolateLogger.onLogRecordInIsolate);
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
 
@@ -105,6 +108,14 @@ class MLComputer {
             //TODO:lau check logging here
             final textEmbedding = await ClipTextEncoder.predict(args);
             sendPort.send(List<double>.from(textEmbedding, growable: false));
+            break;
+          case MLComputerOperation.testLogging:
+            final logger = Logger('XXX MLComputerTestLogging');
+            logger.info("XXX logging from isolate is working!!!");
+            final Queue<String> logStrings =
+                isolateLogger.getLogStringsAndClear();
+            final test = [List<String>.from(logStrings)];
+            sendPort.send(test);
             break;
         }
       } catch (e, stackTrace) {
@@ -220,5 +231,21 @@ class MLComputer {
         rethrow;
       }
     });
+  }
+
+  Future<void> testLogging() async {
+    try {
+      final test = await _runInIsolate(
+        (
+          MLComputerOperation.testLogging,
+          {},
+        ),
+      ) as List<List<String>>;
+      IsolateLogger.handLogStringsToMainLogger(Queue.from(test[0]));
+      return;
+    } catch (e, s) {
+      _logger.severe("XXX Could not test logging in isolate", e, s);
+      rethrow;
+    }
   }
 }

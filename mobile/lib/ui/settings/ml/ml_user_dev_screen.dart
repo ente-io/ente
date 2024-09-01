@@ -3,6 +3,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -53,6 +54,16 @@ class MLUserDeveloperOptions extends StatelessWidget {
                       labelText: "Reset all local ML",
                       onTap: () async {
                         await deleteAllLocalML(context);
+                      },
+                    ),
+                    // TODO:lau remove below code
+                    const SizedBox(height: 24),
+                    ButtonWidget(
+                      buttonType: ButtonType.neutral,
+                      labelText: "Log something in isolate",
+                      onTap: () async {
+                        await MLComputer.instance.testLogging();
+                        showShortToast(context, "Done");
                       },
                     ),
                     const SafeArea(

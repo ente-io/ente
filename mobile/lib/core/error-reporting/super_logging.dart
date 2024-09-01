@@ -270,6 +270,10 @@ class SuperLogging {
     // write to stdout
     printLog(str);
 
+    saveLogString(str, rec.error);
+  }
+
+  static void saveLogString(String str, Object? error) {
     // push to log queue
     if (fileIsEnabled) {
       fileQueueEntries.add(str + '\n');
@@ -279,8 +283,8 @@ class SuperLogging {
     }
 
     // add error to sentry queue
-    if (sentryIsEnabled && rec.error != null) {
-      _sendErrorToSentry(rec.error!, null).ignore();
+    if (sentryIsEnabled && error != null) {
+      _sendErrorToSentry(error, null).ignore();
     }
   }
 

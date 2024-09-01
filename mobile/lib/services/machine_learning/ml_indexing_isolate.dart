@@ -67,7 +67,10 @@ class MLIndexingIsolate {
   @pragma('vm:entry-point')
   static void _isolateMain(SendPort mainSendPort) async {
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
-    Logger.root.onRecord.listen(SuperLogging.onLogRecord);
+    // TODO:lau move to right isolate logging
+    Logger.root.onRecord.listen((LogRecord rec) {
+      debugPrint('[MLIsolate] ${rec.toPrettyString()}');
+    });
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
     receivePort.listen((message) async {

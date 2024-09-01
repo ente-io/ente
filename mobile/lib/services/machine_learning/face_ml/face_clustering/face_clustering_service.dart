@@ -4,7 +4,7 @@ import "dart:isolate";
 import "dart:typed_data" show Uint8List;
 
 import "package:computer/computer.dart";
-import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:logging/logging.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
@@ -120,7 +120,10 @@ class FaceClusteringService {
   /// The main execution function of the isolate.
   static void _isolateMain(SendPort mainSendPort) async {
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
-    Logger.root.onRecord.listen(SuperLogging.onLogRecord);
+    // TODO:lau move to right isolate logging
+    Logger.root.onRecord.listen((LogRecord rec) {
+      debugPrint('[MLIsolate] ${rec.toPrettyString()}');
+    });
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
 
