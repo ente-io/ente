@@ -32,6 +32,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   );
   final List<String> _messages = [];
   final _debouncer = Debouncer(const Duration(milliseconds: 500));
+  late final Timer _didYouKnowTimer;
 
   @override
   void initState() {
@@ -62,7 +63,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         }
       }
     });
-    Timer.periodic(const Duration(seconds: 5), (Timer timer) {
+    _didYouKnowTimer =
+        Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
         return;
       }
@@ -85,6 +87,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     _firstImportEvent.cancel();
     _importProgressEvent.cancel();
     _debouncer.cancelDebounceTimer();
+    _didYouKnowTimer.cancel();
     super.dispose();
   }
 
