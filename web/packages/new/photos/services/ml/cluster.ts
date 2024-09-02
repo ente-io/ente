@@ -119,8 +119,10 @@ export interface ClusteringOpts {
     minBlur: number;
     minScore: number;
     minClusterSize: number;
-    batchSize: number;
     joinThreshold: number;
+    earlyExitThreshold: number;
+    batchSize: number;
+    lookbackSize: number;
 }
 
 export interface ClusterPreview {
@@ -182,11 +184,13 @@ export const clusterFaces = (
 ) => {
     const {
         method,
-        batchSize,
         minBlur,
         minScore,
         minClusterSize,
         joinThreshold,
+        earlyExitThreshold,
+        batchSize,
+        lookbackSize,
     } = opts;
     const t = Date.now();
 
@@ -258,6 +262,7 @@ export const clusterFaces = (
             ({ clusters: embeddingClusters } = clusterLinear(
                 embeddingBatch,
                 joinThreshold,
+                earlyExitThreshold,
             ));
         }
 
@@ -296,10 +301,7 @@ export const clusterFaces = (
 
                 // Use a higher cosine similarity threshold if either of the two
                 // faces are blurry.
-                const threshold =
-                    existingFace.blur < 200 || newFace.blur < 200
-                        ? 0.9
-                        : joinThreshold;
+                const threshold = joinThreshold;
                 if (csim > threshold && csim > nnCosineSimilarity) {
                     nnCluster = existingCluster;
                     nnCosineSimilarity = csim;
@@ -510,7 +512,8 @@ export const clusterLinear_Direct = (
 
 const clusterLinear = (
     embeddings: number[][],
-    threshold: number,
+    joinThreshold: number,
+    earlyExitThreshold: number,
 ): ClusterLinearResult => {
     const clusters: EmbeddingCluster[] = [];
     const clusterIndexForEmbeddingIndex = new Map<number, number>();
@@ -534,7 +537,7 @@ const clusterLinear = (
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(ei, ej);
-            if (csim > threshold) {
+            if (csim > joinThreshold) {
                 if (csim > nnCosineSimilarity) {
                     nnIndex = j;
                     nnCosineSimilarity = csim;
@@ -546,38 +549,25 @@ const clusterLinear = (
                         nClusterCosineSimilarity = csim;
                     }
                 }
+
+                // If we've found something "near enough", stop looking for a
+                // better match. This speeds up clustering.
+                if (csim < earlyExitThreshold) break;
             }
         }
 
         if (nClusterIndex) {
             // Found a neighbouring cluster close enough, add ourselves to that.
-
             ensure(clusters[nClusterIndex]).push(i);
             clusterIndexForEmbeddingIndex.set(i, nClusterIndex);
         } else if (nnIndex) {
-            // Find the cluster the nearest neighbour belongs to, if any.
-            const nnClusterIndex = clusterIndexForEmbeddingIndex.get(nnIndex);
-
-            if (nnClusterIndex) {
-                // TODO-Cluster remove this case.
-                // If the neighbour is already part of a cluster, also add
-                // ourselves to that cluster.
-
-                // ensure(clusters[nnClusterIndex]).push(i);
-                // clusterIndexForEmbeddingIndex.set(i, nnClusterIndex);
-                throw new Error("We shouldn't have reached here");
-            } else {
-                // Otherwise create a new cluster with us and our nearest
-                // neighbour.
-
-                clusterIndexForEmbeddingIndex.set(i, clusters.length);
-                clusterIndexForEmbeddingIndex.set(nnIndex, clusters.length);
-                clusters.push([i, nnIndex]);
-            }
+            // Otherwise create a new cluster with us and our nearest neighbour.
+            clusterIndexForEmbeddingIndex.set(i, clusters.length);
+            clusterIndexForEmbeddingIndex.set(nnIndex, clusters.length);
+            clusters.push([i, nnIndex]);
         } else {
-            // We didn't find a neighbour within the threshold. Create a new
-            // cluster with only this embedding.
-
+            // We didn't find a cluster or a neighbouring face within the
+            // threshold. Create a new cluster with only this embedding.
             clusterIndexForEmbeddingIndex.set(i, clusters.length);
             clusters.push([i]);
         }

@@ -114,7 +114,9 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                 minScore: 0.8,
                 minClusterSize: 2,
                 joinThreshold: 0.7,
-                batchSize: 12500,
+                earlyExitThreshold: 0.2,
+                batchSize: 10000,
+                lookbackSize: 2500,
             },
             onSubmit: (values) =>
                 onCluster({
@@ -123,7 +125,9 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                     minScore: toFloat(values.minScore),
                     minClusterSize: toFloat(values.minClusterSize),
                     joinThreshold: toFloat(values.joinThreshold),
+                    earlyExitThreshold: toFloat(values.earlyExitThreshold),
                     batchSize: toFloat(values.batchSize),
+                    lookbackSize: toFloat(values.lookbackSize),
                 }),
         });
 
@@ -171,6 +175,12 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         size="small"
                         onChange={handleChange}
                     />
+                </Stack>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
                     <TextField
                         name="joinThreshold"
                         label="joinThreshold"
@@ -179,9 +189,23 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         onChange={handleChange}
                     />
                     <TextField
+                        name="earlyExitThreshold"
+                        label="earlyExitThreshold"
+                        value={values.earlyExitThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
                         name="batchSize"
                         label="batchSize"
                         value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="lookbackSize"
+                        label="lookbackSize"
+                        value={values.lookbackSize}
                         size="small"
                         onChange={handleChange}
                     />
@@ -233,7 +257,7 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
 
     const itemSize = (index: number) =>
         index === 0
-            ? 140
+            ? 200
             : index === 1
               ? 130
               : Array.isArray(items[index - 2])
