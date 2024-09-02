@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:collection" show Queue;
 import "dart:io" show File;
 import 'dart:isolate';
 import 'dart:typed_data' show Uint8List;
@@ -75,54 +74,60 @@ class MLComputer {
       final args = message[1] as Map<String, dynamic>;
       final sendPort = message[2] as SendPort;
 
+      late final Object data;
       try {
-        switch (function) {
-          case MLComputerOperation.generateFaceThumbnails:
-            final imagePath = args['imagePath'] as String;
-            final Uint8List imageData = await File(imagePath).readAsBytes();
-            final faceBoxesJson =
-                args['faceBoxesList'] as List<Map<String, dynamic>>;
-            final List<FaceBox> faceBoxes =
-                faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
-            final List<Uint8List> results =
-                await generateFaceThumbnailsUsingCanvas(
-              imageData,
-              faceBoxes,
-            );
-            sendPort.send(List.from(results));
-          case MLComputerOperation.loadModel:
-            final modelName = args['modelName'] as String;
-            final modelPath = args['modelPath'] as String;
-            final int address = await MlModel.loadModel(
-              modelName,
-              modelPath,
-            );
-            sendPort.send(address);
-            break;
-          case MLComputerOperation.initializeClipTokenizer:
-            final vocabPath = args["vocabPath"] as String;
-            await ClipTextTokenizer.instance.init(vocabPath);
-            sendPort.send(true);
-            break;
-          case MLComputerOperation.runClipText:
-            //TODO:lau check logging here
-            final textEmbedding = await ClipTextEncoder.predict(args);
-            sendPort.send(List<double>.from(textEmbedding, growable: false));
-            break;
-          case MLComputerOperation.testLogging:
-            final logger = Logger('XXX MLComputerTestLogging');
-            logger.info("XXX logging from isolate is working!!!");
-            final Queue<String> logStrings =
-                isolateLogger.getLogStringsAndClear();
-            final logs = List<String>.from(logStrings);
-            sendPort.send({"data": true, "logs": logs});
-            break;
-        }
+        data = await cases(function, args);
       } catch (e, stackTrace) {
-        sendPort
-            .send({'error': e.toString(), 'stackTrace': stackTrace.toString()});
+        data = {
+          'error': e.toString(),
+          'stackTrace': stackTrace.toString(),
+        };
       }
+      final logs = List<String>.from(isolateLogger.getLogStringsAndClear());
+      sendPort.send({"data": data, "logs": logs});
     });
+  }
+
+  /// WARNING: Only return primitives: https://api.flutter.dev/flutter/dart-isolate/SendPort/send.html
+  static Future<dynamic> cases(
+    MLComputerOperation function,
+    Map<String, dynamic> args,
+  ) async {
+    switch (function) {
+      case MLComputerOperation.generateFaceThumbnails:
+        final imagePath = args['imagePath'] as String;
+        final Uint8List imageData = await File(imagePath).readAsBytes();
+        final faceBoxesJson =
+            args['faceBoxesList'] as List<Map<String, dynamic>>;
+        final List<FaceBox> faceBoxes =
+            faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
+        final List<Uint8List> results = await generateFaceThumbnailsUsingCanvas(
+          imageData,
+          faceBoxes,
+        );
+        return List.from(results);
+      case MLComputerOperation.loadModel:
+        final modelName = args['modelName'] as String;
+        final modelPath = args['modelPath'] as String;
+        final int address = await MlModel.loadModel(
+          modelName,
+          modelPath,
+        );
+        return address;
+      case MLComputerOperation.initializeClipTokenizer:
+        final vocabPath = args["vocabPath"] as String;
+        await ClipTextTokenizer.instance.init(vocabPath);
+        return true;
+      case MLComputerOperation.runClipText:
+        //TODO:lau check logging here
+        final textEmbedding = await ClipTextEncoder.predict(args);
+        return List<double>.from(textEmbedding, growable: false);
+      case MLComputerOperation.testLogging:
+        final logger = Logger('XXX MLComputerTestLogging');
+        logger.info("XXX logging from isolate is working!!!");
+        throw Exception("XXX logging from isolate testing exception handling");
+        return true;
+    }
   }
 
   /// The common method to run any operation in the isolate. It sends the [message] to [_isolateMain] and waits for the result.
@@ -137,15 +142,18 @@ class MLComputer {
       _mainSendPort.send([message.$1.index, message.$2, answerPort.sendPort]);
 
       answerPort.listen((receivedMessage) {
-        if (receivedMessage is Map && receivedMessage.containsKey('error')) {
+        final logs = receivedMessage['logs'] as List<String>;
+        IsolateLogger.handLogStringsToMainLogger(logs);
+        final data = receivedMessage['data'];
+        if (data is Map && data.containsKey('error')) {
           // Handle the error
-          final errorMessage = receivedMessage['error'];
-          final errorStackTrace = receivedMessage['stackTrace'];
+          final errorMessage = data['error'];
+          final errorStackTrace = data['stackTrace'];
           final exception = Exception(errorMessage);
           final stackTrace = StackTrace.fromString(errorStackTrace);
           completer.completeError(exception, stackTrace);
         } else {
-          completer.complete(receivedMessage);
+          completer.complete(data);
         }
       });
 
@@ -240,10 +248,8 @@ class MLComputer {
           MLComputerOperation.testLogging,
           {},
         ),
-      ) as Map<String, Object>;
-      final logs = result['logs'] as List<String>;
-      IsolateLogger.handLogStringsToMainLogger(logs);
-      return result['data'] as bool;
+      ) as bool;
+      return result;
     } catch (e, s) {
       _logger.severe("XXX Could not test logging in isolate", e, s);
       rethrow;
