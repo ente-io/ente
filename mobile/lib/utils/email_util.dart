@@ -123,7 +123,7 @@ Future<void> _sendLogs(
   }
 }
 
-Future<void> sendLogsForInit(
+Future<void> triggerSendLogs(
   String toEmail,
   String? subject,
   String? body,

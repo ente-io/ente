@@ -11,10 +11,12 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
+import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
-  const LoadingPhotosWidget({Key? key}) : super(key: key);
+  const LoadingPhotosWidget({super.key});
 
   @override
   State<LoadingPhotosWidget> createState() => _LoadingPhotosWidgetState();
@@ -29,6 +31,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     initialPage: 0,
   );
   final List<String> _messages = [];
+  final _debouncer = Debouncer(const Duration(milliseconds: 500));
 
   @override
   void initState() {
@@ -81,6 +84,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   void dispose() {
     _firstImportEvent.cancel();
     _importProgressEvent.cancel();
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 
@@ -91,87 +95,102 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    isLightMode
-                        ? Image.asset(
-                            'assets/loading_photos_background.png',
-                            color: Colors.white.withOpacity(0.5),
-                            colorBlendMode: BlendMode.modulate,
-                          )
-                        : Image.asset(
-                            'assets/loading_photos_background_dark.png',
-                            color: Colors.white.withOpacity(0.25),
-                            colorBlendMode: BlendMode.modulate,
-                          ),
-                    Column(
-                      children: [
-                        const SizedBox(height: 24),
-                        Lottie.asset(
-                          'assets/loadingGalleryLottie.json',
-                          height: 400,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Text(
-                  _loadingMessage,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.subTextColor,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onScaleEnd: (details) {
+              _debouncer.run(() async {
+                unawaited(
+                  triggerSendLogs(
+                    "support@ente.io",
+                    "Stuck on loading local photos screen on ${Platform.operatingSystem}",
+                    null,
                   ),
-                ),
-                const SizedBox(height: 54),
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          S.of(context).didYouKnow,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.greenText,
-                              ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    SizedBox(
-                      height: 175,
-                      child: Stack(
+                );
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      isLightMode
+                          ? Image.asset(
+                              'assets/loading_photos_background.png',
+                              color: Colors.white.withOpacity(0.5),
+                              colorBlendMode: BlendMode.modulate,
+                            )
+                          : Image.asset(
+                              'assets/loading_photos_background_dark.png',
+                              color: Colors.white.withOpacity(0.25),
+                              colorBlendMode: BlendMode.modulate,
+                            ),
+                      Column(
                         children: [
-                          PageView.builder(
-                            scrollDirection: Axis.vertical,
-                            controller: _pageController,
-                            itemBuilder: (context, index) {
-                              return _getMessage(_messages[index]);
-                            },
-                            itemCount: _messages.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                          ),
-                          const Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: BottomShadowWidget(),
+                          const SizedBox(height: 24),
+                          Lottie.asset(
+                            'assets/loadingGalleryLottie.json',
+                            height: 400,
                           ),
                         ],
                       ),
+                    ],
+                  ),
+                  Text(
+                    _loadingMessage,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.subTextColor,
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 54),
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            S.of(context).didYouKnow,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge!
+                                .copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.greenText,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      SizedBox(
+                        height: 175,
+                        child: Stack(
+                          children: [
+                            PageView.builder(
+                              scrollDirection: Axis.vertical,
+                              controller: _pageController,
+                              itemBuilder: (context, index) {
+                                return _getMessage(_messages[index]);
+                              },
+                              itemCount: _messages.length,
+                              physics: const NeverScrollableScrollPhysics(),
+                            ),
+                            const Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: BottomShadowWidget(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
