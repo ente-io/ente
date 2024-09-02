@@ -155,104 +155,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
             ),
     });
 
-    const Form = memo(
-        ({
-            values,
-            handleSubmit,
-            handleChange,
-            isSubmitting,
-        }: FormikProps<ClusteringOpts>) => (
-            <form onSubmit={handleSubmit}>
-                <Stack>
-                    <Stack
-                        direction="row"
-                        gap={1}
-                        sx={{ ".MuiFormControl-root": { flex: "1" } }}
-                    >
-                        <TextField
-                            name="method"
-                            label="method"
-                            value={values.method}
-                            select
-                            size="small"
-                            onChange={handleChange}
-                        >
-                            {["hdbscan", "linear"].map((v) => (
-                                <MenuItem key={v} value={v}>
-                                    {v}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-                        <TextField
-                            name="minBlur"
-                            label="minBlur"
-                            value={values.minBlur}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            name="minScore"
-                            label="minScore"
-                            value={values.minScore}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            name="minClusterSize"
-                            label="minClusterSize"
-                            value={values.minClusterSize}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                    </Stack>
-                    <Stack
-                        direction="row"
-                        gap={1}
-                        sx={{ ".MuiFormControl-root": { flex: "1" } }}
-                    >
-                        <TextField
-                            name="joinThreshold"
-                            label="joinThreshold"
-                            value={values.joinThreshold}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            name="earlyExitThreshold"
-                            label="earlyExitThreshold"
-                            value={values.earlyExitThreshold}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            name="batchSize"
-                            label="batchSize"
-                            value={values.batchSize}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            name="lookbackSize"
-                            label="lookbackSize"
-                            value={values.lookbackSize}
-                            size="small"
-                            onChange={handleChange}
-                        />
-                    </Stack>
-                    <Box marginInlineStart={"auto"} p={1}>
-                        <Button
-                            color="secondary"
-                            type="submit"
-                            disabled={isSubmitting}
-                        >
-                            Cluster
-                        </Button>
-                    </Box>
-                </Stack>
-            </form>
-        ),
-    );
-
     return (
         <Stack>
             <Typography paddingInline={1}>Parameters</Typography>
@@ -261,6 +163,104 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
         </Stack>
     );
 };
+
+const Form = memo(
+    ({
+        values,
+        handleSubmit,
+        handleChange,
+        isSubmitting,
+    }: FormikProps<ClusteringOpts>) => (
+        <form onSubmit={handleSubmit}>
+            <Stack>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
+                    <TextField
+                        name="method"
+                        label="method"
+                        value={values.method}
+                        select
+                        size="small"
+                        onChange={handleChange}
+                    >
+                        {["hdbscan", "linear"].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        name="minBlur"
+                        label="minBlur"
+                        value={values.minBlur}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="minScore"
+                        label="minScore"
+                        value={values.minScore}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="minClusterSize"
+                        label="minClusterSize"
+                        value={values.minClusterSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
+                    <TextField
+                        name="joinThreshold"
+                        label="joinThreshold"
+                        value={values.joinThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="earlyExitThreshold"
+                        label="earlyExitThreshold"
+                        value={values.earlyExitThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="batchSize"
+                        label="batchSize"
+                        value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="lookbackSize"
+                        label="lookbackSize"
+                        value={values.lookbackSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Box marginInlineStart={"auto"} p={1}>
+                    <Button
+                        color="secondary"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        Cluster
+                    </Button>
+                </Box>
+            </Stack>
+        </form>
+    ),
+);
 
 const Loader: React.FC<ClusteringProgress> = ({ completed, total }) => (
     <VerticallyCentered mt={4} gap={2}>
