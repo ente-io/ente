@@ -297,21 +297,26 @@ export const clusterFaces = (
         // Merge the new clusters we got from this batch into the existing
         // clusters, using the lookback embeddings as a link when they exist.
 
-        let [existingCount, newCount] = [0, 0];
-
-        for (const batchCluster of batchClusters) {
-            // If any of the faces in this batch cluster were part of an
-            // existing cluster, also add the other faces from that batch to
-            // that existing cluster.
-
+        // Find the existing clusters before modifying any state so that we
+        // don't end up merging into clusters from the same batch.
+        const annotatedBatch = batchClusters.map((batchCluster) => {
             let existingClusterIndex: number | undefined;
             for (const j of batchCluster) {
                 const faceIndex = batchStart + j;
                 existingClusterIndex = clusterIndexForFaceIndex.get(faceIndex);
                 if (existingClusterIndex !== undefined) break;
             }
+            return [batchCluster, existingClusterIndex] as const;
+        });
 
+        let [existingCount, newCount] = [0, 0];
+
+        for (const [batchCluster, existingClusterIndex] of annotatedBatch) {
             if (existingClusterIndex !== undefined) {
+                // If any of the faces in this batch cluster were part of an
+                // existing cluster, also add the other faces from that batch to
+                // that existing cluster.
+
                 const existingCluster = ensure(clusters[existingClusterIndex]);
                 for (const j of batchCluster) {
                     const faceIndex = batchStart + j;
