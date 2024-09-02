@@ -116,6 +116,7 @@ export interface ClusteringOpts {
     method: "linear" | "hdbscan";
     minBlur: number;
     minScore: number;
+    minClusterSize: number;
     batchSize: number;
     joinThreshold: number;
 }
@@ -176,7 +177,14 @@ export const clusterFaces = (
     faceIndexes: FaceIndex[],
     opts: ClusteringOpts,
 ) => {
-    const { method, batchSize, minBlur, minScore, joinThreshold } = opts;
+    const {
+        method,
+        batchSize,
+        minBlur,
+        minScore,
+        minClusterSize,
+        joinThreshold,
+    } = opts;
     const t = Date.now();
 
     // A flattened array of faces.
@@ -299,7 +307,12 @@ export const clusterFaces = (
         }
     }
 
-    const sortedClusters = clusters.sort(
+    // Prune clusters that are smaller than the threshold.
+    const validClusters = clusters.filter(
+        (cs) => cs.faceIDs.length > minClusterSize,
+    );
+
+    const sortedClusters = validClusters.sort(
         (a, b) => b.faceIDs.length - a.faceIDs.length,
     );
 
@@ -361,7 +374,7 @@ export const clusterFaces = (
 
     const timeTakenMs = Date.now() - t;
     log.info(
-        `Clustered ${faces.length} faces into ${clusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
+        `Clustered ${faces.length} faces into ${sortedClusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
     );
 
     return {
@@ -507,11 +520,13 @@ const clusterLinear = (
             const nnClusterIndex = clusterIndexForEmbeddingIndex.get(nnIndex);
 
             if (nnClusterIndex) {
+                // TODO-Cluster remove this case.
                 // If the neighbour is already part of a cluster, also add
                 // ourselves to that cluster.
 
-                ensure(clusters[nnClusterIndex]).push(i);
-                clusterIndexForEmbeddingIndex.set(i, nnClusterIndex);
+                // ensure(clusters[nnClusterIndex]).push(i);
+                // clusterIndexForEmbeddingIndex.set(i, nnClusterIndex);
+                throw new Error("We shouldn't have reached here");
             } else {
                 // Otherwise create a new cluster with us and our nearest
                 // neighbour.
