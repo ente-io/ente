@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "Lamentamos que te vayas. Por favor, explícanos el motivo para ayudarnos a mejorar.",
   "feedback": "Sugerencias",
   "kindlyHelpUsWithThisInformation": "Por favor ayúdanos con esta información",
-  "confirmDeletePrompt": "Sí, quiero eliminar permanentemente esta cuenta y todos sus datos.",
   "confirmAccountDeletion": "Confirmar borrado de cuenta",
   "deleteAccountPermanentlyButton": "Eliminar cuenta permanentemente",
   "yourAccountHasBeenDeleted": "Tu cuenta ha sido eliminada",

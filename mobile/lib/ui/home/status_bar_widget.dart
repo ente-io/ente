@@ -16,6 +16,7 @@ import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_widget.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
+import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 const double kContainerHeight = 36;
@@ -90,7 +91,16 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
           centerWidget: _showStatus
               ? _showErrorBanner
                   ? const Text("ente", style: brandStyleMedium)
-                  : const SyncStatusWidget()
+                  : GestureDetector(
+                      onTap: () {
+                        routeToPage(
+                          context,
+                          const BackupStatusScreen(),
+                          forceCustomPageRoute: true,
+                        ).ignore();
+                      },
+                      child: const SyncStatusWidget(),
+                    )
               : const Text("ente", style: brandStyleMedium),
         ),
         _showErrorBanner

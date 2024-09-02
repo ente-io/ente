@@ -205,6 +205,15 @@ export const sidebar = [
                     },
                 ],
             },
+            {
+                text: "Troubleshooting",
+                items: [
+                    {
+                        text: "Windows login",
+                        link: "/auth/troubleshooting/windows-login",
+                    },
+                ],
+            },
         ],
     },
     {

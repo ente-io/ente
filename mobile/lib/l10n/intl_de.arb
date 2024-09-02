@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "Wir bedauern sehr, dass du dein Konto löschen möchtest. Du würdest uns sehr helfen, wenn du uns kurz einige Gründe hierfür nennen könntest.",
   "feedback": "Rückmeldung",
   "kindlyHelpUsWithThisInformation": "Bitte gib diese Daten ein",
-  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten endgültig und unwiderruflich löschen.",
+  "confirmDeletePrompt": "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen.",
   "confirmAccountDeletion": "Kontolöschung bestätigen",
   "deleteAccountPermanentlyButton": "Konto unwiderruflich löschen",
   "yourAccountHasBeenDeleted": "Dein Benutzerkonto wurde gelöscht",

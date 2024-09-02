@@ -714,7 +714,7 @@ const detectBlur = (
 
 type FaceDirection = "left" | "right" | "straight";
 
-const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
+export const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
     const leftEye = landmarks[0]!;
     const rightEye = landmarks[1]!;
     const nose = landmarks[2]!;

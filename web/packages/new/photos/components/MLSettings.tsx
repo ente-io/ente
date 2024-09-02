@@ -8,7 +8,6 @@ import {
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
@@ -341,8 +340,7 @@ const ManageML: React.FC<ManageMLProps> = ({
 
     // TODO-Cluster
     const router = useRouter();
-    const wipClusterNow = () => wipCluster();
-    const wipClusterShowNow = () => router.push("/cluster-debug");
+    const wipClusterDebug = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -391,28 +389,15 @@ const ManageML: React.FC<ManageMLProps> = ({
                 <Box>
                     <MenuItemGroup>
                         <EnteMenuItem
-                            label={ut("Create clusters • internal only option")}
-                            onClick={wipClusterNow}
+                            label={ut(
+                                "Create clusters   • internal only option",
+                            )}
+                            onClick={wipClusterDebug}
                         />
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create in-memory clusters from arbitrary 2k photos. Nothing will be saved or synced to remote. You can view the results in search dropdown.",
-                        )}
-                    />
-                </Box>
-            )}
-            {showClusterOpt && (
-                <Box>
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            label={ut("View clusters • internal only option")}
-                            onClick={wipClusterShowNow}
-                        />
-                    </MenuItemGroup>
-                    <MenuSectionTitle
-                        title={ut(
-                            "Variant of above that opens a page with debug info.",
+                            "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
                         )}
                     />
                 </Box>

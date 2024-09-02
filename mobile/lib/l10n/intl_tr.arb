@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "Aramızdan ayrıldığınız için üzgünüz. Lütfen kendimizi geliştirmemize yardımcı olun. Neden ayrıldığınızı Açıklar mısınız.",
   "feedback": "Geri Bildirim",
   "kindlyHelpUsWithThisInformation": "Lütfen bu bilgilerle bize yardımcı olun",
-  "confirmDeletePrompt": "Evet, bu hesabı ve tüm verileri kalıcı olarak silmek istiyorum.",
   "confirmAccountDeletion": "Hesap silme işlemini onayla",
   "deleteAccountPermanentlyButton": "Hesabımı kalıcı olarak sil",
   "yourAccountHasBeenDeleted": "Hesabınız silindi",

@@ -3,7 +3,7 @@ import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
-import type { CGroup, FaceCluster } from "./cluster-new";
+import type { CGroup, FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
 
 /**

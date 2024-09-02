@@ -4,10 +4,10 @@ import {
     faceCrop,
     wipClusterDebugPageContents,
     type ClusterDebugPageContents,
-    type FaceFileNeighbour,
-    type FaceFileNeighbours,
 } from "@/new/photos/services/ml";
-import type { Face } from "@/new/photos/services/ml/face";
+import { type ClusteringOpts } from "@/new/photos/services/ml/cluster";
+import { faceDirection, type Face } from "@/new/photos/services/ml/face";
+import type { EnteFile } from "@/new/photos/types/file";
 import {
     FlexWrapper,
     FluidContainer,
@@ -15,56 +15,52 @@ import {
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
-import { Box, IconButton, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    MenuItem,
+    Stack,
+    styled,
+    TextField,
+    Typography,
+} from "@mui/material";
+import { useFormik } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { VariableSizeList } from "react-window";
+import {
+    areEqual,
+    VariableSizeList,
+    type ListChildComponentProps,
+} from "react-window";
 
 // TODO-Cluster Temporary component for debugging
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
+
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
 
-    useEffect(() => {
-        showNavBar(true);
-        cluster();
-    }, []);
-
-    const cluster = async () => {
+    const cluster = async (opts: ClusteringOpts) => {
+        setClusterRes(undefined);
         startLoading();
-        setClusterRes(await wipClusterDebugPageContents());
+        setClusterRes(await wipClusterDebugPageContents(opts));
         finishLoading();
     };
 
-    if (!clusterRes) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
+    useEffect(() => showNavBar(true), []);
+
     return (
         <>
-            <Typography variant="small">
-                {`${clusterRes.clusters.length} clusters`}
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Showing only upto first 30 faces (and only upto 30 nearest
-                neighbours of each).
-            </Typography>
-            <hr />
             <Container>
                 <AutoSizer>
                     {({ height, width }) => (
-                        <ClusterPhotoList
-                            width={width}
-                            height={height}
-                            clusterRes={clusterRes}
-                        />
+                        <ClusterList {...{ width, height, clusterRes }}>
+                            <OptionsForm onCluster={cluster} />
+                        </ClusterList>
                     )}
                 </AutoSizer>
             </Container>
@@ -84,7 +80,7 @@ const Options: React.FC = () => {
                 <IconButton onClick={close}>
                     <BackButton />
                 </IconButton>
-                <Box sx={{ marginInline: "auto" }}>{pt("Faces")}</Box>
+                <Box sx={{ marginInline: "auto" }}>{pt("Face Clusters")}</Box>
             </FluidContainer>
         </SelectionBar>
     );
@@ -101,19 +97,122 @@ const Container = styled("div")`
     }
 `;
 
-interface ClusterPhotoListProps {
-    height: number;
-    width: number;
-    clusterRes: ClusterDebugPageContents;
+interface OptionsFormProps {
+    onCluster: (opts: ClusteringOpts) => Promise<void>;
 }
 
-const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
-    height,
+const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
+    // Formik converts nums to a string on edit.
+    const toFloat = (n: number | string) =>
+        typeof n == "string" ? parseFloat(n) : n;
+
+    const { values, handleSubmit, handleChange, isSubmitting } =
+        useFormik<ClusteringOpts>({
+            initialValues: {
+                method: "linear",
+                minBlur: 10,
+                minScore: 0.8,
+                minClusterSize: 2,
+                joinThreshold: 0.7,
+                batchSize: 12500,
+            },
+            onSubmit: (values) =>
+                onCluster({
+                    method: values.method,
+                    minBlur: toFloat(values.minBlur),
+                    minScore: toFloat(values.minScore),
+                    minClusterSize: toFloat(values.minClusterSize),
+                    joinThreshold: toFloat(values.joinThreshold),
+                    batchSize: toFloat(values.batchSize),
+                }),
+        });
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <Stack>
+                <Typography paddingInline={1}>Parameters</Typography>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
+                    <TextField
+                        name="method"
+                        label="method"
+                        value={values.method}
+                        select
+                        size="small"
+                        onChange={handleChange}
+                    >
+                        {["hdbscan", "linear"].map((v) => (
+                            <MenuItem key={v} value={v}>
+                                {v}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        name="minBlur"
+                        label="minBlur"
+                        value={values.minBlur}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="minScore"
+                        label="minScore"
+                        value={values.minScore}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="minClusterSize"
+                        label="minClusterSize"
+                        value={values.minClusterSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="joinThreshold"
+                        label="joinThreshold"
+                        value={values.joinThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="batchSize"
+                        label="batchSize"
+                        value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                </Stack>
+                <Box marginInlineStart={"auto"} p={1}>
+                    <Button
+                        color="secondary"
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        Cluster
+                    </Button>
+                </Box>
+                {isSubmitting && <Loader />}
+            </Stack>
+        </form>
+    );
+};
+
+type ClusterListProps = ClusterResHeaderProps & {
+    height: number;
+    width: number;
+};
+
+const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
     width,
+    height,
     clusterRes,
+    children,
 }) => {
-    const { faceFNs, clusterIDForFaceID } = clusterRes;
-    const [itemList, setItemList] = useState<ItemListItem[]>([]);
+    const [items, setItems] = useState<Item[]>([]);
     const listRef = useRef(null);
 
     const columns = useMemo(
@@ -125,78 +224,67 @@ const ClusterPhotoList: React.FC<ClusterPhotoListProps> = ({
     const listItemHeight = 120 * shrinkRatio + 24 + 4;
 
     useEffect(() => {
-        setItemList(itemListFromFaceFNs(faceFNs, columns));
-    }, [columns, faceFNs]);
+        setItems(clusterRes ? itemsFromClusterRes(clusterRes, columns) : []);
+    }, [columns, clusterRes]);
 
     useEffect(() => {
         listRef.current?.resetAfterIndex(0);
-    }, [itemList]);
+    }, [items]);
 
-    const getItemSize = (i: number) =>
-        Array.isArray(itemList[i]) ? listItemHeight : 36;
-
-    const generateKey = (i: number) =>
-        Array.isArray(itemList[i])
-            ? `${itemList[i][0].enteFile.id}/${itemList[i][0].face.faceID}-${itemList[i].slice(-1)[0].enteFile.id}/${itemList[i].slice(-1)[0].face.faceID}-${i}`
-            : `${itemList[i].faceID}-${i}`;
+    const itemSize = (index: number) =>
+        index === 0
+            ? 140
+            : index === 1
+              ? 130
+              : Array.isArray(items[index - 2])
+                ? listItemHeight
+                : 36;
 
     return (
         <VariableSizeList
-            itemData={{ itemList, columns, shrinkRatio }}
-            ref={listRef}
-            itemSize={getItemSize}
             height={height}
             width={width}
-            itemCount={itemList.length}
-            itemKey={generateKey}
+            ref={listRef}
+            itemData={{ items, clusterRes, columns, shrinkRatio, children }}
+            itemCount={2 + items.length}
+            itemSize={itemSize}
             overscanCount={3}
-            useIsScrolling
         >
-            {({ index, style, data }) => {
-                const { itemList, columns, shrinkRatio } = data;
-                const item = itemList[index];
-                return (
-                    <ListItem style={style}>
-                        <ListContainer
-                            columns={columns}
-                            shrinkRatio={shrinkRatio}
-                        >
-                            {!Array.isArray(item) ? (
-                                <LabelContainer span={columns}>
-                                    {`score ${item.score.toFixed(2)} blur ${item.blur.toFixed(0)}`}
-                                </LabelContainer>
-                            ) : (
-                                item.map((faceFN, i) => (
-                                    <FaceItem
-                                        key={i.toString()}
-                                        {...{ faceFN, clusterIDForFaceID }}
-                                    />
-                                ))
-                            )}
-                        </ListContainer>
-                    </ListItem>
-                );
-            }}
+            {ClusterListItemRenderer}
         </VariableSizeList>
     );
 };
 
-type ItemListItem = Face | FaceFileNeighbour[];
+type Item = string | FaceWithFile[];
 
-const itemListFromFaceFNs = (
-    faceFNs: FaceFileNeighbours[],
+const itemsFromClusterRes = (
+    clusterRes: ClusterDebugPageContents,
     columns: number,
 ) => {
-    const result: ItemListItem[] = [];
-    for (let index = 0; index < faceFNs.length; index++) {
-        const { face, neighbours } = faceFNs[index];
-        result.push(face);
+    const { clusterPreviewsWithFile, unclusteredFacesWithFile } = clusterRes;
+
+    const result: Item[] = [];
+    for (let index = 0; index < clusterPreviewsWithFile.length; index++) {
+        const { clusterSize, faces } = clusterPreviewsWithFile[index];
+        result.push(`cluster size ${clusterSize.toFixed(2)}`);
         let lastIndex = 0;
-        while (lastIndex < neighbours.length) {
-            result.push(neighbours.slice(lastIndex, lastIndex + columns));
+        while (lastIndex < faces.length) {
+            result.push(faces.slice(lastIndex, lastIndex + columns));
             lastIndex += columns;
         }
     }
+
+    if (unclusteredFacesWithFile.length) {
+        result.push(`•• unclustered faces ${unclusteredFacesWithFile.length}`);
+        let lastIndex = 0;
+        while (lastIndex < unclusteredFacesWithFile.length) {
+            result.push(
+                unclusteredFacesWithFile.slice(lastIndex, lastIndex + columns),
+            );
+            lastIndex += columns;
+        }
+    }
+
     return result;
 };
 
@@ -209,66 +297,90 @@ const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * 4) /
     (columns * 120);
 
-interface FaceItemProps {
-    faceFN: FaceFileNeighbour;
-    clusterIDForFaceID: Map<string, string>;
+// It in necessary to define the item renderer otherwise it gets recreated every
+// time the parent rerenders, causing the form to lose its submitting state.
+const ClusterListItemRenderer = React.memo<ListChildComponentProps>(
+    ({ index, style, data }) => {
+        const { clusterRes, columns, shrinkRatio, items, children } = data;
+
+        if (index == 0) return <div style={style}>{children}</div>;
+
+        if (index == 1)
+            return (
+                <div style={style}>
+                    <ClusterResHeader clusterRes={clusterRes} />
+                </div>
+            );
+
+        const item = items[index - 2];
+        return (
+            <ListItem style={style}>
+                <ListContainer columns={columns} shrinkRatio={shrinkRatio}>
+                    {!Array.isArray(item) ? (
+                        <LabelContainer span={columns}>{item}</LabelContainer>
+                    ) : (
+                        item.map((f, i) => (
+                            <FaceItem key={i.toString()} faceWithFile={f} />
+                        ))
+                    )}
+                </ListContainer>
+            </ListItem>
+        );
+    },
+    areEqual,
+);
+
+interface ClusterResHeaderProps {
+    clusterRes: ClusterDebugPageContents | undefined;
 }
 
-const FaceItem: React.FC<FaceItemProps> = ({ faceFN, clusterIDForFaceID }) => {
-    const { face, enteFile, cosineSimilarity } = faceFN;
-    const { faceID } = face;
+const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
+    if (!clusterRes) return null;
 
-    const [objectURL, setObjectURL] = useState<string | undefined>();
-
-    useEffect(() => {
-        let didCancel = false;
-        let thisObjectURL: string | undefined;
-
-        void faceCrop(faceID, enteFile).then((blob) => {
-            if (blob && !didCancel)
-                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
-        });
-
-        return () => {
-            didCancel = true;
-            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
-        };
-    }, [faceID, enteFile]);
+    const {
+        totalFaceCount,
+        filteredFaceCount,
+        clusteredFaceCount,
+        unclusteredFaceCount,
+        timeTakenMs,
+        clusters,
+    } = clusterRes;
 
     return (
-        <FaceChip
-            style={{
-                outline: outlineForCluster(clusterIDForFaceID.get(faceID)),
-                outlineOffset: "2px",
-            }}
-        >
-            {objectURL && (
-                <img
-                    style={{
-                        objectFit: "cover",
-                        width: "100%",
-                        height: "100%",
-                    }}
-                    src={objectURL}
-                />
-            )}
-            <Typography variant="small" color="text.muted" textAlign="right">
-                {cosineSimilarity.toFixed(2)}
+        <Stack m={1}>
+            <Typography mb={1} variant="small">
+                {`${clusters.length} clusters in ${(timeTakenMs / 1000).toFixed(0)} seconds • ${totalFaceCount} faces ${filteredFaceCount} filtered ${clusteredFaceCount} clustered ${unclusteredFaceCount} unclustered`}
             </Typography>
-        </FaceChip>
+            <Typography variant="small" color="text.muted">
+                Showing only top 30 clusters, bottom 30 clusters, and
+                unclustered faces.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                For each cluster showing only up to 50 faces, sorted by cosine
+                similarity to highest scoring face in the cluster.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Below each face is its{" "}
+                <b>blur - score - cosineSimilarity - direction</b>.
+            </Typography>
+            <Typography variant="small" color="text.muted">
+                Faces added to the cluster as a result of next batch merging are
+                outlined.
+            </Typography>
+        </Stack>
     );
 };
 
-const FaceChip = styled(Box)`
-    width: 120px;
-    height: 120px;
+const Loader = () => (
+    <VerticallyCentered mt={4}>
+        <EnteSpinner />
+    </VerticallyCentered>
+);
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
 `;
-
-const outlineForCluster = (clusterID: string | undefined) =>
-    clusterID ? `1px solid oklch(0.8 0.2 ${hForID(clusterID)})` : undefined;
-
-const hForID = (id: string) =>
-    ([...id].reduce((s, c) => s + c.charCodeAt(0), 0) % 10) * 36;
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "shrinkRatio",
@@ -293,7 +405,78 @@ const LabelContainer = styled(ListItemContainer)`
     height: 32px;
 `;
 
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
+interface FaceItemProps {
+    faceWithFile: FaceWithFile;
+}
+
+interface FaceWithFile {
+    face: Face;
+    enteFile: EnteFile;
+    cosineSimilarity?: number;
+    wasMerged?: boolean;
+}
+
+const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
+    const { face, enteFile, cosineSimilarity, wasMerged } = faceWithFile;
+    const { faceID } = face;
+
+    const [objectURL, setObjectURL] = useState<string | undefined>();
+
+    useEffect(() => {
+        let didCancel = false;
+        let thisObjectURL: string | undefined;
+
+        void faceCrop(faceID, enteFile).then((blob) => {
+            if (blob && !didCancel)
+                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
+        });
+
+        return () => {
+            didCancel = true;
+            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
+        };
+    }, [faceID, enteFile]);
+
+    const fd = faceDirection(face.detection);
+    const d = fd == "straight" ? "•" : fd == "left" ? "←" : "→";
+    return (
+        <FaceChip
+            style={{
+                outline: wasMerged ? `1px solid gray` : undefined,
+                outlineOffset: "2px",
+            }}
+        >
+            {objectURL && (
+                <img
+                    style={{
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                    }}
+                    src={objectURL}
+                />
+            )}
+            <Stack direction="row" justifyContent="space-between">
+                <Typography variant="small" color="text.muted">
+                    {`b${face.blur.toFixed(0)} `}
+                </Typography>
+                <Typography variant="small" color="text.muted">
+                    {`s${face.score.toFixed(1)}`}
+                </Typography>
+                {cosineSimilarity && (
+                    <Typography variant="small" color="text.muted">
+                        {`c${cosineSimilarity.toFixed(1)}`}
+                    </Typography>
+                )}
+                <Typography variant="small" color="text.muted">
+                    {`d${d}`}
+                </Typography>
+            </Stack>
+        </FaceChip>
+    );
+};
+
+const FaceChip = styled(Box)`
+    width: 120px;
+    height: 120px;
 `;

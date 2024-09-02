@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "Vi är ledsna att se dig lämna oss. Vänligen dela dina synpunkter för att hjälpa oss att förbättra.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Vänligen hjälp oss med denna information",
-  "confirmDeletePrompt": "Ja, jag vill ta bort detta konto och all data permanent.",
   "confirmAccountDeletion": "Bekräfta radering av konto",
   "deleteAccountPermanentlyButton": "Radera kontot permanent",
   "yourAccountHasBeenDeleted": "Ditt konto har raderats",
@@ -281,6 +280,7 @@
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
   "inviteYourFriends": "Bjud in dina vänner",
+  "help": "Hjälp",
   "subscribe": "Prenumerera",
   "trash": "Papperskorg",
   "photoSmallCase": "foto",

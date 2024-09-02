@@ -20,14 +20,13 @@ import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
-import { clusterFacesHdb, type CGroup, type FaceCluster } from "./cluster-new";
-import { regenerateFaceCrops } from "./crop";
 import {
-    clearMLDB,
-    faceIndex,
-    faceIndexes,
-    indexableAndIndexedCounts,
-} from "./db";
+    type ClusteringOpts,
+    type ClusterPreviewFace,
+    type FaceCluster,
+} from "./cluster";
+import { regenerateFaceCrops } from "./crop";
+import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import type { Face } from "./face";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
@@ -349,118 +348,99 @@ export const wipSearchPersons = async () => {
     return _wip_searchPersons ?? [];
 };
 
-export interface FaceFileNeighbours {
-    face: Face;
-    neighbours: FaceFileNeighbour[];
+export interface ClusterPreviewWithFile {
+    clusterSize: number;
+    faces: ClusterPreviewFaceWithFile[];
 }
 
-export interface FaceFileNeighbour {
-    face: Face;
+export type ClusterPreviewFaceWithFile = ClusterPreviewFace & {
     enteFile: EnteFile;
-    cosineSimilarity: number;
-}
+};
 
 export interface ClusterDebugPageContents {
-    faceFNs: FaceFileNeighbours[];
+    totalFaceCount: number;
+    filteredFaceCount: number;
+    clusteredFaceCount: number;
+    unclusteredFaceCount: number;
+    timeTakenMs: number;
     clusters: FaceCluster[];
-    clusterIDForFaceID: Map<string, string>;
+    clusterPreviewsWithFile: ClusterPreviewWithFile[];
+    unclusteredFacesWithFile: {
+        face: Face;
+        enteFile: EnteFile;
+    }[];
 }
 
-export const wipClusterDebugPageContents = async (): Promise<
-    ClusterDebugPageContents | undefined
-> => {
-    if (!(await wipClusterEnable())) return undefined;
+export const wipClusterDebugPageContents = async (
+    opts: ClusteringOpts,
+): Promise<ClusterDebugPageContents> => {
+    if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    log.info("clustering");
+    log.info("clustering", opts);
     _wip_isClustering = true;
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    // const { faceAndNeigbours, clusters, cgroups } = await clusterFaces(
-    const { faceAndNeigbours, clusters, cgroups } = await clusterFacesHdb(
-        await faceIndexes(),
-    );
-    const searchPersons = await convertToSearchPersons(clusters, cgroups);
+    const { clusterPreviews, clusters, cgroups, unclusteredFaces, ...rest } =
+        await worker().then((w) => w.clusterFaces(opts));
 
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
-    const faceFNs = faceAndNeigbours
-        .map(({ face, neighbours }) => ({
-            face,
-            neighbours: neighbours.map(({ face, cosineSimilarity }) => ({
+    const clusterPreviewsWithFile = clusterPreviews.map(
+        ({ clusterSize, faces }) => ({
+            clusterSize,
+            faces: faces.map(({ face, ...rest }) => ({
                 face,
                 enteFile: fileForFace(face),
-                cosineSimilarity,
+                ...rest,
             })),
-        }))
-        .sort((a, b) => b.face.score - a.face.score);
-
-    const clusterIDForFaceID = new Map(
-        clusters.flatMap((cluster) =>
-            cluster.faceIDs.map((id) => [id, cluster.id]),
-        ),
+        }),
     );
+
+    const unclusteredFacesWithFile = unclusteredFaces.map((face) => ({
+        face,
+        enteFile: fileForFace(face),
+    }));
+
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    const searchPersons = cgroups
+        .map((cgroup) => {
+            const faceID = ensure(cgroup.displayFaceID);
+            const fileID = ensure(fileIDFromFaceID(faceID));
+            const file = ensure(localFileByID.get(fileID));
+
+            const faceIDs = cgroup.clusterIDs
+                .map((id) => ensure(clusterByID.get(id)))
+                .flatMap((cluster) => cluster.faceIDs);
+            const fileIDs = faceIDs
+                .map((faceID) => fileIDFromFaceID(faceID))
+                .filter((fileID) => fileID !== undefined);
+
+            return {
+                id: cgroup.id,
+                name: cgroup.name,
+                faceIDs,
+                files: [...new Set(fileIDs)],
+                displayFaceID: faceID,
+                displayFaceFile: file,
+            };
+        })
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
     _wip_searchPersons = searchPersons;
     triggerStatusUpdate();
 
-    const prunedFaceFNs = faceFNs.slice(0, 30).map(({ face, neighbours }) => ({
-        face,
-        neighbours: neighbours.slice(0, 30),
-    }));
-
-    return { faceFNs: prunedFaceFNs, clusters, clusterIDForFaceID };
-};
-
-export const wipCluster = () => void wipClusterDebugPageContents();
-
-const convertToSearchPersons = async (
-    clusters: FaceCluster[],
-    cgroups: CGroup[],
-) => {
-    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
-
-    const localFiles = await getAllLocalFiles();
-    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
-
-    const result: SearchPerson[] = [];
-    for (const cgroup of cgroups) {
-        const displayFaceID = cgroup.displayFaceID;
-        if (!displayFaceID) {
-            // TODO-Cluster
-            assertionFailed(`cgroup ${cgroup.id} without displayFaceID`);
-            continue;
-        }
-
-        const displayFaceFileID = fileIDFromFaceID(displayFaceID);
-        if (!displayFaceFileID) continue;
-
-        const displayFaceFile = localFileByID.get(displayFaceFileID);
-        if (!displayFaceFile) {
-            assertionFailed(`Face ID ${displayFaceFileID} without local file`);
-            continue;
-        }
-
-        const fileIDs = cgroup.clusterIDs
-            .map((id) => clusterByID.get(id))
-            .flatMap((cluster) => cluster?.faceIDs ?? [])
-            .map((faceID) => fileIDFromFaceID(faceID))
-            .filter((fileID) => fileID !== undefined);
-
-        result.push({
-            id: cgroup.id,
-            name: cgroup.name,
-            files: [...new Set(fileIDs)],
-            displayFaceID,
-            displayFaceFile,
-        });
-    }
-
-    return result.sort((a, b) => b.files.length - a.files.length);
+    return {
+        clusters,
+        clusterPreviewsWithFile,
+        unclusteredFacesWithFile,
+        ...rest,
+    };
 };
 
 export type MLStatus =

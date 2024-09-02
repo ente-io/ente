@@ -6,10 +6,7 @@ import {
     getLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
-import {
-    wipClusterEnable,
-    wipHasSwitchedOnceCmpAndSet,
-} from "@/new/photos/services/ml";
+import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -677,11 +674,8 @@ export default function Gallery() {
         // TODO-Cluster
         if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
             setTimeout(() => {
-                if (!wipHasSwitchedOnceCmpAndSet()) {
-                    void wipClusterEnable().then(
-                        (y) => y && router.push("cluster-debug"),
-                    );
-                }
+                if (!wipHasSwitchedOnceCmpAndSet())
+                    router.push("cluster-debug");
             }, 2000);
         }
     }, []);
