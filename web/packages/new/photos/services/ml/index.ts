@@ -16,7 +16,6 @@ import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
-import { getAllLocalFiles } from "../files";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
@@ -381,11 +380,15 @@ export const wipClusterDebugPageContents = async (
     _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const { clusterPreviews, clusters, cgroups, unclusteredFaces, ...rest } =
-        await worker().then((w) => w.clusterFaces(opts));
+    const {
+        localFileByID,
+        clusterPreviews,
+        clusters,
+        cgroups,
+        unclusteredFaces,
+        ...rest
+    } = await worker().then((w) => w.clusterFaces(opts));
 
-    const localFiles = await getAllLocalFiles();
-    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 

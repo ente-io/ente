@@ -277,7 +277,11 @@ export class MLWorker {
 
     // TODO-Cluster
     async clusterFaces(opts: ClusteringOpts) {
-        return clusterFaces(await faceIndexes(), opts);
+        return clusterFaces(
+            await faceIndexes(),
+            await getAllLocalFiles(),
+            opts,
+        );
     }
 }
 

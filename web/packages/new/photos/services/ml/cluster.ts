@@ -1,6 +1,8 @@
+import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
+import type { EnteFile } from "../../types/file";
 import { type EmbeddingCluster, clusterHdbscan } from "./cluster-hdb";
 import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
@@ -175,6 +177,7 @@ export interface ClusterPreviewFace {
  */
 export const clusterFaces = (
     faceIndexes: FaceIndex[],
+    localFiles: EnteFile[],
     opts: ClusteringOpts,
 ) => {
     const {
@@ -187,12 +190,32 @@ export const clusterFaces = (
     } = opts;
     const t = Date.now();
 
+    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+
     // A flattened array of faces.
     const allFaces = [...enumerateFaces(faceIndexes)];
-    const faces = allFaces
+    const filteredFaces = allFaces
         .filter((f) => f.blur > minBlur)
         .filter((f) => f.score > minScore);
     // .slice(0, 2000);
+
+    const fileForFaceID = new Map(
+        filteredFaces.map(({ faceID }) => [
+            faceID,
+            ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID)))),
+        ]),
+    );
+
+    const fileForFace = ({ faceID }: Face) => ensure(fileForFaceID.get(faceID));
+
+    // Sort faces so that photos taken temporally close together are close.
+    //
+    // This is a heuristic to help the clustering algorithm produce better results.
+    const faces = filteredFaces.sort(
+        (a, b) =>
+            fileForFace(a).metadata.creationTime -
+            fileForFace(b).metadata.creationTime,
+    );
 
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
@@ -382,6 +405,7 @@ export const clusterFaces = (
         filteredFaceCount,
         clusteredFaceCount,
         unclusteredFaceCount,
+        localFileByID,
         clusterPreviews,
         clusters: sortedClusters,
         cgroups,
@@ -401,6 +425,21 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
         }
     }
 }
+
+/**
+ * Extract the fileID of the {@link EnteFile} to which the face belongs from its
+ * faceID.
+ *
+ * TODO-Cluster - duplicated with ml/index.ts
+ */
+const fileIDFromFaceID = (faceID: string) => {
+    const fileID = parseInt(faceID.split("_")[0] ?? "");
+    if (isNaN(fileID)) {
+        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
+        return undefined;
+    }
+    return fileID;
+};
 
 interface ClusterLinearResult {
     clusters: EmbeddingCluster[];
