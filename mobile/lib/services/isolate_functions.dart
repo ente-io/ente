@@ -33,7 +33,9 @@ Future<dynamic> isolateFunction(
   Map<String, dynamic> args,
 ) async {
   switch (function) {
-    // Cases for MLComputer
+    /// Cases for MLComputer start here
+
+    /// MLComputer
     case IsolateOperation.generateFaceThumbnails:
       final imagePath = args['imagePath'] as String;
       final Uint8List imageData = await File(imagePath).readAsBytes();
@@ -45,6 +47,8 @@ Future<dynamic> isolateFunction(
         faceBoxes,
       );
       return List.from(results);
+
+    /// MLComputer
     case IsolateOperation.loadModel:
       final modelName = args['modelName'] as String;
       final modelPath = args['modelPath'] as String;
@@ -53,18 +57,28 @@ Future<dynamic> isolateFunction(
         modelPath,
       );
       return address;
+
+    /// MLComputer
     case IsolateOperation.initializeClipTokenizer:
       final vocabPath = args["vocabPath"] as String;
       await ClipTextTokenizer.instance.init(vocabPath);
       return true;
+
+    /// MLComputer
     case IsolateOperation.runClipText:
       //TODO:lau check logging here
       final textEmbedding = await ClipTextEncoder.predict(args);
       return List<double>.from(textEmbedding, growable: false);
+
+    /// MLComputer
     case IsolateOperation.testLogging:
       final logger = Logger('XXX MLComputerTestLogging');
       logger.info("XXX logging from isolate is working!!!");
-      throw Exception("XXX logging from isolate testing exception handling");
+      // throw Exception("XXX logging from isolate testing exception handling");
       return true;
+
+    /// Cases for MLComputer ends here
+
+    ///
   }
 }

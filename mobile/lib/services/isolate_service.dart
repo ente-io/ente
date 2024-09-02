@@ -9,7 +9,6 @@ import "package:photos/services/isolate_functions.dart";
 import "package:synchronized/synchronized.dart";
 
 abstract class SuperIsolate {
-  static final Logger abstractLogger = Logger('SuperIsolate');
   Logger get logger;
 
   Timer? _inactivityTimer;
@@ -20,7 +19,7 @@ abstract class SuperIsolate {
   final _functionLock = Lock();
 
   bool get isDartUiIsolate;
-  bool get automaticDispose;
+  bool get shouldAutomaticDispose;
   String get isolateName;
 
   late dynamic _isolate;
@@ -49,7 +48,7 @@ abstract class SuperIsolate {
               );
         _mainSendPort = await _receivePort.first as SendPort;
 
-        if (automaticDispose) _resetInactivityTimer();
+        if (shouldAutomaticDispose) _resetInactivityTimer();
         logger.info('initIsolate done');
         _isIsolateSpawned = true;
       } catch (e) {
@@ -87,13 +86,16 @@ abstract class SuperIsolate {
     });
   }
 
-  /// The common method to run any operation in the isolate. It sends the [message] to [_isolateMain] and waits for the result.
-  Future<dynamic> _runInIsolate(
-    (int, Map<String, dynamic>) message,
+  /// The common method to run any operation in the isolate.
+  /// It sends the [message] to [_isolateMain] and waits for the result.
+  /// The actual function executed is [isolateFunction].
+  Future<dynamic> runInIsolate(
+    IsolateOperation operation,
+    Map<String, dynamic> args,
   ) async {
     await _initIsolate();
     return _functionLock.synchronized(() async {
-      if (automaticDispose) _resetInactivityTimer();
+      if (shouldAutomaticDispose) _resetInactivityTimer();
 
       if (_postLockStop()) {
         return null;
@@ -103,7 +105,7 @@ abstract class SuperIsolate {
       final answerPort = ReceivePort();
 
       _activeTasks++;
-      _mainSendPort.send([message.$1, message.$2, answerPort.sendPort]);
+      _mainSendPort.send([operation.index, args, answerPort.sendPort]);
 
       answerPort.listen((receivedMessage) {
         final logs = receivedMessage['logs'] as List<String>;
