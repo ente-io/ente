@@ -189,6 +189,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1天', other: '${count} 天')}";
 
+  static String m72(count) => "正在保存 ${count} 个回忆...";
+
   static String m67(endDate) => "有效期至 ${endDate}";
 
   static String m68(email) => "验证 ${email}";
@@ -1352,6 +1354,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("升级"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件上传到相册..."),
+        "uploadingMultipleMemories": m72,
+        "uploadingSingleMemory":
+            MessageLookupByLibrary.simpleMessage("正在保存 1 个回忆..."),
         "upto50OffUntil4thDec":
             MessageLookupByLibrary.simpleMessage("最高五折优惠，直至12月4日。"),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
