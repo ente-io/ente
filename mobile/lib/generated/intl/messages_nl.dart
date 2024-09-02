@@ -363,6 +363,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Graag verifiëren om tweestapsverificatie te configureren"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Gelieve te verifiëren om het verwijderen van je account te starten"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Verifieer uzelf om uw toegangssleutel te bekijken"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Graag verifiëren om uw actieve sessies te bekijken"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -401,6 +403,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Back-up maken via mobiele data"),
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Back-up instellingen"),
+        "backupStatus": MessageLookupByLibrary.simpleMessage("Back-upstatus"),
+        "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Items die zijn geback-upt, worden hier getoond"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Back-up video\'s"),
         "blackFridaySale":
@@ -515,7 +520,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Account verwijderen bevestigen"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen."),
+            "Ja, ik wil mijn account en de bijbehorende gegevens verspreid over alle apps permanent verwijderen."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord bevestigen"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage(
@@ -1715,6 +1720,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Bekijk alle EXIF gegevens"),
         "viewLargeFiles":
             MessageLookupByLibrary.simpleMessage("Grote bestanden"),
+        "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
+            "Bekijk bestanden die de meeste opslagruimte verbruiken."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("Logboeken bekijken"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Toon herstelsleutel"),

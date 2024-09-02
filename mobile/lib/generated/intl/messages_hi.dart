@@ -30,8 +30,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "अकाउंट डिलीट करने की पुष्टि करें"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "हां, मैं इस अकाउंट और इसके सभी डेटा को स्थायी रूप से हटाना चाहता/चाहती हूं।"),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड की पुष्टि करें"),
         "createAccount": MessageLookupByLibrary.simpleMessage("अकाउंट बनायें"),

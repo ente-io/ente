@@ -113,8 +113,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("تایید"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("تایید حذف حساب کاربری"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "بله، من می‌خواهم برای همیشه این حساب کاربری و تمام اطلاعات آن را حذف کنم."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور"),
         "confirmRecoveryKey":

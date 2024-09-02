@@ -24,7 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'הוסף פריט', two: 'הוסף פריטים', many: 'הוסף פריטים', other: 'הוסף פריטים')}";
 
   static String m9(count) =>
-      "${Intl.plural(count, zero: 'אין משתתפים', one: '1 משתתף', two: '${count} משתתפים', many: '${count} משתתפים', other: '${count} משתתפים')}";
+      "${Intl.plural(count, zero: 'אין משתתפים', one: '1 משתתף', two: '2 משתתפים', other: '${count} משתתפים')}";
 
   static String m12(paymentProvider) =>
       "אנא בטל את המנוי הקיים מ-${paymentProvider} קודם";
@@ -46,7 +46,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "אנא צור איתנו קשר ב-support@ente.io על מנת לנהל את המנוי ${provider}.";
 
   static String m19(count) =>
-      "${Intl.plural(count, one: 'מחק ${count} פריט', two: 'מחק ${count} פריטים', many: 'מחק ${count} פריטים', other: 'מחק ${count} פריטים')}";
+      "${Intl.plural(count, one: 'מחק ${count} פריט', two: 'מחק ${count} פריטים', other: 'מחק ${count} פריטים')}";
 
   static String m20(currentlyDeleting, totalCount) =>
       "מוחק ${currentlyDeleting} / ${totalCount}";
@@ -103,7 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "היי, תוכל לוודא שזה מזהה האימות שלך של ente.io: ${verificationID}";
 
   static String m54(numberOfPeople) =>
-      "${Intl.plural(numberOfPeople, zero: 'שתף עם אנשים ספציפיים', one: 'שותף עם איש 1', two: 'שותף עם ${numberOfPeople} אנשים', many: 'שותף עם ${numberOfPeople} אנשים', other: 'שותף עם ${numberOfPeople} אנשים')}";
+      "${Intl.plural(numberOfPeople, zero: 'שתף עם אנשים ספציפיים', one: 'שותף עם איש 1', two: 'שותף עם 2 אנשים', other: 'שותף עם ${numberOfPeople} אנשים')}";
 
   static String m55(emailIDs) => "הושתף ע\"י ${emailIDs}";
 
@@ -295,8 +295,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "האם אתה בטוח שאתה רוצה להשבית את האימות הדו-גורמי?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("אשר את מחיקת החשבון"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "כן, אני רוצה למחוק לצמיתות את החשבון הזה וכל המידע שלו."),
         "confirmPassword": MessageLookupByLibrary.simpleMessage("אמת סיסמא"),
         "confirmPlanChange":
             MessageLookupByLibrary.simpleMessage("אשר שינוי תוכנית"),

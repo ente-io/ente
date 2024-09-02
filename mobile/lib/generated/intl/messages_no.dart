@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'no';
 
   static String m9(count) =>
-      "${Intl.plural(count, zero: 'Ingen deltakere', one: '1 Deltaker', other: '${count} Deltakere')}";
+      "${Intl.plural(count, zero: 'Ingen deltakere', one: '1 deltaker', other: '${count} deltakere')}";
 
   static String m13(user) =>
       "${user} vil ikke kunne legge til flere bilder til dette albumet\n\nDe vil fortsatt kunne fjerne eksisterende bilder lagt til av dem";
@@ -131,8 +131,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekreft sletting av konto"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Bekreft passordet"),
         "confirmRecoveryKey": MessageLookupByLibrary.simpleMessage(

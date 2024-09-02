@@ -350,6 +350,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupOverMobileData":
             MessageLookupByLibrary.simpleMessage("通过移动数据备份"),
         "backupSettings": MessageLookupByLibrary.simpleMessage("备份设置"),
+        "backupStatus": MessageLookupByLibrary.simpleMessage("备份状态"),
+        "backupStatusDescription":
+            MessageLookupByLibrary.simpleMessage("已备份的项目将显示在此处"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("备份视频"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("黑色星期五特惠"),
         "blog": MessageLookupByLibrary.simpleMessage("博客"),
@@ -439,7 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("确认删除账户"),
         "confirmDeletePrompt":
-            MessageLookupByLibrary.simpleMessage("是的，我想永久删除此账户及其相关数据."),
+            MessageLookupByLibrary.simpleMessage("是的，我想永久删除此账户及其所有关联的应用程序的数据。"),
         "confirmPassword": MessageLookupByLibrary.simpleMessage("请确认密码"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage("确认更改计划"),
         "confirmRecoveryKey": MessageLookupByLibrary.simpleMessage("确认恢复密钥"),

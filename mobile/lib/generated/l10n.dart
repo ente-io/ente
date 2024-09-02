@@ -6569,6 +6569,26 @@ class S {
     );
   }
 
+  /// `Preserving {count} memories...`
+  String uploadingMultipleMemories(Object count) {
+    return Intl.message(
+      'Preserving $count memories...',
+      name: 'uploadingMultipleMemories',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Preserving 1 memory...`
+  String get uploadingSingleMemory {
+    return Intl.message(
+      'Preserving 1 memory...',
+      name: 'uploadingSingleMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Archiving...`
   String get archiving {
     return Intl.message(
@@ -9547,6 +9567,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'sv'),
+      Locale.fromSubtags(languageCode: 'ta'),
       Locale.fromSubtags(languageCode: 'te'),
       Locale.fromSubtags(languageCode: 'th'),
       Locale.fromSubtags(languageCode: 'ti'),
