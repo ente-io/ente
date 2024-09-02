@@ -70,7 +70,7 @@ export default function ClusterDebug() {
             minScore: 0.8,
             minClusterSize: 2,
             joinThreshold: 0.7,
-            earlyExitThreshold: 0.2,
+            earlyExitThreshold: 0.8,
             batchSize: 10000,
             lookbackSize: 2500,
         },
