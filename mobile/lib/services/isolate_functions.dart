@@ -4,11 +4,22 @@ import 'dart:typed_data' show Uint8List;
 import "package:logging/logging.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/utils/image_ml_util.dart";
+import "package:photos/utils/ml_util.dart";
 
 enum IsolateOperation {
+  /// [MLIndexingIsolate]
+  analyzeImage,
+
+  /// [MLIndexingIsolate]
+  loadIndexingModels,
+
+  /// [MLIndexingIsolate]
+  releaseIndexingModels,
+
   /// [MLComputer]
   generateFaceThumbnails,
 
@@ -33,6 +44,43 @@ Future<dynamic> isolateFunction(
   Map<String, dynamic> args,
 ) async {
   switch (function) {
+    /// Cases for MLIndexingIsolate start here
+
+    /// MLIndexingIsolate
+    case IsolateOperation.analyzeImage:
+      final MLResult result = await analyzeImageStatic(args);
+      return result.toJsonString();
+
+    /// MLIndexingIsolate
+    case IsolateOperation.loadIndexingModels:
+      final modelNames = args['modelNames'] as List<String>;
+      final modelPaths = args['modelPaths'] as List<String>;
+      final addresses = <int>[];
+      for (int i = 0; i < modelNames.length; i++) {
+        // TODO:lau check logging here
+        final int address = await MlModel.loadModel(
+          modelNames[i],
+          modelPaths[i],
+        );
+        addresses.add(address);
+      }
+      return List<int>.from(addresses, growable: false);
+
+    /// MLIndexingIsolate
+    case IsolateOperation.releaseIndexingModels:
+      // TODO:lau check logging here
+      final modelNames = args['modelNames'] as List<String>;
+      final modelAddresses = args['modelAddresses'] as List<int>;
+      for (int i = 0; i < modelNames.length; i++) {
+        await MlModel.releaseModel(
+          modelNames[i],
+          modelAddresses[i],
+        );
+      }
+      return true;
+
+    /// Cases for MLIndexingIsolate stop here
+
     /// Cases for MLComputer start here
 
     /// MLComputer

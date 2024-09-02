@@ -99,7 +99,7 @@ abstract class SuperIsolate {
     return _functionLock.synchronized(() async {
       if (shouldAutomaticDispose) _resetInactivityTimer();
 
-      if (postFunctionlockStop()) {
+      if (postFunctionlockStop(operation)) {
         return null;
       }
 
@@ -135,7 +135,7 @@ abstract class SuperIsolate {
     });
   }
 
-  bool postFunctionlockStop() => false;
+  bool postFunctionlockStop(IsolateOperation operation) => false;
 
   /// Resets a timer that kills the isolate after a certain amount of inactivity.
   ///
@@ -149,7 +149,7 @@ abstract class SuperIsolate {
         _resetInactivityTimer();
       } else {
         logger.info(
-          'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
+          'Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
         );
         _disposeIsolate();
       }
