@@ -16,7 +16,7 @@ abstract class SuperIsolate {
   final Duration _inactivityDuration = const Duration(seconds: 120);
   int _activeTasks = 0;
 
-  final _initLock = Lock();
+  final _initIsolateLock = Lock();
   final _functionLock = Lock();
 
   bool get isDartUiIsolate;
@@ -31,7 +31,7 @@ abstract class SuperIsolate {
   bool _isIsolateSpawned = false;
 
   Future<void> _initIsolate() async {
-    return _initLock.synchronized(() async {
+    return _initIsolateLock.synchronized(() async {
       if (_isIsolateSpawned) return;
 
       _receivePort = ReceivePort();
@@ -99,7 +99,7 @@ abstract class SuperIsolate {
     return _functionLock.synchronized(() async {
       if (shouldAutomaticDispose) _resetInactivityTimer();
 
-      if (_postLockStop()) {
+      if (postFunctionlockStop()) {
         return null;
       }
 
@@ -135,7 +135,7 @@ abstract class SuperIsolate {
     });
   }
 
-  bool _postLockStop() => false;
+  bool postFunctionlockStop() => false;
 
   /// Resets a timer that kills the isolate after a certain amount of inactivity.
   ///
@@ -156,12 +156,12 @@ abstract class SuperIsolate {
     });
   }
 
-  Future<void> _onDispose();
+  Future<void> onDispose();
 
   void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;
     logger.info('Disposing isolate');
-    await _onDispose();
+    await onDispose();
     _isIsolateSpawned = false;
     _isolate.kill();
     _receivePort.close();

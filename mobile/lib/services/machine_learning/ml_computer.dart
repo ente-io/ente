@@ -26,6 +26,9 @@ class MLComputer extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => false;
 
+  @override
+  Future<void> onDispose() async => {};
+
   // Singleton pattern
   MLComputer._privateConstructor();
   static final MLComputer instance = MLComputer._privateConstructor();
