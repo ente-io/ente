@@ -38,8 +38,9 @@ extension SuperString on String {
 }
 
 extension SuperLogRecord on LogRecord {
-  String toPrettyString([String? extraLines]) {
-    final header = "[$loggerName] [$level] [$time]";
+  String toPrettyString([String? extraLines, bool inIsolate = false]) {
+    final header =
+        "[$loggerName${inIsolate ? " (in isolate)" : ""}] [$level] [$time]";
 
     var msg = "$header $message";
 
