@@ -89,25 +89,17 @@ If you fancy Docker, you can also run the CLI within a container.
 Modify the `docker-compose.yml` and add volume. ``cli-data`` volume is
 mandatory, you can add more volumes for your export directory.
 
-Build the docker image
-
+Build and run the container in detached mode
 ```shell
-docker build -t ente:latest .
+docker-compose up -d --build
 ```
-
 Note that [BuildKit](https://docs.docker.com/go/buildkit/) is needed to build
 this image. If you face this issue, a quick fix is to add `DOCKER_BUILDKIT=1` in
 front of the build command.
 
-Start the container in detached mode
-
-```shell
-docker-compose up -d
-```
-
 `exec` into the container
 ```shell
-docker-compose exec ente /bin/sh -c "./ente version"
-docker-compose exec ente /bin/sh -c "./ente account add" 
+docker-compose exec ente-cli /bin/sh -c "./ente-cli version"
+docker-compose exec ente-cli /bin/sh -c "./ente-cli account add" 
 ```
 

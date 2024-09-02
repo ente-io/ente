@@ -17,4 +17,4 @@ RUN go mod download
 
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-     go build -o ente main.go
+     go build -o ente-cli main.go

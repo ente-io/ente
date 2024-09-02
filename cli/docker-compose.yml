@@ -1,9 +1,10 @@
-version: '3'
 services:
-  ente:
-    image: ente:latest
+  ente-cli:
+    build: 
+      context: .
+      tags:
+        - ente-cli:latest
     command: /bin/sh
-    network_mode: host
     volumes:
       # This is mandatory to mount the local directory to the container at /cli-data
       # CLI will use this directory to store the data required for syncing export
