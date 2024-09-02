@@ -401,6 +401,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Backup usando dados móveis"),
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Configurações de backup"),
+        "backupStatus":
+            MessageLookupByLibrary.simpleMessage("Status do Backup"),
+        "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Os itens que foram salvos no backup aparecerão aqui"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Backup de vídeos"),
         "blackFridaySale":
@@ -513,7 +517,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirmar exclusão da conta"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Sim, desejo excluir permanentemente esta conta e todos os seus dados."),
+            "Sim, eu quero excluir permanentemente esta conta e seus dados em todos os aplicativos."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Confirme sua senha"),
         "confirmPlanChange":

@@ -167,8 +167,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("Bekräfta"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekräfta radering av konto"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, jag vill ta bort detta konto och all data permanent."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Bekräfta lösenord"),
         "confirmRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -272,6 +270,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Gå till inställningar"),
         "guestView": MessageLookupByLibrary.simpleMessage("Gästvy"),
+        "help": MessageLookupByLibrary.simpleMessage("Hjälp"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Så här fungerar det"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(

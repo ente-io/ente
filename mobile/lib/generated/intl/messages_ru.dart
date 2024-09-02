@@ -341,7 +341,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "atAFalloutShelter": MessageLookupByLibrary.simpleMessage("в бункере"),
         "authToChangeEmailVerificationSetting":
             MessageLookupByLibrary.simpleMessage(
-                "Авторизуйтесь, чтобы изменить подтверждение электронной почты"),
+                "Пожалуйста, войдите, чтобы изменить настройку подтверждения электронной почты"),
         "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, авторизуйтесь, чтобы изменить настройки экрана блокировки"),
         "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
@@ -390,8 +390,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ошибка резервного копирования"),
         "backupOverMobileData": MessageLookupByLibrary.simpleMessage(
             "Резервное копирование через мобильную сеть"),
-        "backupSettings":
-            MessageLookupByLibrary.simpleMessage("Резервная копия настроек"),
+        "backupSettings": MessageLookupByLibrary.simpleMessage(
+            "Настройки резервного копирования"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Резервное копирование видео"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
@@ -499,7 +499,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Подтвердить удаление учётной записи"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Да, я хочу навсегда удалить эту учётную запись и все её данные."),
+            "Да, я хочу навсегда удалить эту учётную запись и все её данные во всех приложениях Ente."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Подтвердите пароль"),
         "confirmPlanChange":
@@ -676,13 +676,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "email": MessageLookupByLibrary.simpleMessage("Электронная почта"),
         "emailChangedTo": m25,
         "emailNoEnteAccount": m26,
-        "emailVerificationToggle": MessageLookupByLibrary.simpleMessage(
-            "Подтверждение электронной почты"),
+        "emailVerificationToggle":
+            MessageLookupByLibrary.simpleMessage("Вход с кодом на почту"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage(
             "Отправить логи по электронной почте"),
         "empty": MessageLookupByLibrary.simpleMessage("Очистить"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Очистить корзину?"),
         "enable": MessageLookupByLibrary.simpleMessage("Включить"),
+        "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
+            "Ente поддерживает машинное обучение на устройстве для распознавания лиц, умного поиска и других расширенных функций поиска"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Включить карты"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Ваши фотографии будут показаны на карте мира.\n\nЭта карта размещена на Open Street Map, и точное местоположение ваших фотографий никогда не разглашается.\n\nВы можете отключить эту функцию в любое время в настройках."),
@@ -767,7 +769,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Добавьте 5 членов семьи к существующему плану без дополнительной оплаты.\n\nКаждый участник получает свое личное пространство и не может видеть файлы друг друга, если к ним не предоставлен общий доступ.\n\nСемейные планы доступны клиентам, имеющим платную подписку на Ente.\n\nПодпишитесь сейчас, чтобы начать!"),
         "familyPlanPortalTitle": MessageLookupByLibrary.simpleMessage("Семья"),
         "familyPlans": MessageLookupByLibrary.simpleMessage("Семейные планы"),
-        "faq": MessageLookupByLibrary.simpleMessage("ЧаВо"),
+        "faq": MessageLookupByLibrary.simpleMessage("Ответы на ваши вопросы"),
         "faqs":
             MessageLookupByLibrary.simpleMessage("Часто задаваемые вопросы"),
         "favorite": MessageLookupByLibrary.simpleMessage("В избранное"),
@@ -831,7 +833,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Будет полезно, если вы укажете, где нашли нас, так как мы не отслеживаем установки приложения!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "Как вы узнали о Ente? (необязательно)"),
-        "help": MessageLookupByLibrary.simpleMessage("помощь"),
+        "help": MessageLookupByLibrary.simpleMessage("Помощь"),
         "hidden": MessageLookupByLibrary.simpleMessage("Скрыто"),
         "hide": MessageLookupByLibrary.simpleMessage("Скрыть"),
         "hideContent":
@@ -987,6 +989,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Волшебный поиск"),
+        "magicSearchHint": MessageLookupByLibrary.simpleMessage(
+            "Умный поиск позволяет искать фотографии по их содержимому, например, \'цветок\', \'красная машина\', \'паспорт\', \'документы\'"),
         "manage": MessageLookupByLibrary.simpleMessage("Управление"),
         "manageDeviceStorage": MessageLookupByLibrary.simpleMessage(
             "Управление хранилищем устройства"),
@@ -1005,6 +1009,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Товары"),
+        "mlConsent":
+            MessageLookupByLibrary.simpleMessage("Включить машинное обучение"),
+        "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
+            "Я понимаю и хочу включить машинное обучение"),
+        "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
+            "Если вы включите машинное обучение, Ente будет извлекать информацию из файлов (например, геометрию лица), включая те, которыми с вами поделились.\n\nЭто будет происходить на вашем устройстве, и любая сгенерированная биометрическая информация будет зашифрована с использованием сквозного (End-to-End) шифрования между вашим устройством и сервером."),
+        "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Пожалуйста, нажмите здесь, чтобы узнать больше об этой функции в нашей политике конфиденциальности"),
+        "mlConsentTitle":
+            MessageLookupByLibrary.simpleMessage("Включить машинное обучение?"),
+        "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Обратите внимание, что машинное обучение приведёт к повышенному потреблению трафика и батареи, пока все элементы не будут проиндексированы. Рекомендуем использовать ПК версию для более быстрого индексирования. Полученные результаты будут синхронизированы автоматически между устройствами."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Телефон, Web, ПК"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Средний"),
@@ -1303,6 +1319,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Восстановить в альбоме"),
         "restoringFiles":
             MessageLookupByLibrary.simpleMessage("Восстановление файлов..."),
+        "resumableUploads": MessageLookupByLibrary.simpleMessage(
+            "Поддержка дозагрузки файл(а/ов) при разрыве связи"),
         "retry": MessageLookupByLibrary.simpleMessage("Повторить"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, проверьте и удалите те элементы, которые вы считаете что это дубликаты."),
@@ -1609,13 +1627,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "twofactorAuthenticationSuccessfullyReset":
             MessageLookupByLibrary.simpleMessage(
                 "Двухфакторная аутентификация успешно сброшена"),
-        "twofactorSetup": MessageLookupByLibrary.simpleMessage(
-            "Установка двуфакторной аутентификации"),
+        "twofactorSetup": MessageLookupByLibrary.simpleMessage("Вход с 2FA"),
         "unarchive": MessageLookupByLibrary.simpleMessage("Разархивировать"),
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Разархивировать альбом"),
         "unarchiving":
             MessageLookupByLibrary.simpleMessage("Разархивирование..."),
+        "unavailableReferralCode": MessageLookupByLibrary.simpleMessage(
+            "Извините, такого кода не существует."),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Без категории"),
         "unhide": MessageLookupByLibrary.simpleMessage("Показать"),
         "unhideToAlbum":

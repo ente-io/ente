@@ -206,6 +206,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1 day', other: '${count} days')}";
 
+  static String m72(count) => "Preserving ${count} memories...";
+
   static String m67(endDate) => "Valid till ${endDate}";
 
   static String m68(email) => "Verify ${email}";
@@ -1607,6 +1609,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Uploading files to album..."),
+        "uploadingMultipleMemories": m72,
+        "uploadingSingleMemory":
+            MessageLookupByLibrary.simpleMessage("Preserving 1 memory..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
             "Upto 50% off, until 4th Dec."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(

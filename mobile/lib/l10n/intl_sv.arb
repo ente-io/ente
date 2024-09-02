@@ -236,7 +236,7 @@
   "publicLinkEnabled": "Offentlig länk aktiverad",
   "shareALink": "Dela en länk",
   "sharedAlbumSectionDescription": "Skapa delade och samarbetande album med andra Ente användare, inklusive användare med gratisnivån.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Dela med specifika personer} =1 {Delad med en person} other {Delad med {numberOfPeople} personer}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Dela med specifika personer} =1 {Delad med en person} other {Delad med {numberOfPeople} personer}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {

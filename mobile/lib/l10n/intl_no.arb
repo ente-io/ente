@@ -215,7 +215,7 @@
   "after1Month": "Etter 1 måned",
   "after1Year": "Etter 1 år",
   "manageParticipants": "Administrer",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Ingen deltakere} =1 {1 Deltaker} other {{count} Deltakere}}",
+  "albumParticipantsCount": "{count, plural, =0 {Ingen deltakere} =1 {1 deltaker} other {{count} deltakere}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -233,7 +233,8 @@
   "linkHasExpired": "Lenken har utløpt",
   "publicLinkEnabled": "Offentlig lenke aktivert",
   "shareALink": "Del en lenke",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Del med bestemte personer} =1 {Delt med 1 person} other {Delt med {numberOfPeople} personer}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Del med bestemte personer} =1 {Delt med 1 person} other {Delt med {numberOfPeople} personer}}",
+
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {

@@ -518,7 +518,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Kontolöschung bestätigen"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, ich möchte dieses Konto und alle enthaltenen Daten endgültig und unwiderruflich löschen."),
+            "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Passwort wiederholen"),
         "confirmPlanChange":

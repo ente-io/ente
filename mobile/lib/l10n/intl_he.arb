@@ -215,7 +215,8 @@
   "after1Month": "אחרי חודש 1",
   "after1Year": "אחרי שנה 1",
   "manageParticipants": "נהל",
-  "albumParticipantsCount": "{count, plural, one {} two {{count} משתתפים} many {{count} משתתפים}=0 {אין משתתפים} =1 {1 משתתף} other {{count} משתתפים}}",
+  "albumParticipantsCount": "{count, plural, =0 {אין משתתפים} =1 {1 משתתף} two {2 משתתפים} other {{count} משתתפים}}",
+
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -236,7 +237,7 @@
   "publicLinkEnabled": "לינק ציבורי אופשר",
   "shareALink": "שתף קישור",
   "sharedAlbumSectionDescription": "צור אלבומים הניתנים לשיתוף ושיתוף פעולה עם משתמשי ente אחרים, כולל משתמשים בתוכניות החינמיות.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {} two {שותף עם {numberOfPeople} אנשים} many {שותף עם {numberOfPeople} אנשים}=0 {שתף עם אנשים ספציפיים} =1 {שותף עם איש 1} other {שותף עם {numberOfPeople} אנשים}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {שתף עם אנשים ספציפיים} =1 {שותף עם איש 1} two {שותף עם 2 אנשים} other {שותף עם {numberOfPeople} אנשים}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -408,7 +409,7 @@
   "skip": "דלג",
   "updatingFolderSelection": "מעדכן את בחירת התיקיות...",
   "itemCount": "{count, plural, one{{count} פריט} two {{count} פריטים} many {{count} פריטים} other{{count} פריטים}}",
-  "deleteItemCount": "{count, plural, one {} two {מחק {count} פריטים} many {מחק {count} פריטים}=1 {מחק {count} פריט} other {מחק {count} פריטים}}",
+  "deleteItemCount": "{count, plural, =1 {מחק {count} פריט} two {מחק {count} פריטים} other {מחק {count} פריטים}}",
   "duplicateItemsGroup": "{count} קבצים, כל אחד {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",

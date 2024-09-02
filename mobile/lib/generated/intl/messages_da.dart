@@ -43,8 +43,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, jeg ønsker at slette denne konto og alle dens data permanent."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Bekræft adgangskode"),
         "copypasteThisCodentoYourAuthenticatorApp":
