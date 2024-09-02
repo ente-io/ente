@@ -3,6 +3,7 @@ import 'dart:typed_data' show Uint8List;
 
 import "package:logging/logging.dart";
 import "package:photos/models/ml/face/box.dart";
+import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -34,6 +35,9 @@ enum IsolateOperation {
 
   /// [MLComputer]
   testLogging,
+
+  /// [FaceClusteringService]
+  linearIncrementalClustering
 }
 
 /// WARNING: Only return primitives unless you know the method is only going
@@ -125,8 +129,15 @@ Future<dynamic> isolateFunction(
       // throw Exception("XXX logging from isolate testing exception handling");
       return true;
 
-    /// Cases for MLComputer ends here
+    /// Cases for MLComputer end here
 
-    ///
+    /// Cases for FaceClusteringService start here
+
+    /// FaceClusteringService
+    case IsolateOperation.linearIncrementalClustering:
+      final ClusteringResult result = runLinearClustering(args);
+      return result;
+
+    /// Cases for FaceClusteringService end here
   }
 }
