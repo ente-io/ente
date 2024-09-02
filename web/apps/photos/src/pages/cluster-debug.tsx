@@ -52,9 +52,44 @@ import {
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
 
+    // The clustering result.
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
+
+    // Keep the loading state callback as a ref instead of state to prevent
+    // rerendering when the progress gets updated during clustering.
+    const onProgressRef = useRef<OnClusteringProgress | undefined>();
+
+    // Keep the form state at the top level otherwise it gets reset as we
+    // scroll.
+    const formik = useFormik<ClusteringOpts>({
+        initialValues: {
+            method: "linear",
+            minBlur: 10,
+            minScore: 0.8,
+            minClusterSize: 2,
+            joinThreshold: 0.7,
+            earlyExitThreshold: 0.2,
+            batchSize: 10000,
+            lookbackSize: 2500,
+        },
+        onSubmit: (values) =>
+            cluster(
+                {
+                    method: values.method,
+                    minBlur: toFloat(values.minBlur),
+                    minScore: toFloat(values.minScore),
+                    minClusterSize: toFloat(values.minClusterSize),
+                    joinThreshold: toFloat(values.joinThreshold),
+                    earlyExitThreshold: toFloat(values.earlyExitThreshold),
+                    batchSize: toFloat(values.batchSize),
+                    lookbackSize: toFloat(values.lookbackSize),
+                },
+                (progress: ClusteringProgress) =>
+                    onProgressRef.current?.(progress),
+            ),
+    });
 
     const cluster = useCallback(
         async (opts: ClusteringOpts, onProgress: OnClusteringProgress) => {
@@ -74,7 +109,7 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <MemoizedOptionsForm onCluster={cluster} />
+                            <OptionsForm {...{ formik, onProgressRef }} />
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -83,6 +118,10 @@ export default function ClusterDebug() {
         </>
     );
 }
+
+// Formik converts nums to a string on edit.
+const toFloat = (n: number | string) =>
+    typeof n == "string" ? parseFloat(n) : n;
 
 const Options: React.FC = () => {
     const router = useRouter();
@@ -112,59 +151,16 @@ const Container = styled("div")`
     }
 `;
 
-const MemoizedOptionsForm = memo<OptionsFormProps>(({ onCluster }) => (
-    <OptionsForm {...{ onCluster }} />
-));
+type OptionsFormProps = LoaderProps & {
+    formik: FormikProps<ClusteringOpts>;
+};
 
-interface OptionsFormProps {
-    onCluster: (
-        opts: ClusteringOpts,
-        onProgress: OnClusteringProgress,
-    ) => Promise<void>;
-}
-
-const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
-    const [progress, setProgress] = useState<ClusteringProgress>({
-        completed: 0,
-        total: 0,
-    });
-
-    // Formik converts nums to a string on edit.
-    const toFloat = (n: number | string) =>
-        typeof n == "string" ? parseFloat(n) : n;
-
-    const formik = useFormik<ClusteringOpts>({
-        initialValues: {
-            method: "linear",
-            minBlur: 10,
-            minScore: 0.8,
-            minClusterSize: 2,
-            joinThreshold: 0.7,
-            earlyExitThreshold: 0.2,
-            batchSize: 10000,
-            lookbackSize: 2500,
-        },
-        onSubmit: (values) =>
-            onCluster(
-                {
-                    method: values.method,
-                    minBlur: toFloat(values.minBlur),
-                    minScore: toFloat(values.minScore),
-                    minClusterSize: toFloat(values.minClusterSize),
-                    joinThreshold: toFloat(values.joinThreshold),
-                    earlyExitThreshold: toFloat(values.earlyExitThreshold),
-                    batchSize: toFloat(values.batchSize),
-                    lookbackSize: toFloat(values.lookbackSize),
-                },
-                (progress: ClusteringProgress) => setProgress(progress),
-            ),
-    });
-
+const OptionsForm: React.FC<OptionsFormProps> = ({ formik, onProgressRef }) => {
     return (
         <Stack>
             <Typography paddingInline={1}>Parameters</Typography>
             <MemoizedForm {...formik} />
-            {formik.isSubmitting && <Loader {...progress} />}
+            {formik.isSubmitting && <Loader {...{ onProgressRef }} />}
         </Stack>
     );
 };
@@ -267,38 +263,55 @@ const MemoizedForm = memo(
     ),
 );
 
-const Loader: React.FC<ClusteringProgress> = ({ completed, total }) => (
-    <VerticallyCentered mt={4} gap={2}>
-        <Stack
-            direction="row"
-            gap={1}
-            alignItems={"center"}
-            paddingInline={"1rem"}
-            sx={{
-                width: "100%",
-                "& div": {
-                    flex: 1,
-                },
-            }}
-        >
-            <Box sx={{ mr: 1 }}>
-                <LinearProgress
-                    variant="determinate"
-                    value={
-                        total > 0 ? Math.round((completed / total) * 100) : 0
-                    }
-                />
-            </Box>
-            <Typography
-                variant="small"
+interface LoaderProps {
+    onProgressRef: React.MutableRefObject<OnClusteringProgress | undefined>;
+}
+
+const Loader: React.FC<LoaderProps> = ({ onProgressRef }) => {
+    const [progress, setProgress] = useState<ClusteringProgress>({
+        completed: 0,
+        total: 0,
+    });
+
+    onProgressRef.current = setProgress;
+
+    const { completed, total } = progress;
+
+    return (
+        <VerticallyCentered mt={4} gap={2}>
+            <Stack
+                direction="row"
+                gap={1}
+                alignItems={"center"}
+                paddingInline={"1rem"}
                 sx={{
-                    minWidth: "10rem",
-                    textAlign: "right",
+                    width: "100%",
+                    "& div": {
+                        flex: 1,
+                    },
                 }}
-            >{`${completed} / ${total}`}</Typography>
-        </Stack>
-    </VerticallyCentered>
-);
+            >
+                <Box sx={{ mr: 1 }}>
+                    <LinearProgress
+                        variant="determinate"
+                        value={
+                            total > 0
+                                ? Math.round((completed / total) * 100)
+                                : 0
+                        }
+                    />
+                </Box>
+                <Typography
+                    variant="small"
+                    sx={{
+                        minWidth: "10rem",
+                        textAlign: "right",
+                    }}
+                >{`${completed} / ${total}`}</Typography>
+            </Stack>
+        </VerticallyCentered>
+    );
+};
 
 type ClusterListProps = ClusterResHeaderProps & {
     height: number;
