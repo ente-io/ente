@@ -116,6 +116,7 @@ export interface ClusteringOpts {
     method: "linear" | "hdbscan";
     minBlur: number;
     minScore: number;
+    minClusterSize: number;
     batchSize: number;
     joinThreshold: number;
 }
@@ -176,7 +177,14 @@ export const clusterFaces = (
     faceIndexes: FaceIndex[],
     opts: ClusteringOpts,
 ) => {
-    const { method, batchSize, minBlur, minScore, joinThreshold } = opts;
+    const {
+        method,
+        batchSize,
+        minBlur,
+        minScore,
+        minClusterSize,
+        joinThreshold,
+    } = opts;
     const t = Date.now();
 
     // A flattened array of faces.
@@ -299,7 +307,12 @@ export const clusterFaces = (
         }
     }
 
-    const sortedClusters = clusters.sort(
+    // Prune clusters that are smaller than the threshold.
+    const validClusters = clusters.filter(
+        (cs) => cs.faceIDs.length > minClusterSize,
+    );
+
+    const sortedClusters = validClusters.sort(
         (a, b) => b.faceIDs.length - a.faceIDs.length,
     );
 
@@ -361,7 +374,7 @@ export const clusterFaces = (
 
     const timeTakenMs = Date.now() - t;
     log.info(
-        `Clustered ${faces.length} faces into ${clusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
+        `Clustered ${faces.length} faces into ${sortedClusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
     );
 
     return {
@@ -393,7 +406,8 @@ interface ClusterLinearResult {
     clusters: EmbeddingCluster[];
 }
 
-const clusterLinear = (
+// TODO-Cluster remove me
+export const clusterLinear_Direct = (
     embeddings: number[][],
     threshold: number,
 ): ClusterLinearResult => {
@@ -432,6 +446,87 @@ const clusterLinear = (
 
                 ensure(clusters[nnClusterIndex]).push(i);
                 clusterIndexForEmbeddingIndex.set(i, nnClusterIndex);
+            } else {
+                // Otherwise create a new cluster with us and our nearest
+                // neighbour.
+
+                clusterIndexForEmbeddingIndex.set(i, clusters.length);
+                clusterIndexForEmbeddingIndex.set(nnIndex, clusters.length);
+                clusters.push([i, nnIndex]);
+            }
+        } else {
+            // We didn't find a neighbour within the threshold. Create a new
+            // cluster with only this embedding.
+
+            clusterIndexForEmbeddingIndex.set(i, clusters.length);
+            clusters.push([i]);
+        }
+    }
+
+    // Prune singleton clusters.
+    const validClusters = clusters.filter((cs) => cs.length > 1);
+
+    return { clusters: validClusters };
+};
+
+const clusterLinear = (
+    embeddings: number[][],
+    threshold: number,
+): ClusterLinearResult => {
+    const clusters: EmbeddingCluster[] = [];
+    const clusterIndexForEmbeddingIndex = new Map<number, number>();
+    // For each embedding
+    for (const [i, ei] of embeddings.entries()) {
+        // If the embedding is already part of a cluster, then skip it.
+        if (clusterIndexForEmbeddingIndex.get(i)) continue;
+
+        // Find the nearest neighbour from among all the other embeddings.
+        let nnIndex: number | undefined;
+        let nnCosineSimilarity = 0;
+        // Find the nearest cluster from among all the existing clusters.
+        let nClusterIndex: number | undefined;
+        let nClusterCosineSimilarity = 0;
+        for (const [j, ej] of embeddings.entries()) {
+            // ! This is an O(n^2) loop, be careful when adding more code here.
+
+            // Skip ourselves.
+            if (i == j) continue;
+
+            // The vectors are already normalized, so we can directly use their
+            // dot product as their cosine similarity.
+            const csim = dotProduct(ei, ej);
+            if (csim > threshold) {
+                if (csim > nnCosineSimilarity) {
+                    nnIndex = j;
+                    nnCosineSimilarity = csim;
+                }
+                if (csim > nClusterCosineSimilarity) {
+                    const jClusterIndex = clusterIndexForEmbeddingIndex.get(j);
+                    if (jClusterIndex) {
+                        nClusterIndex = jClusterIndex;
+                        nClusterCosineSimilarity = csim;
+                    }
+                }
+            }
+        }
+
+        if (nClusterIndex) {
+            // Found a neighbouring cluster close enough, add ourselves to that.
+
+            ensure(clusters[nClusterIndex]).push(i);
+            clusterIndexForEmbeddingIndex.set(i, nClusterIndex);
+        } else if (nnIndex) {
+            // Find the cluster the nearest neighbour belongs to, if any.
+            const nnClusterIndex = clusterIndexForEmbeddingIndex.get(nnIndex);
+
+            if (nnClusterIndex) {
+                // TODO-Cluster remove this case.
+                // If the neighbour is already part of a cluster, also add
+                // ourselves to that cluster.
+
+                // ensure(clusters[nnClusterIndex]).push(i);
+                // clusterIndexForEmbeddingIndex.set(i, nnClusterIndex);
+                throw new Error("We shouldn't have reached here");
             } else {
                 // Otherwise create a new cluster with us and our nearest
                 // neighbour.

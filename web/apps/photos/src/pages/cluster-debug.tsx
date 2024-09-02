@@ -112,6 +112,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                 method: "linear",
                 minBlur: 10,
                 minScore: 0.8,
+                minClusterSize: 2,
                 joinThreshold: 0.7,
                 batchSize: 12500,
             },
@@ -120,6 +121,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                     method: values.method,
                     minBlur: toFloat(values.minBlur),
                     minScore: toFloat(values.minScore),
+                    minClusterSize: toFloat(values.minClusterSize),
                     joinThreshold: toFloat(values.joinThreshold),
                     batchSize: toFloat(values.batchSize),
                 }),
@@ -159,6 +161,13 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         name="minScore"
                         label="minScore"
                         value={values.minScore}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="minClusterSize"
+                        label="minClusterSize"
+                        value={values.minClusterSize}
                         size="small"
                         onChange={handleChange}
                     />
