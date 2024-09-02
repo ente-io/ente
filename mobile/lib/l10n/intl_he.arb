@@ -216,7 +216,6 @@
   "after1Year": "אחרי שנה 1",
   "manageParticipants": "נהל",
   "albumParticipantsCount": "{count, plural, =0 {אין משתתפים} =1 {1 משתתף} two {2 משתתפים} other {{count} משתתפים}}",
-
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {

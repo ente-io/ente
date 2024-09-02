@@ -234,7 +234,6 @@
   "publicLinkEnabled": "Offentlig lenke aktivert",
   "shareALink": "Del en lenke",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Del med bestemte personer} =1 {Delt med 1 person} other {Delt med {numberOfPeople} personer}}",
-
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
