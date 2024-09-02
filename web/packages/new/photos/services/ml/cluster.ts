@@ -505,11 +505,12 @@ const clusterLinear = (
                         nClusterIndex = jClusterIndex;
                         nClusterCosineSimilarity = csim;
                     }
-                }
 
-                // If we've found something "near enough", stop looking for a
-                // better match. This speeds up clustering.
-                if (earlyExitThreshold > 0 && csim < earlyExitThreshold) break;
+                    // If we've found something "near enough", stop looking for a
+                    // better match. This speeds up clustering.
+                    if (earlyExitThreshold > 0 && csim < earlyExitThreshold)
+                        break;
+                }
             }
         }
 
