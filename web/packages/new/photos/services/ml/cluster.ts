@@ -202,6 +202,10 @@ export const clusterFaces = (
     } = opts;
     const t = Date.now();
 
+    const lookbackProbability = lookbackSize / batchSize;
+    if (lookbackProbability < 0 || lookbackProbability > 0.7)
+        throw new Error(`Invalid lookback probability ${lookbackProbability}`);
+
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
     // A flattened array of faces.
@@ -234,6 +238,9 @@ export const clusterFaces = (
 
     const faceEmbeddings = faces.map(({ embedding }) => embedding);
 
+    // Map from face index to the corresponding cluster ID (if any).
+    const clusterIndexForFaceIndex = new Map<number, number>();
+
     // For fast reverse lookup - map from cluster ids to their index in the
     // clusters array.
     const clusterIndexForClusterID = new Map<string, number>();
@@ -246,10 +253,6 @@ export const clusterFaces = (
     // which were sublimated in from a later match.
     const wasMergedFaceIDs = new Set<string>();
 
-    // A function to chain two reverse lookup.
-    const firstFaceOfCluster = (cluster: FaceCluster) =>
-        ensure(faceForFaceID.get(ensure(cluster.faceIDs[0])));
-
     // A function to generate new cluster IDs.
     const newClusterID = () => newNonSecureID("cluster_");
 
@@ -259,17 +262,26 @@ export const clusterFaces = (
     const clusters: FaceCluster[] = [];
 
     // Process the faces in batches.
-    for (let i = 0; i < faceEmbeddings.length; i += batchSize) {
+    let i = 0;
+    while (i < faceEmbeddings.length) {
         const it = Date.now();
 
         onProgress({ completed: i, total: faceEmbeddings.length });
 
-        const embeddingBatch = faceEmbeddings.slice(i, i + batchSize);
-        let embeddingClusters: EmbeddingCluster[];
+        // Take some random percentage of faces from the existing clusters as
+        // "lookback" to allow us merge the clusters found in this batch to the
+        // existing ones.
+        const lookbackEmbeddings = faceEmbeddings
+            .slice(0, i)
+            .filter(() => Math.random() < lookbackProbability);
+        const embeddingBatch = lookbackEmbeddings.concat(
+            faceEmbeddings.slice(i, i + batchSize - lookbackEmbeddings.length),
+        );
+        let batchClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
-            ({ clusters: embeddingClusters } = clusterHdbscan(embeddingBatch));
+            ({ clusters: batchClusters } = clusterHdbscan(embeddingBatch));
         } else {
-            ({ clusters: embeddingClusters } = clusterLinear(
+            ({ clusters: batchClusters } = clusterLinear(
                 embeddingBatch,
                 joinThreshold,
                 earlyExitThreshold,
@@ -282,61 +294,42 @@ export const clusterFaces = (
         }
 
         log.info(
-            `${method} produced ${embeddingClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
+            `${method} produced ${batchClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
         );
 
         // Merge the new clusters we got from this batch into the existing
-        // clusters if they are "near" enough (using some heuristic).
-        //
-        // We need to ensure we don't change any of the existing cluster IDs,
-        // since these might be existing clusters we got from remote.
+        // clusters, using the lookback embeddings as a link when they exist.
 
         // Create a copy so that we don't modify existing clusters as we're
         // iterating.
         const existingClusters = [...clusters];
 
-        for (const newCluster of embeddingClusters) {
-            // Find the existing cluster whose (arbitrarily chosen) first face
-            // is the nearest neighbour of the (arbitrarily chosen) first face
-            // of the cluster produced in this batch.
-
-            const newFace = ensure(faces[i + ensure(newCluster[0])]);
-
-            let nnCluster: FaceCluster | undefined;
-            let nnCosineSimilarity = 0;
-            for (const existingCluster of existingClusters) {
-                const existingFace = firstFaceOfCluster(existingCluster);
-
-                // The vectors are already normalized, so we can directly use their
-                // dot product as their cosine similarity.
-                const csim = dotProduct(
-                    existingFace.embedding,
-                    newFace.embedding,
-                );
-
-                // Use a higher cosine similarity threshold if either of the two
-                // faces are blurry.
-                const threshold = joinThreshold;
-                if (csim > threshold && csim > nnCosineSimilarity) {
-                    nnCluster = existingCluster;
-                    nnCosineSimilarity = csim;
-                }
+        for (const batchCluster of batchClusters) {
+            // If any of the faces in this batch cluster were part of an
+            // existing cluster, alse add the others to that existing cluster.
+            let existingClusterIndex: number | undefined;
+            for (const j of batchCluster) {
+                existingClusterIndex = clusterIndexForFaceIndex.get(i + j);
+                if (existingClusterIndex !== undefined) break;
             }
-
-            // If we found an existing cluster that is near enough, merge the
-            // new cluster into the existing cluster.
-            if (nnCluster) {
-                for (const j of newCluster) {
-                    const { faceID } = ensure(faces[i + j]);
-                    wasMergedFaceIDs.add(faceID);
-                    nnCluster.faceIDs.push(faceID);
-                    clusterIDForFaceID.set(faceID, nnCluster.id);
+            const existingCluster =
+                existingClusterIndex !== undefined
+                    ? existingClusters[existingClusterIndex]
+                    : undefined;
+            if (existingCluster) {
+                for (const j of batchCluster) {
+                    if (!clusterIndexForFaceIndex.get(i + j)) {
+                        const { faceID } = ensure(faces[i + j]);
+                        wasMergedFaceIDs.add(faceID);
+                        existingCluster.faceIDs.push(faceID);
+                        clusterIDForFaceID.set(faceID, existingCluster.id);
+                    }
                 }
             } else {
-                // Otherwise retain the new cluster.
+                // Otherwise create a new cluster with these faces.
                 const clusterID = newClusterID();
                 const faceIDs: string[] = [];
-                for (const j of newCluster) {
+                for (const j of batchCluster) {
                     const { faceID } = ensure(faces[i + j]);
                     faceIDs.push(faceID);
                     clusterIDForFaceID.set(faceID, clusterID);
@@ -345,6 +338,8 @@ export const clusterFaces = (
                 clusters.push({ id: clusterID, faceIDs });
             }
         }
+
+        i += embeddingBatch.length;
     }
 
     // Prune clusters that are smaller than the threshold.
