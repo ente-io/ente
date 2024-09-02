@@ -17,12 +17,12 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import {
     Box,
     Button,
     IconButton,
+    LinearProgress,
     MenuItem,
     Stack,
     styled,
@@ -263,9 +263,33 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
 };
 
 const Loader: React.FC<ClusteringProgress> = ({ completed, total }) => (
-    <VerticallyCentered mt={4}>
-        <EnteSpinner />
-        <Typography>{`${completed} / ${total}`}</Typography>
+    <VerticallyCentered mt={4} gap={2}>
+        <Stack
+            direction="row"
+            gap={1}
+            alignItems={"center"}
+            paddingInline={"1rem"}
+            sx={{
+                width: "100%",
+                "& div": {
+                    flex: 1,
+                },
+            }}
+        >
+            <Box sx={{ mr: 1 }}>
+                <LinearProgress
+                    variant="determinate"
+                    value={Math.round((completed / total) * 100)}
+                />
+            </Box>
+            <Typography
+                variant="small"
+                sx={{
+                    minWidth: "10rem",
+                    textAlign: "right",
+                }}
+            >{`${completed} / ${total}`}</Typography>
+        </Stack>
     </VerticallyCentered>
 );
 

@@ -389,7 +389,7 @@ export const wipClusterDebugPageContents = async (
         cgroups,
         unclusteredFaces,
         ...rest
-    } = await worker().then((w) => w.clusterFaces(opts, onProgress));
+    } = await worker().then((w) => w.clusterFaces(opts, proxy(onProgress)));
 
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
