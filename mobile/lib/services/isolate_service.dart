@@ -5,6 +5,7 @@ import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
 import "package:photos/core/error-reporting/isolate_logging.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/services/isolate_functions.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -67,10 +68,11 @@ abstract class SuperIsolate {
     mainSendPort.send(receivePort.sendPort);
 
     receivePort.listen((message) async {
-      final functionIndex = message[0] as int;
+      final taskID = message[0] as String;
+      final functionIndex = message[1] as int;
       final function = IsolateOperation.values[functionIndex];
-      final args = message[1] as Map<String, dynamic>;
-      final sendPort = message[2] as SendPort;
+      final args = message[2] as Map<String, dynamic>;
+      final sendPort = message[3] as SendPort;
 
       late final Object data;
       try {
@@ -82,7 +84,7 @@ abstract class SuperIsolate {
         };
       }
       final logs = List<String>.from(isolateLogger.getLogStringsAndClear());
-      sendPort.send({"data": data, "logs": logs});
+      sendPort.send({"taskID": taskID, "data": data, "logs": logs});
     });
   }
 
@@ -105,9 +107,14 @@ abstract class SuperIsolate {
       final answerPort = ReceivePort();
 
       _activeTasks++;
-      _mainSendPort.send([operation.index, args, answerPort.sendPort]);
+      final taskID = newIsolateTaskID(operation.name);
+      _mainSendPort.send([taskID, operation.index, args, answerPort.sendPort]);
 
       answerPort.listen((receivedMessage) {
+        if (receivedMessage['taskID'] != taskID) {
+          logger.severe("Received isolate message with wrong taskID");
+          return;
+        }
         final logs = receivedMessage['logs'] as List<String>;
         IsolateLogger.handLogStringsToMainLogger(logs);
         final data = receivedMessage['data'];
