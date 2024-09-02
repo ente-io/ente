@@ -125,6 +125,13 @@ export interface ClusteringOpts {
     lookbackSize: number;
 }
 
+export interface ClusteringProgress {
+    completed: number;
+    total: number;
+}
+
+export type OnClusteringProgress = (progress: ClusteringProgress) => void;
+
 export interface ClusterPreview {
     clusterSize: number;
     faces: ClusterPreviewFace[];
@@ -181,6 +188,7 @@ export const clusterFaces = (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
     opts: ClusteringOpts,
+    onProgress: OnClusteringProgress,
 ) => {
     const {
         method,

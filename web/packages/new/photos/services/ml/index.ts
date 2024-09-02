@@ -23,6 +23,7 @@ import {
     type ClusteringOpts,
     type ClusterPreviewFace,
     type FaceCluster,
+    type OnClusteringProgress,
 } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
@@ -372,6 +373,7 @@ export interface ClusterDebugPageContents {
 
 export const wipClusterDebugPageContents = async (
     opts: ClusteringOpts,
+    onProgress: OnClusteringProgress,
 ): Promise<ClusterDebugPageContents> => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
@@ -387,7 +389,7 @@ export const wipClusterDebugPageContents = async (
         cgroups,
         unclusteredFaces,
         ...rest
-    } = await worker().then((w) => w.clusterFaces(opts));
+    } = await worker().then((w) => w.clusterFaces(opts, onProgress));
 
     const fileForFace = ({ faceID }: Face) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
