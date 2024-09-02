@@ -41,7 +41,7 @@
     "REFERRAL_CODE_HINT": "您是如何知道Ente的？ （可选的）",
     "REFERRAL_INFO": "我们不跟踪应用程序安装情况，如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
     "PASSPHRASE_MATCH_ERROR": "两次输入的密码不一致",
-    "create_albums": "",
+    "create_albums": "创建相册",
     "CREATE_COLLECTION": "新建相册",
     "ENTER_ALBUM_NAME": "相册名称",
     "CLOSE_OPTION": "关闭 (或按Esc键)",
