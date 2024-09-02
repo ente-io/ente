@@ -156,7 +156,7 @@ abstract class SuperIsolate {
     });
   }
 
-  Future<void> onDispose();
+  Future<void> onDispose() async {}
 
   void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;

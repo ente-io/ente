@@ -79,11 +79,6 @@ class FaceClusteringService extends SuperIsolate {
   String get isolateName => "FaceClusteringIsolate";
 
   @override
-  Future<void> onDispose() async {
-    return;
-  }
-
-  @override
   bool get shouldAutomaticDispose => true;
 
   // singleton pattern
