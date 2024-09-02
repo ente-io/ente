@@ -266,11 +266,12 @@ export const clusterFaces = (
         // Keep an overlap between batches to allow "links" to form with
         // existing clusters.
 
-        const batchStart = Math.max(i - lookbackSize, 0);
-        const embeddingBatch = faceEmbeddings.slice(
-            batchStart,
-            batchStart + batchSize,
-        );
+        const [batchStart, batchEnd] =
+            i < lookbackSize
+                ? [0, batchSize]
+                : [i - lookbackSize, i + batchSize];
+        const embeddingBatch = faceEmbeddings.slice(batchStart, batchEnd);
+        console.log("from", batchStart, batchEnd);
 
         let batchClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
