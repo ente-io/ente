@@ -67,13 +67,13 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    super.initState();
+
     WidgetsBinding.instance.addObserver(this);
 
     this._didUnlockForAppLaunch = !this.widget.enabled;
     this._isLocked = false;
     this._enabled = this.widget.enabled;
-
-    super.initState();
   }
 
   @override
