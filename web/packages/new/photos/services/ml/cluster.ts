@@ -202,10 +202,6 @@ export const clusterFaces = (
     } = opts;
     const t = Date.now();
 
-    const lookbackProbability = lookbackSize / batchSize;
-    if (lookbackProbability < 0 || lookbackProbability > 0.7)
-        throw new Error(`Invalid lookback probability ${lookbackProbability}`);
-
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
     // A flattened array of faces.
@@ -213,7 +209,6 @@ export const clusterFaces = (
     const filteredFaces = allFaces
         .filter((f) => f.blur > minBlur)
         .filter((f) => f.score > minScore);
-    // .slice(0, 2000);
 
     const fileForFaceID = new Map(
         filteredFaces.map(({ faceID }) => [
@@ -268,21 +263,31 @@ export const clusterFaces = (
 
         onProgress({ completed: i, total: faceEmbeddings.length });
 
-        // Take some random percentage of faces from the existing clusters as
-        // "lookback" to allow us merge the clusters found in this batch to the
-        // existing ones.
-        const lookbackEmbeddings = faceEmbeddings
-            .slice(0, i)
-            .filter(() => Math.random() < lookbackProbability);
+        // Keep an overlap between batches to allow "links" to form with
+        // existing clusters.
+        const lookbackEmbeddings =
+            i < lookbackSize
+                ? []
+                : faceEmbeddings.slice(i - lookbackSize, lookbackSize);
 
         // A function to convert from an index of a face in this batch back to
         // its global index.
         const faceIndexForBatchIndex = (j: number) =>
-            j < lookbackEmbeddings.length ? j : i + j;
+            j < lookbackEmbeddings.length
+                ? i - lookbackEmbeddings.length + j
+                : i + j;
 
         const embeddingBatch = lookbackEmbeddings.concat(
             faceEmbeddings.slice(i, i + batchSize - lookbackEmbeddings.length),
         );
+
+        console.log({
+            i,
+            clustersLen: clusters.length,
+            loELen: lookbackEmbeddings.length,
+            emBLen: embeddingBatch.length,
+        });
+
         let batchClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
             ({ clusters: batchClusters } = clusterHdbscan(embeddingBatch));
@@ -306,8 +311,6 @@ export const clusterFaces = (
         // Merge the new clusters we got from this batch into the existing
         // clusters, using the lookback embeddings as a link when they exist.
 
-        console.log("start merge");
-
         for (const batchCluster of batchClusters) {
             // If any of the faces in this batch cluster were part of an
             // existing cluster, also add the others to that existing cluster.
@@ -325,7 +328,6 @@ export const clusterFaces = (
                 for (const j of batchCluster) {
                     const faceIndex = faceIndexForBatchIndex(j);
                     if (!clusterIndexForFaceIndex.get(faceIndex)) {
-                        console.log("getting 1", faceIndex, faces.length);
                         const { faceID } = ensure(faces[faceIndex]);
                         wasMergedFaceIDs.add(faceID);
                         existingCluster.faceIDs.push(faceID);
