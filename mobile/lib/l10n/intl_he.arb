@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "אנחנו מצטערים לראות שאתה עוזב. אנא תחלוק את המשוב שלך כדי לעזור לנו להשתפר.",
   "feedback": "משוב",
   "kindlyHelpUsWithThisInformation": "אנא עזור לנו עם המידע הזה",
-  "confirmDeletePrompt": "כן, אני רוצה למחוק לצמיתות את החשבון הזה וכל המידע שלו.",
   "confirmAccountDeletion": "אשר את מחיקת החשבון",
   "deleteAccountPermanentlyButton": "מחק את החשבון לצמיתות",
   "yourAccountHasBeenDeleted": "החשבון שלך נמחק",

@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss.",
   "feedback": "Tilbakemelding",
   "kindlyHelpUsWithThisInformation": "Vær vennlig og hjelp oss med denne informasjonen",
-  "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
   "confirmAccountDeletion": "Bekreft sletting av konto",
   "deleteAccountPermanentlyButton": "Slett bruker for altid",
   "yourAccountHasBeenDeleted": "Brukeren din har blitt slettet",

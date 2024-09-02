@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "We vinden het jammer je te zien gaan. Deel je feedback om ons te helpen verbeteren.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Help ons alsjeblieft met deze informatie",
-  "confirmDeletePrompt": "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen.",
+  "confirmDeletePrompt": "Ja, ik wil mijn account en de bijbehorende gegevens verspreid over alle apps permanent verwijderen.",
   "confirmAccountDeletion": "Account verwijderen bevestigen",
   "deleteAccountPermanentlyButton": "Account permanent verwijderen",
   "yourAccountHasBeenDeleted": "Je account is verwijderd",
@@ -453,6 +453,8 @@
   "showMemories": "Toon herinneringen",
   "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
+  "backupStatus": "Back-upstatus",
+  "backupStatusDescription": "Items die zijn geback-upt, worden hier getoond",
   "backupOverMobileData": "Back-up maken via mobiele data",
   "backupVideos": "Back-up video's",
   "disableAutoLock": "Automatisch vergrendelen uitschakelen",
@@ -496,6 +498,7 @@
   "removeDuplicates": "Duplicaten verwijderen",
   "removeDuplicatesDesc": "Controleer en verwijder bestanden die exacte kopieën zijn.",
   "viewLargeFiles": "Grote bestanden",
+  "viewLargeFilesDesc": "Bekijk bestanden die de meeste opslagruimte verbruiken.",
   "noDuplicates": "✨ Geen duplicaten",
   "youveNoDuplicateFilesThatCanBeCleared": "Je hebt geen dubbele bestanden die kunnen worden gewist",
   "success": "Succes",
@@ -1313,5 +1316,6 @@
   "cl_video_player_title": "Videospeler",
   "cl_video_player_description": "Een verfrissende nieuwe videospeler, met betere afspeelknoppen en ondersteuning voor HDR-video's.",
   "appLockDescriptions": "Kies tussen het standaard vergrendelscherm van uw apparaat en een aangepast vergrendelscherm met een pincode of wachtwoord.",
-  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
+  "authToViewPasskey": "Verifieer uzelf om uw toegangssleutel te bekijken"
 }
