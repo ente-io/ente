@@ -71,7 +71,6 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
-  static const shouldLoopVideoKey = "should_loop_video";
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -660,14 +659,6 @@ class Configuration {
 
   Future<void> setSelectAllFoldersForBackup(bool value) async {
     await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
-  }
-
-  Future<void> setShouldLoopVideo(bool value) async {
-    await _preferences.setBool(shouldLoopVideoKey, value);
-  }
-
-  bool shouldLoopVideo() {
-    return _preferences.getBool(shouldLoopVideoKey) ?? true;
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {

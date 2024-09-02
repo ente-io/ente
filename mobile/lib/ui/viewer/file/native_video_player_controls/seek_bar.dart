@@ -2,7 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
-import "package:photos/core/configuration.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/debouncer.dart";
@@ -149,7 +149,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       setState(() {
         _animationController.value = 0;
       });
-      if (!Configuration.instance.shouldLoopVideo()) {
+      if (!localSettings.shouldLoopVideo()) {
         return;
       }
     }

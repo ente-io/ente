@@ -4,15 +4,14 @@ import "dart:io";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
-// import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -348,7 +347,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _onPlaybackEnded() {
-    if (Configuration.instance.shouldLoopVideo()) {
+    if (localSettings.shouldLoopVideo()) {
       _controller?.play();
     }
   }

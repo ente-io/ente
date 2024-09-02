@@ -6,7 +6,6 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -17,6 +16,7 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
@@ -44,8 +44,8 @@ class FileAppBar extends StatefulWidget {
     this.height,
     this.shouldShowActions, {
     required this.enableFullScreenNotifier,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   FileAppBarState createState() => FileAppBarState();
@@ -56,7 +56,7 @@ class FileAppBarState extends State<FileAppBar> {
   final List<Widget> _actions = [];
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool isGuestView = false;
-  bool shouldLoopVideo = Configuration.instance.shouldLoopVideo();
+  bool shouldLoopVideo = localSettings.shouldLoopVideo();
   bool _reloadActions = false;
 
   @override
@@ -390,7 +390,7 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   _onToggleLoopVideo() {
-    Configuration.instance.setShouldLoopVideo(!shouldLoopVideo);
+    localSettings.setShouldLoopVideo(!shouldLoopVideo);
     setState(() {
       _reloadActions = true;
       shouldLoopVideo = !shouldLoopVideo;
