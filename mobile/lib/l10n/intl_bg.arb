@@ -1,3 +1,5 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

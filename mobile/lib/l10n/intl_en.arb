@@ -1319,5 +1319,7 @@
   "cl_video_player_description": "Introducing a fresh new video player, with better playback controls and support for HDR videos.",
   "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
-  "authToViewPasskey": "Please authenticate to view your passkey"
+  "authToViewPasskey": "Please authenticate to view your passkey",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

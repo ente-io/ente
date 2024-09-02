@@ -317,6 +317,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Genom att klicka på logga in godkänner jag <u-terms>användarvillkoren</u-terms> och våran <u-policy>integritetspolicy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logga ut"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Förlorad enhet?"),
         "manage": MessageLookupByLibrary.simpleMessage("Hantera"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Hantera länk"),

@@ -855,6 +855,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Tam ekranda görüntülemek için bir öğeye uzun basın"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Cihazı kayıp mı ettiniz?"),
         "machineLearning":

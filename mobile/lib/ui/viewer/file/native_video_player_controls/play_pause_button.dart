@@ -1,9 +1,5 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/pause_video_event.dart";
 import "package:photos/theme/colors.dart";
 
 class PlayPauseButton extends StatefulWidget {
@@ -15,22 +11,19 @@ class PlayPauseButton extends StatefulWidget {
 }
 
 class _PlayPauseButtonState extends State<PlayPauseButton> {
-  late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool _isPlaying = true;
 
   @override
   void initState() {
     super.initState();
-    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
-      setState(() {
-        _isPlaying = false;
-      });
-    });
+    widget.controller?.onPlaybackStatusChanged
+        .addListener(_onPlaybackStatusChanged);
   }
 
   @override
   void dispose() {
-    pauseVideoSubscription.cancel();
+    widget.controller?.onPlaybackStatusChanged
+        .removeListener(_onPlaybackStatusChanged);
     super.dispose();
   }
 
@@ -41,14 +34,8 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
       onTap: () {
         if (_playbackStatus == PlaybackStatus.playing) {
           widget.controller?.pause();
-          setState(() {
-            _isPlaying = false;
-          });
         } else {
           widget.controller?.play();
-          setState(() {
-            _isPlaying = true;
-          });
         }
       },
       child: Container(
@@ -89,4 +76,16 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
 
   PlaybackStatus? get _playbackStatus =>
       widget.controller?.playbackInfo?.status;
+
+  void _onPlaybackStatusChanged() {
+    if (_playbackStatus == PlaybackStatus.playing) {
+      setState(() {
+        _isPlaying = true;
+      });
+    } else {
+      setState(() {
+        _isPlaying = false;
+      });
+    }
+  }
 }

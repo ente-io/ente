@@ -1305,5 +1305,7 @@
   "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
   "cl_guest_view_title": "Гостевой вид",
   "cl_panorama_viewer_title": "Просмотр Панорамы",
-  "cl_video_player_title": "Видеоплеер"
+  "cl_video_player_title": "Видеоплеер",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

@@ -1216,5 +1216,7 @@
   "developerSettings": "Impostazioni sviluppatore",
   "serverEndpoint": "Endpoint del server",
   "invalidEndpoint": "Endpoint invalido",
-  "invalidEndpointMessage": "Spiacenti, l'endpoint inserito non è valido. Inserisci un endpoint valido e riprova."
+  "invalidEndpointMessage": "Spiacenti, l'endpoint inserito non è valido. Inserisci un endpoint valido e riprova.",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

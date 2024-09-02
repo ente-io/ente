@@ -423,5 +423,7 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "cl_guest_view_title": "Gästvy",
-  "cl_video_player_title": "Videospelare"
+  "cl_video_player_title": "Videospelare",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

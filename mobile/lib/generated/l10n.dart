@@ -9534,6 +9534,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Loop video on`
+  String get loopVideoOn {
+    return Intl.message(
+      'Loop video on',
+      name: 'loopVideoOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loop video off`
+  String get loopVideoOff {
+    return Intl.message(
+      'Loop video off',
+      name: 'loopVideoOff',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

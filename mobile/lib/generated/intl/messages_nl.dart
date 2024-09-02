@@ -1010,6 +1010,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Druk lang op een e-mail om de versleuteling te verifiëren."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Houd een bestand lang ingedrukt om te bekijken op volledig scherm"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Apparaat verloren?"),
         "machineLearning":

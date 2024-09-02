@@ -261,6 +261,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logg inn"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Ved å klikke Logg inn, godtar jeg <u-terms>brukervilkårene</u-terms> og <u-policy>personvernreglene</u-policy>"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Mistet enhet?"),
         "machineLearning": MessageLookupByLibrary.simpleMessage("Maskinlæring"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magisk søk"),

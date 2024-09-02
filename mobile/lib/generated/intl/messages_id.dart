@@ -851,6 +851,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Tekan dan tahan email untuk membuktikan enkripsi ujung ke ujung."),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Perangkat hilang?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Pemelajaran mesin"),

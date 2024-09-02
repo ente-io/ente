@@ -1313,7 +1313,9 @@
   "cl_panorama_viewer_description": "Nous avons ajouté le support pour visionner des photos panoramiques avec des vues à 360 degrés. L'expérience est immersive avec la navigation basée sur les mouvements !",
   "cl_video_player_title": "Lecteur vidéo",
   "cl_video_player_description": "Intégration d'un nouveau lecteur vidéo, avec de meilleurs contrôles de lecture et la prise en charge des vidéos HDR.",
-  "appLockDescriptions": "Choisissez entre l'écran de verrouillage par défaut de votre appareil et un écran de verrouillage personnalisé avec un code PIN ou un mot de passe.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pour activer le verrouillage d'application, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
-  "authToViewPasskey": "Veuillez vous authentifier pour afficher votre clé de récupération"
+  "appLockDescriptions": "Choisissez entre l'écran de verrouillage par défaut de votre appareil et un écran de verrouillage personnalisé avec un code PIN ou un mot de passe.",
+  "authToViewPasskey": "Veuillez vous authentifier pour afficher votre clé de récupération",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

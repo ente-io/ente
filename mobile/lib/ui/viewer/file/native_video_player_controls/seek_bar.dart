@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/debouncer.dart";
@@ -136,16 +137,21 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   }
 
   void _onPlaybackPositionChanged() async {
-    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused) {
+    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused ||
+        (widget.controller.playbackInfo?.status == PlaybackStatus.stopped &&
+            widget.controller.playbackInfo?.positionFraction != 0)) {
       return;
     }
     final target = widget.controller.playbackInfo?.positionFraction ?? 0;
 
-    //To immediately set the position to 0 when the ends when playing in loop
+    //To immediately set the position to 0 when the video ends
     if (_prevPositionFraction == 1.0 && target == 0.0) {
       setState(() {
         _animationController.value = 0;
       });
+      if (!localSettings.shouldLoopVideo()) {
+        return;
+      }
     }
 
     //There is a slight delay (around 350 ms) for the event being listened to

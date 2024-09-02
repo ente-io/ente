@@ -555,6 +555,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "לחץ לחיצה ארוכה על פריט על מנת לראות אותו במסך מלא"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("איבדת את המכשיר?"),
         "manage": MessageLookupByLibrary.simpleMessage("נהל"),
         "manageDeviceStorage":
