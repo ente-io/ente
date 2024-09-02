@@ -937,6 +937,8 @@
   "encryptingBackup": "正在加密备份...",
   "syncStopped": "同步已停止",
   "syncProgress": "已保存的回忆 {completed}/共 {total}",
+  "uploadingMultipleMemories": "正在保存 {count} 个回忆...",
+  "uploadingSingleMemory": "正在保存 1 个回忆...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
