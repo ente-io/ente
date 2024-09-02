@@ -34,6 +34,7 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import React, {
     memo,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -55,15 +56,15 @@ export default function ClusterDebug() {
         ClusterDebugPageContents | undefined
     >();
 
-    const cluster = async (
-        opts: ClusteringOpts,
-        onProgress: OnClusteringProgress,
-    ) => {
-        setClusterRes(undefined);
-        startLoading();
-        setClusterRes(await wipClusterDebugPageContents(opts, onProgress));
-        finishLoading();
-    };
+    const cluster = useCallback(
+        async (opts: ClusteringOpts, onProgress: OnClusteringProgress) => {
+            setClusterRes(undefined);
+            startLoading();
+            setClusterRes(await wipClusterDebugPageContents(opts, onProgress));
+            finishLoading();
+        },
+        [startLoading, finishLoading],
+    );
 
     useEffect(() => showNavBar(true), []);
 
@@ -73,7 +74,7 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <OptionsForm onCluster={cluster} />
+                            <MemoizedOptionsForm onCluster={cluster} />
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -110,6 +111,10 @@ const Container = styled("div")`
         display: inline-block;
     }
 `;
+
+const MemoizedOptionsForm = memo<OptionsFormProps>(({ onCluster }) => (
+    <OptionsForm {...{ onCluster }} />
+));
 
 interface OptionsFormProps {
     onCluster: (
@@ -158,13 +163,13 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
     return (
         <Stack>
             <Typography paddingInline={1}>Parameters</Typography>
-            <Form {...formik} />
+            <MemoizedForm {...formik} />
             {formik.isSubmitting && <Loader {...progress} />}
         </Stack>
     );
 };
 
-const Form = memo(
+const MemoizedForm = memo(
     ({
         values,
         handleSubmit,
