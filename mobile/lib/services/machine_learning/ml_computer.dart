@@ -114,8 +114,8 @@ class MLComputer {
             logger.info("XXX logging from isolate is working!!!");
             final Queue<String> logStrings =
                 isolateLogger.getLogStringsAndClear();
-            final test = [List<String>.from(logStrings)];
-            sendPort.send(test);
+            final logs = List<String>.from(logStrings);
+            sendPort.send({"data": true, "logs": logs});
             break;
         }
       } catch (e, stackTrace) {
@@ -233,16 +233,17 @@ class MLComputer {
     });
   }
 
-  Future<void> testLogging() async {
+  Future<bool> testLogging() async {
     try {
-      final test = await _runInIsolate(
+      final result = await _runInIsolate(
         (
           MLComputerOperation.testLogging,
           {},
         ),
-      ) as List<List<String>>;
-      IsolateLogger.handLogStringsToMainLogger(Queue.from(test[0]));
-      return;
+      ) as Map<String, Object>;
+      final logs = result['logs'] as List<String>;
+      IsolateLogger.handLogStringsToMainLogger(logs);
+      return result['data'] as bool;
     } catch (e, s) {
       _logger.severe("XXX Could not test logging in isolate", e, s);
       rethrow;

@@ -62,8 +62,8 @@ class MLUserDeveloperOptions extends StatelessWidget {
                       buttonType: ButtonType.neutral,
                       labelText: "Log something in isolate",
                       onTap: () async {
-                        await MLComputer.instance.testLogging();
-                        showShortToast(context, "Done");
+                        final boolean = await MLComputer.instance.testLogging();
+                        showShortToast(context, "Done: $boolean");
                       },
                     ),
                     const SafeArea(

@@ -49,9 +49,9 @@ class IsolateLogger {
   }
 
   /// WARNING: only call this from the main thread
-  static void handLogStringsToMainLogger(Queue<String> logs) {
+  static void handLogStringsToMainLogger(List<String> logs) {
     while (logs.isNotEmpty) {
-      final logString = logs.removeFirst();
+      final logString = logs.removeAt(0);
       final log = IsolateLogString.fromJsonString(logString);
       SuperLogging.saveLogString(log.logString, log.error);
     }
