@@ -509,7 +509,7 @@ const clusterLinear = (
 
                 // If we've found something "near enough", stop looking for a
                 // better match. This speeds up clustering.
-                if (csim < earlyExitThreshold) break;
+                if (earlyExitThreshold > 0 && csim < earlyExitThreshold) break;
             }
         }
 
