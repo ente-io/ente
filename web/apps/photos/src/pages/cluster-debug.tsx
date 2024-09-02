@@ -5,7 +5,11 @@ import {
     wipClusterDebugPageContents,
     type ClusterDebugPageContents,
 } from "@/new/photos/services/ml";
-import { type ClusteringOpts } from "@/new/photos/services/ml/cluster";
+import {
+    type ClusteringOpts,
+    type ClusteringProgress,
+    type OnClusteringProgress,
+} from "@/new/photos/services/ml/cluster";
 import { faceDirection, type Face } from "@/new/photos/services/ml/face";
 import type { EnteFile } from "@/new/photos/types/file";
 import {
@@ -13,22 +17,30 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import {
     Box,
     Button,
     IconButton,
+    LinearProgress,
     MenuItem,
     Stack,
     styled,
     TextField,
     Typography,
 } from "@mui/material";
-import { useFormik } from "formik";
+import { useFormik, type FormikProps } from "formik";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    memo,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     areEqual,
@@ -40,16 +52,54 @@ import {
 export default function ClusterDebug() {
     const { startLoading, finishLoading, showNavBar } = useContext(AppContext);
 
+    // The clustering result.
     const [clusterRes, setClusterRes] = useState<
         ClusterDebugPageContents | undefined
     >();
 
-    const cluster = async (opts: ClusteringOpts) => {
-        setClusterRes(undefined);
-        startLoading();
-        setClusterRes(await wipClusterDebugPageContents(opts));
-        finishLoading();
-    };
+    // Keep the loading state callback as a ref instead of state to prevent
+    // rerendering when the progress gets updated during clustering.
+    const onProgressRef = useRef<OnClusteringProgress | undefined>();
+
+    // Keep the form state at the top level otherwise it gets reset as we
+    // scroll.
+    const formik = useFormik<ClusteringOpts>({
+        initialValues: {
+            method: "linear",
+            minBlur: 10,
+            minScore: 0.8,
+            minClusterSize: 2,
+            joinThreshold: 0.7,
+            earlyExitThreshold: 0.2,
+            batchSize: 10000,
+            lookbackSize: 2500,
+        },
+        onSubmit: (values) =>
+            cluster(
+                {
+                    method: values.method,
+                    minBlur: toFloat(values.minBlur),
+                    minScore: toFloat(values.minScore),
+                    minClusterSize: toFloat(values.minClusterSize),
+                    joinThreshold: toFloat(values.joinThreshold),
+                    earlyExitThreshold: toFloat(values.earlyExitThreshold),
+                    batchSize: toFloat(values.batchSize),
+                    lookbackSize: toFloat(values.lookbackSize),
+                },
+                (progress: ClusteringProgress) =>
+                    onProgressRef.current?.(progress),
+            ),
+    });
+
+    const cluster = useCallback(
+        async (opts: ClusteringOpts, onProgress: OnClusteringProgress) => {
+            setClusterRes(undefined);
+            startLoading();
+            setClusterRes(await wipClusterDebugPageContents(opts, onProgress));
+            finishLoading();
+        },
+        [startLoading, finishLoading],
+    );
 
     useEffect(() => showNavBar(true), []);
 
@@ -59,7 +109,7 @@ export default function ClusterDebug() {
                 <AutoSizer>
                     {({ height, width }) => (
                         <ClusterList {...{ width, height, clusterRes }}>
-                            <OptionsForm onCluster={cluster} />
+                            <OptionsForm {...{ formik, onProgressRef }} />
                         </ClusterList>
                     )}
                 </AutoSizer>
@@ -68,6 +118,10 @@ export default function ClusterDebug() {
         </>
     );
 }
+
+// Formik converts nums to a string on edit.
+const toFloat = (n: number | string) =>
+    typeof n == "string" ? parseFloat(n) : n;
 
 const Options: React.FC = () => {
     const router = useRouter();
@@ -97,40 +151,29 @@ const Container = styled("div")`
     }
 `;
 
-interface OptionsFormProps {
-    onCluster: (opts: ClusteringOpts) => Promise<void>;
-}
+type OptionsFormProps = LoaderProps & {
+    formik: FormikProps<ClusteringOpts>;
+};
 
-const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
-    // Formik converts nums to a string on edit.
-    const toFloat = (n: number | string) =>
-        typeof n == "string" ? parseFloat(n) : n;
-
-    const { values, handleSubmit, handleChange, isSubmitting } =
-        useFormik<ClusteringOpts>({
-            initialValues: {
-                method: "linear",
-                minBlur: 10,
-                minScore: 0.8,
-                minClusterSize: 2,
-                joinThreshold: 0.7,
-                batchSize: 12500,
-            },
-            onSubmit: (values) =>
-                onCluster({
-                    method: values.method,
-                    minBlur: toFloat(values.minBlur),
-                    minScore: toFloat(values.minScore),
-                    minClusterSize: toFloat(values.minClusterSize),
-                    joinThreshold: toFloat(values.joinThreshold),
-                    batchSize: toFloat(values.batchSize),
-                }),
-        });
-
+const OptionsForm: React.FC<OptionsFormProps> = ({ formik, onProgressRef }) => {
     return (
+        <Stack>
+            <Typography paddingInline={1}>Parameters</Typography>
+            <MemoizedForm {...formik} />
+            {formik.isSubmitting && <Loader {...{ onProgressRef }} />}
+        </Stack>
+    );
+};
+
+const MemoizedForm = memo(
+    ({
+        values,
+        handleSubmit,
+        handleChange,
+        isSubmitting,
+    }: FormikProps<ClusteringOpts>) => (
         <form onSubmit={handleSubmit}>
             <Stack>
-                <Typography paddingInline={1}>Parameters</Typography>
                 <Stack
                     direction="row"
                     gap={1}
@@ -171,6 +214,12 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         size="small"
                         onChange={handleChange}
                     />
+                </Stack>
+                <Stack
+                    direction="row"
+                    gap={1}
+                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
+                >
                     <TextField
                         name="joinThreshold"
                         label="joinThreshold"
@@ -179,9 +228,23 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         onChange={handleChange}
                     />
                     <TextField
+                        name="earlyExitThreshold"
+                        label="earlyExitThreshold"
+                        value={values.earlyExitThreshold}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
                         name="batchSize"
                         label="batchSize"
                         value={values.batchSize}
+                        size="small"
+                        onChange={handleChange}
+                    />
+                    <TextField
+                        name="lookbackSize"
+                        label="lookbackSize"
+                        value={values.lookbackSize}
                         size="small"
                         onChange={handleChange}
                     />
@@ -195,9 +258,58 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ onCluster }) => {
                         Cluster
                     </Button>
                 </Box>
-                {isSubmitting && <Loader />}
             </Stack>
         </form>
+    ),
+);
+
+interface LoaderProps {
+    onProgressRef: React.MutableRefObject<OnClusteringProgress | undefined>;
+}
+
+const Loader: React.FC<LoaderProps> = ({ onProgressRef }) => {
+    const [progress, setProgress] = useState<ClusteringProgress>({
+        completed: 0,
+        total: 0,
+    });
+
+    onProgressRef.current = setProgress;
+
+    const { completed, total } = progress;
+
+    return (
+        <VerticallyCentered mt={4} gap={2}>
+            <Stack
+                direction="row"
+                gap={1}
+                alignItems={"center"}
+                paddingInline={"1rem"}
+                sx={{
+                    width: "100%",
+                    "& div": {
+                        flex: 1,
+                    },
+                }}
+            >
+                <Box sx={{ mr: 1 }}>
+                    <LinearProgress
+                        variant="determinate"
+                        value={
+                            total > 0
+                                ? Math.round((completed / total) * 100)
+                                : 0
+                        }
+                    />
+                </Box>
+                <Typography
+                    variant="small"
+                    sx={{
+                        minWidth: "10rem",
+                        textAlign: "right",
+                    }}
+                >{`${completed} / ${total}`}</Typography>
+            </Stack>
+        </VerticallyCentered>
     );
 };
 
@@ -233,7 +345,7 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
 
     const itemSize = (index: number) =>
         index === 0
-            ? 140
+            ? 200
             : index === 1
               ? 130
               : Array.isArray(items[index - 2])
@@ -370,12 +482,6 @@ const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
         </Stack>
     );
 };
-
-const Loader = () => (
-    <VerticallyCentered mt={4}>
-        <EnteSpinner />
-    </VerticallyCentered>
-);
 
 const ListItem = styled("div")`
     display: flex;
