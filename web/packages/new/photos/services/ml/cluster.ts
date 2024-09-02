@@ -262,6 +262,8 @@ export const clusterFaces = (
     for (let i = 0; i < faceEmbeddings.length; i += batchSize) {
         const it = Date.now();
 
+        onProgress({ completed: i, total: faceEmbeddings.length });
+
         const embeddingBatch = faceEmbeddings.slice(i, i + batchSize);
         let embeddingClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
@@ -271,6 +273,11 @@ export const clusterFaces = (
                 embeddingBatch,
                 joinThreshold,
                 earlyExitThreshold,
+                ({ completed }: ClusteringProgress) =>
+                    onProgress({
+                        completed: completed + i,
+                        total: faceEmbeddings.length,
+                    }),
             ));
         }
 
@@ -455,73 +462,11 @@ interface ClusterLinearResult {
     clusters: EmbeddingCluster[];
 }
 
-// TODO-Cluster remove me
-export const clusterLinear_Direct = (
-    embeddings: number[][],
-    threshold: number,
-): ClusterLinearResult => {
-    const clusters: EmbeddingCluster[] = [];
-    const clusterIndexForEmbeddingIndex = new Map<number, number>();
-    // For each embedding
-    for (const [i, ei] of embeddings.entries()) {
-        // If the embedding is already part of a cluster, then skip it.
-        if (clusterIndexForEmbeddingIndex.get(i)) continue;
-
-        // Find the nearest neighbour from among all the other embeddings.
-        let nnIndex: number | undefined;
-        let nnCosineSimilarity = 0;
-        for (const [j, ej] of embeddings.entries()) {
-            // ! This is an O(n^2) loop, be careful when adding more code here.
-
-            // Skip ourselves.
-            if (i == j) continue;
-
-            // The vectors are already normalized, so we can directly use their
-            // dot product as their cosine similarity.
-            const csim = dotProduct(ei, ej);
-            if (csim > threshold && csim > nnCosineSimilarity) {
-                nnIndex = j;
-                nnCosineSimilarity = csim;
-            }
-        }
-
-        if (nnIndex) {
-            // Find the cluster the nearest neighbour belongs to, if any.
-            const nnClusterIndex = clusterIndexForEmbeddingIndex.get(nnIndex);
-
-            if (nnClusterIndex) {
-                // If the neighbour is already part of a cluster, also add
-                // ourselves to that cluster.
-
-                ensure(clusters[nnClusterIndex]).push(i);
-                clusterIndexForEmbeddingIndex.set(i, nnClusterIndex);
-            } else {
-                // Otherwise create a new cluster with us and our nearest
-                // neighbour.
-
-                clusterIndexForEmbeddingIndex.set(i, clusters.length);
-                clusterIndexForEmbeddingIndex.set(nnIndex, clusters.length);
-                clusters.push([i, nnIndex]);
-            }
-        } else {
-            // We didn't find a neighbour within the threshold. Create a new
-            // cluster with only this embedding.
-
-            clusterIndexForEmbeddingIndex.set(i, clusters.length);
-            clusters.push([i]);
-        }
-    }
-
-    // Prune singleton clusters.
-    const validClusters = clusters.filter((cs) => cs.length > 1);
-
-    return { clusters: validClusters };
-};
-
 const clusterLinear = (
     embeddings: number[][],
     joinThreshold: number,
     earlyExitThreshold: number,
+    onProgress: (progress: ClusteringProgress) => void,
 ): ClusterLinearResult => {
     const clusters: EmbeddingCluster[] = [];
     const clusterIndexForEmbeddingIndex = new Map<number, number>();
@@ -529,6 +474,10 @@ const clusterLinear = (
     for (const [i, ei] of embeddings.entries()) {
         // If the embedding is already part of a cluster, then skip it.
         if (clusterIndexForEmbeddingIndex.get(i)) continue;
+
+        if (i % 100 == 0) {
+            onProgress({ completed: i, total: embeddings.length });
+        }
 
         // Find the nearest neighbour from among all the other embeddings.
         let nnIndex: number | undefined;
