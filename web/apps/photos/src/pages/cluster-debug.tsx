@@ -279,7 +279,9 @@ const Loader: React.FC<ClusteringProgress> = ({ completed, total }) => (
             <Box sx={{ mr: 1 }}>
                 <LinearProgress
                     variant="determinate"
-                    value={Math.round((completed / total) * 100)}
+                    value={
+                        total > 0 ? Math.round((completed / total) * 100) : 0
+                    }
                 />
             </Box>
             <Typography
