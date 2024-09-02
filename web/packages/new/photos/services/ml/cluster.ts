@@ -297,38 +297,47 @@ export const clusterFaces = (
 
         for (const batchCluster of batchClusters) {
             // If any of the faces in this batch cluster were part of an
-            // existing cluster, also add the others to that existing cluster.
+            // existing cluster, also add the other faces from that batch to
+            // that existing cluster.
+
             let existingClusterIndex: number | undefined;
             for (const j of batchCluster) {
                 const faceIndex = batchStart + j;
                 existingClusterIndex = clusterIndexForFaceIndex.get(faceIndex);
                 if (existingClusterIndex !== undefined) break;
             }
-            const existingCluster =
-                existingClusterIndex !== undefined
-                    ? clusters[existingClusterIndex]
-                    : undefined;
-            if (existingCluster) {
+
+            if (existingClusterIndex !== undefined) {
+                const existingCluster = ensure(clusters[existingClusterIndex]);
                 for (const j of batchCluster) {
                     const faceIndex = batchStart + j;
-                    if (!clusterIndexForFaceIndex.get(faceIndex)) {
+                    if (clusterIndexForFaceIndex.get(faceIndex) === undefined) {
                         const { faceID } = ensure(faces[faceIndex]);
                         wasMergedFaceIDs.add(faceID);
                         existingCluster.faceIDs.push(faceID);
                         clusterIDForFaceID.set(faceID, existingCluster.id);
+                        clusterIndexForFaceIndex.set(
+                            faceIndex,
+                            existingClusterIndex,
+                        );
                     }
                 }
             } else {
                 // Otherwise create a new cluster with these faces.
+
                 const clusterID = newClusterID();
+                const clusterIndex = clusters.length;
+                clusterIndexForClusterID.set(clusterID, clusterIndex);
+
                 const faceIDs: string[] = [];
                 for (const j of batchCluster) {
                     const faceIndex = batchStart + j;
+
                     const { faceID } = ensure(faces[faceIndex]);
                     faceIDs.push(faceID);
                     clusterIDForFaceID.set(faceID, clusterID);
+                    clusterIndexForFaceIndex.set(faceIndex, clusterIndex);
                 }
-                clusterIndexForClusterID.set(clusterID, clusters.length);
                 clusters.push({ id: clusterID, faceIDs });
             }
         }
