@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "आपको जाता हुए देख कर हमें खेद है। कृपया हमें बेहतर बनने में सहायता के लिए अपनी प्रतिक्रिया साझा करें।",
   "feedback": "प्रतिपुष्टि",
   "kindlyHelpUsWithThisInformation": "कृपया हमें इस जानकारी के लिए सहायता करें",
-  "confirmDeletePrompt": "हां, मैं इस अकाउंट और इसके सभी डेटा को स्थायी रूप से हटाना चाहता/चाहती हूं।",
   "confirmAccountDeletion": "अकाउंट डिलीट करने की पुष्टि करें",
   "deleteAccountPermanentlyButton": "अकाउंट स्थायी रूप से डिलीट करें",
   "yourAccountHasBeenDeleted": "आपका अकाउंट डिलीट कर दिया गया है",
