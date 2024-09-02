@@ -271,7 +271,8 @@ export const clusterFaces = (
                 ? [0, batchSize]
                 : [i - lookbackSize, i + batchSize];
         const embeddingBatch = faceEmbeddings.slice(batchStart, batchEnd);
-        console.log("from", batchStart, batchEnd);
+
+        log.info(`[batch] processing ${batchStart} to ${batchEnd}`);
 
         let batchClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
@@ -290,11 +291,13 @@ export const clusterFaces = (
         }
 
         log.info(
-            `${method} produced ${batchClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
+            `[batch] ${method} produced ${batchClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
         );
 
         // Merge the new clusters we got from this batch into the existing
         // clusters, using the lookback embeddings as a link when they exist.
+
+        let [existingCount, newCount] = [0, 0];
 
         for (const batchCluster of batchClusters) {
             // If any of the faces in this batch cluster were part of an
@@ -323,6 +326,7 @@ export const clusterFaces = (
                         );
                     }
                 }
+                existingCount++;
             } else {
                 // Otherwise create a new cluster with these faces.
 
@@ -340,8 +344,11 @@ export const clusterFaces = (
                     clusterIndexForFaceIndex.set(faceIndex, clusterIndex);
                 }
                 clusters.push({ id: clusterID, faceIDs });
+                newCount++;
             }
         }
+
+        log.info(`[batch] merged ${existingCount}, new ${newCount}`);
 
         i += embeddingBatch.length;
     }
