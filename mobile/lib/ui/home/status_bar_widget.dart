@@ -231,6 +231,9 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 
   String _getRefreshingText(BuildContext context) {
+    if (event == null) {
+      return S.of(context).loadingGallery;
+    }
     if (event!.status == SyncStatus.startedFirstGalleryImport ||
         event!.status == SyncStatus.completedFirstGalleryImport) {
       return S.of(context).loadingGallery;
@@ -239,7 +242,15 @@ class RefreshIndicatorWidget extends StatelessWidget {
       return S.of(context).syncing;
     }
     if (event!.status == SyncStatus.preparingForUpload) {
-      return S.of(context).encryptingBackup;
+      if (event!.total == null || event!.total! <= 0) {
+        return S.of(context).encryptingBackup;
+      } else if (event!.total == 1) {
+        return S.of(context).uploadingSingleMemory;
+      } else {
+        return S
+            .of(context)
+            .uploadingMultipleMemories(NumberFormat().format(event!.total!));
+      }
     }
     if (event!.status == SyncStatus.inProgress) {
       final format = NumberFormat();
