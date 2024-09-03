@@ -3,7 +3,7 @@ import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
-import { type EmbeddingCluster, clusterHdbscan } from "./cluster-hdb";
+import { type EmbeddingCluster } from "./cluster-hdb";
 import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
@@ -115,7 +115,6 @@ export interface CGroup {
 }
 
 export interface ClusteringOpts {
-    method: "linear" | "hdbscan";
     minBlur: number;
     minScore: number;
     minClusterSize: number;
@@ -191,7 +190,6 @@ export const clusterFaces = (
     onProgress: OnClusteringProgress,
 ) => {
     const {
-        method,
         minBlur,
         minScore,
         minClusterSize,
@@ -229,13 +227,10 @@ export const clusterFaces = (
             fileForFace(b).metadata.creationTime,
     );
 
+    const faceEmbeddings = faces.map(({ embedding }) => embedding);
+
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-
-    const faceEmbeddings = faces.map(({ embedding }) => embedding);
-    // For the old hbdscan. This is not performant but we might be discarding
-    // that code anyway, so no point in optimizing.
-    const faceEmbeddingsN = faces.map(({ embedding }) => [...embedding]);
 
     // Map from face index to the corresponding cluster ID (if any).
     const clusterIndexForFaceIndex = new Map<number, number>();
@@ -278,25 +273,19 @@ export const clusterFaces = (
 
         log.info(`[batch] processing ${batchStart} to ${batchEnd}`);
 
-        let batchClusters: EmbeddingCluster[];
-        if (method == "hdbscan") {
-            const embeddingBatchN = faceEmbeddingsN.slice(batchStart, batchEnd);
-            ({ clusters: batchClusters } = clusterHdbscan(embeddingBatchN));
-        } else {
-            ({ clusters: batchClusters } = clusterLinear(
-                embeddingBatch,
-                joinThreshold,
-                earlyExitThreshold,
-                ({ completed }: ClusteringProgress) =>
-                    onProgress({
-                        completed: completed + i,
-                        total: faceEmbeddings.length,
-                    }),
-            ));
-        }
+        const batchClusters = clusterLinear(
+            embeddingBatch,
+            joinThreshold,
+            earlyExitThreshold,
+            ({ completed }: ClusteringProgress) =>
+                onProgress({
+                    completed: completed + i,
+                    total: faceEmbeddings.length,
+                }),
+        );
 
         log.info(
-            `[batch] ${method} produced ${batchClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
+            `[batch] ${batchClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
         );
 
         // Merge the new clusters we got from this batch into the existing
@@ -477,16 +466,12 @@ const fileIDFromFaceID = (faceID: string) => {
     return fileID;
 };
 
-interface ClusterLinearResult {
-    clusters: EmbeddingCluster[];
-}
-
 const clusterLinear = (
     embeddings: Float32Array[],
     joinThreshold: number,
     earlyExitThreshold: number,
     onProgress: (progress: ClusteringProgress) => void,
-): ClusterLinearResult => {
+) => {
     const clusters: EmbeddingCluster[] = [];
     const clusterIndexForEmbeddingIndex = new Map<number, number>();
     // For each embedding
@@ -553,5 +538,5 @@ const clusterLinear = (
     // Prune singleton clusters.
     const validClusters = clusters.filter((cs) => cs.length > 1);
 
-    return { clusters: validClusters };
+    return validClusters;
 };

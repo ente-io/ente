@@ -23,7 +23,6 @@ import {
     Button,
     IconButton,
     LinearProgress,
-    MenuItem,
     Stack,
     styled,
     TextField,
@@ -65,7 +64,6 @@ export default function ClusterDebug() {
     // scroll.
     const formik = useFormik<ClusteringOpts>({
         initialValues: {
-            method: "linear",
             minBlur: 10,
             minScore: 0.8,
             minClusterSize: 2,
@@ -77,7 +75,6 @@ export default function ClusterDebug() {
         onSubmit: (values) =>
             cluster(
                 {
-                    method: values.method,
                     minBlur: toFloat(values.minBlur),
                     minScore: toFloat(values.minScore),
                     minClusterSize: toFloat(values.minClusterSize),
@@ -180,20 +177,6 @@ const MemoizedForm = memo(
                     sx={{ ".MuiFormControl-root": { flex: "1" } }}
                 >
                     <TextField
-                        name="method"
-                        label="method"
-                        value={values.method}
-                        select
-                        size="small"
-                        onChange={handleChange}
-                    >
-                        {["hdbscan", "linear"].map((v) => (
-                            <MenuItem key={v} value={v}>
-                                {v}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <TextField
                         name="minBlur"
                         label="minBlur"
                         value={values.minBlur}
@@ -214,12 +197,6 @@ const MemoizedForm = memo(
                         size="small"
                         onChange={handleChange}
                     />
-                </Stack>
-                <Stack
-                    direction="row"
-                    gap={1}
-                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
-                >
                     <TextField
                         name="joinThreshold"
                         label="joinThreshold"
@@ -345,7 +322,7 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
 
     const itemSize = (index: number) =>
         index === 0
-            ? 200
+            ? 140
             : index === 1
               ? 130
               : Array.isArray(items[index - 2])
