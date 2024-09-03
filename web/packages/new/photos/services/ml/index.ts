@@ -366,7 +366,7 @@ export interface ClusterDebugPageContents {
     clusters: FaceCluster[];
     clusterPreviewsWithFile: ClusterPreviewWithFile[];
     unclusteredFacesWithFile: {
-        face: Face;
+        face: Omit<Face, "embedding">;
         enteFile: EnteFile;
     }[];
 }
@@ -391,7 +391,7 @@ export const wipClusterDebugPageContents = async (
         ...rest
     } = await worker().then((w) => w.clusterFaces(opts, proxy(onProgress)));
 
-    const fileForFace = ({ faceID }: Face) =>
+    const fileForFace = ({ faceID }: { faceID: string }) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
 
     const clusterPreviewsWithFile = clusterPreviews.map(

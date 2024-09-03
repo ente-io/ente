@@ -2,7 +2,7 @@ import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBilinear } from "./image";
-import { dotProductF32, norm } from "./math";
+import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
 /**
@@ -178,12 +178,8 @@ export const clipMatches = async (
     const textEmbedding = normalized(t);
     const items = (await cachedOrReadCLIPIndexes()).map(
         ({ fileID, embedding }) =>
-            // What we want to do is `cosineSimilarity`, but since both the
-            // embeddings involved are already normalized, we can save the norm
-            // calculations and directly do their `dotProduct`.
-            //
-            // This code is on the hot path, so these optimizations help.
-            [fileID, dotProductF32(embedding, textEmbedding)] as const,
+
+            [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
     // This score threshold was obtain heuristically. 0.2 generally gives solid
     // results, and around 0.15 we start getting many false positives (all this

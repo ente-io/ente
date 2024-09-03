@@ -12,6 +12,8 @@ export const clamp = (value: number, min: number, max: number) =>
  *
  * Precondition: The two vectors must be of the same length.
  *
+ * ---
+ *
  * [Note: Dot product is cosine similarity for normalized vectors]
  *
  * The cosine similarity of two vectors is defined as
@@ -22,6 +24,14 @@ export const clamp = (value: number, min: number, max: number) =>
  * product. When we're computing dot products in a hot loop, skipping over that
  * unnecessary renormalization matters.
  *
+ * When comparing embeddings we usually want is the cosine similarity, but when
+ * both the embeddings involved are already normalized, we can save the norm
+ * calculations and directly do their `dotProduct`.
+ *
+ * Such code is often on the hot path, so these optimizations help.
+ *
+ * ---
+ *
  * [Note: Cosine similarity and cosine distance]
  *
  * The cosine similarity of two vectors is [-1, 1] (inclusive), indicating how
@@ -31,6 +41,8 @@ export const clamp = (value: number, min: number, max: number) =>
  *     1 - cosine similarity
  *
  * in an attempt to convert it into a (pseudo) distance metric.
+ *
+ * ---
  *
  * [Note: Dot product performance]
  *
@@ -45,21 +57,7 @@ export const clamp = (value: number, min: number, max: number) =>
  * itself to WASM's set. But that'll require bundling native code, so as a
  * tradeoff to avoid complexity we currently leave that 1x on the table.
  */
-export const dotProduct = (v1: number[], v2: number[]) => {
-    if (v1.length != v2.length)
-        throw new Error(`Length mismatch ${v1.length} ${v2.length}`);
-    let d = 0;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    for (let i = 0; i < v1.length; i++) d += v1[i]! * v2[i]!;
-    return d;
-};
-
-/**
- * Float32Array variant of {@link dotProduct}.
- *
- * See: [Note: Dot product performance].
- */
-export const dotProductF32 = (v1: Float32Array, v2: Float32Array) => {
+export const dotProduct = (v1: Float32Array, v2: Float32Array) => {
     if (v1.length != v2.length)
         throw new Error(`Length mismatch ${v1.length} ${v2.length}`);
     let d = 0;
