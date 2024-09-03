@@ -32,7 +32,7 @@ class SemanticSearchService {
       SemanticSearchService._privateConstructor();
 
   static final Computer _computer = Computer.shared();
-  final LRUMap<String, List<double>> _queryCache = LRUMap(20);
+  final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
 
   bool _hasInitialized = false;
@@ -73,7 +73,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "Magic search enabled ${localSettings.isMLIndexingEnabled}, loaded $_textModelIsLoaded ",
+          "Magic search enabled: ${localSettings.isMLIndexingEnabled}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -115,23 +115,23 @@ class SemanticSearchService {
 
   Future<List<EnteFile>> getMatchingFiles(
     String query, {
-    double? scoreThreshold,
+    double? similarityThreshold,
   }) async {
-    bool showScore = false;
+    bool showThreshold = false;
     // if the query starts with 0.xxx, the split the query to get score threshold and actual query
     if (query.startsWith(RegExp(r"0\.\d+"))) {
       final parts = query.split(" ");
       if (parts.length > 1) {
-        scoreThreshold = double.parse(parts[0]);
+        similarityThreshold = double.parse(parts[0]);
         query = parts.sublist(1).join(" ");
-        showScore = true;
+        showThreshold = true;
       }
     }
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults = await _getSimilarities(
       textEmbedding,
-      minimumSimilarity: scoreThreshold,
+      minimumSimilarity: similarityThreshold,
     );
 
     // print query for top ten scores
@@ -157,7 +157,7 @@ class SemanticSearchService {
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
-        if (showScore) {
+        if (showThreshold) {
           file.debugCaption =
               "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
         }
@@ -172,7 +172,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteClipEmbeddings(deletedEntries));
     }
 
     return results;
@@ -215,7 +215,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteClipEmbeddings(deletedEntries));
     }
 
     final matchingFileIDs = <int>[];
@@ -254,12 +254,12 @@ class SemanticSearchService {
 
   Future<List<double>> _getTextEmbedding(String query) async {
     _logger.info("Searching for " + query);
-    final cachedResult = _queryCache.get(query);
+    final cachedResult = _queryEmbeddingCache.get(query);
     if (cachedResult != null) {
       return cachedResult;
     }
     final textEmbedding = await MLComputer.instance.runClipText(query);
-    _queryCache.put(query, textEmbedding);
+    _queryEmbeddingCache.put(query, textEmbedding);
     return textEmbedding;
   }
 
@@ -268,19 +268,19 @@ class SemanticSearchService {
     double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
-    final embeddings = await getClipVectors();
+    final imageEmbeddings = await getClipVectors();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkSimilarities,
       param: {
-        "imageEmbeddings": embeddings,
+        "imageEmbeddings": imageEmbeddings,
         "textEmbedding": textEmbedding,
         "minimumSimilarity": minimumSimilarity,
       },
-      taskName: "computeBulkScore",
+      taskName: "computeBulkSimilarities",
     );
     final endTime = DateTime.now();
     _logger.info(
-      "computingScores took: " +
+      "computingSimilarities took: " +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
               .toString() +
           "ms",

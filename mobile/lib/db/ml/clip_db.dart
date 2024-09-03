@@ -66,7 +66,7 @@ extension ClipDB on MLDataDB {
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
-  Future<void> deleteEmbeddings(List<int> fileIDs) async {
+  Future<void> deleteClipEmbeddings(List<int> fileIDs) async {
     final db = await MLDataDB.instance.asyncDB;
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
