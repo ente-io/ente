@@ -2,7 +2,7 @@ import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBilinear } from "./image";
-import { dotProductF32, normF32 } from "./math";
+import { dotProductF32, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
 /**
@@ -158,7 +158,7 @@ const convertToCLIPInput = (imageData: ImageData) => {
 };
 
 const normalized = (embedding: Float32Array) => {
-    const n = normF32(embedding);
+    const n = norm(embedding);
     return embedding.map((v) => v / n);
 };
 
