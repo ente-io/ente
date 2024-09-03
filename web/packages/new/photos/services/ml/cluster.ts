@@ -3,7 +3,6 @@ import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
-import { type EmbeddingCluster } from "./cluster-hdb";
 import type { Face, FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
@@ -121,7 +120,7 @@ export interface ClusteringOpts {
     joinThreshold: number;
     earlyExitThreshold: number;
     batchSize: number;
-    lookbackSize: number;
+    offsetIncrement: number;
 }
 
 export interface ClusteringProgress {
@@ -131,13 +130,17 @@ export interface ClusteringProgress {
 
 export type OnClusteringProgress = (progress: ClusteringProgress) => void;
 
+export type FaceF32 = Omit<Face, "embedding"> & {
+    embedding: Float32Array;
+};
+
 export interface ClusterPreview {
     clusterSize: number;
     faces: ClusterPreviewFace[];
 }
 
 export interface ClusterPreviewFace {
-    face: Omit<Face, "embedding">;
+    face: FaceF32;
     cosineSimilarity: number;
     wasMerged: boolean;
 }
@@ -196,7 +199,7 @@ export const clusterFaces = (
         joinThreshold,
         earlyExitThreshold,
         batchSize,
-        lookbackSize,
+        offsetIncrement,
     } = opts;
     const t = Date.now();
 
@@ -218,138 +221,63 @@ export const clusterFaces = (
     const fileForFace = ({ faceID }: { faceID: string }) =>
         ensure(fileForFaceID.get(faceID));
 
-    // Sort faces so that photos taken temporally close together are close.
-    //
-    // This is a heuristic to help the clustering algorithm produce better results.
+    // Sort faces temporally (a heuristic for better clusters), with the newest
+    // ones first.
     const faces = filteredFaces.sort(
         (a, b) =>
-            fileForFace(a).metadata.creationTime -
-            fileForFace(b).metadata.creationTime,
+            fileForFace(b).metadata.creationTime -
+            fileForFace(a).metadata.creationTime,
     );
-
-    const faceEmbeddings = faces.map(({ embedding }) => embedding);
 
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
 
-    // Map from face index to the corresponding cluster ID (if any).
-    const clusterIndexForFaceIndex = new Map<number, number>();
-
-    // For fast reverse lookup - map from cluster ids to their index in the
-    // clusters array.
-    const clusterIndexForClusterID = new Map<string, number>();
-
     // For fast reverse lookup - map from the id of a face to the id of the
     // cluster to which it belongs.
-    const clusterIDForFaceID = new Map<string, string>();
+    let clusterIDForFaceID = new Map<string, string>();
 
-    // Keeps track of which faces were found by the OG clustering algorithm, and
-    // which were sublimated in from a later match.
-    const wasMergedFaceIDs = new Set<string>();
-
-    // A function to generate new cluster IDs.
-    const newClusterID = () => newNonSecureID("cluster_");
+    // For fast reverse lookup - map from the id of a cluster to its position in
+    // the clusters array.
+    let clusterIndexForFaceID = new Map<string, number>();
 
     // The resultant clusters.
     // TODO-Cluster Later on, instead of starting from a blank slate, this will
     // be list of existing clusters we fetch from remote.
-    const clusters: FaceCluster[] = [];
+    let clusters: FaceCluster[] = [];
 
-    // Process the faces in batches.
-    let i = 0;
-    while (i < faceEmbeddings.length) {
+    // Process the faces in batches, but keep an overlap between batches to
+    // allow "links" to form with existing clusters.
+    for (let offset = 0; offset < faces.length; offset += offsetIncrement) {
         const it = Date.now();
 
-        onProgress({ completed: i, total: faceEmbeddings.length });
+        const batch = faces.slice(offset, batchSize);
+        log.info(`[batch] processing ${offset} to ${offset + batch.length}`);
 
-        // Keep an overlap between batches to allow "links" to form with
-        // existing clusters.
+        const oldState = {
+            clusterIDForFaceID,
+            clusterIndexForFaceID,
+            clusters,
+        };
 
-        const [batchStart, batchEnd] =
-            i < lookbackSize
-                ? [0, batchSize]
-                : [i - lookbackSize, i + batchSize];
-        const embeddingBatch = faceEmbeddings.slice(batchStart, batchEnd);
-
-        log.info(`[batch] processing ${batchStart} to ${batchEnd}`);
-
-        const batchClusters = clusterLinear(
-            embeddingBatch,
+        const newState = clusterBatchLinear(
+            batch,
+            oldState,
             joinThreshold,
             earlyExitThreshold,
             ({ completed }: ClusteringProgress) =>
                 onProgress({
-                    completed: completed + i,
-                    total: faceEmbeddings.length,
+                    completed: offset + completed,
+                    total: faces.length,
                 }),
         );
 
+        clusterIDForFaceID = newState.clusterIDForFaceID;
+        clusterIndexForFaceID = newState.clusterIndexForFaceID;
+        clusters = newState.clusters;
+
         log.info(
-            `[batch] ${batchClusters.length} clusters from ${embeddingBatch.length} faces (${Date.now() - it} ms)`,
+            `[batch] ${newState.clusters.length} clusters from ${batch.length} faces (${Date.now() - it} ms)`,
         );
-
-        // Merge the new clusters we got from this batch into the existing
-        // clusters, using the lookback embeddings as a link when they exist.
-
-        // Find the existing clusters before modifying any state so that we
-        // don't end up merging into clusters from the same batch.
-        const annotatedBatch = batchClusters.map((batchCluster) => {
-            let existingClusterIndex: number | undefined;
-            for (const j of batchCluster) {
-                const faceIndex = batchStart + j;
-                existingClusterIndex = clusterIndexForFaceIndex.get(faceIndex);
-                if (existingClusterIndex !== undefined) break;
-            }
-            return [batchCluster, existingClusterIndex] as const;
-        });
-
-        let [existingCount, newCount] = [0, 0];
-
-        for (const [batchCluster, existingClusterIndex] of annotatedBatch) {
-            if (existingClusterIndex !== undefined) {
-                // If any of the faces in this batch cluster were part of an
-                // existing cluster, also add the other faces from that batch to
-                // that existing cluster.
-
-                const existingCluster = ensure(clusters[existingClusterIndex]);
-                for (const j of batchCluster) {
-                    const faceIndex = batchStart + j;
-                    if (clusterIndexForFaceIndex.get(faceIndex) === undefined) {
-                        const { faceID } = ensure(faces[faceIndex]);
-                        wasMergedFaceIDs.add(faceID);
-                        existingCluster.faceIDs.push(faceID);
-                        clusterIDForFaceID.set(faceID, existingCluster.id);
-                        clusterIndexForFaceIndex.set(
-                            faceIndex,
-                            existingClusterIndex,
-                        );
-                    }
-                }
-                existingCount++;
-            } else {
-                // Otherwise create a new cluster with these faces.
-
-                const clusterID = newClusterID();
-                const clusterIndex = clusters.length;
-                clusterIndexForClusterID.set(clusterID, clusterIndex);
-
-                const faceIDs: string[] = [];
-                for (const j of batchCluster) {
-                    const faceIndex = batchStart + j;
-
-                    const { faceID } = ensure(faces[faceIndex]);
-                    faceIDs.push(faceID);
-                    clusterIDForFaceID.set(faceID, clusterID);
-                    clusterIndexForFaceIndex.set(faceIndex, clusterIndex);
-                }
-                clusters.push({ id: clusterID, faceIDs });
-                newCount++;
-            }
-        }
-
-        log.info(`[batch] merged ${existingCount}, new ${newCount}`);
-
-        i += embeddingBatch.length;
     }
 
     // Prune clusters that are smaller than the threshold.
@@ -375,8 +303,7 @@ export const clusterFaces = (
         );
         const previewFaces: ClusterPreviewFace[] = faces.map((face) => {
             const csim = dotProduct(topFace.embedding, face.embedding);
-            const wasMerged = wasMergedFaceIDs.has(face.faceID);
-            return { face, cosineSimilarity: csim, wasMerged };
+            return { face, cosineSimilarity: csim, wasMerged: false };
         });
         return {
             clusterSize: cluster.faceIDs.length,
@@ -451,6 +378,9 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
     }
 }
 
+/** Generate a new cluster ID. */
+const newClusterID = () => newNonSecureID("cluster_");
+
 /**
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
@@ -466,77 +396,81 @@ const fileIDFromFaceID = (faceID: string) => {
     return fileID;
 };
 
-const clusterLinear = (
-    embeddings: Float32Array[],
+interface ClusteringState {
+    clusterIDForFaceID: Map<string, string>;
+    clusterIndexForFaceID: Map<string, number>;
+    clusters: FaceCluster[];
+}
+
+const clusterBatchLinear = (
+    faces: FaceF32[],
+    oldState: ClusteringState,
     joinThreshold: number,
     earlyExitThreshold: number,
     onProgress: (progress: ClusteringProgress) => void,
 ) => {
-    const clusters: EmbeddingCluster[] = [];
-    const clusterIndexForEmbeddingIndex = new Map<number, number>();
-    // For each embedding
-    for (const [i, ei] of embeddings.entries()) {
-        // If the embedding is already part of a cluster, then skip it.
-        if (clusterIndexForEmbeddingIndex.get(i)) continue;
+    const state: ClusteringState = {
+        clusterIDForFaceID: new Map(oldState.clusterIDForFaceID),
+        clusterIndexForFaceID: new Map(oldState.clusterIndexForFaceID),
+        clusters: [...oldState.clusters],
+    };
 
-        if (i % 100 == 0) {
-            onProgress({ completed: i, total: embeddings.length });
-        }
+    // Sort the faces so that the already clustered ones are at the front.
+    faces = faces
+        .filter((f) => state.clusterIDForFaceID.has(f.faceID))
+        .concat(faces.filter((f) => !state.clusterIDForFaceID.has(f.faceID)));
 
-        // Find the nearest neighbour from among all the other embeddings.
+    // For each face in the batch
+    for (const [i, fi] of faces.entries()) {
+        if (i % 100 == 0) onProgress({ completed: i, total: faces.length });
+
+        // If the face is already part of a cluster, then skip it.
+        if (state.clusterIDForFaceID.has(fi.faceID)) continue;
+
+        // Find the nearest neighbour among the previous faces in this batch.
         let nnIndex: number | undefined;
-        let nnCosineSimilarity = 0;
-        // Find the nearest cluster from among all the existing clusters.
-        let nClusterIndex: number | undefined;
-        let nClusterCosineSimilarity = 0;
-        for (const [j, ej] of embeddings.entries()) {
+        let nnCosineSimilarity = joinThreshold;
+        for (let j = i - 1; j >= 0; j--) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // Skip ourselves.
-            if (i == j) continue;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const fj = faces[j]!;
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
-            const csim = dotProduct(ei, ej);
-            if (csim > joinThreshold) {
-                if (csim > nnCosineSimilarity) {
-                    nnIndex = j;
-                    nnCosineSimilarity = csim;
-                }
-                if (csim > nClusterCosineSimilarity) {
-                    const jClusterIndex = clusterIndexForEmbeddingIndex.get(j);
-                    if (jClusterIndex) {
-                        nClusterIndex = jClusterIndex;
-                        nClusterCosineSimilarity = csim;
-                    }
+            const csim = dotProduct(fi.embedding, fj.embedding);
+            if (csim > nnCosineSimilarity) {
+                nnIndex = j;
+                nnCosineSimilarity = csim;
 
-                    // If we've found something "near enough", stop looking for a
-                    // better match. This speeds up clustering.
-                    if (earlyExitThreshold > 0 && csim > earlyExitThreshold)
-                        break;
-                }
+                // If we've found something "near enough", stop looking for a
+                // better match (A heuristic to speed up clustering).
+                if (earlyExitThreshold > 0 && csim > earlyExitThreshold) break;
             }
         }
 
-        if (nClusterIndex) {
-            // Found a neighbouring cluster close enough, add ourselves to that.
-            ensure(clusters[nClusterIndex]).push(i);
-            clusterIndexForEmbeddingIndex.set(i, nClusterIndex);
-        } else if (nnIndex) {
-            // Otherwise create a new cluster with us and our nearest neighbour.
-            clusterIndexForEmbeddingIndex.set(i, clusters.length);
-            clusterIndexForEmbeddingIndex.set(nnIndex, clusters.length);
-            clusters.push([i, nnIndex]);
+        if (nnIndex) {
+            // Found a neighbour close enough, add ourselves to its cluster.
+            const nnFace = ensure(faces[nnIndex]);
+            const nnClusterIndex = ensure(
+                state.clusterIndexForFaceID.get(nnFace.faceID),
+            );
+            const nnCluster = ensure(state.clusters[nnClusterIndex]);
+
+            state.clusterIDForFaceID.set(fi.faceID, nnCluster.id);
+            state.clusterIndexForFaceID.set(fi.faceID, nnClusterIndex);
+            nnCluster.faceIDs.push(fi.faceID);
         } else {
-            // We didn't find a cluster or a neighbouring face within the
-            // threshold. Create a new cluster with only this embedding.
-            clusterIndexForEmbeddingIndex.set(i, clusters.length);
-            clusters.push([i]);
+            // No neighbour within the threshold. Create a new cluster.
+            const clusterID = newClusterID();
+            const clusterIndex = state.clusters.length;
+            const cluster = { id: clusterID, faceIDs: [fi.faceID] };
+
+            state.clusterIDForFaceID.set(fi.faceID, cluster.id);
+            state.clusterIndexForFaceID.set(fi.faceID, clusterIndex);
+            state.clusters.push(cluster);
         }
     }
 
-    // Prune singleton clusters.
-    const validClusters = clusters.filter((cs) => cs.length > 1);
-
-    return validClusters;
+    return state;
 };

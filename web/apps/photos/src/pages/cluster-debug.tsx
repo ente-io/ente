@@ -8,6 +8,7 @@ import {
 import {
     type ClusteringOpts,
     type ClusteringProgress,
+    type FaceF32,
     type OnClusteringProgress,
 } from "@/new/photos/services/ml/cluster";
 import { faceDirection, type Face } from "@/new/photos/services/ml/face";
@@ -68,9 +69,9 @@ export default function ClusterDebug() {
             minScore: 0.8,
             minClusterSize: 2,
             joinThreshold: 0.7,
-            earlyExitThreshold: 0.8,
+            earlyExitThreshold: 0.9,
             batchSize: 10000,
-            lookbackSize: 2500,
+            offsetIncrement: 7500,
         },
         onSubmit: (values) =>
             cluster(
@@ -81,7 +82,7 @@ export default function ClusterDebug() {
                     joinThreshold: toFloat(values.joinThreshold),
                     earlyExitThreshold: toFloat(values.earlyExitThreshold),
                     batchSize: toFloat(values.batchSize),
-                    lookbackSize: toFloat(values.lookbackSize),
+                    offsetIncrement: toFloat(values.offsetIncrement),
                 },
                 (progress: ClusteringProgress) =>
                     onProgressRef.current?.(progress),
@@ -219,9 +220,9 @@ const MemoizedForm = memo(
                         onChange={handleChange}
                     />
                     <TextField
-                        name="lookbackSize"
-                        label="lookbackSize"
-                        value={values.lookbackSize}
+                        name="offsetIncrement"
+                        label="offsetIncrement"
+                        value={values.offsetIncrement}
                         size="small"
                         onChange={handleChange}
                     />
@@ -493,7 +494,7 @@ interface FaceItemProps {
 }
 
 interface FaceWithFile {
-    face: Omit<Face, "embedding">;
+    face: FaceF32;
     enteFile: EnteFile;
     cosineSimilarity?: number;
     wasMerged?: boolean;
