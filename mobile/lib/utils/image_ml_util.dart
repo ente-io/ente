@@ -34,11 +34,13 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
       final String? jpgPath =
           await HeifConverter.convert(imagePath, format: 'jpg');
       if (jpgPath != null) {
+        _logger.info('Conversion successful, decoding JPG');
         final imageData = await File(jpgPath).readAsBytes();
         final image = await decodeImageFromData(imageData);
         final ByteData imageByteData = await getByteDataFromImage(image);
         return (image, imageByteData);
       }
+      _logger.info('Unable to convert $format to JPG');
     }
     _logger.severe(
       'Error decoding image of format $format (Android: ${Platform.isAndroid})',

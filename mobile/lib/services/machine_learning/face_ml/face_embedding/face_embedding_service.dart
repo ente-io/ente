@@ -60,8 +60,6 @@ class FaceEmbeddingService extends MlModel {
     Float32List input,
     int sessionAddress,
   ) {
-    final stopwatch = Stopwatch()..start();
-    _logger.info('MobileFaceNet interpreter.run is called');
     final runOptions = OrtRunOptions();
     final int numberOfFaces = input.length ~/ (kInputSize * kInputSize * 3);
     final inputOrt = OrtValueTensor.createTensorWithDataList(
@@ -78,11 +76,9 @@ class FaceEmbeddingService extends MlModel {
     }
     inputOrt.release();
     runOptions.release();
-    outputs.forEach((element) => element?.release());
-    stopwatch.stop();
-    _logger.info(
-      'MobileFaceNetFFI interpreter.run is finished, in ${stopwatch.elapsedMilliseconds}ms',
-    );
+    for (var element in outputs) {
+      element?.release();
+    }
 
     return embeddings;
   }
