@@ -6,6 +6,7 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:ml_linalg/vector.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -15,9 +16,9 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
@@ -37,7 +38,7 @@ class SemanticSearchService {
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
 
-  Future<List<ClipEmbedding>>? _cachedImageEmbeddings;
+  Future<List<EmbeddingVector>>? _cachedImageEmbeddingVectors;
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -53,10 +54,10 @@ class SemanticSearchService {
 
     // call getClipEmbeddings after 5 seconds
     Future.delayed(const Duration(seconds: 5), () async {
-      await getClipEmbeddings();
+      await getClipVectors();
     });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      _cachedImageEmbeddings = null;
+      _cachedImageEmbeddingVectors = null;
     });
 
     unawaited(_loadTextModel(delay: true));
@@ -106,10 +107,10 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<List<ClipEmbedding>> getClipEmbeddings() async {
-    _logger.info("Pulling cached embeddings");
-    _cachedImageEmbeddings ??= MLDataDB.instance.getAll();
-    return _cachedImageEmbeddings!;
+  Future<List<EmbeddingVector>> getClipVectors() async {
+    _logger.info("Pulling cached clip embeddings");
+    _cachedImageEmbeddingVectors ??= MLDataDB.instance.getAllClipVectors();
+    return _cachedImageEmbeddingVectors!;
   }
 
   Future<List<EnteFile>> getMatchingFiles(
@@ -267,7 +268,7 @@ class SemanticSearchService {
     double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
-    final embeddings = await getClipEmbeddings();
+    final embeddings = await getClipVectors();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkSimilarities,
       param: {
@@ -311,25 +312,33 @@ class SemanticSearchService {
 
 List<QueryResult> computeBulkSimilarities(Map args) {
   final queryResults = <QueryResult>[];
-  final imageEmbeddings = args["imageEmbeddings"] as List<ClipEmbedding>;
+  final imageEmbeddings = args["imageEmbeddings"] as List<EmbeddingVector>;
   final textEmbedding = args["textEmbedding"] as List<double>;
   final minimumSimilarity = args["minimumSimilarity"] ??
       SemanticSearchService.kMinimumSimilarityThreshold;
-  double bestScore = 0.0;
-  for (final imageEmbedding in imageEmbeddings) {
-    final score = computeCosineSimilarity(
-      imageEmbedding.embedding,
-      textEmbedding,
-    );
-    if (score >= minimumSimilarity) {
-      queryResults.add(QueryResult(imageEmbedding.fileID, score));
+
+  final Vector textVector = Vector.fromList(textEmbedding);
+  if (!kDebugMode) {
+    for (final imageEmbedding in imageEmbeddings) {
+      final similarity = imageEmbedding.vector.dot(textVector);
+      if (similarity >= minimumSimilarity) {
+        queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+      }
     }
-    if (score > bestScore) {
-      bestScore = score;
+  } else {
+    double bestScore = 0.0;
+    for (final imageEmbedding in imageEmbeddings) {
+      final similarity = imageEmbedding.vector.dot(textVector);
+      if (similarity >= minimumSimilarity) {
+        queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+      }
+      if (similarity > bestScore) {
+        bestScore = similarity;
+      }
     }
-  }
-  if (kDebugMode && queryResults.isEmpty) {
-    dev.log("No results found for query with best score: $bestScore");
+    if (kDebugMode && queryResults.isEmpty) {
+      dev.log("No results found for query with best score: $bestScore");
+    }
   }
 
   queryResults.sort((first, second) => second.score.compareTo(first.score));
