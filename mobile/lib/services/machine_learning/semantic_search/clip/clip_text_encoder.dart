@@ -36,10 +36,19 @@ class ClipTextEncoder extends MlModel {
     final address = args["address"] as int;
     final List<int> tokenize = await ClipTextTokenizer.instance.tokenize(text);
     final int32list = Int32List.fromList(tokenize);
-    if (MlModel.usePlatformPlugin) {
-      return await _runPlatformPluginPredict(int32list);
-    } else {
-      return _runFFIBasedPredict(int32list, address);
+    try {
+      if (MlModel.usePlatformPlugin) {
+        return await _runPlatformPluginPredict(int32list);
+      } else {
+        return _runFFIBasedPredict(int32list, address);
+      }
+    } catch (e, s) {
+      _logger.severe(
+        "Clip text inference failed  (PlatformPlugin: ${MlModel.usePlatformPlugin})",
+        e,
+        s,
+      );
+      rethrow;
     }
   }
 

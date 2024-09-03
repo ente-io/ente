@@ -66,9 +66,8 @@ class FaceDetectionService extends MlModel {
       maintainAspectRatio: true,
     );
     final preprocessingTime = DateTime.now();
-    _logger.info(
-      'Face detection preprocessing is finished, in ${preprocessingTime.difference(startTime).inMilliseconds} ms',
-    );
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
 
     // Run inference
     List<List<List<double>>>? nestedResults = [];
@@ -81,11 +80,14 @@ class FaceDetectionService extends MlModel {
           inputImageList,
         ); // [1, 25200, 16]
       }
+      final inferenceTime = DateTime.now();
+      final inferenceMs =
+          inferenceTime.difference(preprocessingTime).inMilliseconds;
       _logger.info(
-        'inference is finished, in ${DateTime.now().difference(preprocessingTime).inMilliseconds} ms',
+        'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
     } catch (e, s) {
-      _logger.severe('Error while running inference', e, s);
+      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
       throw YOLOFaceInterpreterRunException();
     }
     try {
@@ -121,9 +123,9 @@ class FaceDetectionService extends MlModel {
         outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
     inputOrt.release();
     runOptions.release();
-    outputs.forEach((element) {
+    for (var element in outputs) {
       element?.release();
-    });
+    }
 
     return result;
   }

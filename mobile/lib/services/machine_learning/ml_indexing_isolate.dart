@@ -51,7 +51,6 @@ class MLIndexingIsolate extends SuperIsolate {
     FileMLInstruction instruction,
     String filePath,
   ) async {
-    final Stopwatch stopwatch = Stopwatch()..start();
     late MLResult result;
 
     try {
@@ -79,15 +78,10 @@ class MLIndexingIsolate extends SuperIsolate {
         s,
       );
       debugPrint(
-        "This image with ID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
+        "This image with fileID ${instruction.file.uploadedFileID} has name ${instruction.file.displayName}.",
       );
       rethrow;
     }
-    stopwatch.stop();
-    _logger.info(
-      "Finished Analyze image with uploadedFileID ${instruction.file.uploadedFileID}, in "
-      "${stopwatch.elapsedMilliseconds} ms (including time waiting for inference engine availability)",
-    );
 
     return result;
   }

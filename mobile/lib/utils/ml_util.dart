@@ -332,7 +332,7 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
   imagePath = file?.path;
   stopwatch.stop();
   _logger.info(
-    "Getting file data for uploadedFileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
+    "Getting file data for fileID ${enteFile.uploadedFileID} took ${stopwatch.elapsedMilliseconds} ms",
   );
 
   if (imagePath == null) {
@@ -388,7 +388,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final int clipImageAddress = args["clipImageAddress"] as int;
 
     _logger.info(
-      "Start analyzeImageStatic with fileID: $enteFileID (runFaces: $runFaces, runClip: $runClip)",
+      "Start analyzeImageStatic for fileID $enteFileID (runFaces: $runFaces, runClip: $runClip)",
     );
     final startTime = DateTime.now();
 
@@ -399,9 +399,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = decodedImageSize;
     final decodeTime = DateTime.now();
-    _logger.info(
-      'Reading and decoding image took ${decodeTime.difference(startTime).inMilliseconds} ms (fileID: $enteFileID)',
-    );
+    final decodeMs = decodeTime.difference(startTime).inMilliseconds;
 
     if (runFaces) {
       final resultFaces = await FaceRecognitionService.runFacesPipeline(
@@ -417,6 +415,9 @@ Future<MLResult> analyzeImageStatic(Map args) async {
         result.faces = resultFaces;
       }
     }
+    final facesTime = DateTime.now();
+    final facesMs = facesTime.difference(decodeTime).inMilliseconds;
+    final faceMsString = runFaces ? ", faces: $facesMs ms" : "";
 
     if (runClip) {
       final clipResult = await SemanticSearchService.runClipImage(
@@ -427,10 +428,14 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       );
       result.clip = clipResult;
     }
+    final clipTime = DateTime.now();
+    final clipMs = clipTime.difference(facesTime).inMilliseconds;
+    final clipMsString = runClip ? ", clip: $clipMs ms" : "";
 
     final endTime = DateTime.now();
+    final totalMs = endTime.difference(startTime).inMilliseconds;
     _logger.info(
-      'Finished analyzeImageStatic with fileID: $enteFileID, in ${endTime.difference(startTime).inMilliseconds} ms',
+      'Finished analyzeImageStatic for fileID $enteFileID, in $totalMs ms (decode: $decodeMs ms$faceMsString$clipMsString)',
     );
 
     return result;

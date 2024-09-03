@@ -40,16 +40,25 @@ class ClipImageEncoder extends MlModel {
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;
     late List<double> result;
-    if (MlModel.usePlatformPlugin) {
-      result = await _runPlatformPluginPredict(inputList);
-    } else {
-      result = _runFFIBasedPredict(inputList, sessionAddress);
+    try {
+      if (MlModel.usePlatformPlugin) {
+        result = await _runPlatformPluginPredict(inputList);
+      } else {
+        result = _runFFIBasedPredict(inputList, sessionAddress);
+      }
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Clip image inference failed${enteFileID != null ? " with fileID $enteFileID" : ""}  (PlatformPlugin: ${MlModel.usePlatformPlugin})",
+        e,
+        stackTrace,
+      );
+      rethrow;
     }
     final inferTime = DateTime.now();
     final inferenceMs = inferTime.difference(preprocessingTime).inMilliseconds;
     final totalMs = inferTime.difference(startTime).inMilliseconds;
     _logger.info(
-      "Clip predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (nference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
+      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (inference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
     );
     return result;
   }

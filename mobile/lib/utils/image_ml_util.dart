@@ -259,7 +259,6 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
   int width = 112,
   int height = 112,
 }) async {
-  final stopwatch = Stopwatch()..start();
 
   final Size originalSize =
       Size(image.width.toDouble(), image.height.toDouble());
@@ -299,31 +298,20 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
       alignedImageIndex,
     );
 
-    final blurDetectionStopwatch = Stopwatch()..start();
     final faceGrayMatrix = _createGrayscaleIntMatrixFromNormalized2List(
       alignedImagesFloat32List,
       alignedImageIndex,
     );
 
     alignedImageIndex += 3 * width * height;
-    final grayscalems = blurDetectionStopwatch.elapsedMilliseconds;
-    log('creating grayscale matrix took $grayscalems ms');
     final (isBlur, blurValue) =
         await BlurDetectionService.predictIsBlurGrayLaplacian(
       faceGrayMatrix,
       faceDirection: face.getFaceDirection(),
     );
-    final blurms = blurDetectionStopwatch.elapsedMilliseconds - grayscalems;
-    log('blur detection took $blurms ms');
-    log(
-      'total blur detection took ${blurDetectionStopwatch.elapsedMilliseconds} ms',
-    );
-    blurDetectionStopwatch.stop();
     isBlurs.add(isBlur);
     blurValues.add(blurValue);
   }
-  stopwatch.stop();
-  log("Face Alignment took: ${stopwatch.elapsedMilliseconds} ms");
   return (
     alignedImagesFloat32List,
     alignmentResults,
