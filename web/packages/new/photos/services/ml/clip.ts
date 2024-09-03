@@ -185,7 +185,6 @@ export const clipMatches = async (
             // This code is on the hot path, so these optimizations help.
             [fileID, dotProductF32(embedding, textEmbedding)] as const,
     );
-
     // This score threshold was obtain heuristically. 0.2 generally gives solid
     // results, and around 0.15 we start getting many false positives (all this
     // is query dependent too).
@@ -204,14 +203,15 @@ let _cachedCLIPIndexes:
  * Dot product performance]). But doing that each time loses out on the
  * amortized benefit, so this temporary cache is as attempt to alleviate that.
  *
- * Once the user is done searching (for now), call
- * {@link clearCachedCLIPIndexes}.
+ * Use {@link clearCachedCLIPIndexes} to clear the cache (e.g. after indexing
+ * produces potentially new CLIP indexes).
  */
 const cachedOrReadCLIPIndexes = async () =>
-    _cachedCLIPIndexes ??
-    (await clipIndexes()).map(({ fileID, embedding }) => ({
-        fileID,
-        embedding: new Float32Array(embedding),
-    }));
+    (_cachedCLIPIndexes ??= (await clipIndexes()).map(
+        ({ fileID, embedding }) => ({
+            fileID,
+            embedding: new Float32Array(embedding),
+        }),
+    ));
 
 export const clearCachedCLIPIndexes = () => (_cachedCLIPIndexes = undefined);

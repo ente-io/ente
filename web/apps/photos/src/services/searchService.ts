@@ -2,7 +2,6 @@ import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
 import {
-    clearCachedCLIPIndexes,
     clipMatches,
     isMLEnabled,
     isMLSupported,
@@ -61,10 +60,6 @@ export const getAutoCompleteSuggestions =
             return [];
         }
     };
-
-export const clearSearchCaches = async () => {
-    await clearCachedCLIPIndexes();
-};
 
 async function convertSuggestionsToOptions(
     suggestions: Suggestion[],

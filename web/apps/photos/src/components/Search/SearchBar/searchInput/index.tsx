@@ -17,7 +17,6 @@ import AsyncSelect from "react-select/async";
 import { InputActionMeta } from "react-select/src/types";
 import { City } from "services/locationSearchService";
 import {
-    clearSearchCaches,
     getAutoCompleteSuggestions,
     getDefaultOptions,
 } from "services/searchService";
@@ -98,7 +97,6 @@ export default function SearchInput(props: Iprops) {
             props.setIsOpen(false);
             setValue(null);
             setQuery("");
-            clearSearchCaches();
         }
     };
 
