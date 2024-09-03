@@ -4,7 +4,6 @@ import "dart:ui" show Image;
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
@@ -67,7 +66,6 @@ class ClipImageEncoder extends MlModel {
     Float32List inputList,
     int sessionAddress,
   ) {
-    final w = EnteWatch("ClipImageEncoder._runFFIBasedPredict")..start();
     final inputOrt =
         OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 256, 256]);
     final inputs = {'input': inputOrt};
@@ -81,14 +79,12 @@ class ClipImageEncoder extends MlModel {
       element?.release();
     }
     normalizeEmbedding(embedding);
-    w.stopWithLog("done");
     return embedding;
   }
 
   static Future<List<double>> _runPlatformPluginPredict(
     Float32List inputImageList,
   ) async {
-    final w = EnteWatch("ClipImageEncoder._runEntePlugin")..start();
     final OnnxDart plugin = OnnxDart();
     final result = await plugin.predict(
       inputImageList,
@@ -96,7 +92,6 @@ class ClipImageEncoder extends MlModel {
     );
     final List<double> embedding = result!.sublist(0, 512);
     normalizeEmbedding(embedding);
-    w.stopWithLog("done");
     return embedding;
   }
 }
