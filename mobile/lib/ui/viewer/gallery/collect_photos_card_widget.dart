@@ -70,13 +70,11 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
       children: [
         Positioned(
           bottom: 22,
-          left: 14,
+          left: 14.5,
           child: Container(
             height: 125,
             width: 125,
-            decoration: BoxDecoration(
-              borderRadius:
-                  const BorderRadius.only(bottomLeft: Radius.circular(12)),
+            decoration: ShapeDecoration(
               gradient: LinearGradient(
                 colors: [
                   colorTheme.primary700.withOpacity(0.9),
@@ -85,6 +83,12 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                 ],
                 begin: Alignment.bottomLeft,
                 end: Alignment.topRight,
+              ),
+              shape: SmoothRectangleBorder(
+                borderRadius: SmoothBorderRadius(
+                  cornerRadius: 12.0,
+                  cornerSmoothing: 1.0,
+                ),
               ),
             ),
           ),
