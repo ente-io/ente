@@ -200,10 +200,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          _showControls.value = !_showControls.value;
-                          widget.playbackCallback!(!_showControls.value);
-                        },
+                        onTap: widget.playbackCallback != null
+                            ? () {
+                                _showControls.value = !_showControls.value;
+                                widget.playbackCallback!(!_showControls.value);
+                              }
+                            : null,
                         child: Container(
                           constraints: const BoxConstraints.expand(),
                         ),
