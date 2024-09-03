@@ -57,7 +57,6 @@ Future<dynamic> isolateFunction(
       final modelPaths = args['modelPaths'] as List<String>;
       final addresses = <int>[];
       for (int i = 0; i < modelNames.length; i++) {
-        // TODO:lau check logging here
         final int address = await MlModel.loadModel(
           modelNames[i],
           modelPaths[i],
@@ -68,7 +67,6 @@ Future<dynamic> isolateFunction(
 
     /// MLIndexingIsolate
     case IsolateOperation.releaseIndexingModels:
-      // TODO:lau check logging here
       final modelNames = args['modelNames'] as List<String>;
       final modelAddresses = args['modelAddresses'] as List<int>;
       for (int i = 0; i < modelNames.length; i++) {
@@ -114,7 +112,6 @@ Future<dynamic> isolateFunction(
 
     /// MLComputer
     case IsolateOperation.runClipText:
-      //TODO:lau check logging here
       final textEmbedding = await ClipTextEncoder.predict(args);
       return List<double>.from(textEmbedding, growable: false);
 

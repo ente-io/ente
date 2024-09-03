@@ -109,10 +109,9 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   Uint8List imageData,
   List<FaceBox> faceBoxes,
 ) async {
-  final Image img = await decodeImageFromData(imageData);
-  int i = 0;
-
+  int i = 0; // Index of the faceBox, initialized here for logging purposes
   try {
+    final Image img = await decodeImageFromData(imageData);
     final futureFaceThumbnails = <Future<Uint8List>>[];
     for (final faceBox in faceBoxes) {
       // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
@@ -153,9 +152,12 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
     final List<Uint8List> faceThumbnails =
         await Future.wait(futureFaceThumbnails);
     return faceThumbnails;
-  } catch (e) {
-    _logger.severe('Error generating face thumbnails: $e');
-    _logger.severe('cropImage problematic input argument: ${faceBoxes[i]}');
+  } catch (e, s) {
+    _logger.severe(
+      'Error generating face thumbnails. cropImage problematic input argument: ${faceBoxes[i]}',
+      e,
+      s,
+    );
     return [];
   }
 }
@@ -259,7 +261,6 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
   int width = 112,
   int height = 112,
 }) async {
-
   final Size originalSize =
       Size(image.width.toDouble(), image.height.toDouble());
 

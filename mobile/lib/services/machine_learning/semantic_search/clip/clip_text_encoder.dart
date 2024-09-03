@@ -34,14 +34,25 @@ class ClipTextEncoder extends MlModel {
   static Future<List<double>> predict(Map args) async {
     final text = args["text"] as String;
     final address = args["address"] as int;
+    final startTime = DateTime.now();
     final List<int> tokenize = await ClipTextTokenizer.instance.tokenize(text);
     final int32list = Int32List.fromList(tokenize);
+    final tokenizeTime = DateTime.now();
+    final tokenizeMs = tokenizeTime.difference(startTime).inMilliseconds;
     try {
+      late List<double> embedding;
       if (MlModel.usePlatformPlugin) {
-        return await _runPlatformPluginPredict(int32list);
+        embedding = await _runPlatformPluginPredict(int32list);
       } else {
-        return _runFFIBasedPredict(int32list, address);
+        embedding = _runFFIBasedPredict(int32list, address);
       }
+      final inferTime = DateTime.now();
+      final inferMs = inferTime.difference(tokenizeTime).inMilliseconds;
+      final totalMs = inferTime.difference(startTime).inMilliseconds;
+      _logger.info(
+        "Clip text predict took $totalMs ms (predict: $inferMs ms, tokenize: $tokenizeMs ms) for text: '$text'",
+      );
+      return embedding;
     } catch (e, s) {
       _logger.severe(
         "Clip text inference failed  (PlatformPlugin: ${MlModel.usePlatformPlugin})",
