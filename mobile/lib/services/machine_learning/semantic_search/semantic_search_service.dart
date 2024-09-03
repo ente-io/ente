@@ -24,7 +24,7 @@ import "package:photos/services/machine_learning/semantic_search/clip/clip_image
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
-  final _logger = Logger("SemanticSearchService");
+  static final _logger = Logger("SemanticSearchService");
   SemanticSearchService._privateConstructor();
 
   static final SemanticSearchService instance =
@@ -293,17 +293,14 @@ class SemanticSearchService {
     ByteData imageByteData,
     int clipImageAddress,
   ) async {
-    final startTime = DateTime.now();
     final embedding = await ClipImageEncoder.predict(
       image,
       imageByteData,
       clipImageAddress,
+      enteFileID,
     );
 
     final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);
-
-    dev.log('Finished running ClipImage for $enteFileID in '
-        '${DateTime.now().difference(startTime).inMilliseconds} ms');
 
     return clipResult;
   }

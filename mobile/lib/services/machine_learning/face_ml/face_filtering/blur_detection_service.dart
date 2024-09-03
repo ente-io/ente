@@ -1,10 +1,7 @@
-import 'package:logging/logging.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
 class BlurDetectionService {
-  static final _logger = Logger('BlurDetectionService');
-
   // singleton pattern
   BlurDetectionService._privateConstructor();
   static final instance = BlurDetectionService._privateConstructor();
@@ -18,7 +15,6 @@ class BlurDetectionService {
     final List<List<int>> laplacian =
         _applyLaplacian(grayImage, faceDirection: faceDirection);
     final double variance = _calculateVariance(laplacian);
-    _logger.info('Variance: $variance');
     return (variance < threshold, variance);
   }
 

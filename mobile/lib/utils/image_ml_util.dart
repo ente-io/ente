@@ -29,26 +29,27 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
     return (image, imageByteData);
   } catch (e, s) {
     final format = imagePath.split('.').last;
-    if ((format == 'heic' || format == 'heif') && Platform.isAndroid) {
-      _logger.info('Cannot decode $format, converting to JPG format');
+    if (Platform.isAndroid) {
+      _logger.info('Cannot decode $format, converting to JPG on Android');
       final String? jpgPath =
           await HeifConverter.convert(imagePath, format: 'jpg');
-      if (jpgPath == null) {
-        _logger.severe('Error converting $format to jpg:', e, s);
-        throw Exception('InvalidImageFormatException: Error decoding image of format $format');
+      if (jpgPath != null) {
+        _logger.info('Conversion successful, decoding JPG');
+        final imageData = await File(jpgPath).readAsBytes();
+        final image = await decodeImageFromData(imageData);
+        final ByteData imageByteData = await getByteDataFromImage(image);
+        return (image, imageByteData);
       }
-      final imageData = await File(jpgPath).readAsBytes();
-      final image = await decodeImageFromData(imageData);
-      final ByteData imageByteData = await getByteDataFromImage(image);
-      return (image, imageByteData);
-    } else {
-      _logger.severe(
-        'Error decoding image of format $format:',
-        e,
-        s,
-      );
-      throw Exception('InvalidImageFormatException: Error decoding image of format $format');
+      _logger.info('Unable to convert $format to JPG');
     }
+    _logger.severe(
+      'Error decoding image of format $format (Android: ${Platform.isAndroid})',
+      e,
+      s,
+    );
+    throw Exception(
+      'InvalidImageFormatException: Error decoding image of format $format',
+    );
   }
 }
 
@@ -105,10 +106,9 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   Uint8List imageData,
   List<FaceBox> faceBoxes,
 ) async {
-  final Image img = await decodeImageFromData(imageData);
-  int i = 0;
-
+  int i = 0; // Index of the faceBox, initialized here for logging purposes
   try {
+    final Image img = await decodeImageFromData(imageData);
     final futureFaceThumbnails = <Future<Uint8List>>[];
     for (final faceBox in faceBoxes) {
       // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
@@ -149,9 +149,12 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
     final List<Uint8List> faceThumbnails =
         await Future.wait(futureFaceThumbnails);
     return faceThumbnails;
-  } catch (e) {
-    log('[ImageMlUtils] Error generating face thumbnails: $e');
-    log('[ImageMlUtils] cropImage problematic input argument: ${faceBoxes[i]}');
+  } catch (e, s) {
+    _logger.severe(
+      'Error generating face thumbnails. cropImage problematic input argument: ${faceBoxes[i]}',
+      e,
+      s,
+    );
     return [];
   }
 }
@@ -255,8 +258,6 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
   int width = 112,
   int height = 112,
 }) async {
-  final stopwatch = Stopwatch()..start();
-
   final Size originalSize =
       Size(image.width.toDouble(), image.height.toDouble());
 
@@ -278,7 +279,9 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     final (alignmentResult, correctlyEstimated) =
         SimilarityTransform.estimate(face.allKeypoints);
     if (!correctlyEstimated) {
-      log('Face alignment failed because not able to estimate SimilarityTransform, for face: $face');
+      _logger.severe(
+        'Face alignment failed because not able to estimate SimilarityTransform, for face: $face',
+      );
       throw Exception(
         'Face alignment failed because not able to estimate SimilarityTransform',
       );
@@ -293,31 +296,20 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
       alignedImageIndex,
     );
 
-    final blurDetectionStopwatch = Stopwatch()..start();
     final faceGrayMatrix = _createGrayscaleIntMatrixFromNormalized2List(
       alignedImagesFloat32List,
       alignedImageIndex,
     );
 
     alignedImageIndex += 3 * width * height;
-    final grayscalems = blurDetectionStopwatch.elapsedMilliseconds;
-    log('creating grayscale matrix took $grayscalems ms');
     final (isBlur, blurValue) =
         await BlurDetectionService.predictIsBlurGrayLaplacian(
       faceGrayMatrix,
       faceDirection: face.getFaceDirection(),
     );
-    final blurms = blurDetectionStopwatch.elapsedMilliseconds - grayscalems;
-    log('blur detection took $blurms ms');
-    log(
-      'total blur detection took ${blurDetectionStopwatch.elapsedMilliseconds} ms',
-    );
-    blurDetectionStopwatch.stop();
     isBlurs.add(isBlur);
     blurValues.add(blurValue);
   }
-  stopwatch.stop();
-  log("Face Alignment took: ${stopwatch.elapsedMilliseconds} ms");
   return (
     alignedImagesFloat32List,
     alignmentResults,
