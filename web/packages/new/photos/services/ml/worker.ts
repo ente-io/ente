@@ -19,6 +19,7 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    clearCachedCLIPIndexes,
     clipIndexingVersion,
     clipMatches,
     indexCLIP,
@@ -193,6 +194,13 @@ export class MLWorker {
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
         return clipMatches(searchPhrase, ensure(this.electron));
+    }
+
+    /**
+     * Clear cached intermediate state preserved during a search "session".
+     */
+    clearCachedCLIPIndexes() {
+        clearCachedCLIPIndexes();
     }
 
     private async tick() {

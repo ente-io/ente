@@ -603,6 +603,12 @@ export const clipMatches = (
     worker().then((w) => w.clipMatches(searchPhrase));
 
 /**
+ * Clear any cached intermediate state created during a search session.
+ */
+export const clearCachedCLIPIndexes = () =>
+    worker().then((w) => w.clearCachedCLIPIndexes());
+
+/**
  * Return the IDs of all the faces in the given {@link enteFile} that are not
  * associated with a person cluster.
  */

@@ -43,7 +43,6 @@ export const dotProductF32 = (v1: Float32Array, v2: Float32Array) => {
     return d;
 };
 
-
 /**
  * Return the L2-norm ("magnitude") of the given vector.
  *
@@ -52,6 +51,9 @@ export const dotProductF32 = (v1: Float32Array, v2: Float32Array) => {
  * vector with itself.
  */
 export const norm = (v: number[]) =>
+    Math.sqrt(v.reduce((a, x) => a + x * x, 0));
+
+export const normF32 = (v: Float32Array) =>
     Math.sqrt(v.reduce((a, x) => a + x * x, 0));
 
 /**

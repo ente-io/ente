@@ -2,7 +2,7 @@ import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { clipIndexes } from "./db";
 import { pixelRGBBilinear } from "./image";
-import { dotProduct, norm } from "./math";
+import { dotProductF32, normF32 } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
 /**
@@ -106,13 +106,13 @@ export const indexCLIP = async (
     image: ImageBitmapAndData,
     electron: ElectronMLWorker,
 ): Promise<CLIPIndex> => ({
-    embedding: await computeEmbedding(image.data, electron),
+    embedding: Array.from(await computeEmbedding(image.data, electron)),
 });
 
 const computeEmbedding = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
-): Promise<number[]> => {
+): Promise<Float32Array> => {
     const clipInput = convertToCLIPInput(imageData);
     return normalized(await electron.computeCLIPImageEmbedding(clipInput));
 };
@@ -158,9 +158,8 @@ const convertToCLIPInput = (imageData: ImageData) => {
 };
 
 const normalized = (embedding: Float32Array) => {
-    const nums = Array.from(embedding);
-    const n = norm(nums);
-    return nums.map((v) => v / n);
+    const n = normF32(embedding);
+    return embedding.map((v) => v / n);
 };
 
 /**
@@ -177,17 +176,42 @@ export const clipMatches = async (
     if (!t) return undefined;
 
     const textEmbedding = normalized(t);
-    const items = (await clipIndexes()).map(
+    const items = (await cachedOrReadCLIPIndexes()).map(
         ({ fileID, embedding }) =>
             // What we want to do is `cosineSimilarity`, but since both the
             // embeddings involved are already normalized, we can save the norm
             // calculations and directly do their `dotProduct`.
             //
             // This code is on the hot path, so these optimizations help.
-            [fileID, dotProduct(embedding, textEmbedding)] as const,
+            [fileID, dotProductF32(embedding, textEmbedding)] as const,
     );
+
     // This score threshold was obtain heuristically. 0.2 generally gives solid
     // results, and around 0.15 we start getting many false positives (all this
     // is query dependent too).
     return new Map(items.filter(([, score]) => score >= 0.175));
 };
+
+let _cachedCLIPIndexes:
+    | { fileID: number; embedding: Float32Array }[]
+    | undefined;
+
+/**
+ * Cache the CLIP indexes for the duration of a "search session" to avoid
+ * converting them from number[] to Float32Array during the match.
+ *
+ * Converting them to Float32Array gives a big performance boost (See: [Note:
+ * Dot product performance]). But doing that each time loses out on the
+ * amortized benefit, so this temporary cache is as attempt to alleviate that.
+ *
+ * Once the user is done searching (for now), call
+ * {@link clearCachedCLIPIndexes}.
+ */
+const cachedOrReadCLIPIndexes = async () =>
+    _cachedCLIPIndexes ??
+    (await clipIndexes()).map(({ fileID, embedding }) => ({
+        fileID,
+        embedding: new Float32Array(embedding),
+    }));
+
+export const clearCachedCLIPIndexes = () => (_cachedCLIPIndexes = undefined);
