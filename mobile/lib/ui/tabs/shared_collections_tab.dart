@@ -10,6 +10,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -319,6 +320,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ],
                   )
                 : const SizedBox.shrink(),
+            Divider(color: getEnteColorScheme(context).strokeFaint),
             const CollectPhotosCardWidget(),
             const SizedBox(height: 32),
           ],

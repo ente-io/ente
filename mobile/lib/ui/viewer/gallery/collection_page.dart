@@ -109,13 +109,12 @@ class CollectionPage extends StatelessWidget {
           isFromCollectPhotos: isFromCollectPhotos,
         ),
       ),
-      floatingActionButton: isFromCollectPhotos
+      bottomNavigationBar: isFromCollectPhotos
           ? CollectPhotosBottomButtons(
               c.collection,
               selectedFiles: _selectedFiles,
             )
           : const SizedBox.shrink(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: SelectionState(
         selectedFiles: _selectedFiles,
         child: Stack(

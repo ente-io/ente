@@ -91,56 +91,52 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
           crossFadeState: !_hasSelectedFilesNotifier.value
               ? CrossFadeState.showFirst
               : CrossFadeState.showSecond,
-          firstChild: Stack(
-            children: [
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color:
-                              getEnteColorScheme(context).backgroundElevated2,
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(4)),
-                        ),
-                        child: ButtonWidget(
-                          buttonType: ButtonType.secondary,
-                          buttonSize: ButtonSize.large,
-                          labelText: S.of(context).addPhotos,
-                          icon: Icons.add_photo_alternate_outlined,
-                          shouldSurfaceExecutionStates: false,
-                          onTap: () async {
-                            try {
-                              await showAddPhotosSheet(context, widget.c);
-                            } catch (e) {
-                              await showGenericErrorDialog(
-                                context: context,
-                                error: e,
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ButtonWidget(
-                        buttonType: ButtonType.primary,
-                        buttonSize: ButtonSize.large,
-                        labelText: S.of(context).share,
-                        icon: Icons.adaptive.share,
-                        shouldSurfaceExecutionStates: false,
-                        onTap: () async {
-                          await _generateAlbumUrl();
-                        },
-                      ),
-                    ],
+          firstChild: Container(
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).backgroundElevated,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).backgroundElevated2,
+                      borderRadius: const BorderRadius.all(Radius.circular(4)),
+                    ),
+                    child: ButtonWidget(
+                      buttonType: ButtonType.secondary,
+                      buttonSize: ButtonSize.large,
+                      labelText: S.of(context).addPhotos,
+                      icon: Icons.add_photo_alternate_outlined,
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () async {
+                        try {
+                          await showAddPhotosSheet(context, widget.c);
+                        } catch (e) {
+                          await showGenericErrorDialog(
+                            context: context,
+                            error: e,
+                          );
+                        }
+                      },
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    buttonSize: ButtonSize.large,
+                    labelText: S.of(context).share,
+                    icon: Icons.adaptive.share,
+                    shouldSurfaceExecutionStates: false,
+                    onTap: () async {
+                      await _generateAlbumUrl();
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
           secondChild: const SizedBox.shrink(),
         );
