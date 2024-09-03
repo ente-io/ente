@@ -46,7 +46,7 @@ class MLIndexingIsolate extends SuperIsolate {
   static final instance = MLIndexingIsolate._privateConstructor();
   factory MLIndexingIsolate() => instance;
 
-  /// Analyzes the given image data by running the full pipeline for faces, using [_analyzeImageSync] in the isolate.
+  /// Analyzes the given image data by running the full pipeline for faces, using [analyzeImageStatic] in the isolate.
   Future<MLResult?> analyzeImage(
     FileMLInstruction instruction,
     String filePath,

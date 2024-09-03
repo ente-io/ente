@@ -362,13 +362,11 @@ ClusteringResult runLinearClustering(Map args) {
   sortedFaceInfos.addAll(facesWithClusterID);
   sortedFaceInfos.addAll(facesWithoutClusterID);
 
-  // Make sure the first face has a clusterId
-  final int totalFaces = sortedFaceInfos.length;
-  int dynamicThresholdCount = 0;
-
   if (sortedFaceInfos.isEmpty) {
     return ClusteringResult.empty();
   }
+  final int totalFaces = sortedFaceInfos.length;
+  int dynamicThresholdCount = 0;
 
   // Start actual clustering
   _logger.info(
