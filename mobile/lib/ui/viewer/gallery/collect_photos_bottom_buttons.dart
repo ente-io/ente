@@ -102,7 +102,8 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: getEnteColorScheme(context).backdropBase,
+                          color:
+                              getEnteColorScheme(context).backgroundElevated2,
                           borderRadius:
                               const BorderRadius.all(Radius.circular(4)),
                         ),
