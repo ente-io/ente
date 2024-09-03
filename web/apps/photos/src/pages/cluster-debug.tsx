@@ -11,7 +11,7 @@ import {
     type FaceF32,
     type OnClusteringProgress,
 } from "@/new/photos/services/ml/cluster";
-import { faceDirection, type Face } from "@/new/photos/services/ml/face";
+import { faceDirection } from "@/new/photos/services/ml/face";
 import type { EnteFile } from "@/new/photos/types/file";
 import {
     FlexWrapper,
@@ -68,7 +68,7 @@ export default function ClusterDebug() {
             minBlur: 10,
             minScore: 0.8,
             minClusterSize: 2,
-            joinThreshold: 0.7,
+            joinThreshold: 0.6,
             earlyExitThreshold: 0.9,
             batchSize: 10000,
             offsetIncrement: 7500,

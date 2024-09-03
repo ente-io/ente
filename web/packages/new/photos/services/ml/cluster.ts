@@ -250,7 +250,7 @@ export const clusterFaces = (
     for (let offset = 0; offset < faces.length; offset += offsetIncrement) {
         const it = Date.now();
 
-        const batch = faces.slice(offset, batchSize);
+        const batch = faces.slice(offset, offset + batchSize);
         log.info(`[batch] processing ${offset} to ${offset + batch.length}`);
 
         const oldState = {
