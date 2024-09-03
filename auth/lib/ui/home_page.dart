@@ -31,7 +31,6 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
-// import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -278,8 +277,17 @@ class _HomePageState extends State<HomePage> {
                   ),
                   focusNode: searchBoxFocusNode,
                 ),
-          centerTitle: true,
+          centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
+            PlatformUtil.isDesktop()
+                ? IconButton(
+                    icon: const Icon(Icons.lock),
+                    tooltip: l10n.appLock,
+                    onPressed: () async {
+                      await navigateToLockScreen();
+                    },
+                  )
+                : const SizedBox.shrink(),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
@@ -306,15 +314,6 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
-            PlatformUtil.isDesktop()
-                ? IconButton(
-                    icon: const Icon(Icons.lock),
-                    tooltip: l10n.appLock,
-                    onPressed: () async {
-                      await navigateToLockScreen();
-                    },
-                  )
-                : const SizedBox.shrink(),
           ],
         ),
         floatingActionButton: !_hasLoaded ||
