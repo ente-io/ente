@@ -5,7 +5,7 @@ import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
 import { type EmbeddingCluster, clusterHdbscan } from "./cluster-hdb";
 import type { Face, FaceIndex } from "./face";
-import { dotProduct } from "./math";
+import { dotProduct, dotProductF32 } from "./math";
 
 /**
  * A face cluster is an set of faces.
@@ -231,7 +231,11 @@ export const clusterFaces = (
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
 
-    const faceEmbeddings = faces.map(({ embedding }) => embedding);
+    const faceEmbeddingsN = faces.map(({ embedding }) => embedding);
+
+    const faceEmbeddings = faces.map(
+        ({ embedding }) => new Float32Array(embedding),
+    );
 
     // Map from face index to the corresponding cluster ID (if any).
     const clusterIndexForFaceIndex = new Map<number, number>();
@@ -276,7 +280,8 @@ export const clusterFaces = (
 
         let batchClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
-            ({ clusters: batchClusters } = clusterHdbscan(embeddingBatch));
+            const embeddingBatchN = faceEmbeddingsN.slice(batchStart, batchEnd);
+            ({ clusters: batchClusters } = clusterHdbscan(embeddingBatchN));
         } else {
             ({ clusters: batchClusters } = clusterLinear(
                 embeddingBatch,
@@ -474,7 +479,7 @@ interface ClusterLinearResult {
 }
 
 const clusterLinear = (
-    embeddings: number[][],
+    embeddings: Float32Array[],
     joinThreshold: number,
     earlyExitThreshold: number,
     onProgress: (progress: ClusteringProgress) => void,
@@ -504,7 +509,7 @@ const clusterLinear = (
 
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
-            const csim = dotProduct(ei, ej);
+            const csim = dotProductF32(ei, ej);
             if (csim > joinThreshold) {
                 if (csim > nnCosineSimilarity) {
                     nnIndex = j;
