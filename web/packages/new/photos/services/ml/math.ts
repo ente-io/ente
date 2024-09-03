@@ -24,7 +24,7 @@ export const clamp = (value: number, min: number, max: number) =>
  * product. When we're computing dot products in a hot loop, skipping over that
  * unnecessary renormalization matters.
  *
- * When comparing embeddings we usually want is the cosine similarity, but when
+ * When comparing embeddings we usually want is the cosine similarity, but if
  * both the embeddings involved are already normalized, we can save the norm
  * calculations and directly do their `dotProduct`.
  *

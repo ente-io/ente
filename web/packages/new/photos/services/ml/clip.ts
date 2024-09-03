@@ -178,7 +178,8 @@ export const clipMatches = async (
     const textEmbedding = normalized(t);
     const items = (await cachedOrReadCLIPIndexes()).map(
         ({ fileID, embedding }) =>
-
+            // The dot product gives us cosine similarity here since both the
+            // vectors are already normalized.
             [fileID, dotProduct(embedding, textEmbedding)] as const,
     );
     // This score threshold was obtain heuristically. 0.2 generally gives solid
