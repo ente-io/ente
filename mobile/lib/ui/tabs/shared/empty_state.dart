@@ -1,17 +1,65 @@
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
+import "package:photos/models/collection/collection_items.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class SharedEmptyStateWidget extends StatelessWidget {
   const SharedEmptyStateWidget({super.key});
+
+  Future<void> _onTapCollectEventPhotos(BuildContext context) async {
+    final String currentDate =
+        DateFormat('MMMM d, yyyy').format(DateTime.now());
+    final result = await showTextInputDialog(
+      context,
+      title: "Name the album",
+      submitButtonLabel: S.of(context).create,
+      hintText: S.of(context).enterAlbumName,
+      alwaysShowSuccessState: false,
+      initialValue: currentDate,
+      textCapitalization: TextCapitalization.words,
+      onSubmit: (String text) async {
+        // indicates user cancelled the rename request
+        if (text.trim() == "") {
+          return;
+        }
+
+        try {
+          final Collection c =
+              await CollectionsService.instance.createAlbum(text);
+          // ignore: unawaited_futures
+          routeToPage(
+            context,
+            CollectionPage(
+              isFromCollectPhotos: true,
+              CollectionWithThumbnail(c, null),
+            ),
+          );
+        } catch (e, s) {
+          Logger("Collect event photos from CollectPhotosCardWidget")
+              .severe("Failed to rename album", e, s);
+          rethrow;
+        }
+      },
+    );
+    if (result is Exception) {
+      await showGenericErrorDialog(context: context, error: result);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,10 +128,7 @@ class SharedEmptyStateWidget extends StatelessWidget {
                       labelText: S.of(context).collectEventPhotos,
                       icon: Icons.add_photo_alternate_outlined,
                       onTap: () async {
-                        showCollectionActionSheet(
-                          context,
-                          actionType: CollectionActionType.collectPhotos,
-                        );
+                        await _onTapCollectEventPhotos(context);
                       },
                     ),
                     const SizedBox(height: 6),
