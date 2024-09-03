@@ -99,15 +99,4 @@ class MLComputer extends SuperIsolate {
       }
     });
   }
-
-  Future<bool> testLogging() async {
-    try {
-      final result =
-          await runInIsolate(IsolateOperation.testLogging, {}) as bool;
-      return result;
-    } catch (e, s) {
-      _logger.severe("XXX Could not test logging in isolate", e, s);
-      rethrow;
-    }
-  }
 }

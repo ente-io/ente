@@ -1,7 +1,6 @@
 import "dart:io" show File;
 import 'dart:typed_data' show Uint8List;
 
-import "package:logging/logging.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
@@ -32,9 +31,6 @@ enum IsolateOperation {
 
   /// [MLComputer]
   runClipText,
-
-  /// [MLComputer]
-  testLogging,
 
   /// [FaceClusteringService]
   linearIncrementalClustering
@@ -121,13 +117,6 @@ Future<dynamic> isolateFunction(
       //TODO:lau check logging here
       final textEmbedding = await ClipTextEncoder.predict(args);
       return List<double>.from(textEmbedding, growable: false);
-
-    /// MLComputer
-    case IsolateOperation.testLogging:
-      final logger = Logger('XXX MLComputerTestLogging');
-      logger.info("XXX logging from isolate is working!!!");
-      // throw Exception("XXX logging from isolate testing exception handling");
-      return true;
 
     /// Cases for MLComputer end here
 
