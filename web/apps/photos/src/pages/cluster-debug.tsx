@@ -8,9 +8,10 @@ import {
 import {
     type ClusteringOpts,
     type ClusteringProgress,
+    type FaceF32,
     type OnClusteringProgress,
 } from "@/new/photos/services/ml/cluster";
-import { faceDirection, type Face } from "@/new/photos/services/ml/face";
+import { faceDirection } from "@/new/photos/services/ml/face";
 import type { EnteFile } from "@/new/photos/types/file";
 import {
     FlexWrapper,
@@ -23,7 +24,6 @@ import {
     Button,
     IconButton,
     LinearProgress,
-    MenuItem,
     Stack,
     styled,
     TextField,
@@ -65,26 +65,24 @@ export default function ClusterDebug() {
     // scroll.
     const formik = useFormik<ClusteringOpts>({
         initialValues: {
-            method: "linear",
             minBlur: 10,
             minScore: 0.8,
             minClusterSize: 2,
-            joinThreshold: 0.7,
-            earlyExitThreshold: 0.8,
+            joinThreshold: 0.6,
+            earlyExitThreshold: 0.9,
             batchSize: 10000,
-            lookbackSize: 2500,
+            offsetIncrement: 7500,
         },
         onSubmit: (values) =>
             cluster(
                 {
-                    method: values.method,
                     minBlur: toFloat(values.minBlur),
                     minScore: toFloat(values.minScore),
                     minClusterSize: toFloat(values.minClusterSize),
                     joinThreshold: toFloat(values.joinThreshold),
                     earlyExitThreshold: toFloat(values.earlyExitThreshold),
                     batchSize: toFloat(values.batchSize),
-                    lookbackSize: toFloat(values.lookbackSize),
+                    offsetIncrement: toFloat(values.offsetIncrement),
                 },
                 (progress: ClusteringProgress) =>
                     onProgressRef.current?.(progress),
@@ -180,20 +178,6 @@ const MemoizedForm = memo(
                     sx={{ ".MuiFormControl-root": { flex: "1" } }}
                 >
                     <TextField
-                        name="method"
-                        label="method"
-                        value={values.method}
-                        select
-                        size="small"
-                        onChange={handleChange}
-                    >
-                        {["hdbscan", "linear"].map((v) => (
-                            <MenuItem key={v} value={v}>
-                                {v}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                    <TextField
                         name="minBlur"
                         label="minBlur"
                         value={values.minBlur}
@@ -214,12 +198,6 @@ const MemoizedForm = memo(
                         size="small"
                         onChange={handleChange}
                     />
-                </Stack>
-                <Stack
-                    direction="row"
-                    gap={1}
-                    sx={{ ".MuiFormControl-root": { flex: "1" } }}
-                >
                     <TextField
                         name="joinThreshold"
                         label="joinThreshold"
@@ -242,9 +220,9 @@ const MemoizedForm = memo(
                         onChange={handleChange}
                     />
                     <TextField
-                        name="lookbackSize"
-                        label="lookbackSize"
-                        value={values.lookbackSize}
+                        name="offsetIncrement"
+                        label="offsetIncrement"
+                        value={values.offsetIncrement}
                         size="small"
                         onChange={handleChange}
                     />
@@ -345,7 +323,7 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
 
     const itemSize = (index: number) =>
         index === 0
-            ? 200
+            ? 140
             : index === 1
               ? 130
               : Array.isArray(items[index - 2])
@@ -516,7 +494,7 @@ interface FaceItemProps {
 }
 
 interface FaceWithFile {
-    face: Omit<Face, "embedding">;
+    face: FaceF32;
     enteFile: EnteFile;
     cosineSimilarity?: number;
     wasMerged?: boolean;

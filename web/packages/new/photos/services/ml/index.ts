@@ -23,11 +23,11 @@ import {
     type ClusteringOpts,
     type ClusterPreviewFace,
     type FaceCluster,
+    type FaceF32,
     type OnClusteringProgress,
 } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
-import type { Face } from "./face";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -366,7 +366,7 @@ export interface ClusterDebugPageContents {
     clusters: FaceCluster[];
     clusterPreviewsWithFile: ClusterPreviewWithFile[];
     unclusteredFacesWithFile: {
-        face: Omit<Face, "embedding">;
+        face: FaceF32;
         enteFile: EnteFile;
     }[];
 }
