@@ -29,30 +29,25 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
     return (image, imageByteData);
   } catch (e, s) {
     final format = imagePath.split('.').last;
-    if ((format == 'heic' || format == 'heif') && Platform.isAndroid) {
-      _logger.info('Cannot decode $format, converting to JPG format');
+    if (Platform.isAndroid) {
+      _logger.info('Cannot decode $format, converting to JPG on Android');
       final String? jpgPath =
           await HeifConverter.convert(imagePath, format: 'jpg');
-      if (jpgPath == null) {
-        _logger.severe('Error converting $format to jpg:', e, s);
-        throw Exception(
-          'InvalidImageFormatException: Error decoding image of format $format',
-        );
+      if (jpgPath != null) {
+        final imageData = await File(jpgPath).readAsBytes();
+        final image = await decodeImageFromData(imageData);
+        final ByteData imageByteData = await getByteDataFromImage(image);
+        return (image, imageByteData);
       }
-      final imageData = await File(jpgPath).readAsBytes();
-      final image = await decodeImageFromData(imageData);
-      final ByteData imageByteData = await getByteDataFromImage(image);
-      return (image, imageByteData);
-    } else {
-      _logger.severe(
-        'Error decoding image of format $format:',
-        e,
-        s,
-      );
-      throw Exception(
-        'InvalidImageFormatException: Error decoding image of format $format',
-      );
     }
+    _logger.severe(
+      'Error decoding image of format $format (Android: ${Platform.isAndroid})',
+      e,
+      s,
+    );
+    throw Exception(
+      'InvalidImageFormatException: Error decoding image of format $format',
+    );
   }
 }
 
