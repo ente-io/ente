@@ -516,7 +516,7 @@ interface FaceItemProps {
 }
 
 interface FaceWithFile {
-    face: Face;
+    face: Omit<Face, "embedding">;
     enteFile: EnteFile;
     cosineSimilarity?: number;
     wasMerged?: boolean;

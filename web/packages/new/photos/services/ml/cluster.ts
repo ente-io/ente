@@ -138,7 +138,7 @@ export interface ClusterPreview {
 }
 
 export interface ClusterPreviewFace {
-    face: Face;
+    face: Omit<Face, "embedding">;
     cosineSimilarity: number;
     wasMerged: boolean;
 }
@@ -217,7 +217,8 @@ export const clusterFaces = (
         ]),
     );
 
-    const fileForFace = ({ faceID }: Face) => ensure(fileForFaceID.get(faceID));
+    const fileForFace = ({ faceID }: { faceID: string }) =>
+        ensure(fileForFaceID.get(faceID));
 
     // Sort faces so that photos taken temporally close together are close.
     //
@@ -232,6 +233,9 @@ export const clusterFaces = (
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
 
     const faceEmbeddings = faces.map(({ embedding }) => embedding);
+    // For the old hbdscan. This is not performant but we might be discarding
+    // that code anyway, so no point in optimizing.
+    const faceEmbeddingsN = faces.map(({ embedding }) => [...embedding]);
 
     // Map from face index to the corresponding cluster ID (if any).
     const clusterIndexForFaceIndex = new Map<number, number>();
@@ -276,7 +280,8 @@ export const clusterFaces = (
 
         let batchClusters: EmbeddingCluster[];
         if (method == "hdbscan") {
-            ({ clusters: batchClusters } = clusterHdbscan(embeddingBatch));
+            const embeddingBatchN = faceEmbeddingsN.slice(batchStart, batchEnd);
+            ({ clusters: batchClusters } = clusterHdbscan(embeddingBatchN));
         } else {
             ({ clusters: batchClusters } = clusterLinear(
                 embeddingBatch,
@@ -445,11 +450,14 @@ export const clusterFaces = (
 /**
  * A generator function that returns a stream of {faceID, embedding} values,
  * flattening all the the faces present in the given {@link faceIndices}.
+ *
+ * It also converts the embeddings to Float32Arrays to speed up the dot product
+ * calculations that will happen during clustering.
  */
 function* enumerateFaces(faceIndices: FaceIndex[]) {
     for (const fi of faceIndices) {
         for (const f of fi.faces) {
-            yield f;
+            yield { ...f, embedding: new Float32Array(f.embedding) };
         }
     }
 }
@@ -474,7 +482,7 @@ interface ClusterLinearResult {
 }
 
 const clusterLinear = (
-    embeddings: number[][],
+    embeddings: Float32Array[],
     joinThreshold: number,
     earlyExitThreshold: number,
     onProgress: (progress: ClusteringProgress) => void,
