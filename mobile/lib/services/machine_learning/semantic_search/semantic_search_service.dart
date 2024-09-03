@@ -182,41 +182,8 @@ class SemanticSearchService {
     String query,
     double minimumSimilarity,
   ) async {
-    final textEmbedding = await _getTextEmbedding(query);
-
-    final queryResults = await _getSimilarities(
-      textEmbedding,
-      minimumSimilarity: minimumSimilarity,
-    );
-
-    final queryResultIds = <int>[];
-    for (QueryResult result in queryResults) {
-      queryResultIds.add(result.id);
-    }
-
-    final filesMap = await FilesDB.instance.getFilesFromIDs(
-      queryResultIds,
-    );
-    final results = <EnteFile>[];
-
-    final ignoredCollections =
-        CollectionsService.instance.getHiddenCollectionIds();
-    final deletedEntries = <int>[];
-    for (final result in queryResults) {
-      final file = filesMap[result.id];
-      if (file != null && !ignoredCollections.contains(file.collectionID)) {
-        results.add(file);
-      }
-      if (file == null) {
-        deletedEntries.add(result.id);
-      }
-    }
-
-    _logger.info(results.length.toString() + " results");
-
-    if (deletedEntries.isNotEmpty) {
-      unawaited(MLDataDB.instance.deleteClipEmbeddings(deletedEntries));
-    }
+    final results =
+        await getMatchingFiles(query, similarityThreshold: minimumSimilarity);
 
     final matchingFileIDs = <int>[];
     for (EnteFile file in results) {
