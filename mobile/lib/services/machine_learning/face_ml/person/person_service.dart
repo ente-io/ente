@@ -9,6 +9,7 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -16,9 +17,12 @@ class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
   final SharedPreferences prefs;
+
   PersonService(this.entityService, this.faceMLDataDB, this.prefs);
+
   // instance
   static PersonService? _instance;
+
   static PersonService get instance {
     if (_instance == null) {
       throw Exception("PersonService not initialized");
@@ -260,15 +264,19 @@ class PersonService {
         faceCount += cluster.faces.length;
         for (var faceId in cluster.faces) {
           if (faceIdToClusterID.containsKey(faceId)) {
-            final otherPersonID = clusterToPersonID[faceIdToClusterID[faceId]!];
-            if (otherPersonID != e.id) {
-              final otherPerson = await getPerson(otherPersonID!);
-              throw Exception(
-                "Face $faceId is already assigned to person $otherPersonID (${otherPerson!.data.name}) and person ${e.id} (${personData.name})",
-              );
+            if (flagService.internalUser) {
+              final otherPersonID =
+                  clusterToPersonID[faceIdToClusterID[faceId]!];
+              if (otherPersonID != e.id) {
+                final otherPerson = await getPerson(otherPersonID!);
+                logger.warning(
+                  "Face $faceId is already assigned to person $otherPersonID (${otherPerson!.data.name}) and person ${e.id} (${personData.name})",
+                );
+              }
             }
+          } else {
+            faceIdToClusterID[faceId] = cluster.id;
           }
-          faceIdToClusterID[faceId] = cluster.id;
         }
         clusterToPersonID[cluster.id] = e.id;
       }
