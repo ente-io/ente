@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -6,7 +8,9 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import "package:photos/utils/navigation_util.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -91,11 +95,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
-                      icon: Icons.favorite_rounded,
+                      labelText: 'Claim referral code',
+                      icon: Icons.arrow_forward_outlined,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        await UpdateService.instance.launchReviewUrl();
+                        unawaited(
+                          routeToPage(
+                            context,
+                            const ReferralScreen(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 8),
