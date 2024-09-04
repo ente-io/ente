@@ -20,10 +20,10 @@ import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
 import {
+    type ClusterFace,
     type ClusteringOpts,
     type ClusterPreviewFace,
     type FaceCluster,
-    type FaceF32,
     type OnClusteringProgress,
 } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
@@ -366,7 +366,7 @@ export interface ClusterDebugPageContents {
     clusters: FaceCluster[];
     clusterPreviewsWithFile: ClusterPreviewWithFile[];
     unclusteredFacesWithFile: {
-        face: FaceF32;
+        face: ClusterFace;
         enteFile: EnteFile;
     }[];
 }

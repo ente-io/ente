@@ -6,9 +6,9 @@ import {
     type ClusterDebugPageContents,
 } from "@/new/photos/services/ml";
 import {
+    type ClusterFace,
     type ClusteringOpts,
     type ClusteringProgress,
-    type FaceF32,
     type OnClusteringProgress,
 } from "@/new/photos/services/ml/cluster";
 import { faceDirection } from "@/new/photos/services/ml/face";
@@ -22,6 +22,8 @@ import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import {
     Box,
     Button,
+    Checkbox,
+    FormControlLabel,
     IconButton,
     LinearProgress,
     Stack,
@@ -68,10 +70,11 @@ export default function ClusterDebug() {
             minBlur: 10,
             minScore: 0.8,
             minClusterSize: 2,
-            joinThreshold: 0.6,
+            joinThreshold: 0.76,
             earlyExitThreshold: 0.9,
             batchSize: 10000,
             offsetIncrement: 7500,
+            badFaceHeuristics: true,
         },
         onSubmit: (values) =>
             cluster(
@@ -83,6 +86,7 @@ export default function ClusterDebug() {
                     earlyExitThreshold: toFloat(values.earlyExitThreshold),
                     batchSize: toFloat(values.batchSize),
                     offsetIncrement: toFloat(values.offsetIncrement),
+                    badFaceHeuristics: values.badFaceHeuristics,
                 },
                 (progress: ClusteringProgress) =>
                     onProgressRef.current?.(progress),
@@ -227,7 +231,22 @@ const MemoizedForm = memo(
                         onChange={handleChange}
                     />
                 </Stack>
-                <Box marginInlineStart={"auto"} p={1}>
+                <Stack direction="row" justifyContent={"space-between"} p={1}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                name={"badFaceHeuristics"}
+                                checked={values.badFaceHeuristics}
+                                size="small"
+                                onChange={handleChange}
+                            />
+                        }
+                        label={
+                            <Typography color="text.secondary">
+                                Bad face heuristics
+                            </Typography>
+                        }
+                    />
                     <Button
                         color="secondary"
                         type="submit"
@@ -235,7 +254,7 @@ const MemoizedForm = memo(
                     >
                         Cluster
                     </Button>
-                </Box>
+                </Stack>
             </Stack>
         </form>
     ),
@@ -325,7 +344,7 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
         index === 0
             ? 140
             : index === 1
-              ? 130
+              ? 110
               : Array.isArray(items[index - 2])
                 ? listItemHeight
                 : 36;
@@ -447,15 +466,11 @@ const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
             </Typography>
             <Typography variant="small" color="text.muted">
                 For each cluster showing only up to 50 faces, sorted by cosine
-                similarity to highest scoring face in the cluster.
+                similarity to its highest scoring face.
             </Typography>
             <Typography variant="small" color="text.muted">
-                Below each face is its{" "}
-                <b>blur - score - cosineSimilarity - direction</b>.
-            </Typography>
-            <Typography variant="small" color="text.muted">
-                Faces added to the cluster as a result of next batch merging are
-                outlined.
+                Below each face is its blur, score, cosineSimilarity, direction.
+                Bad faces are outlined.
             </Typography>
         </Stack>
     );
@@ -494,15 +509,15 @@ interface FaceItemProps {
 }
 
 interface FaceWithFile {
-    face: FaceF32;
+    face: ClusterFace;
     enteFile: EnteFile;
     cosineSimilarity?: number;
     wasMerged?: boolean;
 }
 
 const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
-    const { face, enteFile, cosineSimilarity, wasMerged } = faceWithFile;
-    const { faceID } = face;
+    const { face, enteFile, cosineSimilarity } = faceWithFile;
+    const { faceID, isBadFace } = face;
 
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -526,7 +541,7 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
     return (
         <FaceChip
             style={{
-                outline: wasMerged ? `1px solid gray` : undefined,
+                outline: isBadFace ? `1px solid rosybrown` : undefined,
                 outlineOffset: "2px",
             }}
         >
