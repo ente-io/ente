@@ -1,18 +1,20 @@
 ---
 title: DB Migration
-description: Migrating your self hosted Postgre 12 database to Postgres 16
+description:
+    Migrating your self hosted Postgres 12 database to newer Postgres versions
 ---
 
-# Migrating Postgres 12 to 16
+# Migrating Postgres 12 to 15
 
 The old sample docker compose file used Postgres 12, which is now nearing end of
-life, so we've updated it to Postgres 16. Postgres major versions require a
-migration step. This document mentions some approaches.
+life, so we've updated it to Postgres 15. Postgres major versions changes
+require a migration step. This document mentions some approaches you can use.
 
 > [!TIP]
 >
-> Ente itself does not use any specific Postgres 12 or Postgres 16 features, and
-> will talk to either happily.
+> Ente itself does not use any specific Postgres 12 or Postgres 15 features, and
+> will talk to either happily. It should also work with newer Postgres versions,
+> but let us know if you run into any problems and we'll update this page.
 
 ### Taking a backup
 
@@ -38,6 +40,7 @@ goes amiss with the actual migration.
 > something like:
 >
 > ```sh
+> docker compose up postgres
 > cat pg12.backup.sql | docker compose exec -T postgres env PGPASSWORD=pgpass psql -U pguser -d ente_db
 > ```
 
@@ -48,10 +51,10 @@ At the high level, the steps are
 1. Stop your cluster.
 
 2. Start just the postgres container after changing the image to
-   `pgautoupgrade/pgautoupgrade:16-bookworm'.
+   `pgautoupgrade/pgautoupgrade:15-bookworm'.
 
 3. Once the in-place migration completes, stop the container, and change the
-   image to `postgres:16`.
+   image to `postgres:15`.
 
 #### 1. Stop the cluster
 
@@ -64,14 +67,14 @@ docker compose down
 #### 2. Run `pgautoupgrade`
 
 Modify your `compose.yaml`, changing the image for the "postgres" container from
-"postgres:12" to "pgautoupgrade/pgautoupgrade:16-bookworm"
+"postgres:12" to "pgautoupgrade/pgautoupgrade:15-bookworm"
 
 ```diff
 diff a/server/compose.yaml b/server/compose.yaml
 
    postgres:
 -    image: postgres:12
-+    image: pgautoupgrade/pgautoupgrade:16-bookworm
++    image: pgautoupgrade/pgautoupgrade:15-bookworm
      ports:
 ```
 
@@ -90,21 +93,21 @@ will start postgres normally. You should see something like this is the logs
 ```
 postgres-1  | Automatic upgrade process finished with no errors reported
 ...
-postgres-1  | ...  starting PostgreSQL 16.4 ...
+postgres-1  | ...  starting PostgreSQL 15...
 ```
 
 At this point, you can stop the container (`CTRL-C`).
 
 #### 3. Finish by changing image
 
-Modify `compose.yaml` again, changing the image to "postgres:16".
+Modify `compose.yaml` again, changing the image to "postgres:15".
 
 ```diff
 diff a/server/compose.yaml b/server/compose.yaml
 
    postgres:
--    image: pgautoupgrade/pgautoupgrade:16-bookworm
-+    image: postgres:16
+-    image: pgautoupgrade/pgautoupgrade:15-bookworm
++    image: postgres:15
      ports:
 ```
 
@@ -132,18 +135,18 @@ The first method, backup and restore, is low tech and will work similarly in
 most setups. The second method is more efficient, but requires a bit more
 careful preparation.
 
-As another example, here is how one can migrate 12 to 16 when running Postgres
+As another example, here is how one can migrate 12 to 15 when running Postgres
 on macOS, installed using Homebrew.
 
 1. Stop your postgres. Make sure there are no more commands shown by
    `ps aux | grep '[p]ostgres'`.
 
-2. Install postgres16.
+2. Install postgres15.
 
 3. Migrate data using `pg_upgrade`:
 
     ```sh
-    /opt/homebrew/Cellar/postgresql@16/16.4/bin/pg_upgrade -b /opt/homebrew/Cellar/postgresql@12/12.18_1/bin -B /opt/homebrew/Cellar/postgresql@16/16.4/bin/ -d /opt/homebrew/var/postgresql@12 -D /opt/homebrew/var/postgresql@16
+    /opt/homebrew/Cellar/postgresql@15/15.8/bin/pg_upgrade -b /opt/homebrew/Cellar/postgresql@12/12.18_1/bin -B /opt/homebrew/Cellar/postgresql@15/15.8/bin/ -d /opt/homebrew/var/postgresql@12 -D /opt/homebrew/var/postgresql@15
     ```
 
-4. Start postgres 16 and verify version using `SELECT VERSION()`.
+4. Start postgres 15 and verify version using `SELECT VERSION()`.
