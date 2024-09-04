@@ -206,6 +206,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1 day', other: '${count} days')}";
 
+  static String m72(count) => "Preserving ${count} memories...";
+
   static String m67(endDate) => "Valid till ${endDate}";
 
   static String m68(email) => "Verify ${email}";
@@ -390,6 +392,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Backup over mobile data"),
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Backup settings"),
+        "backupStatus": MessageLookupByLibrary.simpleMessage("Backup status"),
+        "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Items that have been backed up will show up here"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
@@ -436,20 +441,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please check your inbox (and spam) to complete verification"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Check status"),
         "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
-        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
-            "Select photos and check out \"Guest view\"."),
-        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
-            "Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far. Guest view will lock them into the photos you select."),
-        "cl_guest_view_title":
-            MessageLookupByLibrary.simpleMessage("Guest View"),
-        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
-            "We\'ve added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!"),
-        "cl_panorama_viewer_title":
-            MessageLookupByLibrary.simpleMessage("Panorama Viewer"),
-        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
-            "Introducing a fresh new video player, with better playback controls and support for HDR videos."),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Video Player"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim free storage"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
@@ -501,7 +492,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Yes, I want to permanently delete this account and all its data."),
+            "Yes, I want to permanently delete this account and its data across all apps."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Confirm password"),
         "confirmPlanChange":
@@ -969,6 +960,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Long-press on an item to view in full-screen"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Machine learning"),
@@ -1604,6 +1597,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Uploading files to album..."),
+        "uploadingMultipleMemories": m72,
+        "uploadingSingleMemory":
+            MessageLookupByLibrary.simpleMessage("Preserving 1 memory..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
             "Upto 50% off, until 4th Dec."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(

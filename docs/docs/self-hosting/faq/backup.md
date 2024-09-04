@@ -8,7 +8,7 @@ description: General introduction to backing up your self hosted Ente instance
 > [!WARNING]
 >
 > This is not meant to be a comprehensive and bullet proof guide. There are many
-> moving parts, and if small mistakes might make your backups unusable.
+> moving parts, and small mistakes might make your backups unusable.
 >
 > Please treat this only as a general introduction. And remember to test your
 > restores.
@@ -42,7 +42,7 @@ database contains information like a file specific encryption key.
 
 Viewed differently, to decrypt your data you need three pieces of information:
 
-1. The encrypted file data (which comes from the object storage backup).
+1. The encrypted file data itself (which comes from the object storage backup).
 
 2. The ([encrypted](https://ente.io/architecture/)) file and collection specific
    encryption keys (which come from the database backup).

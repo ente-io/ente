@@ -170,10 +170,10 @@ class S {
     );
   }
 
-  /// `Yes, I want to permanently delete this account and all its data.`
+  /// `Yes, I want to permanently delete this account and its data across all apps.`
   String get confirmDeletePrompt {
     return Intl.message(
-      'Yes, I want to permanently delete this account and all its data.',
+      'Yes, I want to permanently delete this account and its data across all apps.',
       name: 'confirmDeletePrompt',
       desc: '',
       args: [],
@@ -3167,6 +3167,26 @@ class S {
     return Intl.message(
       'Backup settings',
       name: 'backupSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup status`
+  String get backupStatus {
+    return Intl.message(
+      'Backup status',
+      name: 'backupStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Items that have been backed up will show up here`
+  String get backupStatusDescription {
+    return Intl.message(
+      'Items that have been backed up will show up here',
+      name: 'backupStatusDescription',
       desc: '',
       args: [],
     );
@@ -6549,6 +6569,26 @@ class S {
     );
   }
 
+  /// `Preserving {count} memories...`
+  String uploadingMultipleMemories(Object count) {
+    return Intl.message(
+      'Preserving $count memories...',
+      name: 'uploadingMultipleMemories',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Preserving 1 memory...`
+  String get uploadingSingleMemory {
+    return Intl.message(
+      'Preserving 1 memory...',
+      name: 'uploadingSingleMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Archiving...`
   String get archiving {
     return Intl.message(
@@ -9395,76 +9435,6 @@ class S {
     );
   }
 
-  /// `Guest View`
-  String get cl_guest_view_title {
-    return Intl.message(
-      'Guest View',
-      name: 'cl_guest_view_title',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Handing over your phone to show photos to a friend? Don't worry about them swiping too far. Guest view will lock them into the photos you select.`
-  String get cl_guest_view_description {
-    return Intl.message(
-      'Handing over your phone to show photos to a friend? Don\'t worry about them swiping too far. Guest view will lock them into the photos you select.',
-      name: 'cl_guest_view_description',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Select photos and check out "Guest view".`
-  String get cl_guest_view_call_to_action {
-    return Intl.message(
-      'Select photos and check out "Guest view".',
-      name: 'cl_guest_view_call_to_action',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Panorama Viewer`
-  String get cl_panorama_viewer_title {
-    return Intl.message(
-      'Panorama Viewer',
-      name: 'cl_panorama_viewer_title',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We've added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!`
-  String get cl_panorama_viewer_description {
-    return Intl.message(
-      'We\'ve added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!',
-      name: 'cl_panorama_viewer_description',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Video Player`
-  String get cl_video_player_title {
-    return Intl.message(
-      'Video Player',
-      name: 'cl_video_player_title',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Introducing a fresh new video player, with better playback controls and support for HDR videos.`
-  String get cl_video_player_description {
-    return Intl.message(
-      'Introducing a fresh new video player, with better playback controls and support for HDR videos.',
-      name: 'cl_video_player_description',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
   String get appLockDescriptions {
     return Intl.message(
@@ -9494,6 +9464,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Loop video on`
+  String get loopVideoOn {
+    return Intl.message(
+      'Loop video on',
+      name: 'loopVideoOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loop video off`
+  String get loopVideoOff {
+    return Intl.message(
+      'Loop video off',
+      name: 'loopVideoOff',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -9514,6 +9504,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'fa'),
       Locale.fromSubtags(languageCode: 'fr'),
       Locale.fromSubtags(languageCode: 'gu'),
+      Locale.fromSubtags(languageCode: 'he'),
       Locale.fromSubtags(languageCode: 'hi'),
       Locale.fromSubtags(languageCode: 'id'),
       Locale.fromSubtags(languageCode: 'it'),
@@ -9521,10 +9512,12 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'nl'),
+      Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'sv'),
+      Locale.fromSubtags(languageCode: 'ta'),
       Locale.fromSubtags(languageCode: 'te'),
       Locale.fromSubtags(languageCode: 'th'),
       Locale.fromSubtags(languageCode: 'ti'),

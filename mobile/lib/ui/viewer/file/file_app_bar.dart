@@ -45,8 +45,8 @@ class FileAppBar extends StatefulWidget {
     this.height,
     this.shouldShowActions, {
     required this.enableFullScreenNotifier,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   FileAppBarState createState() => FileAppBarState();
@@ -57,6 +57,8 @@ class FileAppBarState extends State<FileAppBar> {
   final List<Widget> _actions = [];
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool isGuestView = false;
+  bool shouldLoopVideo = localSettings.shouldLoopVideo();
+  bool _reloadActions = false;
 
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
@@ -89,8 +91,9 @@ class FileAppBarState extends State<FileAppBar> {
 
     //When the widget is initialized, the actions are not available.
     //Cannot call _getActions() in initState.
-    if (_actions.isEmpty) {
+    if (_actions.isEmpty || _reloadActions) {
       _getActions();
+      _reloadActions = false;
     }
 
     final isTrashedFile = widget.file is TrashFile;
@@ -336,6 +339,47 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       ),
     );
+
+    if (widget.file.isVideo) {
+      items.add(
+        PopupMenuItem(
+          value: 7,
+          child: Row(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Icon(
+                    Icons.loop_rounded,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
+                  shouldLoopVideo
+                      ? const SizedBox.shrink()
+                      : Transform.rotate(
+                          angle: 3.14 / 4,
+                          child: Container(
+                            width: 2,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).iconTheme.color,
+                              borderRadius: BorderRadius.circular(1),
+                            ),
+                          ),
+                        ),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              shouldLoopVideo
+                  ? Text(S.of(context).loopVideoOn)
+                  : Text(S.of(context).loopVideoOff),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (items.isNotEmpty) {
       _actions.add(
         PopupMenuButton(
@@ -357,12 +401,22 @@ class FileAppBarState extends State<FileAppBar> {
               await _onTapGuestView();
             } else if (value == 99) {
               await PreviewVideoStore.instance.chunkAndUploadVideo(widget.file);
+            } else if (value == 7) {
+              _onToggleLoopVideo();
             }
           },
         ),
       );
     }
     return _actions;
+  }
+
+  _onToggleLoopVideo() {
+    localSettings.setShouldLoopVideo(!shouldLoopVideo);
+    setState(() {
+      _reloadActions = true;
+      shouldLoopVideo = !shouldLoopVideo;
+    });
   }
 
   Future<void> _handleHideRequest(BuildContext context) async {

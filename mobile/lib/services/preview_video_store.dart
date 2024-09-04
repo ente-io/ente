@@ -79,7 +79,7 @@ class PreviewVideoStore {
     final encryptionKey = getFileKey(file);
     final playlistContent = playlist.readAsStringSync();
     final encryptedPlaylist = await CryptoUtil.encryptChaCha(
-      utf8.encode(playlistContent) as Uint8List,
+      utf8.encode(playlistContent),
       encryptionKey,
     );
     final encryptedData =

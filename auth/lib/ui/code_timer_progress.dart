@@ -1,48 +1,56 @@
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/linear_progress_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
+class CodeTimerProgressCache {
+  static final Map<int, CodeTimerProgress> _cache = {};
+
+  static CodeTimerProgress getCachedWidget(int period) {
+    if (!_cache.containsKey(period)) {
+      _cache[period] = CodeTimerProgress(period: period);
+    }
+    return _cache[period]!;
+  }
+}
 
 class CodeTimerProgress extends StatefulWidget {
   final int period;
 
-  CodeTimerProgress({
+  const CodeTimerProgress({
     super.key,
     required this.period,
   });
 
   @override
-  State createState() => _CodeTimerProgressState();
+  State<CodeTimerProgress> createState() => _CodeTimerProgressState();
 }
 
 class _CodeTimerProgressState extends State<CodeTimerProgress>
     with SingleTickerProviderStateMixin {
   late final Ticker _ticker;
-  double _progress = 0.0;
+  late final ValueNotifier<double> _progress;
   late final int _microSecondsInPeriod;
 
   @override
   void initState() {
     super.initState();
     _microSecondsInPeriod = widget.period * 1000000;
-    _ticker = createTicker((elapsed) {
-      _updateTimeRemaining();
-    });
+    _progress = ValueNotifier<double>(0.0);
+    _ticker = createTicker(_updateTimeRemaining);
     _ticker.start();
-    _updateTimeRemaining();
+    _updateTimeRemaining(Duration.zero);
   }
 
-  void _updateTimeRemaining() {
-    int timeRemaining = (_microSecondsInPeriod) -
+  void _updateTimeRemaining(Duration elapsed) {
+    int timeRemaining = _microSecondsInPeriod -
         (DateTime.now().microsecondsSinceEpoch % _microSecondsInPeriod);
-    setState(() {
-      _progress = (timeRemaining / _microSecondsInPeriod);
-    });
+    _progress.value = timeRemaining / _microSecondsInPeriod;
   }
 
   @override
   void dispose() {
     _ticker.dispose();
+    _progress.dispose();
     super.dispose();
   }
 
@@ -50,12 +58,46 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
   Widget build(BuildContext context) {
     return SizedBox(
       height: 3,
-      child: LinearProgressWidget(
-        color: _progress > 0.4
-            ? getEnteColorScheme(context).primary700
-            : Colors.orange,
-        fractionOfStorage: _progress,
+      child: ValueListenableBuilder<double>(
+        valueListenable: _progress,
+        builder: (context, progress, _) {
+          return CustomPaint(
+            painter: _ProgressPainter(
+              progress: progress,
+              color: progress > 0.4
+                  ? getEnteColorScheme(context).primary700
+                  : Colors.orange,
+            ),
+            size: Size.infinite,
+          );
+        },
       ),
     );
+  }
+}
+
+class _ProgressPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  _ProgressPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width * progress, size.height),
+      const Radius.circular(2),
+    );
+
+    canvas.drawRRect(rect, paint);
+  }
+
+  @override
+  bool shouldRepaint(_ProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }

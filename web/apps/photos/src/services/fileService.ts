@@ -1,7 +1,11 @@
 import { encryptMetadataJSON } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { getLocalFiles, setLocalFiles } from "@/new/photos/services/files";
+import {
+    clearCachedThumbnailsIfChanged,
+    getLocalFiles,
+    setLocalFiles,
+} from "@/new/photos/services/files";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -47,6 +51,7 @@ export const syncFiles = async (
         }
 
         const newFiles = await getFiles(collection, lastSyncTime, setFiles);
+        await clearCachedThumbnailsIfChanged(localFiles, newFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(type, files);
         didUpdateFiles = true;

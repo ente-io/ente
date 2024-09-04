@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/details"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
@@ -11,6 +12,14 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+func (c *UserController) GetUser(userID int64) (ente.User, error) {
+	user, err := c.UserRepo.Get(userID)
+	if err != nil && errors.Is(err, ente.ErrUserDeleted) {
+		return ente.User{}, stacktrace.Propagate(ente.ErrUserNotFound, "")
+	}
+	return user, err
+
+}
 func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemoryCount bool, app ente.App) (details.UserDetailsResponse, error) {
 
 	g := new(errgroup.Group)
@@ -21,7 +30,7 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 	var fileCount, sharedCollectionCount, usage int64
 	var bonus *bonus.ActiveStorageBonus
 	g.Go(func() error {
-		resp, err := c.UserRepo.Get(userID)
+		resp, err := c.GetUser(userID)
 		if err != nil {
 			return stacktrace.Propagate(err, "failed to get user")
 		}

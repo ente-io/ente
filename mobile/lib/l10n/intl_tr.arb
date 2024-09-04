@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "Aramızdan ayrıldığınız için üzgünüz. Lütfen kendimizi geliştirmemize yardımcı olun. Neden ayrıldığınızı Açıklar mısınız.",
   "feedback": "Geri Bildirim",
   "kindlyHelpUsWithThisInformation": "Lütfen bu bilgilerle bize yardımcı olun",
-  "confirmDeletePrompt": "Evet, bu hesabı ve tüm verileri kalıcı olarak silmek istiyorum.",
   "confirmAccountDeletion": "Hesap silme işlemini onayla",
   "deleteAccountPermanentlyButton": "Hesabımı kalıcı olarak sil",
   "yourAccountHasBeenDeleted": "Hesabınız silindi",
@@ -1168,5 +1167,7 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı"
+  "customEndpoint": "{endpoint}'e bağlanıldı",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

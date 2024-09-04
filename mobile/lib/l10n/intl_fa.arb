@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "ما متاسفیم که می‌بینیم شما می‌روید. لطفا نظرات خود را برای کمک به بهبود ما به اشتراک بگذارید.",
   "feedback": "بازخورد",
   "kindlyHelpUsWithThisInformation": "لطفا با این اطلاعات به ما کمک کنید",
-  "confirmDeletePrompt": "بله، من می‌خواهم برای همیشه این حساب کاربری و تمام اطلاعات آن را حذف کنم.",
   "confirmAccountDeletion": "تایید حذف حساب کاربری",
   "deleteAccountPermanentlyButton": "حذف دائمی حساب کاربری",
   "yourAccountHasBeenDeleted": "حساب کاربری شما حذف شده است",
@@ -308,5 +307,7 @@
   "developerSettings": "تنظیمات توسعه‌دهنده",
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
-  "reviewSuggestions": "مرور پیشنهادها"
+  "reviewSuggestions": "مرور پیشنهادها",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

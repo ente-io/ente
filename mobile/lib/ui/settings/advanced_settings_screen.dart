@@ -13,7 +13,7 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
-import "package:photos/ui/settings/machine_learning_settings_page.dart";
+import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import 'package:photos/ui/tools/debug/app_storage_viewer.dart';
 import 'package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart';
 import 'package:photos/utils/navigation_util.dart';

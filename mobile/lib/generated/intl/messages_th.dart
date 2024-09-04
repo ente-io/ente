@@ -99,8 +99,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("ยืนยัน"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("ยืนยันการลบบัญชี"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "ใช่ ฉันต้องการลบบัญชีนี้และข้อมูลที่เกี่ยวข้องทั้งหมดแบบถาวร"),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("ยืนยันรหัสผ่าน"),
         "confirmRecoveryKey":
@@ -211,6 +209,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("เข้าสู่ระบบ"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "โดยการคลิกเข้าสู่ระบบ ฉันยอมรับ<u-terms>เงื่อนไขการให้บริการ</u-terms>และ<u-policy>นโยบายความเป็นส่วนตัว</u-policy>"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("จัดการ"),
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),

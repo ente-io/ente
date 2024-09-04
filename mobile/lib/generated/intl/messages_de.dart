@@ -453,20 +453,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Status überprüfen"),
         "checking": MessageLookupByLibrary.simpleMessage("Wird geprüft..."),
-        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
-            "Wähle Fotos aus und schau dir die \"Gastansicht\" an."),
-        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
-            "Du gibst dein Telefon aus der Hand, um Freunden Fotos zu zeigen? Keine Sorge, sie werden nicht zu weit blättern können. Die Gastansicht wird sie auf die von dir ausgewählten Fotos beschränken."),
-        "cl_guest_view_title":
-            MessageLookupByLibrary.simpleMessage("Gastansicht"),
-        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
-            "Wir haben Unterstützung für die Ansicht von Panoramafotos mit 360-Grad-Ansichten hinzugefügt. Dieses Erlebnis fesselt mit bewegungsbasierter Navigation!"),
-        "cl_panorama_viewer_title":
-            MessageLookupByLibrary.simpleMessage("Panoramabetrachter"),
-        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
-            "Einführung eines neuen Video-Players mit besserer Wiedergabesteuerung und Unterstützung für HDR-Videos."),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Video-Player"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Freien Speicher einlösen"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Mehr einlösen!"),
@@ -518,7 +504,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Kontolöschung bestätigen"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, ich möchte dieses Konto und alle enthaltenen Daten endgültig und unwiderruflich löschen."),
+            "Ja, ich möchte dieses Konto und alle enthaltenen Daten über alle Apps endgültig und unwiderruflich löschen."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Passwort wiederholen"),
         "confirmPlanChange":
@@ -1009,6 +995,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Gerät verloren?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Maschinelles Lernen"),

@@ -1,7 +1,9 @@
-version: '3'
 services:
   ente-cli:
-    image: ente-cli:latest
+    build: 
+      context: .
+      tags:
+        - ente-cli:latest
     command: /bin/sh
     volumes:
       # This is mandatory to mount the local directory to the container at /cli-data

@@ -1,5 +1,5 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup } from "@/base/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
@@ -339,9 +339,8 @@ const ManageML: React.FC<ManageMLProps> = ({
     };
 
     // TODO-Cluster
-    // const wipClusterNow = () => void wipCluster();
     const router = useRouter();
-    const wipClusterNow = () => router.push("/cluster-debug");
+    const wipClusterDebug = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -391,16 +390,16 @@ const ManageML: React.FC<ManageMLProps> = ({
                     <MenuItemGroup>
                         <EnteMenuItem
                             label={ut(
-                                "View clusters   ––– internal only option",
+                                "Create clusters   • internal only option",
                             )}
-                            onClick={wipClusterNow}
+                            onClick={wipClusterDebug}
                         />
                     </MenuItemGroup>
-                    {/* <MenuSectionTitle
+                    <MenuSectionTitle
                         title={ut(
-                            "Create clusters locally, afresh and in-memory. Existing local clusters will be overwritten. Nothing will be saved or synced to remote.",
+                            "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
                         )}
-                    /> */}
+                    />
                 </Box>
             )}
         </Stack>

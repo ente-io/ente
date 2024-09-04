@@ -138,7 +138,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
       bool hasVerifiedLock = false;
       late final Collection? collection;
 
-      if (actionType == CollectionActionType.moveToHiddenCollection) {
+      if (actionType == CollectionActionType.moveToHiddenCollection ||
+          actionType == CollectionActionType.addToHiddenAlbum) {
         collection =
             await CollectionsService.instance.createHiddenAlbum(albumName);
         hasVerifiedLock = true;

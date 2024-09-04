@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:developer" as dev show log;
 import 'dart:typed_data' show ByteData, Float32List;
 import 'dart:ui' as ui show Image;
 
@@ -55,9 +54,8 @@ class FaceDetectionService extends MlModel {
       'sessionAddress should be valid',
     );
 
-    final stopwatch = Stopwatch()..start();
+    final startTime = DateTime.now();
 
-    final stopwatchPreprocessing = Stopwatch()..start();
     final (inputImageList, newSize) =
         await preprocessImageToFloat32ChannelsFirst(
       image,
@@ -67,17 +65,11 @@ class FaceDetectionService extends MlModel {
       requiredHeight: kInputHeight,
       maintainAspectRatio: true,
     );
-    stopwatchPreprocessing.stop();
-    dev.log(
-      'Face detection image preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
-    );
-    _logger.info(
-      'Image decoding and preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
-    );
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
 
     // Run inference
-    final stopwatchInterpreter = Stopwatch()..start();
-
     List<List<List<double>>>? nestedResults = [];
     try {
       if (MlModel.usePlatformPlugin) {
@@ -88,23 +80,19 @@ class FaceDetectionService extends MlModel {
           inputImageList,
         ); // [1, 25200, 16]
       }
+      final inferenceTime = DateTime.now();
+      final inferenceMs =
+          inferenceTime.difference(preprocessingTime).inMilliseconds;
+      _logger.info(
+        'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
+      );
     } catch (e, s) {
-      dev.log('Error while running inference', error: e, stackTrace: s);
+      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
       throw YOLOFaceInterpreterRunException();
     }
-    stopwatchInterpreter.stop();
     try {
-      _logger.info(
-        'interpreter.run is finished, in ${stopwatchInterpreter.elapsedMilliseconds} ms',
-      );
-
       final relativeDetections =
           _yoloPostProcessOutputs(nestedResults!, newSize);
-      stopwatch.stop();
-      _logger.info(
-        'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',
-      );
-
       return relativeDetections;
     } catch (e, s) {
       _logger.severe('Error while post processing', e, s);
@@ -135,9 +123,9 @@ class FaceDetectionService extends MlModel {
         outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
     inputOrt.release();
     runOptions.release();
-    outputs.forEach((element) {
+    for (var element in outputs) {
       element?.release();
-    });
+    }
 
     return result;
   }

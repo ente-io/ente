@@ -19,13 +19,20 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    clearCachedCLIPIndexes,
     clipIndexingVersion,
     clipMatches,
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
+import {
+    clusterFaces,
+    type ClusteringOpts,
+    type OnClusteringProgress,
+} from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
+    faceIndexes,
     indexableFileIDs,
     markIndexingFailed,
     saveIndexes,
@@ -272,6 +279,16 @@ export class MLWorker {
             remoteMLData: mlDataByID.get(id),
         }));
     }
+
+    // TODO-Cluster
+    async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
+        return clusterFaces(
+            await faceIndexes(),
+            await getAllLocalFiles(),
+            opts,
+            onProgress,
+        );
+    }
 }
 
 expose(MLWorker);
@@ -339,6 +356,9 @@ const indexNextBatch = async (
 
     // Wait for the pending tasks to drain out.
     await Promise.all(tasks);
+
+    // Clear any cached CLIP indexes, since now we might have new ones.
+    clearCachedCLIPIndexes();
 
     // Return true if nothing failed.
     return allSuccess;

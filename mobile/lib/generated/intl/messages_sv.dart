@@ -67,6 +67,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(verificationID) =>
       "Hallå, kan du bekräfta att detta är ditt ente.io verifierings-ID: ${verificationID}";
 
+  static String m54(numberOfPeople) =>
+      "${Intl.plural(numberOfPeople, zero: 'Dela med specifika personer', one: 'Delad med en person', other: 'Delad med ${numberOfPeople} personer')}";
+
   static String m59(storageAmountInGB) => "${storageAmountInGB} GB";
 
   static String m65(email) => "Detta är ${email}s verifierings-ID";
@@ -141,9 +144,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ändra behörighet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Kontrollera din inkorg (och skräppost) för att slutföra verifieringen"),
-        "cl_guest_view_title": MessageLookupByLibrary.simpleMessage("Gästvy"),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Videospelare"),
         "claimed": MessageLookupByLibrary.simpleMessage("Nyttjad"),
         "close": MessageLookupByLibrary.simpleMessage("Stäng"),
         "codeAppliedPageTitle":
@@ -164,8 +164,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("Bekräfta"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekräfta radering av konto"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, jag vill ta bort detta konto och all data permanent."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Bekräfta lösenord"),
         "confirmRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -269,6 +267,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Gå till inställningar"),
         "guestView": MessageLookupByLibrary.simpleMessage("Gästvy"),
+        "help": MessageLookupByLibrary.simpleMessage("Hjälp"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Så här fungerar det"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
@@ -315,6 +314,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Genom att klicka på logga in godkänner jag <u-terms>användarvillkoren</u-terms> och våran <u-policy>integritetspolicy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logga ut"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Förlorad enhet?"),
         "manage": MessageLookupByLibrary.simpleMessage("Hantera"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Hantera länk"),
@@ -443,6 +444,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ladda ner Ente så att vi enkelt kan dela bilder och videor med originell kvalitet\n\nhttps://ente.io"),
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Dela med icke-Ente användare"),
+        "shareWithPeopleSectionTitle": m54,
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Skapa delade och samarbetande album med andra Ente användare, inklusive användare med gratisnivån."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(

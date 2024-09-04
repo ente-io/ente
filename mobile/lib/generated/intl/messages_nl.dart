@@ -363,6 +363,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Graag verifiëren om tweestapsverificatie te configureren"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Gelieve te verifiëren om het verwijderen van je account te starten"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Verifieer uzelf om uw toegangssleutel te bekijken"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Graag verifiëren om uw actieve sessies te bekijken"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -401,6 +403,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Back-up maken via mobiele data"),
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Back-up instellingen"),
+        "backupStatus": MessageLookupByLibrary.simpleMessage("Back-upstatus"),
+        "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Items die zijn geback-upt, worden hier getoond"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Back-up video\'s"),
         "blackFridaySale":
@@ -449,20 +454,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Status controleren"),
         "checking": MessageLookupByLibrary.simpleMessage("Controleren..."),
-        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
-            "Selecteer foto\'s en bekijk \"Gastweergave\"."),
-        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
-            "Geeft u een vriend uw telefoon om foto\'s te laten zien? Maakt u zich geen zorgen dat ze te ver swipen. Gastweergave zal diegene beperken tot de foto\'s die u selecteert."),
-        "cl_guest_view_title":
-            MessageLookupByLibrary.simpleMessage("Gastweergave"),
-        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
-            "We hebben ondersteuning toegevoegd voor het bekijken van panoramafoto\'s met 360 graden weergave. De ervaring is immersief met op beweging gebaseerde navigatie!"),
-        "cl_panorama_viewer_title":
-            MessageLookupByLibrary.simpleMessage("Panoramakijker"),
-        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
-            "Een verfrissende nieuwe videospeler, met betere afspeelknoppen en ondersteuning voor HDR-video\'s."),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Videospeler"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim gratis opslag"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim meer!"),
@@ -515,7 +506,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Account verwijderen bevestigen"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen."),
+            "Ja, ik wil mijn account en de bijbehorende gegevens verspreid over alle apps permanent verwijderen."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord bevestigen"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage(
@@ -1005,6 +996,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Druk lang op een e-mail om de versleuteling te verifiëren."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Houd een bestand lang ingedrukt om te bekijken op volledig scherm"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Apparaat verloren?"),
         "machineLearning":
@@ -1715,6 +1708,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Bekijk alle EXIF gegevens"),
         "viewLargeFiles":
             MessageLookupByLibrary.simpleMessage("Grote bestanden"),
+        "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
+            "Bekijk bestanden die de meeste opslagruimte verbruiken."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("Logboeken bekijken"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Toon herstelsleutel"),

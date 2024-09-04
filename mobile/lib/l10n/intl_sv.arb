@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "Vi är ledsna att se dig lämna oss. Vänligen dela dina synpunkter för att hjälpa oss att förbättra.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Vänligen hjälp oss med denna information",
-  "confirmDeletePrompt": "Ja, jag vill ta bort detta konto och all data permanent.",
   "confirmAccountDeletion": "Bekräfta radering av konto",
   "deleteAccountPermanentlyButton": "Radera kontot permanent",
   "yourAccountHasBeenDeleted": "Ditt konto har raderats",
@@ -237,7 +236,15 @@
   "publicLinkEnabled": "Offentlig länk aktiverad",
   "shareALink": "Dela en länk",
   "sharedAlbumSectionDescription": "Skapa delade och samarbetande album med andra Ente användare, inklusive användare med gratisnivån.",
-
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Dela med specifika personer} =1 {Delad med en person} other {Delad med {numberOfPeople} personer}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "thisIsYourVerificationId": "Detta är ditt verifierings-ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Någon som delar album med dig bör se samma ID på deras enhet.",
   "howToViewShareeVerificationID": "Be dem att långtrycka på sin e-postadress på inställningsskärmen och verifiera att ID:n på båda enheterna matchar.",
@@ -273,6 +280,7 @@
     "description": "Used to indicate storage claimed, like 10GB Claimed"
   },
   "inviteYourFriends": "Bjud in dina vänner",
+  "help": "Hjälp",
   "subscribe": "Prenumerera",
   "trash": "Papperskorg",
   "photoSmallCase": "foto",
@@ -415,5 +423,7 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "cl_guest_view_title": "Gästvy",
-  "cl_video_player_title": "Videospelare"
+  "cl_video_player_title": "Videospelare",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

@@ -12,7 +12,6 @@
   "deleteAccountFeedbackPrompt": "आपको जाता हुए देख कर हमें खेद है। कृपया हमें बेहतर बनने में सहायता के लिए अपनी प्रतिक्रिया साझा करें।",
   "feedback": "प्रतिपुष्टि",
   "kindlyHelpUsWithThisInformation": "कृपया हमें इस जानकारी के लिए सहायता करें",
-  "confirmDeletePrompt": "हां, मैं इस अकाउंट और इसके सभी डेटा को स्थायी रूप से हटाना चाहता/चाहती हूं।",
   "confirmAccountDeletion": "अकाउंट डिलीट करने की पुष्टि करें",
   "deleteAccountPermanentlyButton": "अकाउंट स्थायी रूप से डिलीट करें",
   "yourAccountHasBeenDeleted": "आपका अकाउंट डिलीट कर दिया गया है",
@@ -49,5 +48,7 @@
   "sorry": "क्षमा करें!",
   "noRecoveryKeyNoDecryption": "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है",
   "verifyEmail": "ईमेल सत्यापित करें",
-  "toResetVerifyEmail": "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।"
+  "toResetVerifyEmail": "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

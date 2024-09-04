@@ -18,11 +18,35 @@
       "hex": "000000"
     },
     {
+      "title": "Amazon"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
     {
       "title": "AscendEX"
+    },
+    {
+      "title": "Battle.net",
+      "slug": "battlenet",
+      "altNames": [
+        "Battle net",
+        "Blizzard"
+      ]
+    },
+    {
+      "title": "Bethesda",
+      "altNames": [
+        "Bethesda Softworks"
+      ]
+    },
+    {
+      "title": "BinanceUS",
+      "slug": "binance_us",
+      "altNames": [
+        "Binance US"
+      ]
     },
     {
       "title": "Bitfinex"
@@ -31,12 +55,12 @@
       "title": "bitget"
     },
     {
-      "titile":"bitget wallet",
-      "slug":"bitget_wallet"
+      "title": "bitget wallet",
+      "slug": "bitget_wallet"
     },
     {
       "title": "Bitmart",
-      "hex":"000000"
+      "hex": "000000"
     },
     {
       "title": "BitMEX"
@@ -51,8 +75,7 @@
       "title": "Bitstamp"
     },
     {
-      "title": "Bitvavo",
-      "hex": "0051FF"
+      "title": "Bitvavo"
     },
     {
       "title": "Bitwarden"
@@ -70,27 +93,24 @@
         "blockchain.com",
         "blockchain.com Wallet",
         "blockchain.com Exchange"
-      ],
-      "slug": "blockchain"
+      ]
     },
     {
       "title": "BorgBase",
       "altNames": [
         "borg"
-      ],
-      "slug": "BorgBase"
+      ]
     },
     {
       "title": "Booking",
-      "slug": "booking",
-      "altNames":[
+      "altNames": [
         "Booking.com"
       ]
     },
     {
       "title": "Brave Creators",
       "slug": "brave_creators",
-      "altNames":[
+      "altNames": [
         "Brave",
         "Brave Rewards",
         "Brave Browser"
@@ -111,14 +131,10 @@
       "hex": "D14633"
     },
     {
-      "title": "Cloudflare"
-    },
-    {
       "title": "CloudAMQP"
     },
     {
-      "title": "ConfigCat",
-      "slug": "configcat"
+      "title": "Cloudflare"
     },
     {
       "title": "CoinDCX"
@@ -128,8 +144,7 @@
     },
     {
       "title": "Control D",
-      "slug": "controld",
-      "hex": "5FD800"
+      "slug": "controld"
     },
     {
       "title": "Crowdpear"
@@ -139,7 +154,6 @@
       "slug": "crypto",
       "altNames": [
         "crypto",
-        "Crypto.com",
         "Crypto com"
       ]
     },
@@ -147,8 +161,7 @@
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
-      ],
-      "slug": "dcs"
+      ]
     },
     {
       "title": "DEGIRO"
@@ -173,16 +186,22 @@
       "slug": "dusnet"
     },
     {
-      "title":"ecitizen kenya",
-      "slug":"ecitizen_kenya"
+      "title": "ecitizen kenya",
+      "slug": "ecitizen_kenya"
+    },
+    {
+      "title": "ecloud",
+      "altNames": [
+        "Murena"
+      ]
     },
     {
       "title": "ente",
       "hex": "1DB954"
     },
     {
-      "title": "enom"   
-    },   
+      "title": "enom"
+    },
     {
       "title": "Epic Games",
       "slug": "epic_games",
@@ -218,10 +237,10 @@
     },
     {
       "title": "Gosuslugi",
+      "slug": "Gosuslugi",
       "altNames": [
         "Госуслуги"
-      ],
-      "slug": "Gosuslugi"
+      ]
     },
     {
       "title": "Habbo"
@@ -240,16 +259,13 @@
       "title": "HuggingFace",
       "altNames": [
         "Hugging Face"
-      ],
-      "slug": "huggingface"
+      ]
     },
     {
-      "title": "IceDrive",
-      "slug": "Icedrive"
+      "title": "IceDrive"
     },
     {
-      "titile": "Infomaniak",
-      "slug": "infomaniak"
+      "title": "Infomaniak"
     },
     {
       "title": "ING"
@@ -270,8 +286,7 @@
       "hex": "000000"
     },
     {
-      "title": "IVPN",
-      "slug": "IVPN"
+      "title": "IVPN"
     },
     {
       "title": "Jagex",
@@ -281,8 +296,7 @@
       "title": "Kagi"
     },
     {
-      "title": "Kick",
-      "hex": "53FC19"
+      "title": "Kick"
     },
     {
       "title": "Kite"
@@ -295,15 +309,13 @@
       "color": "00CC00"
     },
     {
-      "title": "Kraken",
-      "hex": "5848D5"
+      "title": "Kraken"
     },
     {
       "title": "Kronos"
     },
     {
-      "title": "KuCoin",
-      "hex": "01BC8D"
+      "title": "KuCoin"
     },
     {
       "title": "La Poste",
@@ -333,7 +345,6 @@
         "mathstodon",
         "fosstodon"
       ],
-      "slug": "mastodon",
       "hex": "6364FF"
     },
     {
@@ -363,13 +374,6 @@
     },
     {
       "title": "Mozilla"
-    },
-    {
-      "title": "Murena",
-      "altNames": [
-        "eCloud"
-      ],
-      "slug": "ecloud"
     },
     {
       "title": "MyFRITZ!Net",
@@ -407,6 +411,12 @@
       "title": "NextDNS"
     },
     {
+      "title": "Newton",
+      "altNames": [
+        "Newton Crypto"
+      ]
+    },
+    {
       "title": "ngrok",
       "hex": "858585"
     },
@@ -420,8 +430,7 @@
       "title": "Notion"
     },
     {
-      "title": "NuCommunity",
-      "slug": "nucommunity"
+      "title": "NuCommunity"
     },
     {
       "title": "NVIDIA"
@@ -430,16 +439,17 @@
       "title": "Odido"
     },
     {
-      "titile": "OpenObserve",
+      "title": "OpenObserve",
       "slug": "open_observe",
-      "altNames":[
+      "altNames": [
         "openobserve.ai",
         "openobserve ai"
       ]
     },
     {
       "title": "okx",
-      "hex": "000000" },
+      "hex": "000000"
+    },
     {
       "title": "Parsec"
     },
@@ -447,16 +457,13 @@
       "title": "PayPal"
     },
     {
-      "title": "pCloud",
-      "slug": "pCloud"
+      "title": "pCloud"
     },
     {
-      "title": "Peerberry",
-      "hex": "03E5A5"
+      "title": "Peerberry"
     },
     {
-      "title": "Pingvin Share",
-      "hex": "485099"
+      "title": "Pingvin Share"
     },
     {
       "title": "Plutus",
@@ -466,12 +473,10 @@
       "title": "Poloniex"
     },
     {
-      "title": "Porkbun",
-      "hex": "F27777"
+      "title": "Porkbun"
     },
     {
-      "title": "PostNL",
-      "color": "EF8300"
+      "title": "PostNL"
     },
     {
       "title": "Privacy Guides",
@@ -495,7 +500,6 @@
       "title": "Registro br",
       "slug": "registro_br",
       "altNames": [
-        "Registro br",
         "registrobr",
         "Registro.br"
       ]
@@ -508,12 +512,14 @@
       "hex": "858585"
     },
     {
+      "title": "RippleMatch"
+    },
+    {
       "title": "Rockstar Games",
       "slug": "rockstar_games"
     },
     {
-      "title": "RuneMate",
-      "hex": "2ECC71"
+      "title": "RuneMate"
     },
     {
       "title": "Rust Language Forum",
@@ -528,6 +534,9 @@
     },
     {
       "title": "service-bw"
+    },
+    {
+      "title": "Shakepay"
     },
     {
       "title": "SimpleLogin"
@@ -551,16 +560,14 @@
       ]
     },
     {
-      "title": "SMTP2GO",
-      "slug": "smtp2go"
+      "title": "SMTP2GO"
     },
     {
       "title": "Snapchat"
     },
     {
       "title": "Standard Notes",
-      "slug": "standardnotes",
-      "hex": "2173E6"
+      "slug": "standardnotes"
     },
     {
       "title": "Surfshark"
@@ -570,9 +577,7 @@
       "slug": "synology_dsm"
     },
     {
-      "title": "TCPShield",
-      "slug": "tcpshield",
-      "hex": "FFFFFF"
+      "title": "TCPShield"
     },
     {
       "title": "Techlore",
@@ -596,9 +601,7 @@
       "title": "TorGuard"
     },
     {
-      "title": "Trading 212",
-      "slug": "trading212",
-      "hex": "4BA4DE"
+      "title": "Trading 212"
     },
     {
       "title": "TradingView"
@@ -635,13 +638,16 @@
       "hex": "858585"
     },
     {
-      "title": "Uphold",
-      "slug": "uphold",
-      "hex": "6FE68A"
+      "title": "Uphold"
     },
     {
-      "titile": "Vikunja",
-      "slug": "vikunja"
+      "title": "Upstox"
+    },
+    {
+      "title": "Vikunja"
+    },
+    {
+      "title": "Wealthfront"
     },
     {
       "title": "Wealthsimple"
@@ -657,73 +663,29 @@
       "title": "Wise"
     },
     {
-      "title": "WYZE",
-      "slug": "wyze"
-    },
-    {
       "title": "WorkOS",
-      "slug": "workos",
       "altNames": [
         "Work OS"
       ]
     },
     {
-      "title": "X",
-      "altNames": [
-        "twitter"
-      ],
-      "slug": "x"
+      "title": "WYZE"
+    },
+    {
+      "title": "yahoo"
     },
     {
       "title": "Yandex",
       "altNames": [
         "Ya",
         "Яндекс"
-      ],
-      "slug": "Yandex"
-    },
-    {
-      "title": "yahoo"
+      ]
     },
     {
       "title": "YNAB",
       "altNames": [
         "You Need A Budget"
-      ],
-      "slug": "ynab",
-      "hex": "3B5EDA"
-    },
-    {
-      "title": "Shakepay",
-      "slug": "shakepay"
-    },
-    {
-      "title": "Newton",
-      "altNames": ["Newton Crypto"],
-      "slug": "newton"
-    },
-    {
-      "title": "T-Mobile ID",
-      "altNames": [
-        "T-Mobile"
-      ],
-      "slug": "t-mobile"
-    },
-    {
-      "title": "Wealthfront",
-      "slug": "wealthfront"
-    },
-    {
-      "title": "BinanceUS",
-      "altNames": [
-        "Binance US"
-      ],
-      "slug": "binance_us"
-    },
-    {
-      "title": "Bethesda Softworks",
-      "altNames": ["Bethesda"],
-      "slug": "bethesda"
+      ]
     }
   ]
 }

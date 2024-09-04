@@ -49,6 +49,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _shouldShowLargeIcon;
   late bool _hideCode;
   bool isMaskingEnabled = false;
+  int _codeTimeStep = -1;
 
   @override
   void initState() {
@@ -57,11 +58,22 @@ class _CodeWidgetState extends State<CodeWidget> {
     _hideCode = isMaskingEnabled;
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
-      String newCode = _getCurrentOTP();
-      if (newCode != _currentCode.value) {
-        _currentCode.value = newCode;
-        if (widget.code.type.isTOTPCompatible) {
-          _nextCode.value = _getNextTotp();
+      int newStep = 0;
+      if (widget.code.type != Type.hotp) {
+        newStep = (((DateTime.now().millisecondsSinceEpoch ~/ 1000).round()) ~/
+                widget.code.period)
+            .floor();
+      } else {
+        newStep = widget.code.counter;
+      }
+      if (_codeTimeStep != newStep) {
+        _codeTimeStep = newStep;
+        String newCode = _getCurrentOTP();
+        if (newCode != _currentCode.value) {
+          _currentCode.value = newCode;
+          if (widget.code.type.isTOTPCompatible) {
+            _nextCode.value = _getNextTotp();
+          }
         }
       }
     });
@@ -111,8 +123,8 @@ class _CodeWidgetState extends State<CodeWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (widget.code.type.isTOTPCompatible)
-                CodeTimerProgress(
-                  period: widget.code.period,
+                CodeTimerProgressCache.getCachedWidget(
+                  widget.code.period,
                 ),
               const SizedBox(height: 28),
               Row(

@@ -432,8 +432,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "İki adımlı kimlik doğrulamasını devre dışı bırakmak istediğinize emin misiniz?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Hesap silme işlemini onayla"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Evet, bu hesabı ve tüm verileri kalıcı olarak silmek istiyorum."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Şifrenizi onaylayın"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage(
@@ -857,6 +855,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Tam ekranda görüntülemek için bir öğeye uzun basın"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Cihazı kayıp mı ettiniz?"),
         "machineLearning":
