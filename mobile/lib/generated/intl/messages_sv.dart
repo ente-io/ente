@@ -144,9 +144,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ändra behörighet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Kontrollera din inkorg (och skräppost) för att slutföra verifieringen"),
-        "cl_guest_view_title": MessageLookupByLibrary.simpleMessage("Gästvy"),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Videospelare"),
         "claimed": MessageLookupByLibrary.simpleMessage("Nyttjad"),
         "close": MessageLookupByLibrary.simpleMessage("Stäng"),
         "codeAppliedPageTitle":
