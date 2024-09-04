@@ -113,3 +113,37 @@ Migration is now complete. You can start your Ente cluster normally.
 ```sh
 docker compose up
 ```
+
+## Migration elsewhere
+
+The above instructions are for Postgres running inside docker, as the sample
+docker compose file does. There are myriad other ways to run Postgres, and the
+migration sequence then will depend on your exact setup.
+
+Two common approaches are
+
+1. Backup and restore, the `pg_dumpall` + `psql` import sequence described in
+   [Taking a backup](#taking-a-backup) above.
+
+2. In place migrations using `pg_upgrade`, which is what the
+   [pgautoupgrade](#the-migration) migration above does under the hood.
+
+The first method, backup and restore, is low tech and will work similarly in
+most setups. The second method is more efficient, but requires a bit more
+careful preparation.
+
+As another example, here is how one can migrate 12 to 16 when running Postgres
+on macOS, installed using Homebrew.
+
+1. Stop your postgres. Make sure there are no more commands shown by
+   `ps aux | grep '[p]ostgres'`
+
+2. Install postgres16.
+
+3. Migrate data using pg_upgrade
+
+    ```sh
+    /opt/homebrew/Cellar/postgresql@16/16.4/bin/pg_upgrade -b /opt/homebrew/Cellar/postgresql@12/12.18_1/bin -B /opt/homebrew/Cellar/postgresql@16/16.4/bin/ -d /opt/homebrew/var/postgresql@12 -D /opt/homebrew/var/postgresql@16
+    ```
+
+4. Start postgres 16 and verify version using `SELECT VERSION()`.
