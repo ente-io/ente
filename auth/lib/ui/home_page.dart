@@ -211,8 +211,8 @@ class _HomePageState extends State<HomePage> {
     } else {
       await showDialogWidget(
         context: context,
-        title: "No app lock enabled",
-        body: "Please enable app lock from Security > App Lock",
+        title: context.l10n.appLockNotEnabled,
+        body: context.l10n.appLockNotEnabledDescription,
         isDismissible: true,
         buttons: const [
           ButtonWidget(
