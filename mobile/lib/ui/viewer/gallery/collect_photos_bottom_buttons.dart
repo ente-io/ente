@@ -80,67 +80,75 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _hasSelectedFilesNotifier,
-      builder: (context, value, child) {
-        return AnimatedCrossFade(
-          firstCurve: Curves.easeInOutExpo,
-          secondCurve: Curves.easeInOutExpo,
-          sizeCurve: Curves.easeInOutExpo,
-          duration: const Duration(milliseconds: 300),
-          crossFadeState: !_hasSelectedFilesNotifier.value
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          firstChild: Container(
-            decoration: BoxDecoration(
-              color: getEnteColorScheme(context).backgroundElevated,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundElevated2,
-                      borderRadius: const BorderRadius.all(Radius.circular(4)),
+    return SafeArea(
+      child: ValueListenableBuilder(
+        valueListenable: _hasSelectedFilesNotifier,
+        builder: (context, value, child) {
+          return AnimatedCrossFade(
+            firstCurve: Curves.easeInOutExpo,
+            secondCurve: Curves.easeInOutExpo,
+            sizeCurve: Curves.easeInOutExpo,
+            duration: const Duration(milliseconds: 300),
+            crossFadeState: !_hasSelectedFilesNotifier.value
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            firstChild: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: getEnteColorScheme(context).strokeFaint,
+                  ),
+                ),
+                color: getEnteColorScheme(context).backgroundElevated,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: getEnteColorScheme(context).backgroundElevated2,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(4)),
+                      ),
+                      child: ButtonWidget(
+                        buttonType: ButtonType.secondary,
+                        buttonSize: ButtonSize.large,
+                        labelText: S.of(context).addPhotos,
+                        icon: Icons.add_photo_alternate_outlined,
+                        shouldSurfaceExecutionStates: false,
+                        onTap: () async {
+                          try {
+                            await showAddPhotosSheet(context, widget.c);
+                          } catch (e) {
+                            await showGenericErrorDialog(
+                              context: context,
+                              error: e,
+                            );
+                          }
+                        },
+                      ),
                     ),
-                    child: ButtonWidget(
-                      buttonType: ButtonType.secondary,
+                    const SizedBox(height: 8),
+                    ButtonWidget(
+                      buttonType: ButtonType.primary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).addPhotos,
-                      icon: Icons.add_photo_alternate_outlined,
+                      labelText: S.of(context).share,
+                      icon: Icons.adaptive.share,
                       shouldSurfaceExecutionStates: false,
                       onTap: () async {
-                        try {
-                          await showAddPhotosSheet(context, widget.c);
-                        } catch (e) {
-                          await showGenericErrorDialog(
-                            context: context,
-                            error: e,
-                          );
-                        }
+                        await _generateAlbumUrl();
                       },
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  ButtonWidget(
-                    buttonType: ButtonType.primary,
-                    buttonSize: ButtonSize.large,
-                    labelText: S.of(context).share,
-                    icon: Icons.adaptive.share,
-                    shouldSurfaceExecutionStates: false,
-                    onTap: () async {
-                      await _generateAlbumUrl();
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          secondChild: const SizedBox.shrink(),
-        );
-      },
+            secondChild: const SizedBox.shrink(),
+          );
+        },
+      ),
     );
   }
 
