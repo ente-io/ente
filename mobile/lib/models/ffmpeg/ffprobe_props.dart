@@ -35,15 +35,30 @@ class FFProbeProps {
 
   int? get width {
     if (_width == null || _height == null) return null;
-    final intWidth = int.tryParse(_width!);
-    if (_rotation == null) {
-      return intWidth;
-    } else {
-      if ((_rotation! ~/ 90).isEven) {
-        return intWidth;
-      } else {
-        return int.tryParse(_height!);
+    int? finalWidth = int.tryParse(_width!);
+    if (propData?[FFProbeKeys.sampleAspectRatio] != null &&
+        finalWidth != null) {
+      finalWidth = _calculateWidthConsideringSAR(finalWidth);
+    }
+    if (_rotation != null) {
+      if ((_rotation! ~/ 90).isOdd) {
+        finalWidth = int.tryParse(_height!);
       }
+    }
+    return finalWidth;
+  }
+
+  /// To know more, read about Sample Aspect Ratio (SAR), Display Aspect Ratio (DAR)
+  /// and Pixel Aspect Ratio (PAR)
+  int _calculateWidthConsideringSAR(int width) {
+    final List<String> sar =
+        propData![FFProbeKeys.sampleAspectRatio].toString().split(":");
+    if (sar.length == 2) {
+      final int sarWidth = int.tryParse(sar[0]) ?? 1;
+      final int sarHeight = int.tryParse(sar[1]) ?? 1;
+      return (width * (sarWidth / sarHeight)).toInt();
+    } else {
+      return width;
     }
   }
 
@@ -202,6 +217,8 @@ class FFProbeProps {
               parsedData[FFProbeKeys.rotation] = result._rotation;
             }
           }
+        } else if (key == FFProbeKeys.sampleAspectRatio) {
+          parsedData[key] = stream[key];
         }
       }
     }
