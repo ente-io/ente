@@ -392,18 +392,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("检查状态"),
         "checking": MessageLookupByLibrary.simpleMessage("正在检查..."),
-        "cl_guest_view_call_to_action":
-            MessageLookupByLibrary.simpleMessage("选择照片并使用“访客视图”。"),
-        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
-            "把手机交给朋友看照片？不用担心 Ta 们滑动屏幕乱看照片。访客视图会将 Ta 们锁定在您选择的照片中。"),
-        "cl_guest_view_title": MessageLookupByLibrary.simpleMessage("访客视图"),
-        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
-            "我们添加了对 360 度全景照片的支持。通过基于动作的导航，用户可获得身临其境的体验！"),
-        "cl_panorama_viewer_title":
-            MessageLookupByLibrary.simpleMessage("全景图查看器"),
-        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
-            "推出全新的视频播放器，提供更好的播放控制并添加了对 HDR 视频的支持。"),
-        "cl_video_player_title": MessageLookupByLibrary.simpleMessage("视频播放器"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage("领取免费存储"),
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),
