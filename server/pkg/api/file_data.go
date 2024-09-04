@@ -25,7 +25,7 @@ func (h *FileHandler) PutFileData(ctx *gin.Context) {
 		version := 1
 		reqInt.Version = &version
 	}
-	err := h.FileDataCtrl.InsertOrUpdate(ctx, &req)
+	err := h.FileDataCtrl.InsertOrUpdateMetadata(ctx, &req)
 	if err != nil {
 		handler.Error(ctx, err)
 

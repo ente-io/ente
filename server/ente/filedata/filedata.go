@@ -61,6 +61,7 @@ type S3FileMetadata struct {
 type GetPreviewURLRequest struct {
 	FileID int64           `form:"fileID" binding:"required"`
 	Type   ente.ObjectType `form:"type" binding:"required"`
+	Suffix *string         `form:"suffix"`
 }
 
 func (g *GetPreviewURLRequest) Validate() error {

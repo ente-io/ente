@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
@@ -79,6 +80,9 @@ func (c *Controller) deleteFileRow(fileDataRow filedata.Row) error {
 		panic(fmt.Sprintf("file %d does not belong to user %d", fileID, ownerID))
 	}
 	ctxLogger := log.WithField("file_id", fileDataRow.DeleteFromBuckets).WithField("type", fileDataRow.Type).WithField("user_id", fileDataRow.UserID)
+	if fileDataRow.Type != ente.MlData {
+		panic(fmt.Sprintf("unsupported object type for filedata deletion %s", fileDataRow.Type))
+	}
 	objectKeys := filedata.AllObjects(fileID, ownerID, fileDataRow.Type)
 	bucketColumnMap, err := getMapOfBucketItToColumn(fileDataRow)
 	if err != nil {
