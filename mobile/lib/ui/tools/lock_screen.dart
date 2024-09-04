@@ -345,6 +345,7 @@ class _LockScreenState extends State<LockScreen>
           lockedTimeInSeconds = 15;
           isTimerRunning = false;
         });
+        await Configuration.instance.setGuestView(false);
       } else {
         if (!_hasPlacedAppInBackground) {
           if (_lockscreenSetting.getInvalidAttemptCount() > 4 &&

@@ -581,6 +581,7 @@ class _FileSelectionActionsWidgetState
           "guest_view",
         ),
       );
+      await Configuration.instance.setGuestView(true);
       routeToPage(context, page, forceCustomPageRoute: true).ignore();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Bus.instance.fire(GuestViewEvent(true, false));

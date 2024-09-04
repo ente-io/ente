@@ -156,6 +156,7 @@ class _DetailPageState extends State<DetailPage> {
           final authenticated = await _requestAuthentication();
           if (authenticated) {
             Bus.instance.fire(GuestViewEvent(false, false));
+            await Configuration.instance.setGuestView(false);
           }
         }
       },
