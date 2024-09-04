@@ -2,8 +2,9 @@ import { removeKV } from "@/base/kv";
 import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
+import type { CGroup } from "./cgroups";
 import type { LocalCLIPIndex } from "./clip";
-import type { CGroup, FaceCluster } from "./cluster";
+import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
 
 /**

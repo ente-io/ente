@@ -12,7 +12,7 @@ import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
-import type { CGroup } from "./ml/cluster";
+import type { CGroup } from "./ml/cgroups";
 import { applyCGroupDiff } from "./ml/db";
 
 /**
@@ -335,7 +335,7 @@ const saveLatestUpdatedAt = (type: EntityType, value: number) =>
  *
  * This diff is then applied to the data we have persisted locally.
  */
-export const syncCGroups = async () => {
+export const syncCGroupsWithRemote = async () => {
     const type: EntityType = "cgroup";
 
     const entityKeyB64 = await getOrCreateEntityKeyB64(type);
