@@ -22,6 +22,8 @@ import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import {
     Box,
     Button,
+    Checkbox,
+    FormControlLabel,
     IconButton,
     LinearProgress,
     Stack,
@@ -229,7 +231,17 @@ const MemoizedForm = memo(
                         onChange={handleChange}
                     />
                 </Stack>
-                <Box marginInlineStart={"auto"} p={1}>
+                <Stack direction="row" justifyContent={"space-between"} p={1}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                name={"filterBadFaces"}
+                                checked={values.filterBadFaces}
+                                onChange={handleChange}
+                            />
+                        }
+                        label="filterBadFaces"
+                    />
                     <Button
                         color="secondary"
                         type="submit"
@@ -237,7 +249,7 @@ const MemoizedForm = memo(
                     >
                         Cluster
                     </Button>
-                </Box>
+                </Stack>
             </Stack>
         </form>
     ),
